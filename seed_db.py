@@ -1,18 +1,19 @@
 # Seed the database with csv data
-
 import csv 
 import sqlite3
+import os
 
 # Database file
 DB_FILE = "kpopdle.db"
+DATA_FOLDER = "data"
 
 # CSV files
-IDOLS_CSV_FILE = "idols.csv"
-GROUPS_CSV_FILE = "groups.csv"
-IDOL_CAREER_CSV_FILE = "idol_career.csv"
-COMPANIES_CSV_FILE = "companies.csv"
-GROUP_CA_CSV_FILE = "group_company_affiliation.csv"
-IDOL_CA_CSV_FILE = "idol_company_affiliation.csv"
+IDOLS_CSV_FILE = os.path.join(DATA_FOLDER, "idols.csv")
+GROUPS_CSV_FILE = os.path.join(DATA_FOLDER, "groups.csv")
+IDOL_CAREER_CSV_FILE = os.path.join(DATA_FOLDER, "idol_career.csv")
+COMPANIES_CSV_FILE = os.path.join(DATA_FOLDER, "companies.csv")
+GROUP_CA_CSV_FILE = os.path.join(DATA_FOLDER, "group_company_affiliation.csv")
+IDOL_CA_CSV_FILE = os.path.join(DATA_FOLDER, "idol_company_affiliation.csv")
 
 
 connect = sqlite3.connect(DB_FILE)
