@@ -28,6 +28,7 @@ def fetch_full_idol_data(cursor, idol_id):
             i.nationality,
             i.birth_year,
             i.position,
+            i.height
             i.image_path,
             g.id AS group_id,
             g.name AS group_name,
@@ -228,6 +229,22 @@ def guess_idol():
     guessed_idol["companies"] = fetch_idol_companies(cursor, guessed_idol_id)
     answer_data["companies"] = fetch_idol_companies(cursor, answer_id)
 
+    # Special case - if idol has a group, fetch group companies too
+    guessed_group_id = guessed_idol.get("group_id")
+    if guessed_group_id:
+        guessed_idol["group_companies"] = fetch_group_companies(cursor, group_id=guessed_group_id)
+    else:
+        guessed_idol["group_companies"] = []
+
+    answer_group_id = answer_data.get("group_id")
+    if answer_group_id:
+        answer_data["group_companies"] = fetch_group_companies(cursor, group_id=answer_group_id)
+    else:
+        answer_data["group_companies"] = []
+
+    # guessed_idol["group_companies"] = fetch_group_companies(cursor, group_id=guessed_idol["group_id"] if guessed_idol["group_id"] else None)
+    # answer_data["group_companies"] = fetch_group_companies(cursor, group_id=answer_data["group_id"] if answer_data["group_id"] else None)
+
     if not guessed_idol or not answer_data:
         connect.close()
         return jsonify({"error": "Idol not found"}), 404
@@ -237,53 +254,141 @@ def guess_idol():
     # Compare data
     feedback = {}
 
-    position_guess = set(position.strip() for position in guessed_idol["position"].split(", "))
-    position_answer = set(position.strip() for position in answer_data["position"].split(", "))
-
-    def partial_feedback(guess, answer):
+    # Partial feedback function
+    def partial_feedback_function(guess, answer):
         if guess == answer:
-            return 'correct'
-        elif not guess.isdisjoint(answer):
-            return 'partial'
-        else:
-            return 'incorrect'
+            return {
+                "status": "correct",
+                "correct_items": list(guess),
+                "incorrect_items": []
+            }
         
-    position_feedback = {}
-    
-    position_feedback = partial_feedback(position_guess, position_answer)
-    feedback['position'] = position_feedback
+        partial = guess.intersection(answer) # == guess & answer 
 
-    # Numerical feedback
-    numerical_feedback = {}
-    for field in ["debut_year", "height", "birth_year"]:
-        guess_val = guessed_idol.get(field)
-        answer_val = answer_data.get(field)
-
-        if guess_val > answer_val:
-            numerical_feedback[field] = "higher"
-
-        elif guess_val < answer_val:
-            numerical_feedback[field] = "lower"
-
+        if partial:
+            return {
+                "status": "partial",
+                "correct_items": list(partial),
+                "incorrect_items": list(guess.difference(answer)) # == guess - answer
+            }
+        
         else:
-            numerical_feedback[field] = "correct"
+            return {
+                "status": "incorrect",
+                "correct_items": [],
+                "incorrect_items": list(guess)
+            }
+        
 
+    # Position
+    position_guess = set(position.strip() for position in (guessed_idol.get("position") or "").split(", "))
+    position_answer = set(position.strip() for position in (answer_data.get("position") or "").split(", "))
+    
+    feedback['position'] = partial_feedback_function(position_guess, position_answer)
+
+    # Nationality
+    idol_nationality_guess = set(nationality.strip() for nationality in (guessed_idol.get("nationality") or  "").split(", "))
+    idol_nationality_answer = set(nationality.strip() for nationality in (answer_data.get("nationality") or "").split(", "))
+
+    feedback["nationality"] = partial_feedback_function(idol_nationality_guess, idol_nationality_answer)
+
+    # Numerical feedback function
+    def numerical_feedback_function(guessed_idol, answer_data, fields):
+        numerical_feedback = {}
+
+        for field in fields:
+            guess_val = guessed_idol.get(field)
+            answer_val = answer_data.get(field)
+
+            if guess_val is None or answer_val is None:
+                numerical_feedback[field] = "incorrect"
+                continue
+
+            if guess_val > answer_val:
+                numerical_feedback[field] = "higher"
+
+            elif guess_val < answer_val:
+                numerical_feedback[field] = "lower"
+
+            else:
+                numerical_feedback[field] = "correct"
+
+        return numerical_feedback
+    
+    # Numbers - debut year, height, birth year, member count, generation...
+    numerical_fields = ["debut_year", "height", "birth_year", "member_count", "generation"]
+    numerical_feedback = numerical_feedback_function(guessed_idol, answer_data, numerical_fields)
     feedback.update(numerical_feedback)
 
-    group_feedback = {}
+
+    # Group
+    group_guess = set(group["group_name"] for group in guessed_idol["career"])
+    group_answer = set(group["group_name"] for group in answer_data["career"])
 
 
-    # TODO - number functions
-    # TODO - groups / companies = use partial function
-    # TODO - unique values (name, gender)
+    feedback["group"] = partial_feedback_function(group_guess, group_answer)
+
+    # Companies
+    idol_companies_guess = set(company["name"] for company in guessed_idol["companies"])
+    group_companies_guess = set(company["name"] for company in guessed_idol["group_companies"])
+
+    companies_guess = idol_companies_guess.union(group_companies_guess) # == idol_companies | group_companies
+
+    idol_companies_answer = set(company["name"] for company in answer_data["companies"])
+    group_companies_answer = set(company["name"] for company in answer_data["group_companies"])
+
+    companies_answer = idol_companies_answer.union(group_companies_answer)
+
+    feedback["companies"] = partial_feedback_function(companies_guess, companies_answer)
 
 
-    # TODO - response / reveal dict taking feedback comparisons
+    # TODO - number functions - DONE
+    # TODO - groups / companies = use partial function - DONE 
+    # TODO - unique values (name, gender) - DONE 
 
-    # TODO - jsonify final response dict
 
-        
+    """Unique Values - Feedback Check"""
+    unique_fields = ["artist_name", "gender"]
 
+    # Name and Gender
+    for field in unique_fields:
+        if guessed_idol.get(field) == answer_data.get(field):
+            feedback[field] = "correct"
+        else:
+            feedback[field] = "incorrect"
+
+    # Final answer (correct or not)
+    is_correct = guessed_idol.get("idol_id") == answer_data.get("idol_id")
+
+    # TODO - response / reveal dict taking feedback comparisons - DONE
+
+    keys_for_display = [
+        "artist_name", "gender", "nationality", "idol_debut_year", 
+        "birth_year", "height", "position" # just this for now
+    ]
+
+    data_for_display = {key: guessed_idol.get(key) for key in keys_for_display}
+
+    """Extra datas"""
+
+    # Groups data
+    data_for_display["groups"] = [group["group_name"] for group in guessed_idol["career"]]
+
+    # Companies data
+    idol_c = [company["name"] for company in guessed_idol["companies"]]
+    group_c = [company["name"] for company in guessed_idol["group_companies"]]
+    data_for_display["companies"] = idol_c + group_c
+
+    # Response data
+    response_data = {
+        "guess_correct": is_correct,
+        "feedback": feedback,
+        "guessed_idol_data": data_for_display
+    }
+
+    # TODO - jsonify final response dict - DONE
+
+    return jsonify(response_data)
 
 
 
