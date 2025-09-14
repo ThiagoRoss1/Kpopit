@@ -28,7 +28,7 @@ def fetch_full_idol_data(cursor, idol_id):
             i.nationality,
             i.birth_year,
             i.position,
-            i.height
+            i.height,
             i.image_path,
             g.id AS group_id,
             g.name AS group_name,
@@ -163,6 +163,9 @@ def get_daily_idol():
     idol_id = choose_idol_of_the_day(cursor)
     connect.commit()
 
+    """ For testing purposes, you can set a fixed idol_id """
+    # idol_id = 1
+
     # Fetch full idol data
     idol_data = fetch_full_idol_data(cursor, idol_id)
 
@@ -185,6 +188,12 @@ def get_daily_idol():
         idol_data_dict["group_companies"] = []
 
     connect.close()
+
+    # Debug print
+    print("\n -- ENTIRE IDOL DATA DICT --")
+    print(idol_data_dict)
+    print(" ------------------------\n")
+
 
     # Filter data 
     game_data = {
@@ -392,6 +401,11 @@ def guess_idol():
 
 
 
+if __name__ == "__main__":
+    app.run(debug=True)
+
+
+
     # comparison = {
     #     "artist_name": guessed_idol["artist_name"] == answer_data["artist_name"],
     #     "gender": guessed_idol["gender"] == answer_data["gender"],
@@ -419,26 +433,26 @@ def guess_idol():
 
 
 
-@app.route("/api/idols/<int:idol_id>")
-def get_idol_data(idol_id):
-    """Return idol data as JSON"""
+# @app.route("/api/idols/<int:idol_id>")
+# def get_idol_data(idol_id):
+#     """Return idol data as JSON"""
 
-    # Start db connection
-    connect = sqlite3.connect("kpopdle.db")
-    # Set row factory to act like a dictionary
-    connect.row_factory = sqlite3.Row
-    # Create a cursor
-    cursor = connect.cursor()
+#     # Start db connection
+#     connect = sqlite3.connect("kpopdle.db")
+#     # Set row factory to act like a dictionary
+#     connect.row_factory = sqlite3.Row
+#     # Create a cursor
+#     cursor = connect.cursor()
 
-    ## cursor.execute(....)
+#     ## cursor.execute(....)
 
-    # connect.close()
+#     # connect.close()
 
-    # if ....
-        # return jsonify(....)
+#     # if ....
+#         # return jsonify(....)
 
-    # ..... = dict(....)
+#     # ..... = dict(....)
 
-    # return jsonify(....)
+#     # return jsonify(....)
 
 
