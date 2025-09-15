@@ -2,10 +2,12 @@ import sqlite3
 import datetime
 import random
 from flask import Flask, jsonify, request, redirect, session
-from flask_babel import Babel
-from flask_session import Session
+from flask_cors import CORS
+# from flask_babel import Babel
+# from flask_session import Session
 
 app = Flask(__name__)
+CORS(app)
 
 # class Config:
 #     # Configure session
