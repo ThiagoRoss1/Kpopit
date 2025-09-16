@@ -401,6 +401,26 @@ def guess_idol():
 
     return jsonify(response_data)
 
+# Create idol list (For frontend check, list, dropdown...)
+@app.route("/api/idols-list")
+def get_idols_list():
+    """Return a list of all idols with their id and names as JSON"""
+    
+    # Start db connection
+    connect = sqlite3.connect("kpopdle.db")
+    connect.row_factory = sqlite3.Row
+    cursor = connect.cursor()
+
+    # Fetch all idols
+    sql_query = """
+        SELECT id, artist_name FROM idols ORDER BY artist_name ASC
+    """
+    cursor.execute(sql_query)
+    results = cursor.fetchall()
+
+    idols_list = [dict(row) for row in results]
+
+    return jsonify(idols_list)
 
 
 if __name__ == "__main__":
