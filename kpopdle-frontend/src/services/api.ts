@@ -18,7 +18,7 @@ export interface GuessPayload {
 
 export const getGuessIdol = async (payload: GuessPayload) => {
     const response = await api.post('/game/guess', payload);
-    console.log("Resposta recebida da API /guess:", response.data);
+    console.log("Answer received from API /guess:", response.data);
     return response.data;
 };
 

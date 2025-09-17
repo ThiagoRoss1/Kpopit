@@ -1,125 +1,111 @@
 import './style.css'
-import { useState, useEffect } from 'react';
+import { useQuery, useMutation } from '@tanstack/react-query'
+import { useState } from 'react';
 import { getDailyIdol, getGuessIdol, getAllIdols } from '../../services/api';
-
-interface GameData {
-  answer_id: number;
-  categories: string[];
-}
-
-interface IdolListItem {
-  id: number;
-  artist_name: string;
-}
-
-interface FeedbackItem {
-  status: string;
-  // '?' turns these properties optional. I can or cannot exist.
-  correct_items?: string[];
-  incorrect_items?: string[];
-}
-
-interface FeedbackData {
-  artist_name: FeedbackItem;
-  gender: FeedbackItem;
-  idol_debut_year: FeedbackItem;
-  birth_year: FeedbackItem;
-  height: FeedbackItem;
-  nationality: FeedbackItem;
-  groups: FeedbackItem;
-  position: FeedbackItem;
-  companies: FeedbackItem;
-}
-
-interface GuessedIdolData {
-  artist_name: string;
-  gender: string;
-  nationality: string[];
-  groups: string[];
-  idol_debut_year: number;
-  birth_year: number;
-  height: number;
-  position: string[];
-  companies: string[];
-}
-
-interface GuessResponse {
-  guess_correct: boolean;
-  feedback: FeedbackData;
-  guessed_idol_data: GuessedIdolData;
-}
+import type { GameData, IdolListItem, GuessResponse } from '../../interfaces/gameInterfaces';
+// import { Input } from "@chakra-ui/react"; - Css framework import example
 
 function Home() {
-
-  const [gameData, setGameData] = useState<GameData | null>(null);
-  const [allIdols, setAllIdols] = useState<IdolListItem[]>([]);
-  const [loading, setLoading] = useState<boolean>(true);
-  const [error, setError] = useState<string | null>(null);
+  // -- Client-side -- //
   const [currentGuess, setCurrentGuess] = useState<string>("");
   const [guesses, setGuesses] = useState<GuessResponse[]>([]);
+  guesses; // For now, just to avoid the "not used" warning
+
+  // -- Api-side -- //
+
+  // Daily idol game data
+  const { 
+    data: gameData,
+    isLoading: isLoadingGameData, 
+    isError: isErrorGameData
+  } = useQuery<GameData>({
+    queryKey: ['dailyIdol'],
+    queryFn: getDailyIdol
+  });
+
+  // All idols list
+  const {
+    data: allIdolsData,
+    isLoading: isLoadingAllIdols,
+    isError: isErrorAllIdols,
+  } = useQuery<IdolListItem[]>({
+    queryKey: ['allIdols'],
+    queryFn: getAllIdols
+    //staleTime: Infinity // See functionality
+  })
+
+  const guessMutation = useMutation({
+    mutationFn: getGuessIdol,
+    onSuccess: (data) => {
+      console.log('Guess successful:', data);
+      setGuesses((prevGuesses) => [...prevGuesses, data]);
+    },
+    onError: (error) => {
+      console.error('Error during guess:', error);
+    }
+  });
 
   // Guess submission handler function
-  const handleGuessSubmit = async (event: React.FormEvent) => {
+  const handleGuessSubmit = (event: React.FormEvent) => {
     event.preventDefault();
-    if (!currentGuess || !gameData) return;
+    if (!currentGuess || !gameData || !allIdolsData) return;
 
     // Look for idol
-    const guessedIdolObject = allIdols.find(
-      idol => idol.artist_name.toLowerCase() === currentGuess.toLowerCase()
+    const guessedIdolObject = allIdolsData.find(
+      (idol: IdolListItem) => idol.artist_name.toLowerCase() === currentGuess.toLowerCase()
     );
 
     if (!guessedIdolObject) {
       return [];
     }
 
-    try {
-      const response = await getGuessIdol({
-        guessed_idol_id: guessedIdolObject.id,
-        answer_id: gameData.answer_id
-      });
-
-      console.log('Guess response:', response);
-
-      setGuesses([...guesses, response]);
-    } catch (error) {
-      console.error('Error submitting guess:', error);
-      setError('Failed to submit guess');
-    }
+    guessMutation.mutate({
+      guessed_idol_id: guessedIdolObject.id,
+      answer_id: gameData.answer_id
+    });
 
     // Clear input field after submission
     setCurrentGuess("");
   };
 
-  useEffect(() => {
-    // Fetch game data 
-    const fetchData = async () => {
-      try {
-        setLoading(true);
-        const [dailyIdolResponse, allIdolsResponse] = await Promise.all([
-          getDailyIdol(),
-          getAllIdols()
-        ]);
-        setGameData(dailyIdolResponse);
-        setAllIdols(allIdolsResponse);
-        
-      } catch (error) {
-        console.error('Error fetching game data:', error);
-        setError('Failed to load game data');
-        
-      } finally {
-        setLoading(false);
-      }
-    };
-    fetchData();
-  }, []);
-
-  if (loading) {
+  if (isLoadingGameData || isLoadingAllIdols) {
     return <div>Loading Kpopdle...</div>;
   }
 
-  if (error) {
-    return <div>Error: {error}</div>;
+  if (isErrorGameData || isErrorAllIdols) {
+    return <div>Error: Error fetching game data</div>;
   }
+
+  // useEffect(() => {
+  //   // Fetch game data 
+  //   const fetchData = async () => {
+  //     try {
+  //       setLoading(true);
+  //       const [dailyIdolResponse, allIdolsResponse] = await Promise.all([
+  //         getDailyIdol(),
+  //         getAllIdols()
+  //       ]);
+  //       setGameData(dailyIdolResponse);
+  //       setAllIdols(allIdolsResponse);
+        
+  //     } catch (error) {
+  //       console.error('Error fetching game data:', error);
+  //       setError('Failed to load game data');
+        
+  //     } finally {
+  //       setLoading(false);
+  //     }
+  //   };
+  //   fetchData();
+  // }, []);
+
+  // if (loading) {
+  //   return <div>Loading Kpopdle...</div>;
+  // }
+
+  // if (error) {
+  //   return <div>Error: {error}</div>;
+  // }
 
   return (
     <div>
@@ -132,13 +118,15 @@ function Home() {
           onChange={(e) => setCurrentGuess(e.target.value)}
           placeholder="Guess"
         />
-        <button type="submit">Guess</button>
+        <button type="submit" disabled={guessMutation.isPending}>
+          {guessMutation.isPending ? 'Checking...' : 'Guess'}
+          </button>
       </form>
 
       <p>ID: {gameData?.answer_id}</p>
       <h2>Game Categories</h2>
       <ul>
-        {gameData?.categories.map(category => (
+        {gameData?.categories && gameData.categories.map((category: string) => (
           <li key={category}>{category}</li>
         ))}
       </ul>
