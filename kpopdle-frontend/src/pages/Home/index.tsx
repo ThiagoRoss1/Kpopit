@@ -3,6 +3,7 @@ import { useQuery, useMutation } from '@tanstack/react-query'
 import { useState } from 'react';
 import { getDailyIdol, getGuessIdol, getAllIdols } from '../../services/api';
 import type { GameData, IdolListItem, GuessResponse } from '../../interfaces/gameInterfaces';
+import SearchBar from '../../components/GuessSearchBar/SearchBar.tsx';
 // import { Input } from "@chakra-ui/react"; - Css framework import example
 
 function Home() {
@@ -110,7 +111,11 @@ function Home() {
   return (
     <div>
       <h1>Kpopdle</h1>
-      
+
+      <SearchBar allIdols={allIdolsData || []} onIdolSelect={(idolName) => setCurrentGuess(idolName)} />
+
+      <br/>
+
       <form onSubmit={handleGuessSubmit}>
         <input
           type="text"
@@ -118,7 +123,7 @@ function Home() {
           onChange={(e) => setCurrentGuess(e.target.value)}
           placeholder="Guess"
         />
-        <button type="submit" disabled={guessMutation.isPending}>
+        <button type="submit" disabled={guessMutation.isPending || !currentGuess}>
           {guessMutation.isPending ? 'Checking...' : 'Guess'}
           </button>
       </form>
