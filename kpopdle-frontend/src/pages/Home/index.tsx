@@ -1,9 +1,13 @@
-import './style.css'
-import { useQuery, useMutation } from '@tanstack/react-query'
-import { useState } from 'react';
-import { getDailyIdol, getGuessIdol, getAllIdols } from '../../services/api';
-import type { GameData, IdolListItem, GuessResponse } from '../../interfaces/gameInterfaces';
-import SearchBar from '../../components/GuessSearchBar/SearchBar.tsx';
+import "./style.css";
+import { useQuery, useMutation } from "@tanstack/react-query";
+import { useState } from "react";
+import { getDailyIdol, getGuessIdol, getAllIdols } from "../../services/api";
+import type {
+  GameData,
+  IdolListItem,
+  GuessResponse,
+} from "../../interfaces/gameInterfaces";
+import SearchBar from "../../components/GuessSearchBar/SearchBar.tsx";
 // import { Input } from "@chakra-ui/react"; - Css framework import example
 
 function Home() {
@@ -15,13 +19,13 @@ function Home() {
   // -- Api-side -- //
 
   // Daily idol game data
-  const { 
+  const {
     data: gameData,
-    isLoading: isLoadingGameData, 
-    isError: isErrorGameData
+    isLoading: isLoadingGameData,
+    isError: isErrorGameData,
   } = useQuery<GameData>({
-    queryKey: ['dailyIdol'],
-    queryFn: getDailyIdol
+    queryKey: ["dailyIdol"],
+    queryFn: getDailyIdol,
   });
 
   // All idols list
@@ -30,30 +34,30 @@ function Home() {
     isLoading: isLoadingAllIdols,
     isError: isErrorAllIdols,
   } = useQuery<IdolListItem[]>({
-    queryKey: ['allIdols'],
-    queryFn: getAllIdols
+    queryKey: ["allIdols"],
+    queryFn: getAllIdols,
     //staleTime: Infinity // See functionality
-  })
+  });
 
   const guessMutation = useMutation({
     mutationFn: getGuessIdol,
     onSuccess: (data) => {
-      console.log('Guess successful:', data);
+      console.log("Guess successful:", data);
       setGuesses((prevGuesses) => [...prevGuesses, data]);
     },
     onError: (error) => {
-      console.error('Error during guess:', error);
-    }
+      console.error("Error during guess:", error);
+    },
   });
 
   // Guess submission handler function
-  const handleGuessSubmit = (event: React.FormEvent) => {
-    event.preventDefault();
+  const handleGuessSubmit = () => {
     if (!currentGuess || !gameData || !allIdolsData) return;
 
     // Look for idol
     const guessedIdolObject = allIdolsData.find(
-      (idol: IdolListItem) => idol.artist_name.toLowerCase() === currentGuess.toLowerCase()
+      (idol: IdolListItem) =>
+        idol.artist_name.toLowerCase() === currentGuess.toLowerCase()
     );
 
     if (!guessedIdolObject) {
@@ -62,7 +66,7 @@ function Home() {
 
     guessMutation.mutate({
       guessed_idol_id: guessedIdolObject.id,
-      answer_id: gameData.answer_id
+      answer_id: gameData.answer_id,
     });
 
     // Clear input field after submission
@@ -78,7 +82,7 @@ function Home() {
   }
 
   // useEffect(() => {
-  //   // Fetch game data 
+  //   // Fetch game data
   //   const fetchData = async () => {
   //     try {
   //       setLoading(true);
@@ -88,11 +92,11 @@ function Home() {
   //       ]);
   //       setGameData(dailyIdolResponse);
   //       setAllIdols(allIdolsResponse);
-        
+
   //     } catch (error) {
   //       console.error('Error fetching game data:', error);
   //       setError('Failed to load game data');
-        
+
   //     } finally {
   //       setLoading(false);
   //     }
@@ -112,9 +116,16 @@ function Home() {
     <div>
       <h1>Kpopdle</h1>
 
-      <SearchBar allIdols={allIdolsData || []} onIdolSelect={(idolName) => setCurrentGuess(idolName)} />
+      <SearchBar
+        allIdols={allIdolsData || []}
+        value={currentGuess}
+        onIdolSelect={(idolName) => setCurrentGuess(idolName)}
+        onSubmit={() => {
+          handleGuessSubmit();
+        }}
+      />
 
-      <br/>
+      <br />
 
       <form onSubmit={handleGuessSubmit}>
         <input
@@ -123,20 +134,24 @@ function Home() {
           onChange={(e) => setCurrentGuess(e.target.value)}
           placeholder="Guess"
         />
-        <button type="submit" disabled={guessMutation.isPending || !currentGuess}>
-          {guessMutation.isPending ? 'Checking...' : 'Guess'}
-          </button>
+        <button
+          type="submit"
+          disabled={guessMutation.isPending || !currentGuess}
+        >
+          {guessMutation.isPending ? "Checking..." : "Guess"}
+        </button>
       </form>
 
       <p>ID: {gameData?.answer_id}</p>
       <h2>Game Categories</h2>
       <ul>
-        {gameData?.categories && gameData.categories.map((category: string) => (
-          <li key={category}>{category}</li>
-        ))}
+        {gameData?.categories &&
+          gameData.categories.map((category: string) => (
+            <li key={category}>{category}</li>
+          ))}
       </ul>
     </div>
-  )
+  );
 }
 
-export default Home
+export default Home;
