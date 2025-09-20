@@ -253,6 +253,14 @@ def guess_idol():
     else:
         answer_data["group_companies"] = []
 
+    for field in ["nationality", "position"]:
+        for idol in [guessed_idol, answer_data]:
+            if field in idol and isinstance(idol[field], str):
+                idol[field] = [item.strip() for item in idol[field].split(",")]
+            elif field not in idol or idol[field] is None:
+                idol[field] = []
+
+
     # guessed_idol["group_companies"] = fetch_group_companies(cursor, group_id=guessed_idol["group_id"] if guessed_idol["group_id"] else None)
     # answer_data["group_companies"] = fetch_group_companies(cursor, group_id=answer_data["group_id"] if answer_data["group_id"] else None)
 
@@ -292,14 +300,14 @@ def guess_idol():
         
 
     # Position
-    position_guess = set(position.strip() for position in (guessed_idol.get("position") or "").split(", "))
-    position_answer = set(position.strip() for position in (answer_data.get("position") or "").split(", "))
-    
+    position_guess = set(position.strip() for position in (guessed_idol.get("position", [])))
+    position_answer = set(position.strip() for position in (answer_data.get("position", [])))
+
     feedback['position'] = partial_feedback_function(position_guess, position_answer)
 
     # Nationality
-    idol_nationality_guess = set(nationality.strip() for nationality in (guessed_idol.get("nationality") or  "").split(", "))
-    idol_nationality_answer = set(nationality.strip() for nationality in (answer_data.get("nationality") or "").split(", "))
+    idol_nationality_guess = set(nationality.strip() for nationality in (guessed_idol.get("nationality", [])))
+    idol_nationality_answer = set(nationality.strip() for nationality in (answer_data.get("nationality", [])))
 
     feedback["nationality"] = partial_feedback_function(idol_nationality_guess, idol_nationality_answer)
 
@@ -312,22 +320,38 @@ def guess_idol():
             answer_val = answer_data.get(field)
 
             if guess_val is None or answer_val is None:
-                numerical_feedback[field] = "incorrect"
+                numerical_feedback[field] = {
+                    "status": "incorrect",
+                    "correct_items": [],
+                    "incorrect_items": []
+                }
                 continue
 
             if guess_val > answer_val:
-                numerical_feedback[field] = "higher"
+                numerical_feedback[field] = {
+                    "status": "higher",
+                    "correct_items": [],
+                    "incorrect_items": [guess_val]
+                }
 
             elif guess_val < answer_val:
-                numerical_feedback[field] = "lower"
+                numerical_feedback[field] = {
+                    "status": "lower",
+                    "correct_items": [],
+                    "incorrect_items": [guess_val]
+                }
 
             else:
-                numerical_feedback[field] = "correct"
+                numerical_feedback[field] = {
+                    "status": "correct",
+                    "correct_items": [guess_val],
+                    "incorrect_items": []
+                }
 
         return numerical_feedback
     
     # Numbers - debut year, height, birth year, member count, generation...
-    numerical_fields = ["debut_year", "height", "birth_year", "member_count", "generation"]
+    numerical_fields = ["idol_debut_year", "height", "birth_year", "member_count", "generation"]
     numerical_feedback = numerical_feedback_function(guessed_idol, answer_data, numerical_fields)
     feedback.update(numerical_feedback)
 
@@ -337,7 +361,7 @@ def guess_idol():
     group_answer = set(group["group_name"] for group in answer_data["career"])
 
 
-    feedback["group"] = partial_feedback_function(group_guess, group_answer)
+    feedback["groups"] = partial_feedback_function(group_guess, group_answer)
 
     # Companies
     idol_companies_guess = set(company["name"] for company in guessed_idol["companies"])
@@ -364,9 +388,17 @@ def guess_idol():
     # Name and Gender
     for field in unique_fields:
         if guessed_idol.get(field) == answer_data.get(field):
-            feedback[field] = "correct"
+            feedback[field] = {
+                "status": "correct",
+                "correct_items": [guessed_idol.get(field)],
+                "incorrect_items": []
+            }
         else:
-            feedback[field] = "incorrect"
+            feedback[field] = {
+                "status": "incorrect",
+                "correct_items": [],
+                "incorrect_items": [guessed_idol.get(field)]
+            }
 
     # Final answer (correct or not)
     is_correct = guessed_idol.get("idol_id") == answer_data.get("idol_id")
