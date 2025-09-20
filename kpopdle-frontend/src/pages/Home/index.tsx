@@ -7,13 +7,16 @@ import type {
   IdolListItem,
   GuessResponse,
 } from "../../interfaces/gameInterfaces";
+import { Box } from '@chakra-ui/react';
 import SearchBar from "../../components/GuessSearchBar/SearchBar.tsx";
+import GuessesGrid from "../../components/GuessesGrid/GuessGrid.tsx";
 // import { Input } from "@chakra-ui/react"; - Css framework import example
 
 function Home() {
   // -- Client-side -- //
   const [currentGuess, setCurrentGuess] = useState<string>("");
   const [guesses, setGuesses] = useState<GuessResponse[]>([]);
+  const [excludedIdols, setExcludedIdols] = useState<number[]>([]);
   guesses; // For now, just to avoid the "not used" warning
 
   // -- Api-side -- //
@@ -61,13 +64,16 @@ function Home() {
     );
 
     if (!guessedIdolObject) {
-      return [];
+      return;
     }
 
     guessMutation.mutate({
       guessed_idol_id: guessedIdolObject.id,
       answer_id: gameData.answer_id,
     });
+
+    // Add guessed idol to excluded list
+    setExcludedIdols((prevGuesses) => [...prevGuesses, guessedIdolObject.id]);
 
     // Clear input field after submission
     setCurrentGuess("");
@@ -115,17 +121,25 @@ function Home() {
   return (
     <div>
       <h1>Kpopdle</h1>
-
+      
+      <Box position="relative">
       <SearchBar
         allIdols={allIdolsData || []}
         value={currentGuess}
         onIdolSelect={(idolName) => setCurrentGuess(idolName)}
-        onSubmit={() => {
-          handleGuessSubmit();
-        }}
+        onSubmit={handleGuessSubmit}
+        excludedIdols={excludedIdols}
       />
+      </Box>
 
       <br />
+
+      <Box>
+        <GuessesGrid
+          guesses={guesses}
+          allIdols={allIdolsData || []}
+        />
+      </Box>
 
       <form onSubmit={handleGuessSubmit}>
         <input

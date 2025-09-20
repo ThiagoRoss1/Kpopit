@@ -17,6 +17,7 @@ interface SearchBarProps {
   allIdols: IdolListItem[];
   value: string;
   onSubmit?: () => void;
+  excludedIdols?: number[];
 
   // Handle selection
   onIdolSelect: (idolName: string) => void;
@@ -39,9 +40,12 @@ const SearchBar = (props: SearchBarProps) => {
 
     if (value.length > 0) {
       const filteredSuggestions = allIdols
-        .filter((idol: IdolListItem) =>
-          idol.artist_name.toLowerCase().includes(value.toLowerCase())
-        )
+        .filter((idol: IdolListItem) => {
+          const matches = idol.artist_name.toLowerCase().includes(value.toLowerCase())
+          const isNotExcluded = !props.excludedIdols?.includes(idol.id);
+
+          return matches && isNotExcluded;
+        })
         .slice(0, 10); // Limit to 10 suggestions
       setSuggestions(filteredSuggestions);
     } else {
