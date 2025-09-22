@@ -26,3 +26,9 @@ export const getAllIdols = async () => {
     const response = await api.get('/idols-list');
     return response.data;
 };
+
+// Export yesterday's idol date
+export const getYesterdaysIdol = async () => {
+    const response = await api.get('/store-yesterdays-idol');
+    return response.data;
+};

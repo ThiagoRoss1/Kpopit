@@ -28,6 +28,7 @@ export interface FeedbackData {
 }
 
 export interface GuessedIdolData {
+  idol_id: number;
   artist_name: string;
   gender: string;
   nationality: string[];
@@ -37,10 +38,17 @@ export interface GuessedIdolData {
   height: number;
   position: string[];
   companies: string[];
+  image_path: string;
 }
 
 export interface GuessResponse {
   guess_correct: boolean;
   feedback: FeedbackData;
   guessed_idol_data: GuessedIdolData;
+}
+
+export interface YesterdayIdol {
+  past_idol_id: number;
+  yesterdays_pick_date: string;
+  artist_name: string;
 }

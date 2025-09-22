@@ -1,23 +1,31 @@
 import "./style.css";
 import { useQuery, useMutation } from "@tanstack/react-query";
 import { useState } from "react";
-import { getDailyIdol, getGuessIdol, getAllIdols } from "../../services/api";
+import { getDailyIdol, getGuessIdol, getAllIdols, getYesterdaysIdol } from "../../services/api";
 import type {
   GameData,
   IdolListItem,
   GuessResponse,
+  YesterdayIdol,
 } from "../../interfaces/gameInterfaces";
 import { Box } from '@chakra-ui/react';
 import SearchBar from "../../components/GuessSearchBar/SearchBar.tsx";
 import GuessesGrid from "../../components/GuessesGrid/GuessGrid.tsx";
+import VictoryCardHudProps from "../../components/VictoryCard/VictoryCardHud.tsx";
 // import { Input } from "@chakra-ui/react"; - Css framework import example
 
 function Home() {
   // -- Client-side -- //
   const [currentGuess, setCurrentGuess] = useState<string>("");
   const [guesses, setGuesses] = useState<GuessResponse[]>([]);
-  const [excludedIdols, setExcludedIdols] = useState<number[]>([]);
-  guesses; // For now, just to avoid the "not used" warning
+  const [endGame, setEndGame] = useState<boolean>(false);
+
+  // Counter
+  const [attempts, setAttempts] = useState<number>(0);
+
+  const handleGuessAttempts = () => {
+    setAttempts(prev => prev + 1);
+  };
 
   // -- Api-side -- //
 
@@ -42,11 +50,24 @@ function Home() {
     //staleTime: Infinity // See functionality
   });
 
+  const yesterday = useQuery<YesterdayIdol>({
+    queryKey: ["yesterdayIdol"],
+    queryFn: getYesterdaysIdol,
+  });
+
+  const yesterdayArtist = allIdolsData?.find(
+    (idol) => idol.id === yesterday.data?.past_idol_id
+  )?.artist_name;
+
   const guessMutation = useMutation({
     mutationFn: getGuessIdol,
     onSuccess: (data) => {
       console.log("Guess successful:", data);
       setGuesses((prevGuesses) => [...prevGuesses, data]);
+      /// Check if the guess is correct
+      if (data.guess_correct) {
+        setEndGame(true);
+      }
     },
     onError: (error) => {
       console.error("Error during guess:", error);
@@ -71,14 +92,10 @@ function Home() {
       guessed_idol_id: guessedIdolObject.id,
       answer_id: gameData.answer_id,
     });
-
-    // Add guessed idol to excluded list
-    setExcludedIdols((prevGuesses) => [...prevGuesses, guessedIdolObject.id]);
-
     // Clear input field after submission
     setCurrentGuess("");
   };
-
+  
   if (isLoadingGameData || isLoadingAllIdols) {
     return <div>Loading Kpopdle...</div>;
   }
@@ -86,6 +103,66 @@ function Home() {
   if (isErrorGameData || isErrorAllIdols) {
     return <div>Error: Error fetching game data</div>;
   }
+
+
+
+  // Main return
+  return (
+    <div>
+      <h1>Kpopdle</h1>
+      
+      {/* {!endGame && ()} */}
+      <Box position="relative">
+      <SearchBar
+        allIdols={allIdolsData || []}
+        value={currentGuess}
+        onIdolSelect={(idolName) => setCurrentGuess(idolName)}
+        onSubmit={() => {
+          handleGuessSubmit();
+          handleGuessAttempts();
+        }}
+        excludedIdols={guesses.map(guess => guess.guessed_idol_data?.idol_id)}
+        disabled={endGame || guessMutation.isPending}
+      />
+      </Box>
+
+      <br />
+
+      <Box>
+        <GuessesGrid
+          guesses={guesses}
+          allIdols={allIdolsData || []}
+        />
+      </Box>
+
+      <p>ID: {gameData?.answer_id}</p>
+      <h2>Game Categories</h2>
+      <ul>
+        {gameData?.categories &&
+          gameData.categories.map((category: string) => (
+            <li key={category}>{category}</li>
+          ))}
+      </ul>
+
+
+      {endGame && guesses.length > 0 && (
+        <VictoryCardHudProps cardinfo={guesses[guesses.length - 1].guessed_idol_data}
+        attempts={attempts}
+        yesterdayidol={yesterdayArtist || "unknown"} />
+      )}
+    </div>
+  );
+}
+
+export default Home;
+
+
+
+
+
+
+
+
 
   // useEffect(() => {
   //   // Fetch game data
@@ -117,55 +194,3 @@ function Home() {
   // if (error) {
   //   return <div>Error: {error}</div>;
   // }
-
-  return (
-    <div>
-      <h1>Kpopdle</h1>
-      
-      <Box position="relative">
-      <SearchBar
-        allIdols={allIdolsData || []}
-        value={currentGuess}
-        onIdolSelect={(idolName) => setCurrentGuess(idolName)}
-        onSubmit={handleGuessSubmit}
-        excludedIdols={excludedIdols}
-      />
-      </Box>
-
-      <br />
-
-      <Box>
-        <GuessesGrid
-          guesses={guesses}
-          allIdols={allIdolsData || []}
-        />
-      </Box>
-
-      <form onSubmit={handleGuessSubmit}>
-        <input
-          type="text"
-          value={currentGuess}
-          onChange={(e) => setCurrentGuess(e.target.value)}
-          placeholder="Guess"
-        />
-        <button
-          type="submit"
-          disabled={guessMutation.isPending || !currentGuess}
-        >
-          {guessMutation.isPending ? "Checking..." : "Guess"}
-        </button>
-      </form>
-
-      <p>ID: {gameData?.answer_id}</p>
-      <h2>Game Categories</h2>
-      <ul>
-        {gameData?.categories &&
-          gameData.categories.map((category: string) => (
-            <li key={category}>{category}</li>
-          ))}
-      </ul>
-    </div>
-  );
-}
-
-export default Home;

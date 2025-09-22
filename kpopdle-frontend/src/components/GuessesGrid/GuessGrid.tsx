@@ -38,7 +38,7 @@ const GuessesGrid = (props: GuessesGridProps) => {
 
   return (
     <Grid templateColumns="repeat(8, 1fr)" gap={2} alignItems="center">
-      {guesses.map((guess, index) => (
+      {[...guesses].reverse().map((guess, index) => (
         <React.Fragment key={index}>
           <GridItem bg={getStatusColor(guess.feedback.artist_name.status)}>
             <Image

@@ -18,6 +18,7 @@ interface SearchBarProps {
   value: string;
   onSubmit?: () => void;
   excludedIdols?: number[];
+  disabled?: boolean;
 
   // Handle selection
   onIdolSelect: (idolName: string) => void;
@@ -28,7 +29,7 @@ interface SearchBarProps {
 // }
 
 const SearchBar = (props: SearchBarProps) => {
-  const { allIdols, value, onIdolSelect, onSubmit } = props;
+  const { allIdols, value, onIdolSelect, onSubmit, disabled, excludedIdols } = props;
 
   // Input value and Suggestions state
   const [suggestions, setSuggestions] = useState<IdolListItem[]>([]);
@@ -42,7 +43,7 @@ const SearchBar = (props: SearchBarProps) => {
       const filteredSuggestions = allIdols
         .filter((idol: IdolListItem) => {
           const matches = idol.artist_name.toLowerCase().includes(value.toLowerCase())
-          const isNotExcluded = !props.excludedIdols?.includes(idol.id);
+          const isNotExcluded = !excludedIdols?.includes(idol.id);
 
           return matches && isNotExcluded;
         })
@@ -52,6 +53,8 @@ const SearchBar = (props: SearchBarProps) => {
       setSuggestions([]);
     }
   };
+
+  console.log("Excluded idols:", excludedIdols); // Debugging line to check excluded idols
 
   // Handle suggestion click
   const handleSuggestionClick = (suggestion: IdolListItem) => {
@@ -69,9 +72,10 @@ const SearchBar = (props: SearchBarProps) => {
               value={value}
               onChange={handleInputChange}
               placeholder="Idol"
+              disabled={disabled}
             />
             <InputRightElement>
-              <Button onClick={onSubmit}>
+              <Button onClick={onSubmit} disabled={disabled} type="button">
                 Guess
               </Button>
             </InputRightElement>

@@ -406,8 +406,8 @@ def guess_idol():
     # TODO - response / reveal dict taking feedback comparisons - DONE
 
     keys_for_display = [
-        "artist_name", "gender", "nationality", "idol_debut_year", 
-        "birth_year", "height", "position" # just this for now
+        "idol_id", "artist_name", "gender", "nationality", "idol_debut_year", 
+        "birth_year", "height", "position", "image_path" # just this for now
     ]
 
     data_for_display = {key: guessed_idol.get(key) for key in keys_for_display}
@@ -453,6 +453,83 @@ def get_idols_list():
     idols_list = [dict(row) for row in results]
 
     return jsonify(idols_list)
+
+# Store yesterdays idol pick
+@app.route("/api/store-yesterdays-idol")
+def store_yesterdays_idol():
+    """Store yesterday's idol pick in the database"""
+    
+    # Start db connection
+    connect = sqlite3.connect("kpopdle.db")
+    connect.row_factory = sqlite3.Row
+    cursor = connect.cursor()
+
+    # Gey yesterday's date
+
+    yesterday = datetime.date.today() - datetime.timedelta(days=1)
+    yesterday_str = yesterday.isoformat()
+
+    # Store yesterday's idol pick
+    sql_query = """
+        CREATE TABLE IF NOT EXISTS yesterday_picks_test (
+        past_idol_id INTEGER NOT NULL,
+        yesterdays_pick_date DATE PRIMARY KEY,
+
+        /* --- Foreign Key --- */
+        FOREIGN KEY(past_idol_id) REFERENCES idols(id)
+        );
+    """  
+    cursor.execute(sql_query)
+
+    # Get idol id for yesterday
+    select_sql = """
+        SELECT idol_id FROM daily_picks WHERE pick_date = ?
+    """
+    cursor.execute(select_sql, (yesterday_str,))
+    result = cursor.fetchone()
+
+
+    if result:
+        # Insert or Update yesterday's pick
+        insert_sql = """
+            INSERT INTO yesterday_picks_test (past_idol_id, yesterdays_pick_date)
+            VALUES (?, ?)
+            ON CONFLICT(yesterdays_pick_date)
+            DO UPDATE SET past_idol_id = excluded.past_idol_id
+        """
+        cursor.execute(insert_sql, (result["idol_id"], yesterday_str))
+
+        connect.commit()
+    
+        # --- Extra query only for test purposes: fetch idol name ---
+        test_sql = """
+            SELECT artist_name FROM idols WHERE id = ?
+        """
+        cursor.execute(test_sql, (result["idol_id"],))
+        artist_name = cursor.fetchone()["artist_name"]
+
+        connect.close()
+
+        return jsonify({
+            "past_idol_id": result["idol_id"], 
+            "yesterdays_pick_date": yesterday_str,
+            "artist_name": artist_name
+        })
+
+    else:
+        connect.close()
+        return jsonify({"message": "First day - no yesterday pick to store"})
+
+
+
+
+
+
+
+
+
+
+
 
 
 if __name__ == "__main__":
