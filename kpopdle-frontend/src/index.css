@@ -1,14 +1,14 @@
 @import "tailwindcss";
 
-* {
-  margin: 0;
-  padding: 0;
-  box-sizing: border-box;
-}
+@tailwind utilities;
+
+
+
 
 body {
-  min-height: 100vh;
-  width: 10vw;
-  background: linear-gradient(180deg, rgb(253, 209, 218) 0%, rgba(160, 72, 123, 0.8) 100%);
-  font-family: "DynaPuff", system-ui;
+  @apply min-h-screen font-[DynaPuff] bg-gradient-to-b from-gray-700 to-blue-950/80;
+}
+
+*, *::before, *::after {
+  box-sizing: border-box;
 }

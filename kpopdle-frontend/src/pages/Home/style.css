@@ -1,4 +1,11 @@
-.SearchBar {
-    margin-top: 200px;
-    position-anchor: center;
-}
+/* @import url('https://fonts.googleapis.com/css2?family=DynaPuff:wght@400;700&display=swap'); */
+
+/* @import "tailwindcss/preflight"; */
+/* @tailwind utilities;
+
+@layer base {
+    h1 {
+        @apply text-2xl text-center text-white mt-20 font-bold;
+    }
+} */
+

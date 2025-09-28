@@ -1,5 +1,4 @@
 //import React from "react";
-import { Box, FormControl, List, ListItem } from "@chakra-ui/react";
 import type { GuessedIdolData } from "../../interfaces/gameInterfaces";
 
 interface VictoryCardHudProps {
@@ -14,16 +13,16 @@ const VictoryCardHudProps = (props: VictoryCardHudProps) => {
 
 
 return (
-    <Box>
-        <FormControl>
-            <List>
-                <ListItem>{cardinfo.artist_name}</ListItem>
-                <ListItem>Congratulations!</ListItem>
-                <ListItem>Attempts: {attempts}!</ListItem>
-                <ListItem>Yesterday's Idol: {yesterdayidol}</ListItem>
-            </List>
-        </FormControl>
-    </Box>
+    <div>
+        <form>
+            <ul>
+                <li>{cardinfo.artist_name}</li>
+                <li>Congratulations!</li>
+                <li>Attempts: {attempts}!</li>
+                <li>Yesterday's Idol: {yesterdayidol}</li>
+            </ul>
+        </form>
+    </div>
 
 
 )};

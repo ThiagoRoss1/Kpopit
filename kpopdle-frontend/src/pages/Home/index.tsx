@@ -1,3 +1,4 @@
+import "../../index.css";
 import "./style.css";
 import { useQuery, useMutation } from "@tanstack/react-query";
 import { useState } from "react";
@@ -8,7 +9,6 @@ import type {
   GuessResponse,
   YesterdayIdol,
 } from "../../interfaces/gameInterfaces";
-import { Box } from '@chakra-ui/react';
 import SearchBar from "../../components/GuessSearchBar/SearchBar.tsx";
 import GuessesGrid from "../../components/GuessesGrid/GuessGrid.tsx";
 import VictoryCardHudProps from "../../components/VictoryCard/VictoryCardHud.tsx";
@@ -108,11 +108,13 @@ function Home() {
 
   // Main return
   return (
-    <div>
-      <h1>Kpopdle</h1>
+    <div className="min-h-screen flex flex-col items-center justify-start">
+      <h1 className="!text-[64px] font-bold text-center text-amber-700 mt-20">
+        Kpopdle
+      </h1>
       
       {/* {!endGame && ()} */}
-      <Box position="relative">
+      <div className="relative w-full max-w-4xl px-4 mx-auto flex justify-center">
       <SearchBar
         allIdols={allIdolsData || []}
         value={currentGuess}
@@ -124,16 +126,16 @@ function Home() {
         excludedIdols={guesses.map(guess => guess.guessed_idol_data?.idol_id)}
         disabled={endGame || guessMutation.isPending}
       />
-      </Box>
+      </div>
 
       <br />
 
-      <Box>
+      <div className="w-full flex flex-col items-center justify-center mt-4 mb-4">
         <GuessesGrid
           guesses={guesses}
           allIdols={allIdolsData || []}
         />
-      </Box>
+      </div>
 
       <p>ID: {gameData?.answer_id}</p>
       <h2>Game Categories</h2>
