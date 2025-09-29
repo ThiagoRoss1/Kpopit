@@ -1,6 +1,10 @@
 export interface GameData {
   answer_id: number;
   categories: string[];
+
+  /* Hints */
+  member_count?: number;
+  groups?: string[];
 }
 
 export interface IdolListItem {

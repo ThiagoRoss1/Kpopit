@@ -12,6 +12,8 @@ import type {
 import SearchBar from "../../components/GuessSearchBar/SearchBar.tsx";
 import GuessesGrid from "../../components/GuessesGrid/GuessGrid.tsx";
 import VictoryCardHudProps from "../../components/VictoryCard/VictoryCardHud.tsx";
+import AnswerHintsBox from "../../components/AnswerHints/AnswerHintsBox.tsx";
+import TopButtons from "../../components/buttons/TopButtons.tsx";
 // import { Input } from "@chakra-ui/react"; - Css framework import example
 
 function Home() {
@@ -19,6 +21,7 @@ function Home() {
   const [currentGuess, setCurrentGuess] = useState<string>("");
   const [guesses, setGuesses] = useState<GuessResponse[]>([]);
   const [endGame, setEndGame] = useState<boolean>(false);
+  // const [showAbout, setShowAbout] = useState<boolean>(false);
 
   // Counter
   const [attempts, setAttempts] = useState<number>(0);
@@ -113,8 +116,14 @@ function Home() {
         Kpopdle
       </h1>
       
+      <div>
+        <TopButtons onSubmit={() => {
+          // Example function for button
+          console.log("Top button clicked");
+        }} />
+      </div>
       {/* {!endGame && ()} */}
-      <div className="relative w-full max-w-4xl px-4 mx-auto flex justify-center">
+      <div className="relative w-full max-w-4xl px-4 mx-auto flex justify-center z-50">
       <SearchBar
         allIdols={allIdolsData || []}
         value={currentGuess}
@@ -129,6 +138,10 @@ function Home() {
       </div>
 
       <br />
+
+      <div className="w-full flex flex-col items-center justify-center mt-4 mb-4">
+        <AnswerHintsBox memberCount={gameData?.member_count ?? null} groups={gameData?.groups ?? null} />
+      </div>
 
       <div className="w-full flex flex-col items-center justify-center mt-4 mb-4">
         <GuessesGrid

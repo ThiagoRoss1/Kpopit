@@ -189,14 +189,18 @@ def get_daily_idol():
     else:
         idol_data_dict["group_companies"] = []
 
-    connect.close()
-
     # Debug print
     print("\n -- ENTIRE IDOL DATA DICT --")
     print(idol_data_dict)
     print(" ------------------------\n")
 
 
+    # Add career data 
+    idol_career_for_groups = fetch_full_idol_career(cursor, idol_id)
+    groups = [career["group_name"] for career in idol_career_for_groups if career.get("is_active")]
+
+    connect.close()
+    
     # Filter data 
     game_data = {
         "answer_id": idol_data_dict["idol_id"],
@@ -205,8 +209,11 @@ def get_daily_idol():
         "categories": [
             "Artist Name", "Gender", "Group", "Companies", "Nationality", 
             "Debut Year", "Birth Year", "Height", "Position",
-        ]
+        ],
         ## "reveal_info" -- TODO later // TODO - nationalities can be + than 1
+        "member_count": idol_data_dict.get("member_count"),
+        # TODO groups - same as Group but organizing better for frontend
+        "groups": groups,
     }
 
     return jsonify(game_data)
@@ -407,7 +414,7 @@ def guess_idol():
 
     keys_for_display = [
         "idol_id", "artist_name", "gender", "nationality", "idol_debut_year", 
-        "birth_year", "height", "position", "image_path" # just this for now
+        "birth_year", "height", "position", "image_path", "member_count" # just this for now
     ]
 
     data_for_display = {key: guessed_idol.get(key) for key in keys_for_display}
