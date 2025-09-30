@@ -14,6 +14,7 @@ import GuessesGrid from "../../components/GuessesGrid/GuessGrid.tsx";
 import VictoryCardHudProps from "../../components/VictoryCard/VictoryCardHud.tsx";
 import AnswerHintsBox from "../../components/AnswerHints/AnswerHintsBox.tsx";
 import TopButtons from "../../components/buttons/TopButtons.tsx";
+import Modal from "../../components/buttons/modals/Modal.tsx";
 // import { Input } from "@chakra-ui/react"; - Css framework import example
 
 function Home() {
@@ -21,7 +22,7 @@ function Home() {
   const [currentGuess, setCurrentGuess] = useState<string>("");
   const [guesses, setGuesses] = useState<GuessResponse[]>([]);
   const [endGame, setEndGame] = useState<boolean>(false);
-  // const [showAbout, setShowAbout] = useState<boolean>(false);
+  const [showAbout, setShowAbout] = useState<boolean>(false);
 
   // Counter
   const [attempts, setAttempts] = useState<number>(0);
@@ -111,7 +112,7 @@ function Home() {
 
   // Main return
   return (
-    <div className="min-h-screen flex flex-col items-center justify-start">
+    <div className="min-h-screen w-full flex flex-col items-center justify-start">
       <h1 className="!text-[64px] font-bold text-center text-amber-700 mt-20">
         Kpopdle
       </h1>
@@ -119,11 +120,13 @@ function Home() {
       <div>
         <TopButtons onSubmit={() => {
           // Example function for button
-          console.log("Top button clicked");
+          setShowAbout(true);
         }} />
+        {showAbout && <Modal isOpen={showAbout} onClose={() => setShowAbout(false)} />}
+
       </div>
       {/* {!endGame && ()} */}
-      <div className="relative w-full max-w-4xl px-4 mx-auto flex justify-center z-50">
+      <div className="relative w-full max-w-4xl px-4 mx-auto flex justify-center z-40">
       <SearchBar
         allIdols={allIdolsData || []}
         value={currentGuess}
