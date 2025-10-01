@@ -32,3 +32,8 @@ export const getYesterdaysIdol = async () => {
     const response = await api.get('/store-yesterdays-idol');
     return response.data;
 };
+
+export const getResetTimer = async () => {
+    const response = await api.get('/reset-timer');
+    return response.data;
+};

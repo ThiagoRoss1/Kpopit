@@ -2,16 +2,13 @@
 import React from "react";
 
 interface ModalProps {
-    isOpen: boolean;
     onClose: () => void;
     title?: string;
     children?: React.ReactNode;
 }
 
 const Modal = (props: ModalProps) => {
-    const { isOpen, onClose, children } = props;
-
-    if (!isOpen) return null;
+    const { onClose, children, title } = props;
 
     return (
         <div className="fixed inset-0 z-50 overflow-y-auto bg-black/20 backdrop-blur-sm" onClick={() => onClose()}>
@@ -22,7 +19,7 @@ const Modal = (props: ModalProps) => {
 
                     <div className="w-full flex items-center justify-between px-4 py-2 bg-white/10 border-b border-white/20">
                         <h2 className="text-4xl font-bold bg-gradient-to-b from-[#b43777] to-[#ce757a] bg-clip-text text-transparent drop-shadow-lg">
-                            How to Play...
+                            {title}
                         </h2>
                         <button className="rounded-full flex-shrink-0 w-10 h-10 text-center 
                         bg-gradient-to-b from-[#b43777]/80 to-white/80 backdrop-blur-lg shadow-lg hover:brightness-115 hover:scale-105
@@ -32,7 +29,7 @@ const Modal = (props: ModalProps) => {
                     </div>
                     
                     <div className="w-full bg-white/10 px-4 py-4 text-left">
-                        <p className="break-words">Test Text...</p>
+                        <p className="break-words">{children}</p>
                     </div>
                 </div>
             </div>

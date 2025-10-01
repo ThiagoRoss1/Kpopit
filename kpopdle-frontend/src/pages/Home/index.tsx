@@ -14,7 +14,9 @@ import GuessesGrid from "../../components/GuessesGrid/GuessGrid.tsx";
 import VictoryCardHudProps from "../../components/VictoryCard/VictoryCardHud.tsx";
 import AnswerHintsBox from "../../components/AnswerHints/AnswerHintsBox.tsx";
 import TopButtons from "../../components/buttons/TopButtons.tsx";
+import BottomButtons from "../../components/buttons/BottomButtons.tsx";
 import Modal from "../../components/buttons/modals/Modal.tsx";
+import HowToPlayText from "../../components/buttons/modals/HowToPlayContent.tsx";
 // import { Input } from "@chakra-ui/react"; - Css framework import example
 
 function Home() {
@@ -22,7 +24,7 @@ function Home() {
   const [currentGuess, setCurrentGuess] = useState<string>("");
   const [guesses, setGuesses] = useState<GuessResponse[]>([]);
   const [endGame, setEndGame] = useState<boolean>(false);
-  const [showAbout, setShowAbout] = useState<boolean>(false);
+  const [showModal, setShowModal] = useState<null | "changelog" | "how-to-play" | "about" | "stats" | "streak" | "share">(null);
 
   // Counter
   const [attempts, setAttempts] = useState<number>(0);
@@ -113,20 +115,45 @@ function Home() {
   // Main return
   return (
     <div className="min-h-screen w-full flex flex-col items-center justify-start">
-      <h1 className="!text-[64px] font-bold text-center text-amber-700 mt-20">
+      <div className="flex items-center justify-center p-[9px] sm:w-[242px] sm:h-[84px] mt-[70px] mb-[38px] text-center">
+        <h1 className="text-[54px] font-bold text-center text-amber-700">
         Kpopdle
-      </h1>
-      
-      <div>
-        <TopButtons onSubmit={() => {
-          // Example function for button
-          setShowAbout(true);
-        }} />
-        {showAbout && <Modal isOpen={showAbout} onClose={() => setShowAbout(false)} />}
+        </h1>
+      </div>    
+      <div className="flex items-center justify-center mb-[31px]">
+        <TopButtons
+          onSubmitChangelog={() => { setShowModal("changelog") }}
+          onSubmitHowToPlay={() => { setShowModal("how-to-play") }}
+          onSubmitAbout={() => { setShowModal("about") }}
+        />
+        {showModal === "changelog" && <Modal onClose={() => setShowModal(null)} title="Changelog..."><p>On working...</p></Modal>}
+        {showModal === "how-to-play" && <Modal onClose={() => setShowModal(null)} title="How to Play..."><HowToPlayText /></Modal>}
+        {showModal === "about" && <Modal onClose={() => setShowModal(null)} title="About..."><p>On working...</p></Modal>}
 
       </div>
+
+      <div className="flex items-center justify-center mb-[31px]">
+        <BottomButtons
+          onSubmitStats={() => { setShowModal("stats") }}
+          onSubmitStreak={() => { setShowModal("streak") }}
+          onSubmitShare={() => { setShowModal("share") }}
+        />
+        {showModal === "stats" && <Modal onClose={() => setShowModal(null)} title="Stats..."><p>On working...</p></Modal>}
+        {showModal === "streak" && <Modal onClose={() => setShowModal(null)} title="Streak..."><p>On working...</p></Modal>}
+        {showModal === "share" && <Modal onClose={() => setShowModal(null)} title="Share..."><p>On working...</p></Modal>}
+      </div>
+
+      <div className="w-full flex flex-col items-center justify-center mb-[41px]">
+        <AnswerHintsBox memberCount={gameData?.member_count ?? null} groups={gameData?.groups ?? null} />
+      </div>
+      
       {/* {!endGame && ()} */}
-      <div className="relative w-full max-w-4xl px-4 mx-auto flex justify-center z-40">
+      <div className="flex text-center items-center justify-center sm:w-[194px] sm:h-[19px] mb-[3px]">
+        <p className="text-[16px] drop-shadow-lg text-[#d7d7d7]/85">
+          Guess today's idol...
+        </p>
+      </div>
+      <div className="relative w-full max-w-4xl px-4 mx-auto flex justify-center z-40 mb-20">
       <SearchBar
         allIdols={allIdolsData || []}
         value={currentGuess}
@@ -141,10 +168,6 @@ function Home() {
       </div>
 
       <br />
-
-      <div className="w-full flex flex-col items-center justify-center mt-4 mb-4">
-        <AnswerHintsBox memberCount={gameData?.member_count ?? null} groups={gameData?.groups ?? null} />
-      </div>
 
       <div className="w-full flex flex-col items-center justify-center mt-4 mb-4">
         <GuessesGrid

@@ -56,3 +56,11 @@ export interface YesterdayIdol {
   yesterdays_pick_date: string;
   artist_name: string;
 }
+
+export interface ResetTimer {
+  hours: number;
+  minutes: number;
+  seconds: number;
+  total_seconds: number;
+  next_reset: string;
+}
