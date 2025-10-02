@@ -17,6 +17,7 @@ import TopButtons from "../../components/buttons/TopButtons.tsx";
 import BottomButtons from "../../components/buttons/BottomButtons.tsx";
 import Modal from "../../components/buttons/modals/Modal.tsx";
 import HowToPlayText from "../../components/buttons/modals/HowToPlayContent.tsx";
+import { useResetTimer } from "../../hooks/useResetTimer.tsx";
 // import { Input } from "@chakra-ui/react"; - Css framework import example
 
 function Home() {
@@ -25,6 +26,7 @@ function Home() {
   const [guesses, setGuesses] = useState<GuessResponse[]>([]);
   const [endGame, setEndGame] = useState<boolean>(false);
   const [showModal, setShowModal] = useState<null | "changelog" | "how-to-play" | "about" | "stats" | "streak" | "share">(null);
+  const [showVictoryCard, setShowVictoryCard] = useState<boolean>(false);
 
   // Counter
   const [attempts, setAttempts] = useState<number>(0);
@@ -73,6 +75,7 @@ function Home() {
       /// Check if the guess is correct
       if (data.guess_correct) {
         setEndGame(true);
+        setShowVictoryCard(true);
       }
     },
     onError: (error) => {
@@ -186,10 +189,13 @@ function Home() {
       </ul>
 
 
-      {endGame && guesses.length > 0 && (
+      {endGame && guesses.length > 0 && showVictoryCard && (
         <VictoryCardHudProps cardinfo={guesses[guesses.length - 1].guessed_idol_data}
         attempts={attempts}
-        yesterdayidol={yesterdayArtist || "unknown"} />
+        nextreset={useResetTimer}
+        yesterdayidol={yesterdayArtist || "unknown"} // Don't need at small card
+        onClose={() => setShowVictoryCard(false)}
+        />
       )}
     </div>
   );
