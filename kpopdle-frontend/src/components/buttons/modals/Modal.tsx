@@ -13,7 +13,7 @@ const Modal = (props: ModalProps) => {
     return (
         <div className="fixed inset-0 z-50 overflow-y-auto bg-black/20 backdrop-blur-sm" onClick={() => onClose()}>
             
-            <div className="min-h-screen flex items-start justify-center w-full sm:max-w-[846px] mx-auto pt-20 pb-20" onClick={(e) => e.stopPropagation()}>
+            <div className="flex items-start justify-center w-full sm:max-w-[846px] mx-auto mt-20" onClick={(e) => e.stopPropagation()}>
 
                 <div className="relative w-full max-w-[846px] text-center bg-white/10 border border-white/50 rounded-[20px] overflow-hidden shadow-[4px_4px_4px_1px_rgba(0,0,0,0.1),inset_0_4px_4px_rgba(0,0,0,0.25)] ">
 

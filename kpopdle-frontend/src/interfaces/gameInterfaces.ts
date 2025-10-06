@@ -14,7 +14,7 @@ export interface IdolListItem {
 
 export interface FeedbackItem {
   status: string;
-  // '?' turns these properties optional. I can or cannot exist.
+  // '?' turns these properties optional. It can or cannot exist.
   correct_items?: string[];
   incorrect_items?: string[];
 }
@@ -55,6 +55,7 @@ export interface YesterdayIdol {
   past_idol_id: number;
   yesterdays_pick_date: string;
   artist_name: string;
+  groups?: string[];
 }
 
 export interface ResetTimer {

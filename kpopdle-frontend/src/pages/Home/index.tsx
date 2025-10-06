@@ -18,6 +18,7 @@ import BottomButtons from "../../components/buttons/BottomButtons.tsx";
 import Modal from "../../components/buttons/modals/Modal.tsx";
 import HowToPlayText from "../../components/buttons/modals/HowToPlayContent.tsx";
 import { useResetTimer } from "../../hooks/useResetTimer.tsx";
+import VictoryCardBig from "../../components/VictoryCard/VictoryCardBig.tsx";
 // import { Input } from "@chakra-ui/react"; - Css framework import example
 
 function Home() {
@@ -27,6 +28,7 @@ function Home() {
   const [endGame, setEndGame] = useState<boolean>(false);
   const [showModal, setShowModal] = useState<null | "changelog" | "how-to-play" | "about" | "stats" | "streak" | "share">(null);
   const [showVictoryCard, setShowVictoryCard] = useState<boolean>(false);
+  const [showBig, setShowBig] = useState<boolean>(false); // test.
 
   // Counter
   const [attempts, setAttempts] = useState<number>(0);
@@ -67,6 +69,8 @@ function Home() {
     (idol) => idol.id === yesterday.data?.past_idol_id
   )?.artist_name;
 
+  const yesterdayArtistGroup = yesterday.data?.groups ? yesterday.data.groups.join(", ") : null;
+  
   const guessMutation = useMutation({
     mutationFn: getGuessIdol,
     onSuccess: (data) => {
@@ -76,6 +80,7 @@ function Home() {
       if (data.guess_correct) {
         setEndGame(true);
         setShowVictoryCard(true);
+        setShowBig(true);
       }
     },
     onError: (error) => {
@@ -180,23 +185,36 @@ function Home() {
       </div>
 
       <p>ID: {gameData?.answer_id}</p>
-      <h2>Game Categories</h2>
+      {/* <h2>Game Categories</h2>
       <ul>
         {gameData?.categories &&
           gameData.categories.map((category: string) => (
             <li key={category}>{category}</li>
           ))}
-      </ul>
+      </ul> */}
 
 
       {endGame && guesses.length > 0 && showVictoryCard && (
-        <VictoryCardHudProps cardinfo={guesses[guesses.length - 1].guessed_idol_data}
+        <VictoryCardHudProps cardInfo={guesses[guesses.length - 1].guessed_idol_data}
         attempts={attempts}
-        nextreset={useResetTimer}
-        yesterdayidol={yesterdayArtist || "unknown"} // Don't need at small card
+        nextReset={useResetTimer}
+        yesterdayIdol={yesterdayArtist || "unknown"} // Don't need at small card
         onClose={() => setShowVictoryCard(false)}
         />
       )}
+      
+      {endGame && guesses.length > 0 && showBig && (
+        <VictoryCardBig 
+        cardInfo={guesses[guesses.length - 1].guessed_idol_data}
+        idolActiveGroup={gameData?.groups ?? null}
+        attempts={attempts}
+        nextReset={useResetTimer}
+        yesterdayIdol={yesterdayArtist || "unknown"} // Don't need at small card
+        yesterdayIdolGroup={yesterdayArtistGroup ?? null}
+       />
+      )}
+        
+      
     </div>
   );
 }

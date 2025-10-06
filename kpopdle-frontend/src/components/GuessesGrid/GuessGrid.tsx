@@ -47,7 +47,7 @@ const GuessesGrid = (props: GuessesGridProps) => {
   const { guesses } = props;
 
   return (
-    <div className="w-full h-fit max-w-full sm:max-w-[894px] mx-auto flex items-center border border-white/50">
+    <div className="w-full h-fit max-w-full sm:max-w-[894px] mx-auto flex items-center">
       <div className="grid grid-cols-8 gap-4 p-4 justify-items-center items-center w-full max-w-6xl mx-auto">
         {headers.map((header) => (
           <div key={header} className="font-bold text-[16px] text-pretty text-center text-white w-full h-fit pb-1">

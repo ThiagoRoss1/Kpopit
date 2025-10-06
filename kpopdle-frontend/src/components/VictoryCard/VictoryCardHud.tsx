@@ -1,147 +1,52 @@
 //import React from "react";
 import type { GuessedIdolData } from "../../interfaces/gameInterfaces";
+import { motion } from "motion/react";
+import VictoryCardSmall from "./VictoryCardSmall.tsx";
 
 interface VictoryCardHudProps {
     onClose?: () => void;
-    cardinfo: GuessedIdolData;
+    cardInfo: GuessedIdolData;
     attempts: number;
-    yesterdayidol: string;
-    nextreset: () => { timeRemaining: number | null; formattedTime: string; };
+    yesterdayIdol: string;
+    nextReset: () => { timeRemaining: number | null; formattedTime: string; };
 }
 
 const VictoryCardHudProps = (props: VictoryCardHudProps) => {
-    const { cardinfo, attempts, nextreset, onClose } = props;
+    const { cardInfo, attempts, nextReset, yesterdayIdol, onClose } = props;
 
 
 
 return (
-    <div className="fixed inset-0 z-50 overflow-y-auto flex items-center justify-center">
-        <div className="min-h-screen flex items-center justify-center w-full sm:max-w-[370px] sm:max-h-[608px] mx-auto pt-20 pb-20">
-            <div className="relative flex flex-col items-center justify-start w-full sm:w-[350px] sm:h-[588px] bg-white/50 rounded-[50px]">
-                
-                {/* Icons Container */}
-                <div className="relative w-full h-25 mb-3">
-                    <div className="absolute flex items-center justify-center top-0 right-4 sm:w-10 sm:h-10 rounded-full bg-white/20 mt-2.5">
-                        <button className="flex items-center justify-center" onClick={onClose}>
-                            <img src="/icons/close-icon.png" alt="Close" className="w-5 h-5" />
-                        </button>
-                    </div>
-
-                    <div className="absolute flex items-center justify-center top-0 left-1/2 transform -translate-x-1/2 sm:w-16 sm:h-16 rounded-full bg-amber-800 mt-7.5">
-                        <img src="/icons/trophy-icon.png" alt="Trophy" className="w-8 h-8 sm:w-12 sm:h-12" />
-                    </div>
-
-                    </div>
-
-                    {/* Text Container */}
-                    <div className="w-full px-8 sm:px-[52px] mb-3">
-                        <div className="flex flex-col items-center text-center gap-4 max-w-[280px] mx-auto">
-                            <h2 className="font-bold text-lg sm:text-[20px]">
-                                Congratulations! 🎊
-                            </h2>
-                            <p className="text-base sm:text-[16px] leading-tight">
-                                {`You guessed it in ${attempts} ${attempts === 1 ? "try" : "tries"}!`}
-                            </p>
-                        </div>       
-                    </div>
-
-                    {/* Idol Container */}
-                    <div className="flex w-full items-center justify-center sm:h-[100px] mb-4">
-                        <div className="relative flex items-center justify-center bg-[#a8a8a8]/60 sm:w-80 sm:h-24 sm:p-5 rounded-[20px]">
-
-                            <div className="absolute left-5 flex items-center justify-center sm:h-16 sm:w-16 bg-[#d9d9d9] rounded-[20px]">
-                                <img src="/icons/idol-placeholder.png" alt="Idol" className="w-8 h-8 sm:w-12 sm:h-12" />
-                            </div>
-
-                            <div className="flex flex-col text-center items-center justify-center w-full gap-0.5">
-                                <p className="font-bold text-base sm:text-[20px]">
-                                    {cardinfo.artist_name}
-                                </p>
-                                <p className="text-base sm:text-[16px] leading-tight">
-                                    {cardinfo.groups.join(", ") || "Soloist"}
-                                </p>
-                            </div>
-                        </div>
-                    </div>
-
-                    {/* Stats Container */}
-                    <div className="flex w-full items-center justify-center sm:h-20 mb-4">
-                        <div className="flex flex-row items-center justify-between sm:w-80 sm:h-20">
-                            <div className="relative flex items-center justify-center text-center bg-[#b4b4b4]/60 sm:w-36 sm:h-20 rounded-[20px]">
-                                <div className="flex flex-col items-center justify-center text-center gap-0.5">
-                                    <p className="font-bold sm:text-[18px]">
-                                        {attempts}
-                                    </p>
-                                    <p className="text-base sm:text-[16px] leading-tight">
-                                        {`${attempts === 1 ? "Attempt" : "Attempts"}`}
-                                    </p>
-                                </div>
-                            </div>
-
-                            <div className="relative flex items-center justify-center text-center bg-[#b4b4b4]/60 sm:w-36 sm:h-20 rounded-[20px]">
-                                <div className="flex flex-col items-center justify-center text-center gap-0.5">
-                                    <p className="font-bold sm:text-[18px]">
-                                        3
-                                    </p>
-                                    <p className="text-base sm:text-[16px] leading-tight">
-                                        On working... (Streak)
-                                    </p>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-
-                    {/* Share Container */}
-                    <div className="flex w-full items-center justify-center sm:h-29 mb-5">
-                        <div className="flex flex-col items-center sm:w-80 sm:h-29">
-                            <button className="relative top-0 flex items-center justify-center text-center bg-[#9f9f9f]/60 sm:w-80 sm:h-13 rounded-[16px] mb-4" onClick={() => {console.log("Success")}}>
-                                <div className="flex items-center justify-center text-center">
-                                    <p className="text-base font-bold sm:text-[20px] leading-tight">
-                                        Share Results
-                                    </p>
-                                </div>
-                            </button>
-
-                            <div className="flex flex-row items-center justify-center text-center sm:w-80 sm:h-12 gap-6">
-                                <button className="relative left-0 items-center text-center bg-[#747474]/60 sm:w-12 sm:h-12 rounded-[20px]">
-                                    <div className="flex items-center justify-center text-center">
-                                        <img src="/icons/twitter-icon.png" alt="Twt" className="w-6 h-6 sm:w-9 sm:h-9" />
-                                    </div>
-                                </button>
-
-                                <button className="relative right-0 items-center text-center bg-[#747474]/60 sm:w-12 sm:h-12 rounded-[20px]">
-                                    <div className="flex items-center justify-center text-center">
-                                        <img src="/icons/instagram-icon.png" alt="Insta" className="w-6 h-6 sm:w-9 sm:h-9" />
-                                    </div>
-                                </button>
-                            </div>
-                        </div>
-                    </div>
-
-                    {/* Next idol Container */}
-                    <div className="flex w-full items-center justify-center sm:h-5">
-                        <div className="flex flex-row items-center justify-center text-center sm:w-48 sm:h-5 gap-1">
-                            <p className="text-base text-[16px]">
-                                Next idol in 
-                            </p>
-                            <p className="text-base font-bold text-[16px]">
-                                {nextreset().formattedTime}
-                            </p>
-                        </div>
-                    </div>
-
-
-
-
-                
-            
-
-            </div>
-
+    <motion.div 
+        className="fixed inset-0 z-50 bg-black/20 backdrop-blur-sm flex items-center justify-center overflow-y-auto"
+        initial={{ opacity: 0 }} 
+        animate={{ opacity: 1 }} 
+        transition={{ duration: 0.3 }}
+        onClick={onClose}
+    >
+        <div className="min-h-screen flex items-center justify-center w-full sm:max-w-[370px] sm:max-h-[608px] mx-auto py-20">
+            <motion.div 
+                initial={{ scale: 0.8, opacity: 0, y: -50 }} 
+                animate={{ scale: 1, opacity: 1, y: 0 }} 
+                transition={{ 
+                    duration: 0.5,
+                    ease: [0.34, 1.56, 0.64, 1],
+                    delay: 0.1
+                }}
+                onClick={(e) => e.stopPropagation()}
+            >
+                <VictoryCardSmall 
+                    cardInfo={cardInfo}
+                    attempts={attempts}
+                    nextReset={nextReset}
+                    onClose={onClose}
+                />
+            </motion.div>
         </div>
-    </div>
+    </motion.div>
+    
 
-
+                
 )};
 
 {/* <div>    bg-black/20 backdrop-blur-sm

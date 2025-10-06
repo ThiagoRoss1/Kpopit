@@ -166,7 +166,7 @@ def get_daily_idol():
     connect.commit()
 
     """ For testing purposes, you can set a fixed idol_id """
-    # idol_id = 1
+    idol_id = 1
 
     # Fetch full idol data
     idol_data = fetch_full_idol_data(cursor, idol_id)
@@ -508,19 +508,32 @@ def store_yesterdays_idol():
 
         connect.commit()
     
-        # --- Extra query only for test purposes: fetch idol name ---
-        test_sql = """
+        # --- Fetch idol name ---
+        name_sql = """
             SELECT artist_name FROM idols WHERE id = ?
         """
-        cursor.execute(test_sql, (result["idol_id"],))
+        cursor.execute(name_sql, (result["idol_id"],))
         artist_name = cursor.fetchone()["artist_name"]
+
+        # --- Fetch idol group ---
+        group_sql = """
+            SELECT g.name FROM groups AS g
+            LEFT JOIN idol_career AS ic ON g.id = ic.group_id
+            WHERE ic.idol_id = ? AND ic.is_active = 1
+        """
+
+        # Remove left join after testing (not all idols have a career entry)
+
+        cursor.execute(group_sql, (result["idol_id"],))
+        group_result = cursor.fetchone()
 
         connect.close()
 
         return jsonify({
             "past_idol_id": result["idol_id"], 
             "yesterdays_pick_date": yesterday_str,
-            "artist_name": artist_name
+            "artist_name": artist_name,
+            "groups": [group_result["name"]] if group_result else []
         })
 
     else:
