@@ -8,10 +8,11 @@ interface VictoryCardBigProps {
     yesterdayIdol: string;
     yesterdayIdolGroup?: string[] | null;
     nextReset: () => { timeRemaining: number | null; formattedTime: string; };
+    onShareClick?: () => void;
 }
 
 const VictoryCardBig = (props: VictoryCardBigProps) => {
-    const { cardInfo, idolActiveGroup, attempts, yesterdayIdol, yesterdayIdolGroup, nextReset } = props;
+    const { cardInfo, idolActiveGroup, attempts, yesterdayIdol, yesterdayIdolGroup, nextReset, onShareClick } = props;
 
     const activeGroup = idolActiveGroup && idolActiveGroup.length > 0 ? idolActiveGroup : "Soloist";
     const yesterdayGroup = yesterdayIdolGroup && yesterdayIdolGroup.length > 0 ? yesterdayIdolGroup : "Soloist";
@@ -104,11 +105,14 @@ return (
             </div>
         </div>
 
-        {/* Share Container -- will open small card (later)*/}
+        {/* Share Container + Opens small card */}
         <div className="relative w-full sm:h-[50px] mb-5 px-6">
-            <button className="relative w-full h-full items-center justify-center text-center bg-[#696969]/50 rounded-[12px]
-            hover:brightness-105 hover:scale-105 hover:cursor-pointer transition-transform duration-500">
-                <div className="relative flex flex-row w-full h-full items-center justify-center text-center">
+            <button 
+                className="relative w-full h-full items-center justify-center text-center bg-[#696969]/50 rounded-[12px]
+                hover:brightness-105 hover:scale-105 hover:cursor-pointer transition-transform duration-500" 
+                onClick={() => onShareClick?.()}
+            >
+                <div className="relative flex flex-row w-full h-full items-center justify-center text-center gap-2">
                     <img src="/icons/share.png" alt="S" className="w-6 h-6" />
                     <span>Share Result</span>
                 </div>

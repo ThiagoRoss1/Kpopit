@@ -1,53 +1,103 @@
 //import React from "react";
+import React from "react";
+import { useEffect, useState, useRef } from "react";
 import type { GuessedIdolData } from "../../interfaces/gameInterfaces";
 import { motion } from "motion/react";
 import VictoryCardSmall from "./VictoryCardSmall.tsx";
+import VictoryCardBig from "./VictoryCardBig.tsx";
 
 interface VictoryCardHudProps {
-    onClose?: () => void;
     cardInfo: GuessedIdolData;
     attempts: number;
     yesterdayIdol: string;
+    yesterdayIdolGroup?: string[] | null;
+    idolActiveGroup?: string[] | null;
     nextReset: () => { timeRemaining: number | null; formattedTime: string; };
 }
 
 const VictoryCardHudProps = (props: VictoryCardHudProps) => {
-    const { cardInfo, attempts, nextReset, yesterdayIdol, onClose } = props;
+    const { cardInfo, attempts, nextReset, yesterdayIdol, yesterdayIdolGroup, idolActiveGroup } = props;
+    
+    const [showSmallModal, setShowSmallModal] = useState(false);
+    const bigCardRef = useRef<HTMLDivElement>(null);
 
+    useEffect(() => {
+        const scrollToBigCard = () => {
+            if (bigCardRef.current) {
+                const cardPosition = bigCardRef.current.getBoundingClientRect().top + window.scrollY;
+                const offset = window.innerHeight / 2 - bigCardRef.current.offsetHeight / 2;
+                const targetPosition = cardPosition - offset;
 
+                window.scrollTo({
+                    top: targetPosition,
+                    behavior: 'smooth'
+                });
+            }
+        };
+
+        const timer = setTimeout(scrollToBigCard, 300);
+        return () => clearTimeout(timer);
+    }, []);
 
 return (
-    <motion.div 
-        className="fixed inset-0 z-50 bg-black/20 backdrop-blur-sm flex items-center justify-center overflow-y-auto"
-        initial={{ opacity: 0 }} 
-        animate={{ opacity: 1 }} 
-        transition={{ duration: 0.3 }}
-        onClick={onClose}
-    >
-        <div className="min-h-screen flex items-center justify-center w-full sm:max-w-[370px] sm:max-h-[608px] mx-auto py-20">
-            <motion.div 
-                initial={{ scale: 0.8, opacity: 0, y: -50 }} 
-                animate={{ scale: 1, opacity: 1, y: 0 }} 
+    <React.Fragment>
+        <div ref={bigCardRef}>
+            <motion.div
+                initial={{ opacity: 0, scale: 0.95, y: 20 }}
+                animate={{ opacity: 1, scale: 1, y: 0 }}
                 transition={{ 
-                    duration: 0.5,
-                    ease: [0.34, 1.56, 0.64, 1],
-                    delay: 0.1
+                    duration: 0.6,
+                    ease: "easeOut",
+                    delay: 0.2
                 }}
-                onClick={(e) => e.stopPropagation()}
             >
-                <VictoryCardSmall 
+                <VictoryCardBig
                     cardInfo={cardInfo}
                     attempts={attempts}
                     nextReset={nextReset}
-                    onClose={onClose}
+                    yesterdayIdol={yesterdayIdol}
+                    yesterdayIdolGroup={yesterdayIdolGroup ?? null}
+                    idolActiveGroup={idolActiveGroup ?? null}
+                    onShareClick={() => setShowSmallModal(true)}
                 />
             </motion.div>
         </div>
-    </motion.div>
-    
 
-                
+        {showSmallModal && (
+            <motion.div 
+                className="fixed inset-0 z-50 bg-black/20 backdrop-blur-sm flex items-center justify-center overflow-y-auto"
+                initial={{ opacity: 0 }} 
+                animate={{ opacity: 1 }} 
+                transition={{ duration: 0.3 }}
+                onClick={() => setShowSmallModal(false)}
+            >
+                <div className="flex items-center justify-center w-full sm:max-w-[370px] mx-auto p-4">
+                    <motion.div 
+                        initial={{ scale: 0.8, opacity: 0, y: -30 }} 
+                        animate={{ scale: 1, opacity: 1, y: 0 }} 
+                        transition={{ 
+                            duration: 0.4,
+                            ease: [0.34, 1.56, 0.64, 1]
+                        }}
+                        onClick={(e) => e.stopPropagation()}
+                    >
+                        <VictoryCardSmall 
+                            cardInfo={cardInfo}
+                            attempts={attempts}
+                            nextReset={nextReset}
+                            onClose={() => setShowSmallModal(false)}
+                        />
+                    </motion.div>
+                </div>
+            </motion.div>
+        )}
+    </React.Fragment>
+       
 )};
+
+export default VictoryCardHudProps;
+
+
 
 {/* <div>    bg-black/20 backdrop-blur-sm
         <form>
@@ -59,22 +109,6 @@ return (
             </ul>
         </form>
     </div> */}
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-export default VictoryCardHudProps;
 
 
 
