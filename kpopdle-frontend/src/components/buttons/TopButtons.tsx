@@ -1,4 +1,6 @@
 // Top Buttons Component
+import GlassSurface from "../GlassSurface";
+
 interface TopButtonsProps {
     onSubmitChangelog: () => void;
     onSubmitHowToPlay: () => void;   
@@ -17,10 +19,32 @@ const TopButtons = (props: TopButtonsProps) => {
     return (
         <div className="flex items-center justify-center w-full max-w-sm mx-auto h-fit sm:max-w-[458px] sm:h-[50px] bg-transparent">
             <div className="flex items-center justify-between w-full h-fit gap-2 sm:gap-6 sm:h-[50px]">
-                <button onClick={onSubmitChangelog} type="button" className={`${buttonCardStyle} ${hoverEffect}`}>
-                    <span className={`${buttonTextStyle}`}>
-                       Changelog 
-                    </span>
+                <button onClick={onSubmitChangelog} type="button" className={`${hoverEffect}`}>
+                    <GlassSurface
+                        width={130}
+                        height={44}
+                        borderRadius={12}
+                        borderWidth={0.04}
+                        brightness={50}
+                        opacity={0.93}
+                        blur={11}
+                        displace={0.5}
+                        backgroundOpacity={0.1}
+                        saturation={1}
+                        distortionScale={-180}
+                        redOffset={0}
+                        greenOffset={10}
+                        blueOffset={20}
+                        xChannel="R"
+                        yChannel="G"
+                        mixBlendMode="normal"   
+                        className="sm:w-[130px] sm:h-[44px] sm:px-[10px] sm:py-[10px]"                 
+                    >
+                        <span className={`${buttonTextStyle}`}>
+                            Changelog
+                        </span>
+
+                    </GlassSurface>
                 </button>
 
                 <button onClick={onSubmitHowToPlay} type="button" className={`${centerButtonCardStyle} ${hoverEffect}`}>

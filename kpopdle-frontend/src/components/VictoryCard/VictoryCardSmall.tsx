@@ -1,5 +1,11 @@
 //import React from "react";
 import type { GuessedIdolData } from "../../interfaces/gameInterfaces";
+import GlassSurface from "../GlassSurface";
+import trophyIcon from "../../assets/icons/trophy.svg";
+import { X } from 'lucide-react';
+
+
+<X size={20} color="transparent" strokeWidth={0.5} absoluteStrokeWidth />
 
 interface VictoryCardSmallProps {
     onClose?: () => void;
@@ -14,48 +20,83 @@ const VictoryCardSmall = (props: VictoryCardSmallProps) => {
 
 
 return (
-    <div className="relative flex flex-col items-center justify-start w-full sm:w-[350px] sm:h-[588px] bg-white/50 rounded-[50px]">
+    <GlassSurface
+        width={350}
+        height={588}
+        borderRadius={50}
+        backgroundOpacity={0.1}
+        borderWidth={0.04}
+        brightness={50}
+        opacity={0.93}
+        blur={11}
+        displace={2}
+        saturation={1}
+        distortionScale={-180}
+        redOffset={0}
+        greenOffset={10}
+        blueOffset={20}
+        xChannel="R"
+        yChannel="G"
+        mixBlendMode="normal" 
+        className="mb-10 sm:w-0.5 will-change-transform"
+    
+    >
+    <div className="relative flex flex-col items-center justify-start w-full sm:w-[350px] sm:h-[588px] bg-radial brightness-115">
+                
                 
                 {/* Icons Container */}
-                <div className="relative w-full sm:h-25 mb-3">
-                    <div className="absolute flex items-center justify-center top-0 right-4 sm:w-10 sm:h-10 rounded-full bg-white/20 mt-2.5">
-                        <button className="flex items-center justify-center" onClick={onClose}>
-                            <img src="/icons/close-icon.png" alt="Close" className="w-5 h-5" />
+                <div className="relative w-full sm:h-25 mb-2">
+                    <div className="absolute flex items-center justify-center top-0 right-4 sm:w-10 sm:h-10 rounded-full bg-transparent mt-2.5">
+                        <button className="flex items-center justify-center hover:scale-115 w-full h-full transform duration-500 hover:brightness-110" onClick={onClose}>
+                            <X size={20} color="black" strokeWidth={3} absoluteStrokeWidth className="sm:w-5 sm:h-5 opacity-50 hover:opacity-100 transform duration-500" />
                         </button>
                     </div>
-
-                    <div className="absolute flex items-center justify-center top-0 left-1/2 transform -translate-x-1/2 sm:w-16 sm:h-16 rounded-full bg-amber-800 mt-7.5">
-                        <img src="/icons/trophy-icon.png" alt="Trophy" className="w-8 h-8 sm:w-12 sm:h-12" />
+                    
+                    <div className="absolute flex items-center justify-center top-0 left-1/2 transform -translate-x-1/2 sm:w-16 sm:h-16 rounded-full mt-7.5">
+                        <div className="hover:scale-105 transform duration-1000">
+                            <img src={trophyIcon} alt="Trophy" className="w-8 h-8 sm:w-12 sm:h-12" />
+                        </div>
+                        
                     </div>
 
                     </div>
 
                     {/* Text Container */}
                     <div className="w-full px-8 sm:px-[52px] mb-3">
-                        <div className="flex flex-col items-center text-center gap-4 max-w-[280px] mx-auto">
-                            <h2 className="font-bold text-lg sm:text-[20px]">
-                                Congratulations! 🎊
+                        <div className="flex flex-col items-center text-center gap-3 max-w-[280px] mx-auto">
+                            <h2 className="relative font-bold text-lg sm:text-[24px] flex items-center justify-center">
+                                <span className="bg-gradient-to-r from-[#b43777] to-[#ce757a] bg-clip-text text-transparent drop-shadow-xl/50 brightness-105 ">
+                                    Congratulations!
+                                </span>
+                                 <span className="ml-1 drop-shadow-lg">🎊</span>
                             </h2>
-                            <p className="text-base sm:text-[16px] leading-tight">
-                                {`You guessed it in ${attempts} ${attempts === 1 ? "try" : "tries"}!`}
+                            <p className="font-semibold sm:text-[18px] leading-tight">
+                                <span 
+                                className="bg-white text-transparent bg-clip-text drop-shadow-xl/50">
+                                    You guessed it in 
+                                </span> <span 
+                                className="bg-[#ce757a] bg-clip-text text-transparent drop-shadow-xl/50 brightness-120 hover:scale-125 hover:brightness-150 hover:cursor-default">
+                                    {`${attempts} ${attempts === 1 ? "try" : "tries"}!`}
+                                </span>
                             </p>
                         </div>       
                     </div>
 
                     {/* Idol Container */}
                     <div className="flex w-full items-center justify-center sm:h-[100px] mb-4">
-                        <div className="relative flex items-center justify-center bg-[#a8a8a8]/60 sm:w-80 sm:h-24 sm:p-5 rounded-[20px]">
+                        <div className="relative flex items-center justify-center bg-black/20 sm:w-80 sm:h-24 sm:p-5 rounded-[20px]
+                        hover:scale-105 hover:bg-black/50 hover:brightness-110 transform duration-300 shadow-2xl">
 
-                            <div className="absolute left-5 flex items-center justify-center sm:h-16 sm:w-16 bg-[#d9d9d9] rounded-[20px]">
-                                <img src="/icons/idol-placeholder.png" alt="Idol" className="w-8 h-8 sm:w-12 sm:h-12" />
+                            <div className="absolute left-5 flex items-center justify-center sm:h-20 sm:w-20 bg-transparent rounded-[20px] hover:scale-110 hover:rotate-4 transform duration-500 will-change-transform">
+                                <img src={`http://127.0.0.1:5000${cardInfo.image_path}`} alt="Idol" className="w-12 h-12 sm:w-20 sm:h-20 rounded-[20px] object-cover object-top transform-gpu" />
                             </div>
 
-                            <div className="flex flex-col text-center items-center justify-center w-full gap-0.5">
-                                <p className="font-bold text-base sm:text-[20px]">
+                            <div className="ml-20 flex flex-col text-center items-center justify-center w-full gap-0.5">
+                                <p className="font-bold text-base sm:text-[22px] bg-gradient-to-b from-[#b43777] to-[#ce757a] brightness-105 shadow-2xl drop-shadow-2xl text-transparent bg-clip-text">
                                     {cardInfo.artist_name}
                                 </p>
-                                <p className="text-base sm:text-[16px] leading-tight">
-                                    {cardInfo.groups.join(", ") || "Soloist"}
+                                <p className="text-base sm:text-[16px] leading-tight bg-gradient-to-b from-[#ce757a] to-white brightness-105 text-transparent bg-clip-text">
+                                    ({cardInfo.groups.join(", ")|| "Soloist"})
                                 </p>
                             </div>
                         </div>
@@ -126,7 +167,9 @@ return (
                             </p>
                         </div>
                     </div>
+ 
     </div>
+    </GlassSurface>
 )};
 
 export default VictoryCardSmall;

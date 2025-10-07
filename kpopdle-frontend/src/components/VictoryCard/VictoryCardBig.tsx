@@ -1,5 +1,5 @@
 //import React from "react";
-import type { GuessedIdolData } from "../../interfaces/gameInterfaces";
+import type { GuessedIdolData, YesterdayIdol } from "../../interfaces/gameInterfaces";
 
 interface VictoryCardBigProps {
     cardInfo: GuessedIdolData;
@@ -7,12 +7,13 @@ interface VictoryCardBigProps {
     attempts: number;
     yesterdayIdol: string;
     yesterdayIdolGroup?: string[] | null;
+    yesterdayIdolImage?: YesterdayIdol["image_path"];
     nextReset: () => { timeRemaining: number | null; formattedTime: string; };
     onShareClick?: () => void;
 }
 
 const VictoryCardBig = (props: VictoryCardBigProps) => {
-    const { cardInfo, idolActiveGroup, attempts, yesterdayIdol, yesterdayIdolGroup, nextReset, onShareClick } = props;
+    const { cardInfo, idolActiveGroup, attempts, yesterdayIdol, yesterdayIdolGroup, yesterdayIdolImage, nextReset, onShareClick } = props;
 
     const activeGroup = idolActiveGroup && idolActiveGroup.length > 0 ? idolActiveGroup : "Soloist";
     const yesterdayGroup = yesterdayIdolGroup && yesterdayIdolGroup.length > 0 ? yesterdayIdolGroup : "Soloist";
@@ -22,8 +23,8 @@ return (
 
         {/* Idol Container */}
         <div className="relative w-full sm:h-[250px] mt-0 mb-5 bg-[#b7b7b7]/50 sm:rounded-t-3xl flex items-center justify-center">
-            <div className="absolute flex items-center justify-center sm:w-30 sm:h-30 rounded-[50px] bg-[#606060]/50 top-5">
-                <img src="/icons/idol.png" alt="Idol" className="w-20 h-20" />
+            <div className="absolute flex items-center justify-center sm:w-31 sm:h-31 rounded-[50px] top-5 border-2 border-white hover:scale-120 hover:rotate-6 transform duration-1000 will-change-transform">
+                <img src={`http://127.0.0.1:5000${cardInfo.image_path}`} alt="Idol" className="w-20 h-20 sm:w-30 sm:h-30 rounded-[50px] object-cover object-top transform-gpu" />
             </div>
 
             <div className="absolute flex flex-col items-center justify-center sm:w-[580px] sm:max-h-[80px] mt-40">
@@ -86,8 +87,8 @@ return (
                     </p>
 
                     <div className="flex flex-row w-full h-full items-center justify-start ml-20 gap-6">
-                        <img src="/icons/idol.png" alt="Idol" className="sm:w-28 sm:h-28 border border-red-400 hover:scale-105 
-                        select-none transition-transform duration-500" />
+                        <img src={`http://127.0.0.1:5000${yesterdayIdolImage}`} alt="Idol" className="sm:w-28 sm:h-28 rounded-[15px] object-cover object-center hover:scale-105 
+                        select-none transition-transform duration-500 will-change-transform transform-gpu" />
 
                         <p className="text-2xl font-semibold hover:scale-105 select-none transition-transform duration-500">
                             <span className="text-blue-600">
@@ -135,3 +136,4 @@ return (
 )};
 
 export default VictoryCardBig;
+

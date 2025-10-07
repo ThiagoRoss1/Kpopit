@@ -68,6 +68,8 @@ function Home() {
   )?.artist_name;
 
   const yesterdayArtistGroup = yesterday.data?.groups ?? null;
+
+  const yesterdayIdolImage = yesterday.data?.image_path ?? null;
   
   const guessMutation = useMutation({
     mutationFn: getGuessIdol,
@@ -198,6 +200,7 @@ function Home() {
           nextReset={useResetTimer}
           yesterdayIdol={yesterdayArtist || "unknown"}
           yesterdayIdolGroup={yesterdayArtistGroup}
+          yesterdayIdolImage={yesterdayIdolImage}
           idolActiveGroup={gameData?.groups ?? null}
         />
       )}

@@ -7,7 +7,7 @@ from flask_cors import CORS
 # from flask_session import Session
 
 app = Flask(__name__)
-CORS(app)
+CORS(app, resources={r"/*": {"origins": "*"}})  # Allow all origins for static files
 
 # class Config:
 #     # Configure session
@@ -214,6 +214,8 @@ def get_daily_idol():
         "member_count": idol_data_dict.get("member_count"),
         # TODO groups - same as Group but organizing better for frontend
         "groups": groups,
+        # Image path for frontend to display
+        "image_path": idol_data_dict.get("image_path"),
     }
 
     return jsonify(game_data)
@@ -527,13 +529,23 @@ def store_yesterdays_idol():
         cursor.execute(group_sql, (result["idol_id"],))
         group_result = cursor.fetchone()
 
+         # --- Fetch idol image ---
+        image_sql = """
+            SELECT image_path FROM idols WHERE id = ?
+        """
+
+        cursor.execute(image_sql, (result["idol_id"],))
+        image_result = cursor.fetchone()
+        image_path = image_result["image_path"] if image_result else None
+
         connect.close()
 
         return jsonify({
             "past_idol_id": result["idol_id"], 
             "yesterdays_pick_date": yesterday_str,
             "artist_name": artist_name,
-            "groups": [group_result["name"]] if group_result else []
+            "groups": [group_result["name"]] if group_result else [],
+            "image_path": image_path
         })
 
     else:
@@ -635,5 +647,16 @@ if __name__ == "__main__":
 #     # ..... = dict(....)
 
 #     # return jsonify(....)
+
+# dont need
+# ✅ ROTA EXPLÍCITA PARA SERVIR IMAGENS (garantia que funciona)
+@app.route("/static/images/<filename>")
+def serve_image(filename):
+    """Serve image files from static/images folder"""
+    from flask import send_from_directory
+    import os
+    
+    image_dir = os.path.join(app.root_path, 'static', 'images')
+    return send_from_directory(image_dir, filename)
 
 

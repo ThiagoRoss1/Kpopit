@@ -56,6 +56,7 @@ export interface YesterdayIdol {
   yesterdays_pick_date: string;
   artist_name: string;
   groups?: string[];
+  image_path: string;
 }
 
 export interface ResetTimer {

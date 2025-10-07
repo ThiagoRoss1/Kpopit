@@ -166,7 +166,7 @@ def seed_table(cursor, csv_file, table_name, columns, transformer=None):
 
 # Transform the image_path to include the idol's id as prefix
 def image_path_transformer(row):
-    row["image_path"] = f"{row['id']}.{row['image_ext']}"
+    row["image_path"] = f"/static/images/{row['id']}.{row['image_ext']}"
     """It will return the image_path with the same idol id as prefix with the 
     ext (e.g. .jpg, .png) that was given in idols.csv 'image_path' column"""
     return row

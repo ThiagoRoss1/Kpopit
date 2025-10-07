@@ -11,15 +11,17 @@ interface VictoryCardHudProps {
     attempts: number;
     yesterdayIdol: string;
     yesterdayIdolGroup?: string[] | null;
+    yesterdayIdolImage?: string | null;
     idolActiveGroup?: string[] | null;
     nextReset: () => { timeRemaining: number | null; formattedTime: string; };
 }
 
 const VictoryCardHudProps = (props: VictoryCardHudProps) => {
-    const { cardInfo, attempts, nextReset, yesterdayIdol, yesterdayIdolGroup, idolActiveGroup } = props;
+    const { cardInfo, attempts, nextReset, yesterdayIdol, yesterdayIdolGroup, yesterdayIdolImage, idolActiveGroup } = props;
     
     const [showSmallModal, setShowSmallModal] = useState(false);
     const bigCardRef = useRef<HTMLDivElement>(null);
+    
 
     useEffect(() => {
         const scrollToBigCard = () => {
@@ -57,6 +59,7 @@ return (
                     nextReset={nextReset}
                     yesterdayIdol={yesterdayIdol}
                     yesterdayIdolGroup={yesterdayIdolGroup ?? null}
+                    yesterdayIdolImage={yesterdayIdolImage ?? undefined}
                     idolActiveGroup={idolActiveGroup ?? null}
                     onShareClick={() => setShowSmallModal(true)}
                 />
@@ -65,7 +68,7 @@ return (
 
         {showSmallModal && (
             <motion.div 
-                className="fixed inset-0 z-50 bg-black/20 backdrop-blur-sm flex items-center justify-center overflow-y-auto"
+                className="fixed inset-0 z-50 bg-black/10 flex items-center justify-center"
                 initial={{ opacity: 0 }} 
                 animate={{ opacity: 1 }} 
                 transition={{ duration: 0.3 }}
@@ -73,7 +76,7 @@ return (
             >
                 <div className="flex items-center justify-center w-full sm:max-w-[370px] mx-auto p-4">
                     <motion.div 
-                        initial={{ scale: 0.8, opacity: 0, y: -30 }} 
+                        initial={{ scale: 0.8, opacity: 0, y: 90 }} 
                         animate={{ scale: 1, opacity: 1, y: 0 }} 
                         transition={{ 
                             duration: 0.4,
