@@ -13,6 +13,23 @@ body {
   box-sizing: border-box;
 }
 
+/* Test for glow */ 
+@layer utilities {
+  @keyframes pulse-shadow {
+    0%, 100% {
+      box-shadow: 0 
+    };
+    50% {
+      box-shadow: 0
+    };
+  }
+
+
+    .animate-shadow-pulse {
+      animation: pulse-shadow 1.5s ease-in-out infinite;
+    }
+}
+
 /* Avoid blur on images when hovering/scaling */
 img {
   -webkit-backface-visibility: hidden;
