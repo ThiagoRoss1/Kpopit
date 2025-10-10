@@ -70,22 +70,22 @@ function Home() {
   const yesterdayArtistGroup = yesterday.data?.groups ?? null;
 
   const yesterdayIdolImage = yesterday.data?.image_path ?? null;
-  
+
   const guessMutation = useMutation({
     mutationFn: getGuessIdol,
     onSuccess: (data) => {
       console.log("Guess successful:", data);
       setGuesses((prevGuesses) => [...prevGuesses, data]);
-      /// Check if the guess is correct
-      if (data.guess_correct) {
-        setEndGame(true);
-        setShowVictoryCard(true);
-      }
     },
     onError: (error) => {
       console.error("Error during guess:", error);
     },
   });
+
+  const handleAnimationsComplete = () => {
+    setEndGame(true);
+    setShowVictoryCard(true);
+  };
 
   // Guess submission handler function
   const handleGuessSubmit = () => {
@@ -180,6 +180,7 @@ function Home() {
         <GuessesGrid
           guesses={guesses}
           allIdols={allIdolsData || []}
+          onAllAnimationsComplete={handleAnimationsComplete}
         />
       </div>
 
@@ -191,7 +192,6 @@ function Home() {
             <li key={category}>{category}</li>
           ))}
       </ul> */}
-
 
       {endGame && guesses.length > 0 && showVictoryCard && (
         <VictoryCardHudProps 

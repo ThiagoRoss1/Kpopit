@@ -1,15 +1,17 @@
 // Guesses Grid component
-import React from "react";
+import React, { useState, useEffect } from "react";
 import type {
   IdolListItem,
   GuessResponse,
 } from "../../interfaces/gameInterfaces";
 import ArrowUp from "../../assets/icons/arrow-fat-line-up-fill.svg";
 import ArrowDown from "../../assets/icons/arrow-fat-line-down-fill.svg";
+import { motion } from "motion/react";
 
 interface GuessesGridProps {
   guesses: GuessResponse[];
   allIdols: IdolListItem[];
+  onAllAnimationsComplete: () => void;
 }
 
 const getStatusColor = (status: string) => {
@@ -69,7 +71,40 @@ const headers = [
 ]
 
 const GuessesGrid = (props: GuessesGridProps) => {
-  const { guesses } = props;
+  const { guesses, onAllAnimationsComplete } = props; 
+  const [animatingColumn, setAnimatingColumn] = useState<Map<number, number>>(new Map());
+  const [animationEnd, setAnimationEnd] = useState<boolean>(false);
+
+  const COL_GROUPS = 2;
+  const COL_COMPANY = 3;
+  const COL_NATIONALITY = 4;
+  const COL_BIRTH_YEAR = 5;
+  const COL_DEBUT_YEAR = 6;
+  const COL_HEIGHT = 7;
+  
+  useEffect(() => {
+    if (guesses.length > 0) {
+      const latestGuess = guesses[guesses.length - 1];
+      const idolId = latestGuess.guessed_idol_data.idol_id;
+       
+      setAnimatingColumn(prev => {
+        const updated = new Map(prev);
+
+        updated.forEach((_, id) => updated.set(id, 8));
+        updated.set(idolId, 0);
+
+        return updated;
+      });
+
+      setTimeout(() => {
+        setAnimatingColumn(prev => new Map(prev).set(idolId, 1));
+      }, 50);
+
+      if (guesses.length >= 6 && !animationEnd) {
+        setAnimationEnd(true);
+      }
+    }
+  }, [guesses, animationEnd]);
 
   return (
     guesses.length > 0 && (
@@ -85,23 +120,49 @@ const GuessesGrid = (props: GuessesGridProps) => {
 
         {/* <div className="columns-8 gap-2 w-full h-[2px] sm:h-[4px] justify-items-center items-center bg-amber-800"></div> */}
         
-        {[...guesses].reverse().map((guess, index) => (
-          <React.Fragment key={index}>
-            <div className="bg-[#ffffff] shadow-[0_0_10px_2px_rgba(255,255,255,0.1),0_0_10px_2px_rgba(255,255,255,0.1)] backdrop-blur-md relative w-18 h-18 sm:h-28 sm:w-28 flex flex-col items-center justify-center 
-            text-center rounded-[18px] inset-shadow-sm border-2 border-white hover:brightness-120 hover:cursor-default hover:scale-105 transition-transform duration-300
-            transform-gpu">
-              <img
-                src={`http://127.0.0.1:5000${guess.guessed_idol_data.image_path}`}
-                alt="Placeholder"
-                className="w-full h-full object-cover rounded-[16px]"
-                draggable={false}
-              />
-              <span className=" font-light absolute bottom-0.5 text-[10px] sm:text-[14px] text-white [text-shadow:1.6px_1.6px_3px_rgba(26,26,26,0.8)]">{guess.guessed_idol_data.artist_name}</span>{" "}
-              {/* TODO: Nome da idol aparece acima da imagem, mas sem check de cor */}
-            </div>
+        {[...guesses].reverse().map((guess) => {
+          const idolId = guess.guessed_idol_data.idol_id;
+          const currentColumn = animatingColumn.get(idolId) || 0;
 
-            <div className={`${getStatusColor(guess.feedback.groups?.status)} relative w-18 h-18 sm:h-28 sm:w-28 flex flex-col items-center justify-center 
-            text-center rounded-[18px] inset-shadow-sm border-2 border-white hover:brightness-120 hover:cursor-default`}>
+          return (
+          <React.Fragment key={idolId}>
+
+            {/* Idol Image and Name */}
+            <motion.div
+              initial={{ scale: 0.8, opacity: 0 }}
+              animate={{ scale: 1, opacity: 1 }}
+              transition={{ duration: 0.01, ease: [0.34, 1.56, 0.64, 1] }}        
+              className="relative bg-[#ffffff] shadow-[0_0_10px_2px_rgba(255,255,255,0.1),0_0_10px_2px_rgba(255,255,255,0.1)] w-18 h-18 sm:h-28 sm:w-28 rounded-[18px] 
+              flex flex-col items-center justify-center text-center border-2 border-white hover:brightness-120 hover:cursor-default hover:scale-105 transition-transform duration-300
+              transform-gpu overflow-hidden">
+                <img
+                  src={`http://127.0.0.1:5000${guess.guessed_idol_data.image_path}`}
+                  alt="Placeholder"
+                  className="w-18 h-18 sm:w-28 sm:h-28 object-cover select-none" // object-cover kinda bugged (#TODO - fix later)
+                  draggable={false}
+                  style={{ 
+                    transform: 'translate3d(0, 0, 0)',
+                    backfaceVisibility: 'hidden',      
+                    imageRendering: 'crisp-edges'
+                  }}
+                />
+                <span className="font-light absolute bottom-0.5 text-[10px] sm:text-[14px] text-white [text-shadow:1.6px_1.6px_3px_rgba(26,26,26,0.8)]">
+                  {guess.guessed_idol_data.artist_name}
+                </span>{" "}
+            </motion.div>
+
+            {/* Groups Column */}
+            <motion.div 
+            initial={{ rotateY: 90, opacity: 0 }}
+            animate={currentColumn >= 1 ? { rotateY: 0, opacity: 1 } : {}}
+            transition={{ duration: 0.8, ease: "easeInOut" }}
+            onAnimationComplete={() => {
+              if (currentColumn === 1) {
+                setAnimatingColumn(prev => new Map(prev).set(idolId, COL_GROUPS));
+              }
+            }}
+            className={`${getStatusColor(guess.feedback.groups?.status)} relative w-18 h-18 sm:h-28 sm:w-28 flex flex-col items-center justify-center 
+            text-center rounded-[18px] inset-shadow-sm border-2 border-white hover:brightness-120 hover:cursor-default transform-3d perspective-[1000px] transform-gpu`}>
               <p className="text-white text-[10px] sm:text-[14px] font-light [text-shadow:1.6px_1.6px_3px_rgba(26,26,26,0.8)]">
                 {Array.isArray(guess.guessed_idol_data.groups)
                   ? guess.guessed_idol_data.groups.map((groups, index) => (
@@ -112,10 +173,20 @@ const GuessesGrid = (props: GuessesGridProps) => {
                     ))
                   : guess.guessed_idol_data.groups}
               </p>
-            </div>
+            </motion.div>
 
-            <div className={`${getStatusColor(guess.feedback.companies?.status)} relative w-18 h-18 sm:h-28 sm:w-28 flex flex-col items-center justify-center 
-            text-center rounded-[18px] inset-shadow-sm border-2 border-white hover:brightness-120 hover:cursor-default`}>
+            {/* Company Column */}
+            <motion.div 
+            initial={{ rotateY: 90, opacity: 0 }}
+            animate={currentColumn >= 2 ? { rotateY: 0, opacity: 1 } : {}}
+            transition={{ duration: 0.8, ease: "easeInOut" }}
+            onAnimationComplete={() => {
+              if (currentColumn === 2) {
+                setAnimatingColumn(prev => new Map(prev).set(idolId, COL_COMPANY));
+              }
+            }}
+            className={`${getStatusColor(guess.feedback.companies?.status)} relative w-18 h-18 sm:h-28 sm:w-28 flex flex-col items-center justify-center 
+            text-center rounded-[18px] inset-shadow-sm border-2 border-white hover:brightness-120 hover:cursor-default transform-3d perspective-[1000px] transform-gpu`}>
               <p className="text-white text-[10px] sm:text-[14px] font-light [text-shadow:1.6px_1.6px_3px_rgba(26,26,26,0.8)]">
                 {Array.isArray(guess.guessed_idol_data.companies)
                   ? guess.guessed_idol_data.companies.map((companies, index) => (
@@ -126,10 +197,20 @@ const GuessesGrid = (props: GuessesGridProps) => {
                     ))
                   : guess.guessed_idol_data.companies}
               </p>
-            </div>
+            </motion.div>
 
-            <div className={`${getStatusColor(guess.feedback.nationality?.status)} relative w-18 h-18 sm:h-28 sm:w-28 flex flex-col items-center justify-center 
-            text-center rounded-[18px] inset-shadow-sm border-2 border-white hover:brightness-120 hover:cursor-default`}>
+            {/* Nationality Column */}
+            <motion.div 
+            initial={{ rotateY: 90, opacity: 0 }}
+            animate={currentColumn >= 3 ? { rotateY: 0, opacity: 1 } : {}}
+            transition={{ duration: 0.8, ease: "easeInOut" }}
+            onAnimationComplete={() => {
+              if (currentColumn === 3) {
+                setAnimatingColumn(prev => new Map(prev).set(idolId, COL_NATIONALITY));
+              }
+            }}
+            className={`${getStatusColor(guess.feedback.nationality?.status)} relative w-18 h-18 sm:h-28 sm:w-28 flex flex-col items-center justify-center 
+            text-center rounded-[18px] inset-shadow-sm border-2 border-white hover:brightness-120 hover:cursor-default transform-3d perspective-[1000px] transform-gpu`}>
               <p className="text-white text-[10px] sm:text-[14px] font-light [text-shadow:1.6px_1.6px_3px_rgba(26,26,26,0.8)]">
                 {Array.isArray(guess.guessed_idol_data.nationality)
                   ? guess.guessed_idol_data.nationality.map(
@@ -142,10 +223,20 @@ const GuessesGrid = (props: GuessesGridProps) => {
                     )
                   : guess.guessed_idol_data.nationality}
               </p>
-            </div>
+            </motion.div>
 
-            <div className={`${getStatusColor(guess.feedback.birth_year?.status)} relative w-18 h-18 sm:h-28 sm:w-28 flex flex-col items-center justify-center 
-            text-center rounded-[18px] inset-shadow-sm border-2 border-white hover:brightness-120 hover:cursor-default`}>
+            {/* Birth Year Column */}
+            <motion.div 
+            initial={{ rotateY: 90, opacity: 0 }}
+            animate={currentColumn >= 4 ? { rotateY: 0, opacity: 1 } : {}}
+            transition={{ duration: 0.8, ease: "easeInOut" }}
+            onAnimationComplete={() => {
+              if (currentColumn === 4) {
+                setAnimatingColumn(prev => new Map(prev).set(idolId, COL_BIRTH_YEAR));
+              }
+            }}
+            className={`${getStatusColor(guess.feedback.birth_year?.status)} relative w-18 h-18 sm:h-28 sm:w-28 flex flex-col items-center justify-center 
+            text-center rounded-[18px] inset-shadow-sm border-2 border-white hover:brightness-120 hover:cursor-default transform-3d perspective-[1000px] transform-gpu`}>
               {guess.feedback.birth_year?.status !== "correct" && (
                 <img src={getStatusIcon(guess.feedback.birth_year?.status)}
                 alt="Birth Year"
@@ -154,10 +245,20 @@ const GuessesGrid = (props: GuessesGridProps) => {
               )}
               {/* TODO: Mudar no backend para birth date (dia / mes / ano) */}
               <span className="absolute text-center text-white text-[10px] sm:text-[14px] font-light [text-shadow:1.6px_1.6px_3px_rgba(26,26,26,0.8)]">{guess.guessed_idol_data.birth_year}</span>
-            </div>
+            </motion.div>
 
-            <div className={`${getStatusColor(guess.feedback.idol_debut_year?.status)} relative w-18 h-18 sm:h-28 sm:w-28 flex flex-col items-center justify-center 
-            text-center rounded-[18px] inset-shadow-sm border-2 border-white hover:brightness-120 hover:cursor-default`}>
+            {/* Debut Year Column */}
+            <motion.div 
+            initial={{ rotateY: 90, opacity: 0 }}
+            animate={currentColumn >= 5 ? { rotateY: 0, opacity: 1 } : {}}
+            transition={{ duration: 0.8, ease: "easeInOut" }}
+            onAnimationComplete={() => {
+              if (currentColumn === 5) {
+                setAnimatingColumn(prev => new Map(prev).set(idolId, COL_DEBUT_YEAR));
+              }
+            }}
+            className={`${getStatusColor(guess.feedback.idol_debut_year?.status)} relative w-18 h-18 sm:h-28 sm:w-28 flex flex-col items-center justify-center 
+            text-center rounded-[18px] inset-shadow-sm border-2 border-white hover:brightness-120 hover:cursor-default transform-3d perspective-[1000px] transform-gpu`}>
               {guess.feedback.idol_debut_year?.status !== "correct" && (
                 <img src={getStatusIcon(guess.feedback.idol_debut_year?.status)}
                 alt="Debut" 
@@ -165,21 +266,43 @@ const GuessesGrid = (props: GuessesGridProps) => {
                 draggable={false} />
                 )}
                 <span className="absolute text-center text-white text-[10px] sm:text-[14px] font-light [text-shadow:1.6px_1.6px_3px_rgba(26,26,26,0.8)]">{guess.guessed_idol_data.idol_debut_year}</span>
-            </div>
+            </motion.div>
 
-            <div className={`${getStatusColor(guess.feedback.height?.status)} relative w-18 h-18 sm:h-28 sm:w-28 flex flex-col items-center justify-center 
-            text-center rounded-[18px] inset-shadow-sm border-2 border-white hover:brightness-120 hover:cursor-default`}>
+            {/* Height Column */}
+            <motion.div 
+            initial={{ rotateY: 90, opacity: 0 }}
+            animate={currentColumn >= 6 ? { rotateY: 0, opacity: 1 } : {}}
+            transition={{ duration: 0.8, ease: "easeInOut" }}
+            onAnimationComplete={() => {
+              if (currentColumn === 6) {
+                setAnimatingColumn(prev => new Map(prev).set(idolId, COL_HEIGHT));
+              }
+            }}
+            className={`${getStatusColor(guess.feedback.height?.status)} relative w-18 h-18 sm:h-28 sm:w-28 flex flex-col items-center justify-center 
+            text-center rounded-[18px] inset-shadow-sm border-2 border-white hover:brightness-120 hover:cursor-default transform-3d perspective-[1000px] transform-gpu`}>
               {guess.feedback.height?.status !== "correct" && (
                 <img src={getStatusIcon(guess.feedback.height?.status)}
                 alt="Height"
-                className="w-18 h-18 sm:w-28 sm:h-28 object cover"
+                className="w-18 h-18 sm:w-28 sm:h-28 object-cover"
                 draggable={false} />
               )}
               <span className="absolute text-center text-white text-[10px] sm:text-[14px] font-light [text-shadow:1.6px_1.6px_3px_rgba(26,26,26,0.8)]">{guess.guessed_idol_data.height} cm</span>
-            </div>
+            </motion.div>
 
-            <div className={`${getStatusColor(guess.feedback.position?.status)} relative w-18 h-18 sm:h-28 sm:w-28 flex flex-col items-center justify-center 
-            text-center rounded-[18px] inset-shadow-sm border-2 border-white hover:brightness-120 hover:cursor-default`}>
+            {/* Position(s) Column */}
+            <motion.div 
+            initial={{ rotateY: 90, opacity: 0 }}
+            animate={currentColumn >= 7 ? { rotateY: 0, opacity: 1 } : {}}
+            transition={{ duration: 0.8, ease: "easeInOut" }}
+            onAnimationComplete={() => {
+              if (currentColumn === 7 ) {
+                if (guess.guess_correct) {
+                  onAllAnimationsComplete?.();
+                }
+              }
+            }}
+            className={`${getStatusColor(guess.feedback.position?.status)} relative w-18 h-18 sm:h-28 sm:w-28 flex flex-col items-center justify-center 
+            text-center rounded-[18px] inset-shadow-sm border-2 border-white hover:brightness-120 hover:cursor-default transform-3d perspective-[1000px] transform-gpu`}>
               <p className="text-white text-[10px] sm:text-[14px] font-light [text-shadow:1.6px_1.6px_3px_rgba(26,26,26,0.8)]">
                 {Array.isArray(guess.guessed_idol_data.position)
                   ? guess.guessed_idol_data.position.map((position, index) => {
@@ -196,9 +319,10 @@ const GuessesGrid = (props: GuessesGridProps) => {
                   })
                   : guess.guessed_idol_data.position}
               </p>
-            </div>
+            </motion.div>
           </React.Fragment>
-        ))}
+        )
+        })}
       </div>
   </div>
   ));

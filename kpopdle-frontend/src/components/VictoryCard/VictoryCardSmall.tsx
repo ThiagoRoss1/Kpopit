@@ -6,9 +6,6 @@ import InstagramLogo from "../../assets/icons/instagram.svg";
 import TwitterLogo from "../../assets/icons/twitter.svg";
 import { X } from 'lucide-react';
 
-
-
-
 interface VictoryCardSmallProps {
     onClose?: () => void;
     cardInfo: GuessedIdolData;
@@ -18,7 +15,6 @@ interface VictoryCardSmallProps {
 
 const VictoryCardSmall = (props: VictoryCardSmallProps) => {
     const { cardInfo, attempts, nextReset, onClose } = props;
-
 
 
 return (
@@ -44,8 +40,7 @@ return (
     
     >
     <div className="relative flex flex-col items-center justify-start w-full sm:w-[350px] sm:h-[588px] bg-radial brightness-115">
-                
-                
+                            
                 {/* Icons Container */}
                 <div className="relative w-full sm:h-25 mb-2">
                     <div className="absolute flex items-center justify-center top-0 right-4 sm:w-10 sm:h-10 rounded-full bg-transparent mt-2.5">
