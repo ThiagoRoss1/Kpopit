@@ -10,6 +10,8 @@ export interface GameData {
 export interface IdolListItem {
   id: number;
   artist_name: string;
+  image_path: string;
+  groups?: string[];
 }
 
 export interface FeedbackItem {

@@ -6,7 +6,7 @@
 @tailwind utilities;
 
 body {
-  @apply min-h-screen font-[DynaPuff] bg-gradient-to-b from-gray-700 to-blue-950/80;
+  @apply min-h-screen font-[DynaPuff] bg-gradient-to-b from-gray-400 to-blue-950/80;
 }
 
 *, *::before, *::after {
@@ -23,8 +23,6 @@ body {
       box-shadow: 0
     };
   }
-
-
     .animate-shadow-pulse {
       animation: pulse-shadow 1.5s ease-in-out infinite;
     }

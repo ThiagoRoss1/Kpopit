@@ -453,13 +453,34 @@ def get_idols_list():
     cursor = connect.cursor()
 
     # Fetch all idols
-    sql_query = """
-        SELECT id, artist_name FROM idols ORDER BY artist_name ASC
+    idol_query = """
+        SELECT id, artist_name, image_path FROM idols ORDER BY artist_name ASC
     """
-    cursor.execute(sql_query)
+    cursor.execute(idol_query)
     results = cursor.fetchall()
 
     idols_list = [dict(row) for row in results]
+
+    groups_query = """
+        SELECT ic.idol_id, g.name AS group_name
+        FROM idol_career AS ic
+        JOIN groups AS g ON ic.group_id = g.id
+        WHERE ic.is_active = 1
+    """
+    cursor.execute(groups_query)
+    results = cursor.fetchall()
+
+    idol_groups = {}
+
+    for row in results:
+        for row in results:
+            idol_groups.setdefault(row["idol_id"], []).append(row["group_name"])
+
+    for idol in idols_list:
+        idol_id = idol["id"]
+        idol["groups"] = idol_groups.get(idol_id, [])
+
+    connect.close()
 
     return jsonify(idols_list)
 
