@@ -151,7 +151,11 @@ function Home() {
       </div>
 
       <div className="w-full flex flex-col items-center justify-center mb-[41px]">
-        <AnswerHintsBox memberCount={gameData?.member_count ?? null} groups={gameData?.groups ?? null} />
+        <AnswerHintsBox 
+        memberCount={gameData?.member_count ?? null} 
+        groups={gameData?.groups ?? null} 
+        attempts={attempts}
+        />
       </div>
       
       {/* {!endGame && ()} */}

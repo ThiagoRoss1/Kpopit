@@ -22,6 +22,7 @@ const SearchBar = (props: SearchBarProps) => {
   // Input value and Suggestions state
   const [suggestions, setSuggestions] = useState<IdolListItem[]>([]);
   const [showList, setShowList] = useState(false);
+  const [selectedIdol, setSelectedIdol] = useState<IdolListItem | null>(null);
 
   const containerRef = useRef<HTMLDivElement>(null);
 
@@ -70,6 +71,7 @@ const SearchBar = (props: SearchBarProps) => {
   // Handle suggestion click
   const handleSuggestionClick = (suggestion: IdolListItem) => {
     onIdolSelect(suggestion.artist_name);
+    setSelectedIdol(suggestion);
     setSuggestions([]);
   };
   // Return JSX
@@ -93,7 +95,14 @@ const SearchBar = (props: SearchBarProps) => {
                   bg-gradient-to-br from-[#b43777]/80 to-[#ce757a]/80 backdrop-blur-md shadow-lg
                   border border-white/80 hover:brightness-125 transition-all hover:scale-105 hover:border-white/100 cursor-pointer
                   hover:bg-gradient-to-br hover:from-[#b43777]/100 hover:to-[#ce757a]/100 duration-300"
-              onClick={onSubmit}
+              onClick={() => {
+                if (!disabled && selectedIdol && value.trim().length > 0 && (selectedIdol.artist_name.toLocaleLowerCase() === value.trim().toLocaleLowerCase())) {
+                onSubmit?.();
+                setShowList(false);
+                setSelectedIdol(null);
+                onIdolSelect("");
+              }
+            }}
               disabled={disabled}
               type="button"
             >
@@ -126,12 +135,19 @@ const SearchBar = (props: SearchBarProps) => {
             >
               {suggestions.map((suggestion) => {
                 const isLast = suggestions.indexOf(suggestion) === suggestions.length - 1;
+                const isUnique = suggestions.length === 1;
 
                 return (
                 <motion.li
                   onHoverStart={() => setHoveredId(suggestion.id)}
                   onHoverEnd={() => setHoveredId(null)}
-                  whileHover={isLast ? {
+                  whileHover={isUnique ? {
+                    y: 0,
+                    x: 20,
+                    scale: 1.05,
+                    translateZ: 30,
+                    zIndex: 10,
+                  } : isLast ? {
                     y: -6,
                     x: 20,
                     scale: 1.05,
