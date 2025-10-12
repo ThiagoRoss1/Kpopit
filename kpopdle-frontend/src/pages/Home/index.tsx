@@ -27,6 +27,7 @@ function Home() {
   const [endGame, setEndGame] = useState<boolean>(false);
   const [showModal, setShowModal] = useState<null | "changelog" | "how-to-play" | "about" | "stats" | "streak" | "share">(null);
   const [showVictoryCard, setShowVictoryCard] = useState<boolean>(false);
+  const [isCorrect, setIsCorrect] = useState<boolean>(false);
 
   // Counter
   const [attempts, setAttempts] = useState<number>(0);
@@ -76,6 +77,10 @@ function Home() {
     onSuccess: (data) => {
       console.log("Guess successful:", data);
       setGuesses((prevGuesses) => [...prevGuesses, data]);
+
+      if (data.guess_correct) {
+        setIsCorrect(true);
+      }
     },
     onError: (error) => {
       console.error("Error during guess:", error);
@@ -83,9 +88,11 @@ function Home() {
   });
 
   const handleAnimationsComplete = () => {
-    setEndGame(true);
-    setShowVictoryCard(true);
-  };
+    if (isCorrect) {
+      setEndGame(true);
+      setShowVictoryCard(true)
+      setCurrentGuess("");
+  }};
 
   // Guess submission handler function
   const handleGuessSubmit = () => {
@@ -96,6 +103,10 @@ function Home() {
       (idol: IdolListItem) =>
         idol.artist_name.toLowerCase() === currentGuess.toLowerCase()
     );
+
+    if (guessedIdolObject?.id === gameData.answer_id && !isCorrect) {
+      setIsCorrect(true);
+    }
 
     if (!guessedIdolObject) {
       return;
@@ -157,25 +168,27 @@ function Home() {
         attempts={attempts}
         />
       </div>
-      
-      {/* {!endGame && ()} */}
-      <div className="flex text-center items-center justify-center sm:w-[194px] sm:h-[19px] mb-[3px]">
-        <p className="text-[16px] drop-shadow-lg text-[#d7d7d7]/85">
-          Guess today's idol...
-        </p>
-      </div>
+
+      {/* {!endGame && !showVictoryCard && ()} */}
+        <div className="flex text-center items-center justify-center sm:w-[194px] sm:h-[19px] mb-[3px]">
+          <p className="text-[16px] drop-shadow-lg text-[#d7d7d7]/85">
+            Guess today's idol...
+          </p>
+        </div>
+
+      {/* {!endGame && !showVictoryCard && ()} */}
       <div className="relative w-full max-w-4xl px-4 mx-auto flex justify-center z-40 mb-20">
-      <SearchBar
-        allIdols={allIdolsData || []}
-        value={currentGuess}
-        onIdolSelect={(idolName) => setCurrentGuess(idolName)}
-        onSubmit={() => {
-          handleGuessSubmit();
-          handleGuessAttempts();
-        }}
-        excludedIdols={guesses.map(guess => guess.guessed_idol_data?.idol_id)}
-        disabled={endGame || guessMutation.isPending}
-      />
+        <SearchBar
+          allIdols={allIdolsData || []}
+          value={currentGuess}
+          onIdolSelect={(idolName) => setCurrentGuess(idolName)}
+          onSubmit={() => {
+            handleGuessSubmit();
+            handleGuessAttempts();
+          }}
+          excludedIdols={guesses.map(guess => guess.guessed_idol_data?.idol_id)}
+          disabled={endGame || guessMutation.isPending || isCorrect}
+        />
       </div>
 
       <br />

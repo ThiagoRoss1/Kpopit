@@ -79,7 +79,17 @@ const SearchBar = (props: SearchBarProps) => {
     <div ref={containerRef} className="relative w-fit h-fit rounded-3xl">
       <div className="relative w-full h-fit max-w-full sm:w-lg sm:h-13 mx-auto flex items-center 
       border border-white/50 rounded-3xl bg-gradient-to-r from-[#000000]/10 to-[#b43777]/10">
-        <form className="w-full p-2">
+        <form className="w-full p-2" 
+        onSubmit={(e) => {
+          e.preventDefault();
+                if (!disabled && selectedIdol && value.trim().length > 0 && (selectedIdol.artist_name.toLocaleLowerCase() === value.trim().toLocaleLowerCase())) {
+                onSubmit?.();
+                setShowList(false);
+                setSelectedIdol(null);
+                onIdolSelect("");
+              }
+          }}
+        >
           <div className="flex items-center gap-2 w-full">
             <input
               className="flex-grow h-9 px-3 text-white placeholder-white/60 border border-solid border-white/10
@@ -87,22 +97,22 @@ const SearchBar = (props: SearchBarProps) => {
               value={value}
               onChange={handleInputChange}
               placeholder="Idol"
-              disabled={disabled}
               onFocus={() => value.length > 0 && setShowList(true)}
             />
             <button
               className="flex-shrink-0 w-10 h-10 text-white font-semibold rounded-full 
                   bg-gradient-to-br from-[#b43777]/80 to-[#ce757a]/80 backdrop-blur-md shadow-lg
-                  border border-white/80 hover:brightness-125 transition-all hover:scale-105 hover:border-white/100 cursor-pointer
-                  hover:bg-gradient-to-br hover:from-[#b43777]/100 hover:to-[#ce757a]/100 duration-300"
+                  border border-white/80 transform transition-all duration-300 hover:brightness-125 hover:scale-105 
+                  hover:border-white/100 hover:cursor-pointer hover:bg-gradient-to-br hover:from-[#b43777]/100 hover:to-[#ce757a]/100"
               onClick={() => {
                 if (!disabled && selectedIdol && value.trim().length > 0 && (selectedIdol.artist_name.toLocaleLowerCase() === value.trim().toLocaleLowerCase())) {
                 onSubmit?.();
                 setShowList(false);
                 setSelectedIdol(null);
                 onIdolSelect("");
+                }
               }
-            }}
+            }
               disabled={disabled}
               type="button"
             >
