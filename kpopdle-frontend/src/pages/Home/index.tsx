@@ -138,7 +138,7 @@ function Home() {
         Kpopdle
         </h1>
       </div>    
-      <div className="flex items-center justify-center mb-[31px]">
+      <div className="flex items-center justify-center mb-5">
         <TopButtons
           onSubmitChangelog={() => { setShowModal("changelog") }}
           onSubmitHowToPlay={() => { setShowModal("how-to-play") }}
@@ -150,10 +150,10 @@ function Home() {
 
       </div>
 
-      <div className="flex items-center justify-center mb-[31px]">
+      <div className="flex items-center justify-center mb-8">
         <BottomButtons
           onSubmitStats={() => { setShowModal("stats") }}
-          onSubmitStreak={() => { setShowModal("streak") }}
+          // onSubmitStreak={() => { setShowModal("streak") }}
           onSubmitShare={() => { setShowModal("share") }}
         />
         {showModal === "stats" && <Modal onClose={() => setShowModal(null)} title="Stats..."><p>On working...</p></Modal>}
