@@ -2,6 +2,7 @@
 import React, { useState, useEffect, useRef } from "react";
 import type { IdolListItem } from "../../interfaces/gameInterfaces";
 import { AnimatePresence, motion } from "motion/react";
+import SearchIcon from "../../assets/icons/magnifying-glass-fill.svg";
 
 interface SearchBarProps {
   allIdols: IdolListItem[];
@@ -59,6 +60,25 @@ const SearchBar = (props: SearchBarProps) => {
 
           return matches && isNotExcluded;
         })
+        .sort((a, b) => {
+          const search = value.toLowerCase();
+          const aName = a.artist_name.toLowerCase();
+          const bName = b.artist_name.toLowerCase();
+
+          const getPriority = (itemName: string, itemGroups: string[], isSoloist: boolean) => {
+            if (itemName.startsWith(search)) return 1;
+            if (itemName.includes(search)) return 2;
+            if (itemGroups.some(g => g.toLowerCase().includes(search))) return 3;
+            if (isSoloist && ("solo".includes(search) || search.includes("solo"))) return 4;
+            return 5;
+          };
+
+          const aPriority = getPriority(aName, a.groups ?? [], a.groups?.length === 0);
+          const bPriority = getPriority(bName, b.groups ?? [], b.groups?.length === 0);
+
+          if (aPriority !== bPriority) return aPriority - bPriority;
+          return aName.localeCompare(bName);
+        })
         .slice(0, 10); // Limit to 10 suggestions
       setSuggestions(filteredSuggestions);
     } else {
@@ -67,6 +87,7 @@ const SearchBar = (props: SearchBarProps) => {
   };
 
   const [hoveredId, setHoveredId] = useState<number | null>(null);
+  const [isButtonHovered, setIsButtonHovered] = useState(false);
 
   // Handle suggestion click
   const handleSuggestionClick = (suggestion: IdolListItem) => {
@@ -100,10 +121,12 @@ const SearchBar = (props: SearchBarProps) => {
               onFocus={() => value.length > 0 && setShowList(true)}
             />
             <button
+            onMouseEnter={() => setIsButtonHovered(true)}
+            onMouseLeave={() => setIsButtonHovered(false)}
               className="flex-shrink-0 w-10 h-10 text-white font-semibold rounded-full 
                   bg-gradient-to-br from-[#b43777]/80 to-[#ce757a]/80 backdrop-blur-md shadow-lg
-                  border border-white/80 transform transition-all duration-300 hover:brightness-125 hover:scale-105 
-                  hover:border-white/100 hover:cursor-pointer hover:bg-gradient-to-br hover:from-[#b43777]/100 hover:to-[#ce757a]/100"
+                  border border-white/80 transform transition-all duration-300 hover:brightness-125 hover:scale-108 
+                  hover:border-white/100 hover:cursor-pointer hover:bg-gradient-to-br hover:from-[#b43777]/100 hover:to-[#ce757a]/100 hover:rotate-15"
               onClick={() => {
                 if (!disabled && selectedIdol && value.trim().length > 0 && (selectedIdol.artist_name.toLocaleLowerCase() === value.trim().toLocaleLowerCase())) {
                 onSubmit?.();
@@ -116,7 +139,18 @@ const SearchBar = (props: SearchBarProps) => {
               disabled={disabled}
               type="button"
             >
-              G
+              <motion.img 
+                src={SearchIcon} 
+                alt="G" 
+                className="sm:w-5.5 sm:h-5.5 mx-auto" 
+                draggable={false} 
+                animate={{ scale: isButtonHovered ? 1.2 : 1 }}
+                transition={{
+                  type:"spring",
+                  stiffness: 400,
+                  damping: 20
+                }}
+              />
             </button>
           <AnimatePresence>
           {showList && suggestions.length > 0 && (
