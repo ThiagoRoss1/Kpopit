@@ -10,7 +10,7 @@ const TopButtons = (props: TopButtonsProps) => {
     const { onSubmitChangelog, onSubmitHowToPlay, onSubmitAbout } = props;
 
     // Left and Right Button Styles //
-    const buttonCardStyle = "inline-flex relative sm:w-44 sm:h-13 overflow-hidden rounded-[16px] border-1 border-white bg-[#242424] backdrop-blur-3xl shadow-[4px_4px_4px_1px_rgba(0,0,0,0.25),inset_0_4px_4px_0_rgba(0,0,0,0.25)]";
+    const buttonCardStyle = "inline-flex relative sm:w-44 sm:h-13 overflow-hidden rounded-[16px] border-1 border-white bg-transparent backdrop-blur-3xl shadow-[4px_4px_4px_1px_rgba(0,0,0,0.25),inset_0_4px_4px_0_rgba(0,0,0,0.25)]";
     const buttonAnimation = ""
     const buttonTextStyle = "inline-flex h-full w-full items-center justify-center rounded-[16px] text-sm sm:text-[20px] bg-gradient-to-b from-[#b43777] to-[#ce757a] font-semibold text-transparent bg-clip-text";
     // Middle Button Styles //

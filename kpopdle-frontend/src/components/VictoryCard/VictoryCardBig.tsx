@@ -1,5 +1,9 @@
 //import React from "react";
 import type { GuessedIdolData, YesterdayIdol } from "../../interfaces/gameInterfaces";
+import TargetAttempt from "../../assets/icons/target.svg";
+import RankPosition from "../../assets/icons/ranking-fill.svg";
+import PositionTrend from "../../assets/icons/trending-up.svg";
+import { Share2 } from "lucide-react";
 
 interface VictoryCardBigProps {
     cardInfo: GuessedIdolData;
@@ -19,58 +23,66 @@ const VictoryCardBig = (props: VictoryCardBigProps) => {
     const yesterdayGroup = yesterdayIdolGroup && yesterdayIdolGroup.length > 0 ? yesterdayIdolGroup : "Soloist";
 
 return (
-    <div className="relative flex flex-col items-center justify-start w-full sm:w-[628px] sm:h-[812px] rounded-3xl bg-white/50 mb-10">
+    <div className="relative flex flex-col items-center justify-start w-full sm:w-[628px] sm:h-[812px] rounded-3xl border-2 border-white/50 
+    bg-radial from-[#db3189]/0 to-black/84 mb-10 text-white shadow-[2px_2px_10px_2px_rgba(0,0,0,0.25)]">
 
         {/* Idol Container */}
-        <div className="relative w-full sm:h-[250px] mt-0 mb-5 bg-[#b7b7b7]/50 sm:rounded-t-3xl flex items-center justify-center">
-            <div className="absolute flex items-center justify-center sm:w-31 sm:h-31 rounded-[50px] top-5 border-2 border-white hover:scale-120 hover:rotate-6 transform duration-1000 will-change-transform">
+        <div className="relative w-full sm:h-[250px] mt-0 mb-5 sm:rounded-t-3xl flex items-center justify-center bg-transparent">
+            <div className="absolute flex items-center justify-center sm:w-31 sm:h-31 rounded-[50px] top-5 border-2 border-white/80 
+            hover:border-white/100 hover:scale-120 hover:rotate-6 transform duration-1000 will-change-transform 
+            shadow-[0_0_30px_4px_rgba(215,49,137,0.4),0_0_50px_10px_rgba(228,77,134,0.2)]">
                 <img src={`http://127.0.0.1:5000${cardInfo.image_path}`} alt="Idol" className="w-20 h-20 sm:w-30 sm:h-30 rounded-[50px] object-cover object-top transform-gpu" />
             </div>
 
             <div className="absolute flex flex-col items-center justify-center sm:w-[580px] sm:max-h-[80px] mt-40">
-                <p className="text-base sm:text-[20px]">
-                    Today's Idol was <span className="font-bold">
+                <span className="text-base sm:text-[22px]">
+                    Today's Idol was <span className="font-bold bg-gradient-to-r from-[#db3189] via-[#e44d86] to-[#ec5e65] text-transparent bg-clip-text sm:text-[22px]">
                         {cardInfo.artist_name}
-                    </span> <span>
+                    </span> <span className="">
                             ({activeGroup})
                         </span>
-                </p>
+                </span>
 
-                <p className="text-base sm:text-[18px] mt-5">
-                    You were the 115th fan to guess correctly!
-                </p>
+                <span className="text-base sm:text-[18px] mt-2">
+                    You were the <span className="font-bold bg-gradient-to-r from-[#db3189] via-[#e44d86] to-[#ec5e65] text-transparent bg-clip-text">
+                        115th
+                    </span> fan to guess correctly!
+                </span>
             </div>
         </div>
 
         {/* Stats Container */}
         <div className="relative w-full sm:h-25 mb-5 px-6">
             <div className="relative grid grid-cols-3 gap-5">
-                <div className="relative flex flex-col items-center justify-start text-center sm:w-45 sm:h-25 bg-[#949494]/50 gap-1 rounded-[20px]">
-                    <img src="/icons/mark.png" alt="M" className="sm:w-5 sm:h-5 border border-amber-950 mt-2" />
-                    <p className="text-[20px] font-bold">
+                    <div className="relative flex flex-col items-center justify-start text-center sm:w-45 sm:h-25 bg-gradient-to-br from-[#db3189] to-[#511061] 
+                    gap-0.5 rounded-[20px]">
+                    <img src={TargetAttempt} alt="M" className="sm:w-6 sm:h-6 mt-2" />
+                    <span className="text-[22px] font-bold">
                         {attempts}
-                    </p>
-                    <p className="text-[16px] font-semibold">
+                    </span>
+                    <p className="text-[14px] font-semibold">
                         {`${attempts === 1 ? "Attempt" : "Attempts"}`}
                     </p>
                 </div>
 
-                <div className="relative flex flex-col items-center justify-start text-center sm:w-45 sm:h-25 bg-[#949494]/50 gap-1 rounded-[20px]">
-                    <img src="/icons/position.png" alt="P" className="sm:w-5 sm:h-5 border border-amber-950 mt-2" />
-                    <p className="text-[20px] font-bold">
+                    <div className="relative flex flex-col items-center justify-start text-center sm:w-45 sm:h-25 bg-gradient-to-br from-[#7a4de4] to-[#1f2686] 
+                    gap-0.5 rounded-[20px]">
+                    <img src={RankPosition} alt="P" className="sm:w-6 sm:h-6 mt-2" />
+                    <p className="text-[22px] font-bold">
                         2 (ow....)
                     </p>
-                    <p className="text-[16px] font-semibold">
+                    <p className="text-[14px] font-semibold">
                         Position
                     </p>
                 </div>
 
-                <div className="relative flex flex-col items-center justify-start text-center sm:w-45 sm:h-25 bg-[#949494]/50 gap-1 rounded-[20px]">
-                    <img src="/icons/score.png" alt="S" className="sm:w-5 sm:h-5 border border-amber-950 mt-2" />
-                    <p className="text-[20px] font-bold">
+                    <div className="relative flex flex-col items-center justify-start text-center sm:w-45 sm:h-25 bg-gradient-to-br from-[#ec5e65] to-[#802256] 
+                    gap-0.5 rounded-[20px]">
+                    <img src={PositionTrend} alt="S" className="sm:w-6 sm:h-6 mt-2" />
+                    <p className="text-[22px] font-bold">
                         67 (ow....)
                     </p>
-                    <p className="text-[16px] font-semibold">
+                    <p className="text-[14px] font-semibold">
                         Score
                     </p>
                 </div>
@@ -79,22 +91,23 @@ return (
 
         {/* Next idol container */}
         <div className="relative w-full sm:h-50 mb-5 px-6">
-            <div className="relative w-full h-full items-center justify-center text-center bg-[#afafaf]/50 py-4 rounded-[20px]">
+            <div className="relative w-full h-full items-center justify-center text-center bg-gradient-to-r from-gray-600 to-gray-900 
+            shadow-[0_0_4px_2px_rgba(0,0,0,0.2),inset_2px_2px_4px_2px_rgba(0,0,0,0.2)] border border-white/35 py-4 rounded-[20px]
+            hover:scale-102 hover:brightness-110 hover:bg-gradient-to-r transition-all duration-500 transform-gpu">
                 <div className="relative w-full h-full flex flex-col items-center justify-between gap-1">
-                    <p className="text-2xl font-bold hover:scale-105 
-                        select-none transition-transform duration-500">
+                    <span className="text-2xl font-bold select-none">
                         Yesterday idol was
-                    </p>
+                    </span>
 
                     <div className="flex flex-row w-full h-full items-center justify-start ml-20 gap-6">
-                        <img src={`http://127.0.0.1:5000${yesterdayIdolImage}`} alt="Idol" className="sm:w-28 sm:h-28 rounded-[15px] object-cover object-center hover:scale-105 
+                        <img src={`http://127.0.0.1:5000${yesterdayIdolImage}`} alt="Idol" className="sm:w-28 sm:h-28 rounded-[50px] object-cover object-center hover:scale-105 
                         select-none transition-transform duration-500 will-change-transform transform-gpu" />
 
-                        <p className="text-2xl font-semibold hover:scale-105 select-none transition-transform duration-500">
-                            <span className="text-blue-600">
+                        <div className="text-2xl font-semibold hover:scale-105 select-none transition-transform duration-500">
+                            <span className="bg-gradient-to-r from-[#db3189] via-[#e44d86] to-[#ec5e65] text-transparent bg-clip-text">
                                 {yesterdayIdol}
                             </span> <span className="font-semibold text-2xl">({yesterdayGroup})</span>
-                        </p>
+                        </div>
                     </div>
                     
                     <div className="flex w-full h-full items-center justify-center">
@@ -109,26 +122,27 @@ return (
         {/* Share Container + Opens small card */}
         <div className="relative w-full sm:h-[50px] mb-5 px-6">
             <button 
-                className="relative w-full h-full items-center justify-center text-center bg-[#696969]/50 rounded-[12px]
-                hover:brightness-105 hover:scale-105 hover:cursor-pointer transition-transform duration-500" 
+                className="relative w-full h-full items-center justify-center text-center bg-gradient-to-b from-[#b43777] to-[#ce757a] border border-white/60 
+                rounded-[12px] hover:brightness-105 hover:scale-105 hover:cursor-pointer transition-transform duration-500 transform-gpu" 
                 onClick={() => onShareClick?.()}
             >
-                <div className="relative flex flex-row w-full h-full items-center justify-center text-center gap-2">
-                    <img src="/icons/share.png" alt="S" className="w-6 h-6" />
-                    <span>Share Result</span>
+                <div className="relative flex flex-row w-full h-full items-center justify-center text-center gap-3">
+                    <Share2 className="sm:w-6 sm:h-6" />
+                    <span className="text-[20px]">Share Results</span>
                 </div>
             </button>
         </div>
 
         {/* Other Game Modes */}
         <div className="relative w-full sm:h-28 mb-5 px-6">
-            <div className="relative flex flex-col w-full h-full items-start justify-start text-center gap-5">
-                <p>Other Game Modes</p>
+            <div className="relative flex flex-col w-full h-full items-start justify-start text-center gap-1 mt-4">
+                <span className="drop-shadow-2xl">Other Game Modes</span>
                 
-                <div className="relative flex w-full sm:h-17 items-center justify-start text-center px-3.5 bg-[#686868]/50 rounded-[12px]">
-                    <p className="text-[16px] font-semibold">
+                <div className="relative flex w-full sm:h-17 items-center justify-start text-center px-3.5 bg-transparent 
+                border border-white/20 rounded-[12px] hover:text-white/20 hover:border-white/10 transition-all duration-300">
+                    <span className="text-[16px] font-semibold transition-all duration-300">
                         soon...
-                    </p>
+                    </span>
                 </div>
             </div>
         </div>

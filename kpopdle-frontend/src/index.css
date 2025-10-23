@@ -6,8 +6,35 @@
 @tailwind utilities;
 
 body {
-  @apply min-h-screen font-[DynaPuff] bg-gradient-to-b from-gray-400 to-blue-950/80;
+  @apply min-h-screen font-[DynaPuff];
+  /* Default gradient - will be overridden by dynamic class */
+  background: radial-gradient(
+    ellipse at center,
+    #3d4a6b 0%,      /* Azul acinzentado claro (centro) */
+    #2d3550 40%,     /* Azul médio */
+    #1a1f35 100%    /* Azul escuro (bordas) */
+  );
+  background-size: 400% 400%;
+  animation: gradient-pulse 12s ease infinite;
 }
+
+/* Animated gradient pulse - cores piscando suavemente */
+/* @keyframes gradient-pulse {
+  0%, 100% { 
+    background-position: 0% 50%;
+    filter: brightness(1);
+  }
+  25% {
+    filter: brightness(1.08);
+  }
+  50% { 
+    background-position: 100% 50%;
+    filter: brightness(1.15);
+  }
+  75% {
+    filter: brightness(1.08);
+  }
+} */
 
 *, *::before, *::after {
   box-sizing: border-box;

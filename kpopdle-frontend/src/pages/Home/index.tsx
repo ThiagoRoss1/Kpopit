@@ -132,7 +132,7 @@ function Home() {
 
   // Main return
   return (
-    <div className="min-h-screen w-full flex flex-col items-center justify-start">
+    <div className="min-h-screen w-full flex flex-col items-center justify-start bg-radial from-black/0 to-white/10">
       <div className="flex items-center justify-center p-[9px] sm:w-[242px] sm:h-[84px] mt-[70px] mb-[38px] text-center">
         <h1 className="text-[54px] font-bold text-center bg-gradient-to-b from-[#b43777] to-[#ce757a] text-transparent bg-clip-text drop-shadow-lg">
         Kpopdle
