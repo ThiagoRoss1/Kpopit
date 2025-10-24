@@ -18,6 +18,7 @@ import BottomButtons from "../../components/buttons/BottomButtons.tsx";
 import Modal from "../../components/buttons/modals/Modal.tsx";
 import HowToPlayText from "../../components/buttons/modals/HowToPlayContent.tsx";
 import { useResetTimer } from "../../hooks/useResetTimer.tsx";
+import BackgroundStyle from "../../components/Background/BackgroundStyle.tsx";
 // import { Input } from "@chakra-ui/react"; - Css framework import example
 
 function Home() {
@@ -121,20 +122,22 @@ function Home() {
   };
   
   if (isLoadingGameData || isLoadingAllIdols) {
-    return <div>Loading Kpopdle...</div>;
+    return <div className="flex w-full h-screen justify-center items-center text-white">Loading Kpopdle...</div>;
   }
 
   if (isErrorGameData || isErrorAllIdols) {
-    return <div>Error: Error fetching game data</div>;
+    return <div className="flex w-full h-screen justify-center items-center text-white">Error: Error fetching game data</div>;
   }
 
 
 
   // Main return
   return (
-    <div className="min-h-screen w-full flex flex-col items-center justify-start bg-radial from-black/0 to-white/10">
+    <>
+    <BackgroundStyle attempts={attempts} />
+    <div className="min-h-screen w-full flex flex-col items-center justify-start">
       <div className="flex items-center justify-center p-[9px] sm:w-[242px] sm:h-[84px] mt-[70px] mb-[38px] text-center">
-        <h1 className="text-[54px] font-bold text-center bg-gradient-to-b from-[#b43777] to-[#ce757a] text-transparent bg-clip-text drop-shadow-lg">
+        <h1 className="text-[54px] font-bold text-center bg-gradient-to-b from-[#e70a7d] to-[#ec4850] text-transparent bg-clip-text drop-shadow-lg">
         Kpopdle
         </h1>
       </div>    
@@ -224,6 +227,7 @@ function Home() {
         
       
     </div>
+    </>
   );
 }
 

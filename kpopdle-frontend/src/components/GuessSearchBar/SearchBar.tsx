@@ -98,7 +98,7 @@ const SearchBar = (props: SearchBarProps) => {
   // Return JSX
   return (
     <div ref={containerRef} className="relative w-fit h-fit rounded-3xl">
-      <div className="relative w-full h-fit max-w-full sm:w-lg sm:h-13 mx-auto flex items-center 
+      <div className="relative w-full h-fit max-w-full sm:w-140 sm:h-13 mx-auto flex items-center 
       border border-white/50 rounded-3xl bg-gradient-to-r from-[#000000]/10 to-[#b43777]/10">
         <form className="w-full p-2" 
         onSubmit={(e) => {

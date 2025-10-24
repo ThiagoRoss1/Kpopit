@@ -8,33 +8,27 @@
 body {
   @apply min-h-screen font-[DynaPuff];
   /* Default gradient - will be overridden by dynamic class */
-  background: radial-gradient(
-    ellipse at center,
-    #3d4a6b 0%,      /* Azul acinzentado claro (centro) */
-    #2d3550 40%,     /* Azul médio */
-    #1a1f35 100%    /* Azul escuro (bordas) */
+  background: linear-gradient(
+  #000000 30%,
+  #000000 100%
   );
-  background-size: 400% 400%;
-  animation: gradient-pulse 12s ease infinite;
 }
 
-/* Animated gradient pulse - cores piscando suavemente */
-/* @keyframes gradient-pulse {
+/* Stars twinkle animation */
+@keyframes twinkle {
   0%, 100% { 
-    background-position: 0% 50%;
-    filter: brightness(1);
-  }
-  25% {
-    filter: brightness(1.08);
+    opacity: 0.6;
+    transform: scale(1);
   }
   50% { 
-    background-position: 100% 50%;
-    filter: brightness(1.15);
+    opacity: 1;
+    transform: scale(1.15);
   }
-  75% {
-    filter: brightness(1.08);
-  }
-} */
+}
+
+.star-twinkle {
+  animation: twinkle 3s ease-in-out infinite;
+}
 
 *, *::before, *::after {
   box-sizing: border-box;

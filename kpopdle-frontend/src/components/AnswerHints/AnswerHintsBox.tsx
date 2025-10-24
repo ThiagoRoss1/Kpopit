@@ -30,6 +30,9 @@ const AnswerHintsBox = (props: AnswerHintsBoxProps) => {
     const [showHint1, setShowHint1] = useState(false);
     const [showHint2, setShowHint2] = useState(false);
 
+    const [colorize1, setColorize1] = useState(false);
+    const [colorize2, setColorize2] = useState(false);
+
     const getHintText = (attempts: number, cardThreshold: number) => {
         const remaining = cardThreshold - attempts;
         if (attempts >= cardThreshold) return "Click to reveal the hint!";
@@ -115,15 +118,15 @@ const AnswerHintsBox = (props: AnswerHintsBoxProps) => {
                     </motion.div>
 
                     {/* Box 1 Front */}
-                    <div className="absolute inset-0 -rotate-y-180 backface-hidden sm:w-60 sm:h-30 border-2 border-white/50 rounded-2xl backdrop-blur-md 
-                    flex items-center justify-center text-center bg-black/70 shadow-[4px_4px_4px_1px_rgba(0,0,0,0.15),inset_0_4px_4px_0_rgba(0,0,0,0.15)]">
+                    <div className={`absolute inset-0 -rotate-y-180 backface-hidden sm:w-60 sm:h-30 border-2 border-white/50 rounded-2xl backdrop-blur-md 
+                    flex items-center justify-center text-center shadow-[4px_4px_4px_1px_rgba(0,0,0,0.15),inset_0_4px_4px_0_rgba(0,0,0,0.15)] ${colorize1 ? "bg-black/80 transition-colors duration-2000" : ""}`}>
                         <div className="flex flex-col gap-3">
                             <h3 className="relative font-bold text-[22px] text-[#b43777] drop-shadow-lg 
                             [text-shadow:1.2px_1.2px_4px_rgba(0,0,0,0.8),0_0_12px_rgba(180,55,119,0.55)]">
                                 Group Members
                             </h3>
                             <motion.span 
-                                onClick={() => setShowHint1(true)}
+                                onClick={() => [setShowHint1(true), setColorize1(true)]}
                                 animate={{
                                     filter: showHint1
                                         ? "blur(0px)"
@@ -172,15 +175,15 @@ const AnswerHintsBox = (props: AnswerHintsBoxProps) => {
                     </motion.div>
 
                     {/* Box 2 Front */}
-                    <div className="absolute inset-0 -rotate-y-180 backface-hidden sm:w-60 sm:h-30 border-2 border-white/50 rounded-2xl backdrop-blur-md 
-                    flex items-center justify-center text-center bg-black/70 shadow-[4px_4px_4px_1px_rgba(0,0,0,0.15),inset_0_4px_4px_0_rgba(0,0,0,0.15)]">
+                    <div className={`absolute inset-0 -rotate-y-180 backface-hidden sm:w-60 sm:h-30 border-2 border-white/50 rounded-2xl backdrop-blur-md 
+                    flex items-center justify-center text-center shadow-[4px_4px_4px_1px_rgba(0,0,0,0.15),inset_0_4px_4px_0_rgba(0,0,0,0.15)] ${colorize2 ? "bg-black/80 transition-colors duration-2000" : ""}`}>
                         <div className="flex flex-col gap-3">
                             <h3 className="relative font-bold text-[22px] text-[#b43777] 
                             [text-shadow:1.2px_1.2px_4px_rgba(0,0,0,0.8),0_0_12px_rgba(180,55,119,0.55)]">
                                 {groupsDisplay.length > 1 ? "Groups" : "Group"}
                             </h3>
                             <motion.span 
-                                onClick={() => setShowHint2(true)}
+                                onClick={() => [setShowHint2(true), setColorize2(true)]}
                                 animate={{ 
                                     filter: showHint2
                                     ? "blur(0px)"
