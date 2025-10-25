@@ -108,10 +108,10 @@ const GuessesGrid = (props: GuessesGridProps) => {
 
   return (
     guesses.length > 0 && (
-    <div className="w-full h-fit max-w-full sm:w-[960px] mx-auto sm:flex items-center overflow-x-auto">
-      <div className="grid grid-cols-8 gap-4 p-4 justify-items-center items-center w-max mx-auto">
+    <div className="w-full h-fit max-w-full sm:w-[1040px] mx-auto sm:flex items-center overflow-x-auto">
+      <div className="grid grid-cols-8 gap-y-8 gap-x-2.5 p-4 justify-items-center items-center w-max mx-auto">
         {headers.map((header) => (
-          <div key={header} className="font-bold text-[10px] sm:text-[16px] text-pretty text-center text-white w-full h-fit pb-1"> {/* see responsivity */}
+          <div key={header} className="font-bold text-[10px] sm:text-[16px] text-pretty text-center text-white w-full h-fit pb-1 -mb-5"> {/* see responsivity */}
             {header}
             <hr className="w-full h-fill sm:h-[4px] bg-white rounded-[20px] mt-2" />
           </div>
@@ -136,7 +136,7 @@ const GuessesGrid = (props: GuessesGridProps) => {
               flex flex-col items-center justify-center text-center border-2 border-white hover:brightness-110 hover:cursor-default hover:scale-105 transition-transform duration-300
               transform-gpu overflow-hidden">
                 <img
-                  src={`http://127.0.0.1:5000${guess.guessed_idol_data.image_path}`}
+                  src={`${import.meta.env.VITE_API_URL}${guess.guessed_idol_data.image_path}`}
                   alt="Placeholder"
                   className="w-18 h-18 sm:w-28 sm:h-28 object-cover select-none" // object-cover kinda bugged (#TODO - fix later)
                   draggable={false}

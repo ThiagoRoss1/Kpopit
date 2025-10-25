@@ -53,6 +53,12 @@ export interface GuessResponse {
   guessed_idol_data: GuessedIdolData;
 }
 
+// Export guess idol api instance (entire idol career)
+export interface GuessPayload {
+    guessed_idol_id: number;
+    answer_id: number;
+}
+
 export interface YesterdayIdol {
   past_idol_id: number;
   yesterdays_pick_date: string;

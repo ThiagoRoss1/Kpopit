@@ -208,16 +208,19 @@ const SearchBar = (props: SearchBarProps) => {
                     type: "spring", 
                     stiffness: 250, 
                     damping: 25 }}
+                    // #TODO: Fill animation not finished yet // 
                   className="relative px-4 py-3 cursor-pointer transition-colors duration-200
-                    hover:bg-gradient-to-r hover:from-[#000]/100 hover:via-[#b43777]/100 hover:to-[#000]/100 hover:bg-black
-                    flex flex-grow gap-4 items-center backdrop-blur-md text-white drop-shadow-md border border-white/20 
-                    transform-gpu will-change-transform hover:shadow-[2px_2px_12px_8px_rgba(0,0,0,0.35)]"
+                    hover:bg-gradient-to-r hover:from-[#8a0449] hover:via-[#0d0314] hover:to-[#000000]/0 
+                    bg-[length:200%_100%] bg-left hover:animate-[moveGradient_0.3s_linear_forwards]
+                    flex flex-grow gap-4 items-center backdrop-blur-md text-white drop-shadow-md 
+                    border border-white/20 transform-gpu will-change-transform
+                    hover:shadow-[2px_2px_12px_8px_rgba(0,0,0,0.35)]"
                   key={suggestion.id}
                   onClick={() => handleSuggestionClick(suggestion)}
                 >
                   {suggestion.image_path && (
                     <motion.img 
-                    src={`http://127.0.0.1:5000${suggestion.image_path}`} 
+                    src={`${import.meta.env.VITE_API_URL}${suggestion.image_path}`}
                     alt={"Idol image"}
                     className="w-11 h-11 object-cover rounded-full border-1 border-white"
                     animate={{ scale: hoveredId === suggestion.id ? 1.16 : 1 }}

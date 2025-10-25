@@ -25,3 +25,6 @@ dist-ssr
 
 # Just for now
 styles
+
+# env files
+.env

@@ -137,8 +137,8 @@ function Home() {
     <BackgroundStyle attempts={attempts} />
     <div className="min-h-screen w-full flex flex-col items-center justify-start">
       <div className="flex items-center justify-center p-[9px] sm:w-[242px] sm:h-[84px] mt-[70px] mb-[38px] text-center">
-        <h1 className="text-[54px] font-bold text-center bg-gradient-to-b from-[#e70a7d] to-[#ec4850] text-transparent bg-clip-text drop-shadow-lg">
-        Kpopdle
+        <h1 className="text-6xl font-bold text-center bg-gradient-to-b from-[#e70a7d] to-[#ec4850] text-transparent bg-clip-text drop-shadow-lg" >
+        Kpopdle 
         </h1>
       </div>    
       <div className="flex items-center justify-center mb-5">
@@ -153,7 +153,7 @@ function Home() {
 
       </div>
 
-      <div className="flex items-center justify-center mb-8">
+      <div className="flex items-center justify-center mb-7">
         <BottomButtons
           onSubmitStats={() => { setShowModal("stats") }}
           // onSubmitStreak={() => { setShowModal("streak") }}

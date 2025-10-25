@@ -85,7 +85,7 @@ return (
                         hover:scale-105 hover:bg-black/70 hover:brightness-110 hover:cursor-default transform duration-300 transform-gpu"> {/* Maybe shadow-2xl or lg */}
 
                             <div className="absolute left-5 flex items-center justify-center sm:h-20 sm:w-20 bg-transparent rounded-[20px] hover:scale-110 hover:rotate-4 transition-transform duration-500 will-change-transform transform-gpu">
-                                <img src={`http://127.0.0.1:5000${cardInfo.image_path}`} alt="Idol" className="w-full h-full rounded-[20px] object-cover object-top transform-gpu" draggable={false} />
+                                <img src={`${import.meta.env.VITE_API_URL}${cardInfo.image_path}`} alt="Idol" className="w-full h-full rounded-[20px] object-cover object-top transform-gpu" draggable={false} />
                             </div>
 
                             <div className="ml-20 flex flex-col text-center items-center justify-center w-full gap-0.5">

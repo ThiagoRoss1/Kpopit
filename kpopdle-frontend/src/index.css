@@ -22,16 +22,31 @@ body {
   }
   50% { 
     opacity: 1;
-    transform: scale(1.15);
+    transform: scale(1.06);
   }
 }
 
 .star-twinkle {
-  animation: twinkle 3s ease-in-out infinite;
+  animation: twinkle 4s ease-in-out infinite;
+  animation-fill-mode: backwards;
+  opacity: 0.6;
 }
 
 *, *::before, *::after {
   box-sizing: border-box;
+}
+
+/* SearchBar fill animation */
+@keyframes moveGradient {
+  from {
+    background-position: right;
+  }
+  
+  to {
+    background-position: left;
+  }
+
+
 }
 
 /* Test for glow */ 
@@ -70,7 +85,7 @@ canvas {
   will-change: transform, opacity;
   backface-visibility: hidden;
 }
-
+/* 
 @theme inline {
   --radius-sm: calc(var(--radius) - 4px);
   --radius-md: calc(var(--radius) - 2px);
@@ -185,4 +200,4 @@ canvas {
   body {
     @apply bg-background text-foreground;
   }
-}
+} */

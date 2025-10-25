@@ -31,7 +31,7 @@ return (
             <div className="absolute flex items-center justify-center sm:w-31 sm:h-31 rounded-[50px] top-5 border-2 border-white/80 
             hover:border-white/100 hover:scale-120 hover:rotate-6 transform duration-1000 will-change-transform 
             shadow-[0_0_30px_4px_rgba(215,49,137,0.4),0_0_50px_10px_rgba(228,77,134,0.2)]">
-                <img src={`http://127.0.0.1:5000${cardInfo.image_path}`} alt="Idol" className="w-20 h-20 sm:w-30 sm:h-30 rounded-[50px] object-cover object-top transform-gpu" />
+                <img src={`${import.meta.env.VITE_API_URL}${cardInfo.image_path}`} alt="Idol" className="w-20 h-20 sm:w-30 sm:h-30 rounded-[50px] object-cover object-top transform-gpu" />
             </div>
 
             <div className="absolute flex flex-col items-center justify-center sm:w-[580px] sm:max-h-[80px] mt-40">
@@ -100,7 +100,7 @@ return (
                     </span>
 
                     <div className="flex flex-row w-full h-full items-center justify-start ml-20 gap-6">
-                        <img src={`http://127.0.0.1:5000${yesterdayIdolImage}`} alt="Idol" className="sm:w-28 sm:h-28 rounded-[50px] object-cover object-center hover:scale-105 
+                        <img src={`${import.meta.env.VITE_API_URL}${yesterdayIdolImage}`} alt="Idol" className="sm:w-28 sm:h-28 rounded-[50px] object-cover object-center hover:scale-105 
                         select-none transition-transform duration-500 will-change-transform transform-gpu" />
 
                         <div className="text-2xl font-semibold hover:scale-105 select-none transition-transform duration-500">
