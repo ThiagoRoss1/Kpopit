@@ -33,3 +33,9 @@ export const getResetTimer = async () => {
     const response = await api.get('/reset-timer');
     return response.data;
 };
+
+// Get user token
+export const getUserToken = async () => {
+    const response = await api.post('/user/init');
+    return response.data;
+}

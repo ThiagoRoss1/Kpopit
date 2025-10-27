@@ -1,13 +1,14 @@
 import "../../index.css";
 import "./style.css";
 import { useQuery, useMutation } from "@tanstack/react-query";
-import { useState } from "react";
-import { getDailyIdol, getGuessIdol, getAllIdols, getYesterdaysIdol } from "../../services/api";
+import { useState, useEffect, useCallback } from "react";
+import { getDailyIdol, getGuessIdol, getAllIdols, getYesterdaysIdol, getUserToken } from "../../services/api";
 import type {
   GameData,
   IdolListItem,
   GuessResponse,
   YesterdayIdol,
+  Users,
 } from "../../interfaces/gameInterfaces";
 import SearchBar from "../../components/GuessSearchBar/SearchBar.tsx";
 import GuessesGrid from "../../components/GuessesGrid/GuessGrid.tsx";
@@ -29,7 +30,7 @@ function Home() {
   const [showModal, setShowModal] = useState<null | "changelog" | "how-to-play" | "about" | "stats" | "streak" | "share">(null);
   const [showVictoryCard, setShowVictoryCard] = useState<boolean>(false);
   const [isCorrect, setIsCorrect] = useState<boolean>(false);
-
+  const [shouldFetchToken, setShouldFetchToken] = useState<boolean>(!localStorage.getItem("userToken"));
   // Counter
   const [attempts, setAttempts] = useState<number>(0);
 
@@ -38,6 +39,31 @@ function Home() {
   };
 
   // -- Api-side -- //
+
+  // User token
+  const userToken = useQuery<Users>({
+    enabled: shouldFetchToken,
+    queryKey: ["userToken"],
+    queryFn: getUserToken,
+  });
+
+  const initUser = useCallback(() => {
+    const token = localStorage.getItem("userToken");
+
+    if (!token && userToken.data) {
+      localStorage.setItem("userToken", userToken.data.token);
+      return userToken.data.token;
+    }
+
+    return token;
+  }, [userToken.data]);
+
+  useEffect(() => {
+    if (userToken.data) {
+    initUser();
+    setShouldFetchToken(false);
+    }
+  }, [initUser, userToken.data]);
 
   // Daily idol game data
   const {

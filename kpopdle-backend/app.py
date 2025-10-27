@@ -3,6 +3,7 @@ import datetime
 import random
 from flask import Flask, jsonify, request, redirect, session
 from flask_cors import CORS
+import uuid
 # from flask_babel import Babel
 # from flask_session import Session
 
@@ -602,6 +603,45 @@ def get_reset_timer():
     }
     
     return jsonify(display_keys)
+
+# Generate a new user token and stores it in the database
+@app.route("/api/user/init", methods=["POST"])
+def generate_user_token():
+    """Generate a new user token and store it in the database"""
+    token_sucessfuly_generated = False
+
+    # Try up to 5 times
+    attempts = 0
+    error = ""
+
+    while not token_sucessfuly_generated and attempts < 5:
+        try:
+            token = str(uuid.uuid4())
+
+            # Start db connection 
+            connect = sqlite3.connect("kpopdle.db")
+            connect.row_factory = sqlite3.Row
+            cursor = connect.cursor()
+            
+            token_insert_sql = """
+                INSERT INTO users (token, created_at) VALUES (?, CURRENT_TIMESTAMP)
+            """
+            cursor.execute(token_insert_sql, (token,))
+            connect.commit()
+            connect.close()
+            token_sucessfuly_generated = True
+    
+        except sqlite3.IntegrityError as e:
+            token_sucessfuly_generated = False
+            attempts += 1
+            print(f"Token generation attempt {attempts} failed: {e}")
+            error += str(e)
+        
+
+    if token_sucessfuly_generated:
+        return jsonify({"token": token})
+    else:
+        return jsonify({"error": "Failed to generate unique token after 5 attempts", "details": error}), 500
 
 
 

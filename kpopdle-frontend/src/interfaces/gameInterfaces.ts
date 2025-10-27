@@ -74,3 +74,9 @@ export interface ResetTimer {
   total_seconds: number;
   next_reset: string;
 }
+
+export interface Users {
+  id: number;
+  token: string;
+  created_at: string;
+}
