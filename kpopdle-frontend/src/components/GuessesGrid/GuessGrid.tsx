@@ -85,20 +85,29 @@ const GuessesGrid = (props: GuessesGridProps) => {
   useEffect(() => {
     if (guesses.length > 0) {
       const latestGuess = guesses[guesses.length - 1];
-      const idolId = latestGuess.guessed_idol_data.idol_id;
+      const latestIdolId = latestGuess.guessed_idol_data.idol_id;
        
       setAnimatingColumn(prev => {
         const updated = new Map(prev);
 
-        updated.forEach((_, id) => updated.set(id, 8));
-        updated.set(idolId, 0);
+        guesses.forEach(guess => {
+          const idolId = guess.guessed_idol_data.idol_id;
+
+          if (idolId !== latestIdolId) {
+            updated.set(idolId, 8);
+          }
+        });
+
+        updated.set(latestIdolId, 0);
 
         return updated;
       });
 
       setTimeout(() => {
-        setAnimatingColumn(prev => new Map(prev).set(idolId, 1));
+        setAnimatingColumn(prev => new Map(prev).set(latestIdolId, 1));
       }, 50);
+
+      // TODO: Skip animation cache
 
       if (guesses.length >= 6 && !animationEnd) {
         setAnimationEnd(true);

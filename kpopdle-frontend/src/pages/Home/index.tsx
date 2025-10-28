@@ -99,14 +99,69 @@ function Home() {
 
   const yesterdayIdolImage = yesterday.data?.image_path ?? null;
 
+  useEffect(() => {
+    if (!gameData) return;
+
+    const serverDate = gameData?.server_date;
+    const lastGameDate = localStorage.getItem("gameDate");
+   
+    if (lastGameDate !== serverDate) {
+      console.log("New day detected, clearing cache.");
+      localStorage.removeItem("todayGuessesDetails");
+      localStorage.removeItem("GuessedIdols");
+      localStorage.removeItem("gameComplete");
+      localStorage.removeItem("gameWon");
+
+      localStorage.setItem("gameDate", serverDate || "");
+    } else {
+      console.log("Same day, restoring cache.");
+      const cachedGuesses = localStorage.getItem("todayGuessesDetails");
+      const gameComplete = localStorage.getItem("gameComplete");
+      const gameWon = localStorage.getItem("gameWon");
+
+      if (cachedGuesses) {
+        try {
+          const parsedGuesses = JSON.parse(cachedGuesses);
+          setGuesses(parsedGuesses);
+          setAttempts(parsedGuesses.length);
+        } catch (error) {
+          console.error("Error parsing cached guesses:", error);
+        }
+      }
+
+      if (gameComplete === "true") {
+        setEndGame(true);
+        if (gameWon === "true") {
+          setIsCorrect(true);
+          setShowVictoryCard(true);
+        }
+      }
+    }
+  }, [gameData]);
+
   const guessMutation = useMutation({
     mutationFn: getGuessIdol,
     onSuccess: (data) => {
       console.log("Guess successful:", data);
-      setGuesses((prevGuesses) => [...prevGuesses, data]);
+      console.log("Got user token guess:", localStorage.getItem("userToken")); // Testing log
+      
+      setGuesses((prevGuesses) => {
+        const updatedGuesses = [...prevGuesses, data];
+
+        localStorage.setItem("todayGuessesDetails", JSON.stringify(updatedGuesses));
+
+        const names = updatedGuesses.map(g => g.guessed_idol_data.artist_name);
+        localStorage.setItem("GuessedIdols", JSON.stringify(names));
+        
+        return updatedGuesses;
+      });
+
+      
 
       if (data.guess_correct) {
         setIsCorrect(true);
+        localStorage.setItem("gameComplete", "true");
+        localStorage.setItem("gameWon", "true");
       }
     },
     onError: (error) => {
@@ -133,6 +188,9 @@ function Home() {
 
     if (guessedIdolObject?.id === gameData.answer_id && !isCorrect) {
       setIsCorrect(true);
+      // Just a confirmation
+      localStorage.setItem("gameComplete", "true");
+      localStorage.setItem("gameWon", "true");
     }
 
     if (!guessedIdolObject) {
@@ -142,6 +200,8 @@ function Home() {
     guessMutation.mutate({
       guessed_idol_id: guessedIdolObject.id,
       answer_id: gameData.answer_id,
+      user_token: localStorage.getItem("userToken") || "",
+      current_attempt: attempts + 1,
     });
     // Clear input field after submission
     setCurrentGuess("");

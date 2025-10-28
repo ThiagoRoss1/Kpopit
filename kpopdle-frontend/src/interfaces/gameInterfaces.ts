@@ -1,6 +1,7 @@
 export interface GameData {
   answer_id: number;
   categories: string[];
+  server_date: string;
 
   /* Hints */
   member_count?: number;
@@ -58,6 +59,13 @@ export interface GuessPayload {
     guessed_idol_id: number;
     answer_id: number;
 }
+
+export interface UserTokenData {
+  user_token: string;
+  current_attempt: number;
+}
+
+export interface CompleteGuessRequest extends GuessPayload, UserTokenData {}
 
 export interface YesterdayIdol {
   past_idol_id: number;

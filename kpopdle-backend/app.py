@@ -10,6 +10,19 @@ import uuid
 app = Flask(__name__)
 CORS(app, resources={r"/*": {"origins": "*"}})  # Allow all origins for static files
 
+# TEST_MODE = False
+# TEST_DATE_OFFSET = 1  # Dias para adicionar/subtrair (1 = amanhã, -1 = ontem)
+# # ===============================================
+
+# def get_server_date():
+#     """Retorna a data do servidor (real ou de teste)"""
+#     base_date = datetime.date.today()
+#     if TEST_MODE:
+#         return (base_date + datetime.timedelta(days=TEST_DATE_OFFSET)).isoformat()
+#     return base_date.isoformat()
+
+# server_date = get_server_date()
+
 # class Config:
 #     # Configure session
 #     LANGUAGES = ['en'] # Just english for now
@@ -217,6 +230,8 @@ def get_daily_idol():
         "groups": groups,
         # Image path for frontend to display
         "image_path": idol_data_dict.get("image_path"),
+        # Server date for timezone consistency
+        "server_date": datetime.date.today().isoformat(),
     }
 
     return jsonify(game_data)
@@ -230,14 +245,29 @@ def guess_idol():
     data = request.get_json()
     guessed_idol_id = data.get("guessed_idol_id")
     answer_id = data.get("answer_id")
+    user_token = data.get("user_token")
+    current_attempt = data.get("current_attempt")
 
     if not guessed_idol_id or not answer_id:
         return jsonify({"error": "Missing guessed_idol_id or answer_id"}), 400
     
+    if not user_token:
+        return jsonify({"error": "Missing user token"}), 400
+
     # Start db connection
     connect = sqlite3.connect("kpopdle.db")
     connect.row_factory = sqlite3.Row
     cursor = connect.cursor()
+
+    # Validate user token
+    cursor.execute("""SELECT id FROM users WHERE token = ?""", (user_token,))
+    user_row = cursor.fetchone()
+
+    if not user_row:
+        connect.close()
+        return jsonify({"error": "Invalid user token"}), 400
+    
+    user_id = user_row["id"]
 
     # Fetch full data for guessed idol and answer idol
     guessed_idol = dict(fetch_full_idol_data(cursor, guessed_idol_id))
@@ -278,7 +308,7 @@ def guess_idol():
         connect.close()
         return jsonify({"error": "Idol not found"}), 404
     
-    connect.close()
+    # connect.close() -- MOVED DOWN --
     
     # Compare data
     feedback = {}
@@ -412,6 +442,92 @@ def guess_idol():
 
     # Final answer (correct or not)
     is_correct = guessed_idol.get("idol_id") == answer_data.get("idol_id")
+    one_shot_win = is_correct and current_attempt == 1
+    today = datetime.date.today().isoformat()
+
+    # Calculate streak function
+    def streak_calculation(cursor, user_id):
+            cursor.execute("""
+                    SELECT date, won FROM daily_user_history
+                    WHERE user_id = ? AND won = 1
+                    ORDER BY date DESC
+                """, (user_id,))
+            
+            results = cursor.fetchall()
+
+            if not results:
+                return 0
+            
+            streak = 0
+            expected_date = datetime.date.today()
+            
+            for row in results:
+                game_date = datetime.date.fromisoformat(row["date"])
+
+                if game_date == expected_date:
+                    streak += 1
+                    expected_date -= datetime.timedelta(days=1)
+                else:
+                    break
+
+            return streak
+   
+    # Update user history in the database 
+    try:
+        cursor.execute("BEGIN TRANSACTION")
+
+        cursor.execute(
+            """
+                INSERT INTO daily_user_history (user_id, date, guesses_count, won, one_shot_win)
+                VALUES (?, ?, ?, ?, ?)
+                ON CONFLICT(user_id, date) DO UPDATE SET   
+                guesses_count = excluded.guesses_count,
+                won = excluded.won OR won,
+                one_shot_win = excluded.one_shot_win OR one_shot_win
+            """, (user_id, today, current_attempt, is_correct, one_shot_win))
+                        
+        if is_correct:       
+            cursor.execute("""
+                SELECT AVG(guesses_count) as avg_guesses
+                FROM daily_user_history
+                WHERE user_id = ? AND won = TRUE
+            """, (user_id,))
+
+            streak = streak_calculation(cursor, user_id)
+
+
+            cursor.execute("""
+                INSERT INTO user_history 
+                (user_id, current_streak, max_streak, wins_count, average_guesses, one_shot_wins)
+                VALUES (?, ?, ?, 1, ?, ?)
+                ON CONFLICT(user_id) DO UPDATE SET
+                        current_streak = ?,
+                        max_streak = MAX(max_streak, ?),
+                        wins_count = wins_count + 1,
+                        average_guesses = ROUND((average_guesses * (wins_count) + ? ) / (wins_count + 1), 2),
+                        one_shot_wins = one_shot_wins + ?
+                """, (
+                    user_id, 
+                    streak, 
+                    streak, 
+                    current_attempt, 
+                    1 if one_shot_win else 0,              
+                    # Update values:
+                    streak,
+                    streak,
+                    current_attempt,
+                    1 if one_shot_win else 0
+                )
+            )
+
+        # TODO: not commiting into user_history
+        cursor.execute("COMMIT")
+    
+    except Exception as e:
+        cursor.execute("ROLLBACK")
+        print(f"Error updating user history: {e}")
+
+    connect.close()
 
     # TODO - response / reveal dict taking feedback comparisons - DONE
 

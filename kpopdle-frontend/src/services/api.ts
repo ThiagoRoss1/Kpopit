@@ -1,5 +1,5 @@
 import axios from 'axios';
-import type { GuessPayload } from '../interfaces/gameInterfaces';
+import type { CompleteGuessRequest } from '../interfaces/gameInterfaces';
 
 // Api instance with base URL
 const api = axios.create({
@@ -12,7 +12,7 @@ export const getDailyIdol = async () => {
     return response.data;
 };
 
-export const getGuessIdol = async (payload: GuessPayload) => {
+export const getGuessIdol = async (payload: CompleteGuessRequest) => {
     const response = await api.post('/game/guess', payload);
     console.log("Answer received from API /guess:", response.data);
     return response.data;
