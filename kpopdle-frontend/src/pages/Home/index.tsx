@@ -31,6 +31,7 @@ function Home() {
   const [showVictoryCard, setShowVictoryCard] = useState<boolean>(false);
   const [isCorrect, setIsCorrect] = useState<boolean>(false);
   const [shouldFetchToken, setShouldFetchToken] = useState<boolean>(!localStorage.getItem("userToken"));
+  const [dayChecked, setDayChecked] = useState<boolean>(false);
   // Counter
   const [attempts, setAttempts] = useState<number>(0);
 
@@ -111,8 +112,15 @@ function Home() {
       localStorage.removeItem("GuessedIdols");
       localStorage.removeItem("gameComplete");
       localStorage.removeItem("gameWon");
+      localStorage.removeItem("hint1Revealed");
+      localStorage.removeItem("showHint1");
+      localStorage.removeItem("colorize1");
+      localStorage.removeItem("hint2Revealed");
+      localStorage.removeItem("showHint2");
+      localStorage.removeItem("colorize2");
 
       localStorage.setItem("gameDate", serverDate || "");
+      setDayChecked(true);
     } else {
       console.log("Same day, restoring cache.");
       const cachedGuesses = localStorage.getItem("todayGuessesDetails");
@@ -136,6 +144,8 @@ function Home() {
           setShowVictoryCard(true);
         }
       }
+
+      setDayChecked(true);
     }
   }, [gameData]);
 
@@ -215,8 +225,8 @@ function Home() {
     return <div className="flex w-full h-screen justify-center items-center text-white">Error: Error fetching game data</div>;
   }
 
-
-
+  if (!dayChecked) return null;
+  
   // Main return
   return (
     <>

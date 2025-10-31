@@ -21,6 +21,14 @@ CORS(app, resources={r"/*": {"origins": "*"}})  # Allow all origins for static f
 #         return (base_date + datetime.timedelta(days=TEST_DATE_OFFSET)).isoformat()
 #     return base_date.isoformat()
 
+# def get_server_date_obj():
+#     """Retorna a data do servidor (real ou de teste) como DATE OBJECT"""
+#     base_date = datetime.date.today()
+#     if TEST_MODE:
+#         return base_date + datetime.timedelta(days=TEST_DATE_OFFSET)
+#     return base_date
+
+
 # server_date = get_server_date()
 
 # class Config:
@@ -212,6 +220,41 @@ def get_daily_idol():
     # Add career data 
     idol_career_for_groups = fetch_full_idol_career(cursor, idol_id)
     groups = [career["group_name"] for career in idol_career_for_groups if career.get("is_active")]
+
+    # Streak reset
+    user_token = request.headers.get("Authorization") or request.args.get("user_token")
+
+    if user_token:
+        cursor.execute("""
+                SELECT id FROM users
+                WHERE token = ?
+            """, (user_token,))
+        
+        user_row = cursor.fetchone()
+
+        if user_row:
+            user_id = user_row["id"]
+            today = datetime.date.today().isoformat()
+
+            cursor.execute("""
+                    SELECT last_played_date FROM user_history
+                    WHERE user_id = ?
+                """, (user_id,))
+            
+            last_played_row = cursor.fetchone()
+
+            if last_played_row and last_played_row["last_played_date"]:
+                last_played_obj = datetime.date.fromisoformat(last_played_row["last_played_date"])
+                today_obj = datetime.date.fromisoformat(today)
+
+                if (today_obj - last_played_obj).days > 1:
+                    # Reset streak
+                    cursor.execute("""
+                            UPDATE user_history
+                            SET current_streak = 0
+                            WHERE user_id = ?
+                        """, (user_id,))
+                    connect.commit()
 
     connect.close()
     
@@ -498,25 +541,28 @@ def guess_idol():
 
             cursor.execute("""
                 INSERT INTO user_history 
-                (user_id, current_streak, max_streak, wins_count, average_guesses, one_shot_wins)
-                VALUES (?, ?, ?, 1, ?, ?)
+                (user_id, current_streak, max_streak, wins_count, average_guesses, one_shot_wins, last_played_date)
+                VALUES (?, ?, ?, 1, ?, ?, ?)
                 ON CONFLICT(user_id) DO UPDATE SET
                         current_streak = ?,
                         max_streak = MAX(max_streak, ?),
                         wins_count = wins_count + 1,
                         average_guesses = ROUND((average_guesses * (wins_count) + ? ) / (wins_count + 1), 2),
-                        one_shot_wins = one_shot_wins + ?
+                        one_shot_wins = one_shot_wins + ?,
+                        last_played_date = ?
                 """, (
                     user_id, 
                     streak, 
                     streak, 
                     current_attempt, 
-                    1 if one_shot_win else 0,              
+                    1 if one_shot_win else 0,
+                    today,           
                     # Update values:
                     streak,
                     streak,
                     current_attempt,
-                    1 if one_shot_win else 0
+                    1 if one_shot_win else 0,
+                    today
                 )
             )
 

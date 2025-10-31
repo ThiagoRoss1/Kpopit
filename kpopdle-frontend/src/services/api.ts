@@ -8,7 +8,10 @@ const api = axios.create({
 
 // Get daily idol game data endpoint
 export const getDailyIdol = async () => {
-    const response = await api.get('/game/daily-idol');
+    const token = localStorage.getItem('userToken');
+    const response = await api.get('/game/daily-idol', {
+        headers: token ? { 'Authorization': token } : {}
+    });
     return response.data;
 };
 

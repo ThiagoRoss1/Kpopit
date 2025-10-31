@@ -1,5 +1,5 @@
 import { AnimatePresence, motion } from "motion/react";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import React from "react";
 import Mic from "../../assets/icons/mic-vocal.svg";
 // import LockedIcon from "../../assets/icons/lock-key-fill.svg";
@@ -21,17 +21,42 @@ const AnswerHintsBox = (props: AnswerHintsBoxProps) => {
     const CARD1 = 2;
     const CARD2 = 3;
 
-    const [isFlipped1, setIsFlipped1] = useState(false);
-    const [isFlipped2, setIsFlipped2] = useState(false);
+    const [isFlipped1, setIsFlipped1] = useState(() => {
+        return localStorage.getItem("hint1Revealed") === "true";
+    });
+
+    const [isFlipped2, setIsFlipped2] = useState(() => {
+        return localStorage.getItem("hint2Revealed") === "true";
+    });
 
     const canFlipCard1 = attempts >= CARD1;
     const canFlipCard2 = attempts >= CARD2;
 
-    const [showHint1, setShowHint1] = useState(false);
-    const [showHint2, setShowHint2] = useState(false);
+    const [showHint1, setShowHint1] = useState(() => {
+        return localStorage.getItem("showHint1") === "true";
+    });
+    const [showHint2, setShowHint2] = useState(() => {
+        return localStorage.getItem("showHint2") === "true";
+    });
 
-    const [colorize1, setColorize1] = useState(false);
-    const [colorize2, setColorize2] = useState(false);
+    const [colorize1, setColorize1] = useState(() => {
+        return localStorage.getItem("colorize1") === "true";
+    });
+    const [colorize2, setColorize2] = useState(() => {
+        return localStorage.getItem("colorize2") === "true";
+    });
+
+    useEffect(() => {
+        if (isFlipped1) localStorage.setItem("hint1Revealed", "true");
+        if (showHint1) localStorage.setItem("showHint1", "true");
+        if (colorize1) localStorage.setItem("colorize1", "true");
+    }, [isFlipped1, showHint1, colorize1]);
+
+    useEffect(() => {
+        if (isFlipped2) localStorage.setItem("hint2Revealed", "true");
+        if (showHint2) localStorage.setItem("showHint2", "true");
+        if (colorize2) localStorage.setItem("colorize2", "true");
+    }, [isFlipped2, showHint2, colorize2]);
 
     const getHintText = (attempts: number, cardThreshold: number) => {
         const remaining = cardThreshold - attempts;
@@ -93,6 +118,7 @@ const AnswerHintsBox = (props: AnswerHintsBoxProps) => {
             {/* Box 1 */}
             <div className= "relative perspective-distant">
                 <motion.div
+                    initial={ isFlipped1 ? { rotateY: -180 } : { rotateY: 0 } }
                     animate={canFlipCard1 ? isFlipped1 ? { rotateY: -180 } : { rotateY: 0 } : {}}
                     transition={{ duration: 0.8, ease: "easeInOut" }}
                     onClick={() => {
@@ -150,6 +176,7 @@ const AnswerHintsBox = (props: AnswerHintsBoxProps) => {
             {/* Box 2 */}
             <div className="relative perspective-distant">
                 <motion.div
+                    initial= { isFlipped2 ? { rotateY: -180 } : { rotateY: 0 } }
                     animate={canFlipCard2 ? isFlipped2 ? { rotateY: -180 } : { rotateY: 0 } : {}}
                     transition={{ duration: 0.8, ease: "easeInOut"}}
                     onClick={() => {
