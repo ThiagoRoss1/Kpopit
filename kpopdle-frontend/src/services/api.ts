@@ -42,3 +42,8 @@ export const getUserToken = async () => {
     const response = await api.post('/user/init');
     return response.data;
 }
+
+export const getUserStats = async (user_token: string) => {
+    const response = await api.get(`/stats/${user_token}`);
+    return response.data;
+}

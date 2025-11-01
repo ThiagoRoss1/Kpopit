@@ -1,5 +1,7 @@
 // Buttons Card Modal Component
 import React from "react";
+import { motion } from "motion/react";
+import { X } from "lucide-react";
 
 interface ModalProps {
     onClose: () => void;
@@ -11,28 +13,34 @@ const Modal = (props: ModalProps) => {
     const { onClose, children, title } = props;
 
     return (
-        <div className="fixed inset-0 z-50 overflow-y-auto bg-black/20 backdrop-blur-sm" onClick={() => onClose()}>
-            
-            <div className="flex items-start justify-center w-full sm:max-w-[846px] mx-auto mt-20" onClick={(e) => e.stopPropagation()}>
+        <div className="fixed inset-0 z-50 overflow-y-auto bg-black/30 backdrop-blur-sm" onClick={() => onClose()}>        
+            <motion.div 
+                initial={{ opacity: 0, scale: 0.8, y: 50 }}
+                animate={{ opacity: 1, scale: 1, y: 0 }}
+                exit={{ opacity: 0, scale: 0.8, y: 50 }}
+                transition={{ duration: 0.2, ease: "easeInOut" }} 
+                className="flex items-start justify-center w-full sm:max-w-[846px] mx-auto mt-20" onClick={(e) => e.stopPropagation()}>
 
-                <div className="relative w-full max-w-[846px] text-center bg-white/10 border border-white/50 rounded-[20px] overflow-hidden shadow-[4px_4px_4px_1px_rgba(0,0,0,0.1),inset_0_4px_4px_rgba(0,0,0,0.25)] ">
+                <div className="relative w-full max-w-[846px] text-center bg-white/0 border border-white/80 rounded-[20px] overflow-hidden shadow-[4px_4px_4px_1px_rgba(0,0,0,0.1),inset_0_4px_4px_rgba(0,0,0,0.25)] ">
 
                     <div className="w-full flex items-center justify-between px-4 py-2 bg-white/10 border-b border-white/20">
-                        <h2 className="text-4xl font-bold bg-gradient-to-b from-[#b43777] to-[#ce757a] bg-clip-text text-transparent drop-shadow-lg">
+                        <h2 className="text-4xl font-bold bg-gradient-to-b from-[#b43777] to-[#ec4850] bg-clip-text text-transparent drop-shadow-lg hover:cursor-default">
                             {title}
                         </h2>
-                        <button className="rounded-full flex-shrink-0 w-10 h-10 text-center 
-                        bg-gradient-to-b from-[#b43777]/80 to-white/80 backdrop-blur-lg shadow-lg hover:brightness-115 hover:scale-105
-                        hover:cursor-pointer hover:bg-gradient-to-b hover:from-[#b43777]/100 hover:to-white/100 transition-transform duration-500" onClick={onClose}>
-                        X
-                        </button>
+                            <div className="justify-center items-center flex">
+                            <button className="flex items-center justify-center rounded-full flex-shrink-0 sm:w-10 sm:h-10 text-center
+                            bg-gradient-to-b from-[#b43777]/0 to-[#ec4850]/0 backdrop-blur-lg shadow-lg hover:brightness-115 hover:scale-105
+                            hover:cursor-pointer hover:bg-gradient-to-b hover:from-[#b43777] hover:to-[#ec4850] transition-all transform-gpu duration-500" onClick={onClose}>
+                                <X size={20} color="white" strokeWidth={3} absoluteStrokeWidth className="sm:w-5 sm:h-5" />
+                            </button>
+                            </div>
                     </div>
                     
-                    <div className="w-full bg-white/10 px-4 py-4 text-left">
-                        <p className="break-words">{children}</p>
+                    <div className="w-full bg-white/5 px-4 py-4 text-left text-white">
+                        <span className="break-words">{children}</span>
                     </div>
                 </div>
-            </div>
+            </motion.div>
         </div>
     )
 }

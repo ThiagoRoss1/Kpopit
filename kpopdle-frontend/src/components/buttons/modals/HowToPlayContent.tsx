@@ -1,18 +1,25 @@
 import { useResetTimer } from "../../../hooks/useResetTimer.tsx";
+import type { UserStats } from "../../../interfaces/gameInterfaces.ts";
 
-const HowToPlayText = () => {
+interface HowToPlayStatsProps {
+    stats: UserStats | undefined;
+}
+
+const HowToPlayText = (props: HowToPlayStatsProps) => {
     const { formattedTime } = useResetTimer();
+    const { stats } = props;
 
     return (
         <div>
             <div>
                 <h2>Guess today's K-Pop Idol.</h2>
                 <div>
-                   <p>Next Idol in:</p> 
+                   <span>Next Idol in:</span> 
                    <div>
-                     <p>{formattedTime}</p>
+                     <span>{formattedTime}</span> <br/>
+                     <span>{stats?.average_guesses}</span>
                    </div>
-                   <p></p>
+                   <span></span>
                 </div>
                 
                 

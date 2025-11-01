@@ -1,14 +1,15 @@
 import "../../index.css";
 import "./style.css";
-import { useQuery, useMutation } from "@tanstack/react-query";
+import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { useState, useEffect, useCallback } from "react";
-import { getDailyIdol, getGuessIdol, getAllIdols, getYesterdaysIdol, getUserToken } from "../../services/api";
+import { getDailyIdol, getGuessIdol, getAllIdols, getYesterdaysIdol, getUserToken, getUserStats } from "../../services/api";
 import type {
   GameData,
   IdolListItem,
   GuessResponse,
   YesterdayIdol,
   Users,
+  UserStats,
 } from "../../interfaces/gameInterfaces";
 import SearchBar from "../../components/GuessSearchBar/SearchBar.tsx";
 import GuessesGrid from "../../components/GuessesGrid/GuessGrid.tsx";
@@ -18,6 +19,8 @@ import TopButtons from "../../components/buttons/TopButtons.tsx";
 import BottomButtons from "../../components/buttons/BottomButtons.tsx";
 import Modal from "../../components/buttons/modals/Modal.tsx";
 import HowToPlayText from "../../components/buttons/modals/HowToPlayContent.tsx";
+import StatsText from "../../components/buttons/modals/StatsContent.tsx";
+import ChangelogText from "../../components/buttons/modals/ChangelogContent.tsx";
 import { useResetTimer } from "../../hooks/useResetTimer.tsx";
 import BackgroundStyle from "../../components/Background/BackgroundStyle.tsx";
 // import { Input } from "@chakra-ui/react"; - Css framework import example
@@ -40,6 +43,7 @@ function Home() {
   };
 
   // -- Api-side -- //
+  const queryClient = useQueryClient();
 
   // User token
   const userToken = useQuery<Users>({
@@ -99,6 +103,16 @@ function Home() {
   const yesterdayArtistGroup = yesterday.data?.groups ?? null;
 
   const yesterdayIdolImage = yesterday.data?.image_path ?? null;
+
+  const userStats = useQuery<UserStats>({
+    queryKey: ["userStats", userToken],
+    queryFn: () => getUserStats(initUser() || ""),
+    enabled: !!initUser(),
+  });
+
+  queryClient.invalidateQueries({ queryKey: ["userStats", userToken] });
+
+  const userStatsData = userStats.data;
 
   useEffect(() => {
     if (!gameData) return;
@@ -166,12 +180,12 @@ function Home() {
         return updatedGuesses;
       });
 
-      
-
       if (data.guess_correct) {
         setIsCorrect(true);
         localStorage.setItem("gameComplete", "true");
         localStorage.setItem("gameWon", "true");
+
+        queryClient.invalidateQueries({ queryKey: ["userStats"] });
       }
     },
     onError: (error) => {
@@ -226,7 +240,7 @@ function Home() {
   }
 
   if (!dayChecked) return null;
-  
+
   // Main return
   return (
     <>
@@ -243,8 +257,8 @@ function Home() {
           onSubmitHowToPlay={() => { setShowModal("how-to-play") }}
           onSubmitAbout={() => { setShowModal("about") }}
         />
-        {showModal === "changelog" && <Modal onClose={() => setShowModal(null)} title="Changelog..."><p>On working...</p></Modal>}
-        {showModal === "how-to-play" && <Modal onClose={() => setShowModal(null)} title="How to Play..."><HowToPlayText /></Modal>}
+        {showModal === "changelog" && <Modal onClose={() => setShowModal(null)} title="Changelog..."><ChangelogText /></Modal>}
+        {showModal === "how-to-play" && <Modal onClose={() => setShowModal(null)} title="How to Play..."><HowToPlayText stats={userStatsData} /></Modal>}
         {showModal === "about" && <Modal onClose={() => setShowModal(null)} title="About..."><p>On working...</p></Modal>}
 
       </div>
@@ -255,7 +269,7 @@ function Home() {
           // onSubmitStreak={() => { setShowModal("streak") }}
           onSubmitShare={() => { setShowModal("share") }}
         />
-        {showModal === "stats" && <Modal onClose={() => setShowModal(null)} title="Stats..."><p>On working...</p></Modal>}
+        {showModal === "stats" && <Modal onClose={() => setShowModal(null)} title="Stats..."><StatsText stats={userStatsData} /></Modal>}
         {showModal === "streak" && <Modal onClose={() => setShowModal(null)} title="Streak..."><p>On working...</p></Modal>}
         {showModal === "share" && <Modal onClose={() => setShowModal(null)} title="Share..."><p>On working...</p></Modal>}
       </div>

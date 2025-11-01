@@ -45,7 +45,7 @@ return (
                 <div className="relative w-full sm:h-25 mb-2">
                     <div className="absolute flex items-center justify-center top-0 right-4 sm:w-10 sm:h-10 rounded-full bg-transparent mt-2.5">
                         <button className="flex items-center justify-center hover:scale-115 w-full h-full transform duration-500 hover:brightness-110 transform-gpu" onClick={onClose}>
-                            <X size={20} color="black" strokeWidth={3} absoluteStrokeWidth className="sm:w-5 sm:h-5 opacity-50 hover:opacity-100 transform duration-500 transform-gpu" />
+                            <X size={20} color="white" strokeWidth={3} absoluteStrokeWidth className="sm:w-5 sm:h-5 opacity-50 hover:opacity-100 transform duration-500 transform-gpu" />
                         </button>
                     </div>
                     

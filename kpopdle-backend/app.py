@@ -125,6 +125,7 @@ def choose_idol_of_the_day(cursor):
     """Choose a random idol as the 'Idol of the Day'"""
 
     today_date = datetime.date.today().isoformat()
+    # today_date = get_server_date()
 
     # Query to select today's idol
     sql_query = """
@@ -235,6 +236,7 @@ def get_daily_idol():
         if user_row:
             user_id = user_row["id"]
             today = datetime.date.today().isoformat()
+            # today = get_server_date()
 
             cursor.execute("""
                     SELECT last_played_date FROM user_history
@@ -275,6 +277,7 @@ def get_daily_idol():
         "image_path": idol_data_dict.get("image_path"),
         # Server date for timezone consistency
         "server_date": datetime.date.today().isoformat(),
+        # "server_date": get_server_date(),
     }
 
     return jsonify(game_data)
@@ -487,6 +490,7 @@ def guess_idol():
     is_correct = guessed_idol.get("idol_id") == answer_data.get("idol_id")
     one_shot_win = is_correct and current_attempt == 1
     today = datetime.date.today().isoformat()
+    # today = get_server_date()
 
     # Calculate streak function
     def streak_calculation(cursor, user_id):
@@ -503,6 +507,7 @@ def guess_idol():
             
             streak = 0
             expected_date = datetime.date.today()
+            # expected_date = get_server_date_obj()
             
             for row in results:
                 game_date = datetime.date.fromisoformat(row["date"])
@@ -804,15 +809,51 @@ def generate_user_token():
         return jsonify({"token": token})
     else:
         return jsonify({"error": "Failed to generate unique token after 5 attempts", "details": error}), 500
+    
+@app.route("/api/stats/<user_token>", methods=["GET"])
+def get_user_stats(user_token):
+    """Return user stats based on the provided token"""
 
+    # Start db connection
+    connect = sqlite3.connect("kpopdle.db")
+    connect.row_factory = sqlite3.Row
+    cursor = connect.cursor()
 
+    # Validate user token 
+    cursor.execute("""
+            SELECT id FROM users WHERE token = ?
+        """, (user_token,))
+    
+    user_row = cursor.fetchone()
 
+    if not user_row:
+        connect.close()
+        return jsonify({"error": "Invalid user token"}), 400
+    
+    user_id = user_row["id"]
 
+    # Fetch user stats 
+    cursor.execute("""
+            SELECT current_streak, max_streak, wins_count, average_guesses, one_shot_wins
+            FROM user_history
+            WHERE user_id = ?
+        """, (user_id,))
+    
+    stats_row = cursor.fetchone()
 
+    if stats_row:
+        user_stats = dict(stats_row)
+    else:
+        user_stats = {
+            "current_streak": 0,
+            "max_streak": 0,
+            "wins_count": 0,
+            "average_guesses": 0.0,
+            "one_shot_wins": 0
+        }
+    connect.close()
 
-
-
-
+    return jsonify(user_stats)
 
 
 

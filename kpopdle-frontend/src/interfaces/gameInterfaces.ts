@@ -88,3 +88,11 @@ export interface Users {
   token: string;
   created_at: string;
 }
+
+export interface UserStats {
+  current_streak: number;
+  max_streak: number;
+  wins_count: number;
+  average_guesses: number;
+  one_shot_wins: number;
+}
