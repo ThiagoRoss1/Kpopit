@@ -96,3 +96,17 @@ export interface UserStats {
   average_guesses: number;
   one_shot_wins: number;
 }
+
+export interface AddIdolRequest {
+  id?: number;
+  artist_name: string;
+  real_name?: string;
+  gender?: string;
+  debut_year?: number;
+  nationality?: string[];
+  birth_year?: number;
+  height?: number;
+  position?: string[];
+  image_path?: string;
+  is_published?: number;
+}

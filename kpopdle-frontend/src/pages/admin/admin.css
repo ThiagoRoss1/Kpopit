@@ -1,0 +1,11 @@
+@import "tailwindcss";
+@import "tw-animate-css";
+
+
+body {
+  /* Default gradient - will be overridden by dynamic class */
+  background: linear-gradient(
+  #000000 30%,
+  #000000 100%
+  );
+}

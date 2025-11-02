@@ -174,20 +174,20 @@ def image_path_transformer(row):
 # Idols Table Seeding
 idols_columns = [
     "id", "artist_name", "real_name", "gender", "debut_year", "nationality", 
-    "birth_year", "height", "position", "image_path"
+    "birth_year", "height", "position", "image_path", "is_published"
 ]
 seed_table(cursor, IDOLS_CSV_FILE, 'idols', idols_columns, transformer=image_path_transformer)
 
 # Groups Table Seeding
 groups_columns = [
     "id", "name", "group_debut_year", 
-    "member_count", "generation", "fandom_name"
+    "member_count", "generation", "fandom_name", "is_published"
 ]
 seed_table(cursor, GROUPS_CSV_FILE, 'groups', groups_columns)
 
 # Companies Table Seeding
 companies_columns = [
-    "id", "name", "parent_company_id"
+    "id", "name", "parent_company_id", "is_published"
 ]
 seed_table(cursor, COMPANIES_CSV_FILE, 'companies', companies_columns)
 

@@ -28,3 +28,4 @@ styles
 
 # env files
 .env
+.env.production

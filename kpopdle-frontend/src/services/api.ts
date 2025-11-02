@@ -1,5 +1,5 @@
 import axios from 'axios';
-import type { CompleteGuessRequest } from '../interfaces/gameInterfaces';
+import type { AddIdolRequest, CompleteGuessRequest } from '../interfaces/gameInterfaces';
 
 // Api instance with base URL
 const api = axios.create({
@@ -45,5 +45,10 @@ export const getUserToken = async () => {
 
 export const getUserStats = async (user_token: string) => {
     const response = await api.get(`/stats/${user_token}`);
+    return response.data;
+}
+
+export const addNewIdol = async (idolData: AddIdolRequest) => {
+    const response = await api.post('/admin/add-idol', idolData);
     return response.data;
 }

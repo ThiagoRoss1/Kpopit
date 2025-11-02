@@ -4,11 +4,15 @@ import random
 from flask import Flask, jsonify, request, redirect, session
 from flask_cors import CORS
 import uuid
+from routes.admin import admin_bp
 # from flask_babel import Babel
 # from flask_session import Session
 
 app = Flask(__name__)
 CORS(app, resources={r"/*": {"origins": "*"}})  # Allow all origins for static files
+
+# Admin blueprint - Register routes
+app.register_blueprint(admin_bp)
 
 # TEST_MODE = False
 # TEST_DATE_OFFSET = 1  # Dias para adicionar/subtrair (1 = amanhã, -1 = ontem)
