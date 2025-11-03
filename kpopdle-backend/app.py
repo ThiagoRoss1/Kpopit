@@ -58,6 +58,7 @@ def fetch_full_idol_data(cursor, idol_id):
             i.position,
             i.height,
             i.image_path,
+            i.is_published,
             g.id AS group_id,
             g.name AS group_name,
             g.group_debut_year,
@@ -69,7 +70,7 @@ def fetch_full_idol_data(cursor, idol_id):
         LEFT JOIN idol_career AS ic ON i.id = ic.idol_id AND ic.is_active = 1
         -- Join with groups table to get actual group data
         LEFT JOIN groups AS g ON ic.group_id = g.id
-        WHERE i.id = ?
+        WHERE i.id = ? AND i.is_published = 1
     """
     cursor.execute(sql_query, (idol_id,))
     return cursor.fetchone()
@@ -145,10 +146,10 @@ def choose_idol_of_the_day(cursor):
     time_delta = datetime.timedelta(days=20)
     date_limit = (datetime.date.today() - time_delta).isoformat()
     
-    # If no pick for today, select a random idol
+    # If no pick for today, select a random idol - if is_published = 1
     sql_query = """
         SELECT id FROM idols
-        WHERE id NOT IN (
+        WHERE is_published = 1 AND id NOT IN (
         SELECT idol_id FROM daily_picks WHERE pick_date >= ?)
     """
     cursor.execute(sql_query, (date_limit,))
@@ -159,7 +160,7 @@ def choose_idol_of_the_day(cursor):
     """Error prevention: If there are no available idols (i.e., all idols have been picked in the last 20 days)"""
     # If no available idols, pick any random idol
     if not available_idols:
-        cursor.execute("SELECT id FROM idols")
+        cursor.execute("SELECT id FROM idols WHERE is_published = 1")
         available_idols = cursor.fetchall()
 
     # Transform 'Row object' list to a simple list of ids
@@ -626,7 +627,7 @@ def get_idols_list():
 
     # Fetch all idols
     idol_query = """
-        SELECT id, artist_name, image_path FROM idols ORDER BY artist_name ASC
+        SELECT id, artist_name, image_path FROM idols WHERE is_published = 1 ORDER BY artist_name ASC
     """
     cursor.execute(idol_query)
     results = cursor.fetchall()
