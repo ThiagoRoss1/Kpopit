@@ -52,3 +52,8 @@ export const addNewIdol = async (idolData: AddIdolRequest) => {
     const response = await api.post('/admin/add-idol', idolData);
     return response.data;
 }
+
+export const getDailyUserCount = async () => {
+    const response = await api.get('/daily-users-count');
+    return response.data;
+}

@@ -62,7 +62,7 @@ return (
                     <div className="w-full px-8 sm:px-[52px] mb-3">
                         <div className="flex flex-col items-center text-center gap-3 max-w-[280px] mx-auto hover:cursor-default">
                             <h2 className="relative font-bold text-lg sm:text-[24px] flex items-center justify-center">
-                                <span className="bg-gradient-to-r from-[#b43777] to-[#ce757a] bg-clip-text text-transparent drop-shadow-xl/50 brightness-105">
+                                <span className="bg-linear-to-r from-[#b43777] to-[#ce757a] bg-clip-text text-transparent drop-shadow-xl/50 brightness-105">
                                     Congratulations!
                                 </span>
                                  <span className="ml-1 drop-shadow-lg">🎊</span>
@@ -89,10 +89,10 @@ return (
                             </div>
 
                             <div className="ml-20 flex flex-col text-center items-center justify-center w-full gap-0.5">
-                                <p className="font-bold text-base sm:text-[22px] bg-gradient-to-b from-[#b43777] to-[#ce757a] shadow-2xl drop-shadow-2xl text-transparent bg-clip-text transform-gpu backface-visibility-hidden">
+                                <p className="font-bold text-base sm:text-[22px] bg-linear-to-b from-[#b43777] to-[#ce757a] shadow-2xl drop-shadow-2xl text-transparent bg-clip-text transform-gpu backface-visibility-hidden">
                                     {cardInfo.artist_name}
                                 </p>
-                                <p className="text-base sm:text-[16px] leading-tight bg-gradient-to-b from-[#ce757a] to-white brightness-105 text-transparent bg-clip-text">
+                                <p className="text-base sm:text-[16px] leading-tight bg-linear-to-b from-[#ce757a] to-white brightness-105 text-transparent bg-clip-text">
                                     ({cardInfo.groups.join(", ")|| "Soloist"})
                                 </p>
                             </div>
@@ -108,7 +108,7 @@ return (
                                     <p className="font-bold sm:text-[18px] text-[#ce757a] brightness-105">
                                         {attempts}
                                     </p>
-                                    <p className="text-base sm:text-[16px] leading-tight bg-gradient-to-b from-white to-[#ce757a] brightness-105 
+                                    <p className="text-base sm:text-[16px] leading-tight bg-linear-to-b from-white to-[#ce757a] brightness-105 
                                     text-transparent bg-clip-text">
                                         {`${attempts === 1 ? "Attempt" : "Attempts"}`}
                                     </p>
@@ -121,7 +121,7 @@ return (
                                     <p className="font-bold sm:text-[18px] text-[#ce757a] brightness-105">
                                         3
                                     </p>
-                                    <p className="text-base sm:text-[16px] leading-tight bg-gradient-to-b from-white to-[#ce757a] brightness-105 
+                                    <p className="text-base sm:text-[16px] leading-tight bg-linear-to-b from-white to-[#ce757a] brightness-105 
                                     text-transparent bg-clip-text">
                                         On working... (Streak)
                                     </p>
@@ -133,11 +133,11 @@ return (
                     {/* Share Container */}
                     <div className="flex w-full items-center justify-center sm:h-29 mb-5">
                         <div className="flex flex-col items-center sm:w-80 sm:h-29">
-                            <button className="relative top-0 flex items-center justify-center text-center bg-[#000]/80 sm:w-80 sm:h-13 rounded-[16px] mb-4
-                            hover:scale-105 hover:brightness-110 hover:bg-[#000]/0 transform duration-300 shadow-2xl hover:shadow-[0px] hover:cursor-pointer transform-gpu" 
+                            <button className="relative top-0 flex items-center justify-center text-center bg-black/80 sm:w-80 sm:h-13 rounded-2xl mb-4
+                            hover:scale-105 hover:brightness-110 hover:bg-black/0 transform duration-300 shadow-2xl hover:shadow-[0px] hover:cursor-pointer transform-gpu" 
                             onClick={() => {console.log("Success")}}>
                                 <div className="flex items-center justify-center text-center">
-                                    <p className="text-base font-bold sm:text-[20px] leading-tight bg-gradient-to-r from-[#b43777] to-[#ce757a] brightness-105
+                                    <p className="text-base font-bold sm:text-[20px] leading-tight bg-linear-to-r from-[#b43777] to-[#ce757a] brightness-105
                                     text-transparent bg-clip-text transform-gpu">
                                         Share Results
                                     </p>
@@ -145,15 +145,15 @@ return (
                             </button>
 
                             <div className="flex flex-row items-center justify-center text-center sm:w-80 sm:h-12 gap-6">
-                                <button className="relative left-0 items-center text-center bg-gradient-to-r from-black/70 to-black/30 sm:w-12 sm:h-12 rounded-[20px] 
-                                hover:scale-110 hover:brightness-110 hover:cursor-pointer hover:rotate-3 hover:bg-black/100 transform duration-300 transform-gpu">
+                                <button className="relative left-0 items-center text-center bg-linear-to-r from-black/70 to-black/30 sm:w-12 sm:h-12 rounded-[20px] 
+                                hover:scale-110 hover:brightness-110 hover:cursor-pointer hover:rotate-3 hover:bg-black transform duration-300 transform-gpu">
                                     <div className="flex w-full h-full items-center justify-center text-center brightness-100 hover:brightness-110 transform duration-300">
                                         <img src={TwitterLogo} alt="Twt" className="w-6 h-6 sm:w-9 sm:h-9" draggable={false} />
                                     </div>
                                 </button>
 
-                                <button className="relative right-0 items-center text-center bg-gradient-to-r from-black/30 to-black/70 sm:w-12 sm:h-12 rounded-[20px]
-                                hover:scale-110 hover:brightness-110 hover:cursor-pointer hover:-rotate-3 hover:bg-black/100 transform duration-300 transform-gpu">
+                                <button className="relative right-0 items-center text-center bg-linear-to-r from-black/30 to-black/70 sm:w-12 sm:h-12 rounded-[20px]
+                                hover:scale-110 hover:brightness-110 hover:cursor-pointer hover:-rotate-3 hover:bg-black transform duration-300 transform-gpu">
                                     <div className="flex w-full h-full items-center justify-center text-center brightness-100 hover:brightness-110">
                                         <img src={InstagramLogo} alt="Insta" className="w-6 h-6 sm:w-9 sm:h-9" draggable={false} />
                                     </div>

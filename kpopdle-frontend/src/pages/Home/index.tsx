@@ -2,7 +2,7 @@ import "../../index.css";
 import "./style.css";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { useState, useEffect, useCallback } from "react";
-import { getDailyIdol, getGuessIdol, getAllIdols, getYesterdaysIdol, getUserToken, getUserStats } from "../../services/api";
+import { getDailyIdol, getGuessIdol, getAllIdols, getYesterdaysIdol, getUserToken, getUserStats, getDailyUserCount } from "../../services/api";
 import type {
   GameData,
   IdolListItem,
@@ -20,6 +20,7 @@ import BottomButtons from "../../components/buttons/BottomButtons.tsx";
 import Modal from "../../components/buttons/modals/Modal.tsx";
 import HowToPlayText from "../../components/buttons/modals/HowToPlayContent.tsx";
 import StatsText from "../../components/buttons/modals/StatsContent.tsx";
+import TransferDataText from "../../components/buttons/modals/TransferData.tsx";
 import ChangelogText from "../../components/buttons/modals/ChangelogContent.tsx";
 import { useResetTimer } from "../../hooks/useResetTimer.tsx";
 import BackgroundStyle from "../../components/Background/BackgroundStyle.tsx";
@@ -30,7 +31,7 @@ function Home() {
   const [currentGuess, setCurrentGuess] = useState<string>("");
   const [guesses, setGuesses] = useState<GuessResponse[]>([]);
   const [endGame, setEndGame] = useState<boolean>(false);
-  const [showModal, setShowModal] = useState<null | "changelog" | "how-to-play" | "about" | "stats" | "streak" | "share">(null);
+  const [showModal, setShowModal] = useState<null | "changelog" | "how-to-play" | "about" | "stats" | "streak" | "share" | "transfer-data">(null);
   const [showVictoryCard, setShowVictoryCard] = useState<boolean>(false);
   const [isCorrect, setIsCorrect] = useState<boolean>(false);
   const [shouldFetchToken, setShouldFetchToken] = useState<boolean>(!localStorage.getItem("userToken"));
@@ -44,6 +45,7 @@ function Home() {
 
   // -- Api-side -- //
   const queryClient = useQueryClient();
+  const queryUserCount = useQueryClient();
 
   // User token
   const userToken = useQuery<Users>({
@@ -51,6 +53,13 @@ function Home() {
     queryKey: ["userToken"],
     queryFn: getUserToken,
   });
+
+  const dailyUserCount = useQuery({
+    queryKey: ["dailyUserCount"],
+    queryFn: getDailyUserCount,
+  });
+
+  queryUserCount.invalidateQueries({ queryKey: ["dailyUserCount"] });
 
   const initUser = useCallback(() => {
     const token = localStorage.getItem("userToken");
@@ -186,6 +195,7 @@ function Home() {
         localStorage.setItem("gameWon", "true");
 
         queryClient.invalidateQueries({ queryKey: ["userStats"] });
+        queryUserCount.invalidateQueries({ queryKey: ["dailyUserCount"] });
       }
     },
     onError: (error) => {
@@ -247,7 +257,7 @@ function Home() {
     <BackgroundStyle attempts={attempts} />
     <div className="min-h-screen w-full flex flex-col items-center justify-start">
       <div className="flex items-center justify-center p-[9px] sm:w-[242px] sm:h-[84px] mt-[70px] mb-[38px] text-center">
-        <h1 className="text-6xl font-bold text-center bg-gradient-to-b from-[#e70a7d] to-[#ec4850] text-transparent bg-clip-text drop-shadow-lg" >
+        <h1 className="text-6xl font-bold text-center bg-linear-to-b from-[#e70a7d] to-[#ec4850] text-transparent bg-clip-text drop-shadow-lg" >
         Kpopdle 
         </h1>
       </div>    
@@ -269,9 +279,12 @@ function Home() {
           // onSubmitStreak={() => { setShowModal("streak") }}
           onSubmitShare={() => { setShowModal("share") }}
         />
-        {showModal === "stats" && <Modal onClose={() => setShowModal(null)} title="Stats..."><StatsText stats={userStatsData} /></Modal>}
+        {showModal === "stats" && <Modal onClose={() => setShowModal(null)} title="Stats..."><StatsText stats={userStatsData} onSubmitTransferData={() => {setShowModal("transfer-data")}} /></Modal>}
         {showModal === "streak" && <Modal onClose={() => setShowModal(null)} title="Streak..."><p>On working...</p></Modal>}
         {showModal === "share" && <Modal onClose={() => setShowModal(null)} title="Share..."><p>On working...</p></Modal>}
+
+        {/* Sub-Stats Modals */}
+        {showModal === "transfer-data" && <Modal onClose={() => setShowModal(null)} title="Transfer Data..."><TransferDataText /></Modal>}
       </div>
 
       <div className="w-full flex flex-col items-center justify-center mb-[41px]">
@@ -315,6 +328,7 @@ function Home() {
       </div>
 
       <p>ID: {gameData?.answer_id}</p>
+      <p>User Count: {dailyUserCount?.data.user_count}</p>
       {/* <h2>Game Categories</h2>
       <ul>
         {gameData?.categories &&

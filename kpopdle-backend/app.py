@@ -860,7 +860,28 @@ def get_user_stats(user_token):
 
     return jsonify(user_stats)
 
+@app.route("/api/daily-users-count", methods=["GET"])
+def get_daily_users_count():
+    """Return the count of users who played today's game"""
 
+    today = datetime.date.today().isoformat()
+
+    connect = sqlite3.connect("kpopdle.db")
+    connect.row_factory = sqlite3.Row
+    cursor = connect.cursor()
+
+    cursor.execute("""
+            SELECT COUNT(DISTINCT user_id) AS user_count
+            FROM daily_user_history
+            WHERE date = ? AND won = 1
+        """, (today,))
+    
+    result = cursor.fetchone()
+    connect.close()
+    
+    user_count = result["user_count"] if result and result["user_count"] is not None else 0
+
+    return jsonify({"user_count": user_count})
 
 
 if __name__ == "__main__":

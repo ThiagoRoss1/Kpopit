@@ -73,19 +73,39 @@ const headers = [
 const GuessesGrid = (props: GuessesGridProps) => {
   const { guesses, onAllAnimationsComplete } = props; 
   const [animatingColumn, setAnimatingColumn] = useState<Map<number, number>>(new Map());
-  const [animationEnd, setAnimationEnd] = useState<boolean>(false);
+  const [animatedIdols, setAnimatedIdols] = useState<Set<number>>(new Set());
 
-  const COL_GROUPS = 2;
-  const COL_COMPANY = 3;
-  const COL_NATIONALITY = 4;
-  const COL_BIRTH_YEAR = 5;
-  const COL_DEBUT_YEAR = 6;
-  const COL_HEIGHT = 7;
+  useEffect(() => {
+    const stored = localStorage.getItem("animatedIdols");
+    if (stored) {
+      const parsed = JSON.parse(stored) as number[];
+      setAnimatedIdols(new Set(parsed));
+    }
+  }, []);
+
+  const COL = {
+    GROUPS: 2,
+    COMPANY: 3,
+    NATIONALITY: 4,
+    BIRTH_YEAR: 5,
+    DEBUT_YEAR: 6,
+    HEIGHT: 7,
+  } as const;
   
   useEffect(() => {
-    if (guesses.length > 0) {
+    if (guesses.length === 0) return;
+
       const latestGuess = guesses[guesses.length - 1];
       const latestIdolId = latestGuess.guessed_idol_data.idol_id;
+
+      if (animatedIdols.has(latestIdolId)) {
+        setAnimatingColumn(prev => {
+          const updated = new Map(prev);
+          updated.set(latestIdolId, 8);
+          return updated;
+        });
+        return;
+      }
        
       setAnimatingColumn(prev => {
         const updated = new Map(prev);
@@ -103,17 +123,19 @@ const GuessesGrid = (props: GuessesGridProps) => {
         return updated;
       });
 
-      setTimeout(() => {
-        setAnimatingColumn(prev => new Map(prev).set(latestIdolId, 1));
-      }, 50);
+      const timeout = setTimeout(() => {
+        setAnimatingColumn(prev => {
+          const updated = new Map(prev);
+          updated.set(latestIdolId, 1);
+          return updated;
+      });
+    }, 50);
+
+    return () => clearTimeout(timeout);
+      
 
       // TODO: Skip animation cache
-
-      if (guesses.length >= 6 && !animationEnd) {
-        setAnimationEnd(true);
-      }
-    }
-  }, [guesses, animationEnd]);
+  }, [guesses, animatedIdols]);
 
   return (
     guesses.length > 0 && (
@@ -122,7 +144,7 @@ const GuessesGrid = (props: GuessesGridProps) => {
         {headers.map((header) => (
           <div key={header} className="font-bold text-[10px] sm:text-[16px] text-pretty text-center text-white w-full h-fit pb-1 -mb-5"> {/* see responsivity */}
             {header}
-            <hr className="w-full h-fill sm:h-[4px] bg-white rounded-[20px] mt-2" />
+            <hr className="w-full h-fill sm:h-1 bg-white rounded-[20px] mt-2" />
           </div>
         ))}
         
@@ -167,7 +189,7 @@ const GuessesGrid = (props: GuessesGridProps) => {
             transition={{ duration: 0.8, ease: "easeInOut" }}
             onAnimationComplete={() => {
               if (currentColumn === 1) {
-                setAnimatingColumn(prev => new Map(prev).set(idolId, COL_GROUPS));
+                setAnimatingColumn(prev => new Map(prev).set(idolId, COL.GROUPS));
               }
             }}
             className={`${getStatusColor(guess.feedback.groups?.status)} relative w-18 h-18 sm:h-28 sm:w-28 flex flex-col items-center justify-center 
@@ -191,7 +213,7 @@ const GuessesGrid = (props: GuessesGridProps) => {
             transition={{ duration: 0.8, ease: "easeInOut" }}
             onAnimationComplete={() => {
               if (currentColumn === 2) {
-                setAnimatingColumn(prev => new Map(prev).set(idolId, COL_COMPANY));
+                setAnimatingColumn(prev => new Map(prev).set(idolId, COL.COMPANY));
               }
             }}
             className={`${getStatusColor(guess.feedback.companies?.status)} relative w-18 h-18 sm:h-28 sm:w-28 flex flex-col items-center justify-center 
@@ -215,7 +237,7 @@ const GuessesGrid = (props: GuessesGridProps) => {
             transition={{ duration: 0.8, ease: "easeInOut" }}
             onAnimationComplete={() => {
               if (currentColumn === 3) {
-                setAnimatingColumn(prev => new Map(prev).set(idolId, COL_NATIONALITY));
+                setAnimatingColumn(prev => new Map(prev).set(idolId, COL.NATIONALITY));
               }
             }}
             className={`${getStatusColor(guess.feedback.nationality?.status)} relative w-18 h-18 sm:h-28 sm:w-28 flex flex-col items-center justify-center 
@@ -241,7 +263,7 @@ const GuessesGrid = (props: GuessesGridProps) => {
             transition={{ duration: 0.8, ease: "easeInOut" }}
             onAnimationComplete={() => {
               if (currentColumn === 4) {
-                setAnimatingColumn(prev => new Map(prev).set(idolId, COL_BIRTH_YEAR));
+                setAnimatingColumn(prev => new Map(prev).set(idolId, COL.BIRTH_YEAR));
               }
             }}
             className={`${getStatusColor(guess.feedback.birth_year?.status)} relative w-18 h-18 sm:h-28 sm:w-28 flex flex-col items-center justify-center 
@@ -263,7 +285,7 @@ const GuessesGrid = (props: GuessesGridProps) => {
             transition={{ duration: 0.8, ease: "easeInOut" }}
             onAnimationComplete={() => {
               if (currentColumn === 5) {
-                setAnimatingColumn(prev => new Map(prev).set(idolId, COL_DEBUT_YEAR));
+                setAnimatingColumn(prev => new Map(prev).set(idolId, COL.DEBUT_YEAR));
               }
             }}
             className={`${getStatusColor(guess.feedback.idol_debut_year?.status)} relative w-18 h-18 sm:h-28 sm:w-28 flex flex-col items-center justify-center 
@@ -284,7 +306,7 @@ const GuessesGrid = (props: GuessesGridProps) => {
             transition={{ duration: 0.8, ease: "easeInOut" }}
             onAnimationComplete={() => {
               if (currentColumn === 6) {
-                setAnimatingColumn(prev => new Map(prev).set(idolId, COL_HEIGHT));
+                setAnimatingColumn(prev => new Map(prev).set(idolId, COL.HEIGHT));
               }
             }}
             className={`${getStatusColor(guess.feedback.height?.status)} relative w-18 h-18 sm:h-28 sm:w-28 flex flex-col items-center justify-center 
@@ -305,6 +327,12 @@ const GuessesGrid = (props: GuessesGridProps) => {
             transition={{ duration: 0.8, ease: "easeInOut" }}
             onAnimationComplete={() => {
               if (currentColumn === 7 ) {
+                setAnimatedIdols(prev => {
+                  const updated = new Set(prev);
+                  updated.add(idolId);
+                  localStorage.setItem("animatedIdols", JSON.stringify([...updated]));
+                  return updated;
+                });
                 if (guess.guess_correct) {
                   onAllAnimationsComplete?.();
                 }

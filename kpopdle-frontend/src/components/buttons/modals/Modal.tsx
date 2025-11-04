@@ -24,20 +24,20 @@ const Modal = (props: ModalProps) => {
                 <div className="relative w-full max-w-[846px] text-center bg-white/0 border border-white/80 rounded-[20px] overflow-hidden shadow-[4px_4px_4px_1px_rgba(0,0,0,0.1),inset_0_4px_4px_rgba(0,0,0,0.25)] ">
 
                     <div className="w-full flex items-center justify-between px-4 py-2 bg-white/10 border-b border-white/20">
-                        <h2 className="text-4xl font-bold bg-gradient-to-b from-[#b43777] to-[#ec4850] bg-clip-text text-transparent drop-shadow-lg hover:cursor-default">
+                        <h2 className="text-4xl font-bold bg-linear-to-b from-[#b43777] to-[#ec4850] bg-clip-text text-transparent drop-shadow-lg hover:cursor-default">
                             {title}
                         </h2>
                             <div className="justify-center items-center flex">
-                            <button className="flex items-center justify-center rounded-full flex-shrink-0 sm:w-10 sm:h-10 text-center
-                            bg-gradient-to-b from-[#b43777]/0 to-[#ec4850]/0 backdrop-blur-lg shadow-lg hover:brightness-115 hover:scale-105
-                            hover:cursor-pointer hover:bg-gradient-to-b hover:from-[#b43777] hover:to-[#ec4850] transition-all transform-gpu duration-500" onClick={onClose}>
+                            <button className="flex items-center justify-center rounded-full shrink-0 sm:w-10 sm:h-10 text-center
+                            bg-linear-to-b from-[#b43777]/0 to-[#ec4850]/0 backdrop-blur-lg shadow-lg hover:brightness-115 hover:scale-105
+                            hover:cursor-pointer hover:bg-linear-to-b hover:from-[#b43777] hover:to-[#ec4850] transition-all transform-gpu duration-500" onClick={onClose}>
                                 <X size={20} color="white" strokeWidth={3} absoluteStrokeWidth className="sm:w-5 sm:h-5" />
                             </button>
                             </div>
                     </div>
                     
                     <div className="w-full bg-white/5 px-4 py-4 text-left text-white">
-                        <span className="break-words">{children}</span>
+                        <span className="wrap-break-word">{children}</span>
                     </div>
                 </div>
             </motion.div>

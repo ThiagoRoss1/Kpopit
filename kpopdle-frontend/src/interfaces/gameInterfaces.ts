@@ -110,3 +110,7 @@ export interface AddIdolRequest {
   image_path?: string;
   is_published?: number;
 }
+
+export interface DailyUserCount {
+  user_count: number;
+}

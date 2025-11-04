@@ -1,11 +1,32 @@
 import type { UserStats } from "../../../interfaces/gameInterfaces.ts";
+import { useState } from "react";
+import { AnimatePresence, motion } from "motion/react";
 
 interface StatsContentProps {
     stats: UserStats | undefined;
+    onSubmitTransferData: () => void;
 }
 
 const StatsText = (props: StatsContentProps) => {
-    const { stats } = props;
+    const { stats, onSubmitTransferData } = props;
+
+    const [copied, setCopied] = useState<boolean>(false);
+
+    const textToCopy = `
+    My #Kpopdle statistics:
+    🥇 Games won: ${stats?.wins_count}
+    🤓 Average guesses: ${stats?.average_guesses.toFixed(2)}
+    🎯 One shots: ${stats?.one_shot_wins}
+    🔥 Current streak: ${stats?.current_streak}
+    🚀 Max streak: ${stats?.max_streak}
+    --Kpopdle site link--
+    `;
+    
+    const handleCopy = () => {
+        navigator.clipboard.writeText(textToCopy.trim().split('\n').map(line => line.trim()).join('\n'));
+        setCopied(true);
+        setTimeout(() => setCopied(false), 1500);
+    }   
 
     return (
         <div className="w-full h-full bg-transparent px-10 mt-5 mb-5">
@@ -57,29 +78,49 @@ const StatsText = (props: StatsContentProps) => {
                 </div>   
 
                 <div className="flex justify-between px-10 items-center mt-6">
+                    {/* Transfer Data Button */}
                     <button 
-                        onClick={() => console.log("Work in progress... (Transfer data button)")}
-                        className="bg-black/50 sm:w-60 sm:h-12 rounded-2xl border-2 border-white
+                        onClick={onSubmitTransferData}
+                        type="button"
+                        className="bg-transparent sm:w-60 sm:h-16 rounded-2xl border-2 border-white
                         backface-hidden shadow-[0_0_10px_2px_rgba(255,255,255,0.25),0_0_10px_2px_rgba(255,255,255,0.25)]
-                        hover:scale-105 hover:brightness-110 hover:bg-black hover:cursor-default transition-all duration-500 transform-gpu">
+                        hover:scale-105 hover:brightness-110 hover:bg-[#242424] hover:cursor-pointer transition-all duration-500 transform-gpu">
                         <span className="relative font-bold text-[20px] text-[#b43777] drop-shadow-lg
                         [text-shadow:1.2px_1.2px_4px_rgba(0,0,0,0.8),0_0_12px_rgba(180,55,119,0.55)]">
                             Transfer data
                         </span>
                     </button>
 
+                    {/* Copy Button */}
                     <button
-                        onClick={() => console.log("Work in progress... (Copy button)")}
-                        className="bg-black/50 sm:w-60 sm:h-12 rounded-2xl border-2 border-white
+                        onClick={() => handleCopy()}
+                        className="bg-transparent sm:w-60 sm:h-16 rounded-2xl border-2 border-white
                         backface-hidden shadow-[0_0_10px_2px_rgba(255,255,255,0.25),0_0_10px_2px_rgba(255,255,255,0.25)]
-                        hover:scale-105 hover:brightness-110 hover:bg-black hover:cursor-default transition-all duration-500 transform-gpu">
+                        hover:scale-105 hover:brightness-110 hover:bg-[#242424] hover:cursor-pointer transition-all duration-500 transform-gpu">
                         <span className="relative font-bold text-[20px] text-[#b43777] drop-shadow-lg
                         [text-shadow:1.2px_1.2px_4px_rgba(0,0,0,0.8),0_0_12px_rgba(180,55,119,0.55)]">
                             Copy
                         </span>
                     </button>
-
-                    
+                    <AnimatePresence>
+                        {copied && (
+                            <motion.div 
+                                key="copy-notification"
+                                initial={{ opacity: 0, y: 20 }}
+                                animate={{ opacity: 1, y: 0 }}
+                                transition={{ duration: 0.2, ease: "easeOut" }}
+                                exit={{ opacity: 0, y: 20 }}
+                                className="absolute flex bottom-28 left-127 justify-center items-center w-60 h-7">
+                                    <div className="flex justify-center items-center bg-[#242424] w-48 h-7 rounded-xl border border-white
+                                    shadow-[0_0_10px_2px_rgba(255,255,255,0.25),0_0_10px_2px_rgba(255,255,255,0.25)]">
+                                        <span className="relative font-medium text-base text-[#b43777] drop-shadow-lg
+                                        [text-shadow:1.2px_1.2px_4px_rgba(0,0,0,1.8),0_0_12px_rgba(180,55,119,2.55)]">
+                                            Copied to clipboard!
+                                        </span>
+                                    </div>
+                            </motion.div>                   
+                        )}
+                    </AnimatePresence>
                 </div>    
         </div>
     )

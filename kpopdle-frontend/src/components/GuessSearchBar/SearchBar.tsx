@@ -99,7 +99,7 @@ const SearchBar = (props: SearchBarProps) => {
   return (
     <div ref={containerRef} className="relative w-fit h-fit rounded-3xl">
       <div className="relative w-full h-fit max-w-full sm:w-140 sm:h-13 mx-auto flex items-center 
-      border border-white/50 rounded-3xl bg-gradient-to-r from-[#000000]/10 to-[#b43777]/10">
+      border border-white/50 rounded-3xl bg-linear-to-r from-[#000000]/10 to-[#b43777]/10">
         <form className="w-full p-2" 
         onSubmit={(e) => {
           e.preventDefault();
@@ -113,7 +113,7 @@ const SearchBar = (props: SearchBarProps) => {
         >
           <div className="flex items-center gap-2 w-full">
             <input
-              className="flex-grow h-9 px-3 text-white placeholder-white/60 border border-solid border-white/10
+              className="grow h-9 px-3 text-white placeholder-white/60 border border-solid border-white/10
               rounded-3xl bg-white/5 shadow-lg focus:outline-none focus:ring-1 focus:ring-white/40 transition-all"
               value={value}
               onChange={handleInputChange}
@@ -123,10 +123,10 @@ const SearchBar = (props: SearchBarProps) => {
             <button
             onMouseEnter={() => setIsButtonHovered(true)}
             onMouseLeave={() => setIsButtonHovered(false)}
-              className="flex-shrink-0 w-10 h-10 text-white font-semibold rounded-full 
-                  bg-gradient-to-br from-[#b43777]/80 to-[#ce757a]/80 backdrop-blur-md shadow-lg
+              className="shrink-0 w-10 h-10 text-white font-semibold rounded-full 
+                  bg-linear-to-br from-[#b43777]/80 to-[#ce757a]/80 backdrop-blur-md shadow-lg
                   border border-white/80 transform transition-all duration-300 hover:brightness-125 hover:scale-108 
-                  hover:border-white/100 hover:cursor-pointer hover:bg-gradient-to-br hover:from-[#b43777]/100 hover:to-[#ce757a]/100 hover:rotate-15"
+                  hover:border-white hover:cursor-pointer hover:bg-linear-to-br hover:from-[#b43777] hover:to-[#ce757a] hover:rotate-15"
               onClick={() => {
                 if (!disabled && selectedIdol && value.trim().length > 0 && (selectedIdol.artist_name.toLocaleLowerCase() === value.trim().toLocaleLowerCase())) {
                 onSubmit?.();
@@ -173,9 +173,9 @@ const SearchBar = (props: SearchBarProps) => {
                 opacity: 0,
               }}
               className="absolute left-0 top-full w-full mt-2 rounded-3xl
-              overflow-y-auto overflow-x-hidden border border-white bg-gradient-to-r from-[#000]/5 via-[#b43777]/0 to-[#000]/5
+              overflow-y-auto overflow-x-hidden border border-white bg-linear-to-r from-black/5 via-[#b43777]/0 to-black/5
               backdrop-blur-md shadow-lg z-50 drop-shadow-md sm:max-h-60 transform-gpu will-change-transform"
-              // liquid glass if possible but using gradient for now (bg-gradient-to-r from-[#000]/65 via-[#b43777]/80 to-[#000]/65)
+              // liquid glass if possible but using gradient for now (bg-linear-to-r from-[#000]/65 via-[#b43777]/80 to-[#000]/65)
             >
               {suggestions.map((suggestion) => {
                 const isLast = suggestions.indexOf(suggestion) === suggestions.length - 1;
@@ -210,9 +210,9 @@ const SearchBar = (props: SearchBarProps) => {
                     damping: 25 }}
                     // #TODO: Fill animation not finished yet // 
                   className="relative px-4 py-3 cursor-pointer transition-colors duration-200
-                    hover:bg-gradient-to-r hover:from-[#8a0449] hover:via-[#0d0314] hover:to-[#000000]/0 
-                    bg-[length:200%_100%] bg-left hover:animate-[moveGradient_0.3s_linear_forwards]
-                    flex flex-grow gap-4 items-center backdrop-blur-md text-white drop-shadow-md 
+                    hover:bg-linear-to-r hover:from-[#8a0449] hover:via-[#0d0314] hover:to-[#000000]/0 
+                    bg-size-[200%_100%] bg-left hover:animate-[moveGradient_0.3s_linear_forwards]
+                    flex grow gap-4 items-center backdrop-blur-md text-white drop-shadow-md 
                     border border-white/20 transform-gpu will-change-transform
                     hover:shadow-[2px_2px_12px_8px_rgba(0,0,0,0.35)]"
                   key={suggestion.id}
@@ -222,7 +222,7 @@ const SearchBar = (props: SearchBarProps) => {
                     <motion.img 
                     src={`${import.meta.env.VITE_API_URL}${suggestion.image_path}`}
                     alt={"Idol image"}
-                    className="w-11 h-11 object-cover rounded-full border-1 border-white"
+                    className="w-11 h-11 object-cover rounded-full border border-white"
                     animate={{ scale: hoveredId === suggestion.id ? 1.16 : 1 }}
                     transition={{ type: "spring", stiffness: 300, damping: 25 }}/>
                   )}
