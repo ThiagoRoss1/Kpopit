@@ -85,7 +85,7 @@ const BackgroundStyle = (props: BackgroundStyleProps) => {
 
   return (
     <div className="fixed inset-0 overflow-hidden pointer-events-none -z-10">
-      <div className="absolute inset-0 bg-gradient-to-br from-[#090311] via-[#050416] to-[#050822]" />
+      <div className="absolute inset-0 bg-linear-to-br from-[#090311] via-[#050416] to-[#050822]" />
         <div className="absolute inset-0 top-0 bg-black/0" />
         {attempts < 1 && (
         <motion.div 
@@ -155,10 +155,10 @@ const BackgroundStyle = (props: BackgroundStyleProps) => {
         ))}
       </div>
       
-      <div className="absolute inset-0 bg-gradient-to-t from-white/20 via-transparent to-white/5" />
-      <div className="absolute inset-0 bg-gradient-to-b from-white/20 via-transparent to-white/5" />
-      <div className="absolute inset-0 bg-gradient-to-r from-white/5 via-transparent to-gray-900/0" />
-      <div className="absolute inset-0 bg-gradient-to-l from-white/5 via-transparent to-gray-900/0" />
+      <div className="absolute inset-0 bg-linear-to-t from-white/20 via-transparent to-white/5" />
+      <div className="absolute inset-0 bg-linear-to-b from-white/20 via-transparent to-white/5" />
+      <div className="absolute inset-0 bg-linear-to-r from-white/5 via-transparent to-gray-900/0" />
+      <div className="absolute inset-0 bg-linear-to-l from-white/5 via-transparent to-gray-900/0" />
     </div>
   );
 };

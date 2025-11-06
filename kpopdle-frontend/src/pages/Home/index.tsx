@@ -141,6 +141,7 @@ function Home() {
       localStorage.removeItem("hint2Revealed");
       localStorage.removeItem("showHint2");
       localStorage.removeItem("colorize2");
+      localStorage.removeItem("animatedIdols");
 
       localStorage.setItem("gameDate", serverDate || "");
       setDayChecked(true);
@@ -268,7 +269,7 @@ function Home() {
           onSubmitAbout={() => { setShowModal("about") }}
         />
         {showModal === "changelog" && <Modal onClose={() => setShowModal(null)} title="Changelog..."><ChangelogText /></Modal>}
-        {showModal === "how-to-play" && <Modal onClose={() => setShowModal(null)} title="How to Play..."><HowToPlayText stats={userStatsData} /></Modal>}
+        {showModal === "how-to-play" && <Modal onClose={() => setShowModal(null)} title="How to Play..." isHowToPlay={true}><HowToPlayText /></Modal>}
         {showModal === "about" && <Modal onClose={() => setShowModal(null)} title="About..."><p>On working...</p></Modal>}
 
       </div>

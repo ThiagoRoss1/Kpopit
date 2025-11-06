@@ -26,6 +26,10 @@ body {
   }
 }
 
+.normal-font {
+  font-family:  Arial, Helvetica, sans-serif;
+}
+
 .star-twinkle {
   animation: twinkle 4s ease-in-out infinite;
   animation-fill-mode: backwards;

@@ -7,10 +7,13 @@ interface ModalProps {
     onClose: () => void;
     title?: string;
     children?: React.ReactNode;
+    isHowToPlay?: boolean;
 }
 
 const Modal = (props: ModalProps) => {
-    const { onClose, children, title } = props;
+    const { onClose, children, title, isHowToPlay } = props;
+
+
 
     return (
         <div className="fixed inset-0 z-50 overflow-y-auto bg-black/30 backdrop-blur-sm" onClick={() => onClose()}>        
@@ -21,7 +24,7 @@ const Modal = (props: ModalProps) => {
                 transition={{ duration: 0.2, ease: "easeInOut" }} 
                 className="flex items-start justify-center w-full sm:max-w-[846px] mx-auto mt-20" onClick={(e) => e.stopPropagation()}>
 
-                <div className="relative w-full max-w-[846px] text-center bg-white/0 border border-white/80 rounded-[20px] overflow-hidden shadow-[4px_4px_4px_1px_rgba(0,0,0,0.1),inset_0_4px_4px_rgba(0,0,0,0.25)] ">
+                <div className={`relative w-full max-w-[846px] text-center ${isHowToPlay ? "bg-black/80" : "bg-black/0"} border border-white/80 rounded-[20px] overflow-hidden shadow-[4px_4px_4px_1px_rgba(0,0,0,0.1),inset_0_4px_4px_rgba(0,0,0,0.25)]`}>
 
                     <div className="w-full flex items-center justify-between px-4 py-2 bg-white/10 border-b border-white/20">
                         <h2 className="text-4xl font-bold bg-linear-to-b from-[#b43777] to-[#ec4850] bg-clip-text text-transparent drop-shadow-lg hover:cursor-default">
