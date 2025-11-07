@@ -2,8 +2,10 @@
 import React from "react";
 import { motion } from "motion/react";
 import { X } from "lucide-react";
+import { useEffect } from "react";
 
 interface ModalProps {
+    isOpen?: boolean;
     onClose: () => void;
     title?: string;
     children?: React.ReactNode;
@@ -11,9 +13,27 @@ interface ModalProps {
 }
 
 const Modal = (props: ModalProps) => {
-    const { onClose, children, title, isHowToPlay } = props;
+    const { isOpen, onClose, children, title, isHowToPlay } = props;
 
+    useEffect(() => {
+        if (isOpen) {
+            document.body.style.overflow = "hidden";
+            document.body.style.position = "fixed";
+            document.body.style.width = "100%";
+        } else {
+            document.body.style.overflow = "auto";
+            document.body.style.position = "";
+            document.body.style.width = "";
+        }
 
+        return () => {
+            document.body.style.overflow = "auto";
+            document.body.style.position = "";
+            document.body.style.width = "";
+        };
+    }, [isOpen]);
+
+    if (!isOpen) return null;
 
     return (
         <div className="fixed inset-0 z-50 overflow-y-auto bg-black/30 backdrop-blur-sm" onClick={() => onClose()}>        
@@ -22,7 +42,7 @@ const Modal = (props: ModalProps) => {
                 animate={{ opacity: 1, scale: 1, y: 0 }}
                 exit={{ opacity: 0, scale: 0.8, y: 50 }}
                 transition={{ duration: 0.2, ease: "easeInOut" }} 
-                className="flex items-start justify-center w-full sm:max-w-[846px] mx-auto mt-20" onClick={(e) => e.stopPropagation()}>
+                className="flex items-start justify-center w-full sm:max-w-[846px] mx-auto mt-20 mb-10" onClick={(e) => e.stopPropagation()}>
 
                 <div className={`relative w-full max-w-[846px] text-center ${isHowToPlay ? "bg-black/80" : "bg-black/0"} border border-white/80 rounded-[20px] overflow-hidden shadow-[4px_4px_4px_1px_rgba(0,0,0,0.1),inset_0_4px_4px_rgba(0,0,0,0.25)]`}>
 

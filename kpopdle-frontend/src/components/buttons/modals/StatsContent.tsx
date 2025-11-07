@@ -29,8 +29,8 @@ const StatsText = (props: StatsContentProps) => {
     }   
 
     return (
-        <div className="w-full h-full bg-transparent px-10 mt-5 mb-5">
-            <div className="w-full h-full grid grid-cols-2 justify-center items-center gap-x-16 gap-y-6">
+        <div className="w-full bg-transparent px-10 mt-5 mb-5">
+            <div className="w-full grid grid-cols-2 justify-center items-center gap-x-16 gap-y-6">
                 {/* Games won */}
                 <div className="flex flex-col justify-center items-center p-4 gap-3 rounded-2xl border-2 border-white sm:h-28 
                 backface-hidden shadow-[0_0_10px_2px_rgba(255,255,255,0.25),0_0_10px_2px_rgba(255,255,255,0.25)] bg-black/50
@@ -110,8 +110,8 @@ const StatsText = (props: StatsContentProps) => {
                                 animate={{ opacity: 1, y: 0 }}
                                 transition={{ duration: 0.2, ease: "easeOut" }}
                                 exit={{ opacity: 0, y: 20 }}
-                                className="absolute flex bottom-28 left-127 justify-center items-center w-60 h-7">
-                                    <div className="flex justify-center items-center bg-[#242424] w-48 h-7 rounded-xl border border-white
+                                className="absolute flex bottom-28 left-127 justify-center items-center sm:w-60 sm:h-7">
+                                    <div className="flex justify-center items-center bg-[#242424] sm:w-48 sm:h-7 rounded-xl border border-white
                                     shadow-[0_0_10px_2px_rgba(255,255,255,0.25),0_0_10px_2px_rgba(255,255,255,0.25)]">
                                         <span className="relative font-medium text-base text-[#b43777] drop-shadow-lg
                                         [text-shadow:1.2px_1.2px_4px_rgba(0,0,0,1.8),0_0_12px_rgba(180,55,119,2.55)]">

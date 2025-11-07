@@ -20,6 +20,8 @@ import BottomButtons from "../../components/buttons/BottomButtons.tsx";
 import Modal from "../../components/buttons/modals/Modal.tsx";
 import HowToPlayText from "../../components/buttons/modals/HowToPlayContent.tsx";
 import StatsText from "../../components/buttons/modals/StatsContent.tsx";
+import ShareText from "../../components/buttons/modals/ShareContent.tsx";
+import AboutText from "../../components/buttons/modals/AboutContent.tsx";
 import TransferDataText from "../../components/buttons/modals/TransferData.tsx";
 import ChangelogText from "../../components/buttons/modals/ChangelogContent.tsx";
 import { useResetTimer } from "../../hooks/useResetTimer.tsx";
@@ -268,9 +270,9 @@ function Home() {
           onSubmitHowToPlay={() => { setShowModal("how-to-play") }}
           onSubmitAbout={() => { setShowModal("about") }}
         />
-        {showModal === "changelog" && <Modal onClose={() => setShowModal(null)} title="Changelog..."><ChangelogText /></Modal>}
-        {showModal === "how-to-play" && <Modal onClose={() => setShowModal(null)} title="How to Play..." isHowToPlay={true}><HowToPlayText /></Modal>}
-        {showModal === "about" && <Modal onClose={() => setShowModal(null)} title="About..."><p>On working...</p></Modal>}
+        {showModal === "changelog" && <Modal isOpen onClose={() => setShowModal(null)} title="Changelog..."><ChangelogText /></Modal>}
+        {showModal === "how-to-play" && <Modal isOpen onClose={() => setShowModal(null)} title="How to Play..." isHowToPlay={true}><HowToPlayText /></Modal>}
+        {showModal === "about" && <Modal isOpen onClose={() => setShowModal(null)} title="About..."><AboutText /></Modal>}
 
       </div>
 
@@ -280,12 +282,12 @@ function Home() {
           // onSubmitStreak={() => { setShowModal("streak") }}
           onSubmitShare={() => { setShowModal("share") }}
         />
-        {showModal === "stats" && <Modal onClose={() => setShowModal(null)} title="Stats..."><StatsText stats={userStatsData} onSubmitTransferData={() => {setShowModal("transfer-data")}} /></Modal>}
-        {showModal === "streak" && <Modal onClose={() => setShowModal(null)} title="Streak..."><p>On working...</p></Modal>}
-        {showModal === "share" && <Modal onClose={() => setShowModal(null)} title="Share..."><p>On working...</p></Modal>}
+        {showModal === "stats" && <Modal isOpen onClose={() => setShowModal(null)} title="Stats..."><StatsText stats={userStatsData} onSubmitTransferData={() => {setShowModal("transfer-data")}} /></Modal>}
+        {showModal === "share" && <Modal isOpen onClose={() => setShowModal(null)} title="Share..."><ShareText guesses={guesses} hasWon={isCorrect} attempts={attempts} /></Modal>}
+        {/* {showModal === "streak" && <Modal onClose={() => setShowModal(null)} title="Streak..."><p>Working in progress...</p></Modal>} */}
 
         {/* Sub-Stats Modals */}
-        {showModal === "transfer-data" && <Modal onClose={() => setShowModal(null)} title="Transfer Data..."><TransferDataText /></Modal>}
+        {showModal === "transfer-data" && <Modal isOpen onClose={() => setShowModal(null)} title="Transfer Data..."><TransferDataText /></Modal>}
       </div>
 
       <div className="w-full flex flex-col items-center justify-center mb-[41px]">

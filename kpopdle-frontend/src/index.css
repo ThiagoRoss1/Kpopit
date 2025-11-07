@@ -53,6 +53,26 @@ body {
 
 }
 
+/* Future bar customization */
+/* html {
+  scrollbar-gutter: stable;
+} */
+
+/* Scrollbar estilo glass */
+/* ::-webkit-scrollbar {
+  width: 10px;
+}
+
+::-webkit-scrollbar-thumb {
+  background: linear-gradient(180deg, #b43777 0%, #ec4850 100%);
+  border-radius: 10px;
+}
+
+::-webkit-scrollbar-track {
+  background: rgba(255, 255, 255, 0.05);
+  border-radius: 10px;
+} */
+
 /* Test for glow */ 
 @layer utilities {
   @keyframes pulse-shadow {
