@@ -2,7 +2,7 @@ import "../../index.css";
 import "./style.css";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { useState, useEffect, useCallback } from "react";
-import { getDailyIdol, getGuessIdol, getAllIdols, getYesterdaysIdol, getUserToken, getUserStats, getDailyUserCount } from "../../services/api";
+import { getDailyIdol, getGuessIdol, getAllIdols, getYesterdaysIdol, getUserToken, getUserStats, getDailyUserCount, getUserPosition } from "../../services/api";
 import type {
   GameData,
   IdolListItem,
@@ -61,8 +61,6 @@ function Home() {
     queryFn: getDailyUserCount,
   });
 
-  queryUserCount.invalidateQueries({ queryKey: ["dailyUserCount"] });
-
   const initUser = useCallback(() => {
     const token = localStorage.getItem("userToken");
 
@@ -120,8 +118,6 @@ function Home() {
     queryFn: () => getUserStats(initUser() || ""),
     enabled: !!initUser(),
   });
-
-  queryClient.invalidateQueries({ queryKey: ["userStats", userToken] });
 
   const userStatsData = userStats.data;
 
@@ -199,12 +195,23 @@ function Home() {
 
         queryClient.invalidateQueries({ queryKey: ["userStats"] });
         queryUserCount.invalidateQueries({ queryKey: ["dailyUserCount"] });
+        queryClient.invalidateQueries({ queryKey: ["userPosition"] });
       }
     },
     onError: (error) => {
       console.error("Error during guess:", error);
     },
   });
+
+  const userPosition = useQuery({
+    queryKey: ["userPosition", userToken],
+    queryFn: () => getUserPosition(initUser() || ""),
+    enabled: !!initUser(),
+  });
+
+  const userPositionData = userPosition?.data?.position;
+  const userRankData = userPosition?.data?.rank;
+
 
   const handleAnimationsComplete = () => {
     if (isCorrect) {
@@ -348,6 +355,8 @@ function Home() {
           yesterdayIdol={yesterdayArtist || "unknown"}
           yesterdayIdolGroup={yesterdayArtistGroup}
           yesterdayIdolImage={yesterdayIdolImage}
+          userPosition={userPositionData}
+          userRank={userRankData}
           idolActiveGroup={gameData?.groups ?? null}
         />
       )}

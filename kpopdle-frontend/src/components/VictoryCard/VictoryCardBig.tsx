@@ -12,12 +12,14 @@ interface VictoryCardBigProps {
     yesterdayIdol: string;
     yesterdayIdolGroup?: string[] | null;
     yesterdayIdolImage?: YesterdayIdol["image_path"];
+    userPosition?: number | null;
+    userRank?: number | null;
     nextReset: () => { timeRemaining: number | null; formattedTime: string; };
     onShareClick?: () => void;
 }
 
 const VictoryCardBig = (props: VictoryCardBigProps) => {
-    const { cardInfo, idolActiveGroup, attempts, yesterdayIdol, yesterdayIdolGroup, yesterdayIdolImage, nextReset, onShareClick } = props;
+    const { cardInfo, idolActiveGroup, attempts, yesterdayIdol, yesterdayIdolGroup, yesterdayIdolImage, userPosition, userRank, nextReset, onShareClick } = props;
 
     const activeGroup = idolActiveGroup && idolActiveGroup.length > 0 ? idolActiveGroup : "Soloist";
     const yesterdayGroup = yesterdayIdolGroup && yesterdayIdolGroup.length > 0 ? yesterdayIdolGroup : "Soloist";
@@ -45,7 +47,7 @@ return (
 
                 <span className="text-base sm:text-[18px] mt-2">
                     You were the <span className="font-bold bg-linear-to-r from-[#db3189] via-[#e44d86] to-[#ec5e65] text-transparent bg-clip-text">
-                        115th
+                        {`${userPosition}${userPosition === 1 ? "st" : userPosition === 2 ? "nd" : userPosition === 3 ? "rd" : "th"}`}
                     </span> fan to guess correctly!
                 </span>
             </div>
@@ -68,12 +70,12 @@ return (
                     <div className="relative flex flex-col items-center justify-start text-center sm:w-45 sm:h-25 bg-linear-to-br from-[#7a4de4] to-[#1f2686] 
                     gap-0.5 rounded-[20px]">
                     <img src={RankPosition} alt="P" className="sm:w-6 sm:h-6 mt-2" />
-                    <p className="text-[22px] font-bold">
-                        2 (ow....)
-                    </p>
-                    <p className="text-[14px] font-semibold">
+                    <span className="text-[22px] font-bold">
+                        {userRank}
+                    </span>
+                    <span className="text-[14px] font-semibold">
                         Position
-                    </p>
+                    </span>
                 </div>
 
                     <div className="relative flex flex-col items-center justify-start text-center sm:w-45 sm:h-25 bg-linear-to-br from-[#ec5e65] to-[#802256] 

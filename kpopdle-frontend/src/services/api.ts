@@ -57,3 +57,8 @@ export const getDailyUserCount = async () => {
     const response = await api.get('/daily-users-count');
     return response.data;
 }
+
+export const getUserPosition = async (user_token: string) => {
+    const response = await api.get(`/daily-rank/${user_token}`);
+    return response.data;
+}

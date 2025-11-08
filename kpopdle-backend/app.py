@@ -531,13 +531,17 @@ def guess_idol():
 
         cursor.execute(
             """
-                INSERT INTO daily_user_history (user_id, date, guesses_count, won, one_shot_win)
-                VALUES (?, ?, ?, ?, ?)
+                INSERT INTO daily_user_history (user_id, date, guesses_count, won, one_shot_win, won_at, started_at)
+                VALUES (?, ?, ?, ?, ?, CASE WHEN ? = 1 THEN CURRENT_TIMESTAMP ELSE NULL END, CASE WHEN ? = 1 THEN CURRENT_TIMESTAMP ELSE NULL END)
                 ON CONFLICT(user_id, date) DO UPDATE SET   
                 guesses_count = excluded.guesses_count,
                 won = excluded.won OR won,
-                one_shot_win = excluded.one_shot_win OR one_shot_win
-            """, (user_id, today, current_attempt, is_correct, one_shot_win))
+                one_shot_win = excluded.one_shot_win OR one_shot_win,
+                won_at = CASE WHEN excluded.won = 1 AND daily_user_history.won_at IS NULL
+                THEN CURRENT_TIMESTAMP ELSE daily_user_history.won_at END,
+                started_at = CASE WHEN excluded.guesses_count = 1 AND daily_user_history.started_at IS NULL
+                THEN CURRENT_TIMESTAMP ELSE daily_user_history.started_at END
+            """, (user_id, today, current_attempt, is_correct, one_shot_win, is_correct, current_attempt))
                         
         if is_correct:       
             cursor.execute("""
@@ -583,7 +587,8 @@ def guess_idol():
         cursor.execute("ROLLBACK")
         print(f"Error updating user history: {e}")
 
-    connect.close()
+    finally:
+        connect.close()
 
     # TODO - response / reveal dict taking feedback comparisons - DONE
 
@@ -787,6 +792,7 @@ def generate_user_token():
     error = ""
 
     while not token_sucessfuly_generated and attempts < 5:
+        connect = None
         try:
             token = str(uuid.uuid4())
 
@@ -808,6 +814,16 @@ def generate_user_token():
             attempts += 1
             print(f"Token generation attempt {attempts} failed: {e}")
             error += str(e)
+
+        except Exception as e:
+            token_sucessfuly_generated = False
+            attempts += 1
+            print(f"Token generation attempt {attempts} failed: {e}")
+            error += str(e)
+
+        finally:
+            if connect:
+                connect.close()
         
 
     if token_sucessfuly_generated:
@@ -865,6 +881,7 @@ def get_daily_users_count():
     """Return the count of users who played today's game"""
 
     today = datetime.date.today().isoformat()
+    # today = get_server_date()
 
     connect = sqlite3.connect("kpopdle.db")
     connect.row_factory = sqlite3.Row
@@ -882,6 +899,134 @@ def get_daily_users_count():
     user_count = result["user_count"] if result and result["user_count"] is not None else 0
 
     return jsonify({"user_count": user_count})
+
+@app.route("/api/daily-rank/<user_token>", methods=["GET"])
+def get_daily_rank(user_token):
+    """Return the user's rank for today's game"""
+    today = datetime.date.today().isoformat()
+    # today = get_server_date()
+
+    connect = sqlite3.connect("kpopdle.db")
+    connect.row_factory = sqlite3.Row
+    cursor = connect.cursor()
+
+    # Validate user token
+    cursor.execute("""
+            SELECT id FROM users WHERE token = ?
+        """, (user_token,))
+    
+    user_row = cursor.fetchone()
+
+    if not user_row:
+        connect.close()
+        return jsonify({"error": "Invalid user token"}), 400
+    
+    user_id = user_row["id"]
+
+    # Get user's first guess time, guesses count and win time
+    cursor.execute("""
+            SELECT started_at, guesses_count, won_at FROM daily_user_history
+            WHERE user_id = ? AND date = ? AND won = 1
+        """, (user_id, today))
+    
+    result = cursor.fetchone()
+
+    if not result or result["started_at"] is None or result["guesses_count"] is None or result["won_at"] is None:
+        connect.close()
+        return jsonify({"rank": None, "message": "User has not finished today's game"}), 200
+    
+    started_at = result["started_at"]
+    guesses_count = result["guesses_count"]
+    won_at = result["won_at"]
+
+    # Calculate time to win
+    time_to_win = datetime.datetime.fromisoformat(won_at) - datetime.datetime.fromisoformat(started_at) # With python - (Can use julianday in SQL too)
+    time_to_win_seconds = int(time_to_win.total_seconds())
+
+    # Fetch ranks and count user's rank
+    cursor.execute("""
+            SELECT COUNT(*) + 1 AS position FROM daily_user_history
+            WHERE date = ? AND won = 1 AND won_at < ?
+        """, (today, won_at))
+    
+    position_result = cursor.fetchone()
+
+    position = position_result["position"] if position_result else None
+
+    # Fetch ranks and count user's rank
+    cursor.execute("""
+            SELECT COUNT(*) + 1 AS rank FROM daily_user_history
+            WHERE date = ? AND won = 1 
+            AND (guesses_count < ? 
+            OR (guesses_count = ? AND (julianday(won_at) - julianday(started_at)) * 24 * 60 * 60 <= ?))
+        """, (today, guesses_count, guesses_count, time_to_win_seconds))
+    
+    rank_result = cursor.fetchone()  
+    rank = rank_result["rank"] if rank_result else None
+
+    connect.close()
+
+    return jsonify({"position": position, "rank": rank})
+
+# @app.route("/api/daily-rank/<user_token>", methods=["GET"])
+# def get_daily_rank(user_token):
+#     """Return the user's position for today's game after winning - refreshable"""
+#     today = datetime.date.today().isoformat()
+
+#     connect = sqlite3.connect("kpopdle.db")
+#     connect.row_factory = sqlite3.Row
+#     cursor = connect.cursor()
+
+#     # Validate user token 
+#     cursor.execute("""
+#             SELECT id FROM users WHERE token = ?
+#         """, (user_token,))
+    
+#     user_row = cursor.fetchone()
+
+#     if not user_row:
+#         connect.close()
+#         return jsonify({"error": "Invalid user token"}), 400
+    
+#     user_id = user_row["id"]
+
+#     # Get user's first guess time, guesses count and win time
+#     cursor.execute("""
+#             SELECT started_at, guesses_count, won_at FROM daily_user_history
+#             WHERE user_id = ? AND date = ? AND won = 1
+#         """, (user_id, today))
+    
+#     result = cursor.fetchone()
+
+#     if not result or result["started_at"] is None or result["guesses_count"] is None or result["won_at"] is None:
+#         connect.close()
+#         return jsonify({"rank": None, "message": "User has not finished today's game"}), 200
+    
+#     started_at = result["started_at"]
+#     guesses_count = result["guesses_count"]
+#     won_at = result["won_at"]
+
+#     # Calculate time to win
+#     time_to_win = datetime.datetime.fromisoformat(won_at) - datetime.datetime.fromisoformat(started_at) # With python - (Can use julianday in SQL too)
+#     time_to_win_seconds = int(time_to_win.total_seconds())
+
+#     # Fetch ranks and count user's rank
+#     cursor.execute("""
+#             SELECT COUNT(*) + 1 AS rank FROM daily_user_history
+#             WHERE date = ? AND won = 1 
+#             AND (guesses_count < ? 
+#             OR (guesses_count = ? AND (julianday(won_at) - julianday(started_at)) * 24 * 60 * 60 < ?))
+#         """, (today, guesses_count, guesses_count, time_to_win_seconds))
+    
+#     rank_result = cursor.fetchone()
+#     connect.close()
+    
+#     rank = rank_result["rank"] if rank_result else None
+
+#     return jsonify({"rank": rank})
+                   
+                   
+
 
 
 if __name__ == "__main__":

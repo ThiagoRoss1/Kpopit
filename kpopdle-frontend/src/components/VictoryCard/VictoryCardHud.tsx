@@ -13,11 +13,13 @@ interface VictoryCardHudProps {
     yesterdayIdolGroup?: string[] | null;
     yesterdayIdolImage?: string | null;
     idolActiveGroup?: string[] | null;
+    userPosition?: number | null;
+    userRank?: number | null;
     nextReset: () => { timeRemaining: number | null; formattedTime: string; };
 }
 
 const VictoryCardHudProps = (props: VictoryCardHudProps) => {
-    const { cardInfo, attempts, nextReset, yesterdayIdol, yesterdayIdolGroup, yesterdayIdolImage, idolActiveGroup } = props;
+    const { cardInfo, attempts, nextReset, yesterdayIdol, yesterdayIdolGroup, yesterdayIdolImage, idolActiveGroup, userPosition, userRank } = props;
     
     const [showSmallModal, setShowSmallModal] = useState(false);
     const bigCardRef = useRef<HTMLDivElement>(null);
@@ -60,6 +62,8 @@ return (
                     yesterdayIdol={yesterdayIdol}
                     yesterdayIdolGroup={yesterdayIdolGroup ?? null}
                     yesterdayIdolImage={yesterdayIdolImage ?? undefined}
+                    userPosition={userPosition}
+                    userRank={userRank}
                     idolActiveGroup={idolActiveGroup ?? null}
                     onShareClick={() => setShowSmallModal(true)}
                 />
