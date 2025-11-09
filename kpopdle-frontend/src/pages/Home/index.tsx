@@ -211,6 +211,7 @@ function Home() {
 
   const userPositionData = userPosition?.data?.position;
   const userRankData = userPosition?.data?.rank;
+  const userScoreData = userPosition?.data?.score;
 
 
   const handleAnimationsComplete = () => {
@@ -350,6 +351,7 @@ function Home() {
       {endGame && guesses.length > 0 && showVictoryCard && (
         <VictoryCardHudProps 
           cardInfo={guesses[guesses.length - 1].guessed_idol_data}
+          guesses={guesses}
           attempts={attempts}
           nextReset={useResetTimer}
           yesterdayIdol={yesterdayArtist || "unknown"}
@@ -357,6 +359,8 @@ function Home() {
           yesterdayIdolImage={yesterdayIdolImage}
           userPosition={userPositionData}
           userRank={userRankData}
+          userScore={userScoreData}
+          stats={userStatsData}
           idolActiveGroup={gameData?.groups ?? null}
         />
       )}

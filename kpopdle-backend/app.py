@@ -4,6 +4,7 @@ import random
 from flask import Flask, jsonify, request, redirect, session
 from flask_cors import CORS
 import uuid
+import math
 from routes.admin import admin_bp
 # from flask_babel import Babel
 # from flask_session import Session
@@ -543,7 +544,19 @@ def guess_idol():
                 THEN CURRENT_TIMESTAMP ELSE daily_user_history.started_at END
             """, (user_id, today, current_attempt, is_correct, one_shot_win, is_correct, current_attempt))
                         
-        if is_correct:       
+        if is_correct:
+            S0 = 10
+            decay_rate = 0.1
+            n = current_attempt
+
+            score = S0 * round(math.exp(-decay_rate * (n - 1)), 3)
+
+            cursor.execute("""
+                    UPDATE daily_user_history
+                    SET score = ?
+                    WHERE user_id = ? AND date = ?
+                """, (score, user_id, today))
+
             cursor.execute("""
                 SELECT AVG(guesses_count) as avg_guesses
                 FROM daily_user_history
@@ -956,17 +969,26 @@ def get_daily_rank(user_token):
     # Fetch ranks and count user's rank
     cursor.execute("""
             SELECT COUNT(*) + 1 AS rank FROM daily_user_history
-            WHERE date = ? AND won = 1 
+            WHERE date = ? AND won = 1 AND user_id != ?
             AND (guesses_count < ? 
             OR (guesses_count = ? AND (julianday(won_at) - julianday(started_at)) * 24 * 60 * 60 <= ?))
-        """, (today, guesses_count, guesses_count, time_to_win_seconds))
+        """, (today, user_id, guesses_count, guesses_count, time_to_win_seconds))
     
-    rank_result = cursor.fetchone()  
+    rank_result = cursor.fetchone()
     rank = rank_result["rank"] if rank_result else None
 
+    # Get user's score
+    cursor.execute("""
+            SELECT score FROM daily_user_history
+            WHERE user_id = ? AND date = ? AND won = 1
+        """, (user_id, today))
+    
+    result = cursor.fetchone()
+    user_score = result["score"] if result and result["score"] is not None else 0
+    
     connect.close()
 
-    return jsonify({"position": position, "rank": rank})
+    return jsonify({"position": position, "rank": rank, "score": user_score})
 
 # @app.route("/api/daily-rank/<user_token>", methods=["GET"])
 # def get_daily_rank(user_token):

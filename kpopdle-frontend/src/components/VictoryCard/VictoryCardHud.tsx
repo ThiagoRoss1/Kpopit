@@ -1,13 +1,14 @@
 //import React from "react";
 import React from "react";
 import { useEffect, useState, useRef } from "react";
-import type { GuessedIdolData } from "../../interfaces/gameInterfaces";
+import type { GuessedIdolData, GuessResponse, UserStats } from "../../interfaces/gameInterfaces";
 import { motion } from "motion/react";
 import VictoryCardSmall from "./VictoryCardSmall.tsx";
 import VictoryCardBig from "./VictoryCardBig.tsx";
 
 interface VictoryCardHudProps {
     cardInfo: GuessedIdolData;
+    guesses: GuessResponse[]
     attempts: number;
     yesterdayIdol: string;
     yesterdayIdolGroup?: string[] | null;
@@ -15,11 +16,13 @@ interface VictoryCardHudProps {
     idolActiveGroup?: string[] | null;
     userPosition?: number | null;
     userRank?: number | null;
+    userScore?: number | null;
+    stats: UserStats | undefined;
     nextReset: () => { timeRemaining: number | null; formattedTime: string; };
 }
 
 const VictoryCardHudProps = (props: VictoryCardHudProps) => {
-    const { cardInfo, attempts, nextReset, yesterdayIdol, yesterdayIdolGroup, yesterdayIdolImage, idolActiveGroup, userPosition, userRank } = props;
+    const { cardInfo, guesses, attempts, nextReset, yesterdayIdol, yesterdayIdolGroup, yesterdayIdolImage, idolActiveGroup, userPosition, userRank, userScore, stats } = props;
     
     const [showSmallModal, setShowSmallModal] = useState(false);
     const bigCardRef = useRef<HTMLDivElement>(null);
@@ -64,6 +67,7 @@ return (
                     yesterdayIdolImage={yesterdayIdolImage ?? undefined}
                     userPosition={userPosition}
                     userRank={userRank}
+                    userScore={userScore}
                     idolActiveGroup={idolActiveGroup ?? null}
                     onShareClick={() => setShowSmallModal(true)}
                 />
@@ -90,7 +94,11 @@ return (
                     >
                         <VictoryCardSmall 
                             cardInfo={cardInfo}
+                            guesses={guesses}
                             attempts={attempts}
+                            stats={stats}
+                            userRank={userRank}
+                            userScore={userScore}
                             nextReset={nextReset}
                             onClose={() => setShowSmallModal(false)}
                         />

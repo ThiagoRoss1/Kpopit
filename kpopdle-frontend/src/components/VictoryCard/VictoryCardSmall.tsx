@@ -1,5 +1,7 @@
 //import React from "react";
-import type { GuessedIdolData } from "../../interfaces/gameInterfaces";
+import type { GuessedIdolData, GuessResponse, UserStats } from "../../interfaces/gameInterfaces";
+import { useState } from "react";
+import { AnimatePresence, motion } from "motion/react";
 import GlassSurface from "../GlassSurface";
 import trophyIcon from "../../assets/icons/trophy.svg";
 import InstagramLogo from "../../assets/icons/instagram.svg";
@@ -9,12 +11,80 @@ import { X } from 'lucide-react';
 interface VictoryCardSmallProps {
     onClose?: () => void;
     cardInfo: GuessedIdolData;
+    guesses: GuessResponse[];
     attempts: number;
+    stats: UserStats | undefined;
+    userRank?: number | null;
+    userScore?: number | null;
     nextReset: () => { timeRemaining: number | null; formattedTime: string; };
 }
 
 const VictoryCardSmall = (props: VictoryCardSmallProps) => {
-    const { cardInfo, attempts, nextReset, onClose } = props;
+    const { guesses, cardInfo, attempts, stats, userRank, userScore, nextReset, onClose } = props;
+
+
+
+
+    const [copied, setCopied] = useState<boolean>(false);
+
+    const getStatusEmoji = (status: string) => {
+    switch (status) {
+        case "correct":
+            return "🟩";
+        case "partial":
+            return "🟨";
+        default:
+            return "🟥";
+        }
+    }
+
+    const textToCopyCategories = (guesses: GuessResponse[], attempts?: number) => {
+        const header = `I found today's #Kpopdle Idol in ${attempts} ${attempts === 1 ? "attempt" : "attempts"}! 🎤\n\n`;
+        const body = [...guesses].reverse().map(guess => {
+
+        return categories.map(category  => getStatusEmoji(guess.feedback[category]?.status)).join('');
+        }).join('\n');
+
+        const siteLink = `\n\n${window.location.href}`;
+
+        return header + body + siteLink;
+    };
+
+    const categories = ["groups", "companies", "nationality", "birth_year", "idol_debut_year", "height", "position"] as const;
+
+    const handleCopy = () => {
+        navigator.clipboard.writeText(textToCopyCategories(guesses, attempts));
+
+        setCopied(true);
+        setTimeout(() => setCopied(false), 1000);
+    }
+
+    const textToCopy = (attempts: number, stats: UserStats | undefined, userRank?: number | null, userScore?: number | null) => {
+        const header = `I found today's #Kpopdle Idol in ${attempts} ${attempts === 1 ? "attempt" : "attempts"}! 🎤\n\n`;
+        const body = `My statistics:\nPosition: ${userRank}\nScore: ${userScore}\nStreak: ${stats?.current_streak}`;
+        const siteLink = `\n\n${window.location.href}`;
+
+        return header + body + siteLink;
+    };
+
+    const shareOnTwitter = (attempts: number, stats: UserStats | undefined, userRank?: number | null, userScore?: number | null) => {
+        const text = encodeURIComponent(textToCopy(attempts, stats, userRank, userScore));
+        const twitterWebIntentUrl = `https://twitter.com/intent/tweet?text=${text}`;
+
+        const isMobile = /Android|iPhone|iPad|iPod/i.test(navigator.userAgent);
+        if (isMobile) {
+            const twitterAppUrl = `twitter://post?message=${text}`;
+            const now = Date.now();
+            window.location.href = twitterAppUrl;
+            setTimeout(() => {
+                if (Date.now() - now < 1000) {
+                    window.open(twitterWebIntentUrl, '_blank', "noopener,noreferrer");
+                }
+            }, 800);
+        } else {
+            window.open(twitterWebIntentUrl, "_blank", "noopener,noreferrer");
+        };
+    };
 
 
 return (
@@ -44,7 +114,7 @@ return (
                 {/* Icons Container */}
                 <div className="relative w-full sm:h-25 mb-2">
                     <div className="absolute flex items-center justify-center top-0 right-4 sm:w-10 sm:h-10 rounded-full bg-transparent mt-2.5">
-                        <button className="flex items-center justify-center hover:scale-115 w-full h-full transform duration-500 hover:brightness-110 transform-gpu" onClick={onClose}>
+                        <button className="flex items-center justify-center hover:scale-115 w-full h-full transform duration-500 hover:brightness-110 transform-gpu hover:cursor-pointer" onClick={onClose}>
                             <X size={20} color="white" strokeWidth={3} absoluteStrokeWidth className="sm:w-5 sm:h-5 opacity-50 hover:opacity-100 transform duration-500 transform-gpu" />
                         </button>
                     </div>
@@ -119,11 +189,11 @@ return (
                             hover:scale-105 hover:bg-black/60 hover:brightness-110 hover:cursor-default transform duration-300 shadow-2xl transform-gpu">
                                 <div className="flex flex-col items-center justify-center text-center gap-0.5">
                                     <p className="font-bold sm:text-[18px] text-[#ce757a] brightness-105">
-                                        3
+                                        {stats?.current_streak}
                                     </p>
                                     <p className="text-base sm:text-[16px] leading-tight bg-linear-to-b from-white to-[#ce757a] brightness-105 
                                     text-transparent bg-clip-text">
-                                        On working... (Streak)
+                                        Streak
                                     </p>
                                 </div>
                             </div>
@@ -135,18 +205,38 @@ return (
                         <div className="flex flex-col items-center sm:w-80 sm:h-29">
                             <button className="relative top-0 flex items-center justify-center text-center bg-black/80 sm:w-80 sm:h-13 rounded-2xl mb-4
                             hover:scale-105 hover:brightness-110 hover:bg-black/0 transform duration-300 shadow-2xl hover:shadow-[0px] hover:cursor-pointer transform-gpu" 
-                            onClick={() => {console.log("Success")}}>
+                            onClick={() => handleCopy()}>
                                 <div className="flex items-center justify-center text-center">
-                                    <p className="text-base font-bold sm:text-[20px] leading-tight bg-linear-to-r from-[#b43777] to-[#ce757a] brightness-105
+                                    <span className="text-base font-bold sm:text-[20px] leading-tight bg-linear-to-r from-[#b43777] to-[#ce757a] brightness-105
                                     text-transparent bg-clip-text transform-gpu">
-                                        Share Results
-                                    </p>
+                                        Copy Results
+                                    </span>
                                 </div>
                             </button>
+                            <AnimatePresence>
+                                {copied && (
+                                    <motion.div 
+                                        key="copy-notification"
+                                        initial={{ opacity: 0, y: 20 }}
+                                        animate={{ opacity: 1, y: 0 }}
+                                        transition={{ duration: 0.2, ease: "easeOut" }}
+                                        exit={{ opacity: 0, y: 20 }}
+                                        className="absolute flex bottom-48 left-22 justify-center items-center sm:w-44 sm:h-7">
+                                            <div className="flex justify-center items-center bg-transparent sm:w-42 sm:h-7 rounded-xl border border-[#ce757a]
+                                            shadow-[0_0_10px_2px_rgba(206,117,122,0.25),0_0_10px_2px_rgba(206,117,122,0.25)]">
+                                                <span className="relative font-medium text-base leading-tight bg-linear-to-r from-[#b43777] to-[#ce757a] brightness-105
+                                                text-transparent bg-clip-text drop-shadow-lg">
+                                                    Results Copied!
+                                                </span>
+                                            </div>
+                                    </motion.div>                   
+                                )}
+                            </AnimatePresence>
 
                             <div className="flex flex-row items-center justify-center text-center sm:w-80 sm:h-12 gap-6">
                                 <button className="relative left-0 items-center text-center bg-linear-to-r from-black/70 to-black/30 sm:w-12 sm:h-12 rounded-[20px] 
-                                hover:scale-110 hover:brightness-110 hover:cursor-pointer hover:rotate-3 hover:bg-black transform duration-300 transform-gpu">
+                                hover:scale-110 hover:brightness-110 hover:cursor-pointer hover:rotate-3 hover:bg-black transform duration-300 transform-gpu"
+                                onClick={() => shareOnTwitter(attempts, stats, userRank, userScore)}>
                                     <div className="flex w-full h-full items-center justify-center text-center brightness-100 hover:brightness-110 transform duration-300">
                                         <img src={TwitterLogo} alt="Twt" className="w-6 h-6 sm:w-9 sm:h-9" draggable={false} />
                                     </div>

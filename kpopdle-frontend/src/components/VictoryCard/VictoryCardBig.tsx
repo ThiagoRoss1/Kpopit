@@ -14,12 +14,13 @@ interface VictoryCardBigProps {
     yesterdayIdolImage?: YesterdayIdol["image_path"];
     userPosition?: number | null;
     userRank?: number | null;
+    userScore?: number | null;
     nextReset: () => { timeRemaining: number | null; formattedTime: string; };
     onShareClick?: () => void;
 }
 
 const VictoryCardBig = (props: VictoryCardBigProps) => {
-    const { cardInfo, idolActiveGroup, attempts, yesterdayIdol, yesterdayIdolGroup, yesterdayIdolImage, userPosition, userRank, nextReset, onShareClick } = props;
+    const { cardInfo, idolActiveGroup, attempts, yesterdayIdol, yesterdayIdolGroup, yesterdayIdolImage, userPosition, userRank, userScore, nextReset, onShareClick } = props;
 
     const activeGroup = idolActiveGroup && idolActiveGroup.length > 0 ? idolActiveGroup : "Soloist";
     const yesterdayGroup = yesterdayIdolGroup && yesterdayIdolGroup.length > 0 ? yesterdayIdolGroup : "Soloist";
@@ -81,12 +82,12 @@ return (
                     <div className="relative flex flex-col items-center justify-start text-center sm:w-45 sm:h-25 bg-linear-to-br from-[#ec5e65] to-[#802256] 
                     gap-0.5 rounded-[20px]">
                     <img src={PositionTrend} alt="S" className="sm:w-6 sm:h-6 mt-2" />
-                    <p className="text-[22px] font-bold">
-                        67 (ow....)
-                    </p>
-                    <p className="text-[14px] font-semibold">
+                    <span className="text-[22px] font-bold">
+                        {userScore?.toFixed(2)}
+                    </span>
+                    <span className="text-[14px] font-semibold">
                         Score
-                    </p>
+                    </span>
                 </div>
             </div>
         </div>

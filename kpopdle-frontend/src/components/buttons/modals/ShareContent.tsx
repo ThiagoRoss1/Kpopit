@@ -43,7 +43,6 @@ const ShareText = (props: ShareContentProps) => {
     const handleCopy = () => {
         navigator.clipboard.writeText(textToCopy(guesses, attempts));
 
-
         setCopied(true);
         setTimeout(() => setCopied(false), 1500);
     }
