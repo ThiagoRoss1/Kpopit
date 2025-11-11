@@ -5,6 +5,7 @@ from flask import Flask, jsonify, request, redirect, session
 from flask_cors import CORS
 import uuid
 import math
+import secrets
 from routes.admin import admin_bp
 # from flask_babel import Babel
 # from flask_session import Session
@@ -823,13 +824,11 @@ def generate_user_token():
             token_sucessfuly_generated = True
     
         except sqlite3.IntegrityError as e:
-            token_sucessfuly_generated = False
             attempts += 1
             print(f"Token generation attempt {attempts} failed: {e}")
             error += str(e)
 
         except Exception as e:
-            token_sucessfuly_generated = False
             attempts += 1
             print(f"Token generation attempt {attempts} failed: {e}")
             error += str(e)
@@ -990,65 +989,125 @@ def get_daily_rank(user_token):
 
     return jsonify({"position": position, "rank": rank, "score": user_score})
 
-# @app.route("/api/daily-rank/<user_token>", methods=["GET"])
-# def get_daily_rank(user_token):
-#     """Return the user's position for today's game after winning - refreshable"""
-#     today = datetime.date.today().isoformat()
+@app.route("/api/generate-transfer-code/<user_token>", methods=["POST"])
+def generate_transfer_code(user_token):
+    """Generate a transfer code for the user to transfer their data to another device"""
+    code_generated = False
+    # Start db connection
+    connect = sqlite3.connect("kpopdle.db")
+    connect.row_factory = sqlite3.Row
+    cursor = connect.cursor()
 
-#     connect = sqlite3.connect("kpopdle.db")
-#     connect.row_factory = sqlite3.Row
-#     cursor = connect.cursor()
-
-#     # Validate user token 
-#     cursor.execute("""
-#             SELECT id FROM users WHERE token = ?
-#         """, (user_token,))
+    # Validate user token
+    cursor.execute("""
+            SELECT id FROM users WHERE token = ?
+        """, (user_token,))
     
-#     user_row = cursor.fetchone()
+    user_row = cursor.fetchone()
 
-#     if not user_row:
-#         connect.close()
-#         return jsonify({"error": "Invalid user token"}), 400
+    if not user_row:
+        connect.close()
+        return jsonify({"error": "Invalid user token"}), 400
     
-#     user_id = user_row["id"]
+    # Delete expired codes
+    cursor.execute("""
+            DELETE FROM transfer_data
+            WHERE expires_at < CURRENT_TIMESTAMP
+        """)
 
-#     # Get user's first guess time, guesses count and win time
-#     cursor.execute("""
-#             SELECT started_at, guesses_count, won_at FROM daily_user_history
-#             WHERE user_id = ? AND date = ? AND won = 1
-#         """, (user_id, today))
+    # Generate unique transfer code
+    attempts = 0
+    error = ""
+    while not code_generated and attempts < 5:
+        try:
+            # Guarantee uniqueness by checking existing codes
+            cursor.execute("""
+                    SELECT code FROM transfer_data
+                    WHERE user_token = ? AND expires_at >= CURRENT_TIMESTAMP AND used = 0
+                """, (user_token,))
+            existing_code = cursor.fetchone()
+
+            if existing_code:
+                connect.close()
+                return jsonify({"transfer_code": existing_code["code"]})
+
+
+            code = f"{secrets.token_hex(2)[:3].upper()}-{secrets.token_hex(2)[:3].upper()}"
+            expires_at = datetime.datetime.now() + datetime.timedelta(days=3)
+
+            # Insert transfer code into database
+            cursor.execute("""
+                INSERT INTO transfer_data (user_token, code, created_at, expires_at)
+                VALUES (?, ?, CURRENT_TIMESTAMP, ?)
+            """, (user_token,  code, expires_at.isoformat()))
+                
+            connect.commit()
+            code_generated = True
+        
+        except sqlite3.InterruptedError as e:
+            attempts += 1
+            print(f"Transfer code generation attempt {attempts} failed: {e}")
+            error += str(e)
+
+        except Exception as e:
+            attempts += 1
+            print(f"Transfer code generation attempt {attempts} failed: {e}")
+            error += str(e)
+
+    connect.close()
+
+    if code_generated:
+        return jsonify({"transfer_code": code})
+    else:
+        return jsonify({"error": "Failed to generate unique transfer code after 5 attempts", "details": error}), 500
     
-#     result = cursor.fetchone()
+@app.route("/api/transfer-data", methods=["POST"])
+def transfer_data():
+    """Transfer user data using a transfer code"""
+    data = request.get_json()
+    transfer_code = data.get("code")
 
-#     if not result or result["started_at"] is None or result["guesses_count"] is None or result["won_at"] is None:
-#         connect.close()
-#         return jsonify({"rank": None, "message": "User has not finished today's game"}), 200
+    if not transfer_code:
+        return jsonify({"error": "Missing transfer code"}), 404
     
-#     started_at = result["started_at"]
-#     guesses_count = result["guesses_count"]
-#     won_at = result["won_at"]
+    # Start db connection
+    connect = sqlite3.connect("kpopdle.db")
+    connect.row_factory = sqlite3.Row
+    cursor = connect.cursor()
 
-#     # Calculate time to win
-#     time_to_win = datetime.datetime.fromisoformat(won_at) - datetime.datetime.fromisoformat(started_at) # With python - (Can use julianday in SQL too)
-#     time_to_win_seconds = int(time_to_win.total_seconds())
+    # Validate transfer code
+    cursor.execute("""
+            SELECT code, user_token, expires_at, used FROM transfer_data
+            WHERE code = ?
+        """, (transfer_code,))
+        
+    code_row = cursor.fetchone()
 
-#     # Fetch ranks and count user's rank
-#     cursor.execute("""
-#             SELECT COUNT(*) + 1 AS rank FROM daily_user_history
-#             WHERE date = ? AND won = 1 
-#             AND (guesses_count < ? 
-#             OR (guesses_count = ? AND (julianday(won_at) - julianday(started_at)) * 24 * 60 * 60 < ?))
-#         """, (today, guesses_count, guesses_count, time_to_win_seconds))
+    if not code_row:
+        connect.close()
+        return jsonify({"error": "Invalid transfer code"}), 404
     
-#     rank_result = cursor.fetchone()
-#     connect.close()
+    if code_row["used"]:
+        connect.close()
+        return jsonify({"error": "Transfer code has already been used"}), 400
     
-#     rank = rank_result["rank"] if rank_result else None
+    expires_at = datetime.datetime.fromisoformat(code_row["expires_at"])
+    if expires_at < datetime.datetime.now():
+        connect.close()
+        return jsonify({"error": "Transfer code has expired"}), 400
+    
+    user_token = code_row["user_token"]
 
-#     return jsonify({"rank": rank})
-                   
-                   
+    # Mark code as used
+    cursor.execute("""
+            UPDATE transfer_data
+            SET used = 1
+            WHERE code = ? AND used = 0
+        """, (transfer_code,))
+    connect.commit()
+    connect.close()
 
+    return jsonify({"user_token": user_token})            
 
 
 if __name__ == "__main__":
@@ -1105,15 +1164,59 @@ if __name__ == "__main__":
 
 #     # return jsonify(....)
 
-# dont need
-# ✅ ROTA EXPLÍCITA PARA SERVIR IMAGENS (garantia que funciona)
-@app.route("/static/images/<filename>")
-def serve_image(filename):
-    """Serve image files from static/images folder"""
-    from flask import send_from_directory
-    import os
+# @app.route("/api/daily-rank/<user_token>", methods=["GET"])
+# def get_daily_rank(user_token):
+#     """Return the user's position for today's game after winning - refreshable"""
+#     today = datetime.date.today().isoformat()
+
+#     connect = sqlite3.connect("kpopdle.db")
+#     connect.row_factory = sqlite3.Row
+#     cursor = connect.cursor()
+
+#     # Validate user token 
+#     cursor.execute("""
+#             SELECT id FROM users WHERE token = ?
+#         """, (user_token,))
     
-    image_dir = os.path.join(app.root_path, 'static', 'images')
-    return send_from_directory(image_dir, filename)
+#     user_row = cursor.fetchone()
 
+#     if not user_row:
+#         connect.close()
+#         return jsonify({"error": "Invalid user token"}), 400
+    
+#     user_id = user_row["id"]
 
+#     # Get user's first guess time, guesses count and win time
+#     cursor.execute("""
+#             SELECT started_at, guesses_count, won_at FROM daily_user_history
+#             WHERE user_id = ? AND date = ? AND won = 1
+#         """, (user_id, today))
+    
+#     result = cursor.fetchone()
+
+#     if not result or result["started_at"] is None or result["guesses_count"] is None or result["won_at"] is None:
+#         connect.close()
+#         return jsonify({"rank": None, "message": "User has not finished today's game"}), 200
+    
+#     started_at = result["started_at"]
+#     guesses_count = result["guesses_count"]
+#     won_at = result["won_at"]
+
+#     # Calculate time to win
+#     time_to_win = datetime.datetime.fromisoformat(won_at) - datetime.datetime.fromisoformat(started_at) # With python - (Can use julianday in SQL too)
+#     time_to_win_seconds = int(time_to_win.total_seconds())
+
+#     # Fetch ranks and count user's rank
+#     cursor.execute("""
+#             SELECT COUNT(*) + 1 AS rank FROM daily_user_history
+#             WHERE date = ? AND won = 1 
+#             AND (guesses_count < ? 
+#             OR (guesses_count = ? AND (julianday(won_at) - julianday(started_at)) * 24 * 60 * 60 < ?))
+#         """, (today, guesses_count, guesses_count, time_to_win_seconds))
+    
+#     rank_result = cursor.fetchone()
+#     connect.close()
+    
+#     rank = rank_result["rank"] if rank_result else None
+
+#     return jsonify({"rank": rank})

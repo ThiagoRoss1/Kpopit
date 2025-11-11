@@ -1,6 +1,6 @@
 import axios from 'axios';
 import type { AddIdolRequest, CompleteGuessRequest } from '../interfaces/gameInterfaces';
-
+import { decryptToken } from '../utils/tokenEncryption';
 // Api instance with base URL
 const api = axios.create({
     baseURL: `${import.meta.env.VITE_API_URL}/api`,
@@ -8,7 +8,8 @@ const api = axios.create({
 
 // Get daily idol game data endpoint
 export const getDailyIdol = async () => {
-    const token = localStorage.getItem('userToken');
+    const encrypted = localStorage.getItem('userToken');
+    const token = encrypted ? await decryptToken(encrypted) : null;
     const response = await api.get('/game/daily-idol', {
         headers: token ? { 'Authorization': token } : {}
     });

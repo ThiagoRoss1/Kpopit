@@ -11,6 +11,7 @@ import type {
   Users,
   UserStats,
 } from "../../interfaces/gameInterfaces";
+import { encryptToken, decryptToken } from "../../utils/tokenEncryption.ts";
 import SearchBar from "../../components/GuessSearchBar/SearchBar.tsx";
 import GuessesGrid from "../../components/GuessesGrid/GuessGrid.tsx";
 import VictoryCardHudProps from "../../components/VictoryCard/VictoryCardHud.tsx";
@@ -61,15 +62,26 @@ function Home() {
     queryFn: getDailyUserCount,
   });
 
-  const initUser = useCallback(() => {
-    const token = localStorage.getItem("userToken");
+  const initUser = useCallback(async () => {
+    const encrypted = localStorage.getItem("userToken");
 
-    if (!token && userToken.data) {
-      localStorage.setItem("userToken", userToken.data.token);
+    if (encrypted) {
+      try {
+        const token = await decryptToken(encrypted);
+        return token;
+      } catch (error) {
+        console.error("Error decrypting token:", error);
+        localStorage.removeItem("userToken");
+      }
+    }
+
+    if (userToken.data) {
+      const encryptedToken = await encryptToken(userToken.data.token);
+      localStorage.setItem("userToken", encryptedToken);
       return userToken.data.token;
     }
 
-    return token;
+    return null;
   }, [userToken.data]);
 
   useEffect(() => {
@@ -115,8 +127,8 @@ function Home() {
 
   const userStats = useQuery<UserStats>({
     queryKey: ["userStats", userToken],
-    queryFn: () => getUserStats(initUser() || ""),
-    enabled: !!initUser(),
+    queryFn: async () => getUserStats(await initUser() || ""),
+    enabled: !!localStorage.getItem("userToken"),
   });
 
   const userStatsData = userStats.data;
@@ -205,8 +217,8 @@ function Home() {
 
   const userPosition = useQuery({
     queryKey: ["userPosition", userToken],
-    queryFn: () => getUserPosition(initUser() || ""),
-    enabled: !!initUser(),
+    queryFn: async () => getUserPosition(await initUser() || ""),
+    enabled: !!localStorage.getItem("userToken"),
   });
 
   const userPositionData = userPosition?.data?.position;
@@ -222,7 +234,7 @@ function Home() {
   }};
 
   // Guess submission handler function
-  const handleGuessSubmit = () => {
+  const handleGuessSubmit = async () => {
     if (!currentGuess || !gameData || !allIdolsData) return;
 
     // Look for idol
@@ -242,10 +254,13 @@ function Home() {
       return;
     }
 
+    const encrypted = localStorage.getItem("userToken") || "";
+    const decrypted = await decryptToken(encrypted);
+
     guessMutation.mutate({
       guessed_idol_id: guessedIdolObject.id,
       answer_id: gameData.answer_id,
-      user_token: localStorage.getItem("userToken") || "",
+      user_token: decrypted,
       current_attempt: attempts + 1,
     });
     // Clear input field after submission
