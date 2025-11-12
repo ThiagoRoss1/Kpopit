@@ -63,3 +63,25 @@ export const getUserPosition = async (user_token: string) => {
     const response = await api.get(`/daily-rank/${user_token}`);
     return response.data;
 }
+
+export const addGeneratedCodes = async (user_token: string) => {
+    const response = await api.post(`/generate-transfer-code/${user_token}`);
+    return response.data;
+}
+
+export const redeemTransferCode = async (code: string) => {
+    const response = await api.post('/transfer-data', { code });
+    return response.data;
+}
+
+export const saveGameState = async (gameState: object) => {
+    const encrypted = localStorage.getItem("userToken");
+    const token = encrypted ? await decryptToken(encrypted) : null;
+
+    return api.post(`/game-state/${token}`, { game_state: gameState });
+}
+
+export const fetchGameState = async (user_token: string) => {
+    const response = await api.get(`/game-state/${user_token}`);
+    return response.data;
+}

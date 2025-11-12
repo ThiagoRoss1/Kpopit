@@ -114,3 +114,12 @@ export interface AddIdolRequest {
 export interface DailyUserCount {
   user_count: number;
 }
+
+export interface GeneratedCodes {
+  transfer_code: string;
+  expires_at: string;
+}
+
+export interface RedeemUserToken {
+  user_token: string;
+}

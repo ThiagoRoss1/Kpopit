@@ -2,7 +2,7 @@ import "../../index.css";
 import "./style.css";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { useState, useEffect, useCallback } from "react";
-import { getDailyIdol, getGuessIdol, getAllIdols, getYesterdaysIdol, getUserToken, getUserStats, getDailyUserCount, getUserPosition } from "../../services/api";
+import { getDailyIdol, getGuessIdol, getAllIdols, getYesterdaysIdol, getUserToken, getUserStats, getDailyUserCount, getUserPosition, saveGameState } from "../../services/api";
 import type {
   GameData,
   IdolListItem,
@@ -194,6 +194,27 @@ function Home() {
 
         localStorage.setItem("todayGuessesDetails", JSON.stringify(updatedGuesses));
 
+        saveGameState({
+          today_guesses_details: updatedGuesses,
+          game_complete: data.guess_correct,
+          game_won: data.guess_correct,
+          hints_revealed: {
+            hint1: (localStorage.getItem("hint1Revealed")  || false) === "true",
+            hint2: (localStorage.getItem("hint2Revealed")  || false) === "true",
+          },
+          show_hints: {
+            hint1: (localStorage.getItem("showHint1")  || false) === "true",
+            hint2: (localStorage.getItem("showHint2")  || false) === "true",
+          },
+          colorize_hints: {
+            hint1: (localStorage.getItem("colorize1")  || false) === "true",
+            hint2: (localStorage.getItem("colorize2")  || false) === "true",
+          },
+          animated_idols: JSON.parse(localStorage.getItem("animatedIdols") || "[]"),
+          game_date: gameData?.server_date || "",
+          guessed_idols: updatedGuesses.map(g => g.guessed_idol_data.artist_name),
+        })
+
         const names = updatedGuesses.map(g => g.guessed_idol_data.artist_name);
         localStorage.setItem("GuessedIdols", JSON.stringify(names));
         
@@ -310,7 +331,7 @@ function Home() {
         {/* {showModal === "streak" && <Modal onClose={() => setShowModal(null)} title="Streak..."><p>Working in progress...</p></Modal>} */}
 
         {/* Sub-Stats Modals */}
-        {showModal === "transfer-data" && <Modal isOpen onClose={() => setShowModal(null)} title="Transfer Data..."><TransferDataText /></Modal>}
+        {showModal === "transfer-data" && <Modal isOpen onClose={() => setShowModal(null)} title="Transfer Data..."><TransferDataText user_token={localStorage.getItem("userToken") || ""} /></Modal>}
       </div>
 
       <div className="w-full flex flex-col items-center justify-center mb-[41px]">

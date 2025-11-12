@@ -6,6 +6,7 @@ from flask_cors import CORS
 import uuid
 import math
 import secrets
+import json
 from routes.admin import admin_bp
 # from flask_babel import Babel
 # from flask_session import Session
@@ -30,6 +31,12 @@ app.register_blueprint(admin_bp)
 # def get_server_date_obj():
 #     """Retorna a data do servidor (real ou de teste) como DATE OBJECT"""
 #     base_date = datetime.date.today()
+#     if TEST_MODE:
+#         return base_date + datetime.timedelta(days=TEST_DATE_OFFSET)
+#     return base_date
+
+# def get_server_datetime_now():
+#     base_date = datetime.datetime.now()
 #     if TEST_MODE:
 #         return base_date + datetime.timedelta(days=TEST_DATE_OFFSET)
 #     return base_date
@@ -1034,6 +1041,7 @@ def generate_transfer_code(user_token):
 
             code = f"{secrets.token_hex(2)[:3].upper()}-{secrets.token_hex(2)[:3].upper()}"
             expires_at = datetime.datetime.now() + datetime.timedelta(days=3)
+            # expires_at = get_server_datetime_now() + datetime.timedelta(days=3)
 
             # Insert transfer code into database
             cursor.execute("""
@@ -1057,7 +1065,7 @@ def generate_transfer_code(user_token):
     connect.close()
 
     if code_generated:
-        return jsonify({"transfer_code": code})
+        return jsonify({"transfer_code": code, "expires_at": expires_at.isoformat()})
     else:
         return jsonify({"error": "Failed to generate unique transfer code after 5 attempts", "details": error}), 500
     
@@ -1107,8 +1115,60 @@ def transfer_data():
     connect.commit()
     connect.close()
 
-    return jsonify({"user_token": user_token})            
+    return jsonify({"user_token": user_token})
 
+@app.route("/api/game-state/<user_token>", methods=["GET", "POST"])
+def get_game_state(user_token):
+    """Return the current game state for the user"""
+    today = datetime.date.today().isoformat()
+    # today = get_server_date()
+
+    # Start db connection
+    connect = sqlite3.connect("kpopdle.db")
+    connect.row_factory = sqlite3.Row
+    cursor = connect.cursor()
+
+    # Validate user token
+    cursor.execute("""
+            SELECT id FROM users
+            WHERE token = ?
+        """, (user_token,))
+    
+    user_row = cursor.fetchone()
+
+    if not user_row:
+        connect.close()
+        return jsonify({"error": "Invalid user token"}), 400
+    
+    user_id = user_row["id"]
+
+    if request.method == "POST":
+        data = request.get_json()
+        game_state_json = json.dumps(data.get("game_state"))
+
+        cursor.execute("""
+                UPDATE daily_user_history
+                SET game_state = ?
+                WHERE user_id = ? AND date = ?
+            """, (game_state_json, user_id, today))
+        
+        connect.commit()
+        connect.close()
+        return jsonify({"message": "Game state updated successfully"}), 200
+    
+    else:
+        cursor.execute("""
+                SELECT game_state FROM daily_user_history
+                WHERE user_id = ? AND date = ?
+            """, (user_id, today))
+        
+        result = cursor.fetchone()
+        connect.close()
+
+        if result and result["game_state"]:
+            return jsonify(json.loads(result["game_state"]))
+        
+        return jsonify({"game_state": None})
 
 if __name__ == "__main__":
     app.run(debug=True)
