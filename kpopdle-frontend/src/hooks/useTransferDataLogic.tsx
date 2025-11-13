@@ -1,31 +1,51 @@
-import { useState } from 'react';
-import { useMutation } from '@tanstack/react-query';
-import { addGeneratedCodes, redeemTransferCode, fetchGameState } from '../../../services/api';
-import { encryptToken, decryptToken } from '../../../utils/tokenEncryption';
-import type { GeneratedCodes, GuessResponse, RedeemUserToken } from '../../../interfaces/gameInterfaces';
+import { useState, useEffect } from 'react';
+import { useQuery, useMutation } from '@tanstack/react-query';
+import { addGeneratedCodes, redeemTransferCode, fetchGameState, getActiveTransferCode } from '../services/api';
+import { encryptToken, decryptToken } from '../utils/tokenEncryption';
+import type { GeneratedCodes, GuessResponse, RedeemUserToken } from '../interfaces/gameInterfaces';
 
-interface TransferDataTextProps {
-    codes?: GeneratedCodes | undefined;
-    user_token: string;
-}
-
-
-const TransferDataText = (props: TransferDataTextProps) => {
-    const { codes, user_token } = props;
-
+export const useTransferDataLogic = () => {
     const [generatedCodes, setGeneratedCodes] = useState<string | null>(null);
     const [expiresAt, setExpiresAt] = useState<string | null>(null);
-    const [inputCode, setInputCode] = useState<string>("");
+
+    const { data: activeCodeData } = useQuery<GeneratedCodes>({
+        queryKey: ['activeTransferCode'],
+        queryFn: async () => {
+            const encrypted = localStorage.getItem("userToken") || "";
+            const decrypted = await decryptToken(encrypted);
+            return getActiveTransferCode(decrypted);
+        },
+        enabled: !!localStorage.getItem("userToken"),
+    });
+
+    useEffect(() => {
+        if (activeCodeData?.transfer_code) {
+            setGeneratedCodes(activeCodeData.transfer_code);
+            setExpiresAt(activeCodeData.expires_at);
+            localStorage.setItem("transferCode", activeCodeData.transfer_code);
+            localStorage.setItem("transferCodeExpiresAt", activeCodeData.expires_at);
+        } else if (activeCodeData && !activeCodeData.transfer_code) {
+            setGeneratedCodes(null);
+            setExpiresAt(null);
+            localStorage.removeItem("transferCode");
+            localStorage.removeItem("transferCodeExpiresAt");
+        }
+    }, [activeCodeData]);
 
     const generateMutation = useMutation<GeneratedCodes>({
         mutationKey: ['generateCodes'],
         mutationFn: async () => {
-            const decrypted = await decryptToken(user_token);
+            const encrypted = localStorage.getItem("userToken") || "";
+            const decrypted = await decryptToken(encrypted);
             return addGeneratedCodes(decrypted);
         },
         onSuccess: (data) => {
             setGeneratedCodes(data.transfer_code);  
             setExpiresAt(data.expires_at);
+            
+            localStorage.setItem("transferCode", data.transfer_code);
+            localStorage.setItem("transferCodeExpiresAt", data.expires_at);
+
             console.log("Generated Codes:", data.transfer_code);
             console.log("Expires at:", data.expires_at);
         }
@@ -82,46 +102,19 @@ const TransferDataText = (props: TransferDataTextProps) => {
         generateMutation.mutate();
     }
 
-    const handleRedeem = async () => {
-        redeemMutation.mutate(inputCode);
+    const handleRedeem = async (code: string) => {
+        redeemMutation.mutate(code);
     }
-
-    const isExpired = expiresAt ? new Date(expiresAt).getTime() < Date.now() : false;
 
     const timeLeft = expiresAt ? Math.ceil((new Date(expiresAt).getTime() - Date.now()) / (1000 * 60 * 60 * 24)) : null;
 
-
-
-
-    return (
-        <div className='flex flex-col gap-2'>
-            <div className='flex flex-col justify-center items-center gap-2'>
-                {/* {!isExpired && generatedCodes && ( */}
-                <button 
-                onClick={handleGenerate}
-                className='w-30 h-10 bg-black justify-center items-center rounded-2xl'>
-                    Generate
-                </button>
-                {/* )} */}
-                <span>WIP</span>
-
-            </div>
-
-            <div className='flex flex-col justify-center items-center gap-2'>
-                <input 
-                value={inputCode}
-                onChange={e => setInputCode(e.target.value)}
-                type='text'
-                className='w-40 h-10 bg-white/20 rounded-2xl px-2'/>
-                <button
-                onClick={handleRedeem}
-                className='w-20 h-20 rounded-full bg-black'>
-                    Redeem
-                </button>
-                
-            </div>
-        </div>
-    )
-}
-
-export default TransferDataText;
+    return {
+        generatedCodes,
+        expiresAt,
+        timeLeft,
+        handleGenerate,
+        handleRedeem,
+        isGenerating: generateMutation.isPending,
+        isRedeeming: redeemMutation.isPending,
+    };
+};

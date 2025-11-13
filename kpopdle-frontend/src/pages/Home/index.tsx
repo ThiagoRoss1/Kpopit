@@ -23,9 +23,12 @@ import HowToPlayText from "../../components/buttons/modals/HowToPlayContent.tsx"
 import StatsText from "../../components/buttons/modals/StatsContent.tsx";
 import ShareText from "../../components/buttons/modals/ShareContent.tsx";
 import AboutText from "../../components/buttons/modals/AboutContent.tsx";
-import TransferDataText from "../../components/buttons/modals/TransferData.tsx";
+import TransferDataText from "../../components/buttons/modals/TransferDataContent.tsx";
+import ImportDataText from "../../components/buttons/modals/ImportDataContent.tsx";
+import ExportDataText from "../../components/buttons/modals/ExportDataContent.tsx";
 import ChangelogText from "../../components/buttons/modals/ChangelogContent.tsx";
 import { useResetTimer } from "../../hooks/useResetTimer.tsx";
+import { useTransferDataLogic } from "../../hooks/useTransferDataLogic.tsx";
 import BackgroundStyle from "../../components/Background/BackgroundStyle.tsx";
 // import { Input } from "@chakra-ui/react"; - Css framework import example
 
@@ -34,13 +37,16 @@ function Home() {
   const [currentGuess, setCurrentGuess] = useState<string>("");
   const [guesses, setGuesses] = useState<GuessResponse[]>([]);
   const [endGame, setEndGame] = useState<boolean>(false);
-  const [showModal, setShowModal] = useState<null | "changelog" | "how-to-play" | "about" | "stats" | "streak" | "share" | "transfer-data">(null);
+  const [showModal, setShowModal] = useState<null | "changelog" | "how-to-play" | "about" | "stats" | "streak" | "share" | "transfer-data" | "import-data" | "export-data">(null);
   const [showVictoryCard, setShowVictoryCard] = useState<boolean>(false);
   const [isCorrect, setIsCorrect] = useState<boolean>(false);
   const [shouldFetchToken, setShouldFetchToken] = useState<boolean>(!localStorage.getItem("userToken"));
   const [dayChecked, setDayChecked] = useState<boolean>(false);
   // Counter
   const [attempts, setAttempts] = useState<number>(0);
+
+  // Transfer data logic hook
+  const transferData = useTransferDataLogic();
 
   const handleGuessAttempts = () => {
     setAttempts(prev => prev + 1);
@@ -331,7 +337,9 @@ function Home() {
         {/* {showModal === "streak" && <Modal onClose={() => setShowModal(null)} title="Streak..."><p>Working in progress...</p></Modal>} */}
 
         {/* Sub-Stats Modals */}
-        {showModal === "transfer-data" && <Modal isOpen onClose={() => setShowModal(null)} title="Transfer Data..."><TransferDataText user_token={localStorage.getItem("userToken") || ""} /></Modal>}
+        {showModal === "transfer-data" && <Modal isOpen onClose={() => setShowModal(null)} title="Transfer Data..."><TransferDataText onSubmitImportData={() => {setShowModal("import-data")}} onSubmitExportData={() => {setShowModal("export-data")}} /></Modal>}
+        {showModal === "import-data" && <Modal isOpen onClose={() => setShowModal(null)} title="Import Data..."><ImportDataText onSubmitReturn={() => {setShowModal("transfer-data")}} /></Modal>}
+        {showModal === "export-data" && <Modal isOpen onClose={() => setShowModal(null)} title="Export Data..."><ExportDataText handleGenerate={transferData.handleGenerate} generatedCodes={transferData.generatedCodes} timeLeft={transferData.timeLeft} /></Modal>}
       </div>
 
       <div className="w-full flex flex-col items-center justify-center mb-[41px]">

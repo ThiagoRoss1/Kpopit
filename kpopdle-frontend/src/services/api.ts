@@ -85,3 +85,8 @@ export const fetchGameState = async (user_token: string) => {
     const response = await api.get(`/game-state/${user_token}`);
     return response.data;
 }
+
+export const getActiveTransferCode = async (user_token: string) => {
+    const response = await api.get(`/get-active-transfer-code/${user_token}`);
+    return response.data;
+}

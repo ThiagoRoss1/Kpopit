@@ -1101,6 +1101,7 @@ def transfer_data():
     
     expires_at = datetime.datetime.fromisoformat(code_row["expires_at"])
     if expires_at < datetime.datetime.now():
+    # if expires_at < get_server_datetime_now():
         connect.close()
         return jsonify({"error": "Transfer code has expired"}), 400
     
@@ -1169,6 +1170,48 @@ def get_game_state(user_token):
             return jsonify(json.loads(result["game_state"]))
         
         return jsonify({"game_state": None})
+    
+@app.route("/api/get-active-transfer-code/<user_token>", methods=["GET"])
+def get_active_transfer_code(user_token):
+    """Get active transfer code if exists"""
+    connect = sqlite3.connect("kpopdle.db")
+    connect.row_factory = sqlite3.Row
+    cursor = connect.cursor()
+
+    # Validate user token 
+    cursor.execute("""
+            SELECT id FROM users
+            WHERE token = ?
+        """, (user_token,))
+    
+    user_row = cursor.fetchone()
+
+    if not user_row:
+        connect.close()
+        return jsonify({"error": "Invalid user token"}), 400
+    
+    # Get active transfer code 
+    cursor.execute("""
+            SELECT code, expires_at FROM transfer_data
+            WHERE user_token = ? AND used = 0 AND expires_at >= CURRENT_TIMESTAMP
+        """, (user_token,))
+    
+    result = cursor.fetchone()
+    connect.close()
+
+    if result:
+        return jsonify({
+            "transfer_code": result["code"],
+            "expires_at": result["expires_at"],
+            "has_code": True
+        })
+    
+    return jsonify({
+            "transfer_code": None,
+            "expires_at": None,
+            "has_code": False
+        })
+    
 
 if __name__ == "__main__":
     app.run(debug=True)
