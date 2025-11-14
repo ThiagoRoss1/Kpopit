@@ -1015,6 +1015,8 @@ def generate_transfer_code(user_token):
     if not user_row:
         connect.close()
         return jsonify({"error": "Invalid user token"}), 400
+
+    # today = get_server_date()
     
     # Delete expired codes
     cursor.execute("""
@@ -1029,14 +1031,17 @@ def generate_transfer_code(user_token):
         try:
             # Guarantee uniqueness by checking existing codes
             cursor.execute("""
-                    SELECT code FROM transfer_data
+                    SELECT code, expires_at FROM transfer_data
                     WHERE user_token = ? AND expires_at >= CURRENT_TIMESTAMP AND used = 0
                 """, (user_token,))
             existing_code = cursor.fetchone()
 
             if existing_code:
                 connect.close()
-                return jsonify({"transfer_code": existing_code["code"]})
+                return jsonify({
+                    "transfer_code": existing_code["code"],
+                    "expires_at": existing_code["expires_at"]
+                    })
 
 
             code = f"{secrets.token_hex(2)[:3].upper()}-{secrets.token_hex(2)[:3].upper()}"
@@ -1174,6 +1179,10 @@ def get_game_state(user_token):
 @app.route("/api/get-active-transfer-code/<user_token>", methods=["GET"])
 def get_active_transfer_code(user_token):
     """Get active transfer code if exists"""
+
+    # today = get_server_datetime_now().isoformat()
+
+    # Start db connection
     connect = sqlite3.connect("kpopdle.db")
     connect.row_factory = sqlite3.Row
     cursor = connect.cursor()
@@ -1203,13 +1212,11 @@ def get_active_transfer_code(user_token):
         return jsonify({
             "transfer_code": result["code"],
             "expires_at": result["expires_at"],
-            "has_code": True
         })
     
     return jsonify({
             "transfer_code": None,
             "expires_at": None,
-            "has_code": False
         })
     
 

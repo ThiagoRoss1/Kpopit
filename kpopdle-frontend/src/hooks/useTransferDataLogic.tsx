@@ -22,13 +22,11 @@ export const useTransferDataLogic = () => {
         if (activeCodeData?.transfer_code) {
             setGeneratedCodes(activeCodeData.transfer_code);
             setExpiresAt(activeCodeData.expires_at);
-            localStorage.setItem("transferCode", activeCodeData.transfer_code);
-            localStorage.setItem("transferCodeExpiresAt", activeCodeData.expires_at);
+           
         } else if (activeCodeData && !activeCodeData.transfer_code) {
             setGeneratedCodes(null);
             setExpiresAt(null);
-            localStorage.removeItem("transferCode");
-            localStorage.removeItem("transferCodeExpiresAt");
+
         }
     }, [activeCodeData]);
 
@@ -43,9 +41,6 @@ export const useTransferDataLogic = () => {
             setGeneratedCodes(data.transfer_code);  
             setExpiresAt(data.expires_at);
             
-            localStorage.setItem("transferCode", data.transfer_code);
-            localStorage.setItem("transferCodeExpiresAt", data.expires_at);
-
             console.log("Generated Codes:", data.transfer_code);
             console.log("Expires at:", data.expires_at);
         }
@@ -105,6 +100,11 @@ export const useTransferDataLogic = () => {
     const handleRedeem = async (code: string) => {
         redeemMutation.mutate(code);
     }
+
+    // Time test
+    const canManipulate = false;
+    const manipulatedDate = new Date();
+    if (canManipulate) manipulatedDate.setDate(manipulatedDate.getDate() + 0);
 
     const timeLeft = expiresAt ? Math.ceil((new Date(expiresAt).getTime() - Date.now()) / (1000 * 60 * 60 * 24)) : null;
 

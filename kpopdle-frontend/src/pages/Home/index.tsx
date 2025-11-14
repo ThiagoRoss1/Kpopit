@@ -337,9 +337,9 @@ function Home() {
         {/* {showModal === "streak" && <Modal onClose={() => setShowModal(null)} title="Streak..."><p>Working in progress...</p></Modal>} */}
 
         {/* Sub-Stats Modals */}
-        {showModal === "transfer-data" && <Modal isOpen onClose={() => setShowModal(null)} title="Transfer Data..."><TransferDataText onSubmitImportData={() => {setShowModal("import-data")}} onSubmitExportData={() => {setShowModal("export-data")}} /></Modal>}
-        {showModal === "import-data" && <Modal isOpen onClose={() => setShowModal(null)} title="Import Data..."><ImportDataText onSubmitReturn={() => {setShowModal("transfer-data")}} /></Modal>}
-        {showModal === "export-data" && <Modal isOpen onClose={() => setShowModal(null)} title="Export Data..."><ExportDataText handleGenerate={transferData.handleGenerate} generatedCodes={transferData.generatedCodes} timeLeft={transferData.timeLeft} /></Modal>}
+        {showModal === "transfer-data" && <Modal isOpen onClose={() => setShowModal(null)} title="Transfer Data..." isTransferDataSubPages={true} returnPage={() => {setShowModal("stats")}}><TransferDataText onSubmitImportData={() => {setShowModal("import-data")}} onSubmitExportData={() => {setShowModal("export-data")}} /></Modal>}
+        {showModal === "import-data" && <Modal isOpen onClose={() => setShowModal(null)} title="Import Data..." isTransferDataSubPages={true} returnPage={() => {setShowModal("transfer-data")}}><ImportDataText onSubmitReturn={() => {setShowModal("transfer-data")}} /></Modal>}
+        {showModal === "export-data" && <Modal isOpen onClose={() => setShowModal(null)} title="Export Data..." isTransferDataSubPages={true} returnPage={() => {setShowModal("transfer-data")}}><ExportDataText handleGenerate={transferData.handleGenerate} generatedCodes={transferData.generatedCodes} timeLeft={transferData.timeLeft} expires_At={transferData.expiresAt} /></Modal>}
       </div>
 
       <div className="w-full flex flex-col items-center justify-center mb-[41px]">

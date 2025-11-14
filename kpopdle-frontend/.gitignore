@@ -29,3 +29,7 @@ styles
 # env files
 .env
 .env.production
+
+# md
+GAMEMODE_ARCHITECTURE.md
+SECURITY_LOCALSTORAGE_VS_COOKIES.md
