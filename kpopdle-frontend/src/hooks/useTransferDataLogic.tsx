@@ -3,10 +3,12 @@ import { useQuery, useMutation } from '@tanstack/react-query';
 import { addGeneratedCodes, redeemTransferCode, fetchGameState, getActiveTransferCode } from '../services/api';
 import { encryptToken, decryptToken } from '../utils/tokenEncryption';
 import type { GeneratedCodes, GuessResponse, RedeemUserToken } from '../interfaces/gameInterfaces';
+import type { AxiosError } from 'axios';
 
 export const useTransferDataLogic = () => {
     const [generatedCodes, setGeneratedCodes] = useState<string | null>(null);
     const [expiresAt, setExpiresAt] = useState<string | null>(null);
+    const [redeemError, setRedeemError] = useState<string | null>(null);
 
     const { data: activeCodeData } = useQuery<GeneratedCodes>({
         queryKey: ['activeTransferCode'],
@@ -46,7 +48,7 @@ export const useTransferDataLogic = () => {
         }
     });
 
-    const redeemMutation = useMutation<RedeemUserToken, Error, string>({
+    const redeemMutation = useMutation<RedeemUserToken, AxiosError<{ error: string }>, string>({
         mutationKey: ['redeemCode'],
         mutationFn: async (code) => redeemTransferCode(code),
         onSuccess: async (data) => {
@@ -89,7 +91,8 @@ export const useTransferDataLogic = () => {
             window.location.reload();
         },
         onError: (error) => {
-            console.error("Error redeeming code:", error);
+            const backendMessage = error?.response?.data?.error || "Unknown error";
+            setRedeemError(backendMessage);
         }
     });
 
@@ -99,6 +102,10 @@ export const useTransferDataLogic = () => {
 
     const handleRedeem = async (code: string) => {
         redeemMutation.mutate(code);
+    }
+
+    const clearError = () => {
+        setRedeemError(null);
     }
 
     // Time test
@@ -114,6 +121,8 @@ export const useTransferDataLogic = () => {
         timeLeft,
         handleGenerate,
         handleRedeem,
+        redeemError,
+        clearError,
         isGenerating: generateMutation.isPending,
         isRedeeming: redeemMutation.isPending,
     };

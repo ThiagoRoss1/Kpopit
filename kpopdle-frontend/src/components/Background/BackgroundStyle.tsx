@@ -91,11 +91,11 @@ const BackgroundStyle = (props: BackgroundStyleProps) => {
         <motion.div 
             animate={ attempts === 0 ? { opacity: 1 } : { opacity: 0 }}
             transition={{ duration: 3 }}
-            className="absolute inset-0 bg-[#85365f]/60
-            blur-[80px] rounded-full w-110 h-70 top-70 left-185 animate-pulse"
+            className="absolute inset-0 bg-[#85365f]/0
+            blur-[80px] rounded-full w-110 h-70 top-70 left-185 animate-pulse" // Adjust after 
             style={{
                 filter: 'blur(80px)',
-                boxShadow: '0 0 200px rgba(236, 72, 156, 0.3)',
+                boxShadow: '0 0 200px rgba(236, 72, 156, 0)', // Adjust after 
                 animationDuration: '4s'
             }} 
         />

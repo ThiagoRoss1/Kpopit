@@ -117,7 +117,7 @@ const SearchBar = (props: SearchBarProps) => {
               rounded-3xl bg-white/5 shadow-lg focus:outline-none focus:ring-1 focus:ring-white/40 transition-all"
               value={value}
               onChange={handleInputChange}
-              placeholder="Idol"
+              placeholder="Search for an idol or group..."
               onFocus={() => value.length > 0 && setShowList(true)}
             />
             <button

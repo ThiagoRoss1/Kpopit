@@ -11,12 +11,13 @@ interface ModalProps {
     title?: string;
     children?: React.ReactNode;
     isHowToPlay?: boolean;
+    isAboutOrChangelog?: boolean;
     isTransferDataSubPages?: boolean;
     returnPage?: () => void;
 }
 
 const Modal = (props: ModalProps) => {
-    const { isOpen, onClose, children, title, isHowToPlay, isTransferDataSubPages, returnPage } = props;
+    const { isOpen, onClose, children, title, isHowToPlay, isAboutOrChangelog, isTransferDataSubPages, returnPage } = props;
     
     useEffect(() => {
         if (isOpen) {
@@ -47,7 +48,7 @@ const Modal = (props: ModalProps) => {
                 transition={{ duration: 0.2, ease: "easeInOut" }} 
                 className="flex items-start justify-center w-full sm:max-w-[846px] mx-auto mt-20 mb-10" onClick={(e) => e.stopPropagation()}>
 
-                <div className={`relative w-full max-w-[846px] text-center ${isHowToPlay ? "bg-black/80" : "bg-black/0"} border border-white/80 rounded-[20px] overflow-hidden shadow-[4px_4px_4px_1px_rgba(0,0,0,0.1),inset_0_4px_4px_rgba(0,0,0,0.25)]`}>
+                <div className={`relative w-full max-w-[846px] text-center ${isHowToPlay ? "bg-black/80" : isAboutOrChangelog ? "bg-black/40" : "bg-black/0"} border border-white/80 rounded-[20px] overflow-hidden shadow-[4px_4px_4px_1px_rgba(0,0,0,0.1),inset_0_4px_4px_rgba(0,0,0,0.25)]`}>
 
                     <div className={`w-full flex items-center ${isTransferDataSubPages ? "justify-start gap-1 px-2" : "justify-between px-4"} py-2 bg-white/10 border-b border-white/20`}>
                         {isTransferDataSubPages ? (

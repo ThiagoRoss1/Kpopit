@@ -26,28 +26,32 @@ const VictoryCardBig = (props: VictoryCardBigProps) => {
     const yesterdayGroup = yesterdayIdolGroup && yesterdayIdolGroup.length > 0 ? yesterdayIdolGroup : "Soloist";
 
 return (
-    <div className="relative flex flex-col items-center justify-start w-full sm:w-[628px] sm:h-[812px] rounded-3xl border-2 border-white/50 
+    <div className="relative flex flex-col items-center justify-start w-full sm:w-[628px] sm:h-fit rounded-3xl border-2 border-white/50 
     bg-radial from-[#db3189]/0 to-black/84 mb-10 text-white shadow-[2px_2px_10px_2px_rgba(0,0,0,0.25)]">
+
+        <div className="relative w-full items-center justify-center text-center mt-10 mb-2">
+            <span className="text-2xl [text-shadow:1.2px_1.2px_4px_rgba(0,0,0,1.8),0_0_12px_rgba(255,255,255,0.6)]">Congratulations!</span>
+        </div>
 
         {/* Idol Container */}
         <div className="relative w-full sm:h-[250px] mt-0 mb-5 sm:rounded-t-3xl flex items-center justify-center bg-transparent">
-            <div className="absolute flex items-center justify-center sm:w-31 sm:h-31 rounded-[50px] top-5 border-2 border-white/80 
+            <div className="absolute flex items-center justify-center sm:w-35 sm:h-35 rounded-[50px] top-5 border-2 border-white/80 
             hover:border-white hover:scale-120 hover:rotate-6 transform duration-1000 will-change-transform 
-            shadow-[0_0_30px_4px_rgba(215,49,137,0.4),0_0_50px_10px_rgba(228,77,134,0.2)]">
-                <img src={`${import.meta.env.VITE_API_URL}${cardInfo.image_path}`} alt="Idol" className="w-20 h-20 sm:w-30 sm:h-30 rounded-[50px] object-cover object-top transform-gpu" />
+            shadow-[0_0_20px_4px_rgba(255,255,255,0.1),0_0_40px_10px_rgba(255,255,255,0.1)]">
+                <img src={`${import.meta.env.VITE_API_URL}${cardInfo.image_path}`} alt="Idol" className="w-20 h-20 sm:w-34 sm:h-34 rounded-[50px] object-cover object-top transform-gpu" />
             </div>
 
-            <div className="absolute flex flex-col items-center justify-center sm:w-[580px] sm:max-h-20 mt-40">
+            <div className="absolute flex flex-col items-center justify-center sm:w-[580px] sm:max-h-20 mt-44">
                 <span className="text-base sm:text-[22px]">
-                    Today's Idol was <span className="font-bold bg-linear-to-r from-[#db3189] via-[#e44d86] to-[#ec5e65] text-transparent bg-clip-text sm:text-[22px]">
+                    Today's Idol was <span className="font-bold bg-linear-to-r from-[#db3189] via-[#e44d86] to-[#ec5e65] text-transparent bg-clip-text sm:text-[22px] brightness-105">
                         {cardInfo.artist_name}
-                    </span> <span className="">
+                    </span> <span className="font-bold bg-linear-to-r from-[#ec5e65] via-[#e44d86] to-[#db3189] text-transparent bg-clip-text sm:text-[22px] brightness-105">
                             ({activeGroup})
                         </span>
                 </span>
 
                 <span className="text-base sm:text-[18px] mt-2">
-                    You were the <span className="font-bold bg-linear-to-r from-[#db3189] via-[#e44d86] to-[#ec5e65] text-transparent bg-clip-text">
+                    You were the <span className="font-bold bg-linear-to-r from-[#db3189] via-[#e44d86] to-[#ec5e65] text-transparent bg-clip-text brightness-110">
                         {`${userPosition}${userPosition === 1 ? "st" : userPosition === 2 ? "nd" : userPosition === 3 ? "rd" : "th"}`}
                     </span> fan to guess correctly!
                 </span>
@@ -106,10 +110,12 @@ return (
                         <img src={`${import.meta.env.VITE_API_URL}${yesterdayIdolImage}`} alt="Idol" className="sm:w-28 sm:h-28 rounded-[50px] object-cover object-center hover:scale-105 
                         select-none transition-transform duration-500 will-change-transform transform-gpu" />
 
-                        <div className="text-2xl font-semibold hover:scale-105 select-none transition-transform duration-500">
-                            <span className="bg-linear-to-r from-[#db3189] via-[#e44d86] to-[#ec5e65] text-transparent bg-clip-text">
+                        <div className="text-2xl font-semibold select-none transform-gpu">
+                            <span className="bg-linear-to-r from-[#db3189] via-[#e44d86] to-[#ec5e65] text-transparent bg-clip-text brightness-105">
                                 {yesterdayIdol}
-                            </span> <span className="font-semibold text-2xl">({yesterdayGroup})</span>
+                            </span> <span className="bg-linear-to-r from-[#ec5e65] via-[#e44d86] to-[#db3189] text-transparent bg-clip-text text-2xl brightness-105">
+                                ({yesterdayGroup})
+                            </span>
                         </div>
                     </div>
                     
@@ -123,9 +129,9 @@ return (
         </div>
 
         {/* Share Container + Opens small card */}
-        <div className="relative w-full sm:h-[50px] mb-5 px-6">
+        <div className="relative w-full sm:h-14 mb-5 px-6">
             <button 
-                className="relative w-full h-full items-center justify-center text-center bg-linear-to-b from-[#b43777] to-[#ce757a] border border-white/60 
+                className="relative w-full h-full items-center justify-center text-center bg-linear-to-b from-[#b43777] to-transparent border border-white/60 
                 rounded-xl hover:brightness-105 hover:scale-105 hover:cursor-pointer transition-transform duration-500 transform-gpu" 
                 onClick={() => onShareClick?.()}
             >

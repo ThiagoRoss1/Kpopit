@@ -9,10 +9,11 @@ interface AnswerHintsBoxProps {
     memberCount: number | null;
     groups?: string[] | null;
     attempts: number;
+    gameEnded: boolean;
 }
 
 const AnswerHintsBox = (props: AnswerHintsBoxProps) => {
-    const {memberCount, groups, attempts} = props;
+    const {memberCount, groups, attempts, gameEnded} = props;
 
     const memberCountDisplay = memberCount ?? "Soloist"; // == memberCount !== null ? memberCount : "Soloist"; As i'm returning Null
     const groupsDisplay = groups && groups.length > 0 ? groups : ["Soloist"];
@@ -29,8 +30,8 @@ const AnswerHintsBox = (props: AnswerHintsBoxProps) => {
         return localStorage.getItem("hint2Revealed") === "true";
     });
 
-    const canFlipCard1 = attempts >= CARD1;
-    const canFlipCard2 = attempts >= CARD2;
+    const canFlipCard1 = attempts >= CARD1 || gameEnded;
+    const canFlipCard2 = attempts >= CARD2 || gameEnded;
 
     const [showHint1, setShowHint1] = useState(() => {
         return localStorage.getItem("showHint1") === "true";
@@ -60,7 +61,7 @@ const AnswerHintsBox = (props: AnswerHintsBoxProps) => {
 
     const getHintText = (attempts: number, cardThreshold: number) => {
         const remaining = cardThreshold - attempts;
-        if (attempts >= cardThreshold) return "Click to reveal the hint!";
+        if (attempts >= cardThreshold || gameEnded) return "Click to reveal the hint!";
 
         return (
             <React.Fragment>
@@ -68,6 +69,9 @@ const AnswerHintsBox = (props: AnswerHintsBoxProps) => {
             </React.Fragment>
         )
     }
+
+    
+
 
     return (
         <div className="w-full h-fit max-w-full sm:w-lg mx-auto flex justify-center items-center">

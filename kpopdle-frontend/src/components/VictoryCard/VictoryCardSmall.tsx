@@ -137,7 +137,7 @@ return (
                                 </span>
                                  <span className="ml-1 drop-shadow-lg">🎊</span>
                             </h2>
-                            <p className="font-semibold sm:text-[18px] leading-tight">
+                            <span className="font-semibold sm:text-[18px] leading-tight">
                                 <span 
                                 className="bg-white text-transparent bg-clip-text drop-shadow-xl/50">
                                     You guessed it in 
@@ -145,7 +145,7 @@ return (
                                 className="bg-[#ce757a] bg-clip-text text-transparent drop-shadow-xl/50 brightness-120 hover:brightness-150 hover:cursor-default">
                                     {`${attempts} ${attempts === 1 ? "try" : "tries"}!`}
                                 </span>
-                            </p>
+                            </span>
                         </div>       
                     </div>
 

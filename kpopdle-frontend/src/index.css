@@ -1,5 +1,7 @@
+@import url('https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@400;700&display=swap');
 @import "tailwindcss";
 @import "tw-animate-css";
+
 
 @custom-variant dark (&:is(.dark *));
 
@@ -13,6 +15,34 @@ body {
   #000000 100%
   );
 }
+
+.font-korean {
+  font-family: 'Noto Sans KR', sans-serif;
+}
+
+.logo {
+  position: relative;
+  font-weight: 800;
+  font-size: 64px;
+  color: transparent;
+  background: linear-gradient(180deg, #e70a7d, #ec4850);
+  -webkit-background-clip: text;
+  background-clip: text;
+}
+
+.logo::after {
+  content: "Kpopdle";
+  position: absolute;
+  top: 6px;   /* deslocamento vertical */
+  left: 6px;  /* deslocamento horizontal */
+  z-index: -1;
+  background: linear-gradient(180deg, #e70a7d, #ec4850);
+  -webkit-background-clip: text;
+  color: transparent;
+  filter: blur(10px);
+  opacity: 0.6;
+}
+
 
 /* Stars twinkle animation */
 @keyframes twinkle {

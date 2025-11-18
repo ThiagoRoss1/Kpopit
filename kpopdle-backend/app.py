@@ -1081,7 +1081,7 @@ def transfer_data():
     transfer_code = data.get("code")
 
     if not transfer_code:
-        return jsonify({"error": "Missing transfer code"}), 404
+        return jsonify({"error": "Missing transfer code"}), 400
     
     # Start db connection
     connect = sqlite3.connect("kpopdle.db")
@@ -1098,7 +1098,7 @@ def transfer_data():
 
     if not code_row:
         connect.close()
-        return jsonify({"error": "Invalid transfer code"}), 404
+        return jsonify({"error": "Invalid transfer code"}), 400
     
     if code_row["used"]:
         connect.close()

@@ -11,6 +11,7 @@ import type {
   Users,
   UserStats,
 } from "../../interfaces/gameInterfaces";
+import { Link } from "react-router-dom";
 import { encryptToken, decryptToken } from "../../utils/tokenEncryption.ts";
 import SearchBar from "../../components/GuessSearchBar/SearchBar.tsx";
 import GuessesGrid from "../../components/GuessesGrid/GuessGrid.tsx";
@@ -30,6 +31,9 @@ import ChangelogText from "../../components/buttons/modals/ChangelogContent.tsx"
 import { useResetTimer } from "../../hooks/useResetTimer.tsx";
 import { useTransferDataLogic } from "../../hooks/useTransferDataLogic.tsx";
 import BackgroundStyle from "../../components/Background/BackgroundStyle.tsx";
+import FeedbackSquares from "../../components/FeedbackSquares/FeedbackSquares.tsx";
+import XLogo from "../../assets/icons/x-logo.svg";
+import { Info } from "lucide-react";
 // import { Input } from "@chakra-ui/react"; - Css framework import example
 
 function Home() {
@@ -42,6 +46,7 @@ function Home() {
   const [isCorrect, setIsCorrect] = useState<boolean>(false);
   const [shouldFetchToken, setShouldFetchToken] = useState<boolean>(!localStorage.getItem("userToken"));
   const [dayChecked, setDayChecked] = useState<boolean>(false);
+  const [closeFeedbackSquares, setCloseFeedbackSquares] = useState<boolean>(false);
   // Counter
   const [attempts, setAttempts] = useState<number>(0);
 
@@ -158,6 +163,7 @@ function Home() {
       localStorage.removeItem("showHint2");
       localStorage.removeItem("colorize2");
       localStorage.removeItem("animatedIdols");
+      localStorage.removeItem("closeFeedbackSquares");
 
       localStorage.setItem("gameDate", serverDate || "");
       setDayChecked(true);
@@ -166,6 +172,7 @@ function Home() {
       const cachedGuesses = localStorage.getItem("todayGuessesDetails");
       const gameComplete = localStorage.getItem("gameComplete");
       const gameWon = localStorage.getItem("gameWon");
+      const closeFeedbackSquares = localStorage.getItem("closeFeedbackSquares") === "true";
 
       if (cachedGuesses) {
         try {
@@ -176,6 +183,7 @@ function Home() {
           console.error("Error parsing cached guesses:", error);
         }
       }
+      setCloseFeedbackSquares(closeFeedbackSquares);
 
       if (gameComplete === "true") {
         setEndGame(true);
@@ -309,20 +317,25 @@ function Home() {
     <>
     <BackgroundStyle attempts={attempts} />
     <div className="min-h-screen w-full flex flex-col items-center justify-start">
-      <div className="flex items-center justify-center p-[9px] sm:w-[242px] sm:h-[84px] mt-[70px] mb-[38px] text-center">
-        <h1 className="text-6xl font-bold text-center bg-linear-to-b from-[#e70a7d] to-[#ec4850] text-transparent bg-clip-text drop-shadow-lg" >
-        Kpopdle 
+      <div className="flex items-center justify-center p-2 sm:w-3xs sm:h-20 mt-16 mb-9 text-center">
+        <h1 className="leading-tight sm:text-6xl font-bold text-center bg-linear-to-r from-[#b43777] to-[#ec4850] text-transparent bg-clip-text drop-shadow-lg
+        " >
+        Kpopdle
         </h1>
+        <h2 className="font-korean absolute -z-10 sm:text-6xl sm:top-27 text-[#ec4850] opacity-20
+        [text-shadow:1.2px_1.2px_4px_rgba(0,0,0,1.8),0_0_12px_rgba(236,72,80,1.35)]">
+          게임을
+        </h2>
       </div>    
-      <div className="flex items-center justify-center mb-5">
+      <div className="flex items-center justify-center mb-3">
         <TopButtons
           onSubmitChangelog={() => { setShowModal("changelog") }}
           onSubmitHowToPlay={() => { setShowModal("how-to-play") }}
           onSubmitAbout={() => { setShowModal("about") }}
         />
-        {showModal === "changelog" && <Modal isOpen onClose={() => setShowModal(null)} title="Changelog..."><ChangelogText /></Modal>}
+        {showModal === "changelog" && <Modal isOpen onClose={() => setShowModal(null)} title="Changelog..." isAboutOrChangelog={true}><ChangelogText /></Modal>}
         {showModal === "how-to-play" && <Modal isOpen onClose={() => setShowModal(null)} title="How to Play..." isHowToPlay={true}><HowToPlayText /></Modal>}
-        {showModal === "about" && <Modal isOpen onClose={() => setShowModal(null)} title="About..."><AboutText /></Modal>}
+        {showModal === "about" && <Modal isOpen onClose={() => setShowModal(null)} title="About..." isAboutOrChangelog={true}><AboutText /></Modal>}
 
       </div>
 
@@ -338,7 +351,7 @@ function Home() {
 
         {/* Sub-Stats Modals */}
         {showModal === "transfer-data" && <Modal isOpen onClose={() => setShowModal(null)} title="Transfer Data..." isTransferDataSubPages={true} returnPage={() => {setShowModal("stats")}}><TransferDataText onSubmitImportData={() => {setShowModal("import-data")}} onSubmitExportData={() => {setShowModal("export-data")}} /></Modal>}
-        {showModal === "import-data" && <Modal isOpen onClose={() => setShowModal(null)} title="Import Data..." isTransferDataSubPages={true} returnPage={() => {setShowModal("transfer-data")}}><ImportDataText onSubmitReturn={() => {setShowModal("transfer-data")}} /></Modal>}
+        {showModal === "import-data" && <Modal isOpen onClose={() => {transferData.clearError(); setShowModal(null);}} title="Import Data..." isTransferDataSubPages={true} returnPage={() => {setShowModal("transfer-data")}}><ImportDataText handleRedeem={transferData.handleRedeem} isRedeeming={transferData.isRedeeming} redeemError={transferData.redeemError} /></Modal>}
         {showModal === "export-data" && <Modal isOpen onClose={() => setShowModal(null)} title="Export Data..." isTransferDataSubPages={true} returnPage={() => {setShowModal("transfer-data")}}><ExportDataText handleGenerate={transferData.handleGenerate} generatedCodes={transferData.generatedCodes} timeLeft={transferData.timeLeft} expires_At={transferData.expiresAt} /></Modal>}
       </div>
 
@@ -347,34 +360,49 @@ function Home() {
         memberCount={gameData?.member_count ?? null} 
         groups={gameData?.groups ?? null} 
         attempts={attempts}
+        gameEnded={endGame}
         />
       </div>
 
-      {/* {!endGame && !showVictoryCard && ()} */}
-        <div className="flex text-center items-center justify-center sm:w-[194px] sm:h-[19px] mb-[3px]">
+      {!endGame && !showVictoryCard && (
+        <div className="flex text-center items-center justify-center sm:w-[194px] sm:h-[19px] mb-1">
           <p className="text-[16px] drop-shadow-lg text-[#d7d7d7]/85">
             Guess today's idol...
           </p>
         </div>
+      )}
 
-      {/* {!endGame && !showVictoryCard && ()} */}
-      <div className="relative w-full max-w-4xl px-4 mx-auto flex justify-center z-40 mb-20">
-        <SearchBar
-          allIdols={allIdolsData || []}
-          value={currentGuess}
-          onIdolSelect={(idolName) => setCurrentGuess(idolName)}
-          onSubmit={() => {
-            handleGuessSubmit();
-            handleGuessAttempts();
-          }}
-          excludedIdols={guesses.map(guess => guess.guessed_idol_data?.idol_id)}
-          disabled={endGame || guessMutation.isPending || isCorrect}
-        />
+      {!endGame && !showVictoryCard && (
+      <div className="w-full flex flex-col">
+        <div className="relative w-full max-w-4xl px-4 mx-auto flex justify-center z-40 mb-4">
+          <SearchBar
+            allIdols={allIdolsData || []}
+            value={currentGuess}
+            onIdolSelect={(idolName) => setCurrentGuess(idolName)}
+            onSubmit={() => {
+              handleGuessSubmit();
+              handleGuessAttempts();
+            }}
+            excludedIdols={guesses.map(guess => guess.guessed_idol_data?.idol_id)}
+            disabled={endGame || guessMutation.isPending || isCorrect}
+          />
+        </div>
       </div>
+      )}
+      
+      {!endGame && !showVictoryCard && (
+      <div className="flex flex-row items-center justify-center mb-10">
+        <span className="leading-tight">
+          <span className="text-[#b43777] [text-shadow:1.2px_1.2px_4px_rgba(0,0,0,1.8),0_0_12px_rgba(180,55,119,1.0)] brightness-110">
+            {dailyUserCount?.data.user_count}
+          </span> <span className="text-[#d7d7d7]/85 [text-shadow:1.2px_1.2px_4px_rgba(0,0,0,1.8),0_0_12px_rgba(255,255,255,0.2)]">
+            {dailyUserCount?.data.user_count === 1 ? "person" : "people"} already found today's idol!
+          </span>
+        </span>
+      </div>
+      )}
 
-      <br />
-
-      <div className="w-full flex flex-col items-center justify-center mt-4 mb-4">
+      <div className="w-full flex flex-col items-center justify-center mt-2 mb-4">
         <GuessesGrid
           guesses={guesses}
           allIdols={allIdolsData || []}
@@ -382,8 +410,67 @@ function Home() {
         />
       </div>
 
+       <div className="w-full flex mt-2 mb-2">
+        {guesses.length > 0 && !closeFeedbackSquares && (
+        <FeedbackSquares onClose={() => (setCloseFeedbackSquares(true), localStorage.setItem("closeFeedbackSquares", "true"))} />
+        )}
+      </div>
+
+      {endGame && guesses.length > 0 && showVictoryCard && (
+        <div className="w-full flex items-center justify-center mt-10">
+          <VictoryCardHudProps 
+            cardInfo={guesses[guesses.length - 1].guessed_idol_data}
+            guesses={guesses}
+            attempts={attempts}
+            nextReset={useResetTimer}
+            yesterdayIdol={yesterdayArtist || "unknown"}
+            yesterdayIdolGroup={yesterdayArtistGroup}
+            yesterdayIdolImage={yesterdayIdolImage}
+            userPosition={userPositionData}
+            userRank={userRankData}
+            userScore={userScoreData}
+            stats={userStatsData}
+            idolActiveGroup={gameData?.groups ?? null}
+          />
+        </div>
+      )}
+
+      {!showVictoryCard && (
+      <div className={`w-full flex flex-col items-center justify-center mt-18 mb-22`}>
+        <span className="font-semibold text-[18px] leading-tight">
+          <span className="text-white">
+            Yesterday's idol was
+          </span> <span className="text-[#b43777] [text-shadow:1.2px_1.2px_4px_rgba(0,0,0,1.8),0_0_12px_rgba(180,55,119,1.0)] brightness-105">
+            {yesterdayArtist ? `${yesterdayArtist} (${yesterdayArtistGroup})` : "unknown"}
+          </span>
+        </span>
+      </div>
+      )}
+
+      {/* Footer */}
+      <div className="w-full flex flex-col items-center justify-center mt-6 mb-2 gap-1">
+        <div className="w-full flex flex-row items-center justify-center gap-3">
+          <button
+          className="flex items-center justify-center sm:w-10 sm:h-10 bg-black rounded-full hover:scale-110 hover:brightness-110 hover:cursor-pointer
+          transition-all duration-300 transform-gpu" onClick={() => window.open("https://x.com/TgoRoss1", "_blank")}>
+            <img src={XLogo} alt="X" className="sm:w-7.5 sm:h-7.5 items-center justify-center" draggable={false} />
+          </button>
+          
+          <button className="flex items-center justify-center sm:w-10 sm:h-10 bg-white rounded-full hover:scale-110 hover:brightness-110 hover:cursor-pointer
+          transition-all duration-300 transform-gpu" onClick={() => {setShowModal("about")}}>
+            <Info className="sm:w-10 sm:h-10" />
+
+          </button>
+        </div>
+
+        <div className="w-full flex items-center justify-center">
+          <Link to="/privacy-policy">
+            <span className="normal-font font-bold text-white text-base hover:underline">Privacy Policy</span>
+          </Link>
+        </div>
+      </div>
+
       <p>ID: {gameData?.answer_id}</p>
-      <p>User Count: {dailyUserCount?.data.user_count}</p>
       {/* <h2>Game Categories</h2>
       <ul>
         {gameData?.categories &&
@@ -391,23 +478,6 @@ function Home() {
             <li key={category}>{category}</li>
           ))}
       </ul> */}
-
-      {endGame && guesses.length > 0 && showVictoryCard && (
-        <VictoryCardHudProps 
-          cardInfo={guesses[guesses.length - 1].guessed_idol_data}
-          guesses={guesses}
-          attempts={attempts}
-          nextReset={useResetTimer}
-          yesterdayIdol={yesterdayArtist || "unknown"}
-          yesterdayIdolGroup={yesterdayArtistGroup}
-          yesterdayIdolImage={yesterdayIdolImage}
-          userPosition={userPositionData}
-          userRank={userRankData}
-          userScore={userScoreData}
-          stats={userStatsData}
-          idolActiveGroup={gameData?.groups ?? null}
-        />
-      )}
         
       
     </div>
