@@ -10,13 +10,13 @@ const TopButtons = (props: TopButtonsProps) => {
     const { onSubmitChangelog, onSubmitHowToPlay, onSubmitAbout } = props;
 
     // Left and Right Button Styles //
-    const buttonCardStyle = "inline-flex relative sm:w-52 sm:h-13 overflow-hidden rounded-[16px] border-1 border-white bg-transparent backdrop-blur-3xl shadow-[4px_4px_4px_1px_rgba(0,0,0,0.25),inset_0_4px_4px_0_rgba(0,0,0,0.25)]";
+    const buttonCardStyle = "inline-flex relative w-28 h-10 sm:w-52 sm:h-13 overflow-hidden rounded-2xl sm:rounded-2xl border-1 border-white bg-transparent backdrop-blur-xl sm:backdrop-blur-3xl shadow-[4px_4px_4px_1px_rgba(0,0,0,0.25),inset_0_4px_4px_0_rgba(0,0,0,0.25)]";
     const buttonAnimation = ""
-    const buttonTextStyle = "inline-flex h-full w-full items-center justify-center rounded-[16px] text-sm sm:text-[20px] text-white font-semibold text-shadow-[2px_2px_4px_rgba(0,0,0,0.5)]";
+    const buttonTextStyle = "inline-flex h-full w-full items-center justify-center rounded-2xl sm:rounded-2xl text-base sm:text-[20px] text-white font-semibold text-shadow-[2px_2px_4px_rgba(0,0,0,0.5)]";
     // Middle Button Styles //
-    const centerButtonCardStyle = "inline-flex relative sm:w-58 sm:h-15 overflow-hidden rounded-[20px] p-[1px] focus:outline-none focus:ring-2 focus:ring-[#000000] focus:ring-offset-1 focus:ring-offset-[#242424] backdrop-blur-md shadow-[4px_4px_4px_1px_rgba(0,0,0,0.25),inset_0_4px_4px_0_rgba(0,0,0,0.25)]";
+    const centerButtonCardStyle = "inline-flex relative w-32 h-11 sm:w-58 sm:h-15 overflow-hidden rounded-2xl sm:rounded-[20px] p-[1px] focus:outline-none focus:ring-2 focus:ring-[#000000] focus:ring-offset-1 focus:ring-offset-[#242424] backdrop-blur-md shadow-[4px_4px_4px_1px_rgba(0,0,0,0.25),inset_0_4px_4px_0_rgba(0,0,0,0.25)]";
     const centerButtonAnimation = "absolute inset-[-1000%] animate-[spin_2s_linear_infinite] bg-[conic-gradient(from_90deg_at_50%_50%,#b43777_0%,#ffffff_50%,#b43777_100%)]";
-    const centerButtonTextStyle = "inline-flex h-full w-full items-center justify-center rounded-[20px] bg-black px-1 text-sm sm:text-[20px] text-[#b43777] font-semibold backdrop-blur-3xl";
+    const centerButtonTextStyle = "inline-flex h-full w-full items-center justify-center rounded-2xl sm:rounded-[20px] bg-black px-1 text-base sm:text-[20px] text-[#b43777] font-semibold backdrop-blur-3xl";
     // Hover //
     const hoverEffect = "hover:brightness-125 hover:scale-105 hover:cursor-pointer hover:bg-black/80 transition-transform transform-gpu duration-500";
     const centerHoverEffect = "hover:brightness-125 hover:scale-105 hover:cursor-pointer transition-transform transform-gpu duration-500";
@@ -27,7 +27,7 @@ const TopButtons = (props: TopButtonsProps) => {
 
     return (
         <div className="flex items-center justify-center w-full h-full bg-transparent">
-            <div className="flex items-center justify-between w-full h-fit gap-2 sm:gap-14">
+            <div className="flex items-center justify-between w-full h-fit gap-4 sm:gap-14">
                 <button onClick={onSubmitChangelog} type="button" className={`${buttonCardStyle} ${hoverEffect}`}>
                     <span className={`${buttonAnimation}`} />
                         <span className={`${buttonTextStyle}`}>

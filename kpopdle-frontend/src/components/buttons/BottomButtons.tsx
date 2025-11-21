@@ -15,12 +15,12 @@ interface BottomButtonsProps {
 const BottomButtons = (props: BottomButtonsProps) => {
     const { onSubmitStats, onSubmitShare } = props;
 
-    const ButtonStyle = "inline-flex relative sm:h-9 sm:w-9 overflow-hidden rounded-full p-[1px] focus:outline-none focus:ring-2 focus:ring-[#000000] focus:ring-offset-1 focus:ring-offset-[#242424] hover:brightness-110 hover:scale-105 transform duration-300";
-    const ImageStyle = "flex items-center justify-center sm:w-8 sm:h-8 rounded-full";
+    const ButtonStyle = "inline-flex relative h-9 w-9 sm:h-9 sm:w-9 overflow-hidden rounded-full p-[1px] focus:outline-none focus:ring-2 focus:ring-[#000000] focus:ring-offset-1 focus:ring-offset-[#242424] hover:brightness-110 hover:scale-105 transform duration-300";
+    const ImageStyle = "flex items-center justify-center w-8 h-8 sm:w-8 sm:h-8 rounded-full";
 
     return (
         <div className="flex items-center justify-center w-full max-w-sm mx-auto h-fit sm:w-full sm:h-fit">
-            <div className="flex flex-row items-center justify-center sm:w-28 sm:h-9 gap-2 sm:gap-3 rounded-2xl">
+            <div className="flex flex-row items-center justify-center w-28 h-9 sm:w-28 sm:h-9 gap-3 sm:gap-3 rounded-2xl">
                 <button onClick={onSubmitStats} type="button" className={`${ButtonStyle}`}>
                     <span className="absolute inset-[-1000%] animate-[spin_2s_linear_infinite] bg-[conic-gradient(from_90deg_at_50%_50%,#b43777_0%,#bf898c_50%,#b43777_100%)]" />
                         <span className="inline-flex h-full w-full cursor-pointer items-center justify-center rounded-full bg-slate-950 px-1 font-medium text-white backdrop-blur-3xl">

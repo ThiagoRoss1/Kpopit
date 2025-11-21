@@ -24,6 +24,7 @@ const SearchBar = (props: SearchBarProps) => {
   const [suggestions, setSuggestions] = useState<IdolListItem[]>([]);
   const [showList, setShowList] = useState(false);
   const [selectedIdol, setSelectedIdol] = useState<IdolListItem | null>(null);
+  const [isTouched, setIsTouched] = useState<number | null>(null);
 
   const containerRef = useRef<HTMLDivElement>(null);
 
@@ -98,7 +99,7 @@ const SearchBar = (props: SearchBarProps) => {
   // Return JSX
   return (
     <div ref={containerRef} className="relative w-fit h-fit rounded-3xl">
-      <div className="relative w-full h-fit max-w-full sm:w-140 sm:h-13 mx-auto flex items-center 
+      <div className="relative w-100 h-13 max-w-full sm:w-140 sm:h-13 mx-auto flex items-center 
       border border-white/50 rounded-3xl bg-linear-to-r from-[#000000]/10 to-[#b43777]/10">
         <form className="w-full p-2" 
         onSubmit={(e) => {
@@ -142,7 +143,7 @@ const SearchBar = (props: SearchBarProps) => {
               <motion.img 
                 src={SearchIcon} 
                 alt="G" 
-                className="sm:w-5.5 sm:h-5.5 mx-auto" 
+                className="w-5.5 h-5.5 sm:w-5.5 sm:h-5.5 mx-auto" 
                 draggable={false} 
                 animate={{ scale: isButtonHovered ? 1.2 : 1 }}
                 transition={{
@@ -185,6 +186,8 @@ const SearchBar = (props: SearchBarProps) => {
                 <motion.li
                   onHoverStart={() => setHoveredId(suggestion.id)}
                   onHoverEnd={() => setHoveredId(null)}
+                  onTouchStart={() => setIsTouched(suggestion.id)}
+                  onTouchEnd={() => setIsTouched(null)}
                   whileHover={isUnique ? {
                     y: 0,
                     x: 20,
@@ -209,12 +212,14 @@ const SearchBar = (props: SearchBarProps) => {
                     stiffness: 250, 
                     damping: 25 }}
                     // #TODO: Fill animation not finished yet // 
-                  className="relative px-4 py-3 cursor-pointer transition-colors duration-200
+                  className={`relative px-4 py-3 cursor-pointer transition-colors duration-200
                     hover:bg-linear-to-r hover:from-[#8a0449] hover:via-[#0d0314] hover:to-[#000000]/0 
                     bg-size-[200%_100%] bg-left hover:animate-[moveGradient_0.3s_linear_forwards]
+                    ${isTouched === suggestion.id ? 
+                      "bg-linear-to-r from-[#8a0449] via-[#0d0314] to-[#000000]/0 bg-size-[200%_100%] bg-left animate-[moveGradient_0.3s_linear_forwards]" : ""}
                     flex grow gap-4 items-center backdrop-blur-md text-white drop-shadow-md 
                     border border-white/20 transform-gpu will-change-transform
-                    hover:shadow-[2px_2px_12px_8px_rgba(0,0,0,0.35)]"
+                    hover:shadow-[2px_2px_12px_8px_rgba(0,0,0,0.35)]`}
                   key={suggestion.id}
                   onClick={() => handleSuggestionClick(suggestion)}
                 >

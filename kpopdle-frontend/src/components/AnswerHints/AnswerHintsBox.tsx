@@ -65,7 +65,7 @@ const AnswerHintsBox = (props: AnswerHintsBoxProps) => {
 
         return (
             <React.Fragment>
-                 Guess <span className="text-[22px] text-[#ce757a] font-bold text-center">{remaining}</span> more {remaining === 1 ? "idol" : "idols"} to reveal the hint
+                 Guess <span className="sm:text-[22px] text-[#ce757a] font-bold text-center">{remaining}</span> more {remaining === 1 ? "idol" : "idols"} to reveal the hint
             </React.Fragment>
         )
     }
@@ -91,14 +91,14 @@ const AnswerHintsBox = (props: AnswerHintsBoxProps) => {
                         className="w-full max-w-full sm:w-lg"
                     >
                         
-                        <div className="relative z-10 w-full h-fit max-w-full sm:w-96 sm:h-30 mx-auto
+                        <div className="relative z-10 w-86 h-28 max-w-full sm:w-96 sm:h-30 mx-auto
                         flex flex-row items-center justify-center gap-4 rounded-[20px] bg-transparent shadow-[4px_4px_4px_1px_rgba(24,24,24,0.25),inset_0_4px_4px_rgba(24,24,24,0.25)] cursor-default">
                             <span className="relative flex flex-col text-2xl text-white text-center [text-shadow:1.2px_1.2px_4px_rgba(0,0,0,0.8)] items-center justify-center gap-2">
-                                <img src={Mic} alt="microphone" className="relative flex w-8 h-8 animate-pulse object-cover" draggable={false} />
-                                <h2 className="text-[20px] font-light">
+                                <img src={Mic} alt="microphone" className="relative flex w-7 h-7 sm:w-8 sm:h-8 animate-pulse object-cover" draggable={false} />
+                                <h2 className="text-[18px] sm:text-[20px] font-light">
                                     Guess any idol to start the game!
                                 </h2>
-                                <p className="text-[12px] font-light">
+                                <p className="text-[12px] sm:text-[12px] font-light">
                                     Hints grid will be unlocked after your first guess.
                                 </p>
                             </span>
@@ -116,11 +116,11 @@ const AnswerHintsBox = (props: AnswerHintsBoxProps) => {
                             stiffness: 200,
                             damping: 20
                         }}
-                        className="w-full h-fit max-w-full sm:w-lg sm:h-30 mx-auto 
-                        flex flex-row items-center justify-between gap-4 rounded-[15px] bg-linear-to-b from-white/0 to-[#b4b4b4]/0 perspective-distant">
+                        className="w-lg h-28 max-w-full sm:w-lg sm:h-30 mx-auto 
+                        flex flex-row items-center justify-between gap-0 px-1 sm:px-0 sm:gap-4 rounded-[15px] sm:rounded-[15px] bg-linear-to-b from-white/0 to-[#b4b4b4]/0 perspective-distant">
 
             {/* Box 1 */}
-            <div className= "relative perspective-distant">
+            <div className="relative perspective-distant">
                 <motion.div
                     initial={ isFlipped1 ? { rotateY: -180 } : { rotateY: 0 } }
                     animate={canFlipCard1 ? isFlipped1 ? { rotateY: -180 } : { rotateY: 0 } : {}}
@@ -135,13 +135,13 @@ const AnswerHintsBox = (props: AnswerHintsBoxProps) => {
                         initial={{ scale: 0.9 }}
                         animate={canFlipCard1 ? { scale: 1 } : { scale: 0.9 }}
                         transition={{ duration: 0.4, ease: "easeInOut" }}
-                        className="relative sm:w-60 sm:h-30 border-2 border-white/50 rounded-2xl backdrop-blur-md flex items-center justify-center text-center 
+                        className="relative w-50 h-26 sm:w-60 sm:h-30 border-2 border-white/50 rounded-2xl backdrop-blur-md flex items-center justify-center text-center 
                         backface-hidden shadow-[4px_4px_4px_1px_rgba(0,0,0,0.15),inset_0_4px_4px_0_rgba(0,0,0,0.15)]">
-                            <div className="flex flex-col z-10 gap-2 [text-shadow:1.2px_1.2px_4px_rgba(0,0,0,0.8)]">     
-                                <h3 className="relative font-bold text-[20px] text-[#ce757a] drop-shadow-lg">
+                            <div className="flex flex-col z-10 gap-1 sm:gap-2 [text-shadow:1.2px_1.2px_4px_rgba(0,0,0,0.8)]">     
+                                <h3 className="relative font-bold text-[18px] sm:text-[20px] text-[#ce757a] drop-shadow-lg">
                                     Hint 1
                                 </h3>
-                                <span className="text-white text-base px-4">
+                                <span className="text-white text-base sm:text-base px-4">
                                     {getHintText(attempts, CARD1)}
                                 </span>
                             </div>
@@ -150,8 +150,8 @@ const AnswerHintsBox = (props: AnswerHintsBoxProps) => {
                     {/* Box 1 Front */}
                     <div className={`absolute inset-0 -rotate-y-180 backface-hidden sm:w-60 sm:h-30 border-2 border-white/50 rounded-2xl backdrop-blur-md 
                     flex items-center justify-center text-center shadow-[4px_4px_4px_1px_rgba(0,0,0,0.15),inset_0_4px_4px_0_rgba(0,0,0,0.15)] ${colorize1 ? "bg-black/80 transition-colors duration-2000" : ""}`}>
-                        <div className="flex flex-col gap-3">
-                            <h3 className="relative font-bold text-[22px] text-[#b43777] drop-shadow-lg 
+                        <div className="flex flex-col gap-1 sm:gap-3">
+                            <h3 className="relative font-bold text-[20px] sm:text-[22px] text-[#b43777] drop-shadow-lg 
                             [text-shadow:1.2px_1.2px_4px_rgba(0,0,0,0.8),0_0_12px_rgba(180,55,119,0.55)]">
                                 Group Members
                             </h3>
@@ -168,7 +168,7 @@ const AnswerHintsBox = (props: AnswerHintsBoxProps) => {
                                     filter: {duration: 0.8, ease: "easeOut" },
                                     scale: { duration: 0.3, ease: "easeInOut" },
                                 }}
-                                className={`text-white text-3xl 
+                                className={`text-white text-3xl sm:text-3xl 
                                 [text-shadow:1.2px_1.2px_4px_rgba(0,0,0,0.8),0_0_12px_rgba(180,55,119,0.25)] ${!showHint1 ? "cursor-pointer select-none transform-gpu": ""}`}>
                                     {memberCountDisplay}
                             </motion.span>
@@ -193,13 +193,13 @@ const AnswerHintsBox = (props: AnswerHintsBoxProps) => {
                         initial={{ scale: 0.9 }}
                         animate={canFlipCard2 ? { scale: 1 } : { scale: 0.9 }}
                         transition={{ duration: 0.4, ease: "easeInOut" }}
-                        className="relative sm:w-60 sm:h-30 border-2 border-white/50 rounded-2xl backdrop-blur-md flex items-center justify-center text-center 
+                        className="relative w-50 h-26 sm:w-60 sm:h-30 border-2 border-white/50 rounded-2xl backdrop-blur-md flex items-center justify-center text-center 
                         backface-hidden shadow-[4px_4px_4px_1px_rgba(0,0,0,0.15),inset_0_4px_4px_0_rgba(0,0,0,0.15)]">
-                            <div className="flex flex-col gap-2 [text-shadow:1.2px_1.2px_4px_rgba(0,0,0,0.8)]">
-                                <h3 className="relative font-bold text-[20px] text-[#ce757a] drop-shadow-lg">
+                            <div className="flex flex-col gap-1 sm:gap-2 [text-shadow:1.2px_1.2px_4px_rgba(0,0,0,0.8)]">
+                                <h3 className="relative font-bold text-[18px] sm:text-[20px] text-[#ce757a] drop-shadow-lg">
                                     Hint 2
                                 </h3>
-                                <span className="text-white text-base px-4">
+                                <span className="text-white text-base sm:text-base px-4">
                                     {getHintText(attempts, CARD2)}
                                 </span>
                             </div>
@@ -208,8 +208,8 @@ const AnswerHintsBox = (props: AnswerHintsBoxProps) => {
                     {/* Box 2 Front */}
                     <div className={`absolute inset-0 -rotate-y-180 backface-hidden sm:w-60 sm:h-30 border-2 border-white/50 rounded-2xl backdrop-blur-md 
                     flex items-center justify-center text-center shadow-[4px_4px_4px_1px_rgba(0,0,0,0.15),inset_0_4px_4px_0_rgba(0,0,0,0.15)] ${colorize2 ? "bg-black/80 transition-colors duration-2000" : ""}`}>
-                        <div className="flex flex-col gap-3">
-                            <h3 className="relative font-bold text-[22px] text-[#b43777] 
+                        <div className="flex flex-col gap-1 sm:gap-3">
+                            <h3 className="relative font-bold text-[20px] sm:text-[22px] text-[#b43777] 
                             [text-shadow:1.2px_1.2px_4px_rgba(0,0,0,0.8),0_0_12px_rgba(180,55,119,0.55)]">
                                 {groupsDisplay.length > 1 ? "Groups" : "Group"}
                             </h3>
@@ -226,7 +226,7 @@ const AnswerHintsBox = (props: AnswerHintsBoxProps) => {
                                     filter: { duration: 0.8, ease: "easeOut" },
                                     scale: { duration: 0.3, ease: "easeInOut" },
                                 }}
-                                className={`text-white text-[24px] font-semibold 
+                                className={`text-white text-xl sm:text-2xl font-semibold 
                                 [text-shadow:1.2px_1.2px_4px_rgba(0,0,0,0.8),0_0_12px_rgba(180,55,119,0.25)] ${!showHint2 ? "cursor-pointer select-none transform-gpu" : ""}`}>
                                     {groupsDisplay.join(", ")}
                             </motion.span>
