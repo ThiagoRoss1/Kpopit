@@ -4,6 +4,7 @@ import type { IdolListItem } from "../../interfaces/gameInterfaces";
 import { AnimatePresence, motion } from "motion/react";
 import SearchIcon from "../../assets/icons/magnifying-glass-fill.svg";
 
+
 interface SearchBarProps {
   allIdols: IdolListItem[];
   value: string;
@@ -25,6 +26,7 @@ const SearchBar = (props: SearchBarProps) => {
   const [showList, setShowList] = useState(false);
   const [selectedIdol, setSelectedIdol] = useState<IdolListItem | null>(null);
   const [isTouched, setIsTouched] = useState<number | null>(null);
+  const pressTimeout = useRef<number | null>(null);
 
   const containerRef = useRef<HTMLDivElement>(null);
 
@@ -173,9 +175,9 @@ const SearchBar = (props: SearchBarProps) => {
                 y: -10,
                 opacity: 0,
               }}
-              className="absolute left-0 top-full w-full mt-2 rounded-3xl
-              overflow-y-auto overflow-x-hidden border border-white bg-linear-to-r from-black/5 via-[#b43777]/0 to-black/5
-              backdrop-blur-md shadow-lg z-50 drop-shadow-md sm:max-h-60 transform-gpu will-change-transform"
+              className={`absolute left-0 top-full w-full mt-2 rounded-3xl
+              ${suggestions.length === 1 ? "overflow-hidden" : "overflow-y-auto overflow-x-hidden"} border border-white bg-linear-to-r from-black/5 via-[#b43777]/0 to-black/5
+              backdrop-blur-md shadow-lg z-50 drop-shadow-md max-h-50 sm:max-h-60 transform-gpu will-change-transform`}
               // liquid glass if possible but using gradient for now (bg-linear-to-r from-[#000]/65 via-[#b43777]/80 to-[#000]/65)
             >
               {suggestions.map((suggestion) => {
@@ -186,8 +188,16 @@ const SearchBar = (props: SearchBarProps) => {
                 <motion.li
                   onHoverStart={() => setHoveredId(suggestion.id)}
                   onHoverEnd={() => setHoveredId(null)}
-                  onTouchStart={() => setIsTouched(suggestion.id)}
-                  onTouchEnd={() => setIsTouched(null)}
+                  onTouchStart={() => {
+                    pressTimeout.current = setTimeout(() => setIsTouched(suggestion.id), 100);
+                  }}
+                  onTouchEnd={() => {
+                    if (pressTimeout.current) {
+                      clearTimeout(pressTimeout.current)
+                    };
+                    setIsTouched(null);
+                  }}
+                  onContextMenu={(e) => e.preventDefault()}
                   whileHover={isUnique ? {
                     y: 0,
                     x: 20,
@@ -212,14 +222,14 @@ const SearchBar = (props: SearchBarProps) => {
                     stiffness: 250, 
                     damping: 25 }}
                     // #TODO: Fill animation not finished yet // 
-                  className={`relative px-4 py-3 cursor-pointer transition-colors duration-200
+                  className={`relative px-4 py-3 select-none cursor-pointer transition-colors duration-200 shadow=[0px_0px_0px_0px_rgba(0,0,0,0.35)]
                     hover:bg-linear-to-r hover:from-[#8a0449] hover:via-[#0d0314] hover:to-[#000000]/0 
                     bg-size-[200%_100%] bg-left hover:animate-[moveGradient_0.3s_linear_forwards]
                     ${isTouched === suggestion.id ? 
                       "bg-linear-to-r from-[#8a0449] via-[#0d0314] to-[#000000]/0 bg-size-[200%_100%] bg-left animate-[moveGradient_0.3s_linear_forwards]" : ""}
-                    flex grow gap-4 items-center backdrop-blur-md text-white drop-shadow-md 
+                    flex grow gap-4 items-center text-white drop-shadow-md 
                     border border-white/20 transform-gpu will-change-transform
-                    hover:shadow-[2px_2px_12px_8px_rgba(0,0,0,0.35)]`}
+                    hover:shadow-[2px_2px_12px_8px_rgba(0,0,0,0.35)]`} // had to remove backdrop-blur-md due "white corner glitch / artifact"
                   key={suggestion.id}
                   onClick={() => handleSuggestionClick(suggestion)}
                 >

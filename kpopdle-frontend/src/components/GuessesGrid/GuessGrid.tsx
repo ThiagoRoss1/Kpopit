@@ -139,10 +139,10 @@ const GuessesGrid = (props: GuessesGridProps) => {
 
   return (
     guesses.length > 0 && (
-    <div className="w-full h-fit max-w-full sm:w-[1040px] mx-auto sm:flex items-center overflow-x-auto">
-      <div className="grid grid-cols-8 gap-y-8 gap-x-2.5 p-4 justify-items-center items-center w-max mx-auto">
+    <div className="w-full h-fit max-w-full sm:w-[1040px] mx-auto sm:flex items-center overflow-x-auto pb-4 sm:pb-0">
+      <div className="grid grid-cols-8 gap-y-4 sm:gap-y-8 gap-x-1.5 sm:gap-x-2.5 p-2 sm:p-4 justify-items-center items-center w-max mx-auto">
         {headers.map((header) => (
-          <div key={header} className="font-bold text-[10px] sm:text-[16px] text-pretty text-center text-white w-full h-fit pb-1 -mb-5"> {/* see responsivity */}
+          <div key={header} className="font-bold text-[12px] sm:text-[16px] text-pretty text-center text-white w-full h-fit pb-1 sm:pb-1 -mb-3 sm:-mb-5"> {/* see responsivity */}
             {header}
             <hr className="w-full h-fill sm:h-1 bg-white rounded-[20px] mt-2" />
           </div>
@@ -163,7 +163,7 @@ const GuessesGrid = (props: GuessesGridProps) => {
               initial={{ scale: 0.8, opacity: 0 }}
               animate={{ scale: 1, opacity: 1 }}
               transition={{ duration: 0.01, ease: [0.34, 1.56, 0.64, 1] }}        
-              className="relative bg-[#ffffff] shadow-[0_0_10px_2px_rgba(255,255,255,0.1),0_0_10px_2px_rgba(255,255,255,0.1)] w-18 h-18 sm:h-28 sm:w-28 rounded-[18px] 
+              className="relative bg-[#ffffff] shadow-[0_0_10px_2px_rgba(255,255,255,0.1),0_0_10px_2px_rgba(255,255,255,0.1)] w-18 h-18 sm:h-28 sm:w-28 rounded-2xl sm:rounded-[18px] 
               flex flex-col items-center justify-center text-center border-2 border-white hover:brightness-110 hover:cursor-default hover:scale-105 transition-transform duration-300
               transform-gpu overflow-hidden">
                 <img
@@ -193,7 +193,7 @@ const GuessesGrid = (props: GuessesGridProps) => {
               }
             }}
             className={`${getStatusColor(guess.feedback.groups?.status)} relative w-18 h-18 sm:h-28 sm:w-28 flex flex-col items-center justify-center 
-            text-center rounded-[18px] inset-shadow-sm border-2 border-white hover:brightness-110 hover:cursor-default transform-3d perspective-[1000px] transform-gpu`}>
+            text-center rounded-2xl sm:rounded-[18px] inset-shadow-sm border-2 border-white hover:brightness-110 hover:cursor-default transform-3d perspective-[1000px] transform-gpu`}>
               <p className="text-white text-[10px] sm:text-[14px] font-light [text-shadow:1.6px_1.6px_3px_rgba(26,26,26,0.8)]">
                 {Array.isArray(guess.guessed_idol_data.groups)
                   ? guess.guessed_idol_data.groups.map((groups, index) => (
@@ -217,7 +217,7 @@ const GuessesGrid = (props: GuessesGridProps) => {
               }
             }}
             className={`${getStatusColor(guess.feedback.companies?.status)} relative w-18 h-18 sm:h-28 sm:w-28 flex flex-col items-center justify-center 
-            text-center rounded-[18px] inset-shadow-sm border-2 border-white hover:brightness-110 hover:cursor-default transform-3d perspective-[1000px] transform-gpu`}>
+            text-center rounded-2xl sm:rounded-[18px] inset-shadow-sm border-2 border-white hover:brightness-110 hover:cursor-default transform-3d perspective-[1000px] transform-gpu`}>
               <p className="text-white text-[10px] sm:text-[14px] font-light [text-shadow:1.6px_1.6px_3px_rgba(26,26,26,0.8)]">
                 {Array.isArray(guess.guessed_idol_data.companies)
                   ? guess.guessed_idol_data.companies.map((companies, index) => (
@@ -241,7 +241,7 @@ const GuessesGrid = (props: GuessesGridProps) => {
               }
             }}
             className={`${getStatusColor(guess.feedback.nationality?.status)} relative w-18 h-18 sm:h-28 sm:w-28 flex flex-col items-center justify-center 
-            text-center rounded-[18px] inset-shadow-sm border-2 border-white hover:brightness-110 hover:cursor-default transform-3d perspective-[1000px] transform-gpu`}>
+            text-center rounded-2xl sm:rounded-[18px] inset-shadow-sm border-2 border-white hover:brightness-110 hover:cursor-default transform-3d perspective-[1000px] transform-gpu`}>
               <p className="text-white text-[10px] sm:text-[14px] font-light [text-shadow:1.6px_1.6px_3px_rgba(26,26,26,0.8)]">
                 {Array.isArray(guess.guessed_idol_data.nationality)
                   ? guess.guessed_idol_data.nationality.map(
@@ -267,7 +267,7 @@ const GuessesGrid = (props: GuessesGridProps) => {
               }
             }}
             className={`${getStatusColor(guess.feedback.birth_year?.status)} relative w-18 h-18 sm:h-28 sm:w-28 flex flex-col items-center justify-center 
-            text-center rounded-[18px] inset-shadow-sm border-2 border-white hover:brightness-110 hover:cursor-default transform-3d perspective-[1000px] transform-gpu`}>
+            text-center rounded-2xl sm:rounded-[18px] inset-shadow-sm border-2 border-white hover:brightness-110 hover:cursor-default transform-3d perspective-[1000px] transform-gpu`}>
               {guess.feedback.birth_year?.status !== "correct" && (
                 <img src={getStatusIcon(guess.feedback.birth_year?.status)}
                 alt="Birth Year"
@@ -289,7 +289,7 @@ const GuessesGrid = (props: GuessesGridProps) => {
               }
             }}
             className={`${getStatusColor(guess.feedback.idol_debut_year?.status)} relative w-18 h-18 sm:h-28 sm:w-28 flex flex-col items-center justify-center 
-            text-center rounded-[18px] inset-shadow-sm border-2 border-white hover:brightness-110 hover:cursor-default transform-3d perspective-[1000px] transform-gpu`}>
+            text-center rounded-2xl sm:rounded-[18px] inset-shadow-sm border-2 border-white hover:brightness-110 hover:cursor-default transform-3d perspective-[1000px] transform-gpu`}>
               {guess.feedback.idol_debut_year?.status !== "correct" && (
                 <img src={getStatusIcon(guess.feedback.idol_debut_year?.status)}
                 alt="Debut" 
@@ -310,7 +310,7 @@ const GuessesGrid = (props: GuessesGridProps) => {
               }
             }}
             className={`${getStatusColor(guess.feedback.height?.status)} relative w-18 h-18 sm:h-28 sm:w-28 flex flex-col items-center justify-center 
-            text-center rounded-[18px] inset-shadow-sm border-2 border-white hover:brightness-110 hover:cursor-default transform-3d perspective-[1000px] transform-gpu`}>
+            text-center rounded-2xl sm:rounded-[18px] inset-shadow-sm border-2 border-white hover:brightness-110 hover:cursor-default transform-3d perspective-[1000px] transform-gpu`}>
               {guess.feedback.height?.status !== "correct" && (
                 <img src={getStatusIcon(guess.feedback.height?.status)}
                 alt="Height"
@@ -339,7 +339,7 @@ const GuessesGrid = (props: GuessesGridProps) => {
               }
             }}
             className={`${getStatusColor(guess.feedback.position?.status)} relative w-18 h-18 sm:h-28 sm:w-28 flex flex-col items-center justify-center 
-            text-center rounded-[18px] inset-shadow-sm border-2 border-white hover:brightness-110 hover:cursor-default transform-3d perspective-[1000px] transform-gpu`}>
+            text-center rounded-2xl sm:rounded-[18px] inset-shadow-sm border-2 border-white hover:brightness-110 hover:cursor-default transform-3d perspective-[1000px] transform-gpu`}>
               <p className="text-white text-[10px] sm:text-[14px] font-light [text-shadow:1.6px_1.6px_3px_rgba(26,26,26,0.8)]">
                 {Array.isArray(guess.guessed_idol_data.position)
                   ? guess.guessed_idol_data.position.map((position, index) => {

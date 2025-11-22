@@ -1,3 +1,4 @@
+import { useState, useRef } from "react";
 import ArrowUp from "../../assets/icons/arrow-fat-line-up-fill.svg";
 import ArrowDown from "../../assets/icons/arrow-fat-line-down-fill.svg";
 import { X } from "lucide-react";
@@ -49,30 +50,48 @@ const statuses = [
 const FeedbackSquares = (props: FeedbackSquaresProps) => {
   const { onClose } = props;
 
+  const [isTouched, setIsTouched] = useState<boolean>(false);
+  const hideTimeout = useRef<number | null>(null);
+
     return (
         <div className="w-full flex items-center justify-center">
-            <div className="group sm:w-90 sm:h-30 rounded-2xl border border-white/0 items-center justify-center flex relative">
-              <div className="opacity-0 group-hover:opacity-100 absolute -top-1 rounded-lg right-2 w-5 h-5 mt-2">
+            <div className="group w-90 h-25 sm:w-90 sm:h-30 rounded-2xl border border-white/0 items-center justify-center flex relative"
+   
+            onTouchStart={() => {
+              if (hideTimeout.current) {
+                clearTimeout(hideTimeout.current);
+                hideTimeout.current = null;
+              }
+
+              setIsTouched(true);
+              }}
+              onTouchEnd={() => {
+                hideTimeout.current = setTimeout(() => {
+                  setIsTouched(false);
+                }, 1200);
+                }}
+              >
+              <div className={`${isTouched ? "opacity-100" : "opacity-0"} sm:opacity-0 sm:group-hover:opacity-100 absolute -top-1 rounded-lg right-2 w-5 h-5 mt-2 pointer-events-auto`}>
                 <button className="flex items-center justify-center w-full h-full
                 hover:scale-105 hover:brightness-110 hover:cursor-pointer transition-all duration-300 transform-gpu" onClick={onClose}>
-                  <X color="white" className="w-5 h-5" />
+                  <X color="white" className="w-5 h-5 sm:w-5 sm:h-5" />
                 </button>
               </div>
 
-              <div className="grid grid-cols-5 gap-2">
+              <div className="grid grid-cols-5 gap-2 sm:gap-2 pointer-events-none">
                 {statuses.map((status, index) => (
                   <div
                   key={index}
                   className="flex flex-col items-center justify-center gap-1">
 
-                    <div className={`sm:w-10 sm:h-10 flex items-center justify-center rounded-lg border border-white ${getStatusColor(status.key)}`}>
+                    <div className={`w-10 h-10 sm:w-10 sm:h-10 flex items-center justify-center rounded-lg border border-white ${getStatusColor(status.key)}`}>
                     
                     {getStatusIcon(status.key) && (
-                      <img src={getStatusIcon(status.key)!} alt="status" className="sm:w-10 sm:h-10" draggable={false} />
+                      <img src={getStatusIcon(status.key)!} alt="status" className="w-10 h-10 sm:w-10 sm:h-10" draggable={false} />
                     )}
                       </div>
 
-                      <span className="normal-font font-bold text-white sm:text-[12px]">
+                      <span className="normal-font font-bold text-white text-[12px] sm:text-[12px]">
                         {status.label}
                       </span>
                     </div>
