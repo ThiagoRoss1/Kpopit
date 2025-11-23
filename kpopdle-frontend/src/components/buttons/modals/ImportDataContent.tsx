@@ -32,7 +32,7 @@ const ImportDataText = (props: ImportDataTextProps) => {
                     </span>
                     
                     <div className="w-full flex flex-col justify-center items-center gap-4">
-                        <input className="w-full bg-transparent h-20 rounded-2xl border border-white text-center text-3xl 
+                        <input className="w-full bg-transparent h-20 sm:h-20 rounded-2xl border border-white text-center text-3xl 
                         [text-shadow:1.2px_1.2px_4px_rgba(0,0,0,0.8)]"
                         maxLength={7}
                         type="text"

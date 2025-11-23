@@ -139,7 +139,7 @@ const GuessesGrid = (props: GuessesGridProps) => {
 
   return (
     guesses.length > 0 && (
-    <div className="w-full h-fit max-w-full sm:w-[1040px] mx-auto sm:flex items-center overflow-x-auto pb-4 sm:pb-0">
+    <div className="w-full h-fit sm:w-[1040px] mx-auto sm:flex items-center overflow-x-auto pb-4 sm:pb-0">
       <div className="grid grid-cols-8 gap-y-4 sm:gap-y-8 gap-x-1.5 sm:gap-x-2.5 p-2 sm:p-4 justify-items-center items-center w-max mx-auto">
         {headers.map((header) => (
           <div key={header} className="font-bold text-[12px] sm:text-[16px] text-pretty text-center text-white w-full h-fit pb-1 sm:pb-1 -mb-3 sm:-mb-5"> {/* see responsivity */}

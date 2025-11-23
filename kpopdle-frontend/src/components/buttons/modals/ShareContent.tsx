@@ -109,7 +109,7 @@ const ShareText = (props: ShareContentProps) => {
 
             <div className="w-full">
                 <div className="flex flex-row justify-center items-center gap-10 mt-3">
-                    <button className={`sm:w-30 sm:h-12 bg-black/40 rounded-2xl flex items-center justify-center ${hasWon ? "hover:bg-black/70 hover:cursor-pointer hover:scale-105" : "cursor-normal" } transition-all duration-300 transform-gpu`}
+                    <button className={`w-30 h-12 sm:w-30 sm:h-12 bg-black/40 rounded-2xl flex items-center justify-center ${hasWon ? "hover:bg-black/70 hover:cursor-pointer hover:scale-105" : "cursor-normal" } transition-all duration-300 transform-gpu`}
                         type='button'      
                         onClick={(() => {
                             if (hasWon) {
@@ -117,7 +117,7 @@ const ShareText = (props: ShareContentProps) => {
                             }
                         })}>
                         <div className='relative flex flex-row items-center justify-center gap-2'>
-                            <Copy className='sm:w-6 sm:h-6' />
+                            <Copy className='w-6 h-6 sm:w-6 sm:h-6' />
                             <span className='text-base'>Copy</span>
                         </div>
                     </button>
@@ -129,8 +129,8 @@ const ShareText = (props: ShareContentProps) => {
                                 animate={{ opacity: 1, y: 0 }}
                                 transition={{ duration: 0.2, ease: "easeOut" }}
                                 exit={{ opacity: 0, y: 20 }}
-                                className="absolute flex bottom-18 left-72 justify-center items-center sm:w-27 sm:h-7">
-                                    <div className="flex justify-center items-center bg-[#242424] sm:w-25 sm:h-7 rounded-xl border border-white
+                                className="absolute flex bottom-18 left-20 sm:bottom-18 sm:left-72 justify-center items-center w-27 h-7 sm:w-27 sm:h-7">
+                                    <div className="flex justify-center items-center bg-[#242424] w-25 h-7 sm:w-25 sm:h-7 rounded-xl border border-white
                                     shadow-[0_0_10px_2px_rgba(255,255,255,0.25),0_0_10px_2px_rgba(255,255,255,0.25)]">
                                         <span className="relative font-medium text-base text-white drop-shadow-lg
                                         [text-shadow:1.2px_1.2px_4px_rgba(0,0,0,1.8),0_0_12px_rgba(255,255,255,2.55)]">
@@ -141,7 +141,7 @@ const ShareText = (props: ShareContentProps) => {
                         )}
                     </AnimatePresence>
 
-                    <button className={`sm:w-30 sm:h-12 bg-black/40 rounded-2xl flex items-center justify-center ${hasWon ? "hover:bg-black/70 hover:cursor-pointer hover:scale-105" : "cursor-normal" } transition-all duration-300 transform-gpu`}
+                    <button className={`w-30 h-12 sm:w-30 sm:h-12 bg-black/40 rounded-2xl flex items-center justify-center ${hasWon ? "hover:bg-black/70 hover:cursor-pointer hover:scale-105" : "cursor-normal" } transition-all duration-300 transform-gpu`}
                         type='button'  
                         onClick={(() => {
                             if (hasWon) {
@@ -149,7 +149,7 @@ const ShareText = (props: ShareContentProps) => {
                             }
                         })}>
                         <div className='relative flex flex-row items-center justify-center gap-2'>
-                            <img src={Twitter} alt="Twitter" className='sm:w-6 sm:h-6' />
+                            <img src={Twitter} alt="Twitter" className='w-6 h-6 sm:w-6 sm:h-6' />
                             <span className='text-base'>Share</span>
                         </div>
                     </button>

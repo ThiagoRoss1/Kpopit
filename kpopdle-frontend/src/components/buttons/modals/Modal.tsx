@@ -60,7 +60,7 @@ const Modal = (props: ModalProps) => {
                                 </div>
                             </button>
                         ) : null}
-                        <h2 className="text-4xl font-bold bg-linear-to-b from-[#b43777] to-[#ec4850] bg-clip-text text-transparent drop-shadow-lg hover:cursor-default">
+                        <h2 className="text-3xl sm:text-4xl font-bold bg-linear-to-b from-[#b43777] to-[#ec4850] bg-clip-text text-transparent drop-shadow-lg hover:cursor-default">
                             {title}
                         </h2>
                             <div className={`${isTransferDataSubPages ? "justify-end flex-1 px-2" : "justify-center"} items-center flex`}>

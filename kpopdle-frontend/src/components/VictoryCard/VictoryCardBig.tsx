@@ -26,8 +26,8 @@ const VictoryCardBig = (props: VictoryCardBigProps) => {
     const yesterdayGroup = yesterdayIdolGroup && yesterdayIdolGroup.length > 0 ? yesterdayIdolGroup : "Soloist";
 
 return (
-    <div className="relative flex flex-col items-center justify-start w-full h-fit sm:w-[628px] sm:h-fit rounded-3xl border-2 border-white/50 
-    bg-radial from-[#db3189]/0 to-black/84 mb-10 text-white shadow-[2px_2px_10px_2px_rgba(0,0,0,0.25)]">
+    <div className="relative flex flex-col items-center justify-start w-106 h-fit sm:w-[628px] sm:h-fit rounded-3xl border-2 border-white/50 
+    bg-radial from-[#db3189]/0 to-black/84 mb-10 text-white shadow-[2px_2px_10px_2px_rgba(0,0,0,0.25)]"> {/* w-106 */}
 
         <div className="relative w-full items-center justify-center text-center mt-10 mb-2">
             <span className="text-2xl sm:text-2xl [text-shadow:1.2px_1.2px_4px_rgba(0,0,0,1.8),0_0_12px_rgba(255,255,255,0.6)]">Congratulations!</span>
@@ -59,11 +59,11 @@ return (
         </div>
 
         {/* Stats Container */}
-        <div className="relative w-full sm:h-25 mb-5 px-4 sm:px-6">
+        <div className="relative w-full h-25 sm:h-25 mb-5 px-4 sm:px-6">
             <div className="relative grid grid-cols-3 gap-5">
-                <div className="relative flex flex-col items-center justify-start text-center w-30 h-25 sm:w-45 sm:h-25 bg-linear-to-br from-[#db3189] to-[#511061] 
+                <div className="relative flex flex-col items-center justify-start text-center w-29 h-25 sm:w-45 sm:h-25 bg-linear-to-br from-[#db3189] to-[#511061] 
                     gap-0.5 rounded-[18px] sm:rounded-[20px]">
-                    <img src={TargetAttempt} alt="M" className="w-6 h-6 sm:w-6 sm:h-6 mt-2" />
+                    <img src={TargetAttempt} alt="M" className="w-6 h-6 sm:w-6 sm:h-6 mt-2" /> {/* w-27 */}
                     <span className="text-[22px] font-bold">
                         {attempts}
                     </span>
@@ -72,7 +72,7 @@ return (
                     </p>
                 </div>
 
-                <div className="relative flex flex-col items-center justify-start text-center w-30 h-25 sm:w-45 sm:h-25 bg-linear-to-br from-[#7a4de4] to-[#1f2686] 
+                <div className="relative flex flex-col items-center justify-start text-center w-29 h-25 sm:w-45 sm:h-25 bg-linear-to-br from-[#7a4de4] to-[#1f2686] 
                     gap-0.5 rounded-[18px] sm:rounded-[20px]">
                     <img src={RankPosition} alt="P" className="w-6 h-6 sm:w-6 sm:h-6 mt-2" />
                     <span className="text-[22px] font-bold">
@@ -83,7 +83,7 @@ return (
                     </span>
                 </div>
 
-                <div className="relative flex flex-col items-center justify-start text-center w-30 h-25 sm:w-45 sm:h-25 bg-linear-to-br from-[#ec5e65] to-[#802256] 
+                <div className="relative flex flex-col items-center justify-start text-center w-29 h-25 sm:w-45 sm:h-25 bg-linear-to-br from-[#ec5e65] to-[#802256] 
                     gap-0.5 rounded-[18px] sm:rounded-[20px]">
                     <img src={PositionTrend} alt="S" className="w-6 h-6 sm:w-6 sm:h-6 mt-2" />
                     <span className="text-[22px] font-bold">
@@ -131,8 +131,8 @@ return (
         {/* Share Container + Opens small card */}
         <div className="relative w-full h-12 sm:h-14 mb-5 px-4 sm:px-6">
             <button 
-                className="relative w-full h-full items-center justify-center text-center bg-linear-to-b from-[#b43777] to-transparent border border-white/60 
-                rounded-xl hover:brightness-105 hover:scale-105 hover:cursor-pointer transition-transform duration-500 transform-gpu" 
+                className="relative w-full h-full items-center justify-center text-center bg-linear-to-b from-transparent to-transparent border border-white/60 
+                rounded-xl hover:bg-black hover:brightness-105 hover:scale-105 hover:cursor-pointer transition-transform duration-500 transform-gpu" 
                 onClick={() => onShareClick?.()}
             >
                 <div className="relative flex flex-row w-full h-full items-center justify-center text-center gap-3">

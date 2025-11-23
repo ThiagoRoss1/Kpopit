@@ -30,6 +30,7 @@ import ExportDataText from "../../components/buttons/modals/ExportDataContent.ts
 import ChangelogText from "../../components/buttons/modals/ChangelogContent.tsx";
 import { useResetTimer } from "../../hooks/useResetTimer.tsx";
 import { useTransferDataLogic } from "../../hooks/useTransferDataLogic.tsx";
+import { useIsMobile } from "../../hooks/useIsMobile.tsx";
 import BackgroundStyle from "../../components/Background/BackgroundStyle.tsx";
 import FeedbackSquares from "../../components/FeedbackSquares/FeedbackSquares.tsx";
 import XLogo from "../../assets/icons/x-logo.svg";
@@ -49,6 +50,9 @@ function Home() {
   const [closeFeedbackSquares, setCloseFeedbackSquares] = useState<boolean>(false);
   // Counter
   const [attempts, setAttempts] = useState<number>(0);
+
+  // Is mobile
+  const isMobile = useIsMobile();
 
   // Transfer data logic hook
   const transferData = useTransferDataLogic();
@@ -405,7 +409,7 @@ function Home() {
       </div>
       )}
 
-      <div className="w-full flex flex-col items-center justify-center mt-2 mb-4">
+      <div className="w-full flex flex-col items-center justify-center mt-2 mb-4 overflow-x-auto">
         <GuessesGrid
           guesses={guesses}
           allIdols={allIdolsData || []}
@@ -451,7 +455,7 @@ function Home() {
       )}
 
       {/* Footer */}
-      <div className="w-full flex flex-col items-center justify-center mt-6 mb-2 gap-1">
+      <div className={`w-full flex flex-col items-center justify-center ${isMobile && guesses.length === 0 ? "mt-18" : "mt-6"} mb-2 gap-1`}>
         <div className="w-full flex flex-row items-center justify-center gap-3">
           <button
           className="flex items-center justify-center w-10 h-10 sm:w-10 sm:h-10 bg-black rounded-full hover:scale-110 hover:brightness-110 hover:cursor-pointer

@@ -86,29 +86,8 @@ const VictoryCardSmall = (props: VictoryCardSmallProps) => {
         };
     };
 
-return (
-    <GlassSurface
-        width={350}
-        height={588}
-        borderRadius={50}
-        backgroundOpacity={0.1}
-        borderWidth={0.04}
-        brightness={50}
-        opacity={0.93}
-        blur={11}
-        displace={2}
-        saturation={1}
-        distortionScale={-180}
-        redOffset={0}
-        greenOffset={10}
-        blueOffset={20}
-        xChannel="R"
-        yChannel="G"
-        mixBlendMode="normal" 
-        className="mb-10 sm:w-0.5 will-change-transform"
-    
-    >
-    <div className="relative flex flex-col items-center justify-start w-[350px] h-[588px] sm:w-[350px] sm:h-[588px] bg-radial brightness-115">
+    const content = (
+        <div className="relative flex flex-col items-center justify-start w-[350px] h-[588px] sm:w-[350px] sm:h-[588px] bg-radial brightness-115">
                             
                 {/* Icons Container */}
                 <div className="relative w-full h-25 sm:h-25 mb-2">
@@ -150,7 +129,7 @@ return (
 
                     {/* Idol Container */}
                     <div className="flex w-full items-center justify-center h-[100px] sm:h-[100px] mb-4">
-                        <div className={`relative flex items-center justify-center ${isOnMobile ? "bg-black/70" : "bg-white/2"} w-80 h-24 p-5 sm:w-80 sm:h-24 sm:p-5 rounded-[20px]
+                        <div className={`relative flex items-center justify-center ${isOnMobile ? "bg-black/80" : "bg-white/2"} w-80 h-24 p-5 sm:w-80 sm:h-24 sm:p-5 rounded-[20px]
                         hover:scale-105 hover:bg-black/70 hover:brightness-110 hover:cursor-default transform duration-300 transform-gpu`}> {/* Maybe shadow-2xl or lg */}
 
                             <div className="absolute left-5 flex items-center justify-center h-20 w-20 sm:h-20 sm:w-20 bg-transparent rounded-[20px] hover:scale-110 hover:rotate-4 transition-transform duration-500 will-change-transform transform-gpu">
@@ -171,7 +150,7 @@ return (
                     {/* Stats Container */}
                     <div className="flex w-full items-center justify-center h-20 sm:h-20 mb-4">
                         <div className="flex flex-row items-center justify-between w-80 h-20 sm:w-80 sm:h-20">
-                            <div className={`relative flex items-center justify-center text-center ${isOnMobile ? "bg-black/60" : "bg-white/2"} w-36 h-20 sm:w-36 sm:h-20 rounded-[20px] 
+                            <div className={`relative flex items-center justify-center text-center ${isOnMobile ? "bg-black/80" : "bg-white/2"} w-36 h-20 sm:w-36 sm:h-20 rounded-[20px] 
                             hover:scale-105 hover:bg-black/60 hover:brightness-110 hover:cursor-default transform duration-300 shadow-2xl transform-gpu`}>
                                 <div className="flex flex-col items-center justify-center text-center gap-0.5">
                                     <p className="font-bold text-base sm:text-[18px] text-[#ce757a] brightness-105">
@@ -184,7 +163,7 @@ return (
                                 </div>
                             </div>
 
-                            <div className={`relative flex items-center justify-center text-center ${isOnMobile ? "bg-black/60" : "bg-white/2"} w-36 h-20 sm:w-36 sm:h-20 rounded-[20px] 
+                            <div className={`relative flex items-center justify-center text-center ${isOnMobile ? "bg-black/80" : "bg-white/2"} w-36 h-20 sm:w-36 sm:h-20 rounded-[20px] 
                             hover:scale-105 hover:bg-black/60 hover:brightness-110 hover:cursor-default transform duration-300 shadow-2xl transform-gpu`}>
                                 <div className="flex flex-col items-center justify-center text-center gap-0.5">
                                     <span className="font-bold text-base sm:text-[18px] text-[#ce757a] brightness-105">
@@ -264,7 +243,40 @@ return (
                     </div>
  
     </div>
-    </GlassSurface>
+    )
+
+return (
+    <>    
+    {!isOnMobile ? (
+        <GlassSurface
+            width={350}
+            height={588}
+            borderRadius={50}
+            backgroundOpacity={0.1}
+            borderWidth={0.04}
+            brightness={50}
+            opacity={0.93}
+            blur={11}
+            displace={2}
+            saturation={1}
+            distortionScale={-180}
+            redOffset={0}
+            greenOffset={10}
+            blueOffset={20}
+            xChannel="R"
+            yChannel="G"
+            mixBlendMode="normal" 
+            className="mb-10 sm:w-0.5 will-change-transform"   
+        >
+            {content}   
+        </GlassSurface>
+    ) : (
+        <div className="relative flex flex-col w-full h-fit bg-gray-900 rounded-[50px] backdrop-blur-lg border border-white">
+            {content}
+        </div>
+    )}
+    </>
+
 )};
 
 export default VictoryCardSmall;
