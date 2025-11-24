@@ -1,7 +1,7 @@
 // Search bar component
 import React, { useState, useEffect, useRef } from "react";
 import type { IdolListItem } from "../../interfaces/gameInterfaces";
-import { AnimatePresence, motion } from "motion/react";
+import { AnimatePresence, motion} from "motion/react";
 import SearchIcon from "../../assets/icons/magnifying-glass-fill.svg";
 
 
@@ -26,6 +26,8 @@ const SearchBar = (props: SearchBarProps) => {
   const [showList, setShowList] = useState(false);
   const [selectedIdol, setSelectedIdol] = useState<IdolListItem | null>(null);
   const [isTouched, setIsTouched] = useState<number | null>(null);
+  const [isClicked, setIsClicked] = useState<boolean>(false);
+
   const pressTimeout = useRef<number | null>(null);
 
   const containerRef = useRef<HTMLDivElement>(null);
@@ -123,13 +125,22 @@ const SearchBar = (props: SearchBarProps) => {
               placeholder="Search for an idol or group..."
               onFocus={() => value.length > 0 && setShowList(true)}
             />
-            <button
+            <motion.button
+            onTapStart={() => setIsClicked(true)}
+            whileTap={{ scale: 0.88 }}
+            animate={{ scale: 1}}
+            transition={{ 
+              type: "spring", 
+              duration: 0.01,
+              ease: "easeInOut",
+            }}
+            onAnimationComplete={() => setIsClicked(false)}
             onMouseEnter={() => setIsButtonHovered(true)}
             onMouseLeave={() => setIsButtonHovered(false)}
-              className="shrink-0 w-10 h-10 text-white font-semibold rounded-full 
+              className={`shrink-0 w-10 h-10 text-white font-semibold rounded-full 
                   bg-linear-to-br from-[#b43777]/80 to-[#ce757a]/80 backdrop-blur-md shadow-lg
-                  border border-white/80 transform transition-all duration-300 hover:brightness-125 hover:scale-108 
-                  hover:border-white hover:cursor-pointer hover:bg-linear-to-br hover:from-[#b43777] hover:to-[#ce757a] hover:rotate-15"
+                  border border-white/80 transform transition-all ${!isClicked ? "duration-300" : ""} hover:brightness-125 hover:scale-108 
+                  hover:border-white hover:cursor-pointer hover:bg-linear-to-br hover:from-[#b43777] hover:to-[#ce757a] hover:rotate-15`}
               onClick={() => {
                 if (!disabled && selectedIdol && value.trim().length > 0 && (selectedIdol.artist_name.toLocaleLowerCase() === value.trim().toLocaleLowerCase())) {
                 onSubmit?.();
@@ -154,7 +165,7 @@ const SearchBar = (props: SearchBarProps) => {
                   damping: 20
                 }}
               />
-            </button>
+            </motion.button>
           <AnimatePresence>
           {showList && suggestions.length > 0 && (
             <motion.ul
