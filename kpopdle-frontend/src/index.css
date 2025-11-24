@@ -5,7 +5,13 @@
 
 @custom-variant dark (&:is(.dark *));
 
-@tailwind utilities;
+
+
+@theme {
+  --breakpoint-xxs: 360px;
+  --breakpoint-xs: 414px;
+  --breakpoint-xm: 430px;
+}
 
 body {
   @apply min-h-screen font-[DynaPuff];

@@ -99,7 +99,7 @@ const AboutText = () => {
                     </div>
 
                     <div className="w-full flex flex-col items-center justify-center mt-6">
-                        <span className="text-xl font-semibold">Thank you for playing Kpopdle! 💜</span>
+                        <span className="xxs:text-lg xs:text-xl font-semibold">Thank you for playing Kpopdle! 💜</span>
                     </div>
                 </div>
             </div>

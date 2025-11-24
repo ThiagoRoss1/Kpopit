@@ -372,7 +372,7 @@ function Home() {
       </div>
 
       {!endGame && !showVictoryCard && (
-        <div className="flex text-center items-center justify-center w-100 sm:w-[194px] h-5 sm:h-[19px] mb-1">
+        <div className="flex text-center items-center justify-center w-full max-w-100 sm:w-[194px] h-5 sm:h-[19px] mb-1">
           <span className="text-[14px] sm:text-[16px] drop-shadow-lg text-[#d7d7d7]/85">
             Guess today's idol...
           </span>
@@ -399,7 +399,7 @@ function Home() {
       
       {!endGame && !showVictoryCard && (
       <div className="flex flex-row items-center justify-center mb-10">
-        <span className="leading-tight text-[16px] sm:text-base">
+        <span className="leading-tight text-base sm:text-base">
           <span className="text-[#b43777] [text-shadow:1.2px_1.2px_4px_rgba(0,0,0,1.8),0_0_12px_rgba(180,55,119,1.0)] brightness-110">
             {dailyUserCount?.data.user_count}
           </span> <span className="text-[#d7d7d7]/85 [text-shadow:1.2px_1.2px_4px_rgba(0,0,0,1.8),0_0_12px_rgba(255,255,255,0.2)]">
@@ -458,21 +458,21 @@ function Home() {
       <div className={`w-full flex flex-col items-center justify-center ${isMobile && guesses.length === 0 ? "mt-18" : "mt-6"} mb-2 gap-1`}>
         <div className="w-full flex flex-row items-center justify-center gap-3">
           <button
-          className="flex items-center justify-center w-10 h-10 sm:w-10 sm:h-10 bg-black rounded-full hover:scale-110 hover:brightness-110 hover:cursor-pointer
+          className="flex items-center justify-center max-xxs:w-10 max-xxs:h-10 xxs:w-10 xxs:h-10 xs:w-10 xs:h-10 sm:w-10 sm:h-10 bg-black rounded-full hover:scale-110 hover:brightness-110 hover:cursor-pointer
           transition-all duration-300 transform-gpu" onClick={() => window.open("https://x.com/TgoRoss1", "_blank")}>
-            <img src={XLogo} alt="X" className="w-7.5 h-7.5 sm:w-7.5 sm:h-7.5 items-center justify-center" draggable={false} />
+            <img src={XLogo} alt="X" className="max-xxs:w-7.5 max-xxs:h-7.5 xxs:w-7.5 xxs:h-7.5 xs:w-7.5 xs:h-7.5 sm:w-7.5 sm:h-7.5 items-center justify-center" draggable={false} />
           </button>
           
-          <button className="flex items-center justify-center w-10 h-10 sm:w-10 sm:h-10 bg-white rounded-full hover:scale-110 hover:brightness-110 hover:cursor-pointer
+          <button className="flex items-center justify-center max-xxs:w-10 max-xxs:h-10 xxs:w-10 xxs:h-10 xs:w-10 xs:h-10 sm:w-10 sm:h-10 bg-white rounded-full hover:scale-110 hover:brightness-110 hover:cursor-pointer
           transition-all duration-300 transform-gpu" onClick={() => {setShowModal("about")}}>
-            <Info className="w-10 h-10 sm:w-10 sm:h-10" />
+            <Info className="max-xxs:w-10 max-xxs:h-10 xxs:w-10 xxs:h-10 xs:w-10 xs:h-10 sm:w-10 sm:h-10" />
 
           </button>
         </div>
 
         <div className="w-full flex items-center justify-center">
           <Link to="/privacy-policy">
-            <span className="normal-font font-bold text-white text-base sm:text-base hover:underline">Privacy Policy</span>
+            <span className="normal-font font-bold text-white max-xxs:text-[14px] xxs:text-[14px] xs:text-base sm:text-base hover:underline">Privacy Policy</span>
           </Link>
         </div>
       </div>

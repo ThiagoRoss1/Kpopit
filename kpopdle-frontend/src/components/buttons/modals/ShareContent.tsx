@@ -129,7 +129,7 @@ const ShareText = (props: ShareContentProps) => {
                                 animate={{ opacity: 1, y: 0 }}
                                 transition={{ duration: 0.2, ease: "easeOut" }}
                                 exit={{ opacity: 0, y: 20 }}
-                                className="absolute flex bottom-18 left-20 sm:bottom-18 sm:left-72 justify-center items-center w-27 h-7 sm:w-27 sm:h-7">
+                                className="absolute flex bottom-18 max-xxs:left-9 xxs:left-14 xs:left-20 sm:bottom-18 sm:left-72 justify-center items-center w-27 h-7 sm:w-27 sm:h-7">
                                     <div className="flex justify-center items-center bg-[#242424] w-25 h-7 sm:w-25 sm:h-7 rounded-xl border border-white
                                     shadow-[0_0_10px_2px_rgba(255,255,255,0.25),0_0_10px_2px_rgba(255,255,255,0.25)]">
                                         <span className="relative font-medium text-base text-white drop-shadow-lg

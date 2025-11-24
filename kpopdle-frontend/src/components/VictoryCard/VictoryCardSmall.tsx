@@ -87,7 +87,7 @@ const VictoryCardSmall = (props: VictoryCardSmallProps) => {
     };
 
     const content = (
-        <div className="relative flex flex-col items-center justify-start w-[350px] h-[588px] sm:w-[350px] sm:h-[588px] bg-radial brightness-115">
+        <div className="relative flex flex-col items-center justify-start max-xxs:w-[320px] max-xxs:h-[600px] xxs:w-[340px] xxs:h-[570px] xs:w-[350px] xs:h-[588px] sm:w-[350px] sm:h-[588px] bg-radial brightness-115">
                             
                 {/* Icons Container */}
                 <div className="relative w-full h-25 sm:h-25 mb-2">
@@ -199,7 +199,7 @@ const VictoryCardSmall = (props: VictoryCardSmallProps) => {
                                         animate={{ opacity: 1, y: 0 }}
                                         transition={{ duration: 0.2, ease: "easeOut" }}
                                         exit={{ opacity: 0, y: 20 }}
-                                        className="absolute flex bottom-48 left-22 justify-center items-center w-44 h-7 sm:w-44 sm:h-7">
+                                        className="absolute flex max-xxs:bottom-46 max-xxs:left-19 xxs:bottom-44 xs:bottom-48 xxs:left-22 justify-center items-center w-44 h-7 sm:w-44 sm:h-7">
                                             <div className="flex justify-center items-center bg-transparent w-42 h-7 sm:w-42 sm:h-7 rounded-xl border border-[#ce757a]
                                             shadow-[0_0_10px_2px_rgba(206,117,122,0.25),0_0_10px_2px_rgba(206,117,122,0.25)]">
                                                 <span className="relative font-medium text-base leading-tight bg-linear-to-r from-[#b43777] to-[#ce757a] brightness-105
