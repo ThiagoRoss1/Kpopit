@@ -276,10 +276,12 @@ function Home() {
   const handleGuessSubmit = async () => {
     if (!currentGuess || !gameData || !allIdolsData) return;
 
+    const cleanName = currentGuess.split(" (")[0].trim();
+
     // Look for idol
     const guessedIdolObject = allIdolsData.find(
       (idol: IdolListItem) =>
-        idol.artist_name.toLowerCase() === currentGuess.toLowerCase()
+        idol.artist_name.toLowerCase() === cleanName.toLowerCase() // idol.artist_name.toLowerCase() === currentGuess.toLowerCase() <- Before adding groups at searchbar
     );
 
     if (guessedIdolObject?.id === gameData.answer_id && !isCorrect) {
@@ -448,7 +450,7 @@ function Home() {
           <span className="text-white">
             Yesterday's idol was
           </span> <span className="text-[#b43777] [text-shadow:1.2px_1.2px_4px_rgba(0,0,0,1.8),0_0_12px_rgba(180,55,119,1.0)] brightness-105">
-            {yesterdayArtist ? `${yesterdayArtist} (${yesterdayArtistGroup})` : "unknown"}
+            {yesterdayArtist ? `${yesterdayArtist} (${yesterdayArtistGroup && yesterdayArtistGroup.length > 0 ? yesterdayArtistGroup : "Soloist"})` : "Unknown"}
           </span>
         </span>
       </div>

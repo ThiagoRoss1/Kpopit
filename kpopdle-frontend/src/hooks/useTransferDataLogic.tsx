@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { useQuery, useMutation } from '@tanstack/react-query';
+import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { addGeneratedCodes, redeemTransferCode, fetchGameState, getActiveTransferCode } from '../services/api';
 import { encryptToken, decryptToken } from '../utils/tokenEncryption';
 import type { GeneratedCodes, GuessResponse, RedeemUserToken } from '../interfaces/gameInterfaces';
@@ -9,6 +9,8 @@ export const useTransferDataLogic = () => {
     const [generatedCodes, setGeneratedCodes] = useState<string | null>(null);
     const [expiresAt, setExpiresAt] = useState<string | null>(null);
     const [redeemError, setRedeemError] = useState<string | null>(null);
+
+    const queryClient = useQueryClient();
 
     const { data: activeCodeData } = useQuery<GeneratedCodes>({
         queryKey: ['activeTransferCode'],
@@ -42,6 +44,7 @@ export const useTransferDataLogic = () => {
         onSuccess: (data) => {
             setGeneratedCodes(data.transfer_code);  
             setExpiresAt(data.expires_at);
+            queryClient.invalidateQueries({ queryKey: ['activeTransferCode'] }); // Refetch without the need to reload
             
             console.log("Generated Codes:", data.transfer_code);
             console.log("Expires at:", data.expires_at);

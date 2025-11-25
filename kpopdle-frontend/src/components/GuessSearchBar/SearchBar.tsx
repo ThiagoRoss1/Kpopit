@@ -94,11 +94,21 @@ const SearchBar = (props: SearchBarProps) => {
   const [hoveredId, setHoveredId] = useState<number | null>(null);
   const [isButtonHovered, setIsButtonHovered] = useState(false);
 
+  // Format display name
+  const formatDisplayName = (idol: IdolListItem) => {
+    const groups = idol.groups?.join(", ") || "Soloist";  // <- Added Groups display
+    return `${idol.artist_name} (${groups})`;
+  };
+  
   // Handle suggestion click
   const handleSuggestionClick = (suggestion: IdolListItem) => {
-    onIdolSelect(suggestion.artist_name);
+    onIdolSelect(formatDisplayName(suggestion));  // suggestion.artist_name <- Before adding groups at searchbar
     setSelectedIdol(suggestion);
     setSuggestions([]);
+  };
+
+  const extractArtistName = (displayValue: string) => {
+    return displayValue.split(" (")[0].trim(); // <- Added Groups display
   };
   // Return JSX
   return (
@@ -108,7 +118,10 @@ const SearchBar = (props: SearchBarProps) => {
         <form className="w-full p-2" 
         onSubmit={(e) => {
           e.preventDefault();
-                if (!disabled && selectedIdol && value.trim().length > 0 && (selectedIdol.artist_name.toLocaleLowerCase() === value.trim().toLocaleLowerCase())) {
+          const cleanName = extractArtistName(value);
+          // value.trim().toLocaleLowerCase() <- Before adding groups at searchbar
+
+                if (!disabled && selectedIdol && cleanName.length > 0 && (selectedIdol.artist_name.toLocaleLowerCase() === cleanName.toLocaleLowerCase())) {
                 onSubmit?.();
                 setShowList(false);
                 setSelectedIdol(null);
@@ -142,7 +155,10 @@ const SearchBar = (props: SearchBarProps) => {
                   border border-white/80 transform transition-all ${!isClicked ? "duration-300" : ""} hover:brightness-125 hover:scale-108 
                   hover:border-white hover:cursor-pointer hover:bg-linear-to-br hover:from-[#b43777] hover:to-[#ce757a] hover:rotate-15`}
               onClick={() => {
-                if (!disabled && selectedIdol && value.trim().length > 0 && (selectedIdol.artist_name.toLocaleLowerCase() === value.trim().toLocaleLowerCase())) {
+                const cleanName = extractArtistName(value);
+                // value.trim().toLocaleLowerCase() <- Before adding groups at searchbar
+                
+                if (!disabled && selectedIdol && cleanName.length > 0 && (selectedIdol.artist_name.toLocaleLowerCase() === cleanName.toLocaleLowerCase())) {
                 onSubmit?.();
                 setShowList(false);
                 setSelectedIdol(null);

@@ -1,5 +1,6 @@
 import sqlite3
-import datetime
+from datetime import datetime, timezone, timedelta, date
+from zoneinfo import ZoneInfo
 import random
 from flask import Flask, jsonify, request, redirect, session
 from flask_cors import CORS
@@ -16,6 +17,29 @@ CORS(app, resources={r"/*": {"origins": "*"}})  # Allow all origins for static f
 
 # Admin blueprint - Register routes
 app.register_blueprint(admin_bp)
+
+TIMEZONE_BRT = ZoneInfo('America/Sao_Paulo')
+TIMEZONE_EST = ZoneInfo("America/New_York")
+# return datetime.now(timezone.utc) -- EU
+# return datetime.now(timezone.utc).date().isoformat() -- EU
+
+TEST_MODE = False
+TEST_DATE_OFFSET = 1 # Days to add/subtract (1 = tomorrow, -1 = yesterday)
+
+def get_today_now():
+    if TEST_MODE:
+        return datetime.now(TIMEZONE_EST) + timedelta(days=TEST_DATE_OFFSET)
+    
+    return datetime.now(TIMEZONE_EST)
+
+def get_today_date():
+    return get_today_now().date()
+
+def get_today_date_str() -> str:
+    return get_today_now().date().isoformat()
+
+def get_current_timestamp():
+    return get_today_now().strftime("%Y-%m-%d %H:%M:%S")
 
 # TEST_MODE = False
 # TEST_DATE_OFFSET = 1  # Dias para adicionar/subtrair (1 = amanhã, -1 = ontem)
@@ -138,7 +162,7 @@ def fetch_idol_companies(cursor, idol_id):
 def choose_idol_of_the_day(cursor):
     """Choose a random idol as the 'Idol of the Day'"""
 
-    today_date = datetime.date.today().isoformat()
+    today_date = get_today_date_str()
     # today_date = get_server_date()
 
     # Query to select today's idol
@@ -152,8 +176,8 @@ def choose_idol_of_the_day(cursor):
         return todays_pick['idol_id']
     
     # Check if the date is valid
-    time_delta = datetime.timedelta(days=20)
-    date_limit = (datetime.date.today() - time_delta).isoformat()
+    time_delta = timedelta(days=20)
+    date_limit = (get_today_date() - time_delta).isoformat()
     
     # If no pick for today, select a random idol - if is_published = 1
     sql_query = """
@@ -249,7 +273,7 @@ def get_daily_idol():
 
         if user_row:
             user_id = user_row["id"]
-            today = datetime.date.today().isoformat()
+            today = get_today_date_str()
             # today = get_server_date()
 
             cursor.execute("""
@@ -260,8 +284,8 @@ def get_daily_idol():
             last_played_row = cursor.fetchone()
 
             if last_played_row and last_played_row["last_played_date"]:
-                last_played_obj = datetime.date.fromisoformat(last_played_row["last_played_date"])
-                today_obj = datetime.date.fromisoformat(today)
+                last_played_obj = date.fromisoformat(last_played_row["last_played_date"])
+                today_obj = date.fromisoformat(today)
 
                 if (today_obj - last_played_obj).days > 1:
                     # Reset streak
@@ -290,7 +314,7 @@ def get_daily_idol():
         # Image path for frontend to display
         "image_path": idol_data_dict.get("image_path"),
         # Server date for timezone consistency
-        "server_date": datetime.date.today().isoformat(),
+        "server_date": get_today_date_str(),
         # "server_date": get_server_date(),
     }
 
@@ -503,7 +527,8 @@ def guess_idol():
     # Final answer (correct or not)
     is_correct = guessed_idol.get("idol_id") == answer_data.get("idol_id")
     one_shot_win = is_correct and current_attempt == 1
-    today = datetime.date.today().isoformat()
+    today = get_today_date_str()
+    current_timestamp = get_current_timestamp()
     # today = get_server_date()
 
     # Calculate streak function
@@ -520,15 +545,15 @@ def guess_idol():
                 return 0
             
             streak = 0
-            expected_date = datetime.date.today()
+            expected_date = get_today_date()
             # expected_date = get_server_date_obj()
             
             for row in results:
-                game_date = datetime.date.fromisoformat(row["date"])
+                game_date = date.fromisoformat(row["date"])
 
                 if game_date == expected_date:
                     streak += 1
-                    expected_date -= datetime.timedelta(days=1)
+                    expected_date -= timedelta(days=1)
                 else:
                     break
 
@@ -541,16 +566,20 @@ def guess_idol():
         cursor.execute(
             """
                 INSERT INTO daily_user_history (user_id, date, guesses_count, won, one_shot_win, won_at, started_at)
-                VALUES (?, ?, ?, ?, ?, CASE WHEN ? = 1 THEN CURRENT_TIMESTAMP ELSE NULL END, CASE WHEN ? = 1 THEN CURRENT_TIMESTAMP ELSE NULL END)
+                VALUES (?, ?, ?, ?, ?, CASE WHEN ? = 1 THEN ? ELSE NULL END, CASE WHEN ? = 1 THEN ? ELSE NULL END)
                 ON CONFLICT(user_id, date) DO UPDATE SET   
                 guesses_count = excluded.guesses_count,
                 won = excluded.won OR won,
                 one_shot_win = excluded.one_shot_win OR one_shot_win,
+                
                 won_at = CASE WHEN excluded.won = 1 AND daily_user_history.won_at IS NULL
-                THEN CURRENT_TIMESTAMP ELSE daily_user_history.won_at END,
+                THEN excluded.won_at ELSE daily_user_history.won_at END,
+
                 started_at = CASE WHEN excluded.guesses_count = 1 AND daily_user_history.started_at IS NULL
-                THEN CURRENT_TIMESTAMP ELSE daily_user_history.started_at END
-            """, (user_id, today, current_attempt, is_correct, one_shot_win, is_correct, current_attempt))
+                THEN excluded.started_at ELSE daily_user_history.started_at END
+            """, (user_id, today, current_attempt, is_correct, 
+                  one_shot_win, is_correct, current_timestamp, 
+                  current_attempt, current_timestamp))
                         
         if is_correct:
             S0 = 10
@@ -695,7 +724,7 @@ def store_yesterdays_idol():
 
     # Gey yesterday's date
 
-    yesterday = datetime.date.today() - datetime.timedelta(days=1)
+    yesterday = get_today_date() - timedelta(days=1)
     yesterday_str = yesterday.isoformat()
 
     # Store yesterday's idol pick
@@ -778,9 +807,9 @@ def store_yesterdays_idol():
 def get_reset_timer():
     """Return the time remaining until the next daily idol reset"""
     
-    time = datetime.datetime.now()
+    time = get_today_now()
     
-    next_reset = time.replace(hour=0, minute=0, second=0, microsecond=0) + datetime.timedelta(days=1)
+    next_reset = time.replace(hour=0, minute=0, second=0, microsecond=0) + timedelta(days=1)
     
     time_remaining = next_reset - time
     
@@ -807,6 +836,7 @@ def get_reset_timer():
 def generate_user_token():
     """Generate a new user token and store it in the database"""
     token_sucessfuly_generated = False
+    current_timestamp = get_current_timestamp()
 
     # Try up to 5 times
     attempts = 0
@@ -823,9 +853,9 @@ def generate_user_token():
             cursor = connect.cursor()
             
             token_insert_sql = """
-                INSERT INTO users (token, created_at) VALUES (?, CURRENT_TIMESTAMP)
+                INSERT INTO users (token, created_at) VALUES (?, ?)
             """
-            cursor.execute(token_insert_sql, (token,))
+            cursor.execute(token_insert_sql, (token, current_timestamp))
             connect.commit()
             connect.close()
             token_sucessfuly_generated = True
@@ -899,7 +929,7 @@ def get_user_stats(user_token):
 def get_daily_users_count():
     """Return the count of users who played today's game"""
 
-    today = datetime.date.today().isoformat()
+    today = get_today_date_str()
     # today = get_server_date()
 
     connect = sqlite3.connect("kpopdle.db")
@@ -922,7 +952,7 @@ def get_daily_users_count():
 @app.route("/api/daily-rank/<user_token>", methods=["GET"])
 def get_daily_rank(user_token):
     """Return the user's rank for today's game"""
-    today = datetime.date.today().isoformat()
+    today = get_today_date_str()
     # today = get_server_date()
 
     connect = sqlite3.connect("kpopdle.db")
@@ -959,7 +989,7 @@ def get_daily_rank(user_token):
     won_at = result["won_at"]
 
     # Calculate time to win
-    time_to_win = datetime.datetime.fromisoformat(won_at) - datetime.datetime.fromisoformat(started_at) # With python - (Can use julianday in SQL too)
+    time_to_win = datetime.fromisoformat(won_at) - datetime.fromisoformat(started_at) # With python - (Can use julianday in SQL too)
     time_to_win_seconds = int(time_to_win.total_seconds())
 
     # Fetch ranks and count user's rank
@@ -1005,6 +1035,8 @@ def generate_transfer_code(user_token):
     connect.row_factory = sqlite3.Row
     cursor = connect.cursor()
 
+    current_timestamp = get_current_timestamp()
+
     # Validate user token
     cursor.execute("""
             SELECT id FROM users WHERE token = ?
@@ -1021,8 +1053,8 @@ def generate_transfer_code(user_token):
     # Delete expired codes
     cursor.execute("""
             DELETE FROM transfer_data
-            WHERE expires_at < CURRENT_TIMESTAMP
-        """)
+            WHERE expires_at < ?
+        """, (current_timestamp,))
 
     # Generate unique transfer code
     attempts = 0
@@ -1032,8 +1064,8 @@ def generate_transfer_code(user_token):
             # Guarantee uniqueness by checking existing codes
             cursor.execute("""
                     SELECT code, expires_at FROM transfer_data
-                    WHERE user_token = ? AND expires_at >= CURRENT_TIMESTAMP AND used = 0
-                """, (user_token,))
+                    WHERE user_token = ? AND expires_at >= ? AND used = 0
+                """, (user_token, current_timestamp))
             existing_code = cursor.fetchone()
 
             if existing_code:
@@ -1045,19 +1077,19 @@ def generate_transfer_code(user_token):
 
 
             code = f"{secrets.token_hex(2)[:3].upper()}-{secrets.token_hex(2)[:3].upper()}"
-            expires_at = datetime.datetime.now() + datetime.timedelta(days=3)
+            expires_at = get_today_now() + timedelta(days=3)
             # expires_at = get_server_datetime_now() + datetime.timedelta(days=3)
 
             # Insert transfer code into database
             cursor.execute("""
                 INSERT INTO transfer_data (user_token, code, created_at, expires_at)
-                VALUES (?, ?, CURRENT_TIMESTAMP, ?)
-            """, (user_token,  code, expires_at.isoformat()))
+                VALUES (?, ?, ?, ?)
+            """, (user_token, code, current_timestamp, expires_at.strftime("%Y-%m-%d %H:%M:%S")))
                 
             connect.commit()
             code_generated = True
         
-        except sqlite3.InterruptedError as e:
+        except sqlite3.IntegrityError as e:
             attempts += 1
             print(f"Transfer code generation attempt {attempts} failed: {e}")
             error += str(e)
@@ -1104,8 +1136,8 @@ def transfer_data():
         connect.close()
         return jsonify({"error": "Transfer code has already been used"}), 400
     
-    expires_at = datetime.datetime.fromisoformat(code_row["expires_at"])
-    if expires_at < datetime.datetime.now():
+    expires_at = datetime.fromisoformat(code_row["expires_at"])
+    if expires_at < get_today_now():
     # if expires_at < get_server_datetime_now():
         connect.close()
         return jsonify({"error": "Transfer code has expired"}), 400
@@ -1126,7 +1158,7 @@ def transfer_data():
 @app.route("/api/game-state/<user_token>", methods=["GET", "POST"])
 def get_game_state(user_token):
     """Return the current game state for the user"""
-    today = datetime.date.today().isoformat()
+    today = get_today_date_str()
     # today = get_server_date()
 
     # Start db connection
@@ -1186,6 +1218,8 @@ def get_active_transfer_code(user_token):
     connect = sqlite3.connect("kpopdle.db")
     connect.row_factory = sqlite3.Row
     cursor = connect.cursor()
+    
+    current_timestamp = get_current_timestamp()
 
     # Validate user token 
     cursor.execute("""
@@ -1202,8 +1236,8 @@ def get_active_transfer_code(user_token):
     # Get active transfer code 
     cursor.execute("""
             SELECT code, expires_at FROM transfer_data
-            WHERE user_token = ? AND used = 0 AND expires_at >= CURRENT_TIMESTAMP
-        """, (user_token,))
+            WHERE user_token = ? AND used = 0 AND expires_at >= ?
+        """, (user_token, current_timestamp))
     
     result = cursor.fetchone()
     connect.close()
