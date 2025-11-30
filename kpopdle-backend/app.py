@@ -24,7 +24,7 @@ TIMEZONE_EST = ZoneInfo("America/New_York")
 # return datetime.now(timezone.utc).date().isoformat() -- EU
 
 TEST_MODE = False
-TEST_DATE_OFFSET = 1 # Days to add/subtract (1 = tomorrow, -1 = yesterday)
+TEST_DATE_OFFSET = 216 # Days to add/subtract (1 = tomorrow, -1 = yesterday)
 
 def get_today_now():
     if TEST_MODE:
@@ -39,7 +39,7 @@ def get_today_date_str() -> str:
     return get_today_now().date().isoformat()
 
 def get_current_timestamp():
-    return get_today_now().strftime("%Y-%m-%d %H:%M:%S")
+    return get_today_now().isoformat()
 
 # TEST_MODE = False
 # TEST_DATE_OFFSET = 1  # Dias para adicionar/subtrair (1 = amanhã, -1 = ontem)
@@ -162,8 +162,13 @@ def fetch_idol_companies(cursor, idol_id):
 def choose_idol_of_the_day(cursor):
     """Choose a random idol as the 'Idol of the Day'"""
 
+    COOLDOWN_DAYS = 10
+    BOOST_DAYS = 50
+    MULTIPLIER = 2
+    
+
     today_date = get_today_date_str()
-    # today_date = get_server_date()
+    today_date_obj = get_today_date()
 
     # Query to select today's idol
     sql_query = """
@@ -176,12 +181,12 @@ def choose_idol_of_the_day(cursor):
         return todays_pick['idol_id']
     
     # Check if the date is valid
-    time_delta = timedelta(days=20)
-    date_limit = (get_today_date() - time_delta).isoformat()
+    time_delta = timedelta(days=COOLDOWN_DAYS)
+    date_limit = (today_date_obj - time_delta).isoformat()
     
     # If no pick for today, select a random idol - if is_published = 1
     sql_query = """
-        SELECT id FROM idols
+        SELECT id, last_picked_date FROM idols
         WHERE is_published = 1 AND id NOT IN (
         SELECT idol_id FROM daily_picks WHERE pick_date >= ?)
     """
@@ -190,25 +195,59 @@ def choose_idol_of_the_day(cursor):
     # Fetch all available idols
     available_idols = cursor.fetchall()
 
+    possible_idols = []
+    weights = []
+
     """Error prevention: If there are no available idols (i.e., all idols have been picked in the last 20 days)"""
     # If no available idols, pick any random idol
-    if not available_idols:
+    if available_idols:
+        for idol in available_idols:
+            idol_id = idol['id']
+            last_picked_date = idol['last_picked_date'] or None
+
+            try:
+                last_date = date.fromisoformat(last_picked_date) if last_picked_date else None
+                days_waiting = (today_date_obj - last_date).days if last_date else BOOST_DAYS
+
+            except Exception as e:
+                print(f"Error parsing date for idol ID {idol_id}: {e}")
+                days_waiting = COOLDOWN_DAYS
+            
+            A = 1 
+            K = 0.08
+            weight = (A * math.exp(K * days_waiting))
+
+            if not last_picked_date:
+                weight *= MULTIPLIER
+
+            possible_idols.append(idol_id)
+            weights.append(weight)
+
+        selected_idol_id = random.choices(possible_idols, weights=weights, k=1)[0]
+    
+    else:
         cursor.execute("SELECT id FROM idols WHERE is_published = 1")
         available_idols = cursor.fetchall()
 
-    # Transform 'Row object' list to a simple list of ids
-    available_idols_ids = [row['id'] for row in available_idols]
+        # Transform 'Row object' list to a simple list of ids
+        available_idols_ids = [row['id'] for row in available_idols]
 
-    # Randomly select one idol from the available idols
-    selected_idol_id = random.choice(available_idols_ids)
+        if not available_idols_ids: 
+            return None
 
-    # Insert the selected idol into daily_picks
-    insert_sql = """
+        # Randomly select one idol from the available idols
+        selected_idol_id = random.choice(available_idols_ids)
+
+    cursor.execute("""
         INSERT INTO daily_picks (pick_date, idol_id) VALUES (?, ?)
-    """
-    cursor.execute(insert_sql, (today_date, selected_idol_id))
+    """, (today_date, selected_idol_id))
+    
+    cursor.execute("""
+            UPDATE idols SET last_picked_date = ?
+            WHERE id = ?
+        """, (today_date, selected_idol_id))
 
-    # Return selected idol id
+    # Return the selected idol id
     return selected_idol_id
 
 
@@ -227,7 +266,7 @@ def get_daily_idol():
     connect.commit()
 
     """ For testing purposes, you can set a fixed idol_id """
-    idol_id = 1
+    # idol_id = 1
 
     # Fetch full idol data
     idol_data = fetch_full_idol_data(cursor, idol_id)
@@ -1084,7 +1123,7 @@ def generate_transfer_code(user_token):
             cursor.execute("""
                 INSERT INTO transfer_data (user_token, code, created_at, expires_at)
                 VALUES (?, ?, ?, ?)
-            """, (user_token, code, current_timestamp, expires_at.strftime("%Y-%m-%d %H:%M:%S")))
+            """, (user_token, code, current_timestamp, expires_at.isoformat()))
                 
             connect.commit()
             code_generated = True

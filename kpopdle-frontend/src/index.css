@@ -193,6 +193,29 @@ html {
   box-shadow: 0 0 20px rgba(231, 10, 125, 1);
 }
 
+.searchbar-scroll::-webkit-scrollbar {
+  width: 6px;
+  background: transparent;
+}
+
+.searchbar-scroll::-webkit-scrollbar-track {
+  background: transparent;
+  margin-block: 20px;
+  box-shadow: inset 0 0 6px rgba(0, 0, 0, 0.0);
+ 
+}
+
+.searchbar-scroll::-webkit-scrollbar-thumb {
+  background: linear-gradient(180deg, #b43777, #ec4850);
+  border-radius: 10px;
+  background-clip: content-box;
+}
+
+
+.searchbar-scroll::-webkit-scrollbar-thumb:hover {
+  background: linear-gradient(180deg, #e44798, #ff5c64);
+}
+
 
 
 /* Test for glow */ 

@@ -167,7 +167,7 @@ const GuessesGrid = (props: GuessesGridProps) => {
               flex flex-col items-center justify-center text-center border-2 border-white hover:brightness-110 hover:cursor-default hover:scale-105 transition-transform duration-300
               transform-gpu overflow-hidden">
                 <img
-                  src={`${import.meta.env.VITE_API_URL}${guess.guessed_idol_data.image_path}`}
+                  src={`${import.meta.env.VITE_IMAGE_BUCKET_URL}${guess.guessed_idol_data.image_path}`}
                   alt="Placeholder"
                   className="w-18 h-18 sm:w-28 sm:h-28 object-cover select-none" // object-cover kinda bugged (#TODO - fix later)
                   draggable={false}

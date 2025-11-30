@@ -203,7 +203,7 @@ const SearchBar = (props: SearchBarProps) => {
                 opacity: 0,
               }}
               className={`absolute left-0 top-full w-full mt-2 rounded-3xl
-              ${suggestions.length === 1 ? "overflow-hidden" : "overflow-y-auto overflow-x-hidden"} border border-white bg-linear-to-r from-black/5 via-[#b43777]/0 to-black/5
+              ${suggestions.length === 1 ? "overflow-hidden" : "overflow-y-auto overflow-x-hidden"} searchbar-scroll border border-white bg-linear-to-r from-black/5 via-[#b43777]/0 to-black/5
               backdrop-blur-md shadow-lg z-50 drop-shadow-md max-h-50 sm:max-h-60 transform-gpu will-change-transform`}
               // liquid glass if possible but using gradient for now (bg-linear-to-r from-[#000]/65 via-[#b43777]/80 to-[#000]/65)
             >
@@ -262,7 +262,7 @@ const SearchBar = (props: SearchBarProps) => {
                 >
                   {suggestion.image_path && (
                     <motion.img 
-                    src={`${import.meta.env.VITE_API_URL}${suggestion.image_path}`}
+                    src={`${import.meta.env.VITE_IMAGE_BUCKET_URL}${suggestion.image_path}`}
                     alt={"Idol image"}
                     className="w-11 h-11 object-cover rounded-full border border-white"
                     animate={{ scale: hoveredId === suggestion.id ? 1.16 : 1 }}

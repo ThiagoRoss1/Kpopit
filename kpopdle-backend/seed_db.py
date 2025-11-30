@@ -144,7 +144,7 @@ daily_picks_sql = """
 cursor.execute(daily_picks_sql)
 
 
-def seed_table(cursor, csv_file, table_name, columns, transformer=None):
+def seed_table(cursor, csv_file, table_name, columns):
     """Read data from a CSV file and insert it into a database table."""
     with open(csv_file, "r", encoding="utf-8") as file:
         reader = csv.DictReader(file)
@@ -157,26 +157,16 @@ def seed_table(cursor, csv_file, table_name, columns, transformer=None):
 
         # Insert each row in database - List appending
         for row in reader:
-            # Transform row if transformer function is provided - e.g. convert types (image_path)
-            if transformer:
-                row = transformer(row)
-
             values = [row[column] for column in columns]
             cursor.execute(insert_sql, values)
 
-# Transform the image_path to include the idol's id as prefix
-def image_path_transformer(row):
-    row["image_path"] = f"/static/images/{row['id']}.{row['image_ext']}"
-    """It will return the image_path with the same idol id as prefix with the 
-    ext (e.g. .jpg, .png) that was given in idols.csv 'image_path' column"""
-    return row
 
 # Idols Table Seeding
 idols_columns = [
     "id", "artist_name", "real_name", "gender", "debut_year", "nationality", 
-    "birth_year", "height", "position", "image_path", "is_published"
+    "birth_year", "height", "position", "image_path", "is_published", "release_date"
 ]
-seed_table(cursor, IDOLS_CSV_FILE, 'idols', idols_columns, transformer=image_path_transformer)
+seed_table(cursor, IDOLS_CSV_FILE, 'idols', idols_columns)
 
 # Groups Table Seeding
 groups_columns = [

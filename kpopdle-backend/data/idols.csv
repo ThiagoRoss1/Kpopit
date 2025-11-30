@@ -1,5 +1,5 @@
-id,artist_name,real_name,gender,debut_year,nationality,birth_year,height,position,image_ext,is_published
-1,Kim Chaewon,Kim Chae-won,Female,2018,South Korean,2000,164,"Leader, Vocalist, Dancer",jpg,1
+id,artist_name,real_name,gender,debut_year,nationality,birth_year,height,position,image_path,is_published,release_date
+1,Kim Chaewon,Kim Chae-won,Female,2018,South Korean,2000,164,"Leader, Vocalist, Dancer",jpg,1,2025-11-28
 2,Sakura,Miyawaki Sakura,Female,2018,Japanese,1998,163,"Vocalist, Rapper, Dancer",jpg,1
 3,Huh Yunjin,Huh Yun-jin,Female,2022,"South Korean, American",2001,172,"Vocalist, Rapper",jpg,1
 4,Kazuha,Nakamura Kazuha,Female,2022,Japanese,2003,170,"Sub-Vocalist, Rapper, Dancer",jpg,1

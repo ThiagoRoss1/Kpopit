@@ -446,7 +446,7 @@ function Home() {
 
       {!showVictoryCard && (
       <div className={`w-full flex flex-col items-center justify-center mt-18 mb-22`}>
-        <span className="font-semibold text-base sm:text-[18px] leading-tight">
+        <span className="font-semibold max-xxs:text-[14px] xxs:text-[15px] xs:text-base sm:text-[18px] leading-tight">
           <span className="text-white">
             Yesterday's idol was
           </span> <span className="text-[#b43777] [text-shadow:1.2px_1.2px_4px_rgba(0,0,0,1.8),0_0_12px_rgba(180,55,119,1.0)] brightness-105">
@@ -479,7 +479,7 @@ function Home() {
         </div>
       </div>
 
-      {/* <p>ID: {gameData?.answer_id}</p> */}
+      <p>ID: {gameData?.answer_id}</p>
       {/* <h2>Game Categories</h2>
       <ul>
         {gameData?.categories &&

@@ -3,7 +3,7 @@ import { motion } from "framer-motion";
 import Star from "../../assets/icons/star-four-fill.svg";
 
 interface BackgroundStyleProps {
-    attempts: number;
+    attempts?: number;
 }
 
 const BackgroundStyle = (props: BackgroundStyleProps) => {
@@ -87,7 +87,7 @@ const BackgroundStyle = (props: BackgroundStyleProps) => {
     <div className="fixed inset-0 overflow-hidden pointer-events-none -z-10">
       <div className="absolute inset-0 bg-linear-to-br from-[#090311] via-[#050416] to-[#050822]" />
         <div className="absolute inset-0 top-0 bg-black/0" />
-        {attempts < 1 && (
+        {attempts ? attempts < 1 && (
         <motion.div 
             animate={ attempts === 0 ? { opacity: 1 } : { opacity: 0 }}
             transition={{ duration: 3 }}
@@ -99,7 +99,7 @@ const BackgroundStyle = (props: BackgroundStyleProps) => {
                 animationDuration: '4s'
             }} 
         />
-        )}
+        ) : null}
       
       {/* <div 
         className="absolute top-1/4 left-145 sm:w-96 sm:h-96 bg-white/10 rounded-full animate-pulse"
