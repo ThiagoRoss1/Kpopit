@@ -40,6 +40,7 @@ import { Info } from "lucide-react";
 function Home() {
   // -- Client-side -- //
   const [currentGuess, setCurrentGuess] = useState<string>("");
+  const [selectedIdol, setSelectedIdol] = useState<IdolListItem | null>(null);
   const [guesses, setGuesses] = useState<GuessResponse[]>([]);
   const [endGame, setEndGame] = useState<boolean>(false);
   const [showModal, setShowModal] = useState<null | "changelog" | "how-to-play" | "about" | "stats" | "streak" | "share" | "transfer-data" | "import-data" | "export-data">(null);
@@ -274,24 +275,24 @@ function Home() {
 
   // Guess submission handler function
   const handleGuessSubmit = async () => {
-    if (!currentGuess || !gameData || !allIdolsData) return;
+    if (!selectedIdol || !gameData || !allIdolsData) return;
 
-    const cleanName = currentGuess.split(" (")[0].trim();
+    // const cleanName = currentGuess.split(" (")[0].trim();
 
     // Look for idol
-    const guessedIdolObject = allIdolsData.find(
-      (idol: IdolListItem) =>
-        idol.artist_name.toLowerCase() === cleanName.toLowerCase() // idol.artist_name.toLowerCase() === currentGuess.toLowerCase() <- Before adding groups at searchbar
-    );
+    // const guessedIdolObject = allIdolsData.find(
+    //   (idol: IdolListItem) =>
+    //     idol.artist_name.toLowerCase() === cleanName.toLowerCase() // idol.artist_name.toLowerCase() === currentGuess.toLowerCase() <- Before adding groups at searchbar
+    // );
 
-    if (guessedIdolObject?.id === gameData.answer_id && !isCorrect) {
+    if (selectedIdol.id === gameData.answer_id && !isCorrect) {
       setIsCorrect(true);
       // Just a confirmation
       localStorage.setItem("gameComplete", "true");
       localStorage.setItem("gameWon", "true");
     }
 
-    if (!guessedIdolObject) {
+    if (!selectedIdol) {
       return;
     }
 
@@ -299,13 +300,14 @@ function Home() {
     const decrypted = await decryptToken(encrypted);
 
     guessMutation.mutate({
-      guessed_idol_id: guessedIdolObject.id,
+      guessed_idol_id: selectedIdol.id,
       answer_id: gameData.answer_id,
       user_token: decrypted,
       current_attempt: attempts + 1,
     });
     // Clear input field after submission
     setCurrentGuess("");
+    setSelectedIdol(null);
   };
   
   if (isLoadingGameData || isLoadingAllIdols) {
@@ -388,6 +390,7 @@ function Home() {
             allIdols={allIdolsData || []}
             value={currentGuess}
             onIdolSelect={(idolName) => setCurrentGuess(idolName)}
+            onIdolSelectId={(idolId) => setSelectedIdol(idolId)}
             onSubmit={() => {
               handleGuessSubmit();
               handleGuessAttempts();

@@ -13,6 +13,7 @@ export interface IdolListItem {
   artist_name: string;
   image_path: string;
   groups?: string[];
+  all_groups?: string[];
 }
 
 export interface FeedbackItem {
@@ -26,7 +27,7 @@ export interface FeedbackData {
   artist_name: FeedbackItem;
   gender: FeedbackItem;
   idol_debut_year: FeedbackItem;
-  birth_year: FeedbackItem;
+  birth_date: FeedbackItem;
   height: FeedbackItem;
   nationality: FeedbackItem;
   groups: FeedbackItem;
@@ -40,8 +41,9 @@ export interface GuessedIdolData {
   gender: string;
   nationality: string[];
   groups: string[];
+  active_group?: string | null;
   idol_debut_year: number;
-  birth_year: number;
+  birth_date: string;
   height: number;
   position: string[];
   companies: string[];
@@ -104,7 +106,7 @@ export interface AddIdolRequest {
   gender?: string;
   debut_year?: number;
   nationality?: string[];
-  birth_year?: number;
+  birth_date?: string;
   height?: number;
   position?: string[];
   image_path?: string;

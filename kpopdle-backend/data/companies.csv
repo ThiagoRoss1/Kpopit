@@ -1,3 +1,39 @@
 id,name,parent_company_id,is_published
 1,HYBE,,1
 2,Source Music,1,1
+3,CJ E&M,,1
+4,Off the record Entertainment,3,1
+5,SM Entertainment,,1
+6,JYP Entertainment,,1
+7,Kakao Entertainment,,1
+8,Starship Entertainment,7,1
+9,YG Entertainment,,1
+10,LLOUD,,1
+11,S2 Entertainment,,1
+12,RBW,,1
+13,DSP Media,12,1
+14,BEATS Entertainment,,1
+15,High Up Entertainment,7,1
+16,Cube Entertainment,,1
+17,BRD Communications,,1
+18,ADOR,1,1
+19,Belift Lab,1,1
+20,Woollim Entertainment,,1
+21,The Black Label,9,1
+22,Polaris Entertainment,,1
+23,BlockBerryCreative,22,1
+24,MODHAUS,,1
+25,CTDENM,,1
+26,PAIX PER MIL,,1
+27,BY4M Studio,,1
+28,ATRP,27,1
+29,Stone Music Entertainment,3,1
+30,Studio Blu,29,1
+31,Coridel Entertainment,,1
+32,Very Cherry,,1
+33,D-Nation Entertainment,,1
+34,ABYSS Company,,1
+35,MZ Entertainment,,1
+36,WAKEONE,3,1
+37,MyBlin9,,1
+38,143 Entertainment,,1

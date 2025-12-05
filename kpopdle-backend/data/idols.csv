@@ -1,6 +1,128 @@
-id,artist_name,real_name,gender,debut_year,nationality,birth_year,height,position,image_path,is_published,release_date
-1,Kim Chaewon,Kim Chae-won,Female,2018,South Korean,2000,164,"Leader, Vocalist, Dancer",jpg,1,2025-11-28
-2,Sakura,Miyawaki Sakura,Female,2018,Japanese,1998,163,"Vocalist, Rapper, Dancer",jpg,1
-3,Huh Yunjin,Huh Yun-jin,Female,2022,"South Korean, American",2001,172,"Vocalist, Rapper",jpg,1
-4,Kazuha,Nakamura Kazuha,Female,2022,Japanese,2003,170,"Sub-Vocalist, Rapper, Dancer",jpg,1
-5,Hong Eunchae,Hong Eun-chae,Female,2022,South Korean,2006,169,"Vocalist, Lead Dancer, Maknae",jpg,1
+id,artist_name,real_name,gender,debut_year,nationality,birth_date,height,position,image_path,is_published,release_date
+1,Kim Chaewon,Kim Chae-won,Female,2018,South Korean,2000-08-01,164,"Leader, Vocalist, Dancer",/idols/chaewon-teste.jpg,1,2025-11-28
+2,Sakura,Miyawaki Sakura,Female,2018,Japanese,1998-03-19,163,"Vocalist, Rapper, Dancer",/idols/sakura-teste.jpg,1,2121
+3,Huh Yunjin,Huh Yun-jin,Female,2022,"South Korean, American",2001-10-08,172,"Vocalist, Rapper",/idols/yunjin-teste.jpg,1,2121
+4,Kazuha,Nakamura Kazuha,Female,2022,Japanese,2003-08-09,170,"Sub-Vocalist, Rapper, Dancer",/idols/kazuha-teste.jpg,1,2121
+5,Hong Eunchae,Hong Eun-chae,Female,2022,South Korean,2006-11-10,169,"Vocalist, Lead Dancer, Maknae",/idols/eunchae-teste.jpg,1,2121
+6,Karina,Yu Ji-min,Female,2020,South Korean,2000-04-11,168,"Leader, Main Dancer, Lead Rapper, Sub-Vocalist, Visual",jpg,1,2121
+7,Giselle,Uchinaga Aeri,Female,2020,"Japanese, South Korean",2000-10-30,164,"Main Rapper, Sub-Vocalist",jpg,1,2121
+8,Winter,Kim Min-jeong,Female,2020,South Korean,2001-01-01,163,"Lead Vocalist, Lead Dancer",jpg,1,2121
+9,NingNing,Níng Yìzhuō,Female,2020,Chinese,2002-10-23,161,"Main Vocalist, Maknae",jpg,1,2121
+10,Jihyo,Park Ji-hyo,Female,2015,South Korean,1997-02-01,162,"Leader, Main Vocalist",jpg,1,2121
+11,Nayeon,Im Na-yeon,Female,2015,South Korean,1995-09-22,163,"Lead Vocalist, Lead Dancer, Center, FOTG",jpg,1,2121
+12,Jeongyeon,Yoo Jeong-yeon,Female,2015,South Korean,1996-11-01,168,"Lead Vocalist, Dancer",jpg,1,2121
+13,Momo,Hirai Momo,Female,2015,Japanese,1996-11-09,163,"Main Dancer, Sub-Vocalist, Rapper",jpg,1,2121
+14,Sana,Minatozaki Sana,Female,2015,Japanese,1996-12-29,164,"Sub-Vocalist",jpg,1,2121
+15,Mina,Mina Sharon Myoi,Female,2015,"Japanese, American",1997-03-24,163,"Main Dancer, Sub-Vocalist",jpg,1,2121
+16,Dahyun,Kim Da-hyun,Female,2015,South Korean,1998-05-28,161,"Lead Rapper, Sub-Vocalist",jpg,1,2121
+17,Chaeyoung,Son Chae-young,Female,2015,South Korean,1999-04-23,159,"Main Rapper, Sub-Vocalist",jpg,1,2121
+18,Tzuyu,Chou Tzuyu,Female,2015,Taiwanese,1999-06-14,170,"Lead Dancer, Sub-Vocalist, Visual, Maknae",jpg,1,2121
+19,Yujin,An Yu-jin,Female,2018,South Korean,2003-09-01,173,"Leader, Main Vocalist, Main Dancer",jpg,1,2121
+20,Gaeul,Kim Ga Eul,Female,2021,South Korean,2002-09-24,164,"Main Dancer, Lead Rapper, Sub-Vocalist",jpg,1,2121
+21,Rei,Naoi Rei,Female,2021,Japanese,2004-02-03,170,"Main Rapper, Sub-Vocalist",jpg,1,2121
+22,Wonyoung,Jang Won-young,Female,2018,South Korean,2004-08-31,173,"Vocalist, Dancer, Visual",jpg,1,2121
+23,Liz,Kim Ji-won,Female,2021,South Korean,2004-11-21,171,"Main Vocalist, Dancer",jpg,1,2121
+24,Leeseo,Lee Hyun-seo,Female,2021,South Korean,2007-02-21,166,"Lead Dancer, Sub-Vocalist, Visual, Maknae",jpg,1,2121
+25,Jisoo,Kim Ji-soo,Female,2016,South Korean,1995-01-03,162,"Lead Vocalist, Visual",jpg,1,2121
+26,Jennie,Kim Jennie,Female,2016,South Korean,1996-01-16,163,"Main Rapper, Lead Vocalist",jpg,1,2121
+27,Rosé,Roseanne Park,Female,2016,"New Zealand, South Korean",1997-02-11,168,"Main Vocalist, Lead Dancer",jpg,1,2121
+28,Lisa,Lalisa Manobal,Female,2016,Thai,1997-03-27,167,"Main Dancer, Lead Rapper, Sub-Vocalist, Maknae",jpg,1,2121
+29,Ruka,Kawai Ruka,Female,2023,Japanese,2002-03-20,165,"Main Dancer, Main Rapper",jpg,1,2121
+30,Pharita,Pharita Boonpakdeethaveeyod,Female,2023,Thai,2005-08-26,171,"Vocalist",jpg,1,2121
+31,Asa,Enami Asa,Female,2023,Japanese,2006-04-17,167,"Main Rapper, Vocalist, Dancer",jpg,1,2121
+32,Ahyeon,Jung Ahyeon,Female,2023,South Korean,2007-04-11,163,"Main Vocalist, Rapper, Dancer, Visual, Center",jpg,1,2121
+33,Rora,Lee Da-in,Female,2023,South Korean,2008-08-14,172,"Lead Vocalist, Visual",jpg,1,2121
+34,Chiquita,Riracha Phondechaphiphat,Female,2023,Thai,2009-02-17,168,"Vocalist, Dancer, Rapper, Maknae",jpg,1,2121
+35,Rami,Shin Haram,Female,2023,South Korean,2007-10-17,172,"Main Vocalist",jpg,1,2121
+36,Julie,Julie Han,Female,2023,"American, South Korean",2000-03-29,163,"Leader, Main Rapper, Lead Dancer",jpg,1,2121
+37,Natty,Ahnatchaya Suputhipong,Female,2023,"Thai",2002-05-30,167,"Main Dancer, Lead Rapper, Sub-Vocalist",jpg,1,2121
+38,Belle,Shim Hye-won / Annabelle Shim,Female,2023,"American, South Korean",2004-03-20,168,"Main Vocalist, Dancer",jpg,1,2121
+39,Haneul,Won Ha-neul,Female,2023,South Korean,2005-05-25,169,"Lead Vocalist, Maknae",jpg,1,2121
+40,Sunhye,Jeong Sun-hye,Female,2023,South Korean,2004-04-12,159,"Leader, Rapper, Vocalist, Dancer",jpg,1,2121
+41,Yeonjung,Wi Yeon-jung,Female,2023,South Korean,2004-09-1,162,"Main Dancer, Rapper",jpg,1,2121
+42,Jiana,Noh Ji-hyun,Female,2023,South Korean,2006-02-02,163,"Main Vocalist, Rapper, Dancer",jpg,1,2121
+43,Doeun,Kim Do-eun,Female,2023,South Korean,2007-12-24,168,"Vocalist, Rapper, Dancer",jpg,1,2121
+44,Jieun,Han Ji-eun,Female,2023,South Korean,2009-11-05,158,"Vocalist, Dancer, Rapper, Maknae",jpg,1,2121
+45,Yeji,Hwang Ye-ji,Female,2019,South Korean,2000-05-26,167,"Leader, Main Dancer, Lead Vocalist, Sub-Rapper",jpg,1,2121
+46,Lia,Choi Ji-su,Female,2019,South Korean,2000-07-21,162,"Main Vocalist, Sub-Rapper",jpg,1,2121
+47,Ryujin,Shin Ryu-jin,Female,2019,South Korean,2001-04-17,164,"Main Rapper, Lead Dancer, Sub-Vocalist, Center",jpg,1,2121
+48,Chaeryeong,Lee Chae-ryeong,Female,2019,South Korean,2001-06-05,167,"Main Dancer, Sub-Vocalist, Sub-Rapper",jpg,1,2121
+49,Yuna,Shin Yu-na,Female,2019,South Korean,2003-12-09,170,"Lead Rapper, Lead Dancer, Sub-Vocalist, Visual, Maknae",jpg,1,2121
+50,Sumin,Bae Su-min,Female,2020,South Korean,2001-03-13,159,"Vocalist, Rapper, Dancer",jpg,1,2121
+51,Sieun,Park Si-eun,Female,2020,South Korean,2001-08-01,159,"Main Vocalist, Dancer",jpg,1,2121
+52,Isa,Lee Chae-young,Female,2020,South Korean,2002-01-23,166,"Lead Vocalist, Dancer",jpg,1,2121
+53,Seeun,Yoon Se-eun,Female,2020,South Korean,2003-06-14,167,"Vocalist, Dancer",jpg,1,2121
+54,Yoon,Shim Ja-yoon,Female,2020,South Korean,2004-04-14,173,"Lead Vocalist",jpg,1,2121
+55,J,Jang Ye-eun,Female,2020,South Korean,2004-12-09,170,"Vocalist, Rapper, Maknae",jpg,1,2121
+56,Soyeon,Jeon So-yeon,Female,2018,South Korean,1998-08-26,157,"Leader, Main Rapper, Sub-Vocalist, Center",jpg,1,2121
+57,Miyeon,Cho Mi-yeon,Female,2018,South Korean,1997-01-31,161,"Main Vocalist, Visual",jpg,1,2121
+58,Minnie,Nicha Yontararak,Female,2018,Thai,1997-10-23,167,"Main Vocalist",jpg,1,2121
+59,Yuqi,Song Yu Qi,Female,2018,Chinese,1999-09-23,163,"Main Dancer, Sub-Vocalist, Sub-Rapper, FOTG",jpg,1,2121
+60,Shuhua,Yeh  Shuhua,Female,2018,Taiwanese,2000-01-06,161,"Sub-Vocalist, Visual, Maknae",jpg,1,2121
+61,Soojin,Seo Soojin,Female,2018,South Korean,1998-03-09,164,"Main Dancer, Sub-Vocalist, Sub-Rapper",jpg,1,2121
+62,Haewon,Oh Hae-won,Female,2022,South Korean,2003-02-25,163,"Leader, Main Vocalist",jpg,1,2121
+63,Lily,Lily Jin Park Morrow,Female,2022,"South Korean, Australian",2002-10-17,164,"Main Vocalist, Dancer",jpg,1,2121
+64,Sullyoon,Seol Yoon-a,Female,2022,South Korean,2004-01-26,168,"Lead Vocalist, Dancer",jpg,1,2121
+65,Bae,Bae Jin-sol,Female,2022,South Korean,2004-12-28,170,"Lead Vocalist, Dancer",jpg,1,2121
+66,Jiwoo,Kim Ji-woo,Female,2022,South Korean,2005-04-13,161,"Main Rapper, Vocalist, Dancer",jpg,1,2121
+67,Kyujin,Jang Kyu-jin,Female,2022,South Korean,2006-05-26,164,"Dance Leader, Main Dancer, Rapper, Vocalist, Maknae",jpg,1,2121
+68,Minji,Kim Min-ji,Female,2022,South Korean,2004-05-07,169,"Rapper",jpg,1,2121
+69,Hanni,Hanni Phạm,Female,2022,"Vietnamese, Australian",2004-10-06,162,"Vocalist",jpg,1,2121
+70,Danielle,Danielle June Marsh / Mo Ji Hye,Female,2022,"Australian, South Korean",2005-04-11,165,"Dancer",jpg,1,2121
+71,Haerin,Kang Hae-rin,Female,2022,South Korean,2006-05-15,165,"Dancer",jpg,1,2121
+72,Hyein,Lee Hye-in,Female,2022,South Korean,2008-04-21,170,"Dancer, Maknae",jpg,1,2121
+73,Yunah,Noh Yun-ah,Female,2024,South Korean,2004-01-15,168,"Dancer",jpg,1,2121
+74,Minju,Park Min-ju,Female,2024,South Korean,2004-05-11,163,"Main Vocalist",jpg,1,2121
+75,Moka,Sakai Moka,Female,2024,Japanese,2004-10-08,162,"Lead Dancer, Sub-Vocalist, Visual",jpg,1,2121
+76,Wonhee,Lee Won-hee,Female,2024,South Korean,2007-06-26,162,"Lead Vocalist, Center",jpg,1,2121
+77,Iroha,Hokazono Iroha,Female,2024,Japanese,2008-02-04,158,"Main Dancer, Sub-Vocalist, Maknae",jpg,1,2121
+78,Kwon Eunbi,Kwon Eun-bi,Female,2018,South Korean,1995-09-27,158,"Leader, Main Dancer, Lead Vocalist",jpg,1,2121
+79,Sooin,Kim Soo-in,Female,2024,South Korean,2005-04-12,172,"Main Dancer, Vocalist",jpg,1,2121
+80,Gawon,Lee Ga-won,Female,2024,"South Korean, American",2005-04-27,173,"Main Vocalist, Rapper",jpg,1,2121
+81,Anna,Tanaka Anna,Female,2024,Japanese,2005-11-17,164,"Sub-Vocalist, Visual",jpg,1,2121
+82,Narin,Na Rin,Female,2024,South Korean,2007-08-15,166,"Main Rapper, Main Vocalist",jpg,1,2121
+83,Ella,Ella McKenzie Gross,Female,2024,"German, American, South Korean",2008-12-01,168,"Vocalist, Visual, Maknae",jpg,1,2121
+84,HaSeul,Cho Ha-Seul,Female,2016,South Korean,1997-08-18,158,"Leader, Vocalist, Rapper",jpg,1,2121
+85,ViVi,Wong Kahei,Female,2017,Hong Kongese,1996-12-09,158,"Vocalist, Rapper",jpg,1,2121
+86,Yves,Ha Soo-young,Female,2017,South Korean,1997-05-24,166,"Vocalist, Rapper, Dancer",jpg,1,2121
+87,JinSoul,Jeong Jin-Sol,Female,2017,South Korean,1997-06-13,165,"Vocalist, Rapper",jpg,1,2121
+88,Kim Lip,Kim Jung-eun,Female,2017,South Korean,1999-02-10,163,"Vocalist, Dancer",jpg,1,2121
+89,HeeJin,Jeon Hee-jin,Female,2016,South Korean,2000-10-19,161,"Vocalist, Rapper, Dancer, Center",jpg,1,2121
+90,HyunJin,Kim Hyun-jin,Female,2016,South Korean,2000-11-15,163,"Vocalist, Rapper, Dancer",jpg,1,2121
+91,Go Won,Park Chae-won,Female,2018,South Korean,2000-11-19,160,"Vocalist, Rapper, Dancer",jpg,1,2121
+92,Choerry,Choi Ye-rim,Female,2017,South Korean,2001-06-04,161,"Vocalist, Rapper, Dancer",jpg,1,2121
+93,HyeJu,Son Hye-ju,Female,2018,South Korean,2001-11-13,165,"Vocalist, Rapper, Dancer",jpg,1,2121
+94,YeoJin,Im Yeo-Jin,Female,2017,South Korean,2002-11-11,149,"Vocalist, Rapper, Maknae",jpg,1,2121
+95,Chuu,Kim Ji-woo,Female,2017,South Korean,1999-10-20,161,"Vocalist, Rapper, FOTG",jpg,1,2121
+96,Irene,Bae Joo-hyun,Female,2014,South Korean,1991-03-29,158,"Leader, Main Rapper, Lead Dancer, Sub-Vocalist, Visual, Center",jpg,1,2121
+97,Seulgi,Kang Seul Gi,Female,2014,South Korean,1994-02-10,161,"Main Dancer, Lead Vocalist",jpg,1,2121
+98,Wendy,Son Seung-wan,Female,2014,South Korean,1994-02-21,160,"Main Vocalist",jpg,1,2121
+99,Joy,Park Soo Young,Female,2014,South Korean,1996-09-03,167,"Lead Rapper, Sub-Vocalist",jpg,1,2121
+100,Yeri,Kim Ye Rim,Female,2015,South Korean,1999-03-05,159,"Sub-Vocalist, Sub-Rapper, Maknae",jpg,1,2121
+101,Jeon Somi,Ennik Somi Douma,Female,2016,"Canadian, Dutch, South Korean",2001-03-09,172,"Vocalist, Rapper",jpg,1,2121
+102,Taeyeon,Kim Tae-yeon,Female,2007,South Korean,1989-03-09,160,"Leader, Main Vocalist",jpg,1,2121
+103,Sunny,Lee Soon Kyu,Female,2007,"South Korean, American",1989-05-15,158,"Lead Vocalist",jpg,1,2121
+104,Tiffany Young,Stephanie Young Hwang,Female,2007,"South Korean, American",1989-08-01,163,"Lead Vocalist, Rapper",jpg,1,2121
+105,Hyoyeon,Kim Hyo-yeon,Female,2007,South Korean,1989-09-22,161,"Main Rapper, Main Dancer",jpg,1,2121
+106,Yuri,Kwon Yu-ri,Female,2007,South Korean,1989-12-05,168,"Main Dancer, Lead Rapper, Vocalist",jpg,1,2121
+107,Sooyoung,Choi Soo Young,Female,2007,South Korean,1990-02-10,172,"Lead Rapper, Lead Dancer",jpg,1,2121
+108,Yoona,Im Yoon Ah,Female,2007,South Korean,1990-05-30,168,"Lead Rapper, Lead Dancer, Visual, Center",jpg,1,2121
+109,Seohyun,Seo Ju-hyun,Female,2007,South Korean,1991-06-28,170,"Lead Vocalist, Maknae",jpg,1,2121
+110,Jessica,Jessica Jung,Female,2007,"South Korean, American",1989-04-18,162,"Main Vocalist",jpg,1,2121
+111,Solar,Kim Yong Sun,Female,2014,South Korean,1991-02-21,160,"Leader, Vocalist",jpg,1,2121
+112,Moonbyul,Moon Byul-yi,Female,2014,South Korean,1992-12-22,163,"Rapper, Performer",jpg,1,2121
+113,Wheein,Jung Whee-in,Female,2014,South Korean,1995-04-17,159,"Vocalist, Performer",jpg,1,2121
+114,Hwasa,Ahn Hye-jin,Female,2014,South Korean,1995-07-23,160,"Vocalist, Rapper, Maknae",jpg,1,2121
+115,CL,Lee Chae-rin,Female,2009,South Korean,1991-02-26,162,"Leader, Main Rapper, Lead Dancer, Lead Vocalist, FOTG",jpg,1,2121
+116,Park Bom,Park Bom,Female,2009,South Korean,1984-03-24,165,"Main Vocalist",jpg,1,2121
+117,Dara,Park Sandara,Female,2009,South Korean,1984-11-12,159,"Vocalist, Sub-Rapper, Visual",jpg,1,2121
+118,Minzy,Gong Min-ji,Female,2009,South Korean,1994-01-18,161,"Main Dancer, Lead Vocalist, Lead Rapper, Maknae",jpg,1,2121
+119,Yujin,Choi Yu-jin,Female,2015,South Korean,1996-08-12,163,"Leader, Vocalist",jpg,1,2121
+120,Xiaoting,Shen Xiao Ting,Female,2022,Chinese,1999-11-12,168," Main Dancer, Vocalist, Visual",jpg,1,2121
+121,Chaehyun,Kim Chae-hyun,Female,2022,South Korean,2002-04-26,160,"Main Vocalist, Center",jpg,1,2121
+122,Dayeon,Kim Da-yeon,Female,2022,South Korean,2003-03-02,158,"Main Dancer, Main Rapper, Vocalist",jpg,1,2121
+123,Hikaru,Ezaki Hikaru,Female,2022,Japanese,2004-03-12,155,"Main Dancer, Main Rapper, Vocalist",jpg,1,2121
+124,Huening Bahiyyih,Bahiyyih Jaleh Huening,Female,2022,"South Korean, American",2004-07-27,167,"Vocalist",jpg,1,2121
+125,Youngeun,Seo Young-eun,Female,2022,South Korean,2004-12-27,158,"Main Vocalist, Dancer, Maknae",jpg,1,2121
+126,Mashiro,Sakamoto Mashiro,Female,2022,Japanese,1999-12-16,158,"Co-Leader, Vocalist",jpg,1,2121
+127,Yeseo,Kang Ye-seo,Female,2019,South Korean,2005-08-22,157,"Vocalist, Maknae",jpg,1,2121

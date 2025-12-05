@@ -2,7 +2,7 @@
 import sqlite3
 from pathlib import Path
 
-DB_FILE = Path(__file__).parent.parent / "kpopdle.db"
+DB_FILE = Path(__file__).parent.parent / "kpopdle-teste.db"
 
 def apply_migrations():
     conn = sqlite3.connect(DB_FILE)

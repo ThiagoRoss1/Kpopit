@@ -6,7 +6,7 @@ admin_bp = Blueprint('admin', __name__)
 
 
 def init_db():
-    connect = sqlite3.connect("kpopdle.db")
+    connect = sqlite3.connect("kpopdle-teste.db")
     cursor = connect.cursor()
     return connect, cursor
     
@@ -41,7 +41,7 @@ def add_idol():
     if idol_id:          
         idol_insert_sql = """
             INSERT INTO idols (
-            id, artist_name, real_name, gender, debut_year, nationality, birth_year, height, position, image_path, is_published)
+            id, artist_name, real_name, gender, debut_year, nationality, birth_date, height, position, image_path, is_published)
             VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
         """
         
@@ -52,7 +52,7 @@ def add_idol():
             data.get("gender"),
             data.get("debut_year"),
             nationality,
-            data.get("birth_year"),
+            data.get("birth_date"),
             data.get("height"),
             position,
             data.get("image_path"),
@@ -61,7 +61,7 @@ def add_idol():
     else:
         idol_insert_sql = """
             INSERT INTO idols (
-            artist_name, real_name, gender, debut_year, nationality, birth_year, height, position, image_path, is_published)
+            artist_name, real_name, gender, debut_year, nationality, birth_date, height, position, image_path, is_published)
             VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
             """
 
@@ -71,7 +71,7 @@ def add_idol():
             data.get("gender"),
             data.get("debut_year"),
             nationality,
-            data.get("birth_year"),
+            data.get("birth_date"),
             data.get("height"),
             position,
             data.get("image_path"),

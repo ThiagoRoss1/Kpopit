@@ -14,7 +14,7 @@ const Admin = () => {
         gender: "",
         debut_year: 0,
         nationality: "",
-        birth_year: 0,
+        birth_date: "",
         height: 0,
         position: "",
         image_path: "",
@@ -24,8 +24,11 @@ const Admin = () => {
     const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
         const { name, value } = e.target;
         
-        if (name === "debut_year" || name === "birth_year" || name === "height") {
+        if (name === "debut_year" || name === "height") {
             setIdolData({...idolData, [name]: parseInt(value) || 0});
+        }
+        else if (name === "birth_date") {
+            setIdolData({...idolData, [name]: value});
         }
         else if (name === "is_published") {
             setIdolData({...idolData, [name]: value === "1" ? 1 : 0});
@@ -55,7 +58,7 @@ const Admin = () => {
                 gender: "",
                 debut_year: 0,
                 nationality: "",
-                birth_year: 0,
+                birth_date: "",
                 height: 0,
                 position: "",
                 image_path: "",
@@ -104,7 +107,7 @@ const Admin = () => {
                 <input name="gender" type="text" placeholder="Gender" value={idolData.gender} onChange={handleChange} className="border-2 border-white bg-[#242424] text-white p-2 mb-2 w-80" />
                 <input name="debut_year" type="number" placeholder="Debut Year" value={idolData.debut_year || ""} onChange={handleChange} className="border-2 border-white bg-[#242424] text-white p-2 mb-2 w-80" />
                 <input name="nationality" type="text" placeholder="Nationality (comma separated)" value={idolData.nationality} onChange={handleChange} className="border-2 border-white bg-[#242424] text-white p-2 mb-2 w-80" />
-                <input name="birth_year" type="number" placeholder="Birth Year" value={idolData.birth_year || ""} onChange={handleChange} className="border-2 border-white bg-[#242424] text-white p-2 mb-2 w-80" />
+                <input name="birth_date" type="text" placeholder="Birth Date" value={idolData.birth_date || ""} onChange={handleChange} className="border-2 border-white bg-[#242424] text-white p-2 mb-2 w-80" />
                 <input name="height" type="number" placeholder="Height (cm)" value={idolData.height || ""} onChange={handleChange} className="border-2 border-white bg-[#242424] text-white p-2 mb-2 w-80" />
                 <input name="position" type="text" placeholder="Position (comma separated)" value={idolData.position} onChange={handleChange} className="border-2 border-white bg-[#242424] text-white p-2 mb-2 w-80" />
                 <input name="image_path" type="text" placeholder="Image Path" value={idolData.image_path} onChange={handleChange} className="border-2 border-white bg-[#242424] text-white p-2 mb-2 w-80" />

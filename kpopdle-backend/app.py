@@ -87,7 +87,7 @@ def fetch_full_idol_data(cursor, idol_id):
             i.gender,
             i.debut_year AS idol_debut_year,
             i.nationality,
-            i.birth_year,
+            i.birth_date,
             i.position,
             i.height,
             i.image_path,
@@ -257,7 +257,7 @@ def get_daily_idol():
     """Return the 'Idol of the Day' data as JSON"""
 
     # Start db connection
-    connect = sqlite3.connect("kpopdle.db")
+    connect = sqlite3.connect("kpopdle-teste.db")
     connect.row_factory = sqlite3.Row
     cursor = connect.cursor()
 
@@ -266,7 +266,7 @@ def get_daily_idol():
     connect.commit()
 
     """ For testing purposes, you can set a fixed idol_id """
-    # idol_id = 1
+    idol_id = 92
 
     # Fetch full idol data
     idol_data = fetch_full_idol_data(cursor, idol_id)
@@ -344,7 +344,7 @@ def get_daily_idol():
         # Get idol infos (safe to browser)
         "categories": [
             "Artist Name", "Gender", "Group", "Companies", "Nationality", 
-            "Debut Year", "Birth Year", "Height", "Position",
+            "Debut Year", "Birth Date", "Height", "Position",
         ],
         ## "reveal_info" -- TODO later // TODO - nationalities can be + than 1
         "member_count": idol_data_dict.get("member_count"),
@@ -378,7 +378,7 @@ def guess_idol():
         return jsonify({"error": "Missing user token"}), 400
 
     # Start db connection
-    connect = sqlite3.connect("kpopdle.db")
+    connect = sqlite3.connect("kpopdle-teste.db")
     connect.row_factory = sqlite3.Row
     cursor = connect.cursor()
 
@@ -513,8 +513,8 @@ def guess_idol():
 
         return numerical_feedback
     
-    # Numbers - debut year, height, birth year, member count, generation...
-    numerical_fields = ["idol_debut_year", "height", "birth_year", "member_count", "generation"]
+    # Numbers - debut year, height, birth date, member count, generation...
+    numerical_fields = ["idol_debut_year", "height", "birth_date", "member_count"] # removed "generation"
     numerical_feedback = numerical_feedback_function(guessed_idol, answer_data, numerical_fields)
     feedback.update(numerical_feedback)
 
@@ -683,7 +683,7 @@ def guess_idol():
 
     keys_for_display = [
         "idol_id", "artist_name", "gender", "nationality", "idol_debut_year", 
-        "birth_year", "height", "position", "image_path", "member_count" # just this for now
+        "birth_date", "height", "position", "image_path", "member_count" # just this for now
     ]
 
     data_for_display = {key: guessed_idol.get(key) for key in keys_for_display}
@@ -691,7 +691,14 @@ def guess_idol():
     """Extra datas"""
 
     # Groups data
+    active_groups = [
+        group["group_name"] for group in guessed_idol["career"]
+              if group.get("is_active") == 1
+    ]
+    active_group_name = active_groups[0] if active_groups else None
+
     data_for_display["groups"] = [group["group_name"] for group in guessed_idol["career"]]
+    data_for_display["active_group"] = active_group_name
 
     # Companies data
     idol_c = [company["name"] for company in guessed_idol["companies"]]
@@ -715,7 +722,7 @@ def get_idols_list():
     """Return a list of all idols with their id and names as JSON"""
     
     # Start db connection
-    connect = sqlite3.connect("kpopdle.db")
+    connect = sqlite3.connect("kpopdle-teste.db")
     connect.row_factory = sqlite3.Row
     cursor = connect.cursor()
 
@@ -737,15 +744,27 @@ def get_idols_list():
     cursor.execute(groups_query)
     results = cursor.fetchall()
 
-    idol_groups = {}
+    idol_groups_active = {}
 
     for row in results:
-        for row in results:
-            idol_groups.setdefault(row["idol_id"], []).append(row["group_name"])
+        idol_groups_active.setdefault(row["idol_id"], []).append(row["group_name"])
+
+    groups_query_all = """
+        SELECT ic.idol_id, g.name AS group_name
+        FROM idol_career AS ic
+        JOIN groups AS g ON ic.group_id = g.id
+    """
+    cursor.execute(groups_query_all)
+    results = cursor.fetchall()
+
+    idol_groups_all = {}
+    for row in results:
+        idol_groups_all.setdefault(row["idol_id"], []).append(row["group_name"])
 
     for idol in idols_list:
         idol_id = idol["id"]
-        idol["groups"] = idol_groups.get(idol_id, [])
+        idol["groups"] = idol_groups_active.get(idol_id, [])
+        idol["all_groups"] = idol_groups_all.get(idol_id, [])
 
     connect.close()
 
@@ -757,7 +776,7 @@ def store_yesterdays_idol():
     """Store yesterday's idol pick in the database"""
     
     # Start db connection
-    connect = sqlite3.connect("kpopdle.db")
+    connect = sqlite3.connect("kpopdle-teste.db")
     connect.row_factory = sqlite3.Row
     cursor = connect.cursor()
 
@@ -887,7 +906,7 @@ def generate_user_token():
             token = str(uuid.uuid4())
 
             # Start db connection 
-            connect = sqlite3.connect("kpopdle.db")
+            connect = sqlite3.connect("kpopdle-teste.db")
             connect.row_factory = sqlite3.Row
             cursor = connect.cursor()
             
@@ -924,7 +943,7 @@ def get_user_stats(user_token):
     """Return user stats based on the provided token"""
 
     # Start db connection
-    connect = sqlite3.connect("kpopdle.db")
+    connect = sqlite3.connect("kpopdle-teste.db")
     connect.row_factory = sqlite3.Row
     cursor = connect.cursor()
 
@@ -971,7 +990,7 @@ def get_daily_users_count():
     today = get_today_date_str()
     # today = get_server_date()
 
-    connect = sqlite3.connect("kpopdle.db")
+    connect = sqlite3.connect("kpopdle-teste.db")
     connect.row_factory = sqlite3.Row
     cursor = connect.cursor()
 
@@ -994,7 +1013,7 @@ def get_daily_rank(user_token):
     today = get_today_date_str()
     # today = get_server_date()
 
-    connect = sqlite3.connect("kpopdle.db")
+    connect = sqlite3.connect("kpopdle-teste.db")
     connect.row_factory = sqlite3.Row
     cursor = connect.cursor()
 
@@ -1070,7 +1089,7 @@ def generate_transfer_code(user_token):
     """Generate a transfer code for the user to transfer their data to another device"""
     code_generated = False
     # Start db connection
-    connect = sqlite3.connect("kpopdle.db")
+    connect = sqlite3.connect("kpopdle-teste.db")
     connect.row_factory = sqlite3.Row
     cursor = connect.cursor()
 
@@ -1155,7 +1174,7 @@ def transfer_data():
         return jsonify({"error": "Missing transfer code"}), 400
     
     # Start db connection
-    connect = sqlite3.connect("kpopdle.db")
+    connect = sqlite3.connect("kpopdle-teste.db")
     connect.row_factory = sqlite3.Row
     cursor = connect.cursor()
 
@@ -1201,7 +1220,7 @@ def get_game_state(user_token):
     # today = get_server_date()
 
     # Start db connection
-    connect = sqlite3.connect("kpopdle.db")
+    connect = sqlite3.connect("kpopdle-teste.db")
     connect.row_factory = sqlite3.Row
     cursor = connect.cursor()
 
@@ -1254,7 +1273,7 @@ def get_active_transfer_code(user_token):
     # today = get_server_datetime_now().isoformat()
 
     # Start db connection
-    connect = sqlite3.connect("kpopdle.db")
+    connect = sqlite3.connect("kpopdle-teste.db")
     connect.row_factory = sqlite3.Row
     cursor = connect.cursor()
     
@@ -1308,7 +1327,7 @@ if __name__ == "__main__":
     #     ),
     #     "nationality": guessed_idol["nationality"] == answer_data["nationality"],
     #     "debut_year": guessed_idol["debut_year"] == answer_data["debut_year"],
-    #     "birth_year": guessed_idol["birth_year"] == answer_data["birth_year"],
+    #     "birth_date": guessed_idol["birth_date"] == answer_data["birth_date"],
     #     "height": guessed_idol["height"] == answer_data["height"],
     #     "position": any(
     #         position in guessed_idol["position"].split(", ")
@@ -1330,7 +1349,7 @@ if __name__ == "__main__":
 #     """Return idol data as JSON"""
 
 #     # Start db connection
-#     connect = sqlite3.connect("kpopdle.db")
+#     connect = sqlite3.connect("kpopdle-teste.db")
 #     # Set row factory to act like a dictionary
 #     connect.row_factory = sqlite3.Row
 #     # Create a cursor
@@ -1352,7 +1371,7 @@ if __name__ == "__main__":
 #     """Return the user's position for today's game after winning - refreshable"""
 #     today = datetime.date.today().isoformat()
 
-#     connect = sqlite3.connect("kpopdle.db")
+#     connect = sqlite3.connect("kpopdle-teste.db")
 #     connect.row_factory = sqlite3.Row
 #     cursor = connect.cursor()
 

@@ -7,6 +7,7 @@ import type {
 import ArrowUp from "../../assets/icons/arrow-fat-line-up-fill.svg";
 import ArrowDown from "../../assets/icons/arrow-fat-line-down-fill.svg";
 import { motion } from "motion/react";
+import { useDateLocale } from "../../hooks/useDateLocale";
 
 interface GuessesGridProps {
   guesses: GuessResponse[];
@@ -64,7 +65,7 @@ const headers = [
   "Group(s)",
   "Company",
   "Nationality",
-  "Birth Year",
+  "Birth Date",
   "Debut Year",
   "Height",
   "Position(s)"
@@ -74,6 +75,8 @@ const GuessesGrid = (props: GuessesGridProps) => {
   const { guesses, onAllAnimationsComplete } = props; 
   const [animatingColumn, setAnimatingColumn] = useState<Map<number, number>>(new Map());
   const [animatedIdols, setAnimatedIdols] = useState<Set<number>>(new Set());
+
+  const { formatBirthDate } = useDateLocale();
 
   useEffect(() => {
     const stored = localStorage.getItem("animatedIdols");
@@ -87,10 +90,21 @@ const GuessesGrid = (props: GuessesGridProps) => {
     GROUPS: 2,
     COMPANY: 3,
     NATIONALITY: 4,
-    BIRTH_YEAR: 5,
+    BIRTH_DATE: 5,
     DEBUT_YEAR: 6,
     HEIGHT: 7,
   } as const;
+
+  const colorClasses = (guess: GuessResponse, attribute: string, itemValue: string) => {
+    const fieldFeedback = guess.feedback[attribute as keyof typeof guess.feedback];
+
+    if (!fieldFeedback) return "";
+    
+    const isCorrect = fieldFeedback.status !== "correct" && fieldFeedback.correct_items?.includes(itemValue);
+    const isIncorrect = fieldFeedback.status !== "correct" && fieldFeedback.incorrect_items?.includes(itemValue);
+
+    return getPositionColor(isCorrect ? "correct_items" : isIncorrect ? "incorrect_items" : "");
+  }
   
   useEffect(() => {
     if (guesses.length === 0) return;
@@ -179,6 +193,9 @@ const GuessesGrid = (props: GuessesGridProps) => {
                 />
                 <span className="font-light absolute bottom-0.5 text-[10px] sm:text-[14px] text-white [text-shadow:1.6px_1.6px_3px_rgba(26,26,26,0.8)]">
                   {guess.guessed_idol_data.artist_name}
+                  {guess.guessed_idol_data.active_group && guess.guessed_idol_data.active_group !== "Soloist" ? (
+                    <span className="font-light text-[10px] sm:text-[14px] text-white [text-shadow:1.6px_1.6px_3px_rgba(26,26,26,0.8)]"> ({guess.guessed_idol_data.active_group})</span>
+                  ) : null}
                 </span>{" "}
             </motion.div>
 
@@ -196,12 +213,15 @@ const GuessesGrid = (props: GuessesGridProps) => {
             text-center rounded-2xl sm:rounded-[18px] inset-shadow-sm border-2 border-white hover:brightness-110 hover:cursor-default transform-3d perspective-[1000px] transform-gpu`}>
               <p className="text-white text-[10px] sm:text-[14px] font-light [text-shadow:1.6px_1.6px_3px_rgba(26,26,26,0.8)]">
                 {Array.isArray(guess.guessed_idol_data.groups)
-                  ? guess.guessed_idol_data.groups.map((groups, index) => (
+                  ? guess.guessed_idol_data.groups.map((groups, index) => {
+                    const colorClass = colorClasses(guess, "groups", groups);
+                    return (
                       <React.Fragment key={index}>
-                        {groups}
+                        <span className={colorClass}>{groups}</span>
                         <br />
                       </React.Fragment>
-                    ))
+                    );
+                  })
                   : guess.guessed_idol_data.groups}
               </p>
             </motion.div>
@@ -220,12 +240,16 @@ const GuessesGrid = (props: GuessesGridProps) => {
             text-center rounded-2xl sm:rounded-[18px] inset-shadow-sm border-2 border-white hover:brightness-110 hover:cursor-default transform-3d perspective-[1000px] transform-gpu`}>
               <p className="text-white text-[10px] sm:text-[14px] font-light [text-shadow:1.6px_1.6px_3px_rgba(26,26,26,0.8)]">
                 {Array.isArray(guess.guessed_idol_data.companies)
-                  ? guess.guessed_idol_data.companies.map((companies, index) => (
+                  ? guess.guessed_idol_data.companies.map((companies, index) => {
+                    const colorClass = colorClasses(guess, "companies", companies);
+
+                    return (
                       <React.Fragment key={index}>
-                        {companies}
+                        <span className={colorClass}>{companies}</span>
                         <br />
                       </React.Fragment>
-                    ))
+                    );
+                  })
                   : guess.guessed_idol_data.companies}
               </p>
             </motion.div>
@@ -256,26 +280,26 @@ const GuessesGrid = (props: GuessesGridProps) => {
               </p>
             </motion.div>
 
-            {/* Birth Year Column */}
+            {/* Birth Date Column */}
             <motion.div 
             initial={{ rotateY: 90, opacity: 0 }}
             animate={currentColumn >= 4 ? { rotateY: 0, opacity: 1 } : {}}
             transition={{ duration: 0.8, ease: "easeInOut" }}
             onAnimationComplete={() => {
               if (currentColumn === 4) {
-                setAnimatingColumn(prev => new Map(prev).set(idolId, COL.BIRTH_YEAR));
+                setAnimatingColumn(prev => new Map(prev).set(idolId, COL.BIRTH_DATE));
               }
             }}
-            className={`${getStatusColor(guess.feedback.birth_year?.status)} relative w-18 h-18 sm:h-28 sm:w-28 flex flex-col items-center justify-center 
+            className={`${getStatusColor(guess.feedback.birth_date?.status)} relative w-18 h-18 sm:h-28 sm:w-28 flex flex-col items-center justify-center 
             text-center rounded-2xl sm:rounded-[18px] inset-shadow-sm border-2 border-white hover:brightness-110 hover:cursor-default transform-3d perspective-[1000px] transform-gpu`}>
-              {guess.feedback.birth_year?.status !== "correct" && (
-                <img src={getStatusIcon(guess.feedback.birth_year?.status)}
-                alt="Birth Year"
+              {guess.feedback.birth_date?.status !== "correct" && (
+                <img src={getStatusIcon(guess.feedback.birth_date?.status)}
+                alt="Birth Date"
                 className="w-18 h-18 sm:w-28 sm:h-28 object-cover"
                 draggable={false} />
               )}
               {/* TODO: Mudar no backend para birth date (dia / mes / ano) */}
-              <span className="absolute text-center text-white text-[10px] sm:text-[14px] font-light [text-shadow:1.6px_1.6px_3px_rgba(26,26,26,0.8)]">{guess.guessed_idol_data.birth_year}</span>
+              <span className="absolute text-center text-white text-[10px] sm:text-[14px] font-light [text-shadow:1.6px_1.6px_3px_rgba(26,26,26,0.8)]">{formatBirthDate(guess.guessed_idol_data.birth_date)}</span>
             </motion.div>
 
             {/* Debut Year Column */}
@@ -343,10 +367,7 @@ const GuessesGrid = (props: GuessesGridProps) => {
               <p className="text-white text-[10px] sm:text-[14px] font-light [text-shadow:1.6px_1.6px_3px_rgba(26,26,26,0.8)]">
                 {Array.isArray(guess.guessed_idol_data.position)
                   ? guess.guessed_idol_data.position.map((position, index) => {
-                    const isCorrect = guess.feedback.position?.status !== "correct" && guess.feedback.position?.correct_items?.includes(position);
-                    const isIncorrect = guess.feedback.position?.status !== "correct" && guess.feedback.position?.incorrect_items?.includes(position);
-                    const colorClass = getPositionColor(isCorrect ? "correct_items" : isIncorrect ? "incorrect_items" : "");
-
+                    const colorClass = colorClasses(guess, "position", position);
                     return (
                       <React.Fragment key={index}>
                         <span className={colorClass}>{position}</span>

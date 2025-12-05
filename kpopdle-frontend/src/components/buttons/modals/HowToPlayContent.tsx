@@ -126,12 +126,12 @@ const HowToPlayText = () => {
                             <span className="normal-font pt-1">Idol's <b>nationality (or nationalities)</b> will be displayed here.</span>
                         </div>
 
-                        {/* Birth Year or Date / Age */}
+                        {/* Birth Date or Date / Age */}
                         <div className="flex flex-col w-full">
                             <h4 className="text-2xl pt-2 font-bold text-[#ce757a] [text-shadow:1.2px_1.2px_4px_rgba(0,0,0,0.8),0_0_12px_rgba(206,117,122,0.60)] brightness-110">
-                                Birth Year:
+                                Birth Date:
                             </h4>
-                            <span className="normal-font pt-1">Idol's <b>birth year</b> will be displayed here.</span>
+                            <span className="normal-font pt-1">Idol's <b>birth date</b> will be displayed here.</span>
                         </div>
 
                         {/* Debut year */}

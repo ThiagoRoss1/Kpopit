@@ -38,7 +38,7 @@ const ShareText = (props: ShareContentProps) => {
         return header + body + siteLink;
     };
 
-    const categories = ["groups", "companies", "nationality", "birth_year", "idol_debut_year", "height", "position"] as const;
+    const categories = ["groups", "companies", "nationality", "birth_date", "idol_debut_year", "height", "position"] as const;
 
     const handleCopy = () => {
         navigator.clipboard.writeText(textToCopy(guesses, attempts));

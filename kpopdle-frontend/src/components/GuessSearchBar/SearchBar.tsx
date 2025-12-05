@@ -15,10 +15,11 @@ interface SearchBarProps {
 
   // Handle selection
   onIdolSelect: (idolName: string) => void;
+  onIdolSelectId?: (idolId: IdolListItem) => void;
 }
 
 const SearchBar = (props: SearchBarProps) => {
-  const { allIdols, value, onIdolSelect, onSubmit, disabled, excludedIdols, onClose } =
+  const { allIdols, value, onIdolSelect, onIdolSelectId, onSubmit, disabled, excludedIdols, onClose } =
     props;
 
   // Input value and Suggestions state
@@ -55,7 +56,10 @@ const SearchBar = (props: SearchBarProps) => {
           const matchesName = idol.artist_name.toLowerCase().includes(value.toLowerCase());
 
           const matchesGroup = idol.groups?.some(group =>
-            group.toLowerCase().includes(value.toLowerCase()));
+            group.toLowerCase().includes(value.toLowerCase())) ||
+            idol.all_groups?.some(group =>
+              group.toLowerCase().includes(value.toLowerCase())
+            ); // Check in all_groups but only for filtering -> displaying active group(s) only
 
           const isSoloist = (idol.groups?.length === 0) &&
           ("solo".includes(value.toLowerCase()) || value.toLowerCase().includes("solo") && (!idol.groups || idol.groups.length === 0));
@@ -86,8 +90,15 @@ const SearchBar = (props: SearchBarProps) => {
         })
         .slice(0, 10); // Limit to 10 suggestions
       setSuggestions(filteredSuggestions);
+
+      setSelectedIdol(filteredSuggestions[0] || null);
+
+      if (filteredSuggestions[0]) {
+        onIdolSelectId?.(filteredSuggestions[0]);
+      }
     } else {
       setSuggestions([]);
+      setSelectedIdol(null);
     }
   };
 
@@ -103,13 +114,14 @@ const SearchBar = (props: SearchBarProps) => {
   // Handle suggestion click
   const handleSuggestionClick = (suggestion: IdolListItem) => {
     onIdolSelect(formatDisplayName(suggestion));  // suggestion.artist_name <- Before adding groups at searchbar
+    onIdolSelectId?.(suggestion);
     setSelectedIdol(suggestion);
     setSuggestions([]);
   };
 
-  const extractArtistName = (displayValue: string) => {
-    return displayValue.split(" (")[0].trim(); // <- Added Groups display
-  };
+  // const extractArtistName = (displayValue: string) => {
+  //   return displayValue.split(" (")[0].trim(); // <- Added Groups display
+  // };
   // Return JSX
   return (
     <div ref={containerRef} className="relative w-fit h-fit rounded-3xl">
@@ -118,10 +130,10 @@ const SearchBar = (props: SearchBarProps) => {
         <form className="w-full p-2" 
         onSubmit={(e) => {
           e.preventDefault();
-          const cleanName = extractArtistName(value);
+          // const cleanName = extractArtistName(value);
           // value.trim().toLocaleLowerCase() <- Before adding groups at searchbar
 
-                if (!disabled && selectedIdol && cleanName.length > 0 && (selectedIdol.artist_name.toLocaleLowerCase() === cleanName.toLocaleLowerCase())) {
+                if (!disabled && selectedIdol) { // cleanName.length > 0 && (selectedIdol.artist_name.toLocaleLowerCase() === cleanName.toLocaleLowerCase()) -> Certifies that user selected an idol from the list (full name)
                 onSubmit?.();
                 setShowList(false);
                 setSelectedIdol(null);
@@ -155,10 +167,10 @@ const SearchBar = (props: SearchBarProps) => {
                   border border-white/80 transform transition-all ${!isClicked ? "duration-300" : ""} hover:brightness-125 hover:scale-108 
                   hover:border-white hover:cursor-pointer hover:bg-linear-to-br hover:from-[#b43777] hover:to-[#ce757a] hover:rotate-15`}
               onClick={() => {
-                const cleanName = extractArtistName(value);
+                // const cleanName = extractArtistName(value);
                 // value.trim().toLocaleLowerCase() <- Before adding groups at searchbar
                 
-                if (!disabled && selectedIdol && cleanName.length > 0 && (selectedIdol.artist_name.toLocaleLowerCase() === cleanName.toLocaleLowerCase())) {
+                if (!disabled && selectedIdol) { // cleanName.length > 0 && (selectedIdol.artist_name.toLocaleLowerCase() === cleanName.toLocaleLowerCase()) -> Certifies that user selected an idol from the list (full name)
                 onSubmit?.();
                 setShowList(false);
                 setSelectedIdol(null);

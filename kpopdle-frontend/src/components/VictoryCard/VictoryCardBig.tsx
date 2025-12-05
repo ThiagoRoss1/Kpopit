@@ -22,8 +22,8 @@ interface VictoryCardBigProps {
 const VictoryCardBig = (props: VictoryCardBigProps) => {
     const { cardInfo, idolActiveGroup, attempts, yesterdayIdol, yesterdayIdolGroup, yesterdayIdolImage, userPosition, userRank, userScore, nextReset, onShareClick } = props;
 
-    const activeGroup = idolActiveGroup && idolActiveGroup.length > 0 ? idolActiveGroup : "Soloist";
-    const yesterdayGroup = yesterdayIdolGroup && yesterdayIdolGroup.length > 0 ? yesterdayIdolGroup : "Soloist";
+    const activeGroup = idolActiveGroup && idolActiveGroup.length > 0 ? idolActiveGroup.join(", ") : "Soloist";
+    const yesterdayGroup = yesterdayIdolGroup && yesterdayIdolGroup.length > 0 ? yesterdayIdolGroup.join(", ") : "Soloist";
 
 return (
     <div className="relative flex flex-col items-center justify-start max-xxs:w-80 xxs:w-92 xs:w-100 xm:w-106 h-fit sm:w-[628px] sm:h-fit rounded-3xl border-2 border-white/50 
