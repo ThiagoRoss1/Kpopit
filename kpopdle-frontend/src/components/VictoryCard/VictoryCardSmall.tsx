@@ -130,7 +130,7 @@ const VictoryCardSmall = (props: VictoryCardSmallProps) => {
                     {/* Idol Container */}
                     <div className="flex w-full items-center justify-center h-[100px] sm:h-[100px] mb-4">
                         <div className={`relative flex items-center justify-center ${isOnMobile ? "bg-black/80" : "bg-white/2"} w-80 h-24 p-5 sm:w-80 sm:h-24 sm:p-5 rounded-[20px]
-                        hover:scale-105 hover:bg-black/70 hover:brightness-110 hover:cursor-default transform duration-300 transform-gpu`}> {/* Maybe shadow-2xl or lg */}
+                        hover:scale-105 hover:bg-black/90 hover:brightness-110 hover:cursor-default transform duration-300 transform-gpu`}> {/* Maybe shadow-2xl or lg */}
 
                             <div className="absolute left-5 flex items-center justify-center h-20 w-20 sm:h-20 sm:w-20 bg-transparent rounded-[20px] hover:scale-110 hover:rotate-4 transition-transform duration-500 will-change-transform transform-gpu">
                                 <img src={`${import.meta.env.VITE_IMAGE_BUCKET_URL}${cardInfo.image_path}`} alt="Idol" className="w-20 h-20 sm:w-full sm:h-full rounded-[20px] object-cover object-top transform-gpu" draggable={false} />
@@ -151,7 +151,7 @@ const VictoryCardSmall = (props: VictoryCardSmallProps) => {
                     <div className="flex w-full items-center justify-center h-20 sm:h-20 mb-4">
                         <div className="flex flex-row items-center justify-between w-80 h-20 sm:w-80 sm:h-20">
                             <div className={`relative flex items-center justify-center text-center ${isOnMobile ? "bg-black/80" : "bg-white/2"} w-36 h-20 sm:w-36 sm:h-20 rounded-[20px] 
-                            hover:scale-105 hover:bg-black/60 hover:brightness-110 hover:cursor-default transform duration-300 shadow-2xl transform-gpu`}>
+                            hover:scale-105 hover:bg-black/80 hover:brightness-110 hover:cursor-default transform duration-300 shadow-2xl transform-gpu`}>
                                 <div className="flex flex-col items-center justify-center text-center gap-0.5">
                                     <p className="font-bold text-base sm:text-[18px] text-[#ce757a] brightness-105">
                                         {attempts}
@@ -164,7 +164,7 @@ const VictoryCardSmall = (props: VictoryCardSmallProps) => {
                             </div>
 
                             <div className={`relative flex items-center justify-center text-center ${isOnMobile ? "bg-black/80" : "bg-white/2"} w-36 h-20 sm:w-36 sm:h-20 rounded-[20px] 
-                            hover:scale-105 hover:bg-black/60 hover:brightness-110 hover:cursor-default transform duration-300 shadow-2xl transform-gpu`}>
+                            hover:scale-105 hover:bg-black/80 hover:brightness-110 hover:cursor-default transform duration-300 shadow-2xl transform-gpu`}>
                                 <div className="flex flex-col items-center justify-center text-center gap-0.5">
                                     <span className="font-bold text-base sm:text-[18px] text-[#ce757a] brightness-105">
                                         {stats?.current_streak}
@@ -212,7 +212,7 @@ const VictoryCardSmall = (props: VictoryCardSmallProps) => {
                             </AnimatePresence>
 
                             <div className="flex flex-row items-center justify-center text-center w-80 h-12 sm:w-80 sm:h-12 gap-6">
-                                <button className={`relative left-0 items-center text-center bg-linear-to-r ${isOnMobile ? "from-black/90 to-black/50" : "from-black/70 to-black/30"} w-12 h-12 sm:w-12 sm:h-12 rounded-[20px] 
+                                <button className={`relative left-0 items-center text-center bg-linear-to-r ${isOnMobile ? "from-black/90 to-black/50" : "from-black/90 to-black/30"} w-12 h-12 sm:w-12 sm:h-12 rounded-[20px] 
                                 hover:scale-110 hover:brightness-110 hover:cursor-pointer hover:rotate-3 hover:bg-black transform duration-300 transform-gpu`}
                                 onClick={() => shareOnTwitter(attempts, stats, userRank, userScore)}>
                                     <div className="flex w-full h-full items-center justify-center text-center brightness-100 hover:brightness-110 transform duration-300">
@@ -220,7 +220,7 @@ const VictoryCardSmall = (props: VictoryCardSmallProps) => {
                                     </div>
                                 </button>
 
-                                <button className={`relative right-0 items-center text-center bg-linear-to-r ${isOnMobile ? "from-black/90 to-black/50" : "from-black/30 to-black/70"} w-12 h-12 sm:w-12 sm:h-12 rounded-[20px]
+                                <button className={`relative right-0 items-center text-center bg-linear-to-r ${isOnMobile ? "from-black/90 to-black/50" : "from-black/30 to-black/90"} w-12 h-12 sm:w-12 sm:h-12 rounded-[20px]
                                 hover:scale-110 hover:brightness-110 hover:cursor-pointer hover:-rotate-3 hover:bg-black transform duration-300 transform-gpu`}>
                                     <div className="flex w-full h-full items-center justify-center text-center brightness-100 hover:brightness-110">
                                         <img src={InstagramLogo} alt="Insta" className="w-8 h-8 sm:w-9 sm:h-9" draggable={false} />

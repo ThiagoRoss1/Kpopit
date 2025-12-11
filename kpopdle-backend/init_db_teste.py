@@ -124,7 +124,8 @@ cursor.execute(idol_ca_sql)
 
 daily_picks_sql = """
     CREATE TABLE IF NOT EXISTS daily_picks (
-    pick_date DATE PRIMARY KEY,
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    pick_date DATE NOT NULL UNIQUE,
     idol_id INTEGER NOT NULL,
 
     /* --- Foreign Key --- */

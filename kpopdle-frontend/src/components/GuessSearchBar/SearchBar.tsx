@@ -277,6 +277,8 @@ const SearchBar = (props: SearchBarProps) => {
                     src={`${import.meta.env.VITE_IMAGE_BUCKET_URL}${suggestion.image_path}`}
                     alt={"Idol image"}
                     className="w-11 h-11 object-cover rounded-full border border-white"
+                    loading="eager"
+                    fetchPriority="high"
                     animate={{ scale: hoveredId === suggestion.id ? 1.16 : 1 }}
                     transition={{ type: "spring", stiffness: 300, damping: 25 }}/>
                   )}

@@ -23,8 +23,8 @@ TIMEZONE_EST = ZoneInfo("America/New_York")
 # return datetime.now(timezone.utc) -- EU
 # return datetime.now(timezone.utc).date().isoformat() -- EU
 
-TEST_MODE = False
-TEST_DATE_OFFSET = 216 # Days to add/subtract (1 = tomorrow, -1 = yesterday)
+TEST_MODE = True
+TEST_DATE_OFFSET = 217 # Days to add/subtract (1 = tomorrow, -1 = yesterday)
 
 def get_today_now():
     if TEST_MODE:
@@ -266,7 +266,7 @@ def get_daily_idol():
     connect.commit()
 
     """ For testing purposes, you can set a fixed idol_id """
-    idol_id = 92
+    # idol_id = 1
 
     # Fetch full idol data
     idol_data = fetch_full_idol_data(cursor, idol_id)

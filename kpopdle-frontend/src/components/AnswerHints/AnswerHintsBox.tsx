@@ -19,8 +19,8 @@ const AnswerHintsBox = (props: AnswerHintsBoxProps) => {
     const groupsDisplay = groups && groups.length > 0 ? groups : ["Soloist"];
 
     // canReveal states
-    const CARD1 = 2;
-    const CARD2 = 3;
+    const CARD1 = 6;
+    const CARD2 = 8;
 
     const [isFlipped1, setIsFlipped1] = useState(() => {
         return localStorage.getItem("hint1Revealed") === "true";

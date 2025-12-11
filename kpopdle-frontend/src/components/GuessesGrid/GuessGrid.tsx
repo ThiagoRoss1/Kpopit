@@ -8,6 +8,9 @@ import ArrowUp from "../../assets/icons/arrow-fat-line-up-fill.svg";
 import ArrowDown from "../../assets/icons/arrow-fat-line-down-fill.svg";
 import { motion } from "motion/react";
 import { useDateLocale } from "../../hooks/useDateLocale";
+import { formatCompanyName } from "../../utils/formatters";
+import { getNationalityFlag } from "../../utils/getFlags";
+
 
 interface GuessesGridProps {
   guesses: GuessResponse[];
@@ -104,7 +107,7 @@ const GuessesGrid = (props: GuessesGridProps) => {
     const isIncorrect = fieldFeedback.status !== "correct" && fieldFeedback.incorrect_items?.includes(itemValue);
 
     return getPositionColor(isCorrect ? "correct_items" : isIncorrect ? "incorrect_items" : "");
-  }
+  } 
   
   useEffect(() => {
     if (guesses.length === 0) return;
@@ -177,13 +180,13 @@ const GuessesGrid = (props: GuessesGridProps) => {
               initial={{ scale: 0.8, opacity: 0 }}
               animate={{ scale: 1, opacity: 1 }}
               transition={{ duration: 0.01, ease: [0.34, 1.56, 0.64, 1] }}        
-              className="relative bg-[#ffffff] shadow-[0_0_10px_2px_rgba(255,255,255,0.1),0_0_10px_2px_rgba(255,255,255,0.1)] w-18 h-18 sm:h-28 sm:w-28 rounded-2xl sm:rounded-[18px] 
+              className="relative bg-[#ffffff] shadow-[0_0_10px_2px_rgba(255,255,255,0.1),0_0_10px_2px_rgba(255,255,255,0.1)] w-20 h-20 sm:h-28 sm:w-28 rounded-2xl sm:rounded-[18px] 
               flex flex-col items-center justify-center text-center border-2 border-white hover:brightness-110 hover:cursor-default hover:scale-105 transition-transform duration-300
               transform-gpu overflow-hidden">
                 <img
                   src={`${import.meta.env.VITE_IMAGE_BUCKET_URL}${guess.guessed_idol_data.image_path}`}
                   alt="Placeholder"
-                  className="w-18 h-18 sm:w-28 sm:h-28 object-cover select-none" // object-cover kinda bugged (#TODO - fix later)
+                  className="w-20 h-20 sm:w-28 sm:h-28 object-cover select-none" // object-cover kinda bugged (#TODO - fix later)
                   draggable={false}
                   style={{ 
                     transform: 'translate3d(0, 0, 0)',
@@ -191,10 +194,10 @@ const GuessesGrid = (props: GuessesGridProps) => {
                     imageRendering: 'crisp-edges'
                   }}
                 />
-                <span className="font-light absolute bottom-0.5 text-[10px] sm:text-[14px] text-white [text-shadow:1.6px_1.6px_3px_rgba(26,26,26,0.8)]">
+                <span className="font-light absolute bottom-0.5 text-[10px] sm:text-[13px] text-white [text-shadow:0.6px_1.6px_4px_rgba(0,0,0,1),1px_1px_2px_rgba(0,0,0,0.9),2px_2px_4px_rgba(0,0,0,0.8)] px-1">
                   {guess.guessed_idol_data.artist_name}
                   {guess.guessed_idol_data.active_group && guess.guessed_idol_data.active_group !== "Soloist" ? (
-                    <span className="font-light text-[10px] sm:text-[14px] text-white [text-shadow:1.6px_1.6px_3px_rgba(26,26,26,0.8)]"> ({guess.guessed_idol_data.active_group})</span>
+                    <span className="font-light text-[10px] sm:text-[13px] text-white [text-shadow:0.6px_1.6px_4px_rgba(0,0,0,1),1px_1px_2px_rgba(0,0,0,0.9),2px_2px_4px_rgba(0,0,0,0.8)]"> ({guess.guessed_idol_data.active_group})</span>
                   ) : null}
                 </span>{" "}
             </motion.div>
@@ -209,9 +212,9 @@ const GuessesGrid = (props: GuessesGridProps) => {
                 setAnimatingColumn(prev => new Map(prev).set(idolId, COL.GROUPS));
               }
             }}
-            className={`${getStatusColor(guess.feedback.groups?.status)} relative w-18 h-18 sm:h-28 sm:w-28 flex flex-col items-center justify-center 
+            className={`${getStatusColor(guess.feedback.groups?.status)} relative w-20 h-20 sm:h-28 sm:w-28 flex flex-col items-center justify-center 
             text-center rounded-2xl sm:rounded-[18px] inset-shadow-sm border-2 border-white hover:brightness-110 hover:cursor-default transform-3d perspective-[1000px] transform-gpu`}>
-              <p className="text-white text-[10px] sm:text-[14px] font-light [text-shadow:1.6px_1.6px_3px_rgba(26,26,26,0.8)]">
+              <p className="text-white text-[10px] sm:text-[14px] font-light [text-shadow:1.6px_1.6px_3px_rgba(26,26,26,0.8),1px_1px_2px_rgba(26,26,26,0.5)]">
                 {Array.isArray(guess.guessed_idol_data.groups)
                   ? guess.guessed_idol_data.groups.map((groups, index) => {
                     const colorClass = colorClasses(guess, "groups", groups);
@@ -236,16 +239,16 @@ const GuessesGrid = (props: GuessesGridProps) => {
                 setAnimatingColumn(prev => new Map(prev).set(idolId, COL.COMPANY));
               }
             }}
-            className={`${getStatusColor(guess.feedback.companies?.status)} relative w-18 h-18 sm:h-28 sm:w-28 flex flex-col items-center justify-center 
+            className={`${getStatusColor(guess.feedback.companies?.status)} relative w-20 h-20 sm:h-28 sm:w-28 flex flex-col items-center justify-center 
             text-center rounded-2xl sm:rounded-[18px] inset-shadow-sm border-2 border-white hover:brightness-110 hover:cursor-default transform-3d perspective-[1000px] transform-gpu`}>
-              <p className="text-white text-[10px] sm:text-[14px] font-light [text-shadow:1.6px_1.6px_3px_rgba(26,26,26,0.8)]">
+              <p className="text-white text-[10px] sm:text-[14px] font-light [text-shadow:1.6px_1.6px_3px_rgba(26,26,26,0.8),1px_1px_2px_rgba(26,26,26,0.5)]">
                 {Array.isArray(guess.guessed_idol_data.companies)
                   ? guess.guessed_idol_data.companies.map((companies, index) => {
                     const colorClass = colorClasses(guess, "companies", companies);
 
                     return (
                       <React.Fragment key={index}>
-                        <span className={colorClass}>{companies}</span>
+                        <span className={colorClass}>{formatCompanyName(companies)}</span>
                         <br />
                       </React.Fragment>
                     );
@@ -264,20 +267,39 @@ const GuessesGrid = (props: GuessesGridProps) => {
                 setAnimatingColumn(prev => new Map(prev).set(idolId, COL.NATIONALITY));
               }
             }}
-            className={`${getStatusColor(guess.feedback.nationality?.status)} relative w-18 h-18 sm:h-28 sm:w-28 flex flex-col items-center justify-center 
+            className={`${getStatusColor(guess.feedback.nationality?.status)} relative w-20 h-20 sm:h-28 sm:w-28 ${guess.guessed_idol_data.nationality.length >= 3 ? "flex flex-row flex-wrap content-center" : "flex flex-col"} items-center justify-center 
             text-center rounded-2xl sm:rounded-[18px] inset-shadow-sm border-2 border-white hover:brightness-110 hover:cursor-default transform-3d perspective-[1000px] transform-gpu`}>
-              <p className="text-white text-[10px] sm:text-[14px] font-light [text-shadow:1.6px_1.6px_3px_rgba(26,26,26,0.8)]">
+              <div className={`${guess.guessed_idol_data.nationality.length >= 3 ? "flex flex-row flex-wrap content-center gap-2" : "flex flex-col gap-3"} items-center justify-center`}>
                 {Array.isArray(guess.guessed_idol_data.nationality)
                   ? guess.guessed_idol_data.nationality.map(
-                      (nationality, index) => (
-                        <React.Fragment key={index}>
-                          {nationality}
-                          <br />
-                        </React.Fragment>
-                      )
+                      (nationality, index) => {
+                        const flagSrc = getNationalityFlag(nationality);
+                        const isCorrect = guess.feedback.nationality?.status !== "correct" && guess.feedback.nationality?.correct_items?.includes(nationality);
+                        const borderColor = isCorrect ? "border-2 border-[#4FFFB0]" : "";
+
+                        if (flagSrc) {
+                          return (
+                              <img 
+                                key={index}
+                                src={flagSrc} 
+                                alt={nationality}
+                                className={`${guess.guessed_idol_data.nationality.length === 1 ? "w-12" : guess.guessed_idol_data.nationality.length === 2 ? "w-10" : "w-9"} rounded-md object-cover shadow-[1.6px_1.6px_3px_rgba(26,26,26,0.8),1px_1px_2px_rgba(26,26,26,0.5)]
+                                ${borderColor}`} 
+                                draggable={false} 
+                              />
+                          )
+                        }             
+                        return (
+                          <span 
+                            key={index}
+                            className="text-white text-[10px] sm:text-[14px] font-light [text-shadow:1.6px_1.6px_3px_rgba(26,26,26,0.8),1px_1px_2px_rgba(26,26,26,0.5)]">
+                              {nationality}
+                            </span>
+                        );
+                      }
                     )
                   : guess.guessed_idol_data.nationality}
-              </p>
+              </div>
             </motion.div>
 
             {/* Birth Date Column */}
@@ -290,16 +312,16 @@ const GuessesGrid = (props: GuessesGridProps) => {
                 setAnimatingColumn(prev => new Map(prev).set(idolId, COL.BIRTH_DATE));
               }
             }}
-            className={`${getStatusColor(guess.feedback.birth_date?.status)} relative w-18 h-18 sm:h-28 sm:w-28 flex flex-col items-center justify-center 
+            className={`${getStatusColor(guess.feedback.birth_date?.status)} relative w-20 h-20 sm:h-28 sm:w-28 flex flex-col items-center justify-center 
             text-center rounded-2xl sm:rounded-[18px] inset-shadow-sm border-2 border-white hover:brightness-110 hover:cursor-default transform-3d perspective-[1000px] transform-gpu`}>
               {guess.feedback.birth_date?.status !== "correct" && (
                 <img src={getStatusIcon(guess.feedback.birth_date?.status)}
                 alt="Birth Date"
-                className="w-18 h-18 sm:w-28 sm:h-28 object-cover"
+                className="w-20 h-20 sm:w-28 sm:h-28 object-cover"
                 draggable={false} />
               )}
               {/* TODO: Mudar no backend para birth date (dia / mes / ano) */}
-              <span className="absolute text-center text-white text-[10px] sm:text-[14px] font-light [text-shadow:1.6px_1.6px_3px_rgba(26,26,26,0.8)]">{formatBirthDate(guess.guessed_idol_data.birth_date)}</span>
+              <span className="absolute text-center text-white text-[10px] sm:text-[14px] font-light [text-shadow:1.6px_1.6px_3px_rgba(26,26,26,0.8),1px_1px_2px_rgba(26,26,26,0.5)] px-0.5">{formatBirthDate(guess.guessed_idol_data.birth_date)}</span>
             </motion.div>
 
             {/* Debut Year Column */}
@@ -312,15 +334,15 @@ const GuessesGrid = (props: GuessesGridProps) => {
                 setAnimatingColumn(prev => new Map(prev).set(idolId, COL.DEBUT_YEAR));
               }
             }}
-            className={`${getStatusColor(guess.feedback.idol_debut_year?.status)} relative w-18 h-18 sm:h-28 sm:w-28 flex flex-col items-center justify-center 
+            className={`${getStatusColor(guess.feedback.idol_debut_year?.status)} relative w-20 h-20 sm:h-28 sm:w-28 flex flex-col items-center justify-center 
             text-center rounded-2xl sm:rounded-[18px] inset-shadow-sm border-2 border-white hover:brightness-110 hover:cursor-default transform-3d perspective-[1000px] transform-gpu`}>
               {guess.feedback.idol_debut_year?.status !== "correct" && (
                 <img src={getStatusIcon(guess.feedback.idol_debut_year?.status)}
                 alt="Debut" 
-                className="w-18 h-18 sm:w-28 sm:h-28 object-cover"
+                className="w-20 h-20 sm:w-28 sm:h-28 object-cover"
                 draggable={false} />
                 )}
-                <span className="absolute text-center text-white text-[10px] sm:text-[14px] font-light [text-shadow:1.6px_1.6px_3px_rgba(26,26,26,0.8)]">{guess.guessed_idol_data.idol_debut_year}</span>
+                <span className="absolute text-center text-white text-[10px] sm:text-[14px] font-light [text-shadow:1.6px_1.6px_3px_rgba(26,26,26,0.8),1px_1px_2px_rgba(26,26,26,0.5)]">{guess.guessed_idol_data.idol_debut_year}</span>
             </motion.div>
 
             {/* Height Column */}
@@ -333,15 +355,15 @@ const GuessesGrid = (props: GuessesGridProps) => {
                 setAnimatingColumn(prev => new Map(prev).set(idolId, COL.HEIGHT));
               }
             }}
-            className={`${getStatusColor(guess.feedback.height?.status)} relative w-18 h-18 sm:h-28 sm:w-28 flex flex-col items-center justify-center 
+            className={`${getStatusColor(guess.feedback.height?.status)} relative w-20 h-20 sm:h-28 sm:w-28 flex flex-col items-center justify-center 
             text-center rounded-2xl sm:rounded-[18px] inset-shadow-sm border-2 border-white hover:brightness-110 hover:cursor-default transform-3d perspective-[1000px] transform-gpu`}>
               {guess.feedback.height?.status !== "correct" && (
                 <img src={getStatusIcon(guess.feedback.height?.status)}
                 alt="Height"
-                className="w-18 h-18 sm:w-28 sm:h-28 object-cover"
+                className="w-20 h-20 sm:w-28 sm:h-28 object-cover"
                 draggable={false} />
               )}
-              <span className="absolute text-center text-white text-[10px] sm:text-[14px] font-light [text-shadow:1.6px_1.6px_3px_rgba(26,26,26,0.8)]">{guess.guessed_idol_data.height} cm</span>
+              <span className="absolute text-center text-white text-[10px] sm:text-[14px] font-light [text-shadow:1.6px_1.6px_3px_rgba(26,26,26,0.8),1px_1px_2px_rgba(26,26,26,0.5)]">{guess.guessed_idol_data.height} cm</span>
             </motion.div>
 
             {/* Position(s) Column */}
@@ -362,9 +384,9 @@ const GuessesGrid = (props: GuessesGridProps) => {
                 }
               }
             }}
-            className={`${getStatusColor(guess.feedback.position?.status)} relative w-18 h-18 sm:h-28 sm:w-28 flex flex-col items-center justify-center 
+            className={`${getStatusColor(guess.feedback.position?.status)} relative w-20 h-20 sm:h-28 sm:w-28 flex flex-col items-center justify-center 
             text-center rounded-2xl sm:rounded-[18px] inset-shadow-sm border-2 border-white hover:brightness-110 hover:cursor-default transform-3d perspective-[1000px] transform-gpu`}>
-              <p className="text-white text-[10px] sm:text-[14px] font-light [text-shadow:1.6px_1.6px_3px_rgba(26,26,26,0.8)]">
+              <p className={`text-white ${guess.guessed_idol_data.position.length >= 6 ? "text-[8px] sm:text-[12px]" : "text-[10px] sm:text-[14px]" } font-light [text-shadow:1.6px_1.6px_3px_rgba(26,26,26,0.8),1px_1px_2px_rgba(26,26,26,0.5)]`}>
                 {Array.isArray(guess.guessed_idol_data.position)
                   ? guess.guessed_idol_data.position.map((position, index) => {
                     const colorClass = colorClasses(guess, "position", position);

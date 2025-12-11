@@ -125,7 +125,8 @@ function Home() {
   } = useQuery<IdolListItem[]>({
     queryKey: ["allIdols"],
     queryFn: getAllIdols,
-    //staleTime: Infinity // See functionality
+    staleTime: Infinity, // See functionality
+    gcTime: Infinity,
   });
 
   const yesterday = useQuery<YesterdayIdol>({
