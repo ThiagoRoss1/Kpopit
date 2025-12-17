@@ -11,7 +11,7 @@ const PrivacyPolicy = () => {
                 <div className="w-full sm:w-full max-h-fit bg-white overflow-hidden rounded-4xl shadow-[0px_2px_10px_4px_rgba(255,255,255,0.5)]
                 mx-auto mt-20 mb-10">
                     <div className="flex flex-col items-center justify-center w-full h-10 mt-10">
-                        <h1 className="xxs:text-2xl xm:text-3xl sm:text-3xl font-bold">Kpopdle - Privacy Policy</h1>
+                        <h1 className="xxs:text-2xl xm:text-3xl sm:text-3xl font-bold">Kpopit - Privacy Policy</h1>
                     </div>
 
                     {/* Last Updated */}

@@ -1,4 +1,5 @@
 import sqlite3
+import os
 from datetime import datetime, timezone, timedelta, date
 from zoneinfo import ZoneInfo
 import random
@@ -9,8 +10,11 @@ import math
 import secrets
 import json
 from routes.admin import admin_bp
+from dotenv import load_dotenv
 # from flask_babel import Babel
 # from flask_session import Session
+load_dotenv()
+DB_FILE = os.getenv("DB_FILE")
 
 app = Flask(__name__)
 CORS(app, resources={r"/*": {"origins": "*"}})  # Allow all origins for static files
@@ -23,8 +27,8 @@ TIMEZONE_EST = ZoneInfo("America/New_York")
 # return datetime.now(timezone.utc) -- EU
 # return datetime.now(timezone.utc).date().isoformat() -- EU
 
-TEST_MODE = True
-TEST_DATE_OFFSET = 217 # Days to add/subtract (1 = tomorrow, -1 = yesterday)
+TEST_MODE = False
+TEST_DATE_OFFSET = 219 # Days to add/subtract (1 = tomorrow, -1 = yesterday)
 
 def get_today_now():
     if TEST_MODE:
@@ -257,7 +261,7 @@ def get_daily_idol():
     """Return the 'Idol of the Day' data as JSON"""
 
     # Start db connection
-    connect = sqlite3.connect("kpopdle-teste.db")
+    connect = sqlite3.connect(DB_FILE)
     connect.row_factory = sqlite3.Row
     cursor = connect.cursor()
 
@@ -378,7 +382,7 @@ def guess_idol():
         return jsonify({"error": "Missing user token"}), 400
 
     # Start db connection
-    connect = sqlite3.connect("kpopdle-teste.db")
+    connect = sqlite3.connect(DB_FILE)
     connect.row_factory = sqlite3.Row
     cursor = connect.cursor()
 
@@ -722,7 +726,7 @@ def get_idols_list():
     """Return a list of all idols with their id and names as JSON"""
     
     # Start db connection
-    connect = sqlite3.connect("kpopdle-teste.db")
+    connect = sqlite3.connect(DB_FILE)
     connect.row_factory = sqlite3.Row
     cursor = connect.cursor()
 
@@ -776,7 +780,7 @@ def store_yesterdays_idol():
     """Store yesterday's idol pick in the database"""
     
     # Start db connection
-    connect = sqlite3.connect("kpopdle-teste.db")
+    connect = sqlite3.connect(DB_FILE)
     connect.row_factory = sqlite3.Row
     cursor = connect.cursor()
 
@@ -906,7 +910,7 @@ def generate_user_token():
             token = str(uuid.uuid4())
 
             # Start db connection 
-            connect = sqlite3.connect("kpopdle-teste.db")
+            connect = sqlite3.connect(DB_FILE)
             connect.row_factory = sqlite3.Row
             cursor = connect.cursor()
             
@@ -943,7 +947,7 @@ def get_user_stats(user_token):
     """Return user stats based on the provided token"""
 
     # Start db connection
-    connect = sqlite3.connect("kpopdle-teste.db")
+    connect = sqlite3.connect(DB_FILE)
     connect.row_factory = sqlite3.Row
     cursor = connect.cursor()
 
@@ -990,7 +994,7 @@ def get_daily_users_count():
     today = get_today_date_str()
     # today = get_server_date()
 
-    connect = sqlite3.connect("kpopdle-teste.db")
+    connect = sqlite3.connect(DB_FILE)
     connect.row_factory = sqlite3.Row
     cursor = connect.cursor()
 
@@ -1013,7 +1017,7 @@ def get_daily_rank(user_token):
     today = get_today_date_str()
     # today = get_server_date()
 
-    connect = sqlite3.connect("kpopdle-teste.db")
+    connect = sqlite3.connect(DB_FILE)
     connect.row_factory = sqlite3.Row
     cursor = connect.cursor()
 
@@ -1089,7 +1093,7 @@ def generate_transfer_code(user_token):
     """Generate a transfer code for the user to transfer their data to another device"""
     code_generated = False
     # Start db connection
-    connect = sqlite3.connect("kpopdle-teste.db")
+    connect = sqlite3.connect(DB_FILE)
     connect.row_factory = sqlite3.Row
     cursor = connect.cursor()
 
@@ -1174,7 +1178,7 @@ def transfer_data():
         return jsonify({"error": "Missing transfer code"}), 400
     
     # Start db connection
-    connect = sqlite3.connect("kpopdle-teste.db")
+    connect = sqlite3.connect(DB_FILE)
     connect.row_factory = sqlite3.Row
     cursor = connect.cursor()
 
@@ -1220,7 +1224,7 @@ def get_game_state(user_token):
     # today = get_server_date()
 
     # Start db connection
-    connect = sqlite3.connect("kpopdle-teste.db")
+    connect = sqlite3.connect(DB_FILE)
     connect.row_factory = sqlite3.Row
     cursor = connect.cursor()
 
@@ -1273,7 +1277,7 @@ def get_active_transfer_code(user_token):
     # today = get_server_datetime_now().isoformat()
 
     # Start db connection
-    connect = sqlite3.connect("kpopdle-teste.db")
+    connect = sqlite3.connect(DB_FILE)
     connect.row_factory = sqlite3.Row
     cursor = connect.cursor()
     
@@ -1349,7 +1353,7 @@ if __name__ == "__main__":
 #     """Return idol data as JSON"""
 
 #     # Start db connection
-#     connect = sqlite3.connect("kpopdle-teste.db")
+#     connect = sqlite3.connect(DB_FILE)
 #     # Set row factory to act like a dictionary
 #     connect.row_factory = sqlite3.Row
 #     # Create a cursor
@@ -1371,7 +1375,7 @@ if __name__ == "__main__":
 #     """Return the user's position for today's game after winning - refreshable"""
 #     today = datetime.date.today().isoformat()
 
-#     connect = sqlite3.connect("kpopdle-teste.db")
+#     connect = sqlite3.connect(DB_FILE)
 #     connect.row_factory = sqlite3.Row
 #     cursor = connect.cursor()
 

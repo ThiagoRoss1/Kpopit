@@ -1,8 +1,12 @@
 # Migrations management script
 import sqlite3
 from pathlib import Path
+import os
+from dotenv import load_dotenv
 
-DB_FILE = Path(__file__).parent.parent / "kpopdle-teste.db"
+load_dotenv()
+
+DB_FILE = Path(__file__).parent.parent / os.getenv("DB_FILE")
 
 def apply_migrations():
     conn = sqlite3.connect(DB_FILE)

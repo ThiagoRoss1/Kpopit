@@ -35,6 +35,7 @@ import BackgroundStyle from "../../components/Background/BackgroundStyle.tsx";
 import FeedbackSquares from "../../components/FeedbackSquares/FeedbackSquares.tsx";
 import XLogo from "../../assets/icons/x-logo.svg";
 import { Info } from "lucide-react";
+import { WinnerExplosion } from "../../utils/confetti.tsx";
 // import { Input } from "@chakra-ui/react"; - Css framework import example
 
 function Home() {
@@ -49,6 +50,7 @@ function Home() {
   const [shouldFetchToken, setShouldFetchToken] = useState<boolean>(!localStorage.getItem("userToken"));
   const [dayChecked, setDayChecked] = useState<boolean>(false);
   const [closeFeedbackSquares, setCloseFeedbackSquares] = useState<boolean>(false);
+  const [confetti, setConfetti] = useState<boolean>(false);
   // Counter
   const [attempts, setAttempts] = useState<number>(0);
 
@@ -170,6 +172,7 @@ function Home() {
       localStorage.removeItem("colorize2");
       localStorage.removeItem("animatedIdols");
       localStorage.removeItem("closeFeedbackSquares");
+      localStorage.removeItem("confettiShown");
 
       localStorage.setItem("gameDate", serverDate || "");
       setDayChecked(true);
@@ -179,6 +182,7 @@ function Home() {
       const gameComplete = localStorage.getItem("gameComplete");
       const gameWon = localStorage.getItem("gameWon");
       const closeFeedbackSquares = localStorage.getItem("closeFeedbackSquares") === "true";
+      const confettiShown = localStorage.getItem("confettiShown") === "true";
 
       if (cachedGuesses) {
         try {
@@ -200,6 +204,7 @@ function Home() {
       }
 
       setDayChecked(true);
+      setConfetti(confettiShown);
     }
   }, [gameData]);
 
@@ -312,7 +317,7 @@ function Home() {
   };
   
   if (isLoadingGameData || isLoadingAllIdols) {
-    return <div className="flex w-full h-screen justify-center items-center text-white">Loading Kpopdle...</div>;
+    return <div className="flex w-full h-screen justify-center items-center text-white">Loading Kpopit...</div>;
   }
 
   if (isErrorGameData || isErrorAllIdols) {
@@ -335,7 +340,7 @@ function Home() {
           draggable={false}>
           <h1 className="leading-tight text-5xl sm:text-7xl font-bold text-center">
             <span className="kpop-part">Kpop</span>
-            <span className="dle-part">dle</span>
+            <span className="it-part">it</span>
           </h1>
         </Link>
       </div>    
@@ -428,6 +433,15 @@ function Home() {
         <FeedbackSquares onClose={() => (setCloseFeedbackSquares(true), localStorage.setItem("closeFeedbackSquares", "true"))} />
         )}
       </div>
+
+      {endGame && isCorrect && !confetti && (
+        <WinnerExplosion onComplete={() => {
+          setConfetti(true)
+          localStorage.setItem("confettiShown", "true");
+        }}
+        />
+      )} 
+      {/* see later */}
 
       {endGame && guesses.length > 0 && showVictoryCard && (
         <div className="w-full flex items-center justify-center mt-10">
@@ -532,7 +546,7 @@ export default Home;
   // }, []);
 
   // if (loading) {
-  //   return <div>Loading Kpopdle...</div>;
+  //   return <div>Loading Kpopit...</div>;
   // }
 
   // if (error) {

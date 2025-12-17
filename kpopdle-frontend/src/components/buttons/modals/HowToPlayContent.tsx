@@ -1,6 +1,8 @@
 import { useResetTimer } from "../../../hooks/useResetTimer.tsx";
 import ArrowUp from "../../../assets/icons/arrow-fat-line-up-fill.svg";
 import ArrowDown from "../../../assets/icons/arrow-fat-line-down-fill.svg";
+import ChaewonBanner from "../../../assets/imgs/chaewon_guess.png";
+import EunbiBanner from "../../../assets/imgs/eunbi_guess.png";
 
 
 const HowToPlayText = () => {
@@ -242,10 +244,26 @@ const HowToPlayText = () => {
                 </div>
 
                 <div className="flex flex-col w-full items-start justify-center border-t border-white mt-2 gap-0">
-                    <span className="normal-font pt-2">Let's consider today's idol is <b>Chaewon</b>.</span>
-                    <span className="normal-font">And you guessed <b>Lisa</b></span>
-                    <span className="normal-font">....</span>
-                    <span className="normal-font">Working in progress...</span>
+                    <div className="flex flex-col w-full items-start justify-center gap-4">
+                        <span className="normal-font pt-2">Let's consider today's idol is <b className="text-[#b43777] brightness-110 [text-shadow:1.2px_1.2px_4px_rgba(0,0,0,0.8),0_0_12px_rgba(180,55,119,0.60)]">
+                            Kim Chaewon
+                        </b>.</span>
+                        <span className="normal-font">If you guess <b className="text-[#ce757a] [text-shadow:1.2px_1.2px_4px_rgba(0,0,0,0.8),0_0_12px_rgba(206,117,122,0.60)] brightness-110">
+                            Kwon Eunbi
+                        </b>, here's what you see:</span>
+                    </div>
+
+                    <div className="flex flex-col gap-6 mt-4">
+                        <img src={EunbiBanner} alt="Kwon Eunbi" className="border-2 border-white rounded-3xl" draggable={false} />
+
+                        <div className="flex flex-col gap-4">
+                            <span className="normal-font">Buf if you guess <b className="text-[#b43777] brightness-110 [text-shadow:1.2px_1.2px_4px_rgba(0,0,0,0.8),0_0_12px_rgba(180,55,119,0.60)]">
+                                Kim Chaewon
+                            </b>, you get this:</span>
+                            <img src={ChaewonBanner} alt="Kim Chaewon" className="border-2 border-white rounded-3xl" draggable={false} />
+                        </div>
+                    </div>
+                    
                 </div>    
             </div>
 

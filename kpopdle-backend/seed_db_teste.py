@@ -2,9 +2,11 @@
 import csv 
 import sqlite3
 import os
+from dotenv import load_dotenv
 
-DB_FILE = "kpopdle-teste.db"
-DATA_FOLDER = "data"
+load_dotenv()
+DB_FILE = os.getenv("DB_FILE")
+DATA_FOLDER = os.getenv("DATA_FOLDER")
 
 connect = sqlite3.connect(DB_FILE)
 cursor = connect.cursor()

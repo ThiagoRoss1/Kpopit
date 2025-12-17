@@ -37,7 +37,7 @@ body {
 }
 
 .logo::after {
-  content: "Kpopdle";
+  content: "Kpopit";
   position: absolute;
   top: 6px;   /* deslocamento vertical */
   left: 6px;  /* deslocamento horizontal */
@@ -91,7 +91,7 @@ h1 {
     drop-shadow(2px 2px 0 rgba(180, 55, 119, 0.4))
 }
 
-.dle-part {
+.it-part {
   background: linear-gradient(180deg, #ffffff, #ad7894);
   -webkit-background-clip: text;
   background-clip: text;

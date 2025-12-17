@@ -39,7 +39,7 @@ const VictoryCardSmall = (props: VictoryCardSmallProps) => {
     }
 
     const textToCopyCategories = (guesses: GuessResponse[], attempts?: number) => {
-        const header = `I found today's #Kpopdle Idol in ${attempts} ${attempts === 1 ? "attempt" : "attempts"}! 🎤\n\n`;
+        const header = `I found today's #Kpopit Idol in ${attempts} ${attempts === 1 ? "attempt" : "attempts"}! 🎤\n\n`;
         const body = [...guesses].reverse().map(guess => {
 
         return categories.map(category  => getStatusEmoji(guess.feedback[category]?.status)).join('');
@@ -60,7 +60,7 @@ const VictoryCardSmall = (props: VictoryCardSmallProps) => {
     }
 
     const textToCopy = (attempts: number, stats: UserStats | undefined, userRank?: number | null, userScore?: number | null) => {
-        const header = `I found today's #Kpopdle Idol in ${attempts} ${attempts === 1 ? "attempt" : "attempts"}! 🎤\n\n`;
+        const header = `I found today's #Kpopit Idol in ${attempts} ${attempts === 1 ? "attempt" : "attempts"}! 🎤\n\n`;
         const body = `My statistics:\nPosition: ${userRank}\nScore: ${userScore}\nStreak: ${stats?.current_streak}`;
         const siteLink = `\n\n${window.location.href}`;
 
