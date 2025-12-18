@@ -5,9 +5,8 @@ import { useState } from "react";
 import { AnimatePresence, motion } from "motion/react";
 import GlassSurface from "../GlassSurface";
 import trophyIcon from "../../assets/icons/trophy.svg";
-import InstagramLogo from "../../assets/icons/instagram.svg";
 import TwitterLogo from "../../assets/icons/twitter.svg";
-import { X } from 'lucide-react';
+import { X, Download } from 'lucide-react';
 
 interface VictoryCardSmallProps {
     onClose?: () => void;
@@ -24,6 +23,7 @@ const VictoryCardSmall = (props: VictoryCardSmallProps) => {
     const { guesses, cardInfo, attempts, stats, userRank, userScore, nextReset, onClose } = props;
 
     const [copied, setCopied] = useState<boolean>(false);
+    const [downloaded, setDownloaded] = useState<boolean>(false);
 
     const isOnMobile = useIsMobile();
 
@@ -85,6 +85,11 @@ const VictoryCardSmall = (props: VictoryCardSmallProps) => {
             window.open(twitterWebIntentUrl, "_blank", "noopener,noreferrer");
         };
     };
+
+    const handleWip = () => {
+        setDownloaded(true);
+        setTimeout(() => setDownloaded(false), 1000);
+    }
 
     const content = (
         <div className="relative flex flex-col items-center justify-start max-xxs:w-[320px] max-xxs:h-[600px] xxs:w-[340px] xxs:h-[570px] xs:w-[350px] xs:h-[588px] sm:w-[350px] sm:h-[588px] bg-radial brightness-115">
@@ -222,10 +227,31 @@ const VictoryCardSmall = (props: VictoryCardSmallProps) => {
 
                                 <button className={`relative right-0 items-center text-center bg-linear-to-r ${isOnMobile ? "from-black/90 to-black/50" : "from-black/30 to-black/90"} w-12 h-12 sm:w-12 sm:h-12 rounded-[20px]
                                 hover:scale-110 hover:brightness-110 hover:cursor-pointer hover:-rotate-3 hover:bg-black transform duration-300 transform-gpu`}>
-                                    <div className="flex w-full h-full items-center justify-center text-center brightness-100 hover:brightness-110">
-                                        <img src={InstagramLogo} alt="Insta" className="w-8 h-8 sm:w-9 sm:h-9" draggable={false} />
+                                    <div className="flex w-full h-full items-center justify-center text-center brightness-100 hover:brightness-110"
+                                    onClick={() => handleWip()}>
+                                        <Download size={30} color="#ce757a" className="w-8 h-8 sm:w-9 sm:h-9" />
+                                        {/* <img src={InstagramLogo} alt="Insta" className="w-8 h-8 sm:w-9 sm:h-9" draggable={false} /> */}
                                     </div>
                                 </button>
+                                <AnimatePresence>
+                                {downloaded && (
+                                    <motion.div 
+                                        key="download-notification"
+                                        initial={{ opacity: 0, y: 20 }}
+                                        animate={{ opacity: 1, y: 0 }}
+                                        transition={{ duration: 0.2, ease: "easeOut" }}
+                                        exit={{ opacity: 0, y: 20 }}
+                                        className="absolute flex max-xxs:bottom-28 max-xxs:left-27 xxs:bottom-26 xs:bottom-30 xxs:left-30 justify-center items-center w-44 h-7 sm:w-44 sm:h-7">
+                                            <div className="flex justify-center items-center bg-transparent w-42 h-7 sm:w-42 sm:h-7 rounded-xl border border-[#ce757a]
+                                            shadow-[0_0_10px_2px_rgba(206,117,122,0.25),0_0_10px_2px_rgba(206,117,122,0.25)]">
+                                                <span className="relative font-medium text-base leading-tight bg-linear-to-r from-[#b43777] to-[#ce757a] brightness-105
+                                                text-transparent bg-clip-text drop-shadow-lg">
+                                                    Work in progress!
+                                                </span>
+                                            </div>
+                                    </motion.div>                   
+                                )}
+                            </AnimatePresence>
                             </div>
                         </div>
                     </div>

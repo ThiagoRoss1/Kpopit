@@ -19,8 +19,8 @@ const HowToPlayText = () => {
                 <div className="flex flex-col w-full justify-center items-center mt-6 gap-1.5">
                     <span className="text-[18px]">Next Idol in</span>
                     <span className="text-3xl">{formattedTime}</span>
-                    <span className="text-[12px]">Timezone: Brazil</span>
-                    <span className="text-[12px]">(Midnight at 00:00 BRT)</span>
+                    <span className="text-[12px]">Timezone: America (EST)</span>
+                    <span className="text-[12px]">(Midnight at UTC-5)</span>
                 </div>
 
             {/* How to Play Section 1 */}
