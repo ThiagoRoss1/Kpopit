@@ -27,7 +27,7 @@ const ShareText = (props: ShareContentProps) => {
 }
 
     const textToCopy = (guesses: GuessResponse[], attempts?: number) => {
-        const header = `I found today's #Kpopit Idol in ${attempts} ${attempts === 1 ? "attempt" : "attempts"}! 🎤\n\n`;
+        const header = `I found today's #KpopIt Idol in ${attempts} ${attempts === 1 ? "attempt" : "attempts"}! 🎤\n\n`;
         const body = [...guesses].reverse().map(guess => {
 
         return categories.map(category  => getStatusEmoji(guess.feedback[category]?.status)).join('');
@@ -72,7 +72,7 @@ const ShareText = (props: ShareContentProps) => {
             <div className="w-full flex justify-center items-center mt-1">
                 <div className="flex flex-col justify-center items-center">
                     <span className="text-xl [text-shadow:1.2px_1.2px_4px_rgba(0,0,0,0.8),0_0_12px_rgba(255,255,255,0.35)]">
-                        {`I found today's #Kpopit Idol in ${attempts} ${attempts === 1 ? "attempt" : "attempts"}! 🎤`}
+                        {`I found today's #KpopIt Idol in ${attempts} ${attempts === 1 ? "attempt" : "attempts"}! 🎤`}
                     </span>
                 </div>
                 

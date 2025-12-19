@@ -12,15 +12,16 @@ const StatsText = (props: StatsContentProps) => {
 
     const [copied, setCopied] = useState<boolean>(false);
 
+    const siteLink = `\n\n${window.location.href}`;
+
     const textToCopy = `
-    My #Kpopit statistics:
+    My #KpopIt statistics:
     🥇 Games won: ${stats?.wins_count}
     🤓 Average guesses: ${stats?.average_guesses.toFixed(2)}
     🎯 One shots: ${stats?.one_shot_wins}
     🔥 Current streak: ${stats?.current_streak}
     🚀 Max streak: ${stats?.max_streak}
-    --Kpopit site link--
-    `;
+    ${siteLink}`;
     
     const handleCopy = () => {
         navigator.clipboard.writeText(textToCopy.trim().split('\n').map(line => line.trim()).join('\n'));

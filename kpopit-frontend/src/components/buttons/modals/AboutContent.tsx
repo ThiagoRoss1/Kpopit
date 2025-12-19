@@ -4,7 +4,7 @@ const AboutText = () => {
 
             {/* Introduction Section */}
             <div className="w-full flex flex-col items-start justify-center">
-                <span className="normal-font text-[18px]">Kpopit is a <b>daily idol guessing game</b>.</span>
+                <span className="normal-font text-[18px]">KpopIt is a <b>daily idol guessing game</b>.</span>
                 <span className="normal-font text-[18px]">It's a Wordle-inspired project created by <b><a className="text-blue-500" href="https://github.com/ThiagoRoss1">ThiagoRoss1</a></b>, a K-pop fan and Computer Science student.</span>
             </div>
 
@@ -99,7 +99,7 @@ const AboutText = () => {
                     </div>
 
                     <div className="w-full flex flex-col items-center justify-center mt-6">
-                        <span className="xxs:text-lg xs:text-xl font-semibold">Thank you for playing Kpopit! 💜</span>
+                        <span className="xxs:text-lg xs:text-xl font-semibold">Thank you for playing KpopIt! 💜</span>
                     </div>
                 </div>
             </div>
