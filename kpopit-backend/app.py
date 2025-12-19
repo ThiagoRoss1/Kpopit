@@ -14,13 +14,25 @@ from dotenv import load_dotenv
 # from flask_babel import Babel
 # from flask_session import Session
 load_dotenv()
+
+# Global variables
 DB_FILE = os.getenv("DB_FILE")
+ADMIN_ENABLED = os.getenv("ADMIN_ENABLED", "false").lower() == "true"
+FLASK_ENV = os.getenv("FLASK_ENV", "production").lower()
+FRONTEND_URL = os.getenv("FRONTEND_URL")
 
 app = Flask(__name__)
-CORS(app, resources={r"/*": {"origins": "*"}})  # Allow all origins for static files
+
+if FLASK_ENV == "development":
+    CORS(app, resources={r"/*": {"origins": "*"}})  # Allow all origins for static files
+
+else:
+    CORS(app, resources={r"/*": {"origins": FRONTEND_URL}}) # Restrict to frontend URL
+    
 
 # Admin blueprint - Register routes
-app.register_blueprint(admin_bp)
+if ADMIN_ENABLED:
+    app.register_blueprint(admin_bp)
 
 TIMEZONE_BRT = ZoneInfo('America/Sao_Paulo')
 TIMEZONE_EST = ZoneInfo("America/New_York")

@@ -4,7 +4,7 @@ import sqlite3
 import os
 
 # Database file
-DB_FILE = "kpopdle.db"
+DB_FILE = "kpopit.db"
 DATA_FOLDER = "data"
 
 # CSV files

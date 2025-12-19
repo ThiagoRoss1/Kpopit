@@ -1,8 +1,8 @@
 from PIL import Image
 from pathlib import Path
 
-SOURCE_FOLDER = '../../Kpopdle-images/kpopdle-idols-png'
-DESTINATION_FOLDER = '../../Kpopdle-images/kpopdle-idols-webp'
+SOURCE_FOLDER = '../../Kpopit-images/kpopit-idols-png'
+DESTINATION_FOLDER = '../../Kpopit-images/kpopit-idols-webp'
 WEBP_QUALITY = 90
 
 def convert_images_to_webp(source_folder, destination_folder, webp_quality):

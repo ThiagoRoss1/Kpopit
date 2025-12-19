@@ -13,13 +13,13 @@ const StatsText = (props: StatsContentProps) => {
     const [copied, setCopied] = useState<boolean>(false);
 
     const textToCopy = `
-    My #Kpopdle statistics:
+    My #Kpopit statistics:
     🥇 Games won: ${stats?.wins_count}
     🤓 Average guesses: ${stats?.average_guesses.toFixed(2)}
     🎯 One shots: ${stats?.one_shot_wins}
     🔥 Current streak: ${stats?.current_streak}
     🚀 Max streak: ${stats?.max_streak}
-    --Kpopdle site link--
+    --Kpopit site link--
     `;
     
     const handleCopy = () => {

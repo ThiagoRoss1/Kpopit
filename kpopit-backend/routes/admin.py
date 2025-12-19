@@ -1,12 +1,17 @@
 import sqlite3
 from flask import Blueprint, jsonify, request
+import os
+from dotenv import load_dotenv
 # from flask_babel import Babel
 # from flask_session import Session
+load_dotenv()
+DB_FILE = os.getenv("DB_FILE")
+
 admin_bp = Blueprint('admin', __name__)
 
 
 def init_db():
-    connect = sqlite3.connect("kpopdle-teste.db")
+    connect = sqlite3.connect(DB_FILE)
     cursor = connect.cursor()
     return connect, cursor
     
