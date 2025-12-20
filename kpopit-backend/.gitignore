@@ -6,3 +6,5 @@ __pycache__/
 
 # Ignore environment variable files
 .env
+
+seed_db_old.py

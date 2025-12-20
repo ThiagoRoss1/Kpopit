@@ -21,6 +21,10 @@ const Admin = () => {
         is_published: 0,
     });
 
+    if (import.meta.env.VITE_ADMIN_ENABLED !== "true") {
+    return <Navigate to="/" replace />;
+    }
+
     const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
         const { name, value } = e.target;
         

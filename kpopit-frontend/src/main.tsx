@@ -5,7 +5,7 @@ import Home from './pages/Home'
 import Admin from './pages/admin/admin'
 import PrivacyPolicy from './pages/privacy-policy/PrivacyPolicy';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
-import { BrowserRouter, Route, Routes } from 'react-router'
+import { BrowserRouter, Route, Navigate, Routes } from 'react-router'
 
 
 
@@ -20,9 +20,12 @@ createRoot(document.getElementById('root')!).render(
 
             <Route path="/privacy-policy" element={<PrivacyPolicy />} />
             
-            {import.meta.env.VITE_ADMIN_ROUTE && (
+            {import.meta.env.VITE_ADMIN_ROUTE && import.meta.env.VITE_ADMIN_ENABLED === "true" && (
               <Route path={import.meta.env.VITE_ADMIN_ROUTE} element={<Admin />} />
             )}
+
+            {/* Catch inexistent / invalid routes and redirect to home */}
+            <Route path="*" element={<Navigate to="/" replace />} />
           </Routes>
         </BrowserRouter>
       </QueryClientProvider>
