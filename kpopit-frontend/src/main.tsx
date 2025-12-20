@@ -6,6 +6,8 @@ import Admin from './pages/admin/admin'
 import PrivacyPolicy from './pages/privacy-policy/PrivacyPolicy';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
 import { BrowserRouter, Route, Navigate, Routes } from 'react-router'
+import { SpeedInsights } from "@vercel/speed-insights/react"
+import { Analytics } from "@vercel/analytics/react"
 
 
 
@@ -29,5 +31,8 @@ createRoot(document.getElementById('root')!).render(
           </Routes>
         </BrowserRouter>
       </QueryClientProvider>
+
+      <SpeedInsights />
+      <Analytics />
   </StrictMode>,
 )

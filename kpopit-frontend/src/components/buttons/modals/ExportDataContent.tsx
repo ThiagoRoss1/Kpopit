@@ -6,21 +6,35 @@ interface ExportDataTextProps {
     onSubmitReturn?: () => void;
     generatedCodes?: string | null;
     handleGenerate?: () => void;
+    isGenerating?: boolean;
     expires_At?: string | null;
     timeLeft?: number | null;
 }
 
 const ExportDataText = (props: ExportDataTextProps) => {
-    const { generatedCodes, handleGenerate, timeLeft, expires_At } = props;
+    const { generatedCodes, handleGenerate, isGenerating, timeLeft, expires_At } = props;
+
     const hasCalledGenerate = useRef(false);
+
     const [copied, setCopied] = useState<boolean>(false);
+    const [showLoading, setShowLoading] = useState<boolean>(false);
     
     useEffect(() => {
-        if (handleGenerate && !hasCalledGenerate.current) {
+        let timer: ReturnType<typeof setTimeout>;
+
+        if (isGenerating) {
+            timer = setTimeout(() => setShowLoading(true), 100);
+        } else {
+            setShowLoading(false);
+        }
+        
+        if (handleGenerate && !hasCalledGenerate.current && !isGenerating) {
             hasCalledGenerate.current = true;
             handleGenerate();
         }
-    }, [handleGenerate]);
+        return (() => clearTimeout(timer));
+
+    }, [handleGenerate, isGenerating]);
 
     return (
         <div className="w-full bg-transparent">
@@ -44,7 +58,7 @@ const ExportDataText = (props: ExportDataTextProps) => {
                         hover:bg-black/40 hover:brightness-110 hover:cursor-pointer transition-all duration-500 transform-gpu">
                             <div className="w-full flex flex-row items-center justify-center">
                                 <span className="text-3xl [text-shadow:1.2px_1.2px_4px_rgba(0,0,0,0.8),0_0_12px_rgba(255,255,255,0.35)]">
-                                    {generatedCodes}
+                                    {showLoading ? "Generating..." : generatedCodes}
                                 </span>
 
                                 <Copy className="opacity-0 group-hover:opacity-80 w-10 h-10 absolute right-4 top-1/2 -translate-y-1/2 transition-all duration-500 transform-gpu"/>

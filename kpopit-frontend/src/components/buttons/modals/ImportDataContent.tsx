@@ -14,8 +14,9 @@ const ImportDataText = (props: ImportDataTextProps) => {
 
     useEffect(() => {
         let timer: ReturnType<typeof setTimeout>;
+
         if (isRedeeming) {
-            timer = setTimeout(() => setShowLoading(true), 200);
+            timer = setTimeout(() => setShowLoading(true), 100);
         } else {
             setShowLoading(false);
         }
