@@ -1,11 +1,12 @@
 import sqlite3
-from flask import Blueprint, jsonify, request
+from flask import Blueprint, jsonify, request, send_file, current_app
 import os
 from dotenv import load_dotenv
 # from flask_babel import Babel
 # from flask_session import Session
 load_dotenv()
 DB_FILE = os.getenv("DB_FILE")
+BACKUP_KEY = os.getenv("BACKUP_KEY")
 
 admin_bp = Blueprint('admin', __name__)
 
@@ -90,4 +91,23 @@ def add_idol():
     connect.close()
 
     return jsonify({"message": "Idol added successfully", "idol_id": final_idol_id}), 201
+
+
+@admin_bp.route("/api/admin/download-backup", methods=["GET"])
+def download_backup():
+    key = request.args.get("key")
+
+    if not BACKUP_KEY:
+        return jsonify({"error": "Backup key not configured on server"}), 500
     
+    if key != BACKUP_KEY:
+        return jsonify({"error": "Invalid backup key"}), 403
+
+    if os.path.exists(DB_FILE):
+        try:
+            return send_file(DB_FILE, as_attachment=True, download_name="kpopit-backup.db")
+        except Exception as e:
+            return jsonify({"error": f"Failed to send file: {str(e)}"}), 500
+        
+    else:
+        return jsonify({"error": f"Backup file not found: {DB_FILE}"}), 404
