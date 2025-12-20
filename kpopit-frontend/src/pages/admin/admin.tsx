@@ -73,6 +73,21 @@ const Admin = () => {
             alert("Error: " + error);
         }
     }
+
+    const handleDownloadBackup = async () => {
+        try {
+            const backupKey = prompt("Enter backup key:");
+
+            if (!backupKey) return;
+
+            const baseUrl = import.meta.env.VITE_API_URL;
+            const fullUrl = `${baseUrl}/api/admin/download-backup?key=${backupKey}`;
+            window.location.href = fullUrl;
+        } catch (error) {
+            console.error("Error downloading backup:", error);
+            alert("Error: " + error);
+        }
+    }
     
     if (!isAuthenticated) {
         return (
@@ -118,6 +133,7 @@ const Admin = () => {
                 <input name="is_published" type="number" placeholder="Is Published (1 - True or 0 - False)" value={idolData.is_published} onChange={handleChange} className="border-2 border-white bg-[#242424] text-white p-2 mb-2 w-80" />
 
                 <button onClick={handleAddIdol} type="button" className="border-2 border-white bg-green-600 hover:bg-green-700 text-white rounded-lg px-6 py-3 mt-4">Add Idol</button>
+                <button onClick={handleDownloadBackup} type="button" className="border-2 border-white bg-blue-600 hover:bg-blue-700 text-white rounded-lg px-6 py-3 mt-4">Download Backup</button>
             </div>
         </div>
     )
