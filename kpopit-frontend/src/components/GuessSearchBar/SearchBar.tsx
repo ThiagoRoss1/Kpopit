@@ -3,6 +3,7 @@ import React, { useState, useEffect, useRef } from "react";
 import type { IdolListItem } from "../../interfaces/gameInterfaces";
 import { AnimatePresence, motion} from "motion/react";
 import SearchIcon from "../../assets/icons/magnifying-glass-fill.svg";
+import { useIsMobile } from "../../hooks/useIsMobile";
 
 
 interface SearchBarProps {
@@ -28,6 +29,9 @@ const SearchBar = (props: SearchBarProps) => {
   const [selectedIdol, setSelectedIdol] = useState<IdolListItem | null>(null);
   const [isTouched, setIsTouched] = useState<number | null>(null);
   const [isClicked, setIsClicked] = useState<boolean>(false);
+  const [inCooldown, setInCooldown] = useState<boolean>(false);
+
+  const isMobile = useIsMobile();
 
   const pressTimeout = useRef<number | null>(null);
 
@@ -144,7 +148,7 @@ const SearchBar = (props: SearchBarProps) => {
           <div className="flex items-center gap-2 w-full">
             <input
               className="grow h-9 px-3 text-white placeholder-white/60 border border-solid border-white/10
-              rounded-3xl bg-white/5 shadow-lg focus:outline-none focus:ring-1 focus:ring-white/40 transition-all"
+              rounded-3xl bg-white/5 shadow-lg focus:outline-none focus:ring-1 focus:ring-white/40"
               value={value}
               onChange={handleInputChange}
               placeholder="Search for an idol or group..."
@@ -163,24 +167,28 @@ const SearchBar = (props: SearchBarProps) => {
             onMouseEnter={() => setIsButtonHovered(true)}
             onMouseLeave={() => setIsButtonHovered(false)}
               className={`shrink-0 w-10 h-10 text-white font-semibold rounded-full 
-                  bg-linear-to-br from-[#b43777]/80 to-[#ce757a]/80 backdrop-blur-md shadow-lg
+                  bg-linear-to-br from-[#b43777]/80 to-[#ce757a]/80 shadow-lg
                   border border-white/80 transform transition-all ${!isClicked ? "duration-300" : ""} hover:brightness-125 hover:scale-108 
                   hover:border-white hover:cursor-pointer hover:bg-linear-to-br hover:from-[#b43777] hover:to-[#ce757a] hover:rotate-15`}
               onClick={() => {
                 // const cleanName = extractArtistName(value);
                 // value.trim().toLocaleLowerCase() <- Before adding groups at searchbar
                 
-                if (!disabled && selectedIdol) { // cleanName.length > 0 && (selectedIdol.artist_name.toLocaleLowerCase() === cleanName.toLocaleLowerCase()) -> Certifies that user selected an idol from the list (full name)
-                onSubmit?.();
-                setShowList(false);
-                setSelectedIdol(null);
-                onIdolSelect("");
+                if (!disabled && selectedIdol && !inCooldown) { // cleanName.length > 0 && (selectedIdol.artist_name.toLocaleLowerCase() === cleanName.toLocaleLowerCase()) -> Certifies that user selected an idol from the list (full name)
+                  setInCooldown(true);
+                  onSubmit?.();
+                  setShowList(false);
+                  setSelectedIdol(null);
+                  onIdolSelect("");
+
+                  setTimeout(() => setInCooldown(false), 0);
                 }
               }
             }
-              disabled={disabled}
+              disabled={disabled || inCooldown}
               type="button"
             >
+              {!isMobile ? (
               <motion.img 
                 src={SearchIcon} 
                 alt="G" 
@@ -193,6 +201,14 @@ const SearchBar = (props: SearchBarProps) => {
                   damping: 20
                 }}
               />
+              ) : (
+                <img
+                src={SearchIcon} 
+                alt="G" 
+                className="w-5.5 h-5.5 sm:w-5.5 sm:h-5.5 mx-auto" 
+                draggable={false} 
+                />
+              )}
             </motion.button>
           <AnimatePresence>
           {showList && suggestions.length > 0 && (

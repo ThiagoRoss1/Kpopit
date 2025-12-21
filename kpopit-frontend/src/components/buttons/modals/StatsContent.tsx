@@ -45,7 +45,7 @@ const StatsText = (props: StatsContentProps) => {
                 <div className="flex flex-col justify-center items-center p-4 gap-3 rounded-2xl border-2 border-white h-28 sm:h-28 
                 backface-hidden shadow-[0_0_10px_2px_rgba(255,255,255,0.25),0_0_10px_2px_rgba(255,255,255,0.25)] bg-black/50
                 hover:scale-105 hover:brightness-110 hover:bg-black hover:-rotate-1 hover:cursor-default transition-all duration-500 transform-gpu">
-                    <h3 className="relative font-bold max-xxs:text-[11px] xxs:text-[12px] xs:text-base sm:text-2xl text-[#b43777] drop-shadow-lg 
+                    <h3 className="relative font-bold max-xxs:text-[11px] xxs:text-[12px] xs:text-[15px] sm:text-2xl text-[#b43777] drop-shadow-lg 
                     [text-shadow:1.2px_1.2px_4px_rgba(0,0,0,0.8),0_0_12px_rgba(180,55,119,0.55)]">Average Guesses</h3>
                     <span className="max-xxs:text-2xl xxs:text-2xl xs:text-3xl [text-shadow:1.2px_1.2px_4px_rgba(0,0,0,0.8),0_0_12px_rgba(255,255,255,0.55)]">{stats?.average_guesses.toFixed(2)}</span>
                 </div>
@@ -111,7 +111,7 @@ const StatsText = (props: StatsContentProps) => {
                                 animate={{ opacity: 1, y: 0 }}
                                 transition={{ duration: 0.2, ease: "easeOut" }}
                                 exit={{ opacity: 0, y: 20 }}
-                                className="absolute flex bottom-26 max-xxs:left-32 xxs:left-34 xs:left-43 sm:bottom-28 sm:left-127 justify-center items-center w-60 h-7 sm:w-60 sm:h-7">
+                                className="absolute flex bottom-26 max-xxs:left-32 xxs:left-34 xs:left-39.5 sm:bottom-28 sm:left-127 justify-center items-center w-60 h-7 sm:w-60 sm:h-7">
                                     <div className="flex justify-center items-center bg-[#242424] w-40 h-7 sm:w-48 sm:h-7 rounded-xl border border-white
                                     shadow-[0_0_10px_2px_rgba(255,255,255,0.25),0_0_10px_2px_rgba(255,255,255,0.25)]">
                                         <span className="relative font-medium text-[14px] sm:text-base text-[#b43777] drop-shadow-lg

@@ -281,7 +281,15 @@ function Home() {
 
   // Guess submission handler function
   const handleGuessSubmit = async () => {
-    if (!selectedIdol || !gameData || !allIdolsData) return;
+    if (!selectedIdol || !gameData || !allIdolsData || guessMutation.isPending) return;
+
+    // PREVENT DUPLICATE GUESSES - check if idol already guessed
+    const alreadyGuessed = guesses.some(g => g.guessed_idol_data.idol_id === selectedIdol.id);
+    if (alreadyGuessed) {
+      setCurrentGuess("");
+      setSelectedIdol(null);
+      return;
+    } // test after
 
     // const cleanName = currentGuess.split(" (")[0].trim();
 
@@ -372,7 +380,7 @@ function Home() {
         {showModal === "export-data" && <Modal isOpen onClose={() => setShowModal(null)} title="Export Data..." isTransferDataSubPages={true} returnPage={() => {setShowModal("transfer-data")}}><ExportDataText handleGenerate={transferData.handleGenerate} generatedCodes={transferData.generatedCodes} timeLeft={transferData.timeLeft} expires_At={transferData.expiresAt} /></Modal>}
       </div>
 
-      <div className="w-full flex flex-col items-center justify-center mb-[41px]">
+      <div className="w-full flex flex-col items-center justify-center mb-10.25">
         <AnswerHintsBox 
         memberCount={gameData?.member_count ?? null} 
         groups={gameData?.groups ?? null} 
@@ -382,7 +390,7 @@ function Home() {
       </div>
 
       {!endGame && !showVictoryCard && (
-        <div className="flex text-center items-center justify-center w-full max-w-100 sm:w-[194px] h-5 sm:h-[19px] mb-1">
+        <div className="flex text-center items-center justify-center w-full max-w-100 sm:w-48.5 h-5 sm:h-4.75 mb-1">
           <span className="text-[14px] sm:text-[16px] drop-shadow-lg text-[#d7d7d7]/85">
             Guess today's idol...
           </span>
