@@ -1,6 +1,7 @@
 import { useMemo } from "react";
 import { motion } from "framer-motion";
 import Star from "../../assets/icons/star-four-fill.svg";
+import { useIsMobile } from "../../hooks/useIsMobile";
 
 interface BackgroundStyleProps {
     attempts?: number;
@@ -8,6 +9,9 @@ interface BackgroundStyleProps {
 
 const BackgroundStyle = (props: BackgroundStyleProps) => {
     const { attempts } = props;
+
+    const isMobile = useIsMobile();
+
     const stars = useMemo(() => [
 
         // Left Side Stars
@@ -84,6 +88,8 @@ const BackgroundStyle = (props: BackgroundStyleProps) => {
 
 
   return (
+    <>
+    {!isMobile && (
     <div className="fixed inset-0 overflow-hidden pointer-events-none -z-10">
       <div className="absolute inset-0 bg-linear-to-br from-[#090311] via-[#050416] to-[#050822]" />
         <div className="absolute inset-0 top-0 bg-black/0" />
@@ -160,6 +166,8 @@ const BackgroundStyle = (props: BackgroundStyleProps) => {
       <div className="absolute inset-0 bg-linear-to-r from-white/5 via-transparent to-gray-900/0" />
       <div className="absolute inset-0 bg-linear-to-l from-white/5 via-transparent to-gray-900/0" />
     </div>
+  )};
+  </>
   );
 };
 
