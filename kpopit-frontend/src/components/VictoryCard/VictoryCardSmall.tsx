@@ -92,7 +92,7 @@ const VictoryCardSmall = (props: VictoryCardSmallProps) => {
     }
 
     const content = (
-        <div className="relative flex flex-col items-center justify-start max-xxs:w-[320px] max-xxs:h-[600px] xxs:w-[340px] xxs:h-[570px] xs:w-[350px] xs:h-[588px] sm:w-[350px] sm:h-[588px] bg-radial brightness-115">
+        <div className="relative flex flex-col items-center justify-start max-xxs:w-[320px] max-xxs:h-150 xxs:w-85 xxs:h-142.5 xs:w-87.5 xs:h-147 sm:w-87.5 sm:h-147 bg-radial brightness-115">
                             
                 {/* Icons Container */}
                 <div className="relative w-full h-25 sm:h-25 mb-2">
@@ -112,8 +112,8 @@ const VictoryCardSmall = (props: VictoryCardSmallProps) => {
                     </div>
 
                     {/* Text Container */}
-                    <div className="w-full px-[52px] sm:px-[52px] mb-3">
-                        <div className="flex flex-col items-center text-center gap-3 max-w-[280px] mx-auto hover:cursor-default">
+                    <div className="w-full px-13 sm:px-13 mb-3">
+                        <div className="flex flex-col items-center text-center gap-3 max-w-70 mx-auto hover:cursor-default">
                             <h2 className="relative font-bold text-lg text-[24px] sm:text-[24px] flex items-center justify-center">
                                 <span className="bg-linear-to-r from-[#b43777] to-[#ce757a] bg-clip-text text-transparent drop-shadow-xl/50 brightness-105">
                                     Congratulations!
@@ -133,7 +133,7 @@ const VictoryCardSmall = (props: VictoryCardSmallProps) => {
                     </div>
 
                     {/* Idol Container */}
-                    <div className="flex w-full items-center justify-center h-[100px] sm:h-[100px] mb-4">
+                    <div className="flex w-full items-center justify-center h-25 sm:h-25 mb-4">
                         <div className={`relative flex items-center justify-center ${isOnMobile ? "bg-black/80" : "bg-white/2"} w-80 h-24 p-5 sm:w-80 sm:h-24 sm:p-5 rounded-[20px]
                         hover:scale-105 hover:bg-black/90 hover:brightness-110 hover:cursor-default transform duration-300 transform-gpu`}> {/* Maybe shadow-2xl or lg */}
 

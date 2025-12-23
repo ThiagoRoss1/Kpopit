@@ -276,7 +276,6 @@ const SearchBar = (props: SearchBarProps) => {
                     type: "spring", 
                     stiffness: 250, 
                     damping: 25 }}
-                    // #TODO: Fill animation not finished yet // 
                   className={`relative px-4 py-3 select-none cursor-pointer transition-colors duration-200 shadow=[0px_0px_0px_0px_rgba(0,0,0,0.35)]
                     hover:bg-linear-to-r hover:from-[#8a0449] hover:via-[#0d0314] hover:to-[#000000]/0 
                     bg-size-[200%_100%] bg-left hover:animate-[moveGradient_0.3s_linear_forwards]

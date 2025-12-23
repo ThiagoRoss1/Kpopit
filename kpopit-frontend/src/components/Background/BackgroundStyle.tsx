@@ -166,7 +166,7 @@ const BackgroundStyle = (props: BackgroundStyleProps) => {
       <div className="absolute inset-0 bg-linear-to-r from-white/5 via-transparent to-gray-900/0" />
       <div className="absolute inset-0 bg-linear-to-l from-white/5 via-transparent to-gray-900/0" />
     </div>
-  )};
+  )}
   </>
   );
 };

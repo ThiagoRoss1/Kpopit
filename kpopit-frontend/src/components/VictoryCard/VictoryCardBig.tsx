@@ -26,7 +26,7 @@ const VictoryCardBig = (props: VictoryCardBigProps) => {
     const yesterdayGroup = yesterdayIdolGroup && yesterdayIdolGroup.length > 0 ? yesterdayIdolGroup.join(", ") : "Soloist";
 
 return (
-    <div className="relative flex flex-col items-center justify-start max-xxs:w-80 xxs:w-92 xs:w-100 xm:w-106 h-fit sm:w-[628px] sm:h-fit rounded-3xl border-2 border-white/50 
+    <div className="relative flex flex-col items-center justify-start max-xxs:w-80 xxs:w-92 xs:w-100 xm:w-106 h-fit sm:w-157 sm:h-fit rounded-3xl border-2 border-white/50 
     bg-radial from-[#db3189]/0 to-black/84 mb-10 text-white shadow-[2px_2px_10px_2px_rgba(0,0,0,0.25)]"> {/* w-106 */}
 
         <div className="relative w-full items-center justify-center text-center mt-10 mb-2">
@@ -34,14 +34,14 @@ return (
         </div>
 
         {/* Idol Container */}
-        <div className="relative w-full h-60 sm:h-[250px] mt-0 max-xxs:mb-0 xxs:mb-0 xs:mb-2 sm:mb-5 rounded-t-3xl sm:rounded-t-3xl flex items-center justify-center bg-transparent">
+        <div className="relative w-full h-60 sm:h-62.5 mt-0 max-xxs:mb-0 xxs:mb-0 xs:mb-2 sm:mb-5 rounded-t-3xl sm:rounded-t-3xl flex items-center justify-center bg-transparent">
             <div className="absolute flex items-center justify-center max-xxs:w-24 max-xxs:h-24 xxs:w-27 xxs:h-27 xs:w-30 xs:h-30 sm:w-35 sm:h-35 rounded-[48px] sm:rounded-[50px] top-5 border-2 border-white/80 
             hover:border-white hover:scale-120 hover:rotate-6 transform duration-1000 will-change-transform 
             shadow-[0_0_20px_4px_rgba(255,255,255,0.1),0_0_40px_10px_rgba(255,255,255,0.1)]">
                 <img src={`${import.meta.env.VITE_IMAGE_BUCKET_URL}${cardInfo.image_path}`} alt="Idol" className="max-xxs:w-23 max-xxs:h-23 xxs:w-26 xxs:h-26 xs:w-29 xs:h-29 sm:w-34 sm:h-34 rounded-[48px] sm:rounded-[50px] object-cover object-top transform-gpu" />
             </div>
 
-            <div className="absolute flex flex-col items-center justify-center w-full sm:w-[580px] max-h-20 sm:max-h-20 max-xxs:mt-32 xxs:mt-30 xs:mt-36 sm:mt-44">
+            <div className="absolute flex flex-col items-center justify-center w-full sm:w-145 max-h-20 sm:max-h-20 max-xxs:mt-32 xxs:mt-30 xs:mt-36 sm:mt-44">
                 <span className="max-xxs:text-base xxs:text-base xs:text-base xm:text-[18px] sm:text-[22px] text-center">
                     Today's Idol was <span className="font-bold bg-linear-to-r from-[#db3189] via-[#e44d86] to-[#ec5e65] text-transparent bg-clip-text max-xxs:text-base xxs:text-base xs:text-[18px] sm:text-[22px] brightness-105">
                         {cardInfo.artist_name}

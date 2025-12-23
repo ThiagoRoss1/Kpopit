@@ -82,7 +82,7 @@ return (
                 transition={{ duration: 0.3 }}
                 onClick={() => setShowSmallModal(false)}
             >
-                <div className="flex items-center justify-center w-full sm:max-w-[370px] mx-auto p-4">
+                <div className="flex items-center justify-center w-full sm:max-w-92.5 mx-auto p-4">
                     <motion.div 
                         initial={{ scale: 0.8, opacity: 0, y: 90 }} 
                         animate={{ scale: 1, opacity: 1, y: 0 }} 

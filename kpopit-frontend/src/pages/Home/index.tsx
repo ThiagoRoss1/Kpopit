@@ -1,7 +1,7 @@
 import "../../index.css";
 import "./style.css";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
-import { useState, useEffect, useCallback } from "react";
+import { useState, useEffect, useCallback, useRef } from "react";
 import { getDailyIdol, getGuessIdol, getAllIdols, getYesterdaysIdol, getUserToken, getUserStats, getDailyUserCount, getUserPosition, saveGameState } from "../../services/api";
 import type {
   GameData,
@@ -80,12 +80,17 @@ function Home() {
     queryFn: getDailyUserCount,
   });
 
+  const decryptedTokenRef = useRef<string | null>(null);
+
   const initUser = useCallback(async () => {
+    if (decryptedTokenRef.current) return decryptedTokenRef.current;
+
     const encrypted = localStorage.getItem("userToken");
 
     if (encrypted) {
       try {
         const token = await decryptToken(encrypted);
+        decryptedTokenRef.current = token;
         return token;
       } catch (error) {
         console.error("Error decrypting token:", error);
@@ -96,6 +101,7 @@ function Home() {
     if (userToken.data) {
       const encryptedToken = await encryptToken(userToken.data.token);
       localStorage.setItem("userToken", encryptedToken);
+      decryptedTokenRef.current = userToken.data.token;
       return userToken.data.token;
     }
 
@@ -311,12 +317,18 @@ function Home() {
     }
 
     const encrypted = localStorage.getItem("userToken") || "";
-    const decrypted = await decryptToken(encrypted);
+    const token = decryptedTokenRef.current || await decryptToken(encrypted);
+
+    if (!token) {
+      console.warn("User token not available, cannot submit guess.");
+      await initUser();
+      return;
+    }
 
     guessMutation.mutate({
       guessed_idol_id: selectedIdol.id,
       answer_id: gameData.answer_id,
-      user_token: decrypted,
+      user_token: token,
       current_attempt: attempts + 1,
     });
     // Clear input field after submission
@@ -505,7 +517,7 @@ function Home() {
         </div>
       </div>
 
-      <p>ID: {gameData?.answer_id}</p>
+      {/* <p>ID: {gameData?.answer_id}</p> */}
       {/* <h2>Game Categories</h2>
       <ul>
         {gameData?.categories &&
