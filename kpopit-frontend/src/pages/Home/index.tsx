@@ -217,14 +217,24 @@ function Home() {
   const guessMutation = useMutation({
     mutationFn: getGuessIdol,
     onSuccess: (data) => {
-      console.log("Guess successful:", data);
-      console.log("Got user token guess:", localStorage.getItem("userToken")); // Testing log
+      console.timeEnd("⏱️ BACKEND_RESPONSE"); // Fim do timer de resposta do backend
+      console.log("\n✅ [MUTATION SUCCESS] Backend retornou:", data);
+      console.log("📦 [DATA] guess_correct:", data.guess_correct);
+      
+      console.time("🎨 UI_UPDATE"); // Começa timer de atualização da UI
+      console.log("🔄 [STATE] Iniciando setGuesses...");
       
       setGuesses((prevGuesses) => {
+        console.log("📝 [STATE] Guesses anteriores:", prevGuesses.length);
         const updatedGuesses = [...prevGuesses, data];
+        console.log("📝 [STATE] Novos guesses:", updatedGuesses.length);
 
+        console.time("💾 LOCALSTORAGE_SAVE");
         localStorage.setItem("todayGuessesDetails", JSON.stringify(updatedGuesses));
+        console.timeEnd("💾 LOCALSTORAGE_SAVE");
 
+        console.time("🌐 SAVE_GAME_STATE");
+        console.log("🌐 [API] Chamando saveGameState...");
         saveGameState({
           today_guesses_details: updatedGuesses,
           game_complete: data.guess_correct,
@@ -245,18 +255,23 @@ function Home() {
           game_date: gameData?.server_date || "",
           guessed_idols: updatedGuesses.map(g => g.guessed_idol_data.artist_name),
         })
+        console.timeEnd("🌐 SAVE_GAME_STATE");
 
         const names = updatedGuesses.map(g => g.guessed_idol_data.artist_name);
         localStorage.setItem("GuessedIdols", JSON.stringify(names));
         
+        console.timeEnd("🎨 UI_UPDATE"); // Fim do timer de UI
+        console.log("✅ [STATE] setGuesses concluído\n");
         return updatedGuesses;
       });
 
       if (data.guess_correct) {
+        console.log("🎉 [VICTORY] Usuário acertou!");
         setIsCorrect(true);
         localStorage.setItem("gameComplete", "true");
         localStorage.setItem("gameWon", "true");
 
+        console.log("🔄 [QUERIES] Invalidando queries...");
         queryClient.invalidateQueries({ queryKey: ["userStats"] });
         queryUserCount.invalidateQueries({ queryKey: ["dailyUserCount"] });
         queryClient.invalidateQueries({ queryKey: ["userPosition"] });
@@ -287,15 +302,31 @@ function Home() {
 
   // Guess submission handler function
   const handleGuessSubmit = async () => {
-    if (!selectedIdol || !gameData || !allIdolsData || guessMutation.isPending) return;
+    console.log("\n━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━");
+    console.log("🚀 [INICIO] handleGuessSubmit chamado");
+    console.time("⏱️ TOTAL_GUESS_TIME");
+    
+    if (!selectedIdol || !gameData || !allIdolsData || guessMutation.isPending) {
+      console.log("❌ [VALIDATION] Validação falhou");
+      console.log("   - selectedIdol:", !!selectedIdol);
+      console.log("   - gameData:", !!gameData);
+      console.log("   - allIdolsData:", !!allIdolsData);
+      console.log("   - isPending:", guessMutation.isPending);
+      return;
+    }
+
+    console.log("✅ [VALIDATION] Todas validações passaram");
+    console.log("🎯 [IDOL] Chute:", selectedIdol.artist_name, "(ID:", selectedIdol.id, ")");
+    console.log("🎯 [ANSWER] Resposta esperada ID:", gameData.answer_id);
 
     // PREVENT DUPLICATE GUESSES - check if idol already guessed
     const alreadyGuessed = guesses.some(g => g.guessed_idol_data.idol_id === selectedIdol.id);
     if (alreadyGuessed) {
+      console.log("⚠️ [DUPLICATE] Idol já foi chutado anteriormente");
       setCurrentGuess("");
       setSelectedIdol(null);
       return;
-    } // test after
+    }
 
     // const cleanName = currentGuess.split(" (")[0].trim();
 
@@ -306,34 +337,51 @@ function Home() {
     // );
 
     if (selectedIdol.id === gameData.answer_id && !isCorrect) {
+      console.log("🎯 [MATCH] Este chute vai acertar!");
       setIsCorrect(true);
-      // Just a confirmation
       localStorage.setItem("gameComplete", "true");
       localStorage.setItem("gameWon", "true");
     }
 
     if (!selectedIdol) {
+      console.log("❌ [ERROR] selectedIdol está null");
       return;
     }
 
+    console.log("🔑 [TOKEN] Obtendo token de usuário...");
+    console.time("🔑 TOKEN_DECRYPT");
     const encrypted = localStorage.getItem("userToken") || "";
     const token = decryptedTokenRef.current || await decryptToken(encrypted);
+    console.timeEnd("🔑 TOKEN_DECRYPT");
 
     if (!token) {
-      console.warn("User token not available, cannot submit guess.");
+      console.warn("❌ [TOKEN] Token não disponível");
       await initUser();
       return;
     }
+    console.log("✅ [TOKEN] Token obtido com sucesso");
 
+    console.log("\n📡 [MUTATION] Enviando requisição para backend...");
+    console.log("📦 [PAYLOAD]:", {
+      guessed_idol_id: selectedIdol.id,
+      answer_id: gameData.answer_id,
+      current_attempt: attempts + 1,
+      token_length: token.length
+    });
+    
+    console.time("⏱️ BACKEND_RESPONSE"); // Inicia timer para medir resposta do backend
     guessMutation.mutate({
       guessed_idol_id: selectedIdol.id,
       answer_id: gameData.answer_id,
       user_token: token,
       current_attempt: attempts + 1,
     });
-    // Clear input field after submission
+    
+    console.log("🧹 [CLEANUP] Limpando inputs");
     setCurrentGuess("");
     setSelectedIdol(null);
+    console.timeEnd("⏱️ TOTAL_GUESS_TIME");
+    console.log("━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n");
   };
   
   if (isLoadingGameData || isLoadingAllIdols) {

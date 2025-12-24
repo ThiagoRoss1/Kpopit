@@ -380,46 +380,73 @@ def get_daily_idol():
 @app.route("/api/game/guess", methods=["POST"])
 def guess_idol():
     """Get idol guess and return comparison data as JSON"""
+    import time
+    start_time = time.time()
+    
+    print("\n" + "="*60)
+    print("📡 [BACKEND START] Recebeu requisição /api/game/guess")
+    print(f"⏰ [TIMESTAMP] {get_current_timestamp()}")
 
     data = request.get_json()
     guessed_idol_id = data.get("guessed_idol_id")
     answer_id = data.get("answer_id")
     user_token = data.get("user_token")
     current_attempt = data.get("current_attempt")
+    
+    print(f"📦 [PAYLOAD] Guessed ID: {guessed_idol_id}, Answer ID: {answer_id}, Attempt: {current_attempt}")
 
     if not guessed_idol_id or not answer_id:
+        print("❌ [ERROR] Missing guessed_idol_id or answer_id")
         return jsonify({"error": "Missing guessed_idol_id or answer_id"}), 400
     
     if not user_token:
+        print("❌ [ERROR] Missing user token")
         return jsonify({"error": "Missing user token"}), 400
+    
+    print("✅ [VALIDATION] Payload validado")
 
     # Start db connection
+    db_start = time.time()
+    print("💾 [DB] Conectando ao banco de dados...")
     connect = sqlite3.connect(DB_FILE)
     connect.row_factory = sqlite3.Row
     cursor = connect.cursor()
+    print(f"✅ [DB] Conectado em {(time.time() - db_start)*1000:.2f}ms")
 
     # Validate user token
+    token_start = time.time()
+    print("🔑 [TOKEN] Validando token de usuário...")
     cursor.execute("""SELECT id FROM users WHERE token = ?""", (user_token,))
     user_row = cursor.fetchone()
 
     if not user_row:
+        print("❌ [TOKEN] Token inválido")
         connect.close()
         return jsonify({"error": "Invalid user token"}), 400
     
     user_id = user_row["id"]
+    print(f"✅ [TOKEN] Validado (user_id: {user_id}) em {(time.time() - token_start)*1000:.2f}ms")
 
     # Fetch full data for guessed idol and answer idol
+    fetch_start = time.time()
+    print("📁 [DATA] Buscando dados dos idols...")
     guessed_idol = dict(fetch_full_idol_data(cursor, guessed_idol_id))
     answer_data = dict(fetch_full_idol_data(cursor, answer_id))
+    print(f"✅ [DATA] Dados principais buscados em {(time.time() - fetch_start)*1000:.2f}ms")
     
     # Fetch careers and companies
+    career_start = time.time()
+    print("🎯 [CAREER] Buscando carreira e empresas...")
     guessed_idol["career"] = fetch_full_idol_career(cursor, guessed_idol_id)
     answer_data["career"] = fetch_full_idol_career(cursor, answer_id)
 
     guessed_idol["companies"] = fetch_idol_companies(cursor, guessed_idol_id)
     answer_data["companies"] = fetch_idol_companies(cursor, answer_id)
+    print(f"✅ [CAREER] Carreira e empresas buscadas em {(time.time() - career_start)*1000:.2f}ms")
 
     # Special case - if idol has a group, fetch group companies too
+    group_start = time.time()
+    print("🎶 [GROUPS] Buscando empresas dos grupos...")
     guessed_group_id = guessed_idol.get("group_id")
     if guessed_group_id:
         guessed_idol["group_companies"] = fetch_group_companies(cursor, group_id=guessed_group_id)
@@ -431,6 +458,7 @@ def guess_idol():
         answer_data["group_companies"] = fetch_group_companies(cursor, group_id=answer_group_id)
     else:
         answer_data["group_companies"] = []
+    print(f"✅ [GROUPS] Empresas dos grupos buscadas em {(time.time() - group_start)*1000:.2f}ms")
 
     for field in ["nationality", "position"]:
         for idol in [guessed_idol, answer_data]:
@@ -444,12 +472,15 @@ def guess_idol():
     # answer_data["group_companies"] = fetch_group_companies(cursor, group_id=answer_data["group_id"] if answer_data["group_id"] else None)
 
     if not guessed_idol or not answer_data:
+        print("❌ [ERROR] Idol não encontrado")
         connect.close()
         return jsonify({"error": "Idol not found"}), 404
     
     # connect.close() -- MOVED DOWN --
     
     # Compare data
+    feedback_start = time.time()
+    print("🧠 [FEEDBACK] Calculando feedback...")
     feedback = {}
 
     # Partial feedback function
@@ -533,6 +564,7 @@ def guess_idol():
     numerical_fields = ["idol_debut_year", "height", "birth_date", "member_count"] # removed "generation"
     numerical_feedback = numerical_feedback_function(guessed_idol, answer_data, numerical_fields)
     feedback.update(numerical_feedback)
+    print(f"✅ [FEEDBACK] Feedback calculado em {(time.time() - feedback_start)*1000:.2f}ms")
 
 
     # Group
@@ -585,6 +617,8 @@ def guess_idol():
     today = get_today_date_str()
     current_timestamp = get_current_timestamp()
     # today = get_server_date()
+    
+    print(f"🎯 [RESULT] Correto: {is_correct}, One Shot: {one_shot_win}")
 
     # Calculate streak function
     def streak_calculation(cursor, user_id):
@@ -615,6 +649,8 @@ def guess_idol():
             return streak
    
     # Update user history in the database 
+    db_save_start = time.time()
+    print("💾 [DB SAVE] Salvando histórico no banco...")
     try:
         cursor.execute("BEGIN TRANSACTION")
 
@@ -687,10 +723,11 @@ def guess_idol():
 
         # TODO: not commiting into user_history
         cursor.execute("COMMIT")
+        print(f"✅ [DB SAVE] Histórico salvo em {(time.time() - db_save_start)*1000:.2f}ms")
     
     except Exception as e:
         cursor.execute("ROLLBACK")
-        print(f"Error updating user history: {e}")
+        print(f"❌ [DB ERROR] Erro ao salvar: {e}")
 
     finally:
         connect.close()
@@ -722,11 +759,18 @@ def guess_idol():
     data_for_display["companies"] = idol_c + group_c
 
     # Response data
+    response_start = time.time()
+    print("📦 [RESPONSE] Montando resposta...")
     response_data = {
         "guess_correct": is_correct,
         "feedback": feedback,
         "guessed_idol_data": data_for_display
     }
+    print(f"✅ [RESPONSE] Resposta montada em {(time.time() - response_start)*1000:.2f}ms")
+
+    total_time = (time.time() - start_time) * 1000
+    print(f"\n⏱️  [TOTAL TIME] Tempo total: {total_time:.2f}ms")
+    print("=" * 60 + "\n")
 
     # TODO - jsonify final response dict - DONE
 
