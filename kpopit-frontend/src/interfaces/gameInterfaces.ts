@@ -12,13 +12,21 @@ export interface IdolListItem {
   id: number;
   artist_name: string;
   image_path: string;
-  groups?: string[];
+  gender: string;
+  nationality: string[];
+  idol_debut_year: number;
+  birth_date: string;
+  height: number;
+  position: string[];
+  member_count?: number;
+  groups: string[];
   all_groups?: string[];
+  active_group?: string | null;
+  companies: string[];
 }
 
 export interface FeedbackItem {
   status: string;
-  // '?' turns these properties optional. It can or cannot exist.
   correct_items?: string[];
   incorrect_items?: string[];
 }
@@ -29,6 +37,7 @@ export interface FeedbackData {
   idol_debut_year: FeedbackItem;
   birth_date: FeedbackItem;
   height: FeedbackItem;
+  member_count: FeedbackItem;
   nationality: FeedbackItem;
   groups: FeedbackItem;
   position: FeedbackItem;
@@ -48,6 +57,7 @@ export interface GuessedIdolData {
   position: string[];
   companies: string[];
   image_path: string;
+  member_count?: number;
 }
 
 export interface GuessResponse {

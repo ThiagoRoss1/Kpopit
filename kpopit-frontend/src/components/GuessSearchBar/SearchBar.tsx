@@ -59,7 +59,7 @@ const SearchBar = (props: SearchBarProps) => {
         .filter((idol: IdolListItem) => {
           const matchesName = idol.artist_name.toLowerCase().includes(value.toLowerCase());
 
-          const matchesGroup = idol.groups?.some(group =>
+          const matchesGroup = idol.all_groups?.some(group =>
             group.toLowerCase().includes(value.toLowerCase())) ||
             idol.all_groups?.some(group =>
               group.toLowerCase().includes(value.toLowerCase())
@@ -111,7 +111,7 @@ const SearchBar = (props: SearchBarProps) => {
 
   // Format display name
   const formatDisplayName = (idol: IdolListItem) => {
-    const groups = idol.groups?.join(", ") || "Soloist";  // <- Added Groups display
+    const groups = idol.active_group || "Soloist";  // <- Added Groups display
     return `${idol.artist_name} (${groups})`;
   };
   
@@ -301,7 +301,7 @@ const SearchBar = (props: SearchBarProps) => {
                   <span className=" font-normal text-base">
                     {`${suggestion.artist_name}`}
                   </span> <span className="text-base text-white">
-                    {`(${suggestion.groups?.join(", ") ? suggestion.groups?.join(", ") : "Soloist"})`}
+                    {`(${suggestion.active_group ? suggestion.active_group : "Soloist"})`}
                   </span>
                   </p>
                 </motion.li>
