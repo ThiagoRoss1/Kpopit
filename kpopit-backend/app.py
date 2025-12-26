@@ -27,7 +27,9 @@ if FLASK_ENV == "development":
     CORS(app, resources={r"/*": {"origins": "*"}})  # Allow all origins for static files
 
 else:
-    CORS(app, resources={r"/*": {"origins": FRONTEND_URL}}) # Restrict to frontend URL
+    urls_string = FRONTEND_URL if FRONTEND_URL else ""
+    frontend_urls = urls_string.split(",")
+    CORS(app, resources={r"/*": {"origins": frontend_urls}}) # Restrict to frontend URL
     
 
 # Admin blueprint - Register routes
