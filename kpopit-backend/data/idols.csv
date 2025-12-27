@@ -1,152 +1,152 @@
 id,artist_name,real_name,gender,debut_year,nationality,birth_date,height,position,image_path,is_published,release_date
-1,Kim Chaewon,Kim Chae-won,Female,2018,South Korean,2000-08-01,164,"Leader, Vocalist, Dancer",/images/idols/chaewon.webp,1,2025-12-20
-2,Sakura,Miyawaki Sakura,Female,2018,Japanese,1998-03-19,163,"Vocalist, Rapper, Dancer",/images/idols/sakura.webp,1,2025-12-20
-3,Huh Yunjin,Huh Yun-jin,Female,2022,"South Korean, American",2001-10-08,172,"Vocalist, Rapper",/images/idols/yunjin.webp,1,2025-12-20
-4,Kazuha,Nakamura Kazuha,Female,2022,Japanese,2003-08-09,170,"Sub-Vocalist, Rapper, Dancer",/images/idols/kazuha.webp,1,2025-12-20
-5,Hong Eunchae,Hong Eun-chae,Female,2022,South Korean,2006-11-10,169,"Vocalist, Lead Dancer, Maknae",/images/idols/eunchae.webp,1,2025-12-20
-6,Karina,Yu Ji-min,Female,2020,South Korean,2000-04-11,168,"Leader, Main Dancer, Lead Rapper, Sub-Vocalist, Visual",/images/idols/karina.webp,1,2025-12-20
-7,Giselle,Uchinaga Aeri,Female,2020,"Japanese, South Korean",2000-10-30,164,"Main Rapper, Sub-Vocalist",/images/idols/giselle.webp,1,2025-12-20
-8,Winter,Kim Min-jeong,Female,2020,South Korean,2001-01-01,163,"Lead Vocalist, Lead Dancer",/images/idols/winter.webp,1,2025-12-20
-9,NingNing,Níng Yìzhuō,Female,2020,Chinese,2002-10-23,161,"Main Vocalist, Maknae",/images/idols/ningning.webp,1,2025-12-20
-10,Jihyo,Park Ji-hyo,Female,2015,South Korean,1997-02-01,162,"Leader, Main Vocalist",/images/idols/jihyo.webp,1,2025-12-20
-11,Nayeon,Im Na-yeon,Female,2015,South Korean,1995-09-22,163,"Lead Vocalist, Lead Dancer, Center, FOTG",/images/idols/nayeon.webp,1,2025-12-20
-12,Jeongyeon,Yoo Jeong-yeon,Female,2015,South Korean,1996-11-01,168,"Lead Vocalist, Dancer",/images/idols/jeongyeon.webp,1,2025-12-20
-13,Momo,Hirai Momo,Female,2015,Japanese,1996-11-09,163,"Main Dancer, Sub-Vocalist, Rapper",/images/idols/momo.webp,1,2025-12-20
-14,Sana,Minatozaki Sana,Female,2015,Japanese,1996-12-29,164,"Sub-Vocalist",/images/idols/sana.webp,1,2025-12-20
-15,Mina,Mina Sharon Myoi,Female,2015,"Japanese, American",1997-03-24,163,"Main Dancer, Sub-Vocalist",/images/idols/mina.webp,1,2025-12-20
-16,Dahyun,Kim Da-hyun,Female,2015,South Korean,1998-05-28,161,"Lead Rapper, Sub-Vocalist",/images/idols/dahyun.webp,1,2025-12-20
-17,Chaeyoung,Son Chae-young,Female,2015,South Korean,1999-04-23,159,"Main Rapper, Sub-Vocalist",/images/idols/chaeyoung.webp,1,2025-12-20
-18,Tzuyu,Chou Tzuyu,Female,2015,Taiwanese,1999-06-14,170,"Lead Dancer, Sub-Vocalist, Visual, Maknae",/images/idols/tzuyu.webp,1,2025-12-20
-19,Yujin,An Yu-jin,Female,2018,South Korean,2003-09-01,173,"Leader, Main Vocalist, Main Dancer",/images/idols/yujin.webp,1,2025-12-20
-20,Gaeul,Kim Ga Eul,Female,2021,South Korean,2002-09-24,164,"Main Dancer, Lead Rapper, Sub-Vocalist",/images/idols/gaeul.webp,1,2025-12-20
-21,Rei,Naoi Rei,Female,2021,Japanese,2004-02-03,170,"Main Rapper, Sub-Vocalist",/images/idols/rei.webp,1,2025-12-20
-22,Wonyoung,Jang Won-young,Female,2018,South Korean,2004-08-31,173,"Vocalist, Dancer, Visual",/images/idols/wonyoung.webp,1,2025-12-20
-23,Liz,Kim Ji-won,Female,2021,South Korean,2004-11-21,171,"Main Vocalist, Dancer",/images/idols/liz.webp,1,2025-12-20
-24,Leeseo,Lee Hyun-seo,Female,2021,South Korean,2007-02-21,166,"Lead Dancer, Sub-Vocalist, Visual, Maknae",/images/idols/leeseo.webp,1,2025-12-20
-25,Jisoo,Kim Ji-soo,Female,2016,South Korean,1995-01-03,162,"Lead Vocalist, Visual",/images/idols/jisoo.webp,1,2025-12-20
-26,Jennie,Kim Jennie,Female,2016,South Korean,1996-01-16,163,"Main Rapper, Lead Vocalist",/images/idols/jennie.webp,1,2025-12-20
-27,Rosé,Roseanne Park,Female,2016,"New Zealand, South Korean",1997-02-11,168,"Main Vocalist, Lead Dancer",/images/idols/rose.webp,1,2025-12-20
-28,Lisa,Lalisa Manobal,Female,2016,Thai,1997-03-27,167,"Main Dancer, Lead Rapper, Sub-Vocalist, Maknae",/images/idols/lisa.webp,1,2025-12-20
-29,Ruka,Kawai Ruka,Female,2023,Japanese,2002-03-20,165,"Main Dancer, Main Rapper",/images/idols/ruka.webp,1,2025-12-20
-30,Pharita,Pharita Boonpakdeethaveeyod,Female,2023,Thai,2005-08-26,171,"Vocalist",/images/idols/pharita.webp,1,2025-12-20
-31,Asa,Enami Asa,Female,2023,Japanese,2006-04-17,167,"Main Rapper, Vocalist, Dancer",/images/idols/asa.webp,1,2025-12-20
-32,Ahyeon,Jung Ahyeon,Female,2023,South Korean,2007-04-11,163,"Main Vocalist, Rapper, Dancer, Visual, Center",/images/idols/ahyeon.webp,1,2025-12-20
-33,Rora,Lee Da-in,Female,2023,South Korean,2008-08-14,172,"Lead Vocalist, Visual",/images/idols/rora.webp,1,2025-12-20
-34,Chiquita,Riracha Phondechaphiphat,Female,2023,Thai,2009-02-17,168,"Vocalist, Dancer, Rapper, Maknae",/images/idols/chiquita.webp,1,2025-12-20
-35,Rami,Shin Haram,Female,2023,South Korean,2007-10-17,172,"Main Vocalist",/images/idols/rami.webp,1,2025-12-20
-36,Julie,Julie Han,Female,2023,"American, South Korean",2000-03-29,163,"Leader, Main Rapper, Lead Dancer",/images/idols/julie.webp,1,2025-12-20
-37,Natty,Ahnatchaya Suputhipong,Female,2023,"Thai",2002-05-30,167,"Main Dancer, Lead Rapper, Sub-Vocalist",/images/idols/natty.webp,1,2025-12-20
-38,Belle,Shim Hye-won / Annabelle Shim,Female,2023,"American, South Korean",2004-03-20,168,"Main Vocalist, Dancer",/images/idols/belle.webp,1,2025-12-20
-39,Haneul,Won Ha-neul,Female,2023,South Korean,2005-05-25,169,"Lead Vocalist, Maknae",/images/idols/haneul.webp,1,2025-12-20
-40,Sunhye,Jeong Sun-hye,Female,2023,South Korean,2004-04-12,159,"Leader, Rapper, Vocalist, Dancer",/images/idols/sunhye.webp,1,2025-12-20
-41,Yeonjung,Wi Yeon-jung,Female,2023,South Korean,2004-09-1,162,"Main Dancer, Rapper",/images/idols/yeonjung.webp,1,2025-12-20
-42,Jiana,Noh Ji-hyun,Female,2023,South Korean,2006-02-02,163,"Main Vocalist, Rapper, Dancer",/images/idols/jiana.webp,1,2025-12-20
-43,Doeun,Kim Do-eun,Female,2023,South Korean,2007-12-24,168,"Vocalist, Rapper, Dancer",/images/idols/doeun.webp,1,2025-12-20
-44,Jieun,Han Ji-eun,Female,2023,South Korean,2009-11-05,158,"Vocalist, Dancer, Rapper, Maknae",/images/idols/jieun.webp,1,2025-12-20
-45,Yeji,Hwang Ye-ji,Female,2019,South Korean,2000-05-26,167,"Leader, Main Dancer, Lead Vocalist, Sub-Rapper",/images/idols/yeji.webp,1,2025-12-20
-46,Lia,Choi Ji-su,Female,2019,South Korean,2000-07-21,162,"Main Vocalist, Sub-Rapper",/images/idols/lia.webp,1,2025-12-20
-47,Ryujin,Shin Ryu-jin,Female,2019,South Korean,2001-04-17,164,"Main Rapper, Lead Dancer, Sub-Vocalist, Center",/images/idols/ryujin.webp,1,2025-12-20
-48,Chaeryeong,Lee Chae-ryeong,Female,2019,South Korean,2001-06-05,167,"Main Dancer, Sub-Vocalist, Sub-Rapper",/images/idols/chaeryeong.webp,1,2025-12-20
-49,Yuna,Shin Yu-na,Female,2019,South Korean,2003-12-09,170,"Lead Rapper, Lead Dancer, Sub-Vocalist, Visual, Maknae",/images/idols/yuna.webp,1,2025-12-20
-50,Sumin,Bae Su-min,Female,2020,South Korean,2001-03-13,159,"Vocalist, Rapper, Dancer",/images/idols/sumin.webp,1,2025-12-20
-51,Sieun,Park Si-eun,Female,2020,South Korean,2001-08-01,159,"Main Vocalist, Dancer",/images/idols/sieun.webp,1,2025-12-20
-52,Isa,Lee Chae-young,Female,2020,South Korean,2002-01-23,166,"Lead Vocalist, Dancer",/images/idols/isa.webp,1,2025-12-20
-53,Seeun,Yoon Se-eun,Female,2020,South Korean,2003-06-14,167,"Vocalist, Dancer",/images/idols/seeun.webp,1,2025-12-20
-54,Yoon,Shim Ja-yoon,Female,2020,South Korean,2004-04-14,173,"Lead Vocalist",/images/idols/yoon.webp,1,2025-12-20
-55,J,Jang Ye-eun,Female,2020,South Korean,2004-12-09,170,"Vocalist, Rapper, Maknae",/images/idols/j.webp,1,2025-12-20
-56,Soyeon,Jeon So-yeon,Female,2018,South Korean,1998-08-26,157,"Leader, Main Rapper, Sub-Vocalist, Center",/images/idols/soyeon.webp,1,2025-12-20
-57,Miyeon,Cho Mi-yeon,Female,2018,South Korean,1997-01-31,161,"Main Vocalist, Visual",/images/idols/miyeon.webp,1,2025-12-20
-58,Minnie,Nicha Yontararak,Female,2018,Thai,1997-10-23,167,"Main Vocalist",/images/idols/minnie.webp,1,2025-12-20
-59,Yuqi,Song Yu Qi,Female,2018,Chinese,1999-09-23,163,"Main Dancer, Sub-Vocalist, Sub-Rapper, FOTG",/images/idols/yuqi.webp,1,2025-12-20
-60,Shuhua,Yeh  Shuhua,Female,2018,Taiwanese,2000-01-06,161,"Sub-Vocalist, Visual, Maknae",/images/idols/shuhua.webp,1,2025-12-20
-61,Soojin,Seo Soojin,Female,2018,South Korean,1998-03-09,164,"Main Dancer, Sub-Vocalist, Sub-Rapper",/images/idols/soojin.webp,1,2025-12-20
-62,Haewon,Oh Hae-won,Female,2022,South Korean,2003-02-25,163,"Leader, Main Vocalist",/images/idols/haewon.webp,1,2025-12-20
-63,Lily,Lily Jin Park Morrow,Female,2022,"South Korean, Australian",2002-10-17,164,"Main Vocalist, Dancer",/images/idols/lily.webp,1,2025-12-20
-64,Sullyoon,Seol Yoon-a,Female,2022,South Korean,2004-01-26,168,"Lead Vocalist, Dancer",/images/idols/sullyoon.webp,1,2025-12-20
-65,Bae,Bae Jin-sol,Female,2022,South Korean,2004-12-28,170,"Lead Vocalist, Dancer",/images/idols/bae.webp,1,2025-12-20
-66,Jiwoo,Kim Ji-woo,Female,2022,South Korean,2005-04-13,161,"Main Rapper, Vocalist, Dancer",/images/idols/jiwoo.webp,1,2025-12-20
-67,Kyujin,Jang Kyu-jin,Female,2022,South Korean,2006-05-26,164,"Dance Leader, Main Dancer, Rapper, Vocalist, Maknae",/images/idols/kyujin.webp,1,2025-12-20
-68,Minji,Kim Min-ji,Female,2022,South Korean,2004-05-07,169,"Rapper",/images/idols/minji.webp,1,2025-12-20
-69,Hanni,Hanni Phạm,Female,2022,"Vietnamese, Australian",2004-10-06,162,"Vocalist",/images/idols/hanni.webp,1,2025-12-20
-70,Danielle,Danielle June Marsh / Mo Ji Hye,Female,2022,"Australian, South Korean",2005-04-11,165,"Dancer",/images/idols/danielle.webp,1,2025-12-20
-71,Haerin,Kang Hae-rin,Female,2022,South Korean,2006-05-15,165,"Dancer",/images/idols/haerin.webp,1,2025-12-20
-72,Hyein,Lee Hye-in,Female,2022,South Korean,2008-04-21,170,"Dancer, Maknae",/images/idols/hyein.webp,1,2025-12-20
-73,Yunah,Noh Yun-ah,Female,2024,South Korean,2004-01-15,168,"Dancer",/images/idols/yunah.webp,1,2025-12-20
-74,Minju,Park Min-ju,Female,2024,South Korean,2004-05-11,163,"Main Vocalist",/images/idols/minju.webp,1,2025-12-20
-75,Moka,Sakai Moka,Female,2024,Japanese,2004-10-08,162,"Lead Dancer, Sub-Vocalist, Visual",/images/idols/moka.webp,1,2025-12-20
-76,Wonhee,Lee Won-hee,Female,2024,South Korean,2007-06-26,162,"Lead Vocalist, Center",/images/idols/wonhee.webp,1,2025-12-20
-77,Iroha,Hokazono Iroha,Female,2024,Japanese,2008-02-04,158,"Main Dancer, Sub-Vocalist, Maknae",/images/idols/iroha.webp,1,2025-12-20
-78,Kwon Eunbi,Kwon Eun-bi,Female,2018,South Korean,1995-09-27,158,"Leader, Main Dancer, Lead Vocalist",/images/idols/eunbi.webp,1,2025-12-20
-79,Sooin,Kim Soo-in,Female,2024,South Korean,2005-04-12,172,"Main Dancer, Vocalist",/images/idols/sooin.webp,1,2025-12-20
-80,Gawon,Lee Ga-won,Female,2024,"South Korean, American",2005-04-27,173,"Main Vocalist, Rapper",/images/idols/gawon.webp,1,2025-12-20
-81,Anna,Tanaka Anna,Female,2024,Japanese,2005-11-17,164,"Sub-Vocalist, Visual",/images/idols/anna.webp,1,2025-12-20
-82,Narin,Na Rin,Female,2024,South Korean,2007-08-15,166,"Main Rapper, Main Vocalist",/images/idols/narin.webp,1,2025-12-20
-83,Ella,Ella McKenzie Gross,Female,2024,"German, American, South Korean",2008-12-01,168,"Vocalist, Visual, Maknae",/images/idols/ella.webp,1,2025-12-20
-84,HaSeul,Cho Ha-Seul,Female,2016,South Korean,1997-08-18,158,"Leader, Vocalist, Rapper",/images/idols/haseul.webp,1,2025-12-20
-85,ViVi,Wong Kahei,Female,2017,Hong Kongese,1996-12-09,158,"Vocalist, Rapper",/images/idols/vivi.webp,1,2025-12-20
-86,Yves,Ha Soo-young,Female,2017,South Korean,1997-05-24,166,"Vocalist, Rapper, Dancer",/images/idols/yves.webp,1,2025-12-20
-87,JinSoul,Jeong Jin-Sol,Female,2017,South Korean,1997-06-13,165,"Vocalist, Rapper",/images/idols/jinsoul.webp,1,2025-12-20
-88,Kim Lip,Kim Jung-eun,Female,2017,South Korean,1999-02-10,163,"Vocalist, Dancer",/images/idols/kimlip.webp,1,2025-12-20
-89,HeeJin,Jeon Hee-jin,Female,2016,South Korean,2000-10-19,161,"Vocalist, Rapper, Dancer, Center",/images/idols/heejin.webp,1,2025-12-20
-90,HyunJin,Kim Hyun-jin,Female,2016,South Korean,2000-11-15,163,"Vocalist, Rapper, Dancer",/images/idols/hyunjin.webp,1,2025-12-20
-91,Go Won,Park Chae-won,Female,2018,South Korean,2000-11-19,160,"Vocalist, Rapper, Dancer",/images/idols/gowon.webp,1,2025-12-20
-92,Choerry,Choi Ye-rim,Female,2017,South Korean,2001-06-04,161,"Vocalist, Rapper, Dancer",/images/idols/choerry.webp,1,2025-12-20
-93,HyeJu,Son Hye-ju,Female,2018,South Korean,2001-11-13,165,"Vocalist, Rapper, Dancer",/images/idols/hyeju.webp,1,2025-12-20
-94,YeoJin,Im Yeo-Jin,Female,2017,South Korean,2002-11-11,149,"Vocalist, Rapper, Maknae",/images/idols/yeojin.webp,1,2025-12-20
-95,Chuu,Kim Ji-woo,Female,2017,South Korean,1999-10-20,161,"Vocalist, Rapper, FOTG",/images/idols/chuu.webp,1,2025-12-20
-96,Irene,Bae Joo-hyun,Female,2014,South Korean,1991-03-29,158,"Leader, Main Rapper, Lead Dancer, Sub-Vocalist, Visual, Center",/images/idols/irene.webp,1,2025-12-20
-97,Seulgi,Kang Seul Gi,Female,2014,South Korean,1994-02-10,161,"Main Dancer, Lead Vocalist",/images/idols/seulgi.webp,1,2025-12-20
-98,Wendy,Son Seung-wan,Female,2014,South Korean,1994-02-21,160,"Main Vocalist",/images/idols/wendy.webp,1,2025-12-20
-99,Joy,Park Soo Young,Female,2014,South Korean,1996-09-03,167,"Lead Rapper, Sub-Vocalist",/images/idols/joy.webp,1,2025-12-20
-100,Yeri,Kim Ye Rim,Female,2015,South Korean,1999-03-05,159,"Sub-Vocalist, Sub-Rapper, Maknae",/images/idols/yeri.webp,1,2025-12-20
-101,Jeon Somi,Ennik Somi Douma,Female,2016,"Canadian, Dutch, South Korean",2001-03-09,172,"Vocalist, Rapper",/images/idols/jeonsomi.webp,1,2025-12-20
-102,Taeyeon,Kim Tae-yeon,Female,2007,South Korean,1989-03-09,160,"Leader, Main Vocalist",/images/idols/taeyeon.webp,1,2025-12-20
-103,Sunny,Lee Soon Kyu,Female,2007,"South Korean, American",1989-05-15,158,"Lead Vocalist",/images/idols/sunny.webp,1,2025-12-20
-104,Tiffany Young,Stephanie Young Hwang,Female,2007,"South Korean, American",1989-08-01,163,"Lead Vocalist, Rapper",/images/idols/tiffany.webp,1,2025-12-20
-105,Hyoyeon,Kim Hyo-yeon,Female,2007,South Korean,1989-09-22,161,"Main Rapper, Main Dancer",/images/idols/hyoyeon.webp,1,2025-12-20
-106,Yuri,Kwon Yu-ri,Female,2007,South Korean,1989-12-05,168,"Main Dancer, Lead Rapper, Vocalist",/images/idols/kwonyuri.webp,1,2025-12-20
-107,Sooyoung,Choi Soo Young,Female,2007,South Korean,1990-02-10,172,"Lead Rapper, Lead Dancer",/images/idols/sooyoung.webp,1,2025-12-20
-108,Yoona,Im Yoon Ah,Female,2007,South Korean,1990-05-30,168,"Lead Rapper, Lead Dancer, Visual, Center",/images/idols/yoona.webp,1,2025-12-20
-109,Seohyun,Seo Ju-hyun,Female,2007,South Korean,1991-06-28,170,"Lead Vocalist, Maknae",/images/idols/seohyun.webp,1,2025-12-20
-110,Jessica,Jessica Jung,Female,2007,"South Korean, American",1989-04-18,162,"Main Vocalist",/images/idols/jessicajung.webp,1,2025-12-20
-111,Solar,Kim Yong Sun,Female,2014,South Korean,1991-02-21,160,"Leader, Vocalist",/images/idols/solar.webp,1,2025-12-20
-112,Moonbyul,Moon Byul-yi,Female,2014,South Korean,1992-12-22,163,"Rapper, Performer",/images/idols/moonbyul.webp,1,2025-12-20
-113,Wheein,Jung Whee-in,Female,2014,South Korean,1995-04-17,159,"Vocalist, Performer",/images/idols/wheein.webp,1,2025-12-20
-114,Hwasa,Ahn Hye-jin,Female,2014,South Korean,1995-07-23,160,"Vocalist, Rapper, Maknae",/images/idols/hwasa.webp,1,2025-12-20
-115,CL,Lee Chae-rin,Female,2009,South Korean,1991-02-26,162,"Leader, Main Rapper, Lead Dancer, Lead Vocalist, FOTG",/images/idols/cl.webp,1,2025-12-20
-116,Park Bom,Park Bom,Female,2009,South Korean,1984-03-24,165,"Main Vocalist",/images/idols/parkbom.webp,1,2025-12-20
-117,Dara,Park Sandara,Female,2009,South Korean,1984-11-12,159,"Vocalist, Sub-Rapper, Visual",/images/idols/dara.webp,1,2025-12-20
-118,Minzy,Gong Min-ji,Female,2009,South Korean,1994-01-18,161,"Main Dancer, Lead Vocalist, Lead Rapper, Maknae",/images/idols/minzy.webp,1,2025-12-20
-119,Yujin,Choi Yu-jin,Female,2015,South Korean,1996-08-12,163,"Leader, Vocalist",/images/idols/choi_yujin.webp,1,2025-12-20
-120,Xiaoting,Shen Xiao Ting,Female,2022,Chinese,1999-11-12,168," Main Dancer, Vocalist, Visual",/images/idols/xiaoting.webp,1,2025-12-20
-121,Chaehyun,Kim Chae-hyun,Female,2022,South Korean,2002-04-26,160,"Main Vocalist, Center",/images/idols/chaehyun.webp,1,2025-12-20
-122,Dayeon,Kim Da-yeon,Female,2022,South Korean,2003-03-02,158,"Main Dancer, Main Rapper, Vocalist",/images/idols/dayeon.webp,1,2025-12-20
-123,Hikaru,Ezaki Hikaru,Female,2022,Japanese,2004-03-12,155,"Main Dancer, Main Rapper, Vocalist",/images/idols/hikaru.webp,1,2025-12-20
-124,Huening Bahiyyih,Bahiyyih Jaleh Huening,Female,2022,"South Korean, American",2004-07-27,167,"Vocalist",/images/idols/bahiyyih.webp,1,2025-12-20
-125,Youngeun,Seo Young-eun,Female,2022,South Korean,2004-12-27,158,"Main Vocalist, Dancer, Maknae",/images/idols/youngeun.webp,1,2025-12-20
-126,Mashiro,Sakamoto Mashiro,Female,2022,Japanese,1999-12-16,158,"Co-Leader, Vocalist",/images/idols/mashiro.webp,1,2025-12-20
-127,Yeseo,Kang Ye-seo,Female,2019,South Korean,2005-08-22,157,"Vocalist, Maknae",/images/idols/yeseo.webp,1,2025-12-20
-128,Woni,Jeong Won-i,Female,2024,South Korean,2004-05-25,164,"Leader",/images/idols/woni.webp,1,2025-12-20
-129,Liv,Jin Kyung-eun,Female,2024,South Korean,2006-10-11,165,"Vocalist, Dancer",/images/idols/liv.webp,1,2025-12-20
-130,Minami,Ito Minami,Female,2024,Japanese,2006-11-29,164,"Main Vocalist, Lead Dancer",/images/idols/minami.webp,1,2025-12-20
-131,May,Lee Ye-bin,Female,2024,South Korean,2008-08-19,165,"Vocalist, Lead Dancer",/images/idols/may.webp,1,2025-12-20
-132,Zena,Kim Ga Young,Female,2024,South Korean,2008-11-27,164,"Visual, Center, Maknae",/images/idols/zena.webp,1,2025-12-20
-133,Chungha,Kim Chan Mi,Female,2016,South Korean,1996-02-09,161,"Main Dancer, Lead Vocalist, Rapper",/images/idols/chungha.webp,1,2025-12-20
-134,Hyolyn,Kim Hyo Jung,Female,2010,South Korean,1990-12-11,164,"Leader, Main Vocalist, Lead Dancer, Lead Rapper, FOTG",/images/idols/hyolyn.webp,1,2025-12-20
-135,Bora,Yoon Bo Ra,Female,2010,South Korean,1989-12-30,165,"Main Rapper, Main Dancer, Vocalist, Visual",/images/idols/bora.webp,1,2025-12-20
-136,Soyou,Kang Ji-hyun,Female,2010,South Korean,1991-09-12,168,"Lead Vocalist",/images/idols/soyou.webp,1,2025-12-20
-137,Dasom,Kim Da-som,Female,2010,South Korean,1993-05-06,167,"Vocalist, Visual, Maknae",/images/idols/dasom.webp,1,2025-12-20
-138,Seunghee,Oh Seung-hee,Female,2015,South Korean,1995-10-10,161,"Main Vocalist",/images/idols/seunghee.webp,1,2025-12-20
-139,Eunbin,Kwon Eun-bin,Female,2016,South Korean,2000-01-06,171,"Sub-Vocalist, Sub-Rapper, FOTG, Maknae",/images/idols/eunbin.webp,1,2025-12-20
-140,Sorn,Chonnasorn Sajakul,Female,2015,Thai,1996-11-18,160,"Lead Vocalist",/images/idols/sorn.webp,1,2025-12-20
-141,Elkie,Chong Tingyan,Female,2016,Hong Kongese,1998-11-02,165,"Lead Vocalist, Lead Dancer, Visual",/images/idols/elkie.webp,1,2025-12-20
-142,Seungyeon,Jang Seung-yeon,Female,2015,South Korean,1996-11-06,163,"Leader, Main Dancer, Lead Vocalist, Sub-Rapper",/images/idols/seungyeon.webp,1,2025-12-20
-143,Yeeun,Jang Ye-eun,Female,2015,South Korean,1998-08-10,166,"Main Rapper, Sub-Vocalist",/images/idols/yeeun.webp,1,2025-12-20
-144,Jo Yuri,Jo Yu-ri,Female,2018,South Korean,2001-10-22,163,"Main Vocalist, Center, Maknae",/images/idols/jo_yuri.webp,1,2025-12-20
-145,Sowon,Kim So-jung,Female,2015,South Korean,1995-12-07,173,"Leader, Vocalist, Visual",/images/idols/sowon.webp,1,2025-12-20
-146,Yerin,Jung Ye-rin,Female,2015,South Korean,1996-08-19,167,"Lead Dancer, Vocalist, Center, FOTG",/images/idols/yerin.webp,1,2025-12-20
-147,Eunha,Jung Eun Bi,Female,2015,South Korean,1997-05-30,163,"Lead Vocalist",/images/idols/eunha.webp,1,2025-12-20
-148,Yuju,Choi Yu-na,Female,2015,South Korean,1997-10-04,169,"Main Vocalist",/images/idols/yuju.webp,1,2025-12-20
-149,SinB,Hwang Eun-bi,Female,2015,South Korean,1998-06-03,166,"Main Dancer, Vocalist, Center",/images/idols/sinb.webp,1,2025-12-20
-150,Umji,Kim Ye Won,Female,2015,South Korean,1998-08-19,165,"Vocalist, Maknae",/images/idols/umji.webp,1,2025-12-20
-151,Yena,Choi Yena,Female,2018,South Korean,1999-09-29,162,"Rapper, Vocalist, Dancer",/images/idols/yena.webp,1,2025-12-20
+1,Kim Chaewon,Kim Chae-won,Female,2018,South Korean,2000-08-01,164,"Leader, Vocalist, Dancer",/images/idols/chaewon.webp,1,2025-12-26
+2,Sakura,Miyawaki Sakura,Female,2018,Japanese,1998-03-19,163,"Vocalist, Rapper, Dancer",/images/idols/sakura.webp,1,2025-12-26
+3,Huh Yunjin,Huh Yun-jin,Female,2022,"South Korean, American",2001-10-08,172,"Vocalist, Rapper",/images/idols/yunjin.webp,1,2025-12-26
+4,Kazuha,Nakamura Kazuha,Female,2022,Japanese,2003-08-09,170,"Sub-Vocalist, Rapper, Dancer",/images/idols/kazuha.webp,1,2025-12-26
+5,Hong Eunchae,Hong Eun-chae,Female,2022,South Korean,2006-11-10,169,"Vocalist, Lead Dancer, Maknae",/images/idols/eunchae.webp,1,2025-12-26
+6,Karina,Yu Ji-min,Female,2020,South Korean,2000-04-11,168,"Leader, Main Dancer, Lead Rapper, Sub-Vocalist, Visual",/images/idols/karina.webp,1,2025-12-26
+7,Giselle,Uchinaga Aeri,Female,2020,"Japanese, South Korean",2000-10-30,164,"Main Rapper, Sub-Vocalist",/images/idols/giselle.webp,1,2025-12-26
+8,Winter,Kim Min-jeong,Female,2020,South Korean,2001-01-01,163,"Lead Vocalist, Lead Dancer",/images/idols/winter.webp,1,2025-12-26
+9,NingNing,Níng Yìzhuō,Female,2020,Chinese,2002-10-23,161,"Main Vocalist, Maknae",/images/idols/ningning.webp,1,2025-12-26
+10,Jihyo,Park Ji-hyo,Female,2015,South Korean,1997-02-01,162,"Leader, Main Vocalist",/images/idols/jihyo.webp,1,2025-12-26
+11,Nayeon,Im Na-yeon,Female,2015,South Korean,1995-09-22,163,"Lead Vocalist, Lead Dancer, Center, FOTG",/images/idols/nayeon.webp,1,2025-12-26
+12,Jeongyeon,Yoo Jeong-yeon,Female,2015,South Korean,1996-11-01,168,"Lead Vocalist, Dancer",/images/idols/jeongyeon.webp,1,2025-12-26
+13,Momo,Hirai Momo,Female,2015,Japanese,1996-11-09,163,"Main Dancer, Sub-Vocalist, Rapper",/images/idols/momo.webp,1,2025-12-26
+14,Sana,Minatozaki Sana,Female,2015,Japanese,1996-12-29,164,"Sub-Vocalist",/images/idols/sana.webp,1,2025-12-26
+15,Mina,Mina Sharon Myoi,Female,2015,"Japanese, American",1997-03-24,163,"Main Dancer, Sub-Vocalist",/images/idols/mina.webp,1,2025-12-26
+16,Dahyun,Kim Da-hyun,Female,2015,South Korean,1998-05-28,161,"Lead Rapper, Sub-Vocalist",/images/idols/dahyun.webp,1,2025-12-26
+17,Chaeyoung,Son Chae-young,Female,2015,South Korean,1999-04-23,159,"Main Rapper, Sub-Vocalist",/images/idols/chaeyoung.webp,1,2025-12-26
+18,Tzuyu,Chou Tzuyu,Female,2015,Taiwanese,1999-06-14,170,"Lead Dancer, Sub-Vocalist, Visual, Maknae",/images/idols/tzuyu.webp,1,2025-12-26
+19,Yujin,An Yu-jin,Female,2018,South Korean,2003-09-01,173,"Leader, Main Vocalist, Main Dancer",/images/idols/yujin.webp,1,2025-12-26
+20,Gaeul,Kim Ga Eul,Female,2021,South Korean,2002-09-24,164,"Main Dancer, Lead Rapper, Sub-Vocalist",/images/idols/gaeul.webp,1,2025-12-26
+21,Rei,Naoi Rei,Female,2021,Japanese,2004-02-03,170,"Main Rapper, Sub-Vocalist",/images/idols/rei.webp,1,2025-12-26
+22,Wonyoung,Jang Won-young,Female,2018,South Korean,2004-08-31,173,"Vocalist, Dancer, Visual",/images/idols/wonyoung.webp,1,2025-12-26
+23,Liz,Kim Ji-won,Female,2021,South Korean,2004-11-21,171,"Main Vocalist, Dancer",/images/idols/liz.webp,1,2025-12-26
+24,Leeseo,Lee Hyun-seo,Female,2021,South Korean,2007-02-21,166,"Lead Dancer, Sub-Vocalist, Visual, Maknae",/images/idols/leeseo.webp,1,2025-12-26
+25,Jisoo,Kim Ji-soo,Female,2016,South Korean,1995-01-03,162,"Lead Vocalist, Visual",/images/idols/jisoo.webp,1,2025-12-26
+26,Jennie,Kim Jennie,Female,2016,South Korean,1996-01-16,163,"Main Rapper, Lead Vocalist",/images/idols/jennie.webp,1,2025-12-26
+27,Rosé,Roseanne Park,Female,2016,"New Zealand, South Korean",1997-02-11,168,"Main Vocalist, Lead Dancer",/images/idols/rose.webp,1,2025-12-26
+28,Lisa,Lalisa Manobal,Female,2016,Thai,1997-03-27,167,"Main Dancer, Lead Rapper, Sub-Vocalist, Maknae",/images/idols/lisa.webp,1,2025-12-26
+29,Ruka,Kawai Ruka,Female,2023,Japanese,2002-03-20,165,"Main Dancer, Main Rapper",/images/idols/ruka.webp,1,2025-12-26
+30,Pharita,Pharita Boonpakdeethaveeyod,Female,2023,Thai,2005-08-26,171,"Vocalist",/images/idols/pharita.webp,1,2025-12-26
+31,Asa,Enami Asa,Female,2023,Japanese,2006-04-17,167,"Main Rapper, Vocalist, Dancer",/images/idols/asa.webp,1,2025-12-26
+32,Ahyeon,Jung Ahyeon,Female,2023,South Korean,2007-04-11,163,"Main Vocalist, Rapper, Dancer, Visual, Center",/images/idols/ahyeon.webp,1,2025-12-26
+33,Rora,Lee Da-in,Female,2023,South Korean,2008-08-14,172,"Lead Vocalist, Visual",/images/idols/rora.webp,1,2025-12-26
+34,Chiquita,Riracha Phondechaphiphat,Female,2023,Thai,2009-02-17,168,"Vocalist, Dancer, Rapper, Maknae",/images/idols/chiquita.webp,1,2025-12-26
+35,Rami,Shin Haram,Female,2023,South Korean,2007-10-17,172,"Main Vocalist",/images/idols/rami.webp,1,2025-12-26
+36,Julie,Julie Han,Female,2023,"American, South Korean",2000-03-29,163,"Leader, Main Rapper, Lead Dancer",/images/idols/julie.webp,1,2025-12-26
+37,Natty,Ahnatchaya Suputhipong,Female,2023,"Thai",2002-05-30,167,"Main Dancer, Lead Rapper, Sub-Vocalist",/images/idols/natty.webp,1,2025-12-26
+38,Belle,Shim Hye-won / Annabelle Shim,Female,2023,"American, South Korean",2004-03-20,168,"Main Vocalist, Dancer",/images/idols/belle.webp,1,2025-12-26
+39,Haneul,Won Ha-neul,Female,2023,South Korean,2005-05-25,169,"Lead Vocalist, Maknae",/images/idols/haneul.webp,1,2025-12-26
+40,Sunhye,Jeong Sun-hye,Female,2023,South Korean,2004-04-12,159,"Leader, Rapper, Vocalist, Dancer",/images/idols/sunhye.webp,1,2025-12-26
+41,Yeonjung,Wi Yeon-jung,Female,2023,South Korean,2004-09-1,162,"Main Dancer, Rapper",/images/idols/yeonjung.webp,1,2025-12-26
+42,Jiana,Noh Ji-hyun,Female,2023,South Korean,2006-02-02,163,"Main Vocalist, Rapper, Dancer",/images/idols/jiana.webp,1,2025-12-26
+43,Doeun,Kim Do-eun,Female,2023,South Korean,2007-12-24,168,"Vocalist, Rapper, Dancer",/images/idols/doeun.webp,1,2025-12-26
+44,Jieun,Han Ji-eun,Female,2023,South Korean,2009-11-05,158,"Vocalist, Dancer, Rapper, Maknae",/images/idols/jieun.webp,1,2025-12-26
+45,Yeji,Hwang Ye-ji,Female,2019,South Korean,2000-05-26,167,"Leader, Main Dancer, Lead Vocalist, Sub-Rapper",/images/idols/yeji.webp,1,2025-12-26
+46,Lia,Choi Ji-su,Female,2019,South Korean,2000-07-21,162,"Main Vocalist, Sub-Rapper",/images/idols/lia.webp,1,2025-12-26
+47,Ryujin,Shin Ryu-jin,Female,2019,South Korean,2001-04-17,164,"Main Rapper, Lead Dancer, Sub-Vocalist, Center",/images/idols/ryujin.webp,1,2025-12-26
+48,Chaeryeong,Lee Chae-ryeong,Female,2019,South Korean,2001-06-05,167,"Main Dancer, Sub-Vocalist, Sub-Rapper",/images/idols/chaeryeong.webp,1,2025-12-26
+49,Yuna,Shin Yu-na,Female,2019,South Korean,2003-12-09,170,"Lead Rapper, Lead Dancer, Sub-Vocalist, Visual, Maknae",/images/idols/yuna.webp,1,2025-12-26
+50,Sumin,Bae Su-min,Female,2020,South Korean,2001-03-13,159,"Vocalist, Rapper, Dancer",/images/idols/sumin.webp,1,2025-12-26
+51,Sieun,Park Si-eun,Female,2020,South Korean,2001-08-01,159,"Main Vocalist, Dancer",/images/idols/sieun.webp,1,2025-12-26
+52,Isa,Lee Chae-young,Female,2020,South Korean,2002-01-23,166,"Lead Vocalist, Dancer",/images/idols/isa.webp,1,2025-12-26
+53,Seeun,Yoon Se-eun,Female,2020,South Korean,2003-06-14,167,"Vocalist, Dancer",/images/idols/seeun.webp,1,2025-12-26
+54,Yoon,Shim Ja-yoon,Female,2020,South Korean,2004-04-14,173,"Lead Vocalist",/images/idols/yoon.webp,1,2025-12-26
+55,J,Jang Ye-eun,Female,2020,South Korean,2004-12-09,170,"Vocalist, Rapper, Maknae",/images/idols/j.webp,1,2025-12-26
+56,Soyeon,Jeon So-yeon,Female,2018,South Korean,1998-08-26,157,"Leader, Main Rapper, Sub-Vocalist, Center",/images/idols/soyeon.webp,1,2025-12-26
+57,Miyeon,Cho Mi-yeon,Female,2018,South Korean,1997-01-31,161,"Main Vocalist, Visual",/images/idols/miyeon.webp,1,2025-12-26
+58,Minnie,Nicha Yontararak,Female,2018,Thai,1997-10-23,167,"Main Vocalist",/images/idols/minnie.webp,1,2025-12-26
+59,Yuqi,Song Yu Qi,Female,2018,Chinese,1999-09-23,163,"Main Dancer, Sub-Vocalist, Sub-Rapper, FOTG",/images/idols/yuqi.webp,1,2025-12-26
+60,Shuhua,Yeh  Shuhua,Female,2018,Taiwanese,2000-01-06,161,"Sub-Vocalist, Visual, Maknae",/images/idols/shuhua.webp,1,2025-12-26
+61,Soojin,Seo Soojin,Female,2018,South Korean,1998-03-09,164,"Main Dancer, Sub-Vocalist, Sub-Rapper",/images/idols/soojin.webp,1,2025-12-26
+62,Haewon,Oh Hae-won,Female,2022,South Korean,2003-02-25,163,"Leader, Main Vocalist",/images/idols/haewon.webp,1,2025-12-26
+63,Lily,Lily Jin Park Morrow,Female,2022,"South Korean, Australian",2002-10-17,164,"Main Vocalist, Dancer",/images/idols/lily.webp,1,2025-12-26
+64,Sullyoon,Seol Yoon-a,Female,2022,South Korean,2004-01-26,168,"Lead Vocalist, Dancer",/images/idols/sullyoon.webp,1,2025-12-26
+65,Bae,Bae Jin-sol,Female,2022,South Korean,2004-12-28,170,"Lead Vocalist, Dancer",/images/idols/bae.webp,1,2025-12-26
+66,Jiwoo,Kim Ji-woo,Female,2022,South Korean,2005-04-13,161,"Main Rapper, Vocalist, Dancer",/images/idols/jiwoo.webp,1,2025-12-26
+67,Kyujin,Jang Kyu-jin,Female,2022,South Korean,2006-05-26,164,"Dance Leader, Main Dancer, Rapper, Vocalist, Maknae",/images/idols/kyujin.webp,1,2025-12-26
+68,Minji,Kim Min-ji,Female,2022,South Korean,2004-05-07,169,"Rapper",/images/idols/minji.webp,1,2025-12-26
+69,Hanni,Hanni Phạm,Female,2022,"Vietnamese, Australian",2004-10-06,162,"Vocalist",/images/idols/hanni.webp,1,2025-12-26
+70,Danielle,Danielle June Marsh / Mo Ji Hye,Female,2022,"Australian, South Korean",2005-04-11,165,"Dancer",/images/idols/danielle.webp,1,2025-12-26
+71,Haerin,Kang Hae-rin,Female,2022,South Korean,2006-05-15,165,"Dancer",/images/idols/haerin.webp,1,2025-12-26
+72,Hyein,Lee Hye-in,Female,2022,South Korean,2008-04-21,170,"Dancer, Maknae",/images/idols/hyein.webp,1,2025-12-26
+73,Yunah,Noh Yun-ah,Female,2024,South Korean,2004-01-15,168,"Dancer",/images/idols/yunah.webp,1,2025-12-26
+74,Minju,Park Min-ju,Female,2024,South Korean,2004-05-11,163,"Main Vocalist",/images/idols/minju.webp,1,2025-12-26
+75,Moka,Sakai Moka,Female,2024,Japanese,2004-10-08,162,"Lead Dancer, Sub-Vocalist, Visual",/images/idols/moka.webp,1,2025-12-26
+76,Wonhee,Lee Won-hee,Female,2024,South Korean,2007-06-26,162,"Lead Vocalist, Center",/images/idols/wonhee.webp,1,2025-12-26
+77,Iroha,Hokazono Iroha,Female,2024,Japanese,2008-02-04,158,"Main Dancer, Sub-Vocalist, Maknae",/images/idols/iroha.webp,1,2025-12-26
+78,Kwon Eunbi,Kwon Eun-bi,Female,2018,South Korean,1995-09-27,158,"Leader, Main Dancer, Lead Vocalist",/images/idols/eunbi.webp,1,2025-12-26
+79,Sooin,Kim Soo-in,Female,2024,South Korean,2005-04-12,172,"Main Dancer, Vocalist",/images/idols/sooin.webp,1,2025-12-26
+80,Gawon,Lee Ga-won,Female,2024,"South Korean, American",2005-04-27,173,"Main Vocalist, Rapper",/images/idols/gawon.webp,1,2025-12-26
+81,Anna,Tanaka Anna,Female,2024,Japanese,2005-11-17,164,"Sub-Vocalist, Visual",/images/idols/anna.webp,1,2025-12-26
+82,Narin,Na Rin,Female,2024,South Korean,2007-08-15,166,"Main Rapper, Main Vocalist",/images/idols/narin.webp,1,2025-12-26
+83,Ella,Ella McKenzie Gross,Female,2024,"German, American, South Korean",2008-12-01,168,"Vocalist, Visual, Maknae",/images/idols/ella.webp,1,2025-12-26
+84,HaSeul,Cho Ha-Seul,Female,2016,South Korean,1997-08-18,158,"Leader, Vocalist, Rapper",/images/idols/haseul.webp,1,2025-12-26
+85,ViVi,Wong Kahei,Female,2017,Hong Kongese,1996-12-09,158,"Vocalist, Rapper",/images/idols/vivi.webp,1,2025-12-26
+86,Yves,Ha Soo-young,Female,2017,South Korean,1997-05-24,166,"Vocalist, Rapper, Dancer",/images/idols/yves.webp,1,2025-12-26
+87,JinSoul,Jeong Jin-Sol,Female,2017,South Korean,1997-06-13,165,"Vocalist, Rapper",/images/idols/jinsoul.webp,1,2025-12-26
+88,Kim Lip,Kim Jung-eun,Female,2017,South Korean,1999-02-10,163,"Vocalist, Dancer",/images/idols/kimlip.webp,1,2025-12-26
+89,HeeJin,Jeon Hee-jin,Female,2016,South Korean,2000-10-19,161,"Vocalist, Rapper, Dancer, Center",/images/idols/heejin.webp,1,2025-12-26
+90,HyunJin,Kim Hyun-jin,Female,2016,South Korean,2000-11-15,163,"Vocalist, Rapper, Dancer",/images/idols/hyunjin.webp,1,2025-12-26
+91,Go Won,Park Chae-won,Female,2018,South Korean,2000-11-19,160,"Vocalist, Rapper, Dancer",/images/idols/gowon.webp,1,2025-12-26
+92,Choerry,Choi Ye-rim,Female,2017,South Korean,2001-06-04,161,"Vocalist, Rapper, Dancer",/images/idols/choerry.webp,1,2025-12-26
+93,HyeJu,Son Hye-ju,Female,2018,South Korean,2001-11-13,165,"Vocalist, Rapper, Dancer",/images/idols/hyeju.webp,1,2025-12-26
+94,YeoJin,Im Yeo-Jin,Female,2017,South Korean,2002-11-11,149,"Vocalist, Rapper, Maknae",/images/idols/yeojin.webp,1,2025-12-26
+95,Chuu,Kim Ji-woo,Female,2017,South Korean,1999-10-20,161,"Vocalist, Rapper, FOTG",/images/idols/chuu.webp,1,2025-12-26
+96,Irene,Bae Joo-hyun,Female,2014,South Korean,1991-03-29,158,"Leader, Main Rapper, Lead Dancer, Sub-Vocalist, Visual, Center",/images/idols/irene.webp,1,2025-12-26
+97,Seulgi,Kang Seul Gi,Female,2014,South Korean,1994-02-10,161,"Main Dancer, Lead Vocalist",/images/idols/seulgi.webp,1,2025-12-26
+98,Wendy,Son Seung-wan,Female,2014,South Korean,1994-02-21,160,"Main Vocalist",/images/idols/wendy.webp,1,2025-12-26
+99,Joy,Park Soo Young,Female,2014,South Korean,1996-09-03,167,"Lead Rapper, Sub-Vocalist",/images/idols/joy.webp,1,2025-12-26
+100,Yeri,Kim Ye Rim,Female,2015,South Korean,1999-03-05,159,"Sub-Vocalist, Sub-Rapper, Maknae",/images/idols/yeri.webp,1,2025-12-26
+101,Jeon Somi,Ennik Somi Douma,Female,2016,"Canadian, Dutch, South Korean",2001-03-09,172,"Vocalist, Rapper",/images/idols/jeonsomi.webp,1,2025-12-26
+102,Taeyeon,Kim Tae-yeon,Female,2007,South Korean,1989-03-09,160,"Leader, Main Vocalist",/images/idols/taeyeon.webp,1,2025-12-26
+103,Sunny,Lee Soon Kyu,Female,2007,"South Korean, American",1989-05-15,158,"Lead Vocalist",/images/idols/sunny.webp,1,2025-12-26
+104,Tiffany,Stephanie Young Hwang,Female,2007,"South Korean, American",1989-08-01,163,"Lead Vocalist, Rapper",/images/idols/tiffany.webp,1,2025-12-26
+105,Hyoyeon,Kim Hyo-yeon,Female,2007,South Korean,1989-09-22,161,"Main Rapper, Main Dancer",/images/idols/hyoyeon.webp,1,2025-12-26
+106,Yuri,Kwon Yu-ri,Female,2007,South Korean,1989-12-05,168,"Main Dancer, Lead Rapper, Vocalist",/images/idols/kwonyuri.webp,1,2025-12-26
+107,Sooyoung,Choi Soo Young,Female,2007,South Korean,1990-02-10,172,"Lead Rapper, Lead Dancer",/images/idols/sooyoung.webp,1,2025-12-26
+108,Yoona,Im Yoon Ah,Female,2007,South Korean,1990-05-30,168,"Lead Rapper, Lead Dancer, Visual, Center",/images/idols/yoona.webp,1,2025-12-26
+109,Seohyun,Seo Ju-hyun,Female,2007,South Korean,1991-06-28,170,"Lead Vocalist, Maknae",/images/idols/seohyun.webp,1,2025-12-26
+110,Jessica,Jessica Jung,Female,2007,"South Korean, American",1989-04-18,162,"Main Vocalist",/images/idols/jessicajung.webp,1,2025-12-26
+111,Solar,Kim Yong Sun,Female,2014,South Korean,1991-02-21,160,"Leader, Vocalist",/images/idols/solar.webp,1,2025-12-26
+112,Moonbyul,Moon Byul-yi,Female,2014,South Korean,1992-12-22,163,"Rapper, Performer",/images/idols/moonbyul.webp,1,2025-12-26
+113,Wheein,Jung Whee-in,Female,2014,South Korean,1995-04-17,159,"Vocalist, Performer",/images/idols/wheein.webp,1,2025-12-26
+114,Hwasa,Ahn Hye-jin,Female,2014,South Korean,1995-07-23,160,"Vocalist, Rapper, Maknae",/images/idols/hwasa.webp,1,2025-12-26
+115,CL,Lee Chae-rin,Female,2009,South Korean,1991-02-26,162,"Leader, Main Rapper, Lead Dancer, Lead Vocalist, FOTG",/images/idols/cl.webp,1,2025-12-26
+116,Park Bom,Park Bom,Female,2009,South Korean,1984-03-24,165,"Main Vocalist",/images/idols/parkbom.webp,1,2025-12-26
+117,Dara,Park Sandara,Female,2009,South Korean,1984-11-12,159,"Vocalist, Sub-Rapper, Visual",/images/idols/dara.webp,1,2025-12-26
+118,Minzy,Gong Min-ji,Female,2009,South Korean,1994-01-18,161,"Main Dancer, Lead Vocalist, Lead Rapper, Maknae",/images/idols/minzy.webp,1,2025-12-26
+119,Yujin,Choi Yu-jin,Female,2015,South Korean,1996-08-12,163,"Leader, Vocalist",/images/idols/choi_yujin.webp,1,2025-12-26
+120,Xiaoting,Shen Xiao Ting,Female,2022,Chinese,1999-11-12,168," Main Dancer, Vocalist, Visual",/images/idols/xiaoting.webp,1,2025-12-26
+121,Chaehyun,Kim Chae-hyun,Female,2022,South Korean,2002-04-26,160,"Main Vocalist, Center",/images/idols/chaehyun.webp,1,2025-12-26
+122,Dayeon,Kim Da-yeon,Female,2022,South Korean,2003-03-02,158,"Main Dancer, Main Rapper, Vocalist",/images/idols/dayeon.webp,1,2025-12-26
+123,Hikaru,Ezaki Hikaru,Female,2022,Japanese,2004-03-12,155,"Main Dancer, Main Rapper, Vocalist",/images/idols/hikaru.webp,1,2025-12-26
+124,Huening Bahiyyih,Bahiyyih Jaleh Huening,Female,2022,"South Korean, American",2004-07-27,167,"Vocalist",/images/idols/bahiyyih.webp,1,2025-12-26
+125,Youngeun,Seo Young-eun,Female,2022,South Korean,2004-12-27,158,"Main Vocalist, Dancer, Maknae",/images/idols/youngeun.webp,1,2025-12-26
+126,Mashiro,Sakamoto Mashiro,Female,2022,Japanese,1999-12-16,158,"Co-Leader, Vocalist",/images/idols/mashiro.webp,1,2025-12-26
+127,Yeseo,Kang Ye-seo,Female,2019,South Korean,2005-08-22,157,"Vocalist, Maknae",/images/idols/yeseo.webp,1,2025-12-26
+128,Woni,Jeong Won-i,Female,2024,South Korean,2004-05-25,164,"Leader",/images/idols/woni.webp,1,2025-12-26
+129,Liv,Jin Kyung-eun,Female,2024,South Korean,2006-10-11,165,"Vocalist, Dancer",/images/idols/liv.webp,1,2025-12-26
+130,Minami,Ito Minami,Female,2024,Japanese,2006-11-29,164,"Main Vocalist, Lead Dancer",/images/idols/minami.webp,1,2025-12-26
+131,May,Lee Ye-bin,Female,2024,South Korean,2008-08-19,165,"Vocalist, Lead Dancer",/images/idols/may.webp,1,2025-12-26
+132,Zena,Kim Ga Young,Female,2024,South Korean,2008-11-27,164,"Visual, Center, Maknae",/images/idols/zena.webp,1,2025-12-26
+133,Chungha,Kim Chan Mi,Female,2016,South Korean,1996-02-09,161,"Main Dancer, Lead Vocalist, Rapper",/images/idols/chungha.webp,1,2025-12-26
+134,Hyolyn,Kim Hyo Jung,Female,2010,South Korean,1990-12-11,164,"Leader, Main Vocalist, Lead Dancer, Lead Rapper, FOTG",/images/idols/hyolyn.webp,1,2025-12-26
+135,Bora,Yoon Bo Ra,Female,2010,South Korean,1989-12-30,165,"Main Rapper, Main Dancer, Vocalist, Visual",/images/idols/bora.webp,1,2025-12-26
+136,Soyou,Kang Ji-hyun,Female,2010,South Korean,1991-09-12,168,"Lead Vocalist",/images/idols/soyou.webp,1,2025-12-26
+137,Dasom,Kim Da-som,Female,2010,South Korean,1993-05-06,167,"Vocalist, Visual, Maknae",/images/idols/dasom.webp,1,2025-12-26
+138,Seunghee,Oh Seung-hee,Female,2015,South Korean,1995-10-10,161,"Main Vocalist",/images/idols/seunghee.webp,1,2025-12-26
+139,Eunbin,Kwon Eun-bin,Female,2016,South Korean,2000-01-06,171,"Sub-Vocalist, Sub-Rapper, FOTG, Maknae",/images/idols/eunbin.webp,1,2025-12-26
+140,Sorn,Chonnasorn Sajakul,Female,2015,Thai,1996-11-18,160,"Lead Vocalist",/images/idols/sorn.webp,1,2025-12-26
+141,Elkie,Chong Tingyan,Female,2016,Hong Kongese,1998-11-02,165,"Lead Vocalist, Lead Dancer, Visual",/images/idols/elkie.webp,1,2025-12-26
+142,Seungyeon,Jang Seung-yeon,Female,2015,South Korean,1996-11-06,163,"Leader, Main Dancer, Lead Vocalist, Sub-Rapper",/images/idols/seungyeon.webp,1,2025-12-26
+143,Yeeun,Jang Ye-eun,Female,2015,South Korean,1998-08-10,166,"Main Rapper, Sub-Vocalist",/images/idols/yeeun.webp,1,2025-12-26
+144,Jo Yuri,Jo Yu-ri,Female,2018,South Korean,2001-10-22,163,"Main Vocalist, Center, Maknae",/images/idols/jo_yuri.webp,1,2025-12-26
+145,Sowon,Kim So-jung,Female,2015,South Korean,1995-12-07,173,"Leader, Vocalist, Visual",/images/idols/sowon.webp,1,2025-12-26
+146,Yerin,Jung Ye-rin,Female,2015,South Korean,1996-08-19,167,"Lead Dancer, Vocalist, Center, FOTG",/images/idols/yerin.webp,1,2025-12-26
+147,Eunha,Jung Eun Bi,Female,2015,South Korean,1997-05-30,163,"Lead Vocalist",/images/idols/eunha.webp,1,2025-12-26
+148,Yuju,Choi Yu-na,Female,2015,South Korean,1997-10-04,169,"Main Vocalist",/images/idols/yuju.webp,1,2025-12-26
+149,SinB,Hwang Eun-bi,Female,2015,South Korean,1998-06-03,166,"Main Dancer, Vocalist, Center",/images/idols/sinb.webp,1,2025-12-26
+150,Umji,Kim Ye Won,Female,2015,South Korean,1998-08-19,165,"Vocalist, Maknae",/images/idols/umji.webp,1,2025-12-26
+151,Yena,Choi Yena,Female,2018,South Korean,1999-09-29,162,"Rapper, Vocalist, Dancer",/images/idols/yena.webp,1,2025-12-26

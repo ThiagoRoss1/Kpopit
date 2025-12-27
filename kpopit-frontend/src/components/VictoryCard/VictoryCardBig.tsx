@@ -97,6 +97,7 @@ return (
         </div>
 
         {/* Yesterday's idol container */}
+        {yesterdayIdol && yesterdayIdolGroup && yesterdayIdolImage && (
         <div className="relative w-full h-fit sm:h-50 mb-5 px-4 sm:px-6">
             <div className="relative w-full h-full items-center justify-center sm:text-center bg-linear-to-r from-gray-600 to-gray-900 
             shadow-[0_0_4px_2px_rgba(0,0,0,0.2),inset_2px_2px_4px_2px_rgba(0,0,0,0.2)] border border-white/35 py-4 rounded-[20px] overflow-hidden
@@ -127,6 +128,7 @@ return (
                 </div>
             </div>
         </div>
+        )}
 
         {/* Share Container + Opens small card */}
         <div className="relative w-full h-12 sm:h-14 mb-5 px-4 sm:px-6">

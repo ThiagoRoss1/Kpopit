@@ -135,8 +135,8 @@ function Home() {
   } = useQuery<IdolListItem[]>({
     queryKey: ["allIdols"],
     queryFn: getAllIdols,
-    staleTime: Infinity, // See functionality
-    gcTime: Infinity, // Can be this the YG error.
+    staleTime: 1000 * 60 * 60, // See functionality
+    gcTime: 1000 * 60 * 60, // Can be this the YG error.
   });
 
   const yesterday = useQuery<YesterdayIdol>({
@@ -511,7 +511,7 @@ function Home() {
         </div>
       )}
 
-      {!showVictoryCard && (
+      {!showVictoryCard && yesterdayArtist && yesterdayArtistGroup && yesterdayIdolImage && (
       <div className={`w-full flex flex-col items-center justify-center mt-18 mb-22`}>
         <span className="font-semibold max-xxs:text-[14px] xxs:text-[15px] xs:text-base sm:text-[18px] leading-tight">
           <span className="text-white">

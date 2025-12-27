@@ -6,6 +6,7 @@ import ArrowDown from "../../assets/icons/arrow-fat-line-down-fill.svg";
 import { useDateLocale } from "../../hooks/useDateLocale";
 import { formatCompanyName } from "../../utils/formatters";
 import { getNationalityFlag } from "../../utils/getFlags";
+import { useIsMobile } from "../../hooks/useIsMobile";
 
 interface GuessRowProps {
     guess: GuessResponse;
@@ -62,6 +63,8 @@ const getPositionColor = (position: string) => {
 
 const GuessRow = (props: GuessRowProps) => {
     const { guess, isLatest, isAnimated, onIdolAnimated, onAnimationComplete } = props;
+
+    const isMobile = useIsMobile();
 
     const { formatBirthDate } = useDateLocale();
     const [currentColumn, setCurrentColumn] = useState(0);
@@ -142,7 +145,7 @@ const GuessRow = (props: GuessRowProps) => {
                         backfaceVisibility: 'hidden',      
                         imageRendering: 'crisp-edges'
                         }}
-                        loading="lazy"
+                        loading={isMobile ? "lazy" : "eager"}
                     />
                     <span className="font-light absolute bottom-0.5 text-[9px] sm:text-[13px] text-white [text-shadow:0.6px_1.6px_4px_rgba(0,0,0,1),1px_1px_2px_rgba(0,0,0,0.9),2px_2px_4px_rgba(0,0,0,0.8)] px-1">
                         {guess.guessed_idol_data.artist_name}
@@ -212,7 +215,7 @@ const GuessRow = (props: GuessRowProps) => {
                                     className={`${guess.guessed_idol_data.nationality.length === 1 ? "w-9 sm:w-12" : guess.guessed_idol_data.nationality.length === 2 ? "w-8 sm:w-10" : "w-7 sm:w-9"} rounded-md object-cover shadow-[1.6px_1.6px_3px_rgba(26,26,26,0.8),1px_1px_2px_rgba(26,26,26,0.5)]
                                     ${borderColor}`} 
                                     draggable={false} 
-                                    loading="lazy"
+                                    loading={isMobile ? "lazy" : "eager"}
                                     />
                                 )
                             }             
@@ -239,7 +242,7 @@ const GuessRow = (props: GuessRowProps) => {
                 alt="Birth Date"
                 className="w-20 h-20 sm:w-28 sm:h-28 object-cover"
                 draggable={false} 
-                loading="lazy" />
+                loading={isMobile ? "lazy" : "eager"} />
                 )}
                 <span className="absolute text-center text-white text-[10px] sm:text-[14px] font-light [text-shadow:1.6px_1.6px_3px_rgba(26,26,26,0.8),1px_1px_2px_rgba(26,26,26,0.5)] px-0.5">{formatBirthDate(guess.guessed_idol_data.birth_date)}</span>
             </MotionTag>
@@ -254,7 +257,7 @@ const GuessRow = (props: GuessRowProps) => {
                 alt="Debut" 
                 className="w-20 h-20 sm:w-28 sm:h-28 object-cover"
                 draggable={false} 
-                loading="lazy" />
+                loading={isMobile ? "lazy" : "eager"} />
                 )}
                 <span className="absolute text-center text-white text-[10px] sm:text-[14px] font-light [text-shadow:1.6px_1.6px_3px_rgba(26,26,26,0.8),1px_1px_2px_rgba(26,26,26,0.5)]">{guess.guessed_idol_data.idol_debut_year}</span>
             </MotionTag>
@@ -269,7 +272,7 @@ const GuessRow = (props: GuessRowProps) => {
                 alt="Height"
                 className="w-20 h-20 sm:w-28 sm:h-28 object-cover"
                 draggable={false}
-                loading="lazy" />
+                loading={isMobile ? "lazy" : "eager"} />
                 )}
                 <span className="absolute text-center text-white text-[10px] sm:text-[14px] font-light [text-shadow:1.6px_1.6px_3px_rgba(26,26,26,0.8),1px_1px_2px_rgba(26,26,26,0.5)]">{guess.guessed_idol_data.height} cm</span>
             </MotionTag>

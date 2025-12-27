@@ -42,7 +42,7 @@ TIMEZONE_EST = ZoneInfo("America/New_York")
 # return datetime.now(timezone.utc).date().isoformat() -- EU
 
 TEST_MODE = False
-TEST_DATE_OFFSET = 219 # Days to add/subtract (1 = tomorrow, -1 = yesterday)
+TEST_DATE_OFFSET = 1 # Days to add/subtract (1 = tomorrow, -1 = yesterday)
 
 def get_today_now():
     if TEST_MODE:
@@ -284,7 +284,7 @@ def get_daily_idol():
     connect.commit()
 
     """ For testing purposes, you can set a fixed idol_id """
-    idol_id = 102
+    # idol_id = 1
 
     # Fetch full idol data
     idol_data = fetch_full_idol_data(cursor, idol_id)
@@ -868,18 +868,6 @@ def store_yesterdays_idol():
     yesterday = get_today_date() - timedelta(days=1)
     yesterday_str = yesterday.isoformat()
 
-    # Store yesterday's idol pick
-    sql_query = """
-        CREATE TABLE IF NOT EXISTS yesterday_picks_test (
-        past_idol_id INTEGER NOT NULL,
-        yesterdays_pick_date DATE PRIMARY KEY,
-
-        /* --- Foreign Key --- */
-        FOREIGN KEY(past_idol_id) REFERENCES idols(id)
-        );
-    """  
-    cursor.execute(sql_query)
-
     # Get idol id for yesterday
     select_sql = """
         SELECT idol_id FROM daily_picks WHERE pick_date = ?
@@ -891,7 +879,7 @@ def store_yesterdays_idol():
     if result:
         # Insert or Update yesterday's pick
         insert_sql = """
-            INSERT INTO yesterday_picks_test (past_idol_id, yesterdays_pick_date)
+            INSERT INTO yesterday_picks (past_idol_id, yesterdays_pick_date)
             VALUES (?, ?)
             ON CONFLICT(yesterdays_pick_date)
             DO UPDATE SET past_idol_id = excluded.past_idol_id

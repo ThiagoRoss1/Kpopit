@@ -137,3 +137,16 @@ daily_picks_sql = """
 
 # Execute the SQL command to create the table
 cursor.execute(daily_picks_sql)
+
+sql_query = """
+        CREATE TABLE IF NOT EXISTS yesterday_picks (
+        past_idol_id INTEGER NOT NULL,
+        yesterdays_pick_date DATE PRIMARY KEY,
+
+        /* --- Foreign Key --- */
+        FOREIGN KEY(past_idol_id) REFERENCES idols(id)
+        );
+    """  
+
+# Execute the SQL command to create the table
+cursor.execute(sql_query)
