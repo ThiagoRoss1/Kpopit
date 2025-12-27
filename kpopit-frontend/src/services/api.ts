@@ -6,6 +6,23 @@ const api = axios.create({
     baseURL: `${import.meta.env.VITE_API_URL}/api`,
 });
 
+// Response interceptor to handle invalid user token globally
+api.interceptors.response.use(
+    (response) => response,
+    (error) => {
+        if (
+            error.response?.status === 400 &&
+            error.response?.data?.error === 'Invalid user token'
+        ) {
+            console.warn("Invalid user token detected. Removing from localStorage.");
+            localStorage.clear();
+
+            window.location.reload();
+        }
+        return Promise.reject(error);
+    }
+);
+
 // Get daily idol game data endpoint
 export const getDailyIdol = async () => {
     const encrypted = localStorage.getItem('userToken');
