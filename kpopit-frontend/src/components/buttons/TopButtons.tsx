@@ -10,16 +10,17 @@ const TopButtons = (props: TopButtonsProps) => {
     const { onSubmitChangelog, onSubmitHowToPlay, onSubmitAbout } = props;
 
     // Left and Right Button Styles //
-    const buttonCardStyle = "inline-flex relative max-xxs:w-20 max-xxs:h-10 xxs:w-25 xxs:h-10 xs:w-28 xs:h-10 sm:w-52 sm:h-13 overflow-hidden rounded-2xl sm:rounded-2xl border-1 border-white bg-transparent backdrop-blur-sm sm:backdrop-blur-xl";
+    const buttonCardStyle = "inline-flex relative max-xxs:w-20 max-xxs:h-10 xxs:w-25 xxs:h-10 xs:w-28 xs:h-10 sm:w-52 sm:h-13 overflow-hidden rounded-2xl sm:rounded-2xl border-1 border-white bg-transparent backdrop-blur-sm sm:backdrop-blur-xl shadow-[4px_4px_4px_1px_rgba(0,0,0,0.25),inset_0_4px_4px_0_rgba(0,0,0,0.25)]";
+
     const buttonAnimation = ""
     const buttonTextStyle = "inline-flex h-full w-full items-center justify-center rounded-2xl sm:rounded-2xl max-xxs:text-[12px] xxs:text-[14px] xs:text-base sm:text-[20px] text-white font-semibold text-shadow-[2px_2px_4px_rgba(0,0,0,0.5)]";
     // Middle Button Styles //
-    const centerButtonCardStyle = "inline-flex relative max-xxs:w-25 max-xxs:h-11  xxs:w-29 xxs:h-11 xs:w-32 xs:h-11 sm:w-58 sm:h-15 overflow-hidden rounded-2xl sm:rounded-[20px] p-[1px] focus:outline-none focus:ring-2 focus:ring-[#000000] focus:ring-offset-1 focus:ring-offset-[#242424] firefox:isolate z-0";
-    const centerButtonAnimation = "absolute inset-[-300%] animate-[spin_2s_linear_infinite] bg-[conic-gradient(from_90deg_at_50%_50%,#b43777_0%,#ffffff_50%,#b43777_100%)] transform-gpu firefox:transform-3d firefox:will-change-transform";
+    const centerButtonCardStyle = "inline-flex relative max-xxs:w-25 max-xxs:h-11 xxs:w-29 xxs:h-11 xs:w-32 xs:h-11 sm:w-58 sm:h-15 overflow-hidden rounded-2xl sm:rounded-[20px] p-[1px] focus:outline-none focus:ring-2 focus:ring-[#000000] focus:ring-offset-1 focus:ring-offset-[#242424] firefox:isolate firefox:z-0 shadow-[4px_4px_4px_1px_rgba(0,0,0,0.25),inset_0_4px_4px_0_rgba(0,0,0,0.25)]";   
+    const centerButtonAnimation = "absolute inset-[-300%] animate-[spin_2s_linear_infinite] bg-[conic-gradient(from_90deg_at_50%_50%,#b43777_0%,#ffffff_50%,#b43777_100%)] firefox:transform-3d firefox:will-change-transform";
     const centerButtonTextStyle = "inline-flex h-full w-full items-center justify-center rounded-2xl sm:rounded-[20px] bg-black px-1 max-xxs:text-[14px] xxs:text-[14px] xs:text-base sm:text-[20px] text-[#b43777] font-semibold backdrop-blur-2xl";
     // Hover //
-    const hoverEffect = "hover:brightness-125 hover:scale-105 hover:cursor-pointer hover:bg-black/80 transition-all duration-500 will-change-transform";
-    const centerHoverEffect = "hover:brightness-125 hover:scale-105 firefox:hover:scale-102 hover:cursor-pointer transition-transform duration-500 will-change-transform";
+    const hoverEffect = "hover:brightness-125 hover:scale-105 hover:cursor-pointer hover:bg-black/80 transition-transform transform-gpu firefox:transition-all firefox:will-change-transform duration-500";    
+    const centerHoverEffect = "hover:brightness-125 hover:scale-105 firefox:hover:scale-100 hover:cursor-pointer transition-transform transform-gpu firefox:will-change-transform duration-500";
 
     // Previous styles //
     // const pastCenterButtonCardStyle = "flex-1 min-w-0 h-10 flex items-center justify-center text-center rounded-[12px] px-2 py-1 sm:w-[148px] sm:h-[50px] sm:px-[10px] sm:py-[10px] backdrop-blur-md shadow-[4px_4px_4px_1px_rgba(0,0,0,0.25),inset_0_4px_4px_0_rgba(0,0,0,0.25)] bg-gradient-to-b from-black to-black/10";

@@ -15,7 +15,7 @@ interface BottomButtonsProps {
 const BottomButtons = (props: BottomButtonsProps) => {
     const { onSubmitStats, onSubmitShare } = props;
 
-    const ButtonStyle = "inline-flex relative max-xxs:h-8 max-xxs:w-8 xxs:h-8 xxs:w-8 xs:h-9 xs:w-9 sm:h-9 sm:w-9 overflow-hidden rounded-full p-[1px] focus:outline-none focus:ring-2 focus:ring-[#000000] focus:ring-offset-1 focus:ring-offset-[#242424] hover:brightness-110 hover:scale-105 firefox:hover:scale-105 transform transform-gpu duration-300";
+    const ButtonStyle = "inline-flex relative max-xxs:h-8 max-xxs:w-8 xxs:h-8 xxs:w-8 xs:h-9 xs:w-9 sm:h-9 sm:w-9 overflow-hidden rounded-full p-[1px] focus:outline-none focus:ring-2 focus:ring-[#000000] focus:ring-offset-1 focus:ring-offset-[#242424] hover:brightness-110 firefox:hover:brightness-140 hover:scale-105 firefox:hover:scale-100 transform duration-300";
     const ImageStyle = "flex items-center justify-center max-xxs:w-8 max-xxs:h-8 xxs:w-8 xxs:h-8 xs:w-8 xs:h-8 sm:w-8 sm:h-8 rounded-full transform-gpu";
 
     return (
