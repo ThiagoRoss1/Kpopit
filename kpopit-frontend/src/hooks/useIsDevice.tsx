@@ -11,3 +11,10 @@ export function useIsMobile(breakpoint = 768) {
 
     return isMobile;
 }
+
+export const isSafari = typeof window !== "undefined" && (
+    /^((?!chrome|android).)*safari/i.test(navigator.userAgent) ||
+    (navigator.maxTouchPoints > 1 && /Macintosh/.test(navigator.userAgent)));
+
+export const isGeckoEngine = typeof window !== "undefined" && 
+  (window.CSS && CSS.supports('-moz-appearance', 'none'));

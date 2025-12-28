@@ -136,7 +136,7 @@ const AnswerHintsBox = (props: AnswerHintsBoxProps) => {
                         animate={canFlipCard1 ? { scale: 1 } : { scale: 0.9 }}
                         transition={{ duration: 0.4, ease: "easeInOut" }}
                         className="relative max-xxs:w-40 max-xxs:h-24 xxs:w-45 xxs:h-24 xs:w-50 xs:h-26 sm:w-60 sm:h-30 border-2 border-white/50 rounded-2xl backdrop-blur-md flex items-center justify-center text-center 
-                        backface-hidden shadow-[4px_4px_4px_1px_rgba(0,0,0,0.15),inset_0_4px_4px_0_rgba(0,0,0,0.15)]">
+                        backface-hidden shadow-[4px_4px_4px_1px_rgba(0,0,0,0.15),inset_0_4px_4px_0_rgba(0,0,0,0.15)] transform-3d transform-gpu">
                             <div className="flex flex-col z-10 gap-1 sm:gap-2 [text-shadow:1.2px_1.2px_4px_rgba(0,0,0,0.8)]">     
                                 <h3 className="relative font-bold max-xxs:text-base xxs:text-base xs:text-[18px] sm:text-[20px] text-[#ce757a] drop-shadow-lg">
                                     Hint 1
@@ -194,7 +194,7 @@ const AnswerHintsBox = (props: AnswerHintsBoxProps) => {
                         animate={canFlipCard2 ? { scale: 1 } : { scale: 0.9 }}
                         transition={{ duration: 0.4, ease: "easeInOut" }}
                         className="relative max-xxs:w-40 max-xxs:h-24 xxs:w-45 xxs:h-24 xs:w-50 xs:h-26 sm:w-60 sm:h-30 border-2 border-white/50 rounded-2xl backdrop-blur-md flex items-center justify-center text-center 
-                        backface-hidden shadow-[4px_4px_4px_1px_rgba(0,0,0,0.15),inset_0_4px_4px_0_rgba(0,0,0,0.15)]">
+                        backface-hidden shadow-[4px_4px_4px_1px_rgba(0,0,0,0.15),inset_0_4px_4px_0_rgba(0,0,0,0.15)] transform-3d transform-gpu">
                             <div className="flex flex-col gap-1 sm:gap-2 [text-shadow:1.2px_1.2px_4px_rgba(0,0,0,0.8)]">
                                 <h3 className="relative font-bold max-xxs:text-base xxs:text-base xs:text-[18px] sm:text-[20px] text-[#ce757a] drop-shadow-lg">
                                     Hint 2

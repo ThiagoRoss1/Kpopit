@@ -31,7 +31,7 @@ import ExportDataText from "../../components/buttons/modals/ExportDataContent.ts
 import ChangelogText from "../../components/buttons/modals/ChangelogContent.tsx";
 import { useResetTimer } from "../../hooks/useResetTimer.tsx";
 import { useTransferDataLogic } from "../../hooks/useTransferDataLogic.tsx";
-import { useIsMobile } from "../../hooks/useIsMobile.tsx";
+import { useIsMobile } from "../../hooks/useIsDevice.tsx";
 import BackgroundStyle from "../../components/Background/BackgroundStyle.tsx";
 import FeedbackSquares from "../../components/FeedbackSquares/FeedbackSquares.tsx";
 import XLogo from "../../assets/icons/x-logo.svg";
@@ -75,11 +75,14 @@ function Home() {
     enabled: shouldFetchToken,
     queryKey: ["userToken"],
     queryFn: getUserToken,
+    refetchOnWindowFocus: false,
   });
 
   const dailyUserCount = useQuery({
     queryKey: ["dailyUserCount"],
     queryFn: getDailyUserCount,
+    staleTime: 1000 * 60 * 5,
+    refetchOnWindowFocus: false,
   });
 
   const decryptedTokenRef = useRef<string | null>(null);
@@ -125,6 +128,8 @@ function Home() {
   } = useQuery<GameData>({
     queryKey: ["dailyIdol"],
     queryFn: getDailyIdol,
+    staleTime: 1000 * 60 * 60 * 4,
+    refetchOnWindowFocus: false,
   });
 
   // All idols list
@@ -135,13 +140,16 @@ function Home() {
   } = useQuery<IdolListItem[]>({
     queryKey: ["allIdols"],
     queryFn: getAllIdols,
-    staleTime: 1000 * 60 * 60, // See functionality
-    gcTime: 1000 * 60 * 60, // Can be this the YG error.
+    staleTime: 1000 * 60 * 60 * 24 * 5, // See functionality
+    gcTime: 1000 * 60 * 60 * 24 * 6, // Can be this the YG error.
+    refetchOnWindowFocus: false,
   });
 
   const yesterday = useQuery<YesterdayIdol>({
     queryKey: ["yesterdayIdol"],
     queryFn: getYesterdaysIdol,
+    staleTime: 1000 * 60 * 60 * 4,
+    refetchOnWindowFocus: false,
   });
 
   const yesterdayArtist = allIdolsData?.find(
@@ -156,6 +164,7 @@ function Home() {
     queryKey: ["userStats", userToken],
     queryFn: async () => getUserStats(await initUser() || ""),
     enabled: !!localStorage.getItem("userToken"),
+    refetchOnWindowFocus: false,
   });
 
   const userStatsData = userStats.data;
@@ -183,7 +192,10 @@ function Home() {
       localStorage.removeItem("confettiShown");
 
       localStorage.setItem("gameDate", serverDate || "");
-      setDayChecked(true);
+
+      window.location.reload();
+
+      return;
     } else {
       console.log("Same day, restoring cache.");
       const cachedGuesses = localStorage.getItem("todayGuessesDetails");
@@ -219,8 +231,10 @@ function Home() {
   const guessMutation = useMutation({
     mutationFn: getGuessIdol,
     onSuccess: (data) => {
-      console.log("Guess successful:", data);
-      console.log("Got user token guess:", localStorage.getItem("userToken")); // Testing log
+      if (import.meta.env.DEV) {
+        console.log("Guess successful:", data);
+        console.log("Got user token guess:", localStorage.getItem("userToken"));
+      };
 
       const updatedGuesses = guesses;
 
@@ -267,6 +281,7 @@ function Home() {
     queryKey: ["userPosition", userToken],
     queryFn: async () => getUserPosition(await initUser() || ""),
     enabled: !!localStorage.getItem("userToken"),
+    refetchOnWindowFocus: false,
   });
 
   const userPositionData = userPosition?.data?.position;
@@ -291,15 +306,7 @@ function Home() {
       setCurrentGuess("");
       setSelectedIdol(null);
       return;
-    } // test after
-
-    // const cleanName = currentGuess.split(" (")[0].trim();
-
-    // Look for idol
-    // const guessedIdolObject = allIdolsData.find(
-    //   (idol: IdolListItem) =>
-    //     idol.artist_name.toLowerCase() === cleanName.toLowerCase() // idol.artist_name.toLowerCase() === currentGuess.toLowerCase() <- Before adding groups at searchbar
-    // );
+    }
 
     const guessedIdolData = allIdolsData.find(idol => idol.id === selectedIdol.id);
     const answerIdolData = allIdolsData.find(idol => idol.id === gameData.answer_id);
@@ -359,6 +366,7 @@ function Home() {
       answer_id: gameData.answer_id,
       user_token: token,
       current_attempt: attempts + 1,
+      game_date: localStorage.getItem("gameDate") || "",
     });
     // Clear input field after submission
     setCurrentGuess("");
@@ -547,57 +555,9 @@ function Home() {
       </div>
 
       {/* <p>ID: {gameData?.answer_id}</p> */}
-      {/* <h2>Game Categories</h2>
-      <ul>
-        {gameData?.categories &&
-          gameData.categories.map((category: string) => (
-            <li key={category}>{category}</li>
-          ))}
-      </ul> */}
-        
-      
     </div>
     </>
   );
 }
 
 export default Home;
-
-
-
-
-
-
-
-
-
-  // useEffect(() => {
-  //   // Fetch game data
-  //   const fetchData = async () => {
-  //     try {
-  //       setLoading(true);
-  //       const [dailyIdolResponse, allIdolsResponse] = await Promise.all([
-  //         getDailyIdol(),
-  //         getAllIdols()
-  //       ]);
-  //       setGameData(dailyIdolResponse);
-  //       setAllIdols(allIdolsResponse);
-
-  //     } catch (error) {
-  //       console.error('Error fetching game data:', error);
-  //       setError('Failed to load game data');
-
-  //     } finally {
-  //       setLoading(false);
-  //     }
-  //   };
-  //   fetchData();
-  // }, []);
-
-  // if (loading) {
-  //   return <div>Loading Kpopit...</div>;
-  // }
-
-  // if (error) {
-  //   return <div>Error: {error}</div>;
-  // }

@@ -59,33 +59,6 @@ def get_today_date_str() -> str:
 def get_current_timestamp():
     return get_today_now().isoformat()
 
-# TEST_MODE = False
-# TEST_DATE_OFFSET = 1  # Dias para adicionar/subtrair (1 = amanhã, -1 = ontem)
-# # ===============================================
-
-# def get_server_date():
-#     """Retorna a data do servidor (real ou de teste)"""
-#     base_date = datetime.date.today()
-#     if TEST_MODE:
-#         return (base_date + datetime.timedelta(days=TEST_DATE_OFFSET)).isoformat()
-#     return base_date.isoformat()
-
-# def get_server_date_obj():
-#     """Retorna a data do servidor (real ou de teste) como DATE OBJECT"""
-#     base_date = datetime.date.today()
-#     if TEST_MODE:
-#         return base_date + datetime.timedelta(days=TEST_DATE_OFFSET)
-#     return base_date
-
-# def get_server_datetime_now():
-#     base_date = datetime.datetime.now()
-#     if TEST_MODE:
-#         return base_date + datetime.timedelta(days=TEST_DATE_OFFSET)
-#     return base_date
-
-
-# server_date = get_server_date()
-
 # class Config:
 #     # Configure session
 #     LANGUAGES = ['en'] # Just english for now
@@ -308,9 +281,10 @@ def get_daily_idol():
         idol_data_dict["group_companies"] = []
 
     # Debug print
-    print("\n -- ENTIRE IDOL DATA DICT --")
-    print(idol_data_dict)
-    print(" ------------------------\n")
+    if FLASK_ENV == "development":
+        print("\n -- ENTIRE IDOL DATA DICT --")
+        print(idol_data_dict)
+        print(" ------------------------\n")
 
 
     # Add career data 
@@ -388,6 +362,12 @@ def guess_idol():
     answer_id = data.get("answer_id")
     user_token = data.get("user_token")
     current_attempt = data.get("current_attempt")
+    game_date = data.get("game_date")
+
+    today = get_today_date_str()
+
+    if game_date != today:
+        return jsonify({"error": "Game date mismatch"}), 400
 
     if not guessed_idol_id or not answer_id:
         return jsonify({"error": "Missing guessed_idol_id or answer_id"}), 400
@@ -584,7 +564,6 @@ def guess_idol():
     # Final answer (correct or not)
     is_correct = guessed_idol.get("idol_id") == answer_data.get("idol_id")
     one_shot_win = is_correct and current_attempt == 1
-    today = get_today_date_str()
     current_timestamp = get_current_timestamp()
     # today = get_server_date()
 
@@ -639,6 +618,7 @@ def guess_idol():
                   current_attempt, current_timestamp))
                         
         if is_correct:
+            print(f"Victory! User {user_id} guessed correctly idol {answer_data.get('artist_name')} of ID {answer_id} in {current_attempt} attempts at date {today}.")
             S0 = 10
             decay_rate = 0.1
             n = current_attempt
@@ -697,8 +677,6 @@ def guess_idol():
     finally:
         connect.close()
 
-    # TODO - response / reveal dict taking feedback comparisons - DONE
-
     keys_for_display = [
         "idol_id", "artist_name", "gender", "nationality", "idol_debut_year", 
         "birth_date", "height", "position", "image_path", "member_count" # just this for now
@@ -729,8 +707,6 @@ def guess_idol():
         "feedback": feedback,
         "guessed_idol_data": data_for_display
     }
-
-    # TODO - jsonify final response dict - DONE
 
     return jsonify(response_data)
 
@@ -1385,111 +1361,3 @@ def get_active_transfer_code(user_token):
 
 if __name__ == "__main__":
     app.run(debug=True)
-
-
-
-    # comparison = {
-    #     "artist_name": guessed_idol["artist_name"] == answer_data["artist_name"],
-    #     "gender": guessed_idol["gender"] == answer_data["gender"],
-    #     "group": guessed_idol["group_id"] == answer_data["group_id"],
-    #     "companies": any(
-    #         company in [company["name"] for company in fetch_idol_companies(cursor, guessed_idol)]
-    #         for company in [company["name"] for company in fetch_idol_companies(cursor, answer_data)]
-    #     ),
-    #     "nationality": guessed_idol["nationality"] == answer_data["nationality"],
-    #     "debut_year": guessed_idol["debut_year"] == answer_data["debut_year"],
-    #     "birth_date": guessed_idol["birth_date"] == answer_data["birth_date"],
-    #     "height": guessed_idol["height"] == answer_data["height"],
-    #     "position": any(
-    #         position in guessed_idol["position"].split(", ")
-    #         for position in answer_data["position"].split(", ")
-    #     )
-    # }
-
-    # # Final answer (correct or not)
-    # is_correct = guessed_idol["idol_id"] == answer_data["idol_id"]
-
-    # # Final JSON response
-
-    
-
-
-
-# @app.route("/api/idols/<int:idol_id>")
-# def get_idol_data(idol_id):
-#     """Return idol data as JSON"""
-
-#     # Start db connection
-#     connect = sqlite3.connect(DB_FILE)
-#     # Set row factory to act like a dictionary
-#     connect.row_factory = sqlite3.Row
-#     # Create a cursor
-#     cursor = connect.cursor()
-
-#     ## cursor.execute(....)
-
-#     # connect.close()
-
-#     # if ....
-#         # return jsonify(....)
-
-#     # ..... = dict(....)
-
-#     # return jsonify(....)
-
-# @app.route("/api/daily-rank/<user_token>", methods=["GET"])
-# def get_daily_rank(user_token):
-#     """Return the user's position for today's game after winning - refreshable"""
-#     today = datetime.date.today().isoformat()
-
-#     connect = sqlite3.connect(DB_FILE)
-#     connect.row_factory = sqlite3.Row
-#     cursor = connect.cursor()
-
-#     # Validate user token 
-#     cursor.execute("""
-#             SELECT id FROM users WHERE token = ?
-#         """, (user_token,))
-    
-#     user_row = cursor.fetchone()
-
-#     if not user_row:
-#         connect.close()
-#         return jsonify({"error": "Invalid user token"}), 400
-    
-#     user_id = user_row["id"]
-
-#     # Get user's first guess time, guesses count and win time
-#     cursor.execute("""
-#             SELECT started_at, guesses_count, won_at FROM daily_user_history
-#             WHERE user_id = ? AND date = ? AND won = 1
-#         """, (user_id, today))
-    
-#     result = cursor.fetchone()
-
-#     if not result or result["started_at"] is None or result["guesses_count"] is None or result["won_at"] is None:
-#         connect.close()
-#         return jsonify({"rank": None, "message": "User has not finished today's game"}), 200
-    
-#     started_at = result["started_at"]
-#     guesses_count = result["guesses_count"]
-#     won_at = result["won_at"]
-
-#     # Calculate time to win
-#     time_to_win = datetime.datetime.fromisoformat(won_at) - datetime.datetime.fromisoformat(started_at) # With python - (Can use julianday in SQL too)
-#     time_to_win_seconds = int(time_to_win.total_seconds())
-
-#     # Fetch ranks and count user's rank
-#     cursor.execute("""
-#             SELECT COUNT(*) + 1 AS rank FROM daily_user_history
-#             WHERE date = ? AND won = 1 
-#             AND (guesses_count < ? 
-#             OR (guesses_count = ? AND (julianday(won_at) - julianday(started_at)) * 24 * 60 * 60 < ?))
-#         """, (today, guesses_count, guesses_count, time_to_win_seconds))
-    
-#     rank_result = cursor.fetchone()
-#     connect.close()
-    
-#     rank = rank_result["rank"] if rank_result else None
-
-#     return jsonify({"rank": rank})

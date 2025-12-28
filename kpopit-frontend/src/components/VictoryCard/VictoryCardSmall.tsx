@@ -1,6 +1,6 @@
 //import React from "react";
 import type { GuessedIdolData, GuessResponse, UserStats } from "../../interfaces/gameInterfaces";
-import { useIsMobile } from "../../hooks/useIsMobile";
+import { useIsMobile, isSafari, isGeckoEngine } from "../../hooks/useIsDevice";
 import { useState } from "react";
 import { AnimatePresence, motion } from "motion/react";
 import GlassSurface from "../GlassSurface";
@@ -134,8 +134,8 @@ const VictoryCardSmall = (props: VictoryCardSmallProps) => {
 
                     {/* Idol Container */}
                     <div className="flex w-full items-center justify-center h-25 sm:h-25 mb-4">
-                        <div className={`relative flex items-center justify-center ${isOnMobile ? "bg-black/80" : "bg-white/2"} w-80 h-24 p-5 sm:w-80 sm:h-24 sm:p-5 rounded-[20px]
-                        hover:scale-105 hover:bg-black/90 hover:brightness-110 hover:cursor-default transform duration-300 transform-gpu`}> {/* Maybe shadow-2xl or lg */}
+                        <div className={`relative flex items-center justify-center ${isOnMobile ? "bg-black/80" : "bg-black/70"} w-80 h-24 p-5 sm:w-80 sm:h-24 sm:p-5 rounded-[20px]
+                        hover:scale-105 hover:bg-black hover:brightness-110 hover:cursor-default transform duration-300 transform-gpu`}> {/* Maybe shadow-2xl or lg */}
 
                             <div className="absolute left-5 flex items-center justify-center h-20 w-20 sm:h-20 sm:w-20 bg-transparent rounded-[20px] hover:scale-110 hover:rotate-4 transition-transform duration-500 will-change-transform transform-gpu">
                                 <img src={`${import.meta.env.VITE_IMAGE_BUCKET_URL}${cardInfo.image_path}`} alt="Idol" className="w-20 h-20 sm:w-full sm:h-full rounded-[20px] object-cover object-top transform-gpu" draggable={false} />
@@ -155,8 +155,8 @@ const VictoryCardSmall = (props: VictoryCardSmallProps) => {
                     {/* Stats Container */}
                     <div className="flex w-full items-center justify-center h-20 sm:h-20 mb-4">
                         <div className="flex flex-row items-center justify-between w-80 h-20 sm:w-80 sm:h-20">
-                            <div className={`relative flex items-center justify-center text-center ${isOnMobile ? "bg-black/80" : "bg-white/2"} w-36 h-20 sm:w-36 sm:h-20 rounded-[20px] 
-                            hover:scale-105 hover:bg-black/80 hover:brightness-110 hover:cursor-default transform duration-300 shadow-2xl transform-gpu`}>
+                            <div className={`relative flex items-center justify-center text-center ${isOnMobile ? "bg-black/80" : "bg-black/70"} w-36 h-20 sm:w-36 sm:h-20 rounded-[20px] 
+                            hover:scale-105 hover:bg-black hover:brightness-110 hover:cursor-default transform duration-300 shadow-2xl transform-gpu`}>
                                 <div className="flex flex-col items-center justify-center text-center gap-0.5">
                                     <p className="font-bold text-base sm:text-[18px] text-[#ce757a] brightness-105">
                                         {attempts}
@@ -168,8 +168,8 @@ const VictoryCardSmall = (props: VictoryCardSmallProps) => {
                                 </div>
                             </div>
 
-                            <div className={`relative flex items-center justify-center text-center ${isOnMobile ? "bg-black/80" : "bg-white/2"} w-36 h-20 sm:w-36 sm:h-20 rounded-[20px] 
-                            hover:scale-105 hover:bg-black/80 hover:brightness-110 hover:cursor-default transform duration-300 shadow-2xl transform-gpu`}>
+                            <div className={`relative flex items-center justify-center text-center ${isOnMobile ? "bg-black/80" : "bg-black/70"} w-36 h-20 sm:w-36 sm:h-20 rounded-[20px] 
+                            hover:scale-105 hover:bg-black hover:brightness-110 hover:cursor-default transform duration-300 shadow-2xl transform-gpu`}>
                                 <div className="flex flex-col items-center justify-center text-center gap-0.5">
                                     <span className="font-bold text-base sm:text-[18px] text-[#ce757a] brightness-105">
                                         {stats?.current_streak}
@@ -186,7 +186,7 @@ const VictoryCardSmall = (props: VictoryCardSmallProps) => {
                     {/* Share Container */}
                     <div className="flex w-full items-center justify-center h-29 sm:h-29 mb-5">
                         <div className="flex flex-col items-center w-80 h-29 sm:w-80 sm:h-29">
-                            <button className="relative top-0 flex items-center justify-center text-center bg-black/80 w-80 h-13 sm:w-80 sm:h-13 rounded-2xl mb-4
+                            <button className="relative top-0 flex items-center justify-center text-center bg-black w-80 h-13 sm:w-80 sm:h-13 rounded-2xl mb-4
                             hover:scale-105 hover:brightness-110 hover:bg-black/0 transform duration-300 shadow-2xl hover:shadow-[0px] hover:cursor-pointer transform-gpu" 
                             onClick={() => handleCopy()}>
                                 <div className="flex items-center justify-center text-center">
@@ -273,7 +273,7 @@ const VictoryCardSmall = (props: VictoryCardSmallProps) => {
 
 return (
     <>    
-    {!isOnMobile ? (
+    {!isOnMobile && !isSafari && !isGeckoEngine ? (
         <GlassSurface
             width={350}
             height={588}
@@ -297,7 +297,7 @@ return (
             {content}   
         </GlassSurface>
     ) : (
-        <div className="relative flex flex-col w-full h-fit bg-gray-900 rounded-[50px] backdrop-blur-lg border border-white">
+        <div className="relative flex flex-col w-full h-fit bg-gray-900 rounded-[50px] border border-white">
             {content}
         </div>
     )}

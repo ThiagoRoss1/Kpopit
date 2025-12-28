@@ -70,6 +70,7 @@ export interface GuessResponse {
 export interface GuessPayload {
     guessed_idol_id: number;
     answer_id: number;
+    game_date?: string;
 }
 
 export interface UserTokenData {

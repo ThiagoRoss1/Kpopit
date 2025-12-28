@@ -5,7 +5,11 @@
 
 @custom-variant dark (&:is(.dark *));
 
-
+@custom-variant firefox {
+  @supports (-moz-appearance: none) {
+    && { @slot }
+  }
+}
 
 @theme {
   --breakpoint-xxs: 370px;
@@ -216,7 +220,19 @@ html {
   background: linear-gradient(180deg, #e44798, #ff5c64);
 }
 
+@supports (-moz-appearance: none) {
 
+  * {
+    scrollbar-width: thin;
+    scrollbar-color: #b43777 #0a0a0a;
+  }
+
+  .searchbar-scroll {
+    scrollbar-width: thin;
+    scrollbar-color: #b43777 transparent;
+  }
+
+}
 
 /* Test for glow */ 
 @layer utilities {

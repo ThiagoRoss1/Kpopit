@@ -1,7 +1,7 @@
 import { useMemo } from "react";
 import { motion } from "framer-motion";
 import Star from "../../assets/icons/star-four-fill.svg";
-import { useIsMobile } from "../../hooks/useIsMobile";
+import { useIsMobile } from "../../hooks/useIsDevice";
 
 interface BackgroundStyleProps {
     attempts?: number;

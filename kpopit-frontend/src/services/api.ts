@@ -10,14 +10,18 @@ const api = axios.create({
 api.interceptors.response.use(
     (response) => response,
     (error) => {
-        if (
-            error.response?.status === 400 &&
-            error.response?.data?.error === 'Invalid user token'
-        ) {
-            console.warn("Invalid user token detected. Removing from localStorage.");
-            localStorage.clear();
+        if (error.response?.status === 400) {
+            if (error.response?.data?.error === 'Invalid user token') {
+                console.warn("Invalid user token detected. Removing from localStorage.");
+                localStorage.clear();
 
-            window.location.reload();
+                window.location.reload();
+            }
+
+            else if (error.response?.data?.error === 'Game date mismatch') {
+                console.warn("Game date mismatch detected. Reloading the page.");
+                window.location.reload();
+            }
         }
         return Promise.reject(error);
     }
@@ -35,7 +39,9 @@ export const getDailyIdol = async () => {
 
 export const getGuessIdol = async (payload: CompleteGuessRequest) => {
     const response = await api.post('/game/guess', payload);
+    if (import.meta.env.DEV) {
     console.log("Answer received from API /guess:", response.data);
+    };
     return response.data;
 };
 

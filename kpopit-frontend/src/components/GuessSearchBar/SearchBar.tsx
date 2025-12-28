@@ -3,7 +3,7 @@ import React, { useState, useEffect, useRef } from "react";
 import type { IdolListItem } from "../../interfaces/gameInterfaces";
 import { AnimatePresence, motion} from "motion/react";
 import SearchIcon from "../../assets/icons/magnifying-glass-fill.svg";
-import { useIsMobile } from "../../hooks/useIsMobile";
+import { useIsMobile } from "../../hooks/useIsDevice";
 
 
 interface SearchBarProps {

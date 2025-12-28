@@ -6,7 +6,9 @@ import { useState, useEffect } from "react";
 export const useResetTimer = () => {
     const { data } = useQuery<ResetTimer>({
         queryKey: ['resetTimer'],
-        queryFn: getResetTimer
+        queryFn: getResetTimer,
+        staleTime: 1000 * 60 * 60,
+        refetchOnWindowFocus: false,
     });
 
     const [timeRemaining, setTimeRemaining] = useState<number | null>(null);
@@ -19,7 +21,12 @@ export const useResetTimer = () => {
     }, [data]);
 
     useEffect(() => {
-        if (timeRemaining === null) return;
+        if (timeRemaining === 0) {
+            console.log("New day has started, reloading the page.");
+            window.location.reload();
+            return;
+        }
+        if (timeRemaining === null || timeRemaining === 0) return;
         
         const interval = setInterval(() => {
             setTimeRemaining(prev => (prev && prev > 0 ? prev - 1 : 0));

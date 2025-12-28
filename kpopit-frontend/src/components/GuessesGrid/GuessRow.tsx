@@ -6,7 +6,7 @@ import ArrowDown from "../../assets/icons/arrow-fat-line-down-fill.svg";
 import { useDateLocale } from "../../hooks/useDateLocale";
 import { formatCompanyName } from "../../utils/formatters";
 import { getNationalityFlag } from "../../utils/getFlags";
-import { useIsMobile } from "../../hooks/useIsMobile";
+import { useIsMobile } from "../../hooks/useIsDevice";
 
 interface GuessRowProps {
     guess: GuessResponse;
@@ -236,7 +236,7 @@ const GuessRow = (props: GuessRowProps) => {
             <MotionTag
             {...getMotionProps(4, 5)}
             className={`${getStatusColor(guess.feedback.birth_date?.status)} relative w-20 h-20 sm:h-28 sm:w-28 flex flex-col items-center justify-center 
-            text-center rounded-2xl sm:rounded-[18px] inset-shadow-sm border-2 border-white hover:brightness-110 hover:cursor-default transform-3d perspective-[1000px] transform-gpu`}>
+            text-center rounded-2xl sm:rounded-[18px] inset-shadow-sm border-2 border-white hover:brightness-110 hover:cursor-default transform-3d perspective-[1000px] transform-gpu firefox:isolate`}>
                 {guess.feedback.birth_date?.status !== "correct" && (
                 <img src={getStatusIcon(guess.feedback.birth_date?.status)}
                 alt="Birth Date"
@@ -251,7 +251,7 @@ const GuessRow = (props: GuessRowProps) => {
             <MotionTag
             {...getMotionProps(5, 6)}
             className={`${getStatusColor(guess.feedback.idol_debut_year?.status)} relative w-20 h-20 sm:h-28 sm:w-28 flex flex-col items-center justify-center 
-            text-center rounded-2xl sm:rounded-[18px] inset-shadow-sm border-2 border-white hover:brightness-110 hover:cursor-default transform-3d perspective-[1000px] transform-gpu`}>
+            text-center rounded-2xl sm:rounded-[18px] inset-shadow-sm border-2 border-white hover:brightness-110 hover:cursor-default transform-3d perspective-[1000px] transform-gpu firefox:isolate`}>
                 {guess.feedback.idol_debut_year?.status !== "correct" && (
                 <img src={getStatusIcon(guess.feedback.idol_debut_year?.status)}
                 alt="Debut" 
@@ -266,7 +266,7 @@ const GuessRow = (props: GuessRowProps) => {
             <MotionTag
             {...getMotionProps(6, 7)}
             className={`${getStatusColor(guess.feedback.height?.status)} relative w-20 h-20 sm:h-28 sm:w-28 flex flex-col items-center justify-center 
-            text-center rounded-2xl sm:rounded-[18px] inset-shadow-sm border-2 border-white hover:brightness-110 hover:cursor-default transform-3d perspective-[1000px] transform-gpu`}>
+            text-center rounded-2xl sm:rounded-[18px] inset-shadow-sm border-2 border-white hover:brightness-110 hover:cursor-default transform-3d perspective-[1000px] transform-gpu firefox:isolate`}>
                 {guess.feedback.height?.status !== "correct" && (
                 <img src={getStatusIcon(guess.feedback.height?.status)}
                 alt="Height"

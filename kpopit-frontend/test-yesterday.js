@@ -1,1 +1,0 @@
-﻿console.log('=== YESTERDAY DEBUG ==='); fetch('http://127.0.0.1:5000/api/store-yesterdays-idol').then(r => r.json()).then(data => { console.log('Backend response:', data); console.log('image_path:', data.image_path); console.log('Type:', typeof data.image_path); });

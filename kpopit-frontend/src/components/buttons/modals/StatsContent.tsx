@@ -85,7 +85,7 @@ const StatsText = (props: StatsContentProps) => {
                         type="button"
                         className="bg-transparent max-xxs:w-30 max-xxs:h-16 xxs:w-35 xxs:h-16 sm:w-60 sm:h-16 rounded-2xl border-2 border-white
                         backface-hidden shadow-[0_0_10px_2px_rgba(255,255,255,0.25),0_0_10px_2px_rgba(255,255,255,0.25)]
-                        hover:scale-105 hover:brightness-110 hover:bg-[#242424] hover:cursor-pointer transition-all duration-500 transform-gpu">
+                        hover:scale-105 firefox:hover:scale-100 hover:brightness-110 hover:bg-[#242424] hover:cursor-pointer transition-all duration-500 transform-gpu">
                         <span className="relative font-bold max-xxs:text-[14px] xxs:text-base sm:text-[20px] text-[#b43777] drop-shadow-lg
                         [text-shadow:1.2px_1.2px_4px_rgba(0,0,0,0.8),0_0_12px_rgba(180,55,119,0.55)]">
                             Transfer data
@@ -97,7 +97,7 @@ const StatsText = (props: StatsContentProps) => {
                         onClick={() => handleCopy()}
                         className="bg-transparent max-xxs:w-30 max-xxs:h-16 xxs:w-35 xxs:h-16 sm:w-60 sm:h-16 rounded-2xl border-2 border-white
                         backface-hidden shadow-[0_0_10px_2px_rgba(255,255,255,0.25),0_0_10px_2px_rgba(255,255,255,0.25)]
-                        hover:scale-105 hover:brightness-110 hover:bg-[#242424] hover:cursor-pointer transition-all duration-500 transform-gpu">
+                        hover:scale-105 firefox:hover:scale-100 hover:brightness-110 hover:bg-[#242424] hover:cursor-pointer transition-all duration-500 transform-gpu">
                         <span className="relative font-bold text-base sm:text-[20px] text-[#b43777] drop-shadow-lg
                         [text-shadow:1.2px_1.2px_4px_rgba(0,0,0,0.8),0_0_12px_rgba(180,55,119,0.55)]">
                             Copy
