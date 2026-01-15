@@ -3,13 +3,14 @@ import os
 from datetime import datetime, timezone, timedelta, date
 from zoneinfo import ZoneInfo
 import random
-from flask import Flask, jsonify, request, redirect, session
+from flask import Flask, jsonify, request, redirect, session, g
 from flask_cors import CORS
 import uuid
 import math
 import secrets
 import json
 from routes.admin import admin_bp
+from routes.tasks import tasks_bp
 from dotenv import load_dotenv
 # from flask_babel import Babel
 # from flask_session import Session
@@ -35,6 +36,9 @@ else:
 # Admin blueprint - Register routes
 if ADMIN_ENABLED:
     app.register_blueprint(admin_bp)
+
+# Tasks blueprint - Backup route
+app.register_blueprint(tasks_bp, url_prefix='/api')
 
 TIMEZONE_BRT = ZoneInfo('America/Sao_Paulo')
 TIMEZONE_EST = ZoneInfo("America/New_York")
@@ -68,6 +72,22 @@ def get_current_timestamp():
 # babel = Babel(app)
 # Session(app)
 
+def get_db():
+    """Get a database connection"""
+    if 'db' not in g:
+        g.db = sqlite3.connect(DB_FILE)
+        g.db.row_factory = sqlite3.Row
+        g.db.execute('PRAGMA journal_mode=WAL;') # Enable WAL mode
+        g.db.execute('PRAGMA synchronous=NORMAL;') # Set synchronous to NORMAL for better performance
+
+    return g.db
+
+@app.teardown_appcontext
+def close_db(error):
+    db = g.pop('db', None)
+    if db is not None:
+        db.close()
+    
 def fetch_full_idol_data(cursor, idol_id):
     """Fetch full idol data from the database"""  
     sql_query = """
@@ -248,8 +268,7 @@ def get_daily_idol():
     """Return the 'Idol of the Day' data as JSON"""
 
     # Start db connection
-    connect = sqlite3.connect(DB_FILE)
-    connect.row_factory = sqlite3.Row
+    connect = get_db()
     cursor = connect.cursor()
 
     # Choose idol of the day 
@@ -263,7 +282,7 @@ def get_daily_idol():
     idol_data = fetch_full_idol_data(cursor, idol_id)
 
     if not idol_data:
-        connect.close()
+        
         return jsonify({"error": "Idol not found"}), 404
     
     idol_data_dict = dict(idol_data)
@@ -327,7 +346,7 @@ def get_daily_idol():
                         """, (user_id,))
                     connect.commit()
 
-    connect.close()
+    
     
     # Filter data 
     game_data = {
@@ -376,8 +395,7 @@ def guess_idol():
         return jsonify({"error": "Missing user token"}), 400
 
     # Start db connection
-    connect = sqlite3.connect(DB_FILE)
-    connect.row_factory = sqlite3.Row
+    connect = get_db()
     cursor = connect.cursor()
 
     # Validate user token
@@ -385,7 +403,7 @@ def guess_idol():
     user_row = cursor.fetchone()
 
     if not user_row:
-        connect.close()
+        
         return jsonify({"error": "Invalid user token"}), 400
     
     user_id = user_row["id"]
@@ -426,10 +444,10 @@ def guess_idol():
     # answer_data["group_companies"] = fetch_group_companies(cursor, group_id=answer_data["group_id"] if answer_data["group_id"] else None)
 
     if not guessed_idol or not answer_data:
-        connect.close()
+        
         return jsonify({"error": "Idol not found"}), 404
     
-    # connect.close() -- MOVED DOWN --
+    #  -- MOVED DOWN --
     
     # Compare data
     feedback = {}
@@ -668,14 +686,12 @@ def guess_idol():
             )
 
         # TODO: not commiting into user_history
-        cursor.execute("COMMIT")
+        connect.commit()
     
     except Exception as e:
         cursor.execute("ROLLBACK")
         print(f"Error updating user history: {e}")
 
-    finally:
-        connect.close()
 
     keys_for_display = [
         "idol_id", "artist_name", "gender", "nationality", "idol_debut_year", 
@@ -716,8 +732,7 @@ def get_idols_list():
     """Return a list of all idols with their id and names as JSON"""
     
     # Start db connection
-    connect = sqlite3.connect(DB_FILE)
-    connect.row_factory = sqlite3.Row
+    connect = get_db()
     cursor = connect.cursor()
 
     # Fetch all idols data
@@ -825,7 +840,7 @@ def get_idols_list():
             elif field not in idol or idol[field] is None:
                 idol[field] = []
 
-    connect.close()
+    
 
     return jsonify(idols_list)
 
@@ -835,8 +850,7 @@ def store_yesterdays_idol():
     """Store yesterday's idol pick in the database"""
     
     # Start db connection
-    connect = sqlite3.connect(DB_FILE)
-    connect.row_factory = sqlite3.Row
+    connect = get_db()
     cursor = connect.cursor()
 
     # Gey yesterday's date
@@ -892,7 +906,7 @@ def store_yesterdays_idol():
         image_result = cursor.fetchone()
         image_path = image_result["image_path"] if image_result else None
 
-        connect.close()
+        
 
         return jsonify({
             "past_idol_id": result["idol_id"], 
@@ -903,7 +917,7 @@ def store_yesterdays_idol():
         })
 
     else:
-        connect.close()
+        
         return jsonify({"message": "First day - no yesterday pick to store"})
 
 
@@ -953,8 +967,7 @@ def generate_user_token():
             token = str(uuid.uuid4())
 
             # Start db connection 
-            connect = sqlite3.connect(DB_FILE)
-            connect.row_factory = sqlite3.Row
+            connect = get_db()
             cursor = connect.cursor()
             
             token_insert_sql = """
@@ -962,7 +975,7 @@ def generate_user_token():
             """
             cursor.execute(token_insert_sql, (token, current_timestamp))
             connect.commit()
-            connect.close()
+            
             token_sucessfuly_generated = True
     
         except sqlite3.IntegrityError as e:
@@ -974,10 +987,6 @@ def generate_user_token():
             attempts += 1
             print(f"Token generation attempt {attempts} failed: {e}")
             error += str(e)
-
-        finally:
-            if connect:
-                connect.close()
         
 
     if token_sucessfuly_generated:
@@ -990,8 +999,7 @@ def get_user_stats(user_token):
     """Return user stats based on the provided token"""
 
     # Start db connection
-    connect = sqlite3.connect(DB_FILE)
-    connect.row_factory = sqlite3.Row
+    connect = get_db()
     cursor = connect.cursor()
 
     # Validate user token 
@@ -1002,7 +1010,7 @@ def get_user_stats(user_token):
     user_row = cursor.fetchone()
 
     if not user_row:
-        connect.close()
+        
         return jsonify({"error": "Invalid user token"}), 400
     
     user_id = user_row["id"]
@@ -1026,7 +1034,7 @@ def get_user_stats(user_token):
             "average_guesses": 0.0,
             "one_shot_wins": 0
         }
-    connect.close()
+    
 
     return jsonify(user_stats)
 
@@ -1037,8 +1045,7 @@ def get_daily_users_count():
     today = get_today_date_str()
     # today = get_server_date()
 
-    connect = sqlite3.connect(DB_FILE)
-    connect.row_factory = sqlite3.Row
+    connect = get_db()
     cursor = connect.cursor()
 
     cursor.execute("""
@@ -1048,7 +1055,7 @@ def get_daily_users_count():
         """, (today,))
     
     result = cursor.fetchone()
-    connect.close()
+    
     
     user_count = result["user_count"] if result and result["user_count"] is not None else 0
 
@@ -1060,8 +1067,7 @@ def get_daily_rank(user_token):
     today = get_today_date_str()
     # today = get_server_date()
 
-    connect = sqlite3.connect(DB_FILE)
-    connect.row_factory = sqlite3.Row
+    connect = get_db()
     cursor = connect.cursor()
 
     # Validate user token
@@ -1072,7 +1078,7 @@ def get_daily_rank(user_token):
     user_row = cursor.fetchone()
 
     if not user_row:
-        connect.close()
+        
         return jsonify({"error": "Invalid user token"}), 400
     
     user_id = user_row["id"]
@@ -1086,7 +1092,7 @@ def get_daily_rank(user_token):
     result = cursor.fetchone()
 
     if not result or result["started_at"] is None or result["guesses_count"] is None or result["won_at"] is None:
-        connect.close()
+        
         return jsonify({"rank": None, "message": "User has not finished today's game"}), 200
     
     started_at = result["started_at"]
@@ -1127,7 +1133,7 @@ def get_daily_rank(user_token):
     result = cursor.fetchone()
     user_score = result["score"] if result and result["score"] is not None else 0
     
-    connect.close()
+    
 
     return jsonify({"position": position, "rank": rank, "score": user_score})
 
@@ -1136,8 +1142,8 @@ def generate_transfer_code(user_token):
     """Generate a transfer code for the user to transfer their data to another device"""
     code_generated = False
     # Start db connection
-    connect = sqlite3.connect(DB_FILE)
-    connect.row_factory = sqlite3.Row
+
+    connect = get_db()
     cursor = connect.cursor()
 
     current_timestamp = get_current_timestamp()
@@ -1150,7 +1156,7 @@ def generate_transfer_code(user_token):
     user_row = cursor.fetchone()
 
     if not user_row:
-        connect.close()
+        
         return jsonify({"error": "Invalid user token"}), 400
 
     # today = get_server_date()
@@ -1174,7 +1180,7 @@ def generate_transfer_code(user_token):
             existing_code = cursor.fetchone()
 
             if existing_code:
-                connect.close()
+                
                 return jsonify({
                     "transfer_code": existing_code["code"],
                     "expires_at": existing_code["expires_at"]
@@ -1204,7 +1210,7 @@ def generate_transfer_code(user_token):
             print(f"Transfer code generation attempt {attempts} failed: {e}")
             error += str(e)
 
-    connect.close()
+    
 
     if code_generated:
         return jsonify({"transfer_code": code, "expires_at": expires_at.isoformat()})
@@ -1221,8 +1227,7 @@ def transfer_data():
         return jsonify({"error": "Missing transfer code"}), 400
     
     # Start db connection
-    connect = sqlite3.connect(DB_FILE)
-    connect.row_factory = sqlite3.Row
+    connect = get_db()
     cursor = connect.cursor()
 
     # Validate transfer code
@@ -1234,17 +1239,17 @@ def transfer_data():
     code_row = cursor.fetchone()
 
     if not code_row:
-        connect.close()
+        
         return jsonify({"error": "Invalid transfer code"}), 400
     
     if code_row["used"]:
-        connect.close()
+        
         return jsonify({"error": "Transfer code has already been used"}), 400
     
     expires_at = datetime.fromisoformat(code_row["expires_at"])
     if expires_at < get_today_now():
     # if expires_at < get_server_datetime_now():
-        connect.close()
+        
         return jsonify({"error": "Transfer code has expired"}), 400
     
     user_token = code_row["user_token"]
@@ -1256,7 +1261,7 @@ def transfer_data():
             WHERE code = ? AND used = 0
         """, (transfer_code,))
     connect.commit()
-    connect.close()
+    
 
     return jsonify({"user_token": user_token})
 
@@ -1267,8 +1272,7 @@ def get_game_state(user_token):
     # today = get_server_date()
 
     # Start db connection
-    connect = sqlite3.connect(DB_FILE)
-    connect.row_factory = sqlite3.Row
+    connect = get_db()
     cursor = connect.cursor()
 
     # Validate user token
@@ -1280,7 +1284,7 @@ def get_game_state(user_token):
     user_row = cursor.fetchone()
 
     if not user_row:
-        connect.close()
+        
         return jsonify({"error": "Invalid user token"}), 400
     
     user_id = user_row["id"]
@@ -1296,7 +1300,7 @@ def get_game_state(user_token):
             """, (game_state_json, user_id, today))
         
         connect.commit()
-        connect.close()
+        
         return jsonify({"message": "Game state updated successfully"}), 200
     
     else:
@@ -1306,7 +1310,7 @@ def get_game_state(user_token):
             """, (user_id, today))
         
         result = cursor.fetchone()
-        connect.close()
+        
 
         if result and result["game_state"]:
             return jsonify(json.loads(result["game_state"]))
@@ -1320,8 +1324,7 @@ def get_active_transfer_code(user_token):
     # today = get_server_datetime_now().isoformat()
 
     # Start db connection
-    connect = sqlite3.connect(DB_FILE)
-    connect.row_factory = sqlite3.Row
+    connect = get_db()
     cursor = connect.cursor()
     
     current_timestamp = get_current_timestamp()
@@ -1335,7 +1338,7 @@ def get_active_transfer_code(user_token):
     user_row = cursor.fetchone()
 
     if not user_row:
-        connect.close()
+        
         return jsonify({"error": "Invalid user token"}), 400
     
     # Get active transfer code 
@@ -1345,7 +1348,7 @@ def get_active_transfer_code(user_token):
         """, (user_token, current_timestamp))
     
     result = cursor.fetchone()
-    connect.close()
+    
 
     if result:
         return jsonify({
