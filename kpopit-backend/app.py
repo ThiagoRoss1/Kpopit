@@ -12,6 +12,12 @@ import json
 from routes.admin import admin_bp
 from routes.tasks import tasks_bp
 from dotenv import load_dotenv
+from utils.dates import (get_today_now, get_today_date, get_today_date_str, get_current_timestamp)
+from services.get_db import get_db, get_idol_repo, init_app
+from services.user_service import UserService
+from services.idol_service import IdolService
+from repositories.idol_repository import IdolRepository
+from routes.games.blurry import blurry_bp
 # from flask_babel import Babel
 # from flask_session import Session
 load_dotenv()
@@ -23,6 +29,8 @@ FLASK_ENV = os.getenv("FLASK_ENV", "production").lower()
 FRONTEND_URL = os.getenv("FRONTEND_URL")
 
 app = Flask(__name__)
+
+init_app(app)
 
 if FLASK_ENV == "development":
     CORS(app, resources={r"/*": {"origins": "*"}})  # Allow all origins for static files
@@ -40,28 +48,9 @@ if ADMIN_ENABLED:
 # Tasks blueprint - Backup route
 app.register_blueprint(tasks_bp, url_prefix='/api')
 
-TIMEZONE_BRT = ZoneInfo('America/Sao_Paulo')
-TIMEZONE_EST = ZoneInfo("America/New_York")
-# return datetime.now(timezone.utc) -- EU
-# return datetime.now(timezone.utc).date().isoformat() -- EU
+# Blurry game blueprint - Register routes
+app.register_blueprint(blurry_bp, url_prefix="/api")
 
-TEST_MODE = False
-TEST_DATE_OFFSET = 1 # Days to add/subtract (1 = tomorrow, -1 = yesterday)
-
-def get_today_now():
-    if TEST_MODE:
-        return datetime.now(TIMEZONE_EST) + timedelta(days=TEST_DATE_OFFSET)
-    
-    return datetime.now(TIMEZONE_EST)
-
-def get_today_date():
-    return get_today_now().date()
-
-def get_today_date_str() -> str:
-    return get_today_now().date().isoformat()
-
-def get_current_timestamp():
-    return get_today_now().isoformat()
 
 # class Config:
 #     # Configure session
@@ -72,229 +61,45 @@ def get_current_timestamp():
 # babel = Babel(app)
 # Session(app)
 
-def get_db():
-    """Get a database connection"""
-    if 'db' not in g:
-        g.db = sqlite3.connect(DB_FILE)
-        g.db.row_factory = sqlite3.Row
-        g.db.execute('PRAGMA journal_mode=WAL;') # Enable WAL mode
-        g.db.execute('PRAGMA synchronous=NORMAL;') # Set synchronous to NORMAL for better performance
-
-    return g.db
-
-@app.teardown_appcontext
-def close_db(error):
-    db = g.pop('db', None)
-    if db is not None:
-        db.close()
-    
-def fetch_full_idol_data(cursor, idol_id):
-    """Fetch full idol data from the database"""  
-    sql_query = """
-        SELECT
-            i.id AS idol_id,
-            i.artist_name,
-            i.real_name,
-            i.gender,
-            i.debut_year AS idol_debut_year,
-            i.nationality,
-            i.birth_date,
-            i.position,
-            i.height,
-            i.image_path,
-            i.is_published,
-            g.id AS group_id,
-            g.name AS group_name,
-            g.group_debut_year,
-            g.member_count,
-            g.generation,
-            g.fandom_name
-        FROM idols AS i
-        -- Join with idol career to get current group
-        LEFT JOIN idol_career AS ic ON i.id = ic.idol_id AND ic.is_active = 1
-        -- Join with groups table to get actual group data
-        LEFT JOIN groups AS g ON ic.group_id = g.id
-        WHERE i.id = ? AND i.is_published = 1
-    """
-    cursor.execute(sql_query, (idol_id,))
-    return cursor.fetchone()
-
-def fetch_full_idol_career(cursor, idol_id):
-    """Fetch full idol career data from the database"""
-    sql_query = """
-        SELECT
-            ic.is_active,
-            ic.start_year,
-            ic.end_year,
-            g.name AS group_name
-        FROM idol_career AS ic
-        JOIN groups AS g ON ic.group_id = g.id
-        WHERE ic.idol_id = ?
-        ORDER BY ic.start_year ASC
-    """
-    cursor.execute(sql_query, (idol_id,))
-    results = cursor.fetchall()
-    # Convert Row objects to dictionaries
-    return [dict(row) for row in results]
-
-
-def fetch_group_companies(cursor, group_id):
-    """Fetch group's companies from the database"""
-    sql_query = """
-        SELECT
-            c.name,
-            c.parent_company_id
-        FROM companies AS c
-        JOIN group_company_affiliation AS gca ON c.id = gca.company_id
-        WHERE gca.group_id = ?
-    """
-    cursor.execute(sql_query, (group_id,))
-    results = cursor.fetchall()
-    # Convert Row objects to dictionaries
-    return [dict(row) for row in results]
-
-
-def fetch_idol_companies(cursor, idol_id):
-    """Fetch idol's companies from the database"""
-    sql_query = """
-        SELECT
-            c.name,
-            c.parent_company_id
-        FROM companies AS c
-        JOIN idol_company_affiliation AS ica ON c.id = ica.company_id
-        WHERE ica.idol_id = ?
-    """
-    cursor.execute(sql_query, (idol_id,))
-    results = cursor.fetchall()
-    # Convert Row objects to dictionaries
-    return [dict(row) for row in results]
-
-
-def choose_idol_of_the_day(cursor):
-    """Choose a random idol as the 'Idol of the Day'"""
-
-    COOLDOWN_DAYS = 10
-    BOOST_DAYS = 50
-    MULTIPLIER = 2
-    
-
-    today_date = get_today_date_str()
-    today_date_obj = get_today_date()
-
-    # Query to select today's idol
-    sql_query = """
-        SELECT idol_id FROM daily_picks WHERE pick_date = ?        
-    """
-    cursor.execute(sql_query, (today_date,))
-    todays_pick = cursor.fetchone()
-
-    if todays_pick:
-        return todays_pick['idol_id']
-    
-    # Check if the date is valid
-    time_delta = timedelta(days=COOLDOWN_DAYS)
-    date_limit = (today_date_obj - time_delta).isoformat()
-    
-    # If no pick for today, select a random idol - if is_published = 1
-    sql_query = """
-        SELECT id, last_picked_date FROM idols
-        WHERE is_published = 1 AND id NOT IN (
-        SELECT idol_id FROM daily_picks WHERE pick_date >= ?)
-    """
-    cursor.execute(sql_query, (date_limit,))
-
-    # Fetch all available idols
-    available_idols = cursor.fetchall()
-
-    possible_idols = []
-    weights = []
-
-    """Error prevention: If there are no available idols (i.e., all idols have been picked in the last 20 days)"""
-    # If no available idols, pick any random idol
-    if available_idols:
-        for idol in available_idols:
-            idol_id = idol['id']
-            last_picked_date = idol['last_picked_date'] or None
-
-            try:
-                last_date = date.fromisoformat(last_picked_date) if last_picked_date else None
-                days_waiting = (today_date_obj - last_date).days if last_date else BOOST_DAYS
-
-            except Exception as e:
-                print(f"Error parsing date for idol ID {idol_id}: {e}")
-                days_waiting = COOLDOWN_DAYS
-            
-            A = 1 
-            K = 0.08
-            weight = (A * math.exp(K * days_waiting))
-
-            if not last_picked_date:
-                weight *= MULTIPLIER
-
-            possible_idols.append(idol_id)
-            weights.append(weight)
-
-        selected_idol_id = random.choices(possible_idols, weights=weights, k=1)[0]
-    
-    else:
-        cursor.execute("SELECT id FROM idols WHERE is_published = 1")
-        available_idols = cursor.fetchall()
-
-        # Transform 'Row object' list to a simple list of ids
-        available_idols_ids = [row['id'] for row in available_idols]
-
-        if not available_idols_ids: 
-            return None
-
-        # Randomly select one idol from the available idols
-        selected_idol_id = random.choice(available_idols_ids)
-
-    cursor.execute("""
-        INSERT INTO daily_picks (pick_date, idol_id) VALUES (?, ?)
-    """, (today_date, selected_idol_id))
-    
-    cursor.execute("""
-            UPDATE idols SET last_picked_date = ?
-            WHERE id = ?
-        """, (today_date, selected_idol_id))
-
-    # Return the selected idol id
-    return selected_idol_id
-
+# Do it later for repositories 
+# @app.before_request
+# def load_repositories():
+#     g.repository = get_idol_repo()
 
 # Create daily idol route
 @app.route("/api/game/daily-idol")
 def get_daily_idol():
     """Return the 'Idol of the Day' data as JSON"""
+    repository = get_idol_repo()
 
     # Start db connection
     connect = get_db()
     cursor = connect.cursor()
 
+    idol_service = IdolService(connect, repository)
+
     # Choose idol of the day 
-    idol_id = choose_idol_of_the_day(cursor)
+    idol_id = idol_service.choose_idol_of_the_day(cursor, gamemode_id=1)
     connect.commit()
 
     """ For testing purposes, you can set a fixed idol_id """
     # idol_id = 1
 
     # Fetch full idol data
-    idol_data = fetch_full_idol_data(cursor, idol_id)
+    idol_data = repository.fetch_full_idol_data(idol_id)
 
-    if not idol_data:
-        
+    if not idol_data:     
         return jsonify({"error": "Idol not found"}), 404
     
     idol_data_dict = dict(idol_data)
 
     # Fetch idol companies
-    idol_companies = fetch_idol_companies(cursor, idol_id)
-    idol_data_dict["companies"] = idol_companies
+    idol_data_dict["companies"] = repository.fetch_idol_companies(idol_id)
 
     # Fetch group companies
     group_id = idol_data_dict["group_id"]
     if group_id:
-        group_companies = fetch_group_companies(cursor, group_id)
+        group_companies = repository.fetch_group_companies(group_id)
         idol_data_dict["group_companies"] = group_companies
     else:
         idol_data_dict["group_companies"] = []
@@ -305,49 +110,17 @@ def get_daily_idol():
         print(idol_data_dict)
         print(" ------------------------\n")
 
-
     # Add career data 
-    idol_career_for_groups = fetch_full_idol_career(cursor, idol_id)
+    idol_career_for_groups = repository.fetch_full_idol_career(idol_id)
     groups = [career["group_name"] for career in idol_career_for_groups if career.get("is_active")]
 
-    # Streak reset
-    user_token = request.headers.get("Authorization") or request.args.get("user_token")
+    # User service - Streak reset
+    user_service = UserService(connect)
+    user_id = user_service.handle_user_streak(gamemode_id=1)
 
-    if user_token:
-        cursor.execute("""
-                SELECT id FROM users
-                WHERE token = ?
-            """, (user_token,))
+    if user_id:
+        print(f"User {user_id} streak checked/updated for daily idol game.")
         
-        user_row = cursor.fetchone()
-
-        if user_row:
-            user_id = user_row["id"]
-            today = get_today_date_str()
-            # today = get_server_date()
-
-            cursor.execute("""
-                    SELECT last_played_date FROM user_history
-                    WHERE user_id = ?
-                """, (user_id,))
-            
-            last_played_row = cursor.fetchone()
-
-            if last_played_row and last_played_row["last_played_date"]:
-                last_played_obj = date.fromisoformat(last_played_row["last_played_date"])
-                today_obj = date.fromisoformat(today)
-
-                if (today_obj - last_played_obj).days > 1:
-                    # Reset streak
-                    cursor.execute("""
-                            UPDATE user_history
-                            SET current_streak = 0
-                            WHERE user_id = ?
-                        """, (user_id,))
-                    connect.commit()
-
-    
-    
     # Filter data 
     game_data = {
         "answer_id": idol_data_dict["idol_id"],
@@ -397,6 +170,7 @@ def guess_idol():
     # Start db connection
     connect = get_db()
     cursor = connect.cursor()
+    repository = get_idol_repo()
 
     # Validate user token
     cursor.execute("""SELECT id FROM users WHERE token = ?""", (user_token,))
@@ -409,36 +183,28 @@ def guess_idol():
     user_id = user_row["id"]
 
     # Fetch full data for guessed idol and answer idol
-    guessed_idol = dict(fetch_full_idol_data(cursor, guessed_idol_id))
-    answer_data = dict(fetch_full_idol_data(cursor, answer_id))
+    guessed_idol = dict(repository.fetch_full_idol_data(guessed_idol_id))
+    answer_data = dict(repository.fetch_full_idol_data(answer_id))
+
+    for idol in [guessed_idol, answer_data]:
+
+        idol_id = idol["idol_id"]
+        group_id = idol.get("group_id")
+
+        # Fetch careers and companies
+        idol["career"] = repository.fetch_full_idol_career(idol_id)
+        idol["companies"] = repository.fetch_idol_companies(idol_id)
+
+        if group_id:
+            idol["group_companies"] = repository.fetch_group_companies(group_id)
+        else:
+            idol["group_companies"] = []
     
-    # Fetch careers and companies
-    guessed_idol["career"] = fetch_full_idol_career(cursor, guessed_idol_id)
-    answer_data["career"] = fetch_full_idol_career(cursor, answer_id)
-
-    guessed_idol["companies"] = fetch_idol_companies(cursor, guessed_idol_id)
-    answer_data["companies"] = fetch_idol_companies(cursor, answer_id)
-
-    # Special case - if idol has a group, fetch group companies too
-    guessed_group_id = guessed_idol.get("group_id")
-    if guessed_group_id:
-        guessed_idol["group_companies"] = fetch_group_companies(cursor, group_id=guessed_group_id)
-    else:
-        guessed_idol["group_companies"] = []
-
-    answer_group_id = answer_data.get("group_id")
-    if answer_group_id:
-        answer_data["group_companies"] = fetch_group_companies(cursor, group_id=answer_group_id)
-    else:
-        answer_data["group_companies"] = []
-
-    for field in ["nationality", "position"]:
-        for idol in [guessed_idol, answer_data]:
-            if field in idol and isinstance(idol[field], str):
+        for field in ["nationality", "position"]:
+            if idol.get(field) and isinstance(idol[field], str):
                 idol[field] = [item.strip() for item in idol[field].split(",")]
-            elif field not in idol or idol[field] is None:
-                idol[field] = []
-
+            else:
+                idol[field] = idol.get(field, [])
 
     # guessed_idol["group_companies"] = fetch_group_companies(cursor, group_id=guessed_idol["group_id"] if guessed_idol["group_id"] else None)
     # answer_data["group_companies"] = fetch_group_companies(cursor, group_id=answer_data["group_id"] if answer_data["group_id"] else None)
@@ -554,12 +320,6 @@ def guess_idol():
     companies_answer = idol_companies_answer.union(group_companies_answer)
 
     feedback["companies"] = partial_feedback_function(companies_guess, companies_answer)
-
-
-    # TODO - number functions - DONE
-    # TODO - groups / companies = use partial function - DONE 
-    # TODO - unique values (name, gender) - DONE 
-
 
     """Unique Values - Feedback Check"""
     unique_fields = ["artist_name", "gender"]

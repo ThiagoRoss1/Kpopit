@@ -113,3 +113,13 @@ export const getActiveTransferCode = async (user_token: string) => {
     const response = await api.get(`/get-active-transfer-code/${user_token}`);
     return response.data;
 }
+
+// Blurry game APIs
+export const getBlurryDailyIdol = async () => {
+    const encrypted = localStorage.getItem('userToken');
+    const token = encrypted ? await decryptToken(encrypted) : null;
+    const response = await api.get('/game/blurry/daily-idol', {
+        headers: token ? { 'Authorization': token } : {}
+    });
+    return response.data;
+}

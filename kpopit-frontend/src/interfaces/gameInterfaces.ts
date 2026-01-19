@@ -136,3 +136,7 @@ export interface GeneratedCodes {
 export interface RedeemUserToken {
   user_token: string;
 }
+
+export interface BlurryGameData extends GameData {
+  blur_image_path: string;
+}
