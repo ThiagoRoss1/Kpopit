@@ -8,3 +8,7 @@ __pycache__/
 .env
 
 seed_db_old.py
+
+# sqlite temp files
+*.db-shm
+*.db-wal

@@ -1,19 +1,18 @@
 import "../../index.css";
 import "./style.css";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
-import { useState, useEffect, useCallback, useRef } from "react";
-import { getDailyIdol, getGuessIdol, getAllIdols, getYesterdaysIdol, getUserToken, getUserStats, getDailyUserCount, getUserPosition, saveGameState } from "../../services/api";
+import { useSharedGameData } from "../../hooks/useSharedGameData.tsx";
+import { useState, useEffect } from "react";
+import { getDailyIdol, getGuessIdol, getYesterdaysIdol, getDailyUserCount, getUserPosition, saveGameState } from "../../services/api";
 import type {
   GameData,
   IdolListItem,
   GuessResponse,
   YesterdayIdol,
-  Users,
-  UserStats,
   GuessedIdolData,
 } from "../../interfaces/gameInterfaces";
 import { Link } from "react-router-dom";
-import { encryptToken, decryptToken } from "../../utils/tokenEncryption.ts";
+import { decryptToken } from "../../utils/tokenEncryption.ts";
 import SearchBar from "../../components/GuessSearchBar/SearchBar.tsx";
 import GuessesGrid from "../../components/GuessesGrid/GuessGrid.tsx";
 import VictoryCardHudProps from "../../components/VictoryCard/VictoryCardHud.tsx";
@@ -30,8 +29,6 @@ import ImportDataText from "../../components/buttons/modals/ImportDataContent.ts
 import ExportDataText from "../../components/buttons/modals/ExportDataContent.tsx";
 import ChangelogText from "../../components/buttons/modals/ChangelogContent.tsx";
 import { useResetTimer } from "../../hooks/useResetTimer.tsx";
-import { useTransferDataLogic } from "../../hooks/useTransferDataLogic.tsx";
-import { useIsMobile } from "../../hooks/useIsDevice.tsx";
 import BackgroundStyle from "../../components/Background/BackgroundStyle.tsx";
 import FeedbackSquares from "../../components/FeedbackSquares/FeedbackSquares.tsx";
 import XLogo from "../../assets/icons/x-logo.svg";
@@ -49,7 +46,6 @@ function Home() {
   const [showModal, setShowModal] = useState<null | "changelog" | "how-to-play" | "about" | "stats" | "streak" | "share" | "transfer-data" | "import-data" | "export-data">(null);
   const [showVictoryCard, setShowVictoryCard] = useState<boolean>(false);
   const [isCorrect, setIsCorrect] = useState<boolean>(false);
-  const [shouldFetchToken, setShouldFetchToken] = useState<boolean>(!localStorage.getItem("userToken"));
   const [dayChecked, setDayChecked] = useState<boolean>(false);
   const [closeFeedbackSquares, setCloseFeedbackSquares] = useState<boolean>(false);
   const [confetti, setConfetti] = useState<boolean>(false);
@@ -57,26 +53,19 @@ function Home() {
   const [attempts, setAttempts] = useState<number>(0);
 
   // Is mobile
-  const isMobile = useIsMobile();
+  
 
   // Transfer data logic hook
-  const transferData = useTransferDataLogic();
+  
+  const { userToken, isMobile, initUser, decryptedTokenRef, allIdolsData, isLoadingAllIdols, isErrorAllIdols, userStatsData, transferData, queryClient } = useSharedGameData();
 
   const handleGuessAttempts = () => {
     setAttempts(prev => prev + 1);
   };
 
   // -- Api-side -- //
-  const queryClient = useQueryClient();
   const queryUserCount = useQueryClient();
 
-  // User token
-  const userToken = useQuery<Users>({
-    enabled: shouldFetchToken,
-    queryKey: ["userToken"],
-    queryFn: getUserToken,
-    refetchOnWindowFocus: false,
-  });
 
   const dailyUserCount = useQuery({
     queryKey: ["dailyUserCount"],
@@ -84,41 +73,6 @@ function Home() {
     staleTime: 1000 * 60 * 5,
     refetchOnWindowFocus: false,
   });
-
-  const decryptedTokenRef = useRef<string | null>(null);
-
-  const initUser = useCallback(async () => {
-    if (decryptedTokenRef.current) return decryptedTokenRef.current;
-
-    const encrypted = localStorage.getItem("userToken");
-
-    if (encrypted) {
-      try {
-        const token = await decryptToken(encrypted);
-        decryptedTokenRef.current = token;
-        return token;
-      } catch (error) {
-        console.error("Error decrypting token:", error);
-        localStorage.removeItem("userToken");
-      }
-    }
-
-    if (userToken.data) {
-      const encryptedToken = await encryptToken(userToken.data.token);
-      localStorage.setItem("userToken", encryptedToken);
-      decryptedTokenRef.current = userToken.data.token;
-      return userToken.data.token;
-    }
-
-    return null;
-  }, [userToken.data]);
-
-  useEffect(() => {
-    if (userToken.data) {
-    initUser();
-    setShouldFetchToken(false);
-    }
-  }, [initUser, userToken.data]);
 
   // Daily idol game data
   const {
@@ -132,18 +86,6 @@ function Home() {
     refetchOnWindowFocus: false,
   });
 
-  // All idols list
-  const {
-    data: allIdolsData,
-    isLoading: isLoadingAllIdols,
-    isError: isErrorAllIdols,
-  } = useQuery<IdolListItem[]>({
-    queryKey: ["allIdols"],
-    queryFn: getAllIdols,
-    staleTime: 1000 * 60 * 60 * 24 * 5, // See functionality
-    gcTime: 1000 * 60 * 60 * 24 * 6, // Can be this the YG error.
-    refetchOnWindowFocus: false,
-  });
 
   const yesterday = useQuery<YesterdayIdol>({
     queryKey: ["yesterdayIdol"],
@@ -160,14 +102,6 @@ function Home() {
 
   const yesterdayIdolImage = yesterday.data?.image_path ?? null;
 
-  const userStats = useQuery<UserStats>({
-    queryKey: ["userStats", userToken],
-    queryFn: async () => getUserStats(await initUser() || ""),
-    enabled: !!localStorage.getItem("userToken"),
-    refetchOnWindowFocus: false,
-  });
-
-  const userStatsData = userStats.data;
 
   useEffect(() => {
     if (!gameData) return;
@@ -408,7 +342,7 @@ function Home() {
           onSubmitAbout={() => { setShowModal("about") }}
         />
         {showModal === "changelog" && <Modal isOpen onClose={() => setShowModal(null)} title="Changelog..." isAboutOrChangelog={true}><ChangelogText /></Modal>}
-        {showModal === "how-to-play" && <Modal isOpen onClose={() => setShowModal(null)} title="How to Play..." isHowToPlay={true}><HowToPlayText /></Modal>}
+        {showModal === "how-to-play" && <Modal isOpen onClose={() => setShowModal(null)} title="How to Play..." isHowToPlay={true}><HowToPlayText nextReset={useResetTimer} /></Modal>}
         {showModal === "about" && <Modal isOpen onClose={() => setShowModal(null)} title="About..." isAboutOrChangelog={true}><AboutText /></Modal>}
 
       </div>
@@ -426,7 +360,7 @@ function Home() {
         {/* Sub-Stats Modals */}
         {showModal === "transfer-data" && <Modal isOpen onClose={() => setShowModal(null)} title="Transfer Data..." isTransferDataSubPages={true} returnPage={() => {setShowModal("stats")}}><TransferDataText onSubmitImportData={() => {setShowModal("import-data")}} onSubmitExportData={() => {setShowModal("export-data")}} /></Modal>}
         {showModal === "import-data" && <Modal isOpen onClose={() => {transferData.clearError(); setShowModal(null);}} title="Import Data..." isTransferDataSubPages={true} returnPage={() => {setShowModal("transfer-data")}}><ImportDataText handleRedeem={transferData.handleRedeem} isRedeeming={transferData.isRedeeming} redeemError={transferData.redeemError} /></Modal>}
-        {showModal === "export-data" && <Modal isOpen onClose={() => setShowModal(null)} title="Export Data..." isTransferDataSubPages={true} returnPage={() => {setShowModal("transfer-data")}}><ExportDataText handleGenerate={transferData.handleGenerate} generatedCodes={transferData.generatedCodes} timeLeft={transferData.timeLeft} expires_At={transferData.expiresAt} /></Modal>}
+        {showModal === "export-data" && <Modal isOpen onClose={() => setShowModal(null)} title="Export Data..." isTransferDataSubPages={true} returnPage={() => {setShowModal("transfer-data")}}><ExportDataText handleGenerate={transferData.handleGenerate} generatedCodes={transferData.generatedCodes} timeLeft={transferData.timeLeft} expires_At={transferData.expiresAt} fetchActiveCode={transferData.fetchActiveCode} /></Modal>}
       </div>
 
       <div className="w-full flex flex-col items-center justify-center mb-10.25">
@@ -528,6 +462,16 @@ function Home() {
             {yesterdayArtist ? `${yesterdayArtist} (${yesterdayArtistGroup && yesterdayArtistGroup.length > 0 ? yesterdayArtistGroup : "Soloist"})` : "Unknown"}
           </span>
         </span>
+      </div>
+      )}
+
+      {/* REMOVE AFTER TEST */}
+      {import.meta.env.DEV && (
+      <div className="w-full flex items-center justify-center">
+        <Link to="/blurry" 
+        className="flex items-center justify-center w-30 h-10 bg-black/20 rounded-2xl hover:scale-105 hover:black/40">
+          <span className="text-xl text-white">Blurry</span>
+        </Link>
       </div>
       )}
 

@@ -9,15 +9,18 @@ interface ExportDataTextProps {
     isGenerating?: boolean;
     expires_At?: string | null;
     timeLeft?: number | null;
+    fetchActiveCode?: () => Promise<void>;
 }
 
 const ExportDataText = (props: ExportDataTextProps) => {
-    const { generatedCodes, handleGenerate, isGenerating, timeLeft, expires_At } = props;
+    const { generatedCodes, handleGenerate, isGenerating, timeLeft, expires_At, fetchActiveCode } = props;
 
     const hasCalledGenerate = useRef(false);
+    const hasCalledFetch = useRef(false);
 
     const [copied, setCopied] = useState<boolean>(false);
     const [showLoading, setShowLoading] = useState<boolean>(false);
+    const [isFetching, setIsFetching] = useState<boolean>(true);
     
     useEffect(() => {
         let timer: ReturnType<typeof setTimeout>;
@@ -28,13 +31,27 @@ const ExportDataText = (props: ExportDataTextProps) => {
             setShowLoading(false);
         }
         
-        if (handleGenerate && !hasCalledGenerate.current && !isGenerating) {
+        const fetchCode = async () => {
+            if (fetchActiveCode && !hasCalledFetch.current) {
+            hasCalledFetch.current = true;
+            setIsFetching(true);
+            try {
+                await fetchActiveCode();
+            } finally {
+                setIsFetching(false);
+            }
+            }
+        }
+
+        fetchCode();
+
+        if (handleGenerate && !hasCalledGenerate.current && !isGenerating && !generatedCodes && !isFetching) {
             hasCalledGenerate.current = true;
             handleGenerate();
         }
         return (() => clearTimeout(timer));
 
-    }, [handleGenerate, isGenerating]);
+    }, [handleGenerate, isGenerating, fetchActiveCode, generatedCodes, isFetching]);
 
     return (
         <div className="w-full bg-transparent">
@@ -58,7 +75,7 @@ const ExportDataText = (props: ExportDataTextProps) => {
                         hover:bg-black/40 hover:brightness-110 hover:cursor-pointer transition-all duration-500 transform-gpu">
                             <div className="w-full flex flex-row items-center justify-center">
                                 <span className="text-3xl [text-shadow:1.2px_1.2px_4px_rgba(0,0,0,0.8),0_0_12px_rgba(255,255,255,0.35)]">
-                                    {showLoading ? "Generating..." : generatedCodes}
+                                    {isFetching ? "Loading..." : (showLoading ? "Generating..." : generatedCodes)}
                                 </span>
 
                                 <Copy className="opacity-0 group-hover:opacity-80 w-10 h-10 absolute right-4 top-1/2 -translate-y-1/2 transition-all duration-500 transform-gpu"/>
