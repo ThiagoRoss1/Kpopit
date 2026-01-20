@@ -7,7 +7,7 @@ TIMEZONE_EST = ZoneInfo("America/New_York")
 # return datetime.now(timezone.utc).date().isoformat() -- EU
 
 TEST_MODE = False
-TEST_DATE_OFFSET = 1 # Days to add/subtract (1 = tomorrow, -1 = yesterday)
+TEST_DATE_OFFSET = 3 # Days to add/subtract (1 = tomorrow, -1 = yesterday)
 
 def get_today_now():
     if TEST_MODE:

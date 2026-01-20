@@ -13,9 +13,11 @@ from routes.admin import admin_bp
 from routes.tasks import tasks_bp
 from dotenv import load_dotenv
 from utils.dates import (get_today_now, get_today_date, get_today_date_str, get_current_timestamp)
+from utils.game_feedback_logic import partial_feedback_function, numerical_feedback_function
 from services.get_db import get_db, get_idol_repo, init_app
 from services.user_service import UserService
 from services.idol_service import IdolService
+from services.game_service import GameService
 from repositories.idol_repository import IdolRepository
 from routes.games.blurry import blurry_bp
 # from flask_babel import Babel
@@ -172,6 +174,8 @@ def guess_idol():
     cursor = connect.cursor()
     repository = get_idol_repo()
 
+    game_service = GameService(connect, repository)
+
     # Validate user token
     cursor.execute("""SELECT id FROM users WHERE token = ?""", (user_token,))
     user_row = cursor.fetchone()
@@ -218,32 +222,6 @@ def guess_idol():
     # Compare data
     feedback = {}
 
-    # Partial feedback function
-    def partial_feedback_function(guess, answer):
-        if guess == answer:
-            return {
-                "status": "correct",
-                "correct_items": list(guess),
-                "incorrect_items": []
-            }
-        
-        partial = guess.intersection(answer) # == guess & answer 
-
-        if partial:
-            return {
-                "status": "partial",
-                "correct_items": list(partial),
-                "incorrect_items": list(guess.difference(answer)) # == guess - answer
-            }
-        
-        else:
-            return {
-                "status": "incorrect",
-                "correct_items": [],
-                "incorrect_items": list(guess)
-            }
-        
-
     # Position
     position_guess = set(position.strip() for position in (guessed_idol.get("position", [])))
     position_answer = set(position.strip() for position in (answer_data.get("position", [])))
@@ -255,56 +233,15 @@ def guess_idol():
     idol_nationality_answer = set(nationality.strip() for nationality in (answer_data.get("nationality", [])))
 
     feedback["nationality"] = partial_feedback_function(idol_nationality_guess, idol_nationality_answer)
-
-    # Numerical feedback function
-    def numerical_feedback_function(guessed_idol, answer_data, fields):
-        numerical_feedback = {}
-
-        for field in fields:
-            guess_val = guessed_idol.get(field)
-            answer_val = answer_data.get(field)
-
-            if guess_val is None or answer_val is None:
-                numerical_feedback[field] = {
-                    "status": "incorrect",
-                    "correct_items": [],
-                    "incorrect_items": []
-                }
-                continue
-
-            if guess_val > answer_val:
-                numerical_feedback[field] = {
-                    "status": "higher",
-                    "correct_items": [],
-                    "incorrect_items": [guess_val]
-                }
-
-            elif guess_val < answer_val:
-                numerical_feedback[field] = {
-                    "status": "lower",
-                    "correct_items": [],
-                    "incorrect_items": [guess_val]
-                }
-
-            else:
-                numerical_feedback[field] = {
-                    "status": "correct",
-                    "correct_items": [guess_val],
-                    "incorrect_items": []
-                }
-
-        return numerical_feedback
     
     # Numbers - debut year, height, birth date, member count, generation...
     numerical_fields = ["idol_debut_year", "height", "birth_date", "member_count"] # removed "generation"
     numerical_feedback = numerical_feedback_function(guessed_idol, answer_data, numerical_fields)
     feedback.update(numerical_feedback)
 
-
     # Group
     group_guess = set(group["group_name"] for group in guessed_idol["career"])
     group_answer = set(group["group_name"] for group in answer_data["career"])
-
 
     feedback["groups"] = partial_feedback_function(group_guess, group_answer)
 
@@ -340,118 +277,19 @@ def guess_idol():
             }
 
     # Final answer (correct or not)
-    is_correct = guessed_idol.get("idol_id") == answer_data.get("idol_id")
-    one_shot_win = is_correct and current_attempt == 1
     current_timestamp = get_current_timestamp()
     # today = get_server_date()
 
-    # Calculate streak function
-    def streak_calculation(cursor, user_id):
-            cursor.execute("""
-                    SELECT date, won FROM daily_user_history
-                    WHERE user_id = ? AND won = 1
-                    ORDER BY date DESC
-                """, (user_id,))
-            
-            results = cursor.fetchall()
+    # Update user history
+    try:      
+        is_correct = game_service.save_user_history(
+            connect, cursor, user_id, 1, guessed_idol_id, answer_data, 
+            answer_id, current_attempt, today, current_timestamp
+        )
 
-            if not results:
-                return 0
-            
-            streak = 0
-            expected_date = get_today_date()
-            # expected_date = get_server_date_obj()
-            
-            for row in results:
-                game_date = date.fromisoformat(row["date"])
-
-                if game_date == expected_date:
-                    streak += 1
-                    expected_date -= timedelta(days=1)
-                else:
-                    break
-
-            return streak
-   
-    # Update user history in the database 
-    try:
-        cursor.execute("BEGIN TRANSACTION")
-
-        cursor.execute(
-            """
-                INSERT INTO daily_user_history (user_id, date, guesses_count, won, one_shot_win, won_at, started_at)
-                VALUES (?, ?, ?, ?, ?, CASE WHEN ? = 1 THEN ? ELSE NULL END, CASE WHEN ? = 1 THEN ? ELSE NULL END)
-                ON CONFLICT(user_id, date) DO UPDATE SET   
-                guesses_count = excluded.guesses_count,
-                won = excluded.won OR won,
-                one_shot_win = excluded.one_shot_win OR one_shot_win,
-                
-                won_at = CASE WHEN excluded.won = 1 AND daily_user_history.won_at IS NULL
-                THEN excluded.won_at ELSE daily_user_history.won_at END,
-
-                started_at = CASE WHEN excluded.guesses_count = 1 AND daily_user_history.started_at IS NULL
-                THEN excluded.started_at ELSE daily_user_history.started_at END
-            """, (user_id, today, current_attempt, is_correct, 
-                  one_shot_win, is_correct, current_timestamp, 
-                  current_attempt, current_timestamp))
-                        
-        if is_correct:
-            print(f"Victory! User {user_id} guessed correctly idol {answer_data.get('artist_name')} of ID {answer_id} in {current_attempt} attempts at date {today}.")
-            S0 = 10
-            decay_rate = 0.1
-            n = current_attempt
-
-            score = S0 * round(math.exp(-decay_rate * (n - 1)), 3)
-
-            cursor.execute("""
-                    UPDATE daily_user_history
-                    SET score = ?
-                    WHERE user_id = ? AND date = ?
-                """, (score, user_id, today))
-
-            cursor.execute("""
-                SELECT AVG(guesses_count) as avg_guesses
-                FROM daily_user_history
-                WHERE user_id = ? AND won = TRUE
-            """, (user_id,))
-
-            streak = streak_calculation(cursor, user_id)
-
-
-            cursor.execute("""
-                INSERT INTO user_history 
-                (user_id, current_streak, max_streak, wins_count, average_guesses, one_shot_wins, last_played_date)
-                VALUES (?, ?, ?, 1, ?, ?, ?)
-                ON CONFLICT(user_id) DO UPDATE SET
-                        current_streak = ?,
-                        max_streak = MAX(max_streak, ?),
-                        wins_count = wins_count + 1,
-                        average_guesses = ROUND((average_guesses * (wins_count) + ? ) / (wins_count + 1), 2),
-                        one_shot_wins = one_shot_wins + ?,
-                        last_played_date = ?
-                """, (
-                    user_id, 
-                    streak, 
-                    streak, 
-                    current_attempt, 
-                    1 if one_shot_win else 0,
-                    today,           
-                    # Update values:
-                    streak,
-                    streak,
-                    current_attempt,
-                    1 if one_shot_win else 0,
-                    today
-                )
-            )
-
-        # TODO: not commiting into user_history
-        connect.commit()
-    
     except Exception as e:
-        cursor.execute("ROLLBACK")
-        print(f"Error updating user history: {e}")
-
+        print(f"Error saving user history: {e}")
+        return jsonify({"error": "Database error saving user history"}), 500
 
     keys_for_display = [
         "idol_id", "artist_name", "gender", "nationality", "idol_debut_year", 
@@ -487,7 +325,7 @@ def guess_idol():
     return jsonify(response_data)
 
 # Create idol list (For frontend check, list, dropdown...)
-@app.route("/api/idols-list")
+@app.route("/api/idols-list", methods=["GET"])
 def get_idols_list():
     """Return a list of all idols with their id and names as JSON"""
     
@@ -506,8 +344,10 @@ def get_idols_list():
             i.nationality,
             i.birth_date,
             i.height,
-            i.position
+            i.position,
+            b.blur_image_path
             FROM idols AS i
+            LEFT JOIN blurry_mode_data AS b ON i.id = b.idol_id AND b.is_active = 1
             WHERE i.is_published = 1 
             ORDER BY artist_name ASC
     """

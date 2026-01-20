@@ -33,13 +33,24 @@ class IdolService:
         date_limit = (today_date_obj - time_delta).isoformat()
         
         # If no pick for today, select a random idol - if is_published = 1
-        sql_query = """
-            SELECT id, (SELECT MAX(pick_date) FROM daily_picks WHERE idol_id = idols.id AND gamemode_id = ? AND pick_date <= ?) AS last_picked_date 
-            FROM idols
-            WHERE is_published = 1 
-            AND id NOT IN (SELECT idol_id FROM daily_picks WHERE pick_date >= ? AND gamemode_id = ?)
-        """
-        cursor.execute(sql_query, (gamemode_id, today_date, date_limit, gamemode_id))
+        if gamemode_id == 1:
+            sql_query = """
+                SELECT id, (SELECT MAX(pick_date) FROM daily_picks WHERE idol_id = idols.id AND gamemode_id = ? AND pick_date <= ?) AS last_picked_date 
+                FROM idols
+                WHERE is_published = 1 
+                AND id NOT IN (SELECT idol_id FROM daily_picks WHERE pick_date >= ? AND gamemode_id = ?)
+            """
+            cursor.execute(sql_query, (gamemode_id, today_date, date_limit, gamemode_id))
+
+        elif gamemode_id == 2:
+            sql_query = """
+                SELECT i.id, (SELECT MAX(pick_date) FROM daily_picks WHERE idol_id = i.id AND gamemode_id = ? AND pick_date <= ?) AS last_picked_date
+                FROM idols AS i
+                INNER JOIN blurry_mode_data AS b ON i.id = b.idol_id
+                WHERE i.is_published = 1
+                AND i.id NOT IN (SELECT idol_id FROM daily_picks WHERE pick_date >= ? AND gamemode_id = ?)
+            """
+            cursor.execute(sql_query, (gamemode_id, today_date, date_limit, gamemode_id))
 
         # Fetch all available idols
         available_idols = cursor.fetchall()
@@ -75,11 +86,19 @@ class IdolService:
             selected_idol_id = random.choices(possible_idols, weights=weights, k=1)[0]
         
         else:
-            cursor.execute("SELECT id FROM idols WHERE is_published = 1")
-            available_idols = cursor.fetchall()
+            if gamemode_id == 1:
+                cursor.execute("SELECT id FROM idols WHERE is_published = 1")
+          
+                
+            elif gamemode_id == 2:
+                cursor.execute("""
+                        SELECT i.id FROM idols AS i
+                        INNER JOIN blurry_mode_data AS b ON i.id = b.idol_id
+                        WHERE i.is_published = 1
+                    """)  
 
             # Transform 'Row object' list to a simple list of ids
-            available_idols_ids = [row['id'] for row in available_idols]
+            available_idols_ids = [row['id'] for row in cursor.fetchall()]
 
             if not available_idols_ids: 
                 return None
