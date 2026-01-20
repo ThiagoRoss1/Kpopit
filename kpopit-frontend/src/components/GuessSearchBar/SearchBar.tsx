@@ -92,7 +92,7 @@ const SearchBar = (props: SearchBarProps) => {
           if (aPriority !== bPriority) return aPriority - bPriority;
           return aName.localeCompare(bName);
         })
-        .slice(0, 18); // Limit to 18 suggestions
+        .slice(0, 20); // Limit to 20 suggestions
       setSuggestions(filteredSuggestions);
 
       setSelectedIdol(filteredSuggestions[0] || null);

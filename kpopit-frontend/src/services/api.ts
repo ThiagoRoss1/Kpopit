@@ -123,3 +123,11 @@ export const getBlurryDailyIdol = async () => {
     });
     return response.data;
 }
+
+export const getBlurryGuessIdol = async (payload: CompleteGuessRequest) => {
+    const response = await api.post('/game/blurry/guess', payload);
+    if (import.meta.env.DEV) {
+        console.log("Answer received from API /blurry/guess:", response.data);
+    };
+    return response.data;
+}

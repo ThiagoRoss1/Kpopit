@@ -7,6 +7,7 @@ import type { Users, UserStats, IdolListItem } from "../interfaces/gameInterface
 import { useIsMobile } from "./useIsDevice";
 
 export const useSharedGameData = () => {
+    const [isInitialized, setIsInitialized] = useState<boolean>(false);
     const [shouldFetchToken, setShouldFetchToken] = useState<boolean>(!localStorage.getItem("userToken"));
 
     // Is mobile
@@ -36,6 +37,7 @@ export const useSharedGameData = () => {
         try {
             const token = await decryptToken(encrypted);
             decryptedTokenRef.current = token;
+            setIsInitialized(true);
             return token;
         } catch (error) {
             console.error("Error decrypting token:", error);
@@ -47,6 +49,7 @@ export const useSharedGameData = () => {
         const encryptedToken = await encryptToken(userToken.data.token);
         localStorage.setItem("userToken", encryptedToken);
         decryptedTokenRef.current = userToken.data.token;
+        setIsInitialized(true);
         return userToken.data.token;
         }
 
@@ -54,7 +57,7 @@ export const useSharedGameData = () => {
     }, [userToken.data]);
 
     useEffect(() => {
-        if (userToken.data) {
+        if (localStorage.getItem("userToken") || userToken.data) {
         initUser();
         setShouldFetchToken(false);
         }
@@ -80,10 +83,41 @@ export const useSharedGameData = () => {
         refetchOnWindowFocus: false,
     });
 
+    const checkAndResetDay = useCallback((mode: 'classic' | 'blurry', currentServerDate: string) => {
+        const lastPlayedDateKey = `${mode}_lastPlayedDate`;
+        const lastPlayedDate = localStorage.getItem(lastPlayedDateKey);
+
+        if (lastPlayedDate !== currentServerDate) {
+            console.log(`New day detected for ${mode} mode. Resetting local data.`);
+
+            if (mode === 'classic') {
+                const classicKeys = [
+                    "todayGuessesDetails", "GuessedIdols", "gameComplete", "gameWon", "hint1Revealed", "showHint1", 
+                    "colorize1", "hint2Revealed", "showHint2", "colorize2", "animatedIdols", "closeFeedbackSquares", "confettiShown"
+                ];
+                classicKeys.forEach(key => localStorage.removeItem(key));
+            } else if (mode === 'blurry') {
+                const blurryKeys = [
+                    "blurryGuessesDetails", "blurryGuessedIdols", "blurryGameComplete", "blurryGameWon"
+                ];
+                blurryKeys.forEach(key => localStorage.removeItem(key));
+            }
+
+            localStorage.setItem(lastPlayedDateKey, currentServerDate);
+            localStorage.setItem(`${mode}_gameDate`, currentServerDate);
+
+            window.location.reload();
+
+            return true;
+        }
+        return false;
+    }, []);
+
     return {
         userToken,
         isMobile,
         initUser,
+        isInitialized,
         decryptedTokenRef,
         allIdolsData,
         isLoadingAllIdols,
@@ -91,5 +125,6 @@ export const useSharedGameData = () => {
         userStatsData: userStats.data,
         transferData,
         queryClient,
+        checkAndResetDay,
     };
 }

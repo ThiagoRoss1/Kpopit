@@ -57,7 +57,8 @@ function Home() {
 
   // Transfer data logic hook
   
-  const { userToken, isMobile, initUser, decryptedTokenRef, allIdolsData, isLoadingAllIdols, isErrorAllIdols, userStatsData, transferData, queryClient } = useSharedGameData();
+  const { userToken, isMobile, initUser, decryptedTokenRef, allIdolsData, isLoadingAllIdols, isErrorAllIdols, 
+    isInitialized, userStatsData, transferData, queryClient } = useSharedGameData();
 
   const handleGuessAttempts = () => {
     setAttempts(prev => prev + 1);
@@ -84,6 +85,7 @@ function Home() {
     queryFn: getDailyIdol,
     staleTime: 1000 * 60 * 60 * 4,
     refetchOnWindowFocus: false,
+    enabled: isInitialized,
   });
 
 
@@ -92,7 +94,9 @@ function Home() {
     queryFn: getYesterdaysIdol,
     staleTime: 1000 * 60 * 60 * 4,
     refetchOnWindowFocus: false,
+    enabled: isInitialized,
   });
+
 
   const yesterdayArtist = allIdolsData?.find(
     (idol) => idol.id === yesterday.data?.past_idol_id
@@ -214,7 +218,7 @@ function Home() {
   const userPosition = useQuery({
     queryKey: ["userPosition", userToken],
     queryFn: async () => getUserPosition(await initUser() || ""),
-    enabled: !!localStorage.getItem("userToken"),
+    enabled: isInitialized,
     refetchOnWindowFocus: false,
   });
 
@@ -307,7 +311,7 @@ function Home() {
     setSelectedIdol(null);
   };
   
-  if (isLoadingGameData || isLoadingAllIdols) {
+  if (isLoadingGameData || isLoadingAllIdols || !isInitialized) {
     return <div className="flex w-full h-screen justify-center items-center text-white">Loading Kpopit...</div>;
   }
 

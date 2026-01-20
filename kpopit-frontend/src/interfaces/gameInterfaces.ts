@@ -23,6 +23,7 @@ export interface IdolListItem {
   all_groups?: string[];
   active_group?: string | null;
   companies: string[];
+  blur_image_path?: string | null;
 }
 
 export interface FeedbackItem {
@@ -60,9 +61,9 @@ export interface GuessedIdolData {
   member_count?: number;
 }
 
-export interface GuessResponse {
+export interface GuessResponse<T = FeedbackData> {
   guess_correct: boolean;
-  feedback: FeedbackData;
+  feedback: T;
   guessed_idol_data: GuessedIdolData;
 }
 
