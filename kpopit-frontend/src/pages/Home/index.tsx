@@ -29,6 +29,7 @@ import ImportDataText from "../../components/buttons/modals/ImportDataContent.ts
 import ExportDataText from "../../components/buttons/modals/ExportDataContent.tsx";
 import ChangelogText from "../../components/buttons/modals/ChangelogContent.tsx";
 import { useResetTimer } from "../../hooks/useResetTimer.tsx";
+import { useGameMode } from "../../hooks/useGameMode.tsx";
 import BackgroundStyle from "../../components/Background/BackgroundStyle.tsx";
 import FeedbackSquares from "../../components/FeedbackSquares/FeedbackSquares.tsx";
 import XLogo from "../../assets/icons/x-logo.svg";
@@ -38,6 +39,7 @@ import { calculateFeedback } from "../../utils/calculateFeedback.ts";
 // import { Input } from "@chakra-ui/react"; - Css framework import example
 
 function Home() {
+  const gameMode = useGameMode()
   // -- Client-side -- //
   const [currentGuess, setCurrentGuess] = useState<string>("");
   const [selectedIdol, setSelectedIdol] = useState<IdolListItem | null>(null);
@@ -69,7 +71,7 @@ function Home() {
 
 
   const dailyUserCount = useQuery({
-    queryKey: ["dailyUserCount"],
+    queryKey: ["dailyUserCount", gameMode],
     queryFn: getDailyUserCount,
     staleTime: 1000 * 60 * 5,
     refetchOnWindowFocus: false,
@@ -81,22 +83,20 @@ function Home() {
     isLoading: isLoadingGameData,
     isError: isErrorGameData,
   } = useQuery<GameData>({
-    queryKey: ["dailyIdol"],
+    queryKey: ["dailyIdol", gameMode],
     queryFn: getDailyIdol,
     staleTime: 1000 * 60 * 60 * 4,
     refetchOnWindowFocus: false,
     enabled: isInitialized,
   });
 
-
   const yesterday = useQuery<YesterdayIdol>({
-    queryKey: ["yesterdayIdol"],
+    queryKey: ["yesterdayIdol", gameMode],
     queryFn: getYesterdaysIdol,
     staleTime: 1000 * 60 * 60 * 4,
     refetchOnWindowFocus: false,
     enabled: isInitialized,
   });
-
 
   const yesterdayArtist = allIdolsData?.find(
     (idol) => idol.id === yesterday.data?.past_idol_id
@@ -105,7 +105,6 @@ function Home() {
   const yesterdayArtistGroup = yesterday.data?.groups ?? null;
 
   const yesterdayIdolImage = yesterday.data?.image_path ?? null;
-
 
   useEffect(() => {
     if (!gameData) return;

@@ -2,27 +2,36 @@ import "../BlurryMode/blurry_mode.css";
 import { AxiosError } from "axios";
 import { useQuery, useMutation } from "@tanstack/react-query";
 import { useSharedGameData } from "../../hooks/useSharedGameData";
+import { useGameMode } from "../../hooks/useGameMode";
 import { useState, useEffect, useMemo } from "react";
-import { getBlurryDailyIdol, getBlurryGuessIdol } from "../../services/api";
-import type { GuessResponse, BlurryGameData, IdolListItem, FeedbackData } from "../../interfaces/gameInterfaces";
+import { getBlurryDailyIdol, getBlurryGuessIdol, getYesterdaysIdol, saveGameState } from "../../services/api";
+import type { GuessResponse, BlurryGameData, IdolListItem, FeedbackData, YesterdayIdol } from "../../interfaces/gameInterfaces";
 import { decryptToken } from "../../utils/tokenEncryption";
 import SearchBar from "../../components/GuessSearchBar/SearchBar"; 
 
 function BlurryMode() {
+    const gameMode = useGameMode();
     const [isImageLoading, setIsImageLoading] = useState<boolean>(true);
     const [currentGuess, setCurrentGuess] = useState<string>("");
     const [selectedIdol, setSelectedIdol] = useState<IdolListItem | null>(null);
     const [guesses, setGuesses] = useState<GuessResponse<Partial<FeedbackData>>[]>([]);
-    const [isCorrect, setIsCorrect] = useState<boolean>(false);
-    const [endGame, setEndGame] = useState<boolean>(false);
 
     const [attempts, setAttempts] = useState<number>(0);
 
     const {decryptedTokenRef, allIdolsData, 
         isLoadingAllIdols, isInitialized, isErrorAllIdols} = useSharedGameData();
 
-    // to be used consts - initUser / userToken / isMobile / userStatsData / queryClient / useMutation / useQueryClient / useEffect
-    // Just to remove errors for now
+    const isCorrect = guesses.some(g => g.guess_correct === true);
+
+    const endGame = isCorrect;
+
+    useEffect(() => {
+        if (guesses.length > 0) {
+            setAttempts(guesses.length);
+            localStorage.setItem("blurryGameComplete", endGame ? "true" : "false");
+            localStorage.setItem("blurryGameWon", isCorrect ? "true" : "false");
+        }
+    }, [isCorrect, endGame, guesses.length]);
 
     // Blurry game data
     const {
@@ -31,35 +40,57 @@ function BlurryMode() {
         isError: isErrorBlurryGameData,
         error: blurryGameDataError,
     } = useQuery<BlurryGameData>({
-        queryKey: ['blurryDailyIdol'],
+        queryKey: ['blurryDailyIdol', gameMode],
         queryFn: getBlurryDailyIdol,
         enabled: isInitialized || !!decryptedTokenRef.current,
         staleTime: 1000 * 60 * 60 * 4,
         refetchOnWindowFocus: false,
-    })
+    });
+
+    // Yesterday idol
+    const yesterdayIdol = useQuery<YesterdayIdol>({
+        queryKey: ['blurryYesterdayIdol', gameMode],
+        queryFn: getYesterdaysIdol,
+        staleTime: 1000 * 60 * 60 * 4,
+        refetchOnWindowFocus: false,
+        enabled: isInitialized
+    });
+
+    console.log(yesterdayIdol.data?.artist_name);
 
     useEffect(() => {
         if (!blurryGameData?.server_date) return;
 
         const serverDate = blurryGameData?.server_date;
-        const lastGameDate = localStorage.getItem('blurryGameDate');
+        const lastGameDate = localStorage.getItem("blurryGameDate");
 
         if (lastGameDate !== serverDate) {
-            localStorage.removeItem('blurryGuessesDetails');
-            localStorage.removeItem('blurryGuessedIdols');
-            localStorage.removeItem('blurryGameComplete');
-            localStorage.removeItem('blurryGameWon');
+            console.log("New day detected, clearing cache.");
+            localStorage.removeItem("blurryGuessesDetails");
+            localStorage.removeItem("blurryGuessedIdols");
+            localStorage.removeItem("blurryGameComplete");
+            localStorage.removeItem("blurryGameWon");
 
             setGuesses([]);
             setAttempts(0);
-            setIsCorrect(false);
-            setEndGame(false);
 
-            localStorage.setItem('blurryGameDate', serverDate);
+            localStorage.setItem("blurryGameDate", serverDate);
             
-        }; // do else 
+        } else {
+            console.log("Same day, restoring cache.");
 
-        console.log("Same day, restoring cache.");
+            const cachedGuesses = localStorage.getItem("blurryGuessesDetails");
+
+            if (cachedGuesses) {
+                try {
+                    const parsedGuesses = JSON.parse(cachedGuesses) as GuessResponse<Partial<FeedbackData>>[];
+                    setGuesses(parsedGuesses);
+                    setAttempts(parsedGuesses.length);
+                } catch (error) {
+                    console.error("Error parsing cached guesses:", error);
+                }
+            }
+        }
     }, [blurryGameData]);
 
     const blurryIdols = useMemo(() => {
@@ -80,18 +111,22 @@ function BlurryMode() {
             if (import.meta.env.DEV) {
                 console.log("Guess response data:", data);
                 console.log("Got user token guess:", decryptedTokenRef.current);
-            };
+            }
+
             const updatedGuesses = [...guesses, data];
-
-            // Save on local storage - later
-
+            setGuesses(updatedGuesses);
+            
+            localStorage.setItem("blurryGuessesDetails", JSON.stringify(updatedGuesses));
             const names = updatedGuesses.map(g => g.guessed_idol_data?.artist_name);
             localStorage.setItem("blurryGuessedIdols", JSON.stringify(names));
-
-            if (data.guess_correct) {
-                setIsCorrect(true);
-                setEndGame(true);
-            }
+            
+            saveGameState({
+                blurry_guesses_details: updatedGuesses,
+                game_complete: data.guess_correct,
+                game_won: data.guess_correct,
+                game_date: blurryGameData?.server_date || "",
+                guessed_idols: updatedGuesses.map(g => g.guessed_idol_data?.artist_name),
+            });
         },
         onError: (error) => {
             console.error("Error submitting guess:", error);
@@ -105,11 +140,6 @@ function BlurryMode() {
             resetInput();
             return;
         }
-
-        setGuesses(prev => {
-            const updatedGuesses = [...prev];
-            return updatedGuesses;
-        });
 
         const encrypted = localStorage.getItem("userToken") || "";
         const token = decryptedTokenRef.current || await decryptToken(encrypted);
@@ -174,6 +204,16 @@ function BlurryMode() {
                     disabled={isCorrect || endGame}
                 />
             </div>
+
+            <div className="z-10 w-full h-fit flex items-center justify-center">
+                <span className={`${isCorrect ? "text-green-500" : "text-white"} text-xl`}>{guesses.map(g => g.guessed_idol_data?.artist_name).join(", ")}</span> 
+            </div>
+
+            {endGame && (
+                <div className="z-10 w-full h-fit flex items-center justify-center">
+                    <span className="text-white text-2xl">Game won!</span>
+                </div>
+            )}
         </div>
     )
 }

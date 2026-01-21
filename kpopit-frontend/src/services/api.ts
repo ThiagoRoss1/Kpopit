@@ -6,6 +6,12 @@ const api = axios.create({
     baseURL: `${import.meta.env.VITE_API_URL}/api`,
 });
 
+// Game modes
+const MODES: Record<string, number> = {
+    "classic": 1,
+    "blurry": 2
+};
+
 // Response interceptor to handle invalid user token globally
 api.interceptors.response.use(
     (response) => response,
@@ -27,18 +33,33 @@ api.interceptors.response.use(
     }
 );
 
+api.interceptors.request.use(
+    (config) => {
+        const activeMode = localStorage.getItem("kpopit_gamemode") || "classic";
+
+        const modeId = MODES[activeMode] || MODES["classic"];
+
+        config.params = {
+            ...config.params,
+            gamemode_id: modeId
+        };
+        return config;
+    }, (error) => {
+        return Promise.reject(error);
+    });
+
 // Get daily idol game data endpoint
 export const getDailyIdol = async () => {
     const encrypted = localStorage.getItem('userToken');
     const token = encrypted ? await decryptToken(encrypted) : null;
-    const response = await api.get('/game/daily-idol', {
+    const response = await api.get('/game/classic/daily-idol', {
         headers: token ? { 'Authorization': token } : {}
     });
     return response.data;
 };
 
 export const getGuessIdol = async (payload: CompleteGuessRequest) => {
-    const response = await api.post('/game/guess', payload);
+    const response = await api.post('/game/classic/guess', payload);
     if (import.meta.env.DEV) {
     console.log("Answer received from API /guess:", response.data);
     };
