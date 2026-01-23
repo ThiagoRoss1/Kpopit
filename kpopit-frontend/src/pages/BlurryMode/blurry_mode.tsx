@@ -7,7 +7,7 @@ import { useState, useEffect, useMemo } from "react";
 import { getBlurryDailyIdol, getBlurryGuessIdol, getYesterdaysIdol, saveGameState } from "../../services/api";
 import type { GuessResponse, BlurryGameData, IdolListItem, FeedbackData, YesterdayIdol } from "../../interfaces/gameInterfaces";
 import { decryptToken } from "../../utils/tokenEncryption";
-import SearchBar from "../../components/GuessSearchBar/SearchBar"; 
+import SearchBar from "../../components/GuessSearchBar/SearchBar";
 
 function BlurryMode() {
     const gameMode = useGameMode();
