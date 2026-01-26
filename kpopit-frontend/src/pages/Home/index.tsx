@@ -468,7 +468,7 @@ function Home() {
       </div>
       )}
 
-      {/* REMOVE AFTER TEST */}
+      {/* REMOVE AFTER TEST
       {import.meta.env.DEV && (
       <div className="w-full flex items-center justify-center">
         <Link to="/blurry" 
@@ -476,7 +476,7 @@ function Home() {
           <span className="text-xl text-white">Blurry</span>
         </Link>
       </div>
-      )}
+      )} */}
 
       {/* Footer */}
       <div className={`w-full flex flex-col items-center justify-center ${isMobile && guesses.length === 0 ? "mt-18" : "mt-6"} mb-2 gap-1`}>

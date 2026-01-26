@@ -1,0 +1,55 @@
+/* droplist.ccs animations */
+.droplist-base {
+    display: none;
+    opacity: 0;
+    transform: translateY(-10px) scale(1);
+    transition: opacity 0.3s ease, transform 0.3s ease, display 0.3s ease;
+    transition-behavior: allow-discrete;
+}
+
+@starting-style {
+    .droplist-base {
+        opacity: 0;
+        transform: translateY(-10px) scale(1);
+    }
+}
+
+.droplist-base[data-state="open"] {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+    display: block;
+
+    animation: droplist-fade-in 0.3s ease forwards;
+}
+
+.droplist-base[data-state="closed"] {
+    opacity: 0;
+    transform: translateY(-10px) scale(1);
+    display: none;
+
+    animation: droplist-fade-out 0.3s ease forwards; 
+}
+
+@keyframes droplist-fade-in {
+    from {
+        opacity: 0;
+        transform: translateY(-10px) scale(1);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateY(0) scale(1);
+    }
+}
+
+@keyframes droplist-fade-out {
+    from {
+        opacity: 1;
+        transform: translateY(0) scale(1);
+    }
+
+    to {
+        opacity: 0;
+        transform: translateY(-10px) scale(1);
+    }
+}

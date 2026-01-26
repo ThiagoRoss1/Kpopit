@@ -1,29 +1,39 @@
+import "./droplist.css";
+import { useEffect } from "react";
+
 interface DroplistBaseProps {
     isOpen?: boolean;
     onClose: () => void;
     children?: React.ReactNode;
-    // align?: "left" | "center" | "right";
+    containerRef: React.RefObject<HTMLDivElement | null>;
+    className?: string;
 }
 
 const DroplistBase = (props: DroplistBaseProps) => {
-    const { isOpen, onClose, children } = props;
+    const { isOpen, onClose, children, containerRef, className } = props;
 
-    if (!isOpen) return null;
+    useEffect(() => {
+        const handleClickOutside = (event: MouseEvent) => {
+            if (isOpen && containerRef.current && !containerRef.current.contains(event.target as Node)) {
+                onClose();
+            }
+        };
+
+        document.addEventListener("mousedown", handleClickOutside);
+
+        return () => {
+            document.removeEventListener("mousedown", handleClickOutside);
+        };
+    }, [isOpen, onClose, containerRef]);
 
     return (
-        <>
-            <div className="fixed inset-0 z-50" onClick={() => onClose()}>
-                <div 
-                    className="absolute mt-2 right-0 w-48 bg-black/30 border border-white rounded-lg shadow-lg backdrop-blur-xl"
-                    onClick={(e) => e.stopPropagation()}>
+        <div 
+            data-state={isOpen ? "open" : "closed"}
+            className={`droplist-base absolute top-full left-0 mt-3 z-50 bg-black/80 border border-white/10 rounded-2xl  
+            backdrop-blur-xl overflow-hidden shadow-[0_0_30px_rgba(0,0,0,0.5),0_0_20px_rgba(255,255,255,0.2)] ${className || ""}`}>
 
-                    <div className="flex flex-col">
-                        {children}
-                    </div>
-                </div>
-            </div>
-        
-        </>
+                {children}
+        </div>
     )
 }
 

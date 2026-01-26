@@ -6,7 +6,7 @@ const MainLayout = () => {
         <div className="min-h-screen bg-transparent text-foreground selection:bg-pink-800">
             <NavBar />
 
-            <main className="pt-20 max-w-360 mx-auto px-4 md:px-25 w-full min-h-[calc(100vh-80px)]">
+            <main className="max-w-360 mx-auto px-4 md:px-25 w-full min-h-[calc(100vh-60px)]">
                 <Outlet />
             </main>
         </div>

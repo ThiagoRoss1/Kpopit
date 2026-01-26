@@ -1,7 +1,6 @@
 import { Link, useLocation } from "react-router-dom";
-import KpopitLogo from "../../../public/kpopit-icon.png";
 import ButtonsDroplist from "./ButtonsDroplist";
-import { GAMES_LINKS } from "./navigation";
+import { GAMES_LINKS, IDOLS_LINKS } from "./navigation";
 
 export type GameMode = "classic" | "blurry" | "popIt";
 const MODES: GameMode[] = ["classic", "blurry"];
@@ -10,20 +9,22 @@ const MODES: GameMode[] = ["classic", "blurry"];
 const NavBar = () => {
     const location = useLocation();
     const path = location.pathname;
-    const currentPage = path === "/" ? "popIt" : MODES.find(m => path.includes(m)) || "classic";
+    const currentPage = path === "/" ? "" : MODES.find(m => path.includes(m)) || "classic";
 
     return (
-        <nav className="sticky top-0 z-50 w-full h-20 border-b border-pink-500 bg-black/20 backdrop-blur-xl">
+        <nav className="sticky top-0 z-50 w-full h-15 border-b border-[#FF3399]/40 bg-black/50 backdrop-blur-xl">
             <div className="max-w-360 mx-auto px-0 h-full flex items-center justify-between">
-                <div className="flex items-center">
+
+                {/* Logo - Left part */}
+                <div className="flex items-center hover:scale-105 active:scale-95 ease-[cubic-bezier(0.34,1.56,0.64,1)] transition-all duration-300 transform-gpu">
                     <Link 
                         to="/"
                         className="flex items-center gap-1 hover:opacity-80 transition-opacity duration-300"
                     >
                         <img 
-                            src={KpopitLogo}
-                            alt={"Kpopit logo"}
-                            className="w-15 h-15 object-contain"
+                            src="/kpopit-icon.png"
+                            alt="Kpopit logo"
+                            className="w-12 h-12 object-contain"
                             draggable={false}
                         />
 
@@ -31,8 +32,30 @@ const NavBar = () => {
                     </Link>
                 </div>
 
-                <div className="flex items-center">
-                    <ButtonsDroplist buttonName="Games" items={GAMES_LINKS} />
+                {/* Buttons - Center-right part */}
+                <div className="flex items-center gap-4">
+                    {/* Games */}
+                    <ButtonsDroplist
+                        buttonName="Games" 
+                        items={GAMES_LINKS} 
+                        className="bg-white/0 w-26 h-12"
+                        dropdownClassName=""
+                    />
+                    {/* Idols */}
+                    <ButtonsDroplist
+                        buttonName="Idols"
+                        items={IDOLS_LINKS}
+                        className="bg-white/0 w-23 h-12"
+                        dropdownClassName=""
+                    />
+                    {/* Contact */}
+                    <Link
+                        to=""
+                        className="flex items-center justify-center rounded-3xl hover:cursor-pointer hover:scale-105 hover:bg-[#b43777] transition-all duration-300 transform-gpu
+                        bg-white/0 w-25 h-12"
+                    >
+                        <span className="flex flex-row text-white text-base gap-1">Contact</span>
+                    </Link>
                 </div>
             </div>
         </nav>
