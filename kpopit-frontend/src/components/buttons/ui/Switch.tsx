@@ -11,7 +11,7 @@ const Switch = (props: SwitchButtonProps) => {
         <div
             onClick={!disabled ? onToggle : undefined}
             className={`flex sm:w-12 sm:h-6 p-1 rounded-full transition-colors duration-300
-                ${isActive ? "bg-[#FF3399]" : "bg-gray-400"} ${disabled ? "select-none cursor-default opacity-50" : "cursor-pointer"}`}
+                ${isActive ? "bg-[#FF3399]" : "bg-gray-700"} ${disabled ? "select-none cursor-default opacity-50" : "cursor-pointer"}`}
         >
             <div
                 className={`sm:w-4 sm:h-4 bg-white rounded-full transition-transform duration-300 transform-gpu

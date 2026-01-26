@@ -397,6 +397,7 @@ function Home() {
             }}
             excludedIdols={guesses.map(guess => guess.guessed_idol_data?.idol_id)}
             disabled={endGame || guessMutation.isPending || isCorrect}
+            gameMode={"classic"}
           />
         </div>
       </div>

@@ -1,4 +1,4 @@
-import { useMemo } from "react";
+import React, { useMemo } from "react";
 import { motion } from "framer-motion";
 import Star from "../../assets/icons/star-four-fill.svg";
 import { useIsMobile } from "../../hooks/useIsDevice";
@@ -171,7 +171,9 @@ const BackgroundStyle = (props: BackgroundStyleProps) => {
   );
 };
 
-export default BackgroundStyle;
+export default React.memo(BackgroundStyle, (prev, next) => {
+    return prev.attempts === next.attempts;
+});
 
 
 
