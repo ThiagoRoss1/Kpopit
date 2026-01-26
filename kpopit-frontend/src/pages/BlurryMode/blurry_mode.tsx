@@ -8,6 +8,8 @@ import { getBlurryDailyIdol, getBlurryGuessIdol, getYesterdaysIdol, saveGameStat
 import type { GuessResponse, BlurryGameData, IdolListItem, FeedbackData, YesterdayIdol } from "../../interfaces/gameInterfaces";
 import { decryptToken } from "../../utils/tokenEncryption";
 import SearchBar from "../../components/GuessSearchBar/SearchBar";
+import TopButtons from "../../components/Blurry/buttons/TopButtons";
+import ModeOptions from "../../components/Blurry/buttons/ModeOptions";
 
 function BlurryMode() {
     const gameMode = useGameMode();
@@ -15,8 +17,8 @@ function BlurryMode() {
     const [currentGuess, setCurrentGuess] = useState<string>("");
     const [selectedIdol, setSelectedIdol] = useState<IdolListItem | null>(null);
     const [guesses, setGuesses] = useState<GuessResponse<Partial<FeedbackData>>[]>([]);
-
     const [attempts, setAttempts] = useState<number>(0);
+
 
     const {decryptedTokenRef, allIdolsData, 
         isLoadingAllIdols, isInitialized, isErrorAllIdols} = useSharedGameData();
@@ -56,6 +58,7 @@ function BlurryMode() {
         enabled: isInitialized
     });
 
+    // remove later 
     console.log(yesterdayIdol.data?.artist_name);
 
     useEffect(() => {
@@ -164,6 +167,20 @@ function BlurryMode() {
         setAttempts(prev => prev + 1);
     }
 
+    // Toggle UI
+    const [blurryToggleOptions, setBlurryToggleOptions] = useState({
+        hardcore: localStorage.getItem("blurryHardcoreMode") === "true" || false,
+        color: localStorage.getItem("blurryColorMode") === "true" || false,
+    });
+
+    const handleToggleOption = (optionId: "hardcore" | "color") => {
+        setBlurryToggleOptions(prev => {
+            const nextValue = !prev[optionId];
+            localStorage.setItem(`blurry${optionId.charAt(0).toUpperCase() + optionId.slice(1)}Mode`, nextValue ? "true" : "false");
+            return {...prev, [optionId]: nextValue};
+        });
+    }; 
+
     // Loading and error states
     if (isLoadingBlurryGameData || isLoadingAllIdols || !isInitialized) {
         return <div className="flex w-full h-screen justify-center items-center text-white">Loading Kpopit...</div>;
@@ -176,18 +193,42 @@ function BlurryMode() {
         return <div className="flex w-full h-screen justify-center items-center text-white">Error loading Kpopit. Please try again later.</div>;
     }
 
+
     return (
-        <div className="min-h-screen w-full flex flex-col items-center justify-start">
-            <div className="flex items-center justify-center text-center mt-40">
-                <span className="text-white text-3xl">Blurry Mode - Coming Soon!</span>
+        <div className="min-h-screen w-full flex flex-col items-center justify-start mt-4">
+            <div className="flex items-center justify-center text-center w-3xs sm:w-3xs h-9 sm:h-14 mb-4">
+                <h1 className="leading-tight text-2xl sm:text-5xl font-bold text-center">
+                    <span className="it-part">K-</span>
+                    <span className="kpop-part">Blurry</span>
+                </h1>
             </div>
 
-            <div className={`flex items-center justify-center text-center mt-40 h-100 w-100 bg-white ${isImageLoading ? 'bg-gray-600' : 'bg-black'}`}>
+            <div className="flex items-center justify-center mb-8.5">
+                <TopButtons
+                    onSubmitStatus={() => {}}
+                    onSubmitHowToPlay={() => {}}
+                    onSubmitShare={() => {}}
+                />
+            </div>
+
+                <div className={`flex items-center justify-center bg-white border-2 border-white
+            w-100 h-128 rounded-[46px] overflow-hidden mb-5
+            ${isImageLoading ? 'bg-gray-600' : 'bg-black'}`}>
                 <img
                     src={`${import.meta.env.VITE_IMAGE_BUCKET_URL}${blurryGameData.blur_image_path}`}
                     alt={`Blurry image of ${artistName}`}
                     onLoad={() => setIsImageLoading(false)}
+                    draggable={false}
+                    className="w-100 h-128 object-cover"
                 />
+            </div>
+
+            <div className="w-full h-fit flex items-center justify-center">
+                <ModeOptions
+                    options={blurryToggleOptions}
+                    onToggle={handleToggleOption}
+                    attempts={attempts}
+                 />
             </div>
 
             <div className="w-full h-fit flex items-center justify-center">
