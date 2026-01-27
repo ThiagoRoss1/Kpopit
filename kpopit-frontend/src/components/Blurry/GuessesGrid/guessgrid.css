@@ -1,0 +1,79 @@
+@keyframes photoEntry {
+    0% {
+        opacity: 0;
+        left: 50%;
+        transform: translateX(-50%) scale(0);
+        animation-timing-function: cubic-bezier(0.68, -0.55, 0.27, 1.55);
+        border-radius: 0%;
+        border-color: transparent;
+    }
+
+    35% {
+        opacity: 1;
+        left: 50%;
+        transform: translateX(-50%) scale(1.1);
+        animation-timing-function: ease-in-out;
+    }
+
+    40% {
+        left: 50%;
+        transform: translateX(-50%) scale(1);
+        animation-timing-function: cubic-bezier(0.22, 1, 0.36, 1);
+    }
+
+    100% {
+        left: 0;
+        opacity: 1;
+        transform: translateX(0) scale(1);
+        border-radius: 20px;
+        border-color: rgba(0, 0, 0, 0.3);
+    } 
+}
+
+.guess-photo-enter {
+    position: relative;
+    animation: photoEntry 2s forwards;
+    will-change: transform, opacity;
+}
+
+
+@keyframes nameEntry {
+    0%, 50% {
+        opacity: 0;
+        left: 50%;
+        transform: translateX(-50%) scale(0.8);
+    }
+
+    100% {
+        opacity: 1;
+        left: 50%;
+        transform: translateX(-50%) scale(1);
+    }  
+}
+
+.name-container {
+    position: absolute;
+    left: 50%;
+    transform: translateX(-50%);
+}
+
+.name-reveal {
+    animation: nameEntry 2s forwards;
+    will-change: transform, opacity;
+}
+
+
+/* 
+.name-reveal-a {
+    position: absolute;
+    left: 50%;
+    opacity: 0;
+    transform: translateX(-20px);
+    transition: all 0s ease-in-out;
+    transition-delay: 0s;
+}
+
+.name-reveal-a.active {
+    opacity: 1;
+    transform: translateX(-50%);
+} */

@@ -12,6 +12,7 @@ import SearchBar from "../../components/GuessSearchBar/SearchBar";
 import TopButtons from "../../components/Blurry/buttons/TopButtons";
 import ModeOptions from "../../components/Blurry/buttons/ModeOptions";
 import GetBlurLevel, { BLUR_LEVELS } from "./blurLevels";
+import GuessGrid from "../../components/Blurry/GuessesGrid/GuessGrid";
 
 function BlurryMode() {
     const gameMode = useGameMode();
@@ -261,18 +262,32 @@ function BlurryMode() {
             </div>
 
             {/* Blurry Image */}
-            <div className={`flex items-center justify-center bg-transparent border-2 border-white
-            w-100 h-128 rounded-[46px] overflow-hidden mb-4
-            ${isImageLoading ? 'bg-gray-600' : 'bg-black'}`}>
-                <img
-                    src={`${import.meta.env.VITE_IMAGE_BUCKET_URL}${blurryGameData.blur_image_path}`}
-                    style={{filter: `blur(${currentBlur}px) grayscale(${blurryToggleOptions.color ? 0 : 100}%)`}}
-                    alt={`Blurry image of ${artistName}`}
-                    onLoad={() => setIsImageLoading(false)}
-                    draggable={false}
-                    className={`sm:w-100 sm:h-128 object-cover transition-all duration-1000
-                    ${isImageLoading ? 'opacity-0' : 'opacity-100'}`} // load image (TODO)
-                />
+            <div className="relative group">
+                <div className={`relative flex items-center justify-center bg-transparent border-2 border-white
+                w-100 h-128 rounded-[46px] overflow-hidden mb-4
+                ${isImageLoading ? 'bg-gray-600' : 'bg-black'}`}>
+                    {/* Corner Decorations */}
+                    {[
+                        "top-5 left-5 border-l-3 border-t-3", "top-5 right-5 border-r-3 border-t-3",
+                        "bottom-5 left-5 border-l-3 border-b-3", "bottom-5 right-5 border-r-3 border-b-3"
+                    ].map((cornerClasses, index) => (
+                        <div
+                            key={index}
+                            className={`absolute w-6 h-6 z-50 border-white/20 ${cornerClasses}`}
+                        />
+                    ))}
+
+                    {/* Image */}
+                    <img
+                        src={`${import.meta.env.VITE_IMAGE_BUCKET_URL}${blurryGameData.blur_image_path}`}
+                        style={{filter: `${endGame ? "blur(0px)" : `blur(${currentBlur}px)`} ${endGame ? "grayscale(0%)" : `grayscale(${blurryToggleOptions.color ? 0 : 100}%)`}`}}
+                        alt={`Blurry image of ${artistName}`}
+                        onLoad={() => setIsImageLoading(false)}
+                        draggable={false}
+                        className={`sm:w-100 sm:h-128 object-cover transition-all duration-1000
+                        ${isImageLoading ? 'opacity-0' : 'opacity-100'}`} // load image (TODO)
+                    />
+                </div>
             </div>
 
             {/* Mode Options */}
@@ -284,7 +299,7 @@ function BlurryMode() {
                  />
             </div>
 
-            <div className="w-full h-fit flex items-center justify-center">
+            <div className="w-full h-fit flex items-center justify-center mb-4">
                 <SearchBar
                     allIdols={blurryIdols}
                     value={currentGuess}
@@ -294,6 +309,13 @@ function BlurryMode() {
                     excludedIdols={excludedIds}
                     disabled={isCorrect || endGame}
                     gameMode={"blurry"}
+                />
+            </div>
+
+            <div className="w-full h-fit flex items-center justify-center mb-4">
+                <GuessGrid
+                    guesses={guesses}
+                    onAnimationComplete={() => {}}
                 />
             </div>
 
