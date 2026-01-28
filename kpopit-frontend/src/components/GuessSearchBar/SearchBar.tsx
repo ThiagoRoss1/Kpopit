@@ -23,7 +23,6 @@ interface SearchBarProps {
 }
 
 const SearchBar = (props: SearchBarProps) => {
-  console.log("SearchBar Rendered");
   const { allIdols, value, onIdolSelect, onIdolSelectId, gameMode, onSubmit, disabled, excludedIdols, onClose } =
     props;
 

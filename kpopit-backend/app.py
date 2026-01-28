@@ -26,6 +26,7 @@ from routes.idols import idol_bp
 from routes.game_logic import game_logic_bp
 from routes.general import general_bp
 from routes.ranking import ranking_bp
+from routes.session_info import session_info
 # from flask_babel import Babel
 # from flask_session import Session
 load_dotenv()
@@ -56,6 +57,9 @@ def load_gamemode():
 # Admin blueprint - Register routes
 if ADMIN_ENABLED:
     app.register_blueprint(admin_bp)
+
+# Session Info blueprint - Analytics data route
+app.register_blueprint(session_info, url_prefix="/api")
 
 # Tasks blueprint - Backup route
 app.register_blueprint(tasks_bp, url_prefix="/api")

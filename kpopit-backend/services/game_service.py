@@ -34,7 +34,7 @@ class GameService:
 
             return streak
     
-    def save_user_history(self, connect, cursor, user_id, gamemode_id, guessed_id, answer_data, answer_id, current_attempt, today, current_timestamp):
+    def save_user_history(self, connect, cursor, user_id, gamemode_id, guessed_id, answer_data, answer_id, current_attempt, today, current_timestamp, analytics_data):
         is_correct = int(guessed_id) == int(answer_id)
         one_shot_win = is_correct and current_attempt == 1
     
@@ -61,7 +61,9 @@ class GameService:
                     current_attempt, current_timestamp))
                             
             if is_correct:
-                print(f"Victory! User {user_id} guessed correctly idol {answer_data.get('artist_name')} of ID {answer_id} in {current_attempt} attempts at date {today}.")
+                formatted_analytics_data = ' | '.join([f"{key.capitalize()}: {value}" for key, value in analytics_data.items()])
+                print(f"Victory! User {user_id} from {analytics_data.get('country', 'Unknown')} guessed correctly idol {answer_data.get('artist_name')} of ID {answer_id} in {current_attempt} attempts at date {today}.")
+                print(f"Entire analytics data for User {user_id}: {formatted_analytics_data}")
                 S0 = 10
                 decay_rate = 0.1
                 n = current_attempt

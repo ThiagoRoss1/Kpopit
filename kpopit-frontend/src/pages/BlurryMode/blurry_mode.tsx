@@ -4,8 +4,16 @@ import { useQuery, useMutation } from "@tanstack/react-query";
 import { useSharedGameData } from "../../hooks/useSharedGameData";
 import { useGameMode } from "../../hooks/useGameMode";
 import { useState, useEffect, useMemo, useCallback, useRef } from "react";
-import { getBlurryDailyIdol, getBlurryGuessIdol, getYesterdaysIdol, saveGameState } from "../../services/api";
-import type { GuessResponse, BlurryGameData, IdolListItem, FeedbackData, YesterdayIdol } from "../../interfaces/gameInterfaces";
+import { getBlurryDailyIdol, getBlurryGuessIdol, getUserPosition, getYesterdaysIdol, saveGameState } from "../../services/api";
+import type { 
+    GuessResponse, 
+    BlurryGameData, 
+    IdolListItem, 
+    FeedbackData, 
+    YesterdayIdol,
+    CompleteGuessRequest,
+    CompleteGuessTrafficRequest,
+} from "../../interfaces/gameInterfaces";
 import { decryptToken } from "../../utils/tokenEncryption";
 import BackgroundStyle from "../../components/Background/BackgroundStyle";
 import SearchBar from "../../components/GuessSearchBar/SearchBar";
@@ -13,6 +21,8 @@ import TopButtons from "../../components/Blurry/buttons/TopButtons";
 import ModeOptions from "../../components/Blurry/buttons/ModeOptions";
 import GetBlurLevel, { BLUR_LEVELS } from "./blurLevels";
 import GuessGrid from "../../components/Blurry/GuessesGrid/GuessGrid";
+import VictoryCardHudBlurry from "../../components/Blurry/VictoryCard/VictoryCardHudBlurry";
+import { useResetTimer } from "../../hooks/useResetTimer";
 
 function BlurryMode() {
     const gameMode = useGameMode();
@@ -20,14 +30,18 @@ function BlurryMode() {
     const [currentGuess, setCurrentGuess] = useState<string>("");
     const [selectedIdol, setSelectedIdol] = useState<IdolListItem | null>(null);
     const [guesses, setGuesses] = useState<GuessResponse<Partial<FeedbackData>>[]>([]);
+    const [endGame, setEndGame] = useState<boolean>(false);
+    const [dayChecked, setDayChecked] = useState<boolean>(false);
+    const [showVictoryCard, setShowVictoryCard] = useState<boolean>(false);
     const [attempts, setAttempts] = useState<number>(0);
 
+    // Query user count
 
-    const {decryptedTokenRef, allIdolsData, 
-        isLoadingAllIdols, isInitialized, isErrorAllIdols} = useSharedGameData();
+
+    const { userToken, initUser, decryptedTokenRef, allIdolsData, 
+        isLoadingAllIdols, isInitialized, isErrorAllIdols, queryClient} = useSharedGameData();
 
     const isCorrect = guesses.some(g => g.guess_correct === true);
-    const endGame = isCorrect;
 
     useEffect(() => {
         if (guesses.length > 0) {
@@ -77,9 +91,12 @@ function BlurryMode() {
         enabled: isInitialized
     });
 
-    // remove later 
-    console.log(yesterdayIdol.data?.artist_name);
+    const yesterdayArtist = allIdolsData?.find(
+        (idol) => idol.id === yesterdayIdol.data?.past_idol_id
+    )?.artist_name;
 
+    const yesterdayIdolImage = yesterdayIdol.data?.image_path ?? null;
+    
     useEffect(() => {
         if (!blurryGameData?.server_date) return;
 
@@ -94,17 +111,23 @@ function BlurryMode() {
             localStorage.removeItem("blurryGameWon");
             localStorage.removeItem("blurryHardcoreMode");
             localStorage.removeItem("blurryColorMode");
+            localStorage.removeItem("blurryAnimatedIdols");
 
             setGuesses([]);
             setAttempts(0);
             setBlurryToggleOptions({ hardcore: false, color: false });
 
             localStorage.setItem("blurryGameDate", serverDate);
-            
+
+            window.location.reload();
+            return;
+
         } else {
             console.log("Same day, restoring cache.");
 
             const cachedGuesses = localStorage.getItem("blurryGuessesDetails");
+            const gameComplete = localStorage.getItem("blurryGameComplete");
+            const gameWon = localStorage.getItem("blurryGameWon");
 
             if (cachedGuesses) {
                 try {
@@ -115,6 +138,14 @@ function BlurryMode() {
                     console.error("Error parsing cached guesses:", error);
                 }
             }
+
+            if (gameComplete === "true") {
+                setEndGame(true);
+                if (gameWon === "true") {
+                    setShowVictoryCard(true);
+                }
+            }
+            setDayChecked(true);
         }
     }, [blurryGameData]);
 
@@ -134,7 +165,18 @@ function BlurryMode() {
     [targetIdol]);
 
     const guessMutation = useMutation({
-        mutationFn: getBlurryGuessIdol,
+        mutationFn: async (guessData: CompleteGuessRequest) => {
+            const traffic = {
+                utm_source: new URLSearchParams(window.location.search).get('utm_source') || 'organic',
+                referrer: document.referrer || 'direct'
+            };
+
+            const payload: CompleteGuessTrafficRequest = {
+                ...guessData,
+                ...traffic
+            };
+            return getBlurryGuessIdol(payload);
+        },
         onSuccess: (data, variables) => {
             if (import.meta.env.DEV) {
                 console.log("Guess response data:", data);
@@ -151,6 +193,8 @@ function BlurryMode() {
                 // Victory and game complete
                 localStorage.setItem("blurryGameComplete", data.guess_correct ? "true" : "false");
                 localStorage.setItem("blurryGameWon", data.guess_correct ? "true" : "false");
+
+                queryClient.invalidateQueries({queryKey: ["blurryUserPosition", gameMode]});
                 
                 saveGameState({
                     blurry_guesses_details: updatedGuesses,
@@ -167,6 +211,23 @@ function BlurryMode() {
             console.error("Error submitting guess:", error);
         }
     });
+
+    // User ranks 
+    const userPosition = useQuery({
+        queryKey: ['blurryUserPosition', gameMode],
+        queryFn: async () => {
+            if (!userToken) return null;
+            return getUserPosition(await initUser() || "");
+        },
+        enabled: isInitialized,
+        refetchOnWindowFocus: false,
+    });
+
+    const userPositionData = userPosition?.data?.position;
+    const userRankData = userPosition?.data?.rank;
+    const userScoreData = userPosition?.data?.score;
+
+
 
     // Search bar
     const handleIdolSelect = useCallback((idolName: string) => setCurrentGuess(idolName), []);
@@ -230,6 +291,15 @@ function BlurryMode() {
     // Blur level calculation (logic)
     const currentBlur = blurryToggleOptions.hardcore ? BLUR_LEVELS[0] : GetBlurLevel(attempts);
 
+    // Animations complete
+    const handleAnimationsComplete = () => {
+        if (isCorrect) {
+            setEndGame(true);
+            setShowVictoryCard(true);
+            setCurrentGuess("");
+        }
+    };
+
     // Loading and error states
     if (isLoadingBlurryGameData || isLoadingAllIdols || !isInitialized) {
         return <div className="flex w-full h-screen justify-center items-center text-white">Loading Kpopit...</div>;
@@ -241,6 +311,8 @@ function BlurryMode() {
         console.error(error?.response?.data || error?.message);
         return <div className="flex w-full h-screen justify-center items-center text-white">Error loading Kpopit. Please try again later.</div>;
     }
+
+    if (!dayChecked) return null;
 
     return (
         <>
@@ -264,7 +336,7 @@ function BlurryMode() {
             {/* Blurry Image */}
             <div className="relative group">
                 <div className={`relative flex items-center justify-center bg-transparent border-2 border-white
-                w-100 h-128 rounded-[46px] overflow-hidden mb-4
+                sm:w-100 sm:h-128 rounded-[46px] overflow-hidden mb-4
                 ${isImageLoading ? 'bg-gray-600' : 'bg-black'}`}>
                     {/* Corner Decorations */}
                     {[
@@ -312,20 +384,27 @@ function BlurryMode() {
                 />
             </div>
 
-            <div className="w-full h-fit flex items-center justify-center mb-4">
+            <div className="w-full h-fit flex items-center justify-center mb-20">
                 <GuessGrid
                     guesses={guesses}
-                    onAnimationComplete={() => {}}
+                    onAnimationComplete={handleAnimationsComplete}
                 />
             </div>
 
-            <div className="z-10 w-full h-fit flex items-center justify-center">
-                <span className={`${isCorrect ? "text-green-500" : "text-white"} text-xl`}>{guesses.map(g => g.guessed_idol_data?.artist_name).join(", ")}</span> 
-            </div>
-
-            {endGame && (
-                <div className="z-10 w-full h-fit flex items-center justify-center">
-                    <span className="text-white text-2xl">Game won!</span>
+            {endGame && guesses.length > 0 && showVictoryCard && (
+                <div className="w-full flex items-center justify-center">
+                    <VictoryCardHudBlurry
+                        cardInfo={guesses[guesses.length - 1].guessed_idol_data}
+                        guesses={guesses}
+                        attempts={attempts}
+                        idol_blur_image={blurryGameData.blur_image_path}
+                        yesterdayIdol={yesterdayArtist || "Unknown"}
+                        yesterdayIdolImage={yesterdayIdolImage}
+                        userPosition={userPositionData}
+                        userRank={userRankData}
+                        userScore={userScoreData}
+                        nextReset={useResetTimer}
+                    />
                 </div>
             )}
         </div>

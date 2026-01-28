@@ -113,6 +113,17 @@ h1 {
   box-sizing: border-box;
 }
 
+/* Selection color */
+::selection {
+  background: #b43777;
+  color: white;
+}
+
+::-moz-selection {
+  background: #b43777;
+  color: white;
+}
+
 /* SearchBar fill animation */
 @keyframes moveGradient {
   from {
@@ -122,8 +133,6 @@ h1 {
   to {
     background-position: left;
   }
-
-
 }
 
 html {

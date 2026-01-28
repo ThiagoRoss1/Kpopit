@@ -19,8 +19,6 @@ const getStoredAnimatedIdols = (): Set<number> => {
     }
 }
 
-
-
 const GuessGrid = (props: GuessGridProps) => {
     const { guesses, onAnimationComplete } = props;
 
@@ -38,22 +36,14 @@ const GuessGrid = (props: GuessGridProps) => {
         });
     };
 
-    
-
-   
-
     const reversedGuesses = useMemo(() => {
         return [...guesses].reverse();
     }, [guesses]);
 
     if (guesses.length === 0) return null;
 
-
-
-
-
     return (
-        <div className="w-full h-fit flex flex-col items-center justify-center gap-2 px-4">
+        <div className="w-full h-fit flex flex-col items-center justify-center gap-4 px-4">
             {reversedGuesses.map((guess, index) => (
                 <GuessRow
                     key={guess.guessed_idol_data.idol_id}
@@ -68,4 +58,11 @@ const GuessGrid = (props: GuessGridProps) => {
     )
 }
 
-export default React.memo(GuessGrid);
+export default React.memo(GuessGrid, (prev, next) => {
+    if (prev.guesses.length !== next.guesses.length) return false;
+
+    const prevLast = prev.guesses[prev.guesses.length - 1];
+    const nextLast = next.guesses[next.guesses.length - 1];
+
+    return prevLast?.guessed_idol_data.idol_id === nextLast?.guessed_idol_data.idol_id;
+});

@@ -1,5 +1,5 @@
 import axios from 'axios';
-import type { AddIdolRequest, CompleteGuessRequest } from '../interfaces/gameInterfaces';
+import type { AddIdolRequest, CompleteGuessTrafficRequest } from '../interfaces/gameInterfaces';
 import { decryptToken } from '../utils/tokenEncryption';
 // Api instance with base URL
 const api = axios.create({
@@ -58,7 +58,7 @@ export const getDailyIdol = async () => {
     return response.data;
 };
 
-export const getGuessIdol = async (payload: CompleteGuessRequest) => {
+export const getGuessIdol = async (payload: CompleteGuessTrafficRequest) => {
     const response = await api.post('/game/classic/guess', payload);
     if (import.meta.env.DEV) {
     console.log("Answer received from API /guess:", response.data);
@@ -145,10 +145,21 @@ export const getBlurryDailyIdol = async () => {
     return response.data;
 }
 
-export const getBlurryGuessIdol = async (payload: CompleteGuessRequest) => {
+export const getBlurryGuessIdol = async (payload: CompleteGuessTrafficRequest) => {
     const response = await api.post('/game/blurry/guess', payload);
     if (import.meta.env.DEV) {
         console.log("Answer received from API /blurry/guess:", response.data);
     };
+    return response.data;
+}
+
+// Get user session analytics data
+export const getUserAnalytics = async () => {
+    const trafficData = {
+        utm_source: new URLSearchParams(window.location.search).get('utm_source') || 'organic',
+        referrer: document.referrer || 'direct'
+    };
+
+    const response = await api.post('/analytics', trafficData);
     return response.data;
 }

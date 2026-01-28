@@ -10,12 +10,14 @@ import type {
   GuessResponse,
   YesterdayIdol,
   GuessedIdolData,
+  CompleteGuessRequest,
+  CompleteGuessTrafficRequest,
 } from "../../interfaces/gameInterfaces";
 import { Link } from "react-router-dom";
 import { decryptToken } from "../../utils/tokenEncryption.ts";
 import SearchBar from "../../components/GuessSearchBar/SearchBar.tsx";
 import GuessesGrid from "../../components/GuessesGrid/GuessGrid.tsx";
-import VictoryCardHudProps from "../../components/VictoryCard/VictoryCardHud.tsx";
+import VictoryCardHud from "../../components/VictoryCard/VictoryCardHud.tsx";
 import AnswerHintsBox from "../../components/AnswerHints/AnswerHintsBox.tsx";
 import TopButtons from "../../components/buttons/TopButtons.tsx";
 import BottomButtons from "../../components/buttons/BottomButtons.tsx";
@@ -166,7 +168,18 @@ function Home() {
   }, [gameData]);
 
   const guessMutation = useMutation({
-    mutationFn: getGuessIdol,
+    mutationFn: async (guessData: CompleteGuessRequest) => {
+      const traffic = {
+        utm_source: new URLSearchParams(window.location.search).get('utm_source') || 'organic',
+        referrer: document.referrer || 'direct'
+      };
+
+      const payload: CompleteGuessTrafficRequest = {
+        ...guessData,
+        ...traffic
+      };
+      return getGuessIdol(payload);
+    },
     onSuccess: (data) => {
       if (import.meta.env.DEV) {
         console.log("Guess successful:", data);
@@ -440,12 +453,12 @@ function Home() {
 
       {endGame && guesses.length > 0 && showVictoryCard && (
         <div className="w-full flex items-center justify-center mt-10">
-          <VictoryCardHudProps 
+          <VictoryCardHud
             cardInfo={guesses[guesses.length - 1].guessed_idol_data}
             guesses={guesses}
             attempts={attempts}
             nextReset={useResetTimer}
-            yesterdayIdol={yesterdayArtist || "unknown"}
+            yesterdayIdol={yesterdayArtist || "Unknown"}
             yesterdayIdolGroup={yesterdayArtistGroup}
             yesterdayIdolImage={yesterdayIdolImage}
             userPosition={userPositionData}

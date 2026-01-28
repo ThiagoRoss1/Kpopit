@@ -9,6 +9,7 @@ from services.idol_service import IdolService
 from services.user_service import UserService
 from services.game_service import GameService
 from utils.dates import get_today_date_str, get_current_timestamp
+from utils.analytics import get_analytics_data, get_country_name
 
 load_dotenv()
 
@@ -67,6 +68,9 @@ def guess_blurry_idol():
     user_token = data.get("user_token")
     current_attempt = data.get("current_attempt")
     game_date = data.get("game_date")
+    analytics_data = get_analytics_data()
+    country_name, flag = get_country_name(analytics_data.get("country"))
+    analytics_data['country'] = f"{country_name} {flag}"
 
     today = get_today_date_str()
     current_timestamp = get_current_timestamp()
@@ -123,7 +127,7 @@ def guess_blurry_idol():
     try:
         is_correct = game_service.save_user_history(
             connect, cursor, user_id, 2, guessed_idol_id, answer_data, 
-            answer_id, current_attempt, today, current_timestamp
+            answer_id, current_attempt, today, current_timestamp, analytics_data
         )
     
     except Exception as e:
