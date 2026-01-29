@@ -8,10 +8,13 @@ interface ShareContentProps {
     guesses: GuessResponse[];
     hasWon: boolean;
     attempts?: number;
+    gameMode: 'classic' | 'blurry' | null;
+    wonWithHardMode?: boolean;
+    wonWithoutColors?: boolean;
 }
 
 const ShareText = (props: ShareContentProps) => {
-    const { guesses, hasWon, attempts } = props;
+    const { guesses, hasWon, attempts, gameMode, wonWithHardMode, wonWithoutColors } = props;
 
     const [copied, setCopied] = useState<boolean>(false);
     
@@ -38,17 +41,34 @@ const ShareText = (props: ShareContentProps) => {
         return header + body + siteLink;
     };
 
+    const textToCopyCategoriesBlurry = (attempts?: number) => {
+        const header = `I found today's #KpopIt Blurry Idol in ${attempts} ${attempts === 1 ? "attempt" : "attempts"}! 🎤\n\n`;
+        const bodyHardmode = `Hardmode ${wonWithHardMode ? "✅" : "❌"}\n`;
+        const bodyGrayscale = `Grayscale ${wonWithoutColors ? "✅" : "❌"}`;
+        const siteLink = `\n\n${window.location.href}`;
+
+        return header + bodyHardmode + bodyGrayscale + siteLink;
+        
+    };
+
     const categories = ["groups", "companies", "nationality", "birth_date", "idol_debut_year", "height", "position"] as const;
 
     const handleCopy = () => {
+        if (gameMode === 'blurry') {
+            navigator.clipboard.writeText(textToCopyCategoriesBlurry(attempts));
+        }
+        else {
         navigator.clipboard.writeText(textToCopy(guesses, attempts));
+        }
 
         setCopied(true);
         setTimeout(() => setCopied(false), 1500);
     }
 
     const shareOnTwitter = (guesses: GuessResponse[], attempts?: number) => {
-        const text = encodeURIComponent(textToCopy(guesses, attempts));
+        const text = gameMode === 'blurry'
+        ? encodeURIComponent(textToCopyCategoriesBlurry(attempts))
+        : encodeURIComponent(textToCopy(guesses, attempts));
         const twitterWebIntentUrl = `https://twitter.com/intent/tweet?text=${text}`;
 
         const isMobile = /Android|iPhone|iPad|iPod/i.test(navigator.userAgent);
@@ -96,6 +116,17 @@ const ShareText = (props: ShareContentProps) => {
             )}
             
             <div className="w-full flex flex-col justify-center items-center mt-3">
+                {gameMode === 'blurry' ? (
+                    <div className={`w-85 flex flex-col justify-center items-center ${guesses.length > 0 ? 
+                        "bg-black/20 border border-white/10" : "bg-black/0 border-0"} gap-1 rounded-3xl p-3`}>
+                            {hasWon ? (
+                            <>
+                                <span className="text-2xl">Hardmode {wonWithHardMode ? "✅" : "❌"}</span>
+                                <span className="text-2xl">Grayscale {wonWithoutColors ? "✅" : "❌"}</span>
+                            </>
+                            ) : null}
+                        </div>
+                ) :
                 <div className={`w-85 flex flex-col justify-center items-center ${guesses.length > 0 ? "bg-black/20 border border-white/10" : "bg-black/0 border-0"} gap-1 rounded-3xl p-3`}>
                 {[...guesses].reverse().map((guess, index) => (
                     <div key={index} className="flex flex-row justify-center items-center cursor-default">
@@ -105,6 +136,7 @@ const ShareText = (props: ShareContentProps) => {
                     </div>
                 ))}
                 </div>
+                }
             </div>
 
             <div className="w-full">

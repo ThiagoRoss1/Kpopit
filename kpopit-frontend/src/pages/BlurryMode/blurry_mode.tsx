@@ -23,6 +23,14 @@ import GetBlurLevel, { BLUR_LEVELS } from "./blurLevels";
 import GuessGrid from "../../components/Blurry/GuessesGrid/GuessGrid";
 import VictoryCardHudBlurry from "../../components/Blurry/VictoryCard/VictoryCardHudBlurry";
 import { useResetTimer } from "../../hooks/useResetTimer";
+import { useAllGameModes } from "../../hooks/useAllGameModes";
+import Modal from "../../components/buttons/modals/Modal";
+import StatsText from "../../components/buttons/modals/StatsContent";
+import HowToPlayBlurryContent from "../../components/buttons/modals/HowToPlayBlurryContent";
+import ShareText from "../../components/buttons/modals/ShareContent";
+import TransferDataText from "../../components/buttons/modals/TransferDataContent";
+import ImportDataText from "../../components/buttons/modals/ImportDataContent";
+import ExportDataText from "../../components/buttons/modals/ExportDataContent";
 
 function BlurryMode() {
     const gameMode = useGameMode();
@@ -31,6 +39,7 @@ function BlurryMode() {
     const [selectedIdol, setSelectedIdol] = useState<IdolListItem | null>(null);
     const [guesses, setGuesses] = useState<GuessResponse<Partial<FeedbackData>>[]>([]);
     const [endGame, setEndGame] = useState<boolean>(false);
+    const [showModal, setShowModal] = useState<null | "stats" | "how-to-play-blurry" | "share" | "transfer-data" | "import-data" | "export-data">(null);
     const [dayChecked, setDayChecked] = useState<boolean>(false);
     const [showVictoryCard, setShowVictoryCard] = useState<boolean>(false);
     const [attempts, setAttempts] = useState<number>(0);
@@ -39,7 +48,7 @@ function BlurryMode() {
 
 
     const { userToken, initUser, decryptedTokenRef, allIdolsData, 
-        isLoadingAllIdols, isInitialized, isErrorAllIdols, queryClient} = useSharedGameData();
+        isLoadingAllIdols, isInitialized, userStatsData, transferData, isErrorAllIdols, queryClient} = useSharedGameData();
 
     const isCorrect = guesses.some(g => g.guess_correct === true);
 
@@ -194,6 +203,7 @@ function BlurryMode() {
                 localStorage.setItem("blurryGameComplete", data.guess_correct ? "true" : "false");
                 localStorage.setItem("blurryGameWon", data.guess_correct ? "true" : "false");
 
+                queryClient.invalidateQueries({queryKey: ["userStats"]});
                 queryClient.invalidateQueries({queryKey: ["blurryUserPosition", gameMode]});
                 
                 saveGameState({
@@ -226,8 +236,6 @@ function BlurryMode() {
     const userPositionData = userPosition?.data?.position;
     const userRankData = userPosition?.data?.rank;
     const userScoreData = userPosition?.data?.score;
-
-
 
     // Search bar
     const handleIdolSelect = useCallback((idolName: string) => setCurrentGuess(idolName), []);
@@ -300,6 +308,13 @@ function BlurryMode() {
         }
     };
 
+    // All gameModes for victory card
+    const { otherModes } = useAllGameModes(gameMode);
+
+    // Blurry Wins
+    const wonWithHardMode = isCorrect && blurryToggleOptions.hardcore;
+    const wonWithoutColors = isCorrect && !blurryToggleOptions.color;
+
     // Loading and error states
     if (isLoadingBlurryGameData || isLoadingAllIdols || !isInitialized) {
         return <div className="flex w-full h-screen justify-center items-center text-white">Loading Kpopit...</div>;
@@ -318,7 +333,8 @@ function BlurryMode() {
         <>
         <BackgroundStyle attempts={attempts} />
         <div className="min-h-screen w-full flex flex-col items-center justify-start mt-4">
-            <div className="flex items-center justify-center text-center w-3xs sm:w-3xs h-9 sm:h-14 mb-4">
+            <div className="flex items-center justify-center text-center w-3xs sm:w-3xs h-9 sm:h-14 mb-4
+            hover:scale-105 hover:cursor-pointer transition-all duration-300 transform-gpu">
                 <h1 className="leading-tight text-2xl sm:text-5xl font-bold text-center">
                     <span className="it-part">K</span>
                     <span className="kpop-part">blurry</span>
@@ -327,10 +343,18 @@ function BlurryMode() {
 
             <div className="flex items-center justify-center mb-4">
                 <TopButtons
-                    onSubmitStatus={() => {}}
-                    onSubmitHowToPlay={() => {}}
-                    onSubmitShare={() => {}}
+                    onSubmitStats={() => {setShowModal("stats")}}
+                    onSubmitHowToPlay={() => {setShowModal("how-to-play-blurry")}}
+                    onSubmitShare={() => {setShowModal("share")}}
                 />
+                {showModal === "stats" && <Modal isOpen onClose={() => setShowModal(null)} title="Stats..."><StatsText stats={userStatsData} onSubmitTransferData={() => {setShowModal("transfer-data")}} /></Modal>}
+                {showModal === "how-to-play-blurry" && <Modal isOpen onClose={() => setShowModal(null)} title="How to Play..." isHowToPlay={true}><HowToPlayBlurryContent  nextReset={useResetTimer} /></Modal>}
+                {showModal === "share" && <Modal isOpen onClose={() => setShowModal(null)} title="Share..."><ShareText guesses={guesses as GuessResponse[]} hasWon={isCorrect} attempts={attempts} gameMode={'blurry'} wonWithHardMode={wonWithHardMode} wonWithoutColors={wonWithoutColors} /></Modal>}
+
+                {/* Sub-Stats Modals */}
+                {showModal === "transfer-data" && <Modal isOpen onClose={() => setShowModal(null)} title="Transfer Data..." isTransferDataSubPages={true} returnPage={() => {setShowModal("stats")}}><TransferDataText onSubmitImportData={() => {setShowModal("import-data")}} onSubmitExportData={() => {setShowModal("export-data")}} /></Modal>}
+                {showModal === "import-data" && <Modal isOpen onClose={() => {transferData.clearError(); setShowModal(null);}} title="Import Data..." isTransferDataSubPages={true} returnPage={() => {setShowModal("transfer-data")}}><ImportDataText handleRedeem={transferData.handleRedeem} isRedeeming={transferData.isRedeeming} redeemError={transferData.redeemError} /></Modal>}
+                {showModal === "export-data" && <Modal isOpen onClose={() => setShowModal(null)} title="Export Data..." isTransferDataSubPages={true} returnPage={() => {setShowModal("transfer-data")}}><ExportDataText handleGenerate={transferData.handleGenerate} generatedCodes={transferData.generatedCodes} timeLeft={transferData.timeLeft} expires_At={transferData.expiresAt} fetchActiveCode={transferData.fetchActiveCode} /></Modal>}
             </div>
 
             {/* Blurry Image */}
@@ -345,7 +369,7 @@ function BlurryMode() {
                     ].map((cornerClasses, index) => (
                         <div
                             key={index}
-                            className={`absolute w-6 h-6 z-50 border-white/20 ${cornerClasses}`}
+                            className={`absolute w-6 h-6 z-10 border-white/20 ${cornerClasses}`}
                         />
                     ))}
 
@@ -403,7 +427,11 @@ function BlurryMode() {
                         userPosition={userPositionData}
                         userRank={userRankData}
                         userScore={userScoreData}
+                        stats={userStatsData}
                         nextReset={useResetTimer}
+                        otherGameModes={otherModes}
+                        wonWithHardMode={wonWithHardMode}
+                        wonWithoutColors={wonWithoutColors}
                     />
                 </div>
             )}

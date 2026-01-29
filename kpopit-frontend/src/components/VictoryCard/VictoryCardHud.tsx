@@ -6,6 +6,14 @@ import { motion } from "motion/react";
 import VictoryCardSmall from "./VictoryCardSmall.tsx";
 import VictoryCardBig from "./VictoryCardBig.tsx";
 
+interface GameMode {
+    id: string;
+    name: string;
+    path: string;
+    won?: boolean;
+    photoSpecs?: string;
+}
+
 interface VictoryCardHudProps {
     cardInfo: GuessedIdolData;
     guesses: GuessResponse[]
@@ -19,10 +27,11 @@ interface VictoryCardHudProps {
     userScore?: number | null;
     stats: UserStats | undefined;
     nextReset: () => { timeRemaining: number | null; formattedTime: string; };
+    otherGameModes?: GameMode[];
 }
 
 const VictoryCardHud = (props: VictoryCardHudProps) => {
-    const { cardInfo, guesses, attempts, nextReset, yesterdayIdol, yesterdayIdolGroup, yesterdayIdolImage, idolActiveGroup, userPosition, userRank, userScore, stats } = props;
+    const { cardInfo, guesses, attempts, nextReset, yesterdayIdol, yesterdayIdolGroup, yesterdayIdolImage, idolActiveGroup, userPosition, userRank, userScore, stats, otherGameModes } = props;
     
     const [showSmallModal, setShowSmallModal] = useState(false);
     const bigCardRef = useRef<HTMLDivElement>(null);
@@ -70,6 +79,7 @@ return (
                     userScore={userScore}
                     idolActiveGroup={idolActiveGroup ?? null}
                     onShareClick={() => setShowSmallModal(true)}
+                    otherGameModes={otherGameModes}
                 />
             </motion.div>
         </div>
@@ -101,6 +111,7 @@ return (
                             userScore={userScore}
                             nextReset={nextReset}
                             onClose={() => setShowSmallModal(false)}
+                            gameMode={"classic"}
                         />
                     </motion.div>
                 </div>

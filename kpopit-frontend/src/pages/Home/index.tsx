@@ -38,6 +38,7 @@ import XLogo from "../../assets/icons/x-logo.svg";
 import { Info } from "lucide-react";
 import { WinnerExplosion } from "../../utils/confetti.tsx";
 import { calculateFeedback } from "../../utils/calculateFeedback.ts";
+import { useAllGameModes } from "../../hooks/useAllGameModes.tsx";
 // import { Input } from "@chakra-ui/react"; - Css framework import example
 
 function Home() {
@@ -322,6 +323,9 @@ function Home() {
     setCurrentGuess("");
     setSelectedIdol(null);
   };
+
+  // All gameModes for victory card
+  const { otherModes } = useAllGameModes(gameMode);
   
   if (isLoadingGameData || isLoadingAllIdols || !isInitialized) {
     return <div className="flex w-full h-screen justify-center items-center text-white">Loading Kpopit...</div>;
@@ -370,7 +374,7 @@ function Home() {
           onSubmitShare={() => { setShowModal("share") }}
         />
         {showModal === "stats" && <Modal isOpen onClose={() => setShowModal(null)} title="Stats..."><StatsText stats={userStatsData} onSubmitTransferData={() => {setShowModal("transfer-data")}} /></Modal>}
-        {showModal === "share" && <Modal isOpen onClose={() => setShowModal(null)} title="Share..."><ShareText guesses={guesses} hasWon={isCorrect} attempts={attempts} /></Modal>}
+        {showModal === "share" && <Modal isOpen onClose={() => setShowModal(null)} title="Share..."><ShareText guesses={guesses} hasWon={isCorrect} attempts={attempts} gameMode={"classic"} /></Modal>}
         {/* {showModal === "streak" && <Modal onClose={() => setShowModal(null)} title="Streak..."><p>Working in progress...</p></Modal>} */}
 
         {/* Sub-Stats Modals */}
@@ -466,6 +470,7 @@ function Home() {
             userScore={userScoreData}
             stats={userStatsData}
             idolActiveGroup={gameData?.groups ?? null}
+            otherGameModes={otherModes}
           />
         </div>
       )}

@@ -4,13 +4,13 @@ import Share from "../../../assets/icons/share-network-fill.svg";
 
 
 interface TopButtonsProps {
-    onSubmitStatus: () => void;
+    onSubmitStats: () => void;
     onSubmitHowToPlay: () => void;
     onSubmitShare: () => void;
 }
 
 const TopButtons = (props: TopButtonsProps) => {
-    const { onSubmitStatus, onSubmitHowToPlay, onSubmitShare } = props;
+    const { onSubmitStats, onSubmitHowToPlay, onSubmitShare } = props;
 
     // Middle Button Styles //
     const centerButtonCardStyle = "inline-flex relative sm:w-46.5 sm:h-12.5 overflow-hidden rounded-2xl sm:rounded-[20px] p-[1px] focus:outline-none focus:ring-2 focus:ring-[#000000] focus:ring-offset-1 focus:ring-offset-[#242424] firefox:isolate firefox:z-0 shadow-[4px_4px_4px_1px_rgba(0,0,0,0.25),inset_0_4px_4px_0_rgba(0,0,0,0.25)]";   
@@ -33,7 +33,7 @@ const TopButtons = (props: TopButtonsProps) => {
             <div className="flex items-center justify-between w-full h-fit gap-4">
                 
                 {/* Stats Button */}
-                <button onClick={onSubmitStatus} type="button" className={RoundedButtonStyle}>
+                <button onClick={onSubmitStats} type="button" className={RoundedButtonStyle}>
                     <span className={RoundedButtonAnimation} />
                         <span className={RoundedButtonBackgroundStyle}>
                             <img src={Stats} alt="Stats" className={ImageStyle} draggable={false} />

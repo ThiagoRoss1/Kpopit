@@ -1,5 +1,5 @@
 //import React from "react";
-import type { GuessedIdolData, GuessResponse, UserStats } from "../../interfaces/gameInterfaces";
+import type {  FeedbackData, GuessedIdolData, GuessResponse, UserStats } from "../../interfaces/gameInterfaces";
 import { useIsMobile, isSafari, isGeckoEngine } from "../../hooks/useIsDevice";
 import { useState } from "react";
 import { AnimatePresence, motion } from "motion/react";
@@ -8,19 +8,22 @@ import trophyIcon from "../../assets/icons/trophy.svg";
 import TwitterLogo from "../../assets/icons/twitter.svg";
 import { X, Download } from 'lucide-react';
 
-interface VictoryCardSmallProps {
+interface VictoryCardSmallProps<T = FeedbackData> {
     onClose?: () => void;
     cardInfo: GuessedIdolData;
-    guesses: GuessResponse[];
+    guesses?: GuessResponse<T>[];
     attempts: number;
     stats: UserStats | undefined;
     userRank?: number | null;
     userScore?: number | null;
     nextReset: () => { timeRemaining: number | null; formattedTime: string; };
+    gameMode: 'classic' | 'blurry' | null;
+    wonWithHardMode?: boolean;
+    wonWithoutColors?: boolean;
 }
 
-const VictoryCardSmall = (props: VictoryCardSmallProps) => {
-    const { guesses, cardInfo, attempts, stats, userRank, userScore, nextReset, onClose } = props;
+const VictoryCardSmall = <T = FeedbackData, >(props: VictoryCardSmallProps<T>) => {
+    const { guesses, cardInfo, attempts, stats, userRank, userScore, nextReset, onClose, gameMode, wonWithHardMode, wonWithoutColors } = props;
 
     const [copied, setCopied] = useState<boolean>(false);
     const [downloaded, setDownloaded] = useState<boolean>(false);
@@ -50,10 +53,24 @@ const VictoryCardSmall = (props: VictoryCardSmallProps) => {
         return header + body + siteLink;
     };
 
+    const textToCopyCategoriesBlurry = (attempts?: number) => {
+        const header = `I found today's #KpopIt Blurry Idol in ${attempts} ${attempts === 1 ? "attempt" : "attempts"}! 🎤\n\n`;
+        const bodyHardmode = `Hardmode ${wonWithHardMode ? "✅" : "❌"}\n`;
+        const bodyGrayscale = `Grayscale ${wonWithoutColors ? "✅" : "❌"}`;
+        const siteLink = `\n\n${window.location.href}`;
+
+        return header + bodyHardmode + bodyGrayscale + siteLink;
+        
+    };
+
     const categories = ["groups", "companies", "nationality", "birth_date", "idol_debut_year", "height", "position"] as const;
 
     const handleCopy = () => {
-        navigator.clipboard.writeText(textToCopyCategories(guesses, attempts));
+        if (gameMode === 'blurry')
+            navigator.clipboard.writeText(textToCopyCategoriesBlurry(attempts));
+        else {
+            navigator.clipboard.writeText(textToCopyCategories(guesses as GuessResponse<FeedbackData>[], attempts));
+        }
 
         setCopied(true);
         setTimeout(() => setCopied(false), 1000);
@@ -61,7 +78,7 @@ const VictoryCardSmall = (props: VictoryCardSmallProps) => {
 
     const textToCopy = (attempts: number, stats: UserStats | undefined, userRank?: number | null, userScore?: number | null) => {
         const header = `I found today's #KpopIt Idol in ${attempts} ${attempts === 1 ? "attempt" : "attempts"}! 🎤\n\n`;
-        const body = `My statistics:\nPosition: ${userRank}\nScore: ${userScore}\nStreak: ${stats?.current_streak}`;
+        const body = `My statistics:\nPosition: ${userRank}\nScore: ${userScore?.toFixed(2)}\nStreak: ${stats?.current_streak}`;
         const siteLink = `\n\n${window.location.href}`;
 
         return header + body + siteLink;
@@ -146,7 +163,7 @@ const VictoryCardSmall = (props: VictoryCardSmallProps) => {
                                     {cardInfo.artist_name}
                                 </p>
                                 <p className="text-base sm:text-[16px] leading-tight bg-linear-to-b from-[#ce757a] to-white brightness-105 text-transparent bg-clip-text">
-                                    ({cardInfo.groups.join(", ")|| "Soloist"})
+                                    {cardInfo.groups && cardInfo.groups.length > 0 ? `(${cardInfo.groups.join(", ")})` : ""}
                                 </p>
                             </div>
                         </div>

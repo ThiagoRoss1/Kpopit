@@ -1,9 +1,18 @@
 //import React from "react";
 import type { GuessedIdolData, YesterdayIdol } from "../../interfaces/gameInterfaces";
+import { Link } from "react-router-dom";
 import TargetAttempt from "../../assets/icons/target.svg";
 import RankPosition from "../../assets/icons/ranking-fill.svg";
 import PositionTrend from "../../assets/icons/trending-up.svg";
 import { Share2 } from "lucide-react";
+
+interface GameMode {
+    id: string;
+    name: string;
+    path: string;
+    won?: boolean;
+    photoSpecs?: string;
+}
 
 interface VictoryCardBigProps {
     cardInfo: GuessedIdolData;
@@ -17,10 +26,11 @@ interface VictoryCardBigProps {
     userScore?: number | null;
     nextReset: () => { timeRemaining: number | null; formattedTime: string; };
     onShareClick?: () => void;
+    otherGameModes?: GameMode[];
 }
 
 const VictoryCardBig = (props: VictoryCardBigProps) => {
-    const { cardInfo, idolActiveGroup, attempts, yesterdayIdol, yesterdayIdolGroup, yesterdayIdolImage, userPosition, userRank, userScore, nextReset, onShareClick } = props;
+    const { cardInfo, idolActiveGroup, attempts, yesterdayIdol, yesterdayIdolGroup, yesterdayIdolImage, userPosition, userRank, userScore, nextReset, onShareClick, otherGameModes } = props;
 
     const activeGroup = idolActiveGroup && idolActiveGroup.length > 0 ? idolActiveGroup.join(", ") : "Soloist";
     const yesterdayGroup = yesterdayIdolGroup && yesterdayIdolGroup.length > 0 ? yesterdayIdolGroup.join(", ") : "Soloist";
@@ -145,15 +155,32 @@ return (
         </div>
 
         {/* Other Game Modes */}
-        <div className="relative w-full sm:h-28 mb-5 px-4 sm:px-6">
+        <div className="relative w-full sm:h-fit mb-5 px-4 sm:px-6">
             <div className="relative flex flex-col w-full h-full items-start justify-start text-center gap-1 mt-4">
                 <span className="text-[14px] sm:text-base drop-shadow-2xl">Other Game Modes</span>
                 
-                <div className="relative flex w-full h-12 sm:h-17 items-center justify-start text-center px-3.5 bg-transparent 
-                border border-white/20 rounded-xl hover:text-white/20 hover:border-white/10 transition-all duration-300">
-                    <span className="text-[14px] sm:text-base font-semibold transition-all duration-300">
-                        soon...
-                    </span>
+                <div className="relative flex w-full h-fit sm:h-fit items-center justify-start text-center px-3.5 bg-transparent 
+                border border-white/60 rounded-xl transition-all duration-300">
+                        {otherGameModes && otherGameModes.length > 0 ? (
+                            otherGameModes.map((mode) => (
+                                <Link key={mode.id} to={mode.path}>
+                                    <div 
+                                        className={`flex w-16 h-16 mt-2 mb-2 rounded-2xl items-center justify-center 
+                                    text-center border border-r-4 border-b-4 border-white/30
+                                    hover:scale-105 hover:cursor-pointer active:scale-95 ease-[cubic-bezier(0.34,1.56,0.64,1)] transition-all duration-500 transform-gpu
+                                    ${mode.won ? "opacity-50" : "opacity-100"}`}
+                                    >
+                                        <img
+                                            src="/kpopit-icon.png"
+                                            alt="Kpopit Icon"
+                                            draggable={false}
+                                            className={`${mode.photoSpecs} sm:w-12 sm:h-12 object-contain`}
+                                        />
+                                        <span className="absolute text-white font-semibold text-sm [text-shadow:1px_1px_4px_rgba(0,0,0,0.7)]">{mode.name}</span>
+                                    </div>
+                                </Link>
+                            ))
+                        ) : null}
                 </div>
             </div>
         </div>
