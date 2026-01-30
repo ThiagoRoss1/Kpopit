@@ -50,7 +50,7 @@ const NavBar = () => {
                     />
                     {/* Contact */}
                     <Link
-                        to=""
+                        to="/contact"
                         className="flex items-center justify-center rounded-3xl hover:cursor-pointer hover:scale-105 hover:bg-[#b43777] transition-all duration-300 transform-gpu
                         bg-white/0 w-25 h-12"
                     >

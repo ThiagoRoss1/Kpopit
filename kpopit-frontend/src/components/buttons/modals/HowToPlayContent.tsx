@@ -35,9 +35,8 @@ const HowToPlayText = (props: HowToPlayTextProps) => {
                 </div>
 
                 <div className="flex flex-col w-full items-start justify-center border-t border-white mt-2 gap-0">
-                    <span className="pt-2 normal-font">For now, only one game mode is available - Classic.</span>
-                    <span className="normal-font">In classic mode, you must type the name of a K-pop idol or group in the search bar.</span>
-                    <span className="normal-font">To submit your guess, press <b>enter</b> or click the <b>Guess</b> button</span>
+                    <span className="pt-2 normal-font">In classic mode, you must type the name of a K-pop idol or group in the search bar.</span>
+                    <span className="normal-font">To submit your guess, press <b>enter</b> or click the <b>Guess</b> button.</span>
 
                     
                     {/* Feedback */}

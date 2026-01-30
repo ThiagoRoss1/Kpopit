@@ -1,10 +1,10 @@
 import "../BlurryMode/blurry_mode.css";
 import { AxiosError } from "axios";
-import { useQuery, useMutation } from "@tanstack/react-query";
+import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { useSharedGameData } from "../../hooks/useSharedGameData";
 import { useGameMode } from "../../hooks/useGameMode";
 import { useState, useEffect, useMemo, useCallback, useRef } from "react";
-import { getBlurryDailyIdol, getBlurryGuessIdol, getUserPosition, getYesterdaysIdol, saveGameState } from "../../services/api";
+import { getBlurryDailyIdol, getBlurryGuessIdol, getUserPosition, getYesterdaysIdol, getDailyUserCount, saveGameState } from "../../services/api";
 import type { 
     GuessResponse, 
     BlurryGameData, 
@@ -31,6 +31,7 @@ import ShareText from "../../components/buttons/modals/ShareContent";
 import TransferDataText from "../../components/buttons/modals/TransferDataContent";
 import ImportDataText from "../../components/buttons/modals/ImportDataContent";
 import ExportDataText from "../../components/buttons/modals/ExportDataContent";
+import { WinnerExplosion } from "../../utils/confetti";
 
 function BlurryMode() {
     const gameMode = useGameMode();
@@ -42,13 +43,11 @@ function BlurryMode() {
     const [showModal, setShowModal] = useState<null | "stats" | "how-to-play-blurry" | "share" | "transfer-data" | "import-data" | "export-data">(null);
     const [dayChecked, setDayChecked] = useState<boolean>(false);
     const [showVictoryCard, setShowVictoryCard] = useState<boolean>(false);
+    const [confetti, setConfetti] = useState<boolean>(false);
     const [attempts, setAttempts] = useState<number>(0);
 
-    // Query user count
-
-
-    const { userToken, initUser, decryptedTokenRef, allIdolsData, 
-        isLoadingAllIdols, isInitialized, userStatsData, transferData, isErrorAllIdols, queryClient} = useSharedGameData();
+    const { userToken, initUser, decryptedTokenRef, allIdolsData, isLoadingAllIdols, 
+        isInitialized, userStatsData, transferData, isErrorAllIdols, queryClient} = useSharedGameData();
 
     const isCorrect = guesses.some(g => g.guess_correct === true);
 
@@ -58,6 +57,17 @@ function BlurryMode() {
             localStorage.setItem("blurryGameWon", isCorrect ? "true" : "false");
         }
     }, [isCorrect, endGame, guesses.length]);
+
+    // Query user count
+    const queryUserCount = useQueryClient();
+
+    const dailyUserCount = useQuery({
+        queryKey: ["dailyUserCount", gameMode],
+        queryFn: getDailyUserCount,
+        staleTime: 1000 * 60 * 5,
+        refetchOnWindowFocus: false,
+    })
+
 
     // Blurry game data
     const {
@@ -121,6 +131,7 @@ function BlurryMode() {
             localStorage.removeItem("blurryHardcoreMode");
             localStorage.removeItem("blurryColorMode");
             localStorage.removeItem("blurryAnimatedIdols");
+            localStorage.removeItem("confettiShownBlurry");
 
             setGuesses([]);
             setAttempts(0);
@@ -137,6 +148,7 @@ function BlurryMode() {
             const cachedGuesses = localStorage.getItem("blurryGuessesDetails");
             const gameComplete = localStorage.getItem("blurryGameComplete");
             const gameWon = localStorage.getItem("blurryGameWon");
+            const confettiShown = localStorage.getItem("confettiShownBlurry") === "true";
 
             if (cachedGuesses) {
                 try {
@@ -155,6 +167,7 @@ function BlurryMode() {
                 }
             }
             setDayChecked(true);
+            setConfetti(confettiShown);
         }
     }, [blurryGameData]);
 
@@ -204,6 +217,7 @@ function BlurryMode() {
                 localStorage.setItem("blurryGameWon", data.guess_correct ? "true" : "false");
 
                 queryClient.invalidateQueries({queryKey: ["userStats"]});
+                queryUserCount.invalidateQueries({queryKey: ["dailyUserCount", gameMode]});
                 queryClient.invalidateQueries({queryKey: ["blurryUserPosition", gameMode]});
                 
                 saveGameState({
@@ -332,7 +346,7 @@ function BlurryMode() {
     return (
         <>
         <BackgroundStyle attempts={attempts} />
-        <div className="min-h-screen w-full flex flex-col items-center justify-start mt-4">
+        <div className="min-h-full w-full flex flex-col items-center justify-start mt-4">
             <div className="flex items-center justify-center text-center w-3xs sm:w-3xs h-9 sm:h-14 mb-4
             hover:scale-105 hover:cursor-pointer transition-all duration-300 transform-gpu">
                 <h1 className="leading-tight text-2xl sm:text-5xl font-bold text-center">
@@ -395,6 +409,7 @@ function BlurryMode() {
                  />
             </div>
 
+            {!endGame && !showVictoryCard && (
             <div className="w-full h-fit flex items-center justify-center mb-4">
                 <SearchBar
                     allIdols={blurryIdols}
@@ -407,13 +422,46 @@ function BlurryMode() {
                     gameMode={"blurry"}
                 />
             </div>
+            )}
+            
+            <div className="flex flex-row items-center justify-center mb-4">
+                <span className="leading-tight text-base sm:text-base">
+                    <span className="text-[#b43777] [text-shadow:1.2px_1.2px_4px_rgba(0,0,0,1.8),0_0_12px_rgba(180,55,119,1.0)] brightness-110">
+                        {dailyUserCount?.data.user_count}
+                    </span> <span className="text-[#d7d7d7]/85 [text-shadow:1.2px_1.2px_4px_rgba(0,0,0,1.8),0_0_12px_rgba(255,255,255,0.2)]">
+                        {dailyUserCount?.data.user_count === 1 ? "person" : "people"} already found today's blurry idol!
+                    </span>
+                </span>
+            </div>
 
+            {guesses.length > 0 && (
             <div className="w-full h-fit flex items-center justify-center mb-20">
                 <GuessGrid
                     guesses={guesses}
                     onAnimationComplete={handleAnimationsComplete}
                 />
             </div>
+            )}
+
+            {!showVictoryCard && yesterdayArtist && yesterdayIdolImage && (
+            <div className={`w-full flex flex-col items-center justify-center mt-10 mb-10`}>
+                <span className="font-semibold max-xxs:text-[14px] xxs:text-[15px] xs:text-base sm:text-[18px] leading-tight">
+                <span className="text-white">
+                    Yesterday's idol was
+                </span> <span className="text-[#b43777] [text-shadow:1.2px_1.2px_4px_rgba(0,0,0,1.8),0_0_12px_rgba(180,55,119,1.0)] brightness-105">
+                    {yesterdayArtist ? `${yesterdayArtist}` : "Unknown"}
+                </span>
+                </span>
+            </div>
+            )}
+
+            {endGame && isCorrect && !confetti && (
+                <WinnerExplosion onComplete={() => {
+                    setConfetti(true)
+                    localStorage.setItem("confettiShownBlurry", "true");
+                }}
+                />
+            )}
 
             {endGame && guesses.length > 0 && showVictoryCard && (
                 <div className="w-full flex items-center justify-center">

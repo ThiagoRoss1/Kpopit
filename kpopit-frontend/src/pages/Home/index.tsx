@@ -34,8 +34,6 @@ import { useResetTimer } from "../../hooks/useResetTimer.tsx";
 import { useGameMode } from "../../hooks/useGameMode.tsx";
 import BackgroundStyle from "../../components/Background/BackgroundStyle.tsx";
 import FeedbackSquares from "../../components/FeedbackSquares/FeedbackSquares.tsx";
-import XLogo from "../../assets/icons/x-logo.svg";
-import { Info } from "lucide-react";
 import { WinnerExplosion } from "../../utils/confetti.tsx";
 import { calculateFeedback } from "../../utils/calculateFeedback.ts";
 import { useAllGameModes } from "../../hooks/useAllGameModes.tsx";
@@ -57,12 +55,9 @@ function Home() {
   // Counter
   const [attempts, setAttempts] = useState<number>(0);
 
-  // Is mobile
-  
-
   // Transfer data logic hook
   
-  const { userToken, isMobile, initUser, decryptedTokenRef, allIdolsData, isLoadingAllIdols, isErrorAllIdols, 
+  const { userToken, initUser, decryptedTokenRef, allIdolsData, isLoadingAllIdols, isErrorAllIdols, 
     isInitialized, userStatsData, transferData, queryClient } = useSharedGameData();
 
   const handleGuessAttempts = () => {
@@ -341,7 +336,7 @@ function Home() {
   return (
     <>
     <BackgroundStyle attempts={attempts} />
-    <div className="min-h-screen w-full flex flex-col items-center justify-start">
+    <div className="min-h-full w-full flex flex-col items-center justify-start">
       <div className="flex items-center justify-center p-2 w-3xs sm:w-3xs h-9 sm:h-20 mt-12 mb-13 text-center">
         <Link 
           to="/"
@@ -420,7 +415,6 @@ function Home() {
       </div>
       )}
       
-      {!endGame && !showVictoryCard && (
       <div className="flex flex-row items-center justify-center mb-10">
         <span className="leading-tight text-base sm:text-base">
           <span className="text-[#b43777] [text-shadow:1.2px_1.2px_4px_rgba(0,0,0,1.8),0_0_12px_rgba(180,55,119,1.0)] brightness-110">
@@ -430,8 +424,8 @@ function Home() {
           </span>
         </span>
       </div>
-      )}
 
+      {guesses.length > 0 && (
       <div className="w-full flex flex-col items-center justify-center mt-2 mb-4 overflow-x-auto">
         <GuessesGrid
           guesses={guesses}
@@ -439,6 +433,7 @@ function Home() {
           onAllAnimationsComplete={handleAnimationsComplete}
         />
       </div>
+      )}
 
        <div className="w-full flex mt-2 mb-2">
         {guesses.length > 0 && !closeFeedbackSquares && (
@@ -476,7 +471,7 @@ function Home() {
       )}
 
       {!showVictoryCard && yesterdayArtist && yesterdayArtistGroup && yesterdayIdolImage && (
-      <div className={`w-full flex flex-col items-center justify-center mt-18 mb-22`}>
+      <div className={`w-full flex flex-col items-center justify-center mt-10 mb-26`}>
         <span className="font-semibold max-xxs:text-[14px] xxs:text-[15px] xs:text-base sm:text-[18px] leading-tight">
           <span className="text-white">
             Yesterday's idol was
@@ -486,39 +481,6 @@ function Home() {
         </span>
       </div>
       )}
-
-      {/* REMOVE AFTER TEST
-      {import.meta.env.DEV && (
-      <div className="w-full flex items-center justify-center">
-        <Link to="/blurry" 
-        className="flex items-center justify-center w-30 h-10 bg-black/20 rounded-2xl hover:scale-105 hover:black/40">
-          <span className="text-xl text-white">Blurry</span>
-        </Link>
-      </div>
-      )} */}
-
-      {/* Footer */}
-      <div className={`w-full flex flex-col items-center justify-center ${isMobile && guesses.length === 0 ? "mt-18" : "mt-6"} mb-2 gap-1`}>
-        <div className="w-full flex flex-row items-center justify-center gap-3">
-          <button
-          className="flex items-center justify-center max-xxs:w-10 max-xxs:h-10 xxs:w-10 xxs:h-10 xs:w-10 xs:h-10 sm:w-10 sm:h-10 bg-black rounded-full hover:scale-110 hover:brightness-110 hover:cursor-pointer
-          transition-all duration-300 transform-gpu" onClick={() => window.open("https://x.com/TgoRoss1", "_blank")}>
-            <img src={XLogo} alt="X" className="max-xxs:w-7.5 max-xxs:h-7.5 xxs:w-7.5 xxs:h-7.5 xs:w-7.5 xs:h-7.5 sm:w-7.5 sm:h-7.5 items-center justify-center" draggable={false} />
-          </button>
-          
-          <button className="flex items-center justify-center max-xxs:w-10 max-xxs:h-10 xxs:w-10 xxs:h-10 xs:w-10 xs:h-10 sm:w-10 sm:h-10 bg-white rounded-full hover:scale-110 hover:brightness-110 hover:cursor-pointer
-          transition-all duration-300 transform-gpu" onClick={() => {setShowModal("about")}}>
-            <Info className="max-xxs:w-10 max-xxs:h-10 xxs:w-10 xxs:h-10 xs:w-10 xs:h-10 sm:w-10 sm:h-10" />
-
-          </button>
-        </div>
-
-        <div className="w-full flex items-center justify-center">
-          <Link to="/privacy-policy">
-            <span className="normal-font font-bold text-white max-xxs:text-[14px] xxs:text-[14px] xs:text-base sm:text-base hover:underline">Privacy Policy</span>
-          </Link>
-        </div>
-      </div>
 
       {/* <p>ID: {gameData?.answer_id}</p> */}
     </div>

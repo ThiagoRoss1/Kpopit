@@ -5,14 +5,13 @@ import Home from './pages/Home'
 import Admin from './pages/admin/admin'
 import BlurryMode from './pages/BlurryMode/blurry_mode'
 import PrivacyPolicy from './pages/privacy-policy/PrivacyPolicy';
+import Contact from './pages/contact/Contact'
 import MainLayout from './components/MainLayout/MainLayout'
 import ScrollToTop from './hooks/useScrollToTop'
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
 import { BrowserRouter, Route, Navigate, Routes } from 'react-router'
 import { SpeedInsights } from "@vercel/speed-insights/react"
 import { Analytics } from "@vercel/analytics/react"
-
-
 
 const queryClient = new QueryClient();
 
@@ -28,6 +27,8 @@ createRoot(document.getElementById('root')!).render(
                 <Route path="/blurry" element={<BlurryMode />} />
 
                 <Route path="/privacy-policy" element={<PrivacyPolicy />} />
+
+                <Route path="/contact" element={<Contact />} />
                 
                 {import.meta.env.VITE_ADMIN_ROUTE && import.meta.env.VITE_ADMIN_ENABLED === "true" && (
                   <Route path={import.meta.env.VITE_ADMIN_ROUTE} element={<Admin />} />

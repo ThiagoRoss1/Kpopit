@@ -1,4 +1,4 @@
-# 🎮 KpopIt
+# KpopIt
 
 ## 📃 Introduction
 
