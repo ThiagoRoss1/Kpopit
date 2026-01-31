@@ -1,7 +1,8 @@
 import { StrictMode } from 'react'
 import { createRoot } from 'react-dom/client'
 import './index.css'
-import Home from './pages/Home'
+import Home from './pages/Home/home'
+import ClassicMode from './pages/ClassicMode/classic_mode'
 import Admin from './pages/admin/admin'
 import BlurryMode from './pages/BlurryMode/blurry_mode'
 import PrivacyPolicy from './pages/privacy-policy/PrivacyPolicy';
@@ -23,6 +24,8 @@ createRoot(document.getElementById('root')!).render(
             <Routes>
               <Route element={<MainLayout />}>
                 <Route path="/" element={<Home />} />
+
+                <Route path="/classic" element={<ClassicMode />} />
                 
                 <Route path="/blurry" element={<BlurryMode />} />
 

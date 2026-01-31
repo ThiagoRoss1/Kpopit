@@ -3,7 +3,7 @@ import "./style.css";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { useSharedGameData } from "../../hooks/useSharedGameData.tsx";
 import { useState, useEffect } from "react";
-import { getDailyIdol, getGuessIdol, getYesterdaysIdol, getDailyUserCount, getUserPosition, saveGameState } from "../../services/api";
+import { getDailyIdol, getGuessIdol, getYesterdaysIdol, getDailyUserCount, getUserPosition, saveGameState } from "../../services/api.ts";
 import type {
   GameData,
   IdolListItem,
@@ -12,7 +12,7 @@ import type {
   GuessedIdolData,
   CompleteGuessRequest,
   CompleteGuessTrafficRequest,
-} from "../../interfaces/gameInterfaces";
+} from "../../interfaces/gameInterfaces.ts";
 import { Link } from "react-router-dom";
 import { decryptToken } from "../../utils/tokenEncryption.ts";
 import SearchBar from "../../components/GuessSearchBar/SearchBar.tsx";
@@ -20,16 +20,13 @@ import GuessesGrid from "../../components/GuessesGrid/GuessGrid.tsx";
 import VictoryCardHud from "../../components/VictoryCard/VictoryCardHud.tsx";
 import AnswerHintsBox from "../../components/AnswerHints/AnswerHintsBox.tsx";
 import TopButtons from "../../components/buttons/TopButtons.tsx";
-import BottomButtons from "../../components/buttons/BottomButtons.tsx";
 import Modal from "../../components/buttons/modals/Modal.tsx";
 import HowToPlayText from "../../components/buttons/modals/HowToPlayContent.tsx";
 import StatsText from "../../components/buttons/modals/StatsContent.tsx";
 import ShareText from "../../components/buttons/modals/ShareContent.tsx";
-import AboutText from "../../components/buttons/modals/AboutContent.tsx";
 import TransferDataText from "../../components/buttons/modals/TransferDataContent.tsx";
 import ImportDataText from "../../components/buttons/modals/ImportDataContent.tsx";
 import ExportDataText from "../../components/buttons/modals/ExportDataContent.tsx";
-import ChangelogText from "../../components/buttons/modals/ChangelogContent.tsx";
 import { useResetTimer } from "../../hooks/useResetTimer.tsx";
 import { useGameMode } from "../../hooks/useGameMode.tsx";
 import BackgroundStyle from "../../components/Background/BackgroundStyle.tsx";
@@ -39,14 +36,14 @@ import { calculateFeedback } from "../../utils/calculateFeedback.ts";
 import { useAllGameModes } from "../../hooks/useAllGameModes.tsx";
 // import { Input } from "@chakra-ui/react"; - Css framework import example
 
-function Home() {
+function ClassicMode() {
   const gameMode = useGameMode()
   // -- Client-side -- //
   const [currentGuess, setCurrentGuess] = useState<string>("");
   const [selectedIdol, setSelectedIdol] = useState<IdolListItem | null>(null);
   const [guesses, setGuesses] = useState<GuessResponse[]>([]);
   const [endGame, setEndGame] = useState<boolean>(false);
-  const [showModal, setShowModal] = useState<null | "changelog" | "how-to-play" | "about" | "stats" | "streak" | "share" | "transfer-data" | "import-data" | "export-data">(null);
+  const [showModal, setShowModal] = useState<null | "how-to-play" | "stats" | "streak" | "share" | "transfer-data" | "import-data" | "export-data">(null);
   const [showVictoryCard, setShowVictoryCard] = useState<boolean>(false);
   const [isCorrect, setIsCorrect] = useState<boolean>(false);
   const [dayChecked, setDayChecked] = useState<boolean>(false);
@@ -323,11 +320,19 @@ function Home() {
   const { otherModes } = useAllGameModes(gameMode);
   
   if (isLoadingGameData || isLoadingAllIdols || !isInitialized) {
-    return <div className="flex w-full h-screen justify-center items-center text-white">Loading Kpopit...</div>;
+    return (
+      <div className="fixed inset-0 z-100 flex w-full h-screen bg-black justify-center items-center">
+        <span className="text-white animate-pulse">Loading Kpopit...</span>
+      </div>
+    );
   }
 
   if (isErrorGameData || isErrorAllIdols) {
-    return <div className="flex w-full h-screen justify-center items-center text-white">Error: Error fetching game data</div>;
+    return (
+      <div className="fixed inset-0 z-100 flex w-full h-screen bg-black justify-center items-center">
+        <span className="text-white animate-pulse">Error: Error fetching game data</span>
+      </div>
+    );
   }
 
   if (!dayChecked) return null;
@@ -341,7 +346,6 @@ function Home() {
         <Link 
           to="/"
           className="inline-block bg-transparent border-0 p-0 cursor-pointer hover:scale-105
-          focus-visible:outline-2 focus-visible:outline-[#e70a7d] focus-visible:outline-offset-4
           transition-all duration-500 transform-gpu"
           draggable={false}>
           <h1 className="leading-tight text-5xl sm:text-7xl font-bold text-center">
@@ -350,24 +354,15 @@ function Home() {
           </h1>
         </Link>
       </div>    
-      <div className="flex items-center justify-center mb-3">
+      <div className="flex items-center justify-center mb-10">
         <TopButtons
-          onSubmitChangelog={() => { setShowModal("changelog") }}
           onSubmitHowToPlay={() => { setShowModal("how-to-play") }}
-          onSubmitAbout={() => { setShowModal("about") }}
-        />
-        {showModal === "changelog" && <Modal isOpen onClose={() => setShowModal(null)} title="Changelog..." isAboutOrChangelog={true}><ChangelogText /></Modal>}
-        {showModal === "how-to-play" && <Modal isOpen onClose={() => setShowModal(null)} title="How to Play..." isHowToPlay={true}><HowToPlayText nextReset={useResetTimer} /></Modal>}
-        {showModal === "about" && <Modal isOpen onClose={() => setShowModal(null)} title="About..." isAboutOrChangelog={true}><AboutText /></Modal>}
-
-      </div>
-
-      <div className="flex items-center justify-center mb-7">
-        <BottomButtons
           onSubmitStats={() => { setShowModal("stats") }}
           // onSubmitStreak={() => { setShowModal("streak") }}
           onSubmitShare={() => { setShowModal("share") }}
         />
+        {showModal === "how-to-play" && <Modal isOpen onClose={() => setShowModal(null)} title="How to Play..." isHowToPlay={true}><HowToPlayText nextReset={useResetTimer} /></Modal>}
+
         {showModal === "stats" && <Modal isOpen onClose={() => setShowModal(null)} title="Stats..."><StatsText stats={userStatsData} onSubmitTransferData={() => {setShowModal("transfer-data")}} /></Modal>}
         {showModal === "share" && <Modal isOpen onClose={() => setShowModal(null)} title="Share..."><ShareText guesses={guesses} hasWon={isCorrect} attempts={attempts} gameMode={"classic"} /></Modal>}
         {/* {showModal === "streak" && <Modal onClose={() => setShowModal(null)} title="Streak..."><p>Working in progress...</p></Modal>} */}
@@ -376,8 +371,9 @@ function Home() {
         {showModal === "transfer-data" && <Modal isOpen onClose={() => setShowModal(null)} title="Transfer Data..." isTransferDataSubPages={true} returnPage={() => {setShowModal("stats")}}><TransferDataText onSubmitImportData={() => {setShowModal("import-data")}} onSubmitExportData={() => {setShowModal("export-data")}} /></Modal>}
         {showModal === "import-data" && <Modal isOpen onClose={() => {transferData.clearError(); setShowModal(null);}} title="Import Data..." isTransferDataSubPages={true} returnPage={() => {setShowModal("transfer-data")}}><ImportDataText handleRedeem={transferData.handleRedeem} isRedeeming={transferData.isRedeeming} redeemError={transferData.redeemError} /></Modal>}
         {showModal === "export-data" && <Modal isOpen onClose={() => setShowModal(null)} title="Export Data..." isTransferDataSubPages={true} returnPage={() => {setShowModal("transfer-data")}}><ExportDataText handleGenerate={transferData.handleGenerate} generatedCodes={transferData.generatedCodes} timeLeft={transferData.timeLeft} expires_At={transferData.expiresAt} fetchActiveCode={transferData.fetchActiveCode} /></Modal>}
-      </div>
 
+      </div>
+      
       <div className="w-full flex flex-col items-center justify-center mb-10.25">
         <AnswerHintsBox 
         memberCount={gameData?.member_count ?? null} 
@@ -481,11 +477,11 @@ function Home() {
         </span>
       </div>
       )}
-
+      
       {/* <p>ID: {gameData?.answer_id}</p> */}
     </div>
     </>
   );
 }
 
-export default Home;
+export default ClassicMode;

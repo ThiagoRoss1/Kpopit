@@ -24,11 +24,11 @@ const NavBar = () => {
                         <img 
                             src="/kpopit-icon.png"
                             alt="Kpopit logo"
-                            className="w-12 h-12 object-contain"
+                            className="sm:w-12 sm:h-12 object-contain"
                             draggable={false}
                         />
 
-                        <span className="text-[#FF3399] text-2xl [text-shadow:1.6px_1.5px_5px_#FF3399]">• {currentPage}</span>
+                        <span className="text-[#FF3399] text-xl [text-shadow:2px_2px_0px_rgba(0,0,0,0.5),0px_0px_6px_#FF3399] transform-gpu">• {currentPage}</span>
                     </Link>
                 </div>
 

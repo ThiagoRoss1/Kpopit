@@ -8,7 +8,7 @@ export interface DropLink {
 export const GAMES_LINKS: DropLink[] = [
     { 
         label: "Classic",
-        path: "/",  // do not have classic yet so change after adding it 
+        path: "/classic",
         icon: "/public/kpopit-icon.png",
     },
     
@@ -22,7 +22,7 @@ export const GAMES_LINKS: DropLink[] = [
 export const IDOLS_LINKS: DropLink[] = [
     {
         label: "All Idols - Soon",
-        path: "/blurry",
+        path: "/idols",
         icon: "/public/kpopit-icon.png",
         isWip: true,
     }

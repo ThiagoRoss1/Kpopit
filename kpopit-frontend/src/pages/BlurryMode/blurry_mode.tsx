@@ -14,10 +14,11 @@ import type {
     CompleteGuessRequest,
     CompleteGuessTrafficRequest,
 } from "../../interfaces/gameInterfaces";
+import { Link } from "react-router-dom";
 import { decryptToken } from "../../utils/tokenEncryption";
 import BackgroundStyle from "../../components/Background/BackgroundStyle";
 import SearchBar from "../../components/GuessSearchBar/SearchBar";
-import TopButtons from "../../components/Blurry/buttons/TopButtons";
+import TopButtons from "../../components/buttons/TopButtons";
 import ModeOptions from "../../components/Blurry/buttons/ModeOptions";
 import GetBlurLevel, { BLUR_LEVELS } from "./blurLevels";
 import GuessGrid from "../../components/Blurry/GuessesGrid/GuessGrid";
@@ -331,14 +332,22 @@ function BlurryMode() {
 
     // Loading and error states
     if (isLoadingBlurryGameData || isLoadingAllIdols || !isInitialized) {
-        return <div className="flex w-full h-screen justify-center items-center text-white">Loading Kpopit...</div>;
+        return (
+            <div className="fixed inset-0 z-100 flex w-full h-screen bg-black justify-center items-center">
+                <span className="text-white animate-pulse">Loading Kpopit...</span>
+            </div>
+        );
     }
 
     if (isErrorAllIdols || isErrorBlurryGameData || !blurryGameData) {
         const error = blurryGameDataError as AxiosError;
         console.error("Error loading Blurry Mode data:", blurryGameDataError);
         console.error(error?.response?.data || error?.message);
-        return <div className="flex w-full h-screen justify-center items-center text-white">Error loading Kpopit. Please try again later.</div>;
+        return (
+            <div className="fixed inset-0 z-100 flex w-full h-screen bg-black justify-center items-center">
+                <span className="text-white animate-pulse">Error loading Kpopit. Please try again later.</span>
+            </div>
+        );
     }
 
     if (!dayChecked) return null;
@@ -347,13 +356,15 @@ function BlurryMode() {
         <>
         <BackgroundStyle attempts={attempts} />
         <div className="min-h-full w-full flex flex-col items-center justify-start mt-4">
-            <div className="flex items-center justify-center text-center w-3xs sm:w-3xs h-9 sm:h-14 mb-4
-            hover:scale-105 hover:cursor-pointer transition-all duration-300 transform-gpu">
+            <Link 
+                to="/"
+                className="flex items-center justify-center text-center w-3xs sm:w-3xs h-9 sm:h-14 mb-4
+                hover:scale-105 hover:cursor-pointer transition-all duration-300 transform-gpu">
                 <h1 className="leading-tight text-2xl sm:text-5xl font-bold text-center">
                     <span className="it-part">K</span>
                     <span className="kpop-part">blurry</span>
                 </h1>
-            </div>
+            </Link>
 
             <div className="flex items-center justify-center mb-4">
                 <TopButtons
