@@ -6,29 +6,28 @@ const Contact = () => {
         <BackgroundStyle />
         <div className="w-full flex-1 overflow-y-auto flex items-start justify-center">
             <div className="flex flex-col items-center justify-center">
-                <div className="w-full sm:w-full max-h-fit bg-white/0 overflow-hidden rounded-4xl
+                <div className="max-xxs:w-70 xxs:w-90 xs:w-90 xm:w-100 zm:w-110 sm:w-full max-h-fit bg-white/0 overflow-hidden rounded-4xl
                 shadow-[0px_2px_10px_4px_rgba(255,255,255,0.5)] mx-auto mt-20 mb-10">
                     <div className="flex flex-col items-center justify-center w-full h-10 mt-10">
-                        <h1 className="xxs:text-2xl xm:text-3xl sm:text-3xl font-bold
+                        <h1 className="max-xxs:text-2xl xxs:text-2xl xs:text-3xl sm:text-3xl font-bold
                         text-[#b43777] brightness-110 [text-shadow:1.2px_1.2px_4px_rgba(0,0,0,0.8),0_0_12px_rgba(180,55,119,0.60)]">
                             Contact
                         </h1>
                     </div>
 
-                    <div className="flex flex-col items-center justify-center px-8">
+                    <div className="flex flex-col items-center justify-center max-xxs:px-1 sm:px-8">
                         <div className="flex flex-col items-center justify-center mt-8 gap-3">
-                            <h2 className="text-2xl font-bold text-white [text-shadow:1.2px_1.2px_4px_rgba(0,0,0,0.8)] brightness-110">
-                                Something to talk about KpopIt ?
+                            <h2 className="max-xxs:text-lg xxs:text-lg xs:text-xl zm:text-2xl font-bold text-white [text-shadow:1.2px_1.2px_4px_rgba(0,0,0,0.8)] brightness-110">
+                                Want to talk about KpopIt ?
                             </h2>
                         </div>
                     </div>
 
                     <div className="flex flex-col items-center justify-center mt-0 px-8">
                         <span className="text-base mt-1 text-white [text-shadow:1.2px_1.2px_4px_rgba(0,0,0,0.8)] brightness-110">
-                            If you find any issues or have any questions, feedback feel free to contact me!
+                            If you find any issues, have any questions, or just want to give feedback, feel free to contact me!
                         </span>
                     </div>
-                    
 
                     <div className="flex flex-col items-center justify-center mt-8 mb-8 px-8">
                         <div className="flex flex-row items-center justify-center">

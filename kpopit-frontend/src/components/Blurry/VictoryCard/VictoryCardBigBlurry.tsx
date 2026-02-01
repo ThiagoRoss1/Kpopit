@@ -105,36 +105,36 @@ const VictoryCardBigBlurry = (props: BlurryVictoryCardBigProps) => {
             
             {/* Idol image */}
             <div className="relative flex flex-row items-center justify-center w-full h-64 mb-5">
-                <div className="absolute flex items-center justify-center bg-transparent border-2 border-white
-                sm:w-50 sm:h-64 rounded-[46px] overflow-hidden -rotate-8 z-0 left-40 opacity-30 mb-4">
+                <div className="hidden absolute sm:flex items-center justify-center bg-transparent border-2 border-white
+                w-fit h-64 sm:w-50 sm:h-64 rounded-[46px] overflow-hidden -rotate-8 z-0 left-40 opacity-30 mb-4">
                 {/* hover:opacity-100 hover:z-30 hover:scale-105 transition-all duration-500 transform-gpu - see it later*/}
                     <img
                         src={`${import.meta.env.VITE_IMAGE_BUCKET_URL}${idol_blur_image}`}
                         alt={`Blurry image of ${cardInfo.artist_name}`}
                         draggable={false}
-                        className="sm:w-50 sm:h-64 object-cover" 
+                        className="w-50 h-64 sm:w-50 sm:h-64 object-cover" 
                     />
                 </div>
 
                 <div className="absolute flex items-center justify-center bg-transparent border-2 border-white
-                sm:w-50 sm:h-64 rounded-[46px] overflow-hidden z-20 mb-4
+                w-fit h-64 sm:w-50 sm:h-64 rounded-[46px] overflow-hidden z-20 mb-4
                 hover:scale-110 hover:z-30 hover:brightness-110 hover:cursor-pointer transition-all duration-500 transform-gpu">
                     <img
                         src={`${import.meta.env.VITE_IMAGE_BUCKET_URL}${idol_blur_image}`}
                         alt={`Blurry image of ${cardInfo.artist_name}`}
                         draggable={false}
-                        className="sm:w-50 sm:h-64 object-cover" 
+                        className="w-50 h-64 sm:w-50 sm:h-64 object-cover" 
                     />
                 </div>
 
-                <div className="absolute flex items-center justify-center bg-transparent border-2 border-white
-                sm:w-50 sm:h-64 rounded-[46px] overflow-hidden rotate-8 z-0 right-40 opacity-30 mb-4">
+                <div className="hidden absolute sm:flex items-center justify-center bg-transparent border-2 border-white
+                w-fit h-64 sm:w-50 sm:h-64 rounded-[46px] overflow-hidden rotate-8 z-0 right-40 opacity-30 mb-4">
                 {/* hover:opacity-100 hover:z-30 hover:scale-105 transition-all duration-500 transform-gpu - see it later */}
                     <img
                         src={`${import.meta.env.VITE_IMAGE_BUCKET_URL}${idol_blur_image}`}
                         alt={`Blurry image of ${cardInfo.artist_name}`}
                         draggable={false}
-                        className="sm:w-50 sm:h-64 object-cover" 
+                        className="w-50 h-64 sm:w-50 sm:h-64 object-cover" 
                     />
                 </div>
             </div>
@@ -143,18 +143,18 @@ const VictoryCardBigBlurry = (props: BlurryVictoryCardBigProps) => {
             {yesterdayIdol && yesterdayIdolImage && (
             <div className="relative w-full h-fit sm:h-50 mb-5 px-4 sm:px-6">
                 <div className="relative w-full h-full items-center justify-center sm:text-center bg-linear-to-r from-gray-600 to-gray-900 
-                shadow-[0_0_4px_2px_rgba(0,0,0,0.2),inset_2px_2px_4px_2px_rgba(0,0,0,0.2)] border border-white/35 py-4 rounded-[20px] overflow-hidden
+                shadow-[0_0_4px_2px_rgba(0,0,0,0.2),inset_2px_2px_4px_2px_rgba(0,0,0,0.2)] border border-white/35 py-2 sm:py-4 rounded-[20px] overflow-hidden
                 hover:scale-102 hover:brightness-110 hover:bg-linear-to-r transition-all duration-500 transform-gpu">
                     <div className="relative w-full h-full flex flex-col items-center justify-between gap-1">
                         <span className="max-xxs:text-lg xxs:text-lg xs:text-xl sm:text-2xl font-bold select-none">
                             Yesterday idol was
                         </span>
 
-                        <div className="flex flex-row w-full h-full items-center justify-start max-xxs:pr-0 pl-8 sm:pl-12 gap-6 sm:gap-8">
+                        <div className="flex flex-row w-full h-full items-center justify-start max-xxs:pr-0 pl-8 sm:pl-12 max-xxs:gap-2 xxs:gap-4 sm:gap-8">
                             <img src={`${import.meta.env.VITE_IMAGE_BUCKET_URL}${yesterdayIdolImage}`} alt="Idol" className="max-xxs:w-16 max-xxs:h-16 xxs:w-20 xxs:h-20 xs:w-22 xs:h-22 sm:w-28 sm:h-28 rounded-full sm:rounded-full object-cover object-center hover:scale-105 
                             select-none border-b-4 border-r-4 border-black/30 transition-transform duration-500 will-change-transform transform-gpu" draggable={false} />
 
-                            <div className="max-xxs:text-[15px] xxs:text-base xs:text-[18px] xm:text-xl sm:text-2xl font-semibold select-none transform-gpu ml-4 sm:ml-0">
+                            <div className="max-xxs:text-lg xxs:text-xl xm:text-xl sm:text-2xl font-semibold select-none transform-gpu ml-4 sm:ml-0">
                                 <span className="bg-linear-to-r from-[#db3189] via-[#e44d86] to-[#ec5e65] text-transparent bg-clip-text brightness-105">
                                     {yesterdayIdol}
                                 </span>
@@ -205,7 +205,7 @@ const VictoryCardBigBlurry = (props: BlurryVictoryCardBigProps) => {
                                                 src="/kpopit-icon.png"
                                                 alt="Kpopit Icon"
                                                 draggable={false}
-                                                className="sm:w-12 sm:h-12 object-contain"
+                                                className="w-12 h-12 sm:w-12 sm:h-12 object-contain"
                                             />
                                             <span className="absolute text-white font-semibold text-sm [text-shadow:1px_1px_4px_rgba(0,0,0,0.7)]">{mode.name}</span>
                                         </div>

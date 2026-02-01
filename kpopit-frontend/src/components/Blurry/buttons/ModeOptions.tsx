@@ -18,10 +18,10 @@ const ModeOptions = (props: ModeOptionsProps) => {
     const remaining = COLOR - attempts;
 
     return (
-    <div className="flex sm:w-60 sm:h-16 justify-center items-center
-    bg-transparent border border-white rounded-2xl sm:gap-4 sm:p-2">
-        <div className="flex flex-1 flex-col items-center sm:gap-0.5 sm:mb-0.5">
-            <span className="text-white [text-shadow:1.2px_1.2px_4px_rgba(0,0,0,0.8)] text-sm">
+    <div className="flex w-50 h-14 sm:w-60 sm:h-16 justify-center items-center
+    bg-transparent border border-white rounded-2xl gap-0 p-1 sm:gap-4 sm:p-2">
+        <div className="flex flex-1 flex-col items-center gap-0.5 mb-0.5 sm:gap-0.5 sm:mb-0.5">
+            <span className="text-white [text-shadow:1.2px_1.2px_4px_rgba(0,0,0,0.8)] text-[12px] sm:text-sm">
                 Hardmode
             </span>
 
@@ -32,11 +32,11 @@ const ModeOptions = (props: ModeOptionsProps) => {
             />
         </div>
 
-        <div className="sm:w-0.5 sm:h-8 bg-gray-300" />
+        <div className="w-0.5 h-8 sm:w-0.5 sm:h-8 bg-gray-300" />
 
-        <div className={`flex flex-1 flex-col items-center sm:gap-0.5 sm:mb-0.5
+        <div className={`flex flex-1 flex-col items-center gap-0.5 mb-0.5 sm:gap-0.5 sm:mb-0.5
             ${!canUseColorMode ? "opacity-50 grayscale" : ""}`}>
-            <span className="text-white [text-shadow:1.2px_1.2px_4px_rgba(0,0,0,0.8)] text-sm">
+            <span className="text-white [text-shadow:1.2px_1.2px_4px_rgba(0,0,0,0.8)] text-[12px] sm:text-sm">
                 Color {remaining > 0 ? `(${remaining})` : ""}
             </span>
 

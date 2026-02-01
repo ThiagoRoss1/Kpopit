@@ -47,6 +47,9 @@ function BlurryMode() {
     const [confetti, setConfetti] = useState<boolean>(false);
     const [attempts, setAttempts] = useState<number>(0);
 
+    // Mobile
+    const [isTouched, setIsTouched] = useState<boolean>(false);
+
     const { userToken, initUser, decryptedTokenRef, allIdolsData, isLoadingAllIdols, 
         isInitialized, userStatsData, transferData, isErrorAllIdols, queryClient} = useSharedGameData();
 
@@ -358,11 +361,11 @@ function BlurryMode() {
         <div className="min-h-full w-full flex flex-col items-center justify-start mt-4">
             <Link 
                 to="/"
-                className="flex items-center justify-center text-center w-3xs sm:w-3xs h-9 sm:h-14 mb-4
+                className="flex items-center justify-center text-center w-fit sm:w-3xs h-fit sm:h-14 mb-4
                 hover:scale-105 hover:cursor-pointer transition-all duration-300 transform-gpu">
-                <h1 className="leading-tight text-2xl sm:text-5xl font-bold text-center">
-                    <span className="it-part">K</span>
-                    <span className="kpop-part">blurry</span>
+                <h1 className="leading-tight max-xxs:text-3xl xxs:text-3xl xs:text-4xl sm:text-5xl font-bold text-center">
+                    <span className="kpop-part">Blur</span>
+                    <span className="it-part">it</span>
                 </h1>
             </Link>
 
@@ -382,11 +385,27 @@ function BlurryMode() {
                 {showModal === "export-data" && <Modal isOpen onClose={() => setShowModal(null)} title="Export Data..." isTransferDataSubPages={true} returnPage={() => {setShowModal("transfer-data")}}><ExportDataText handleGenerate={transferData.handleGenerate} generatedCodes={transferData.generatedCodes} timeLeft={transferData.timeLeft} expires_At={transferData.expiresAt} fetchActiveCode={transferData.fetchActiveCode} /></Modal>}
             </div>
 
+            {/* Mobile background card zoom */}
+            {isTouched && (
+                <div 
+                    className="fixed inset-0 z-40 bg-black/60"
+                    onTouchEnd={() => setIsTouched(false)}
+                    />
+            )}
+
             {/* Blurry Image */}
-            <div className="relative group">
+            <div className="relative group" onTouchEnd={() => setIsTouched(false)}>
                 <div className={`relative flex items-center justify-center bg-transparent border-2 border-white
-                sm:w-100 sm:h-128 rounded-[46px] overflow-hidden mb-4
-                ${isImageLoading ? 'bg-gray-600' : 'bg-black'}`}>
+                max-xxs:w-55 max-xxs:h-80 xxs:w-60 xxs:h-88 xs:w-70 xs:h-98 xm:w-70 xm:h-98 zm:w-80 zm:h-108 sm:w-100 sm:h-128 rounded-[46px] overflow-hidden mb-4
+                ${isImageLoading ? 'bg-gray-600' : 'bg-black'}
+                ${isTouched ? 'scale-110 z-50' : 'scale-100'} transition-all duration-300 transform-gpu`}
+                    onTouchEnd={(e) => {
+                        if (window.matchMedia("(orientation: portrait)").matches) {
+                            setIsTouched(!isTouched)
+                            e.stopPropagation();
+                        }
+                    }}
+                >
                     {/* Corner Decorations */}
                     {[
                         "top-5 left-5 border-l-3 border-t-3", "top-5 right-5 border-r-3 border-t-3",
@@ -394,7 +413,7 @@ function BlurryMode() {
                     ].map((cornerClasses, index) => (
                         <div
                             key={index}
-                            className={`absolute w-6 h-6 z-10 border-white/20 ${cornerClasses}`}
+                            className={`absolute max-xxs:w-4 max-xxs:h-4 xxs:w-4 xxs:h-4 xs:w-6 xs:h-6 z-10 border-white/20 ${cornerClasses}`}
                         />
                     ))}
 
@@ -405,7 +424,7 @@ function BlurryMode() {
                         alt={`Blurry image of ${artistName}`}
                         onLoad={() => setIsImageLoading(false)}
                         draggable={false}
-                        className={`sm:w-100 sm:h-128 object-cover transition-all duration-1000
+                        className={`max-xxs:w-55 max-xxs:h-80 xxs:w-60 xxs:h-88 xs:w-70 xs:h-98 xm:w-70 xm:h-98 zm:w-80 zm:h-108 sm:w-100 sm:h-128 object-cover transition-all duration-1000
                         ${isImageLoading ? 'opacity-0' : 'opacity-100'}`} // load image (TODO)
                     />
                 </div>
@@ -436,7 +455,7 @@ function BlurryMode() {
             )}
             
             <div className="flex flex-row items-center justify-center mb-4">
-                <span className="leading-tight text-base sm:text-base">
+                <span className="leading-tight max-xxs:text-[12px] xxs:text-sm xs:text-base sm:text-base">
                     <span className="text-[#b43777] [text-shadow:1.2px_1.2px_4px_rgba(0,0,0,1.8),0_0_12px_rgba(180,55,119,1.0)] brightness-110">
                         {dailyUserCount?.data.user_count}
                     </span> <span className="text-[#d7d7d7]/85 [text-shadow:1.2px_1.2px_4px_rgba(0,0,0,1.8),0_0_12px_rgba(255,255,255,0.2)]">

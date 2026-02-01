@@ -15,6 +15,7 @@
   --breakpoint-xxs: 370px;
   --breakpoint-xs: 414px;
   --breakpoint-xm: 430px;
+  --breakpoint-zm: 480px;
 }
 
 body {

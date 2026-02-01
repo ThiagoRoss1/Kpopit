@@ -9,10 +9,10 @@ const InfoButtons = (props: InfoProps) => {
     const { onSubmitChangelog, onSubmitAbout } = props;
 
     // Left and Right Button Styles //
-    const buttonCardStyle = "inline-flex relative max-xxs:w-20 max-xxs:h-10 xxs:w-25 xxs:h-10 xs:w-28 xs:h-10 sm:w-52 sm:h-13 overflow-hidden rounded-2xl sm:rounded-2xl border-1 border-white bg-transparent backdrop-blur-sm sm:backdrop-blur-xl shadow-[4px_4px_4px_1px_rgba(0,0,0,0.25),inset_0_4px_4px_0_rgba(0,0,0,0.25)]";
+    const buttonCardStyle = "inline-flex relative max-xxs:w-30 max-xxs:h-10 xxs:w-34 xxs:h-11 xs:w-40 xs:h-12 sm:w-52 sm:h-13 overflow-hidden rounded-2xl sm:rounded-2xl border-1 border-white bg-transparent backdrop-blur-sm sm:backdrop-blur-xl shadow-[4px_4px_4px_1px_rgba(0,0,0,0.25),inset_0_4px_4px_0_rgba(0,0,0,0.25)]";
 
     const buttonAnimation = ""
-    const buttonTextStyle = "inline-flex h-full w-full items-center justify-center rounded-2xl sm:rounded-2xl max-xxs:text-[12px] xxs:text-[14px] xs:text-base sm:text-[20px] text-white font-semibold text-shadow-[2px_2px_4px_rgba(0,0,0,0.5)]";
+    const buttonTextStyle = "inline-flex h-full w-full items-center justify-center rounded-2xl sm:rounded-2xl max-xxs:text-[14px] xxs:text-[14px] xs:text-base sm:text-[20px] text-white font-semibold text-shadow-[2px_2px_4px_rgba(0,0,0,0.5)]";
 
     // Hover //
     const hoverEffect = "hover:brightness-125 hover:scale-105 hover:cursor-pointer hover:bg-black/80 transition-transform transform-gpu firefox:transition-all firefox:will-change-transform duration-500";    
