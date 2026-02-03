@@ -65,7 +65,7 @@ def seed_table(cursor, csv_file, table_name, columns, conflict_column=["id"]):
 
 def run_seed():
     connect = sqlite3.connect(DB_FILE)
-    connect.execute("PRAGMA foreign_keys=ON;")
+    connect.execute("PRAGMA foreign_keys=OFF;")
     connect.execute("PRAGMA journal_mode=WAL;")
     connect.execute("PRAGMA synchronous=NORMAL;")
     cursor = connect.cursor()
@@ -131,6 +131,7 @@ def run_seed():
         print(f"Rolled back changes due to error.")
 
     finally:
+        connect.execute("PRAGMA foreign_keys=ON;")
         # Close connection
         connect.close()
 
