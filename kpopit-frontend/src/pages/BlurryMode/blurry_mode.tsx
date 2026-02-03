@@ -85,6 +85,7 @@ function BlurryMode() {
         enabled: isInitialized || !!decryptedTokenRef.current,
         staleTime: 1000 * 60 * 60 * 4,
         refetchOnWindowFocus: false,
+        placeholderData: (previousData) => previousData,
     });
 
     useEffect(() => {
@@ -209,30 +210,19 @@ function BlurryMode() {
                 console.log("Got user token guess:", decryptedTokenRef.current);
             }
 
-            setGuesses((prev) => {
-                const updatedGuesses = [...prev, data];
-            
-                localStorage.setItem("blurryGuessesDetails", JSON.stringify(updatedGuesses));
-                const names = updatedGuesses.map(g => g.guessed_idol_data?.artist_name);
-                localStorage.setItem("blurryGuessedIdols", JSON.stringify(names));
 
-                // Victory and game complete
-                localStorage.setItem("blurryGameComplete", data.guess_correct ? "true" : "false");
-                localStorage.setItem("blurryGameWon", data.guess_correct ? "true" : "false");
+            queryClient.invalidateQueries({queryKey: ["userStats"]});
+            queryUserCount.invalidateQueries({queryKey: ["dailyUserCount", gameMode]});
+            queryClient.invalidateQueries({queryKey: ["blurryUserPosition", gameMode]});
 
-                queryClient.invalidateQueries({queryKey: ["userStats"]});
-                queryUserCount.invalidateQueries({queryKey: ["dailyUserCount", gameMode]});
-                queryClient.invalidateQueries({queryKey: ["blurryUserPosition", gameMode]});
-                
-                saveGameState({
-                    blurry_guesses_details: updatedGuesses,
-                    game_complete: data.guess_correct,
-                    game_won: data.guess_correct,
-                    game_date: variables.game_date,
-                    guessed_idols: updatedGuesses.map(g => g.guessed_idol_data?.artist_name),
-                });
+            const currentGuesses = JSON.parse(localStorage.getItem("blurryGuessesDetails") || "[]") as GuessResponse<Partial<FeedbackData>>[];
 
-                return updatedGuesses;
+            saveGameState({
+                blurry_guesses_details: currentGuesses,
+                game_complete: data.guess_correct,
+                game_won: data.guess_correct,
+                game_date: variables.game_date,
+                guessed_idols: currentGuesses.map(g => g.guessed_idol_data?.artist_name),
             });
         },
         onError: (error) => {
@@ -277,6 +267,37 @@ function BlurryMode() {
             setSelectedIdol(null);
             return;
         }
+
+        const guessedIdolData = allIdolsData.find(idol => idol.id === selectedIdol.id);
+        if (!guessedIdolData) {
+            console.error("Idol data not found");
+            return;
+        }
+
+        const isCorrectGuess = guessedIdolData.id === blurryGameData.answer_id;
+
+        const localGuessResult: GuessResponse<Partial<FeedbackData>> = {
+            guess_correct: isCorrectGuess,
+            feedback: {},
+            guessed_idol_data: {
+                ...guessedIdolData,
+                idol_id: guessedIdolData.id,
+            }
+        };
+
+        setGuesses(prev => {
+            const updatedGuesses = [...prev, localGuessResult];
+            localStorage.setItem("blurryGuessesDetails", JSON.stringify(updatedGuesses));
+            const names = updatedGuesses.map(g => g.guessed_idol_data?.artist_name);
+            localStorage.setItem("blurryGuessedIdols", JSON.stringify(names));
+
+            localStorage.setItem("blurryGameComplete", isCorrectGuess ? "true" : "false");
+            localStorage.setItem("blurryGameWon", isCorrectGuess ? "true" : "false");
+
+            return updatedGuesses;
+        });
+
+        setAttempts(prev => prev + 1);
 
         const encrypted = localStorage.getItem("userToken") || "";
         const token = decryptedTokenRef.current || await decryptToken(encrypted);
@@ -334,7 +355,7 @@ function BlurryMode() {
     const wonWithoutColors = isCorrect && !blurryToggleOptions.color;
 
     // Loading and error states
-    if (isLoadingBlurryGameData || isLoadingAllIdols || !isInitialized) {
+    if ((isLoadingBlurryGameData || isLoadingAllIdols || !isInitialized) && !blurryGameData) {
         return (
             <div className="fixed inset-0 z-100 flex w-full h-screen bg-black justify-center items-center">
                 <span className="text-white animate-pulse">Loading Kpopit...</span>

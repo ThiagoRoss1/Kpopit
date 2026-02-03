@@ -16,8 +16,6 @@ if DB_FILE:
         print(f"Ensured database directory exists: {db_dir}")
 
 try:
-
-
     connect = sqlite3.connect(DB_FILE)
     cursor = connect.cursor()
     

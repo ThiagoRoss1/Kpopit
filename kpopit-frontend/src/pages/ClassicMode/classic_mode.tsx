@@ -83,6 +83,7 @@ function ClassicMode() {
     staleTime: 1000 * 60 * 60 * 4,
     refetchOnWindowFocus: false,
     enabled: isInitialized,
+    placeholderData: (previousData) => previousData,
   });
 
   const yesterday = useQuery<YesterdayIdol>({
@@ -319,7 +320,7 @@ function ClassicMode() {
   // All gameModes for victory card
   const { otherModes } = useAllGameModes(gameMode);
   
-  if (isLoadingGameData || isLoadingAllIdols || !isInitialized) {
+  if ((isLoadingGameData || isLoadingAllIdols || !isInitialized) && !gameData) {
     return (
       <div className="fixed inset-0 z-100 flex w-full h-screen bg-black justify-center items-center">
         <span className="text-white animate-pulse">Loading Kpopit...</span>

@@ -1,6 +1,6 @@
 export const useAllGameModes = (currentMode: string) => {
     const allModes = [
-        { id: 'classic', name: 'Classic', path: '/' },
+        { id: 'classic', name: 'Classic', path: '/classic' },
         { id: 'blurry', name: 'Blurry', path: '/blurry' },
     ].map(mode => ({
         ...mode,
