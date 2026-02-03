@@ -49,7 +49,7 @@ function Home() {
                     <div className="w-full h-fit flex flex-col bg-transparent items-center justify-center gap-6 sm:gap-10">
                         {/* Classic */}
                         <div 
-                            className="flex max-xxs:w-70 xxs:w-80 xs:w-90 xm:w-94 sm:w-117.5 max-xxs:h-20 xxs:h-20 xs:h-20 xm:h-20 sm:h-25 max-xxs:px-1 xxs:px-1 xm:px-2 bg-transparent border border-white rounded-3xl
+                            className="flex max-xxs:w-70 xxs:w-80 xs:w-90 xm:w-94 sm:w-117.5 h-20 sm:h-25 max-xxs:px-1 xxs:px-1 xm:px-2 bg-transparent border border-white rounded-3xl
                             items-center justify-start max-xxs:gap-0 xxs:gap-1 xs:gap-2 shadow-[4px_4px_0px_0px_rgba(255,255,255,1)] hover:shadow-[0px_0px_0px_0px_rgba(255,255,255,1)]
                             hover:bg-black hover:translate-x-1 hover:translate-y-1 transition-all duration-200 transform-gpu">
                             <div className="flex w-20 h-20 bg-white/0 rounded-full items-center text-center justify-center">
