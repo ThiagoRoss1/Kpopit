@@ -9,9 +9,21 @@ load_dotenv()
 DB_FILE = os.getenv("DB_FILE")
 DATA_FOLDER = os.getenv("DATA_FOLDER")
 
+if DB_FILE:
+    db_dir = os.path.dirname(DB_FILE)
+    if db_dir:
+        os.makedirs(db_dir, exist_ok=True)
+        print(f"Ensured database directory exists: {db_dir}")
 
-connect = sqlite3.connect(DB_FILE)
-cursor = connect.cursor()
+try:
+
+
+    connect = sqlite3.connect(DB_FILE)
+    cursor = connect.cursor()
+    
+except Exception as e:
+    print(f"Error connecting to database: {e}")
+    exit(1)
 
 idols_sql = """
     CREATE TABLE IF NOT EXISTS idols (
