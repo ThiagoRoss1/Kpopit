@@ -31,6 +31,9 @@ def get_daily_blurry_idol():
 
     connect.commit()
 
+    # For testing purposes, we can override the idol_id here
+    # idol_id = 1
+
     idol_blurry_data = repository.fetch_blurry_idol_data(idol_id)
 
     if not idol_blurry_data:

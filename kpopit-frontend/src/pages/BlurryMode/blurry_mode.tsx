@@ -297,8 +297,6 @@ function BlurryMode() {
             return updatedGuesses;
         });
 
-        setAttempts(prev => prev + 1);
-
         const encrypted = localStorage.getItem("userToken") || "";
         const token = decryptedTokenRef.current || await decryptToken(encrypted);
         
