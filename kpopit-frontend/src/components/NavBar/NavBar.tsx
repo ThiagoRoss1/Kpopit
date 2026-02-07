@@ -1,6 +1,9 @@
 import { Link, useLocation } from "react-router-dom";
+import { useState } from "react";
 import ButtonsDroplist from "./ButtonsDroplist";
+import ButtonsListMobile from "./ButtonsListMobile";
 import { GAMES_LINKS, IDOLS_LINKS } from "./navigation";
+import { Menu, X } from "lucide-react";
 
 export type GameMode = "classic" | "blurry" | "popIt";
 const MODES: GameMode[] = ["classic", "blurry"];
@@ -11,8 +14,10 @@ const NavBar = () => {
     const path = location.pathname;
     const currentPage = path === "/" ? "" : MODES.find(m => path.includes(m)) || "classic";
 
+    const [isMobileMenuOpen, setIsMobileMenuOpen] = useState<boolean>(false);
+
     return (
-        <nav className="sticky top-0 z-50 w-full sm:w-full h-12 sm:h-15 border-b border-[#FF3399]/40 bg-black/50 backdrop-blur-xl">
+        <nav className="sticky top-0 z-[100] w-full sm:w-full h-12 sm:h-15 border-b border-[#FF3399]/40 bg-black/50 backdrop-blur-xl px-2 sm:px-4">
             <div className="max-w-full sm:max-w-360 mx-auto px-2 sm:px-0 h-full flex items-center justify-between">
 
                 {/* Logo - Left part */}
@@ -32,8 +37,8 @@ const NavBar = () => {
                     </Link>
                 </div>
 
-                {/* Buttons - Center-right part */}
-                <div className="flex items-center gap-1 sm:gap-4">
+                {/* Buttons PC - Center-right part */}
+                <div className="hidden md:flex items-center gap-1 sm:gap-4">
                     {/* Games */}
                     <ButtonsDroplist
                         buttonName="Games" 
@@ -56,6 +61,26 @@ const NavBar = () => {
                     >
                         <span className="flex flex-row text-white max-xxs:text-[14px] xxs:text-[14px] xs:text-[14px] sm:text-base gap-1">Contact</span>
                     </Link>
+                </div>
+
+                {/* Buttons Mobile - Right part */}
+                <div className="md:hidden flex items-center">
+                    <button 
+                        id="mobile-menu-button"
+                        className="w-12 h-12 bg-transparent"
+                        onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
+                    >
+                        {isMobileMenuOpen ? (
+                            <X className="w-8 h-8 text-[#e70a7d] mx-auto transition-all duration-300 transform-gpu ease-in-out" />
+
+                        ) : (
+
+                            <Menu className="w-8 h-8 text-[#e70a7d] mx-auto transition-all duration-300 transform-gpu ease-in-out" />
+                        )}
+
+                    </button>
+
+                    {isMobileMenuOpen && <ButtonsListMobile isOpen={isMobileMenuOpen} onClose={() => setIsMobileMenuOpen(false)} />}
                 </div>
             </div>
         </nav>

@@ -28,7 +28,7 @@ const ButtonsDroplist = (props: ButtonsDroplistProps) => {
                     className={`flex items-center justify-center rounded-3xl hover:cursor-pointer hover:scale-105 hover:bg-[#b43777] transition-all duration-300 transform-gpu ${className || ""}`}
                     onClick={() => setIsOpen(!isOpen)}    
                     >
-                    <span className="flex flex-row text-white max-xxs:text-[14px] xxs:text-[14px] xs:text-[14px] sm:text-base gap-1 sm:gap-1.5 text-center items-center justify-center">{buttonName} <ChevronDown className="w-3.5 h-3.5 sm:w-4.5 sm:h-4.5" /></span>
+                    <span className="flex flex-row text-white max-xxs:text-[14px] xxs:text-[14px] xs:text-[14px] sm:text-base gap-1 sm:gap-1.5 text-center items-center justify-center">{buttonName} <ChevronDown className={`w-3.5 h-3.5 sm:w-4.5 sm:h-4.5 transition-all duration-300 transform-gpu ${isOpen ? "rotate-180" : ""}`} /></span>
                 </button>
 
                 <DroplistBase isOpen={isOpen} onClose={() => setIsOpen(false)} containerRef={containerRef} className={`${isGrid ? "max-xxs:w-45 xxs:w-55 xm:w-65 sm:w-80 lg:w-100" : "w-50"} h-auto`}>
