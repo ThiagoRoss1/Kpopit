@@ -17,7 +17,7 @@ const NavBar = () => {
     const [isMobileMenuOpen, setIsMobileMenuOpen] = useState<boolean>(false);
 
     return (
-        <nav className="sticky top-0 z-[100] w-full sm:w-full h-12 sm:h-15 border-b border-[#FF3399]/40 bg-black/50 backdrop-blur-xl px-2 sm:px-4">
+        <nav className="sticky top-0 z-100 w-full sm:w-full h-12 sm:h-15 border-b border-[#FF3399]/40 bg-black/50 backdrop-blur-xl px-2 sm:px-4">
             <div className="max-w-full sm:max-w-360 mx-auto px-2 sm:px-0 h-full flex items-center justify-between">
 
                 {/* Logo - Left part */}
@@ -70,17 +70,21 @@ const NavBar = () => {
                         className="w-12 h-12 bg-transparent"
                         onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
                     >
-                        {isMobileMenuOpen ? (
-                            <X className="w-8 h-8 text-[#e70a7d] mx-auto transition-all duration-300 transform-gpu ease-in-out" />
+                        <div 
+                            className={`relative w-full h-full flex items-center justify-center transition-all duration-500 ease-in-out
+                            transform-gpu ${isMobileMenuOpen ? "rotate-180" : "rotate-0"}`}>
 
-                        ) : (
+                            <Menu 
+                                className={`absolute w-8 h-8 text-[#e70a7d] mx-auto transition-all duration-500 transform-gpu ease-in-out
+                                ${isMobileMenuOpen ? "opacity-0 scale-50 rotate-90" : "opacity-100 scale-100 rotate-0"}`} />
 
-                            <Menu className="w-8 h-8 text-[#e70a7d] mx-auto transition-all duration-300 transform-gpu ease-in-out" />
-                        )}
+                            <X className={`absolute w-8 h-8 text-[#e70a7d] mx-auto transition-all duration-500 transform-gpu ease-in-out
+                                ${isMobileMenuOpen ? "opacity-100 scale-100 rotate-0" : "opacity-0 scale-50 -rotate-90"}`} />
+                        </div>
 
                     </button>
 
-                    {isMobileMenuOpen && <ButtonsListMobile isOpen={isMobileMenuOpen} onClose={() => setIsMobileMenuOpen(false)} />}
+                    <ButtonsListMobile isOpen={isMobileMenuOpen} onClose={() => setIsMobileMenuOpen(false)} />
                 </div>
             </div>
         </nav>

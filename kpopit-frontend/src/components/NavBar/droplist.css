@@ -54,18 +54,48 @@
     }
 }
 
-@keyframes MobileListFadeSlide {
+@keyframes MobileNavBarEnter {
     0% {
         opacity: 0;
-        transform: translateY(-20px);
+        transform: translateY(20px);
+        animation-timing-function: cubic-bezier(0.28, 1, 0.25, 1);
+    }
+
+    75% {
+        opacity: 1;
+        animation-timing-function: cubic-bezier(0.68, -0.55, 0.27, 1.55);
     }
 
     100% {
         opacity: 1;
-        transform: translateY(0);
+        transform: translateY(0px);
+        animation-timing-function: ease-in-out;
     }
 }
 
-.mobile-list-enter {
-    animation: MobileListFadeSlide 0.3s ease forwards;;
+.mobile-navbar-enter {
+    animation: MobileNavBarEnter 1s ease-in-out forwards;
+}
+
+@keyframes MobileNavBarExit {
+    0% {
+        opacity: 1;
+        transform: translateY(0px);
+        animation-timing-function: ease-in-out;
+    }
+
+    75% {
+        opacity: 0;
+        animation-timing-function: cubic-bezier(0.68, -0.55, 0.27, 1.55);
+    }
+
+    100% {
+        opacity: 0;
+        transform: translateY(20px);
+        animation-timing-function: cubic-bezier(0.28, 1, 0.25, 1);
+    }
+}
+
+.mobile-navbar-exit {
+    animation: MobileNavBarExit 0.5s ease-in-out forwards;
 }

@@ -149,7 +149,7 @@ const AnswerHintsBox = (props: AnswerHintsBoxProps) => {
 
                     {/* Box 1 Front */}
                     <div className={`absolute inset-0 -rotate-y-180 backface-hidden max-xxs:w-40 max-xxs:h-24 xxs:w-45 xxs:h-24 xs:w-50 xs:h-26 sm:w-60 sm:h-30 border-2 border-white/50 rounded-2xl backdrop-blur-md 
-                    flex items-center justify-center text-center shadow-[4px_4px_4px_1px_rgba(0,0,0,0.15),inset_0_4px_4px_0_rgba(0,0,0,0.15)] ${colorize1 ? "bg-black/80 transition-colors duration-2000" : ""}`}>
+                    flex items-center justify-center text-center shadow-[4px_4px_4px_1px_rgba(0,0,0,0.15),inset_0_4px_4px_0_rgba(0,0,0,0.15)] ${colorize1 ? "bg-black transition-colors duration-2000" : ""}`}>
                         <div className="flex flex-col gap-1 sm:gap-3">
                             <h3 className="relative font-bold max-xxs:text-base xxs:text-lg xs:text-[20px] sm:text-[22px] text-[#b43777] drop-shadow-lg 
                             [text-shadow:1.2px_1.2px_4px_rgba(0,0,0,0.8),0_0_12px_rgba(180,55,119,0.55)]">
@@ -207,7 +207,7 @@ const AnswerHintsBox = (props: AnswerHintsBoxProps) => {
 
                     {/* Box 2 Front */}
                     <div className={`absolute inset-0 -rotate-y-180 backface-hidden max-xxs:w-40 max-xxs:h-24 xxs:w-45 xxs:h-24 xs:w-50 xs:h-26 sm:w-60 sm:h-30 border-2 border-white/50 rounded-2xl backdrop-blur-md 
-                    flex items-center justify-center text-center shadow-[4px_4px_4px_1px_rgba(0,0,0,0.15),inset_0_4px_4px_0_rgba(0,0,0,0.15)] ${colorize2 ? "bg-black/80 transition-colors duration-2000" : ""}`}>
+                    flex items-center justify-center text-center shadow-[4px_4px_4px_1px_rgba(0,0,0,0.15),inset_0_4px_4px_0_rgba(0,0,0,0.15)] ${colorize2 ? "bg-black transition-colors duration-2000" : ""}`}>
                         <div className="flex flex-col gap-2 sm:gap-4">
                             <h3 className="relative font-bold max-xxs:text-base xxs:text-lg xs:text-[20px] sm:text-[22px] text-[#b43777] drop-shadow-lg
                             [text-shadow:1.2px_1.2px_4px_rgba(0,0,0,0.8),0_0_12px_rgba(180,55,119,0.55)]">
