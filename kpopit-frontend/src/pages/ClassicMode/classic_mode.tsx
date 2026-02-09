@@ -52,6 +52,11 @@ function ClassicMode() {
   // Counter
   const [attempts, setAttempts] = useState<number>(0);
 
+  // Page title //
+  useEffect(() => {
+    document.title = "KpopIt Classic - K-pop Idol Guessing Game";
+  }, []);
+
   // Transfer data logic hook
   
   const { userToken, initUser, decryptedTokenRef, allIdolsData, isLoadingAllIdols, isErrorAllIdols, 

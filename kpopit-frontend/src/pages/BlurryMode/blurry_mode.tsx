@@ -47,6 +47,11 @@ function BlurryMode() {
     const [confetti, setConfetti] = useState<boolean>(false);
     const [attempts, setAttempts] = useState<number>(0);
 
+    // Page title //
+    useEffect(() => {
+        document.title = "KpopIt Blurry - K-pop Idol Image Guessing Game";
+    }, []);
+
     // Mobile
     const [isTouched, setIsTouched] = useState<boolean>(false);
 
