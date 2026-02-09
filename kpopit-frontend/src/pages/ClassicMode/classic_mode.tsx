@@ -415,9 +415,9 @@ function ClassicMode() {
       <div className="flex flex-row items-center justify-center mb-10">
         <span className="leading-tight text-base sm:text-base">
           <span className="text-[#b43777] [text-shadow:1.2px_1.2px_4px_rgba(0,0,0,1.8),0_0_12px_rgba(180,55,119,1.0)] brightness-110">
-            {dailyUserCount?.data.user_count}
+            {dailyUserCount?.data?.user_count ?? 0}
           </span> <span className="text-[#d7d7d7]/85 [text-shadow:1.2px_1.2px_4px_rgba(0,0,0,1.8),0_0_12px_rgba(255,255,255,0.2)]">
-            {dailyUserCount?.data.user_count === 1 ? "person" : "people"} already found today's idol!
+            {dailyUserCount?.data?.user_count === 1 ? "person" : "people"} already found today's idol!
           </span>
         </span>
       </div>
