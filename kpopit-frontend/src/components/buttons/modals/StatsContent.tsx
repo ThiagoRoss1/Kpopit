@@ -17,7 +17,7 @@ const StatsText = (props: StatsContentProps) => {
     const textToCopy = `
     My #KpopIt statistics:
     🥇 Games won: ${stats?.wins_count}
-    🤓 Average guesses: ${stats?.average_guesses.toFixed(2)}
+    🤓 Average guesses: ${stats?.average_guesses?.toFixed(2) ?? "0.00"}
     🎯 One shots: ${stats?.one_shot_wins}
     🔥 Current streak: ${stats?.current_streak}
     🚀 Max streak: ${stats?.max_streak}
@@ -47,7 +47,7 @@ const StatsText = (props: StatsContentProps) => {
                 hover:scale-105 hover:brightness-110 hover:bg-black hover:-rotate-1 hover:cursor-default transition-all duration-500 transform-gpu">
                     <h3 className="relative font-bold max-xxs:text-[11px] xxs:text-[12px] xs:text-[15px] sm:text-[23px] md:text-2xl text-[#b43777] drop-shadow-lg 
                     [text-shadow:1.2px_1.2px_4px_rgba(0,0,0,0.8),0_0_12px_rgba(180,55,119,0.55)]">Average Guesses</h3>
-                    <span className="max-xxs:text-2xl xxs:text-2xl xs:text-3xl [text-shadow:1.2px_1.2px_4px_rgba(0,0,0,0.8),0_0_12px_rgba(255,255,255,0.55)]">{stats?.average_guesses.toFixed(2)}</span>
+                    <span className="max-xxs:text-2xl xxs:text-2xl xs:text-3xl [text-shadow:1.2px_1.2px_4px_rgba(0,0,0,0.8),0_0_12px_rgba(255,255,255,0.55)]">{stats?.average_guesses?.toFixed(2) ?? "0.00"}</span>
                 </div>
 
                 {/* Current streak */}

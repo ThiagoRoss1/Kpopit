@@ -59,7 +59,7 @@ const VictoryCardBigBlurry = (props: BlurryVictoryCardBigProps) => {
 
                     <span className="max-xxs:text-[14px] xxs:text-[14px] xs:text-base sm:text-[18px] mt-2 text-center">
                         You were the <span className="font-bold bg-linear-to-r from-[#db3189] via-[#e44d86] to-[#ec5e65] text-transparent bg-clip-text brightness-110">
-                            {`${userPosition}${userPosition === 1 ? "st" : userPosition === 2 ? "nd" : userPosition === 3 ? "rd" : "th"}`}
+                            {userPosition !== null ? `${userPosition}${userPosition === 1 ? "st" : userPosition === 2 ? "nd" : userPosition === 3 ? "rd" : "th"}` : "..."}
                         </span> fan to guess correctly!
                     </span>
                 </div>
@@ -83,7 +83,7 @@ const VictoryCardBigBlurry = (props: BlurryVictoryCardBigProps) => {
                         gap-0.5 rounded-[18px] sm:rounded-[20px]">
                         <img src={RankPosition} alt="P" className="max-xxs:w-4 max-xxs:h-4 xxs:w-5 xxs:h-5 xs:w-6 xs:h-6 sm:w-6 sm:h-6 mt-2" draggable={false} />
                         <span className="max-xxs:text-lg xxs:text-[20px] xs:text-[22px] font-bold">
-                            {userRank}
+                            {userRank ?? "-"}
                         </span>
                         <span className="max-xxs:text-[12px] xxs:text-[12px] xs:text-[14px] font-semibold">
                             Position
