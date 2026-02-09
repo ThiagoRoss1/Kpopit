@@ -17,10 +17,13 @@ interface SearchBarProps {
   // Handle selection
   onIdolSelect: (idolName: string) => void;
   onIdolSelectId?: (idolId: IdolListItem) => void;
+
+  // Game modes
+  gameMode: 'classic' | 'blurry' | null;
 }
 
 const SearchBar = (props: SearchBarProps) => {
-  const { allIdols, value, onIdolSelect, onIdolSelectId, onSubmit, disabled, excludedIdols, onClose } =
+  const { allIdols, value, onIdolSelect, onIdolSelectId, gameMode, onSubmit, disabled, excludedIdols, onClose } =
     props;
 
   // Input value and Suggestions state
@@ -92,7 +95,7 @@ const SearchBar = (props: SearchBarProps) => {
           if (aPriority !== bPriority) return aPriority - bPriority;
           return aName.localeCompare(bName);
         })
-        .slice(0, 10); // Limit to 10 suggestions
+        .slice(0, 20); // Limit to 20 suggestions
       setSuggestions(filteredSuggestions);
 
       setSelectedIdol(filteredSuggestions[0] || null);
@@ -129,8 +132,9 @@ const SearchBar = (props: SearchBarProps) => {
   // Return JSX
   return (
     <div ref={containerRef} className="relative w-fit h-fit rounded-3xl">
-      <div className="relative max-xxs:w-80 max-xxs:h-13 xxs:w-90 xxs:h-13 xs:w-100 xs:h-13 max-w-full sm:w-140 sm:h-13 mx-auto flex items-center 
-      border border-white/50 rounded-3xl bg-linear-to-r from-[#000000]/10 to-[#b43777]/10">
+      <div className={`relative max-xxs:w-80 max-xxs:h-13 xxs:w-90 xxs:h-13 xs:w-100 xs:h-13 max-w-full 
+      ${gameMode === "classic" ? "sm:w-140" : gameMode === "blurry" ? "sm:w-100" : ""} sm:h-13 mx-auto flex items-center 
+      border border-white/50 rounded-3xl bg-linear-to-r from-[#000000]/10 to-[#b43777]/10`}>
         <form className="w-full p-2" 
         onSubmit={(e) => {
           e.preventDefault();
@@ -317,4 +321,4 @@ const SearchBar = (props: SearchBarProps) => {
   );
 };
 
-export default SearchBar;
+export default React.memo(SearchBar);

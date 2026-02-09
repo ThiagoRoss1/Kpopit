@@ -6,7 +6,7 @@ const PrivacyPolicy = () => {
     return (
         <>
         <BackgroundStyle />
-        <div className="w-full h-screen overflow-y-auto flex items-start justify-center">
+        <div className="w-full h-full flex items-start justify-center">
             <div className="flex flex-col items-center justify-center">
                 <div className="w-full sm:w-full max-h-fit bg-white overflow-hidden rounded-4xl shadow-[0px_2px_10px_4px_rgba(255,255,255,0.5)]
                 mx-auto mt-20 mb-10">

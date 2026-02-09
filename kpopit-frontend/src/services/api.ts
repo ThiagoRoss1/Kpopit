@@ -1,10 +1,16 @@
 import axios from 'axios';
-import type { AddIdolRequest, CompleteGuessRequest } from '../interfaces/gameInterfaces';
+import type { AddIdolRequest, CompleteGuessTrafficRequest } from '../interfaces/gameInterfaces';
 import { decryptToken } from '../utils/tokenEncryption';
 // Api instance with base URL
 const api = axios.create({
     baseURL: `${import.meta.env.VITE_API_URL}/api`,
 });
+
+// Game modes
+const MODES: Record<string, number> = {
+    "classic": 1,
+    "blurry": 2
+};
 
 // Response interceptor to handle invalid user token globally
 api.interceptors.response.use(
@@ -27,18 +33,33 @@ api.interceptors.response.use(
     }
 );
 
+api.interceptors.request.use(
+    (config) => {
+        const activeMode = localStorage.getItem("kpopit_gamemode") || "classic";
+
+        const modeId = MODES[activeMode] || MODES["classic"];
+
+        config.params = {
+            ...config.params,
+            gamemode_id: modeId
+        };
+        return config;
+    }, (error) => {
+        return Promise.reject(error);
+    });
+
 // Get daily idol game data endpoint
 export const getDailyIdol = async () => {
     const encrypted = localStorage.getItem('userToken');
     const token = encrypted ? await decryptToken(encrypted) : null;
-    const response = await api.get('/game/daily-idol', {
+    const response = await api.get('/game/classic/daily-idol', {
         headers: token ? { 'Authorization': token } : {}
     });
     return response.data;
 };
 
-export const getGuessIdol = async (payload: CompleteGuessRequest) => {
-    const response = await api.post('/game/guess', payload);
+export const getGuessIdol = async (payload: CompleteGuessTrafficRequest) => {
+    const response = await api.post('/game/classic/guess', payload);
     if (import.meta.env.DEV) {
     console.log("Answer received from API /guess:", response.data);
     };
@@ -111,5 +132,34 @@ export const fetchGameState = async (user_token: string) => {
 
 export const getActiveTransferCode = async (user_token: string) => {
     const response = await api.get(`/get-active-transfer-code/${user_token}`);
+    return response.data;
+}
+
+// Blurry game APIs
+export const getBlurryDailyIdol = async () => {
+    const encrypted = localStorage.getItem('userToken');
+    const token = encrypted ? await decryptToken(encrypted) : null;
+    const response = await api.get('/game/blurry/daily-idol', {
+        headers: token ? { 'Authorization': token } : {}
+    });
+    return response.data;
+}
+
+export const getBlurryGuessIdol = async (payload: CompleteGuessTrafficRequest) => {
+    const response = await api.post('/game/blurry/guess', payload);
+    if (import.meta.env.DEV) {
+        console.log("Answer received from API /blurry/guess:", response.data);
+    };
+    return response.data;
+}
+
+// Get user session analytics data
+export const getUserAnalytics = async () => {
+    const trafficData = {
+        utm_source: new URLSearchParams(window.location.search).get('utm_source') || 'organic',
+        referrer: document.referrer || 'direct'
+    };
+
+    const response = await api.post('/analytics', trafficData);
     return response.data;
 }

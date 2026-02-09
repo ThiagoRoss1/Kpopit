@@ -1,124 +1,76 @@
 import "../../index.css";
 import "./style.css";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
-import { useState, useEffect, useCallback, useRef } from "react";
-import { getDailyIdol, getGuessIdol, getAllIdols, getYesterdaysIdol, getUserToken, getUserStats, getDailyUserCount, getUserPosition, saveGameState } from "../../services/api";
+import { useSharedGameData } from "../../hooks/useSharedGameData.tsx";
+import { useState, useEffect } from "react";
+import { getDailyIdol, getGuessIdol, getYesterdaysIdol, getDailyUserCount, getUserPosition, saveGameState } from "../../services/api.ts";
 import type {
   GameData,
   IdolListItem,
   GuessResponse,
   YesterdayIdol,
-  Users,
-  UserStats,
   GuessedIdolData,
-} from "../../interfaces/gameInterfaces";
+  CompleteGuessRequest,
+  CompleteGuessTrafficRequest,
+} from "../../interfaces/gameInterfaces.ts";
 import { Link } from "react-router-dom";
-import { encryptToken, decryptToken } from "../../utils/tokenEncryption.ts";
+import { decryptToken } from "../../utils/tokenEncryption.ts";
 import SearchBar from "../../components/GuessSearchBar/SearchBar.tsx";
 import GuessesGrid from "../../components/GuessesGrid/GuessGrid.tsx";
-import VictoryCardHudProps from "../../components/VictoryCard/VictoryCardHud.tsx";
+import VictoryCardHud from "../../components/VictoryCard/VictoryCardHud.tsx";
 import AnswerHintsBox from "../../components/AnswerHints/AnswerHintsBox.tsx";
 import TopButtons from "../../components/buttons/TopButtons.tsx";
-import BottomButtons from "../../components/buttons/BottomButtons.tsx";
 import Modal from "../../components/buttons/modals/Modal.tsx";
 import HowToPlayText from "../../components/buttons/modals/HowToPlayContent.tsx";
 import StatsText from "../../components/buttons/modals/StatsContent.tsx";
 import ShareText from "../../components/buttons/modals/ShareContent.tsx";
-import AboutText from "../../components/buttons/modals/AboutContent.tsx";
 import TransferDataText from "../../components/buttons/modals/TransferDataContent.tsx";
 import ImportDataText from "../../components/buttons/modals/ImportDataContent.tsx";
 import ExportDataText from "../../components/buttons/modals/ExportDataContent.tsx";
-import ChangelogText from "../../components/buttons/modals/ChangelogContent.tsx";
 import { useResetTimer } from "../../hooks/useResetTimer.tsx";
-import { useTransferDataLogic } from "../../hooks/useTransferDataLogic.tsx";
-import { useIsMobile } from "../../hooks/useIsDevice.tsx";
+import { useGameMode } from "../../hooks/useGameMode.tsx";
 import BackgroundStyle from "../../components/Background/BackgroundStyle.tsx";
 import FeedbackSquares from "../../components/FeedbackSquares/FeedbackSquares.tsx";
-import XLogo from "../../assets/icons/x-logo.svg";
-import { Info } from "lucide-react";
 import { WinnerExplosion } from "../../utils/confetti.tsx";
 import { calculateFeedback } from "../../utils/calculateFeedback.ts";
+import { useAllGameModes } from "../../hooks/useAllGameModes.tsx";
 // import { Input } from "@chakra-ui/react"; - Css framework import example
 
-function Home() {
+function ClassicMode() {
+  const gameMode = useGameMode()
   // -- Client-side -- //
   const [currentGuess, setCurrentGuess] = useState<string>("");
   const [selectedIdol, setSelectedIdol] = useState<IdolListItem | null>(null);
   const [guesses, setGuesses] = useState<GuessResponse[]>([]);
   const [endGame, setEndGame] = useState<boolean>(false);
-  const [showModal, setShowModal] = useState<null | "changelog" | "how-to-play" | "about" | "stats" | "streak" | "share" | "transfer-data" | "import-data" | "export-data">(null);
+  const [showModal, setShowModal] = useState<null | "how-to-play" | "stats" | "streak" | "share" | "transfer-data" | "import-data" | "export-data">(null);
   const [showVictoryCard, setShowVictoryCard] = useState<boolean>(false);
   const [isCorrect, setIsCorrect] = useState<boolean>(false);
-  const [shouldFetchToken, setShouldFetchToken] = useState<boolean>(!localStorage.getItem("userToken"));
   const [dayChecked, setDayChecked] = useState<boolean>(false);
   const [closeFeedbackSquares, setCloseFeedbackSquares] = useState<boolean>(false);
   const [confetti, setConfetti] = useState<boolean>(false);
   // Counter
   const [attempts, setAttempts] = useState<number>(0);
 
-  // Is mobile
-  const isMobile = useIsMobile();
-
   // Transfer data logic hook
-  const transferData = useTransferDataLogic();
+  
+  const { userToken, initUser, decryptedTokenRef, allIdolsData, isLoadingAllIdols, isErrorAllIdols, 
+    isInitialized, userStatsData, transferData, queryClient } = useSharedGameData();
 
   const handleGuessAttempts = () => {
     setAttempts(prev => prev + 1);
   };
 
   // -- Api-side -- //
-  const queryClient = useQueryClient();
   const queryUserCount = useQueryClient();
 
-  // User token
-  const userToken = useQuery<Users>({
-    enabled: shouldFetchToken,
-    queryKey: ["userToken"],
-    queryFn: getUserToken,
-    refetchOnWindowFocus: false,
-  });
 
   const dailyUserCount = useQuery({
-    queryKey: ["dailyUserCount"],
+    queryKey: ["dailyUserCount", gameMode],
     queryFn: getDailyUserCount,
     staleTime: 1000 * 60 * 5,
     refetchOnWindowFocus: false,
   });
-
-  const decryptedTokenRef = useRef<string | null>(null);
-
-  const initUser = useCallback(async () => {
-    if (decryptedTokenRef.current) return decryptedTokenRef.current;
-
-    const encrypted = localStorage.getItem("userToken");
-
-    if (encrypted) {
-      try {
-        const token = await decryptToken(encrypted);
-        decryptedTokenRef.current = token;
-        return token;
-      } catch (error) {
-        console.error("Error decrypting token:", error);
-        localStorage.removeItem("userToken");
-      }
-    }
-
-    if (userToken.data) {
-      const encryptedToken = await encryptToken(userToken.data.token);
-      localStorage.setItem("userToken", encryptedToken);
-      decryptedTokenRef.current = userToken.data.token;
-      return userToken.data.token;
-    }
-
-    return null;
-  }, [userToken.data]);
-
-  useEffect(() => {
-    if (userToken.data) {
-    initUser();
-    setShouldFetchToken(false);
-    }
-  }, [initUser, userToken.data]);
 
   // Daily idol game data
   const {
@@ -126,30 +78,20 @@ function Home() {
     isLoading: isLoadingGameData,
     isError: isErrorGameData,
   } = useQuery<GameData>({
-    queryKey: ["dailyIdol"],
+    queryKey: ["dailyIdol", gameMode],
     queryFn: getDailyIdol,
     staleTime: 1000 * 60 * 60 * 4,
     refetchOnWindowFocus: false,
-  });
-
-  // All idols list
-  const {
-    data: allIdolsData,
-    isLoading: isLoadingAllIdols,
-    isError: isErrorAllIdols,
-  } = useQuery<IdolListItem[]>({
-    queryKey: ["allIdols"],
-    queryFn: getAllIdols,
-    staleTime: 1000 * 60 * 60 * 24 * 5, // See functionality
-    gcTime: 1000 * 60 * 60 * 24 * 6, // Can be this the YG error.
-    refetchOnWindowFocus: false,
+    enabled: isInitialized,
+    placeholderData: (previousData) => previousData,
   });
 
   const yesterday = useQuery<YesterdayIdol>({
-    queryKey: ["yesterdayIdol"],
+    queryKey: ["yesterdayIdol", gameMode],
     queryFn: getYesterdaysIdol,
     staleTime: 1000 * 60 * 60 * 4,
     refetchOnWindowFocus: false,
+    enabled: isInitialized,
   });
 
   const yesterdayArtist = allIdolsData?.find(
@@ -159,15 +101,6 @@ function Home() {
   const yesterdayArtistGroup = yesterday.data?.groups ?? null;
 
   const yesterdayIdolImage = yesterday.data?.image_path ?? null;
-
-  const userStats = useQuery<UserStats>({
-    queryKey: ["userStats", userToken],
-    queryFn: async () => getUserStats(await initUser() || ""),
-    enabled: !!localStorage.getItem("userToken"),
-    refetchOnWindowFocus: false,
-  });
-
-  const userStatsData = userStats.data;
 
   useEffect(() => {
     if (!gameData) return;
@@ -229,7 +162,18 @@ function Home() {
   }, [gameData]);
 
   const guessMutation = useMutation({
-    mutationFn: getGuessIdol,
+    mutationFn: async (guessData: CompleteGuessRequest) => {
+      const traffic = {
+        utm_source: new URLSearchParams(window.location.search).get('utm_source') || 'organic',
+        referrer: document.referrer || 'direct'
+      };
+
+      const payload: CompleteGuessTrafficRequest = {
+        ...guessData,
+        ...traffic
+      };
+      return getGuessIdol(payload);
+    },
     onSuccess: (data) => {
       if (import.meta.env.DEV) {
         console.log("Guess successful:", data);
@@ -280,7 +224,7 @@ function Home() {
   const userPosition = useQuery({
     queryKey: ["userPosition", userToken],
     queryFn: async () => getUserPosition(await initUser() || ""),
-    enabled: !!localStorage.getItem("userToken"),
+    enabled: isInitialized,
     refetchOnWindowFocus: false,
   });
 
@@ -372,13 +316,24 @@ function Home() {
     setCurrentGuess("");
     setSelectedIdol(null);
   };
+
+  // All gameModes for victory card
+  const { otherModes } = useAllGameModes(gameMode);
   
-  if (isLoadingGameData || isLoadingAllIdols) {
-    return <div className="flex w-full h-screen justify-center items-center text-white">Loading Kpopit...</div>;
+  if ((isLoadingGameData || isLoadingAllIdols || !isInitialized) && !gameData) {
+    return (
+      <div className="fixed inset-0 z-100 flex w-full h-screen bg-black justify-center items-center">
+        <span className="text-white animate-pulse">Loading Kpopit...</span>
+      </div>
+    );
   }
 
   if (isErrorGameData || isErrorAllIdols) {
-    return <div className="flex w-full h-screen justify-center items-center text-white">Error: Error fetching game data</div>;
+    return (
+      <div className="fixed inset-0 z-100 flex w-full h-screen bg-black justify-center items-center">
+        <span className="text-white animate-pulse">Error: Error fetching game data</span>
+      </div>
+    );
   }
 
   if (!dayChecked) return null;
@@ -387,48 +342,39 @@ function Home() {
   return (
     <>
     <BackgroundStyle attempts={attempts} />
-    <div className="min-h-screen w-full flex flex-col items-center justify-start">
+    <div className="min-h-full w-full flex flex-col items-center justify-start">
       <div className="flex items-center justify-center p-2 w-3xs sm:w-3xs h-9 sm:h-20 mt-12 mb-13 text-center">
         <Link 
           to="/"
           className="inline-block bg-transparent border-0 p-0 cursor-pointer hover:scale-105
-          focus-visible:outline-2 focus-visible:outline-[#e70a7d] focus-visible:outline-offset-4
           transition-all duration-500 transform-gpu"
           draggable={false}>
-          <h1 className="leading-tight text-5xl sm:text-7xl font-bold text-center">
+          <h1 className="leading-tight max-sxs:text-4xl sxs:text-5xl zm:text-6xl sm:text-7xl font-bold text-center">
             <span className="kpop-part">Kpop</span>
             <span className="it-part">it</span>
           </h1>
         </Link>
       </div>    
-      <div className="flex items-center justify-center mb-3">
+      <div className="flex items-center justify-center mb-10">
         <TopButtons
-          onSubmitChangelog={() => { setShowModal("changelog") }}
           onSubmitHowToPlay={() => { setShowModal("how-to-play") }}
-          onSubmitAbout={() => { setShowModal("about") }}
-        />
-        {showModal === "changelog" && <Modal isOpen onClose={() => setShowModal(null)} title="Changelog..." isAboutOrChangelog={true}><ChangelogText /></Modal>}
-        {showModal === "how-to-play" && <Modal isOpen onClose={() => setShowModal(null)} title="How to Play..." isHowToPlay={true}><HowToPlayText /></Modal>}
-        {showModal === "about" && <Modal isOpen onClose={() => setShowModal(null)} title="About..." isAboutOrChangelog={true}><AboutText /></Modal>}
-
-      </div>
-
-      <div className="flex items-center justify-center mb-7">
-        <BottomButtons
           onSubmitStats={() => { setShowModal("stats") }}
           // onSubmitStreak={() => { setShowModal("streak") }}
           onSubmitShare={() => { setShowModal("share") }}
         />
+        {showModal === "how-to-play" && <Modal isOpen onClose={() => setShowModal(null)} title="How to Play..." isHowToPlay={true}><HowToPlayText nextReset={useResetTimer} /></Modal>}
+
         {showModal === "stats" && <Modal isOpen onClose={() => setShowModal(null)} title="Stats..."><StatsText stats={userStatsData} onSubmitTransferData={() => {setShowModal("transfer-data")}} /></Modal>}
-        {showModal === "share" && <Modal isOpen onClose={() => setShowModal(null)} title="Share..."><ShareText guesses={guesses} hasWon={isCorrect} attempts={attempts} /></Modal>}
+        {showModal === "share" && <Modal isOpen onClose={() => setShowModal(null)} title="Share..."><ShareText guesses={guesses} hasWon={isCorrect} attempts={attempts} gameMode={"classic"} /></Modal>}
         {/* {showModal === "streak" && <Modal onClose={() => setShowModal(null)} title="Streak..."><p>Working in progress...</p></Modal>} */}
 
         {/* Sub-Stats Modals */}
         {showModal === "transfer-data" && <Modal isOpen onClose={() => setShowModal(null)} title="Transfer Data..." isTransferDataSubPages={true} returnPage={() => {setShowModal("stats")}}><TransferDataText onSubmitImportData={() => {setShowModal("import-data")}} onSubmitExportData={() => {setShowModal("export-data")}} /></Modal>}
         {showModal === "import-data" && <Modal isOpen onClose={() => {transferData.clearError(); setShowModal(null);}} title="Import Data..." isTransferDataSubPages={true} returnPage={() => {setShowModal("transfer-data")}}><ImportDataText handleRedeem={transferData.handleRedeem} isRedeeming={transferData.isRedeeming} redeemError={transferData.redeemError} /></Modal>}
-        {showModal === "export-data" && <Modal isOpen onClose={() => setShowModal(null)} title="Export Data..." isTransferDataSubPages={true} returnPage={() => {setShowModal("transfer-data")}}><ExportDataText handleGenerate={transferData.handleGenerate} generatedCodes={transferData.generatedCodes} timeLeft={transferData.timeLeft} expires_At={transferData.expiresAt} /></Modal>}
-      </div>
+        {showModal === "export-data" && <Modal isOpen onClose={() => setShowModal(null)} title="Export Data..." isTransferDataSubPages={true} returnPage={() => {setShowModal("transfer-data")}}><ExportDataText handleGenerate={transferData.handleGenerate} generatedCodes={transferData.generatedCodes} timeLeft={transferData.timeLeft} expires_At={transferData.expiresAt} fetchActiveCode={transferData.fetchActiveCode} /></Modal>}
 
+      </div>
+      
       <div className="w-full flex flex-col items-center justify-center mb-10.25">
         <AnswerHintsBox 
         memberCount={gameData?.member_count ?? null} 
@@ -460,12 +406,12 @@ function Home() {
             }}
             excludedIdols={guesses.map(guess => guess.guessed_idol_data?.idol_id)}
             disabled={endGame || guessMutation.isPending || isCorrect}
+            gameMode={"classic"}
           />
         </div>
       </div>
       )}
       
-      {!endGame && !showVictoryCard && (
       <div className="flex flex-row items-center justify-center mb-10">
         <span className="leading-tight text-base sm:text-base">
           <span className="text-[#b43777] [text-shadow:1.2px_1.2px_4px_rgba(0,0,0,1.8),0_0_12px_rgba(180,55,119,1.0)] brightness-110">
@@ -475,8 +421,8 @@ function Home() {
           </span>
         </span>
       </div>
-      )}
 
+      {guesses.length > 0 && (
       <div className="w-full flex flex-col items-center justify-center mt-2 mb-4 overflow-x-auto">
         <GuessesGrid
           guesses={guesses}
@@ -484,6 +430,7 @@ function Home() {
           onAllAnimationsComplete={handleAnimationsComplete}
         />
       </div>
+      )}
 
        <div className="w-full flex mt-2 mb-2">
         {guesses.length > 0 && !closeFeedbackSquares && (
@@ -502,12 +449,12 @@ function Home() {
 
       {endGame && guesses.length > 0 && showVictoryCard && (
         <div className="w-full flex items-center justify-center mt-10">
-          <VictoryCardHudProps 
+          <VictoryCardHud
             cardInfo={guesses[guesses.length - 1].guessed_idol_data}
             guesses={guesses}
             attempts={attempts}
             nextReset={useResetTimer}
-            yesterdayIdol={yesterdayArtist || "unknown"}
+            yesterdayIdol={yesterdayArtist || "Unknown"}
             yesterdayIdolGroup={yesterdayArtistGroup}
             yesterdayIdolImage={yesterdayIdolImage}
             userPosition={userPositionData}
@@ -515,12 +462,13 @@ function Home() {
             userScore={userScoreData}
             stats={userStatsData}
             idolActiveGroup={gameData?.groups ?? null}
+            otherGameModes={otherModes}
           />
         </div>
       )}
 
       {!showVictoryCard && yesterdayArtist && yesterdayArtistGroup && yesterdayIdolImage && (
-      <div className={`w-full flex flex-col items-center justify-center mt-18 mb-22`}>
+      <div className={`w-full flex flex-col items-center justify-center mt-10 mb-26`}>
         <span className="font-semibold max-xxs:text-[14px] xxs:text-[15px] xs:text-base sm:text-[18px] leading-tight">
           <span className="text-white">
             Yesterday's idol was
@@ -530,34 +478,11 @@ function Home() {
         </span>
       </div>
       )}
-
-      {/* Footer */}
-      <div className={`w-full flex flex-col items-center justify-center ${isMobile && guesses.length === 0 ? "mt-18" : "mt-6"} mb-2 gap-1`}>
-        <div className="w-full flex flex-row items-center justify-center gap-3">
-          <button
-          className="flex items-center justify-center max-xxs:w-10 max-xxs:h-10 xxs:w-10 xxs:h-10 xs:w-10 xs:h-10 sm:w-10 sm:h-10 bg-black rounded-full hover:scale-110 hover:brightness-110 hover:cursor-pointer
-          transition-all duration-300 transform-gpu" onClick={() => window.open("https://x.com/TgoRoss1", "_blank")}>
-            <img src={XLogo} alt="X" className="max-xxs:w-7.5 max-xxs:h-7.5 xxs:w-7.5 xxs:h-7.5 xs:w-7.5 xs:h-7.5 sm:w-7.5 sm:h-7.5 items-center justify-center" draggable={false} />
-          </button>
-          
-          <button className="flex items-center justify-center max-xxs:w-10 max-xxs:h-10 xxs:w-10 xxs:h-10 xs:w-10 xs:h-10 sm:w-10 sm:h-10 bg-white rounded-full hover:scale-110 hover:brightness-110 hover:cursor-pointer
-          transition-all duration-300 transform-gpu" onClick={() => {setShowModal("about")}}>
-            <Info className="max-xxs:w-10 max-xxs:h-10 xxs:w-10 xxs:h-10 xs:w-10 xs:h-10 sm:w-10 sm:h-10" />
-
-          </button>
-        </div>
-
-        <div className="w-full flex items-center justify-center">
-          <Link to="/privacy-policy">
-            <span className="normal-font font-bold text-white max-xxs:text-[14px] xxs:text-[14px] xs:text-base sm:text-base hover:underline">Privacy Policy</span>
-          </Link>
-        </div>
-      </div>
-
+      
       {/* <p>ID: {gameData?.answer_id}</p> */}
     </div>
     </>
   );
 }
 
-export default Home;
+export default ClassicMode;

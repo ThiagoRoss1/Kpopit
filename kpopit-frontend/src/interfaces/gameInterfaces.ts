@@ -23,6 +23,7 @@ export interface IdolListItem {
   all_groups?: string[];
   active_group?: string | null;
   companies: string[];
+  blur_image_path?: string | null;
 }
 
 export interface FeedbackItem {
@@ -58,11 +59,12 @@ export interface GuessedIdolData {
   companies: string[];
   image_path: string;
   member_count?: number;
+  blur_image_path?: string | null;
 }
 
-export interface GuessResponse {
+export interface GuessResponse<T = FeedbackData> {
   guess_correct: boolean;
-  feedback: FeedbackData;
+  feedback: T;
   guessed_idol_data: GuessedIdolData;
 }
 
@@ -79,6 +81,11 @@ export interface UserTokenData {
 }
 
 export interface CompleteGuessRequest extends GuessPayload, UserTokenData {}
+
+export interface CompleteGuessTrafficRequest extends CompleteGuessRequest {
+  utm_source?: string;
+  referrer?: string;
+}
 
 export interface YesterdayIdol {
   past_idol_id: number;
@@ -135,4 +142,8 @@ export interface GeneratedCodes {
 
 export interface RedeemUserToken {
   user_token: string;
+}
+
+export interface BlurryGameData extends GameData {
+  blur_image_path: string;
 }

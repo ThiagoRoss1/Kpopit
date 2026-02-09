@@ -1,57 +1,62 @@
-// Top Buttons Component
+// Top Buttons Blurry component
+import Stats from "../../assets/icons/chart-bar-fill.svg";
+import Share from "../../assets/icons/share-network-fill.svg";
 
 interface TopButtonsProps {
-    onSubmitChangelog: () => void;
-    onSubmitHowToPlay: () => void;   
-    onSubmitAbout: () => void;
+    onSubmitStats: () => void;
+    onSubmitHowToPlay: () => void;
+    onSubmitShare: () => void;
 }
 
 const TopButtons = (props: TopButtonsProps) => {
-    const { onSubmitChangelog, onSubmitHowToPlay, onSubmitAbout } = props;
+    const { onSubmitStats, onSubmitHowToPlay, onSubmitShare } = props;
 
-    // Left and Right Button Styles //
-    const buttonCardStyle = "inline-flex relative max-xxs:w-20 max-xxs:h-10 xxs:w-25 xxs:h-10 xs:w-28 xs:h-10 sm:w-52 sm:h-13 overflow-hidden rounded-2xl sm:rounded-2xl border-1 border-white bg-transparent backdrop-blur-sm sm:backdrop-blur-xl shadow-[4px_4px_4px_1px_rgba(0,0,0,0.25),inset_0_4px_4px_0_rgba(0,0,0,0.25)]";
-
-    const buttonAnimation = ""
-    const buttonTextStyle = "inline-flex h-full w-full items-center justify-center rounded-2xl sm:rounded-2xl max-xxs:text-[12px] xxs:text-[14px] xs:text-base sm:text-[20px] text-white font-semibold text-shadow-[2px_2px_4px_rgba(0,0,0,0.5)]";
     // Middle Button Styles //
-    const centerButtonCardStyle = "inline-flex relative max-xxs:w-25 max-xxs:h-11 xxs:w-29 xxs:h-11 xs:w-32 xs:h-11 sm:w-58 sm:h-15 overflow-hidden rounded-2xl sm:rounded-[20px] p-[1px] focus:outline-none focus:ring-2 focus:ring-[#000000] focus:ring-offset-1 focus:ring-offset-[#242424] firefox:isolate firefox:z-0 shadow-[4px_4px_4px_1px_rgba(0,0,0,0.25),inset_0_4px_4px_0_rgba(0,0,0,0.25)]";   
+    const centerButtonCardStyle = "inline-flex relative max-xxs:w-28 max-xxs:h-10 xxs:w-32 xxs:h-10 xs:w-34.5 xs:h-10.5 xm:w-36.5 xs:h-10.5 zm:w-44 zm:h-11 sm:w-46.5 sm:h-12.5 overflow-hidden rounded-2xl sm:rounded-[20px] p-[1px] focus:outline-none focus:ring-2 focus:ring-[#000000] focus:ring-offset-1 focus:ring-offset-[#242424] firefox:isolate firefox:z-0 shadow-[4px_4px_4px_1px_rgba(0,0,0,0.25),inset_0_4px_4px_0_rgba(0,0,0,0.25)]";   
     const centerButtonAnimation = "absolute inset-[-300%] animate-[spin_2s_linear_infinite] bg-[conic-gradient(from_90deg_at_50%_50%,#b43777_0%,#ffffff_50%,#b43777_100%)] firefox:transform-3d firefox:will-change-transform";
-    const centerButtonTextStyle = "inline-flex h-full w-full items-center justify-center rounded-2xl sm:rounded-[20px] bg-black px-1 max-xxs:text-[14px] xxs:text-[14px] xs:text-base sm:text-[20px] text-[#b43777] font-semibold backdrop-blur-2xl";
+    const centerButtonTextStyle = "inline-flex h-full w-full items-center justify-center rounded-2xl sm:rounded-[20px] bg-black px-1 max-xxs:text-[14px] xxs:text-[14px] xs:text-base zm:text-lg sm:text-xl text-[#b43777] font-semibold backdrop-blur-2xl";
+
     // Hover //
-    const hoverEffect = "hover:brightness-125 hover:scale-105 hover:cursor-pointer hover:bg-black/80 transition-transform transform-gpu firefox:transition-all firefox:will-change-transform duration-500";    
     const centerHoverEffect = "hover:brightness-125 hover:scale-105 firefox:hover:scale-100 hover:cursor-pointer transition-transform transform-gpu firefox:will-change-transform duration-500";
 
-    // Previous styles //
-    // const pastCenterButtonCardStyle = "flex-1 min-w-0 h-10 flex items-center justify-center text-center rounded-[12px] px-2 py-1 sm:w-[148px] sm:h-[50px] sm:px-[10px] sm:py-[10px] backdrop-blur-md shadow-[4px_4px_4px_1px_rgba(0,0,0,0.25),inset_0_4px_4px_0_rgba(0,0,0,0.25)] bg-gradient-to-b from-black to-black/10";
-    // const pastCenterButtonTextStyle = "inline-flex h-full items-center justify-center rounded-full backdrop-blur-3xl w-full text-sm sm:text-[20px] text-center bg-gradient-to-b from-[#b43777] to-[#ce757a] text-transparent bg-clip-text";
+    // Rounded Button Styles - Stats / Share //
+    const RoundedButtonStyle = "inline-flex relative max-xxs:h-9 max-xxs:w-9 xxs:h-9 xxs:w-9 xs:h-9 xs:w-9 zm:w-10 zm:h-10 sm:h-12.5 sm:w-12.5 overflow-hidden rounded-full p-[1px] focus:outline-none focus:ring-2 focus:ring-[#000000] focus:ring-offset-1 focus:ring-offset-[#242424] hover:brightness-110 firefox:hover:brightness-140 hover:scale-105 firefox:hover:scale-100 transform duration-300";
+    const ImageStyle = "flex items-center justify-center max-xxs:w-8 max-xxs:h-8 xxs:w-8 xxs:h-8 xs:w-8 xs:h-8 sm:w-9 sm:h-9 rounded-full transform-gpu";
+
+    // Rounded Button Animation - Stats / Share //
+    const RoundedButtonAnimation = "absolute inset-[-1000%] animate-[spin_2s_linear_infinite] bg-[conic-gradient(from_90deg_at_50%_50%,#b43777_0%,#bf898c_50%,#b43777_100%)]";
+    const RoundedButtonBackgroundStyle = "inline-flex h-full w-full cursor-pointer items-center justify-center rounded-full bg-slate-950 px-1 font-medium text-white backdrop-blur-3xl";
 
     return (
         <div className="flex items-center justify-center w-full h-full bg-transparent">
-            <div className="flex items-center justify-between w-full h-fit gap-4 xs:gap-4 sm:gap-14">
-                <button onClick={onSubmitChangelog} type="button" className={`${buttonCardStyle} ${hoverEffect}`}>
-                    <span className={`${buttonAnimation}`} />
-                        <span className={`${buttonTextStyle}`}>
-                            Changelog
+            <div className="flex items-center justify-between w-full h-fit gap-3 sm:gap-4">
+                
+                {/* Stats Button */}
+                <button onClick={onSubmitStats} type="button" className={RoundedButtonStyle}>
+                    <span className={RoundedButtonAnimation} />
+                        <span className={RoundedButtonBackgroundStyle}>
+                            <img src={Stats} alt="Stats" className={ImageStyle} draggable={false} />
                         </span>
                 </button>
 
+                {/* How to Play Button */}        
                 <button onClick={onSubmitHowToPlay} type="button" className={`${centerButtonCardStyle} ${centerHoverEffect}`}>
                     <span className={`${centerButtonAnimation}`} />
                         <span className={`${centerButtonTextStyle}`}>
-                            How to Play 
+                            How to Play
                         </span>
                 </button>
-                
-                <button onClick={onSubmitAbout} type="button" className={`${buttonCardStyle} ${hoverEffect}`}>
-                    <span className={`${buttonTextStyle}`}>
-                       About 
-                    </span>
+
+                {/* Share Button */}
+                <button onClick={onSubmitShare} type="button" className={RoundedButtonStyle}>
+                    <span className={RoundedButtonAnimation} />
+                        <span className={RoundedButtonBackgroundStyle}>
+                            <img src={Share} alt="Share" className={ImageStyle} draggable={false} />
+                        </span>
                 </button>
             </div>
         </div>
     )
-
 }
 
 export default TopButtons;

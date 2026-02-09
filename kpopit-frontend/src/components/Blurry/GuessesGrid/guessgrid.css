@@ -1,0 +1,115 @@
+@keyframes cardColorFade {
+    0% {
+        opacity: 0;
+        background-color: transparent;
+    }
+
+    40% {
+        opacity: 1;
+        background-color: transparent;
+    }
+
+    100% {
+        opacity: 1;
+        background-color: rgba(var(--status-bg-color));
+    }
+}
+
+.guess-card-color-fade {
+    animation: cardColorFade 2.5s forwards;
+    will-change: background-color, opacity;
+}
+
+.guess-card-color-container {
+    background-color: rgba(var(--status-bg-color));
+}
+
+@keyframes photoEntry {
+    0% {
+        opacity: 0;
+        left: 50%;
+        transform: translateX(-50%) scale(0);
+        animation-timing-function: cubic-bezier(0.68, -0.55, 0.27, 1.55);
+        border-radius: 0%;
+        border-color: transparent;
+    }
+
+    35% {
+        opacity: 1;
+        left: 50%;
+        transform: translateX(-50%) scale(1.1);
+        animation-timing-function: ease-in-out;
+    }
+
+    40% {
+        left: 50%;
+        transform: translateX(-50%) scale(1);
+        animation-timing-function: cubic-bezier(0.28, 1, 0.25, 1);
+    }
+
+    100% {
+        left: 0;
+        opacity: 1;
+        transform: translateX(0) scale(1);
+        border-radius: 20px;
+        border-color: rgba(0, 0, 0, 0.3);
+        animation-timing-function: ease-out;
+    } 
+}
+
+.guess-photo-enter {
+    position: relative;
+    animation: photoEntry 2s forwards;
+    will-change: transform, opacity;
+}
+
+
+@keyframes nameEntry {
+    0%, 50% {
+        opacity: 0;
+        left: 50%;
+        transform: translateX(-50%) scale(0.8);
+    }
+
+    100% {
+        opacity: 1;
+        left: 50%;
+        transform: translateX(-50%) scale(1);
+    }  
+}
+
+.name-container {
+    position: absolute;
+    left: 50%;
+    transform: translateX(-50%);
+}
+
+.name-reveal {
+    opacity: 0;
+    animation: nameEntry 2s forwards;
+    will-change: transform, opacity;
+}
+
+@keyframes nameBorderB {
+    0% {
+        border-left: 0px;
+        border-bottom-width: 0px;
+        border-color: white;
+    }
+
+    100% {
+        border-left: 100px;
+        border-bottom-width: 2px;
+        border-color: white;
+    }
+}
+
+.border-b-reveal {
+    animation: nameBorderB 2s forwards;
+    will-change: border-bottom-width, border-color;
+}
+
+.name-shadow-effect {
+    text-shadow: 50px 10px 0px rgba(0, 0, 0, 0.3);
+    
+}

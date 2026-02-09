@@ -45,7 +45,7 @@ const StatsText = (props: StatsContentProps) => {
                 <div className="flex flex-col justify-center items-center p-4 gap-3 rounded-2xl border-2 border-white h-28 sm:h-28 
                 backface-hidden shadow-[0_0_10px_2px_rgba(255,255,255,0.25),0_0_10px_2px_rgba(255,255,255,0.25)] bg-black/50
                 hover:scale-105 hover:brightness-110 hover:bg-black hover:-rotate-1 hover:cursor-default transition-all duration-500 transform-gpu">
-                    <h3 className="relative font-bold max-xxs:text-[11px] xxs:text-[12px] xs:text-[15px] sm:text-2xl text-[#b43777] drop-shadow-lg 
+                    <h3 className="relative font-bold max-xxs:text-[11px] xxs:text-[12px] xs:text-[15px] sm:text-[23px] md:text-2xl text-[#b43777] drop-shadow-lg 
                     [text-shadow:1.2px_1.2px_4px_rgba(0,0,0,0.8),0_0_12px_rgba(180,55,119,0.55)]">Average Guesses</h3>
                     <span className="max-xxs:text-2xl xxs:text-2xl xs:text-3xl [text-shadow:1.2px_1.2px_4px_rgba(0,0,0,0.8),0_0_12px_rgba(255,255,255,0.55)]">{stats?.average_guesses.toFixed(2)}</span>
                 </div>
@@ -54,7 +54,7 @@ const StatsText = (props: StatsContentProps) => {
                 <div className="flex flex-col justify-center items-center p-4 gap-3 rounded-2xl border-2 border-white h-28 sm:h-28 
                 backface-hidden shadow-[0_0_10px_2px_rgba(255,255,255,0.25),0_0_10px_2px_rgba(255,255,255,0.25)] bg-black/50
                 hover:scale-105 hover:brightness-110 hover:bg-black hover:rotate-1 hover:cursor-default transition-all duration-500 transform-gpu">
-                    <h3 className="relative font-bold max-xxs:text-[12px] xxs:text-[14px] xs:text-[18px] sm:text-2xl text-[#b43777] drop-shadow-lg 
+                    <h3 className="relative font-bold max-xxs:text-[12px] xxs:text-[14px] xs:text-[17px] xm:text-lg sm:text-2xl text-[#b43777] drop-shadow-lg 
                     [text-shadow:1.2px_1.2px_4px_rgba(0,0,0,0.8),0_0_12px_rgba(180,55,119,0.55)]">Current Streak</h3>
                     <span className="max-xxs:text-2xl xxs:text-2xl xs:text-3xl [text-shadow:1.2px_1.2px_4px_rgba(0,0,0,0.8),0_0_12px_rgba(255,255,255,0.55)]">{stats?.current_streak}</span>
                 </div>

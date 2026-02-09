@@ -1,10 +1,18 @@
-venv/
+.venv/
 __pycache__/
 
 # Ignore database files
 *.db
 
+# Ignore backup
+backup_kpopit.b64
+backup_kpopit_before_2.b64
+
 # Ignore environment variable files
 .env
 
 seed_db_old.py
+
+# sqlite temp files
+*.db-shm
+*.db-wal

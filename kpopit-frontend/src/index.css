@@ -12,9 +12,12 @@
 }
 
 @theme {
+  --breakpoint-sxs: 340px;
   --breakpoint-xxs: 370px;
   --breakpoint-xs: 414px;
   --breakpoint-xm: 430px;
+  --breakpoint-zm: 480px;
+  --breakpoint-3xl: 1728px;
 }
 
 body {
@@ -113,6 +116,17 @@ h1 {
   box-sizing: border-box;
 }
 
+/* Selection color */
+::selection {
+  background: #b43777;
+  color: white;
+}
+
+::-moz-selection {
+  background: #b43777;
+  color: white;
+}
+
 /* SearchBar fill animation */
 @keyframes moveGradient {
   from {
@@ -122,8 +136,6 @@ h1 {
   to {
     background-position: left;
   }
-
-
 }
 
 html {

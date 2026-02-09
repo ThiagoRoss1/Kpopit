@@ -1,12 +1,15 @@
-import { useResetTimer } from "../../../hooks/useResetTimer.tsx";
 import ArrowUp from "../../../assets/icons/arrow-fat-line-up-fill.svg";
 import ArrowDown from "../../../assets/icons/arrow-fat-line-down-fill.svg";
 import ChaewonBanner from "../../../assets/imgs/chaewon_guess.png";
 import EunbiBanner from "../../../assets/imgs/eunbi_guess.png";
 
+interface HowToPlayTextProps {
+    nextReset: () => { timeRemaining: number | null; formattedTime: string; };
+}
 
-const HowToPlayText = () => {
-    const { formattedTime } = useResetTimer();
+
+const HowToPlayText = (props: HowToPlayTextProps) => {
+    const { nextReset } = props;
 
     return (
         <div className="w-full [text-shadow:1.6px_1.6px_3px_rgba(0,0,0,0.5)]">
@@ -18,7 +21,7 @@ const HowToPlayText = () => {
             </div>
                 <div className="flex flex-col w-full justify-center items-center mt-6 gap-1.5">
                     <span className="text-[18px]">Next Idol in</span>
-                    <span className="text-3xl">{formattedTime}</span>
+                    <span className="text-3xl">{nextReset().formattedTime}</span>
                     <span className="text-[12px]">Timezone: America (EST)</span>
                     <span className="text-[12px]">(Midnight at UTC-5)</span>
                 </div>
@@ -32,9 +35,8 @@ const HowToPlayText = () => {
                 </div>
 
                 <div className="flex flex-col w-full items-start justify-center border-t border-white mt-2 gap-0">
-                    <span className="pt-2 normal-font">For now, only one game mode is available - Classic.</span>
-                    <span className="normal-font">In classic mode, you must type the name of a K-pop idol or group in the search bar.</span>
-                    <span className="normal-font">To submit your guess, press <b>enter</b> or click the <b>Guess</b> button</span>
+                    <span className="pt-2 normal-font">In classic mode, you must type the name of a K-pop idol or group in the search bar.</span>
+                    <span className="normal-font">To submit your guess, press <b>enter</b> or click the <b>Guess</b> button.</span>
 
                     
                     {/* Feedback */}

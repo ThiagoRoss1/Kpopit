@@ -12,14 +12,17 @@ export const useTransferDataLogic = () => {
 
     const queryClient = useQueryClient();
 
-    const { data: activeCodeData } = useQuery<GeneratedCodes>({
+
+    const { data: activeCodeData, refetch: refetchActiveCode } = useQuery<GeneratedCodes>({
         queryKey: ['activeTransferCode'],
         queryFn: async () => {
             const encrypted = localStorage.getItem("userToken") || "";
             const decrypted = await decryptToken(encrypted);
             return getActiveTransferCode(decrypted);
         },
-        enabled: !!localStorage.getItem("userToken"),
+        enabled: false,
+        refetchOnWindowFocus: false,
+        staleTime: 1000 * 60 * 5,
     });
 
     useEffect(() => {
@@ -118,6 +121,10 @@ export const useTransferDataLogic = () => {
 
     const timeLeft = expiresAt ? Math.ceil((new Date(expiresAt).getTime() - Date.now()) / (1000 * 60 * 60 * 24)) : null;
 
+    const fetchActiveCodeWrapper = async () => {
+        await refetchActiveCode();
+    }
+
     return {
         generatedCodes,
         expiresAt,
@@ -128,5 +135,6 @@ export const useTransferDataLogic = () => {
         clearError,
         isGenerating: generateMutation.isPending,
         isRedeeming: redeemMutation.isPending,
+        fetchActiveCode: fetchActiveCodeWrapper,
     };
 };

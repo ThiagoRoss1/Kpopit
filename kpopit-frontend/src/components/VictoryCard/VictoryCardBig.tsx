@@ -1,9 +1,18 @@
 //import React from "react";
 import type { GuessedIdolData, YesterdayIdol } from "../../interfaces/gameInterfaces";
+import { Link } from "react-router-dom";
 import TargetAttempt from "../../assets/icons/target.svg";
 import RankPosition from "../../assets/icons/ranking-fill.svg";
 import PositionTrend from "../../assets/icons/trending-up.svg";
 import { Share2 } from "lucide-react";
+
+interface GameMode {
+    id: string;
+    name: string;
+    path: string;
+    won?: boolean;
+    photoSpecs?: string;
+}
 
 interface VictoryCardBigProps {
     cardInfo: GuessedIdolData;
@@ -17,10 +26,11 @@ interface VictoryCardBigProps {
     userScore?: number | null;
     nextReset: () => { timeRemaining: number | null; formattedTime: string; };
     onShareClick?: () => void;
+    otherGameModes?: GameMode[];
 }
 
 const VictoryCardBig = (props: VictoryCardBigProps) => {
-    const { cardInfo, idolActiveGroup, attempts, yesterdayIdol, yesterdayIdolGroup, yesterdayIdolImage, userPosition, userRank, userScore, nextReset, onShareClick } = props;
+    const { cardInfo, idolActiveGroup, attempts, yesterdayIdol, yesterdayIdolGroup, yesterdayIdolImage, userPosition, userRank, userScore, nextReset, onShareClick, otherGameModes } = props;
 
     const activeGroup = idolActiveGroup && idolActiveGroup.length > 0 ? idolActiveGroup.join(", ") : "Soloist";
     const yesterdayGroup = yesterdayIdolGroup && yesterdayIdolGroup.length > 0 ? yesterdayIdolGroup.join(", ") : "Soloist";
@@ -38,7 +48,7 @@ return (
             <div className="absolute flex items-center justify-center max-xxs:w-24 max-xxs:h-24 xxs:w-27 xxs:h-27 xs:w-30 xs:h-30 sm:w-35 sm:h-35 rounded-[48px] sm:rounded-[50px] top-5 border-2 border-white/80 
             hover:border-white hover:scale-120 hover:rotate-6 transform duration-1000 will-change-transform 
             shadow-[0_0_20px_4px_rgba(255,255,255,0.1),0_0_40px_10px_rgba(255,255,255,0.1)]">
-                <img src={`${import.meta.env.VITE_IMAGE_BUCKET_URL}${cardInfo.image_path}`} alt="Idol" className="max-xxs:w-23 max-xxs:h-23 xxs:w-26 xxs:h-26 xs:w-29 xs:h-29 sm:w-34 sm:h-34 rounded-[48px] sm:rounded-[50px] object-cover object-top transform-gpu" />
+                <img src={`${import.meta.env.VITE_IMAGE_BUCKET_URL}${cardInfo.image_path}`} alt="Idol" className="max-xxs:w-23 max-xxs:h-23 xxs:w-26 xxs:h-26 xs:w-29 xs:h-29 sm:w-34 sm:h-34 rounded-[48px] sm:rounded-[50px] object-cover object-top transform-gpu" draggable={false} />
             </div>
 
             <div className="absolute flex flex-col items-center justify-center w-full sm:w-145 max-h-20 sm:max-h-20 max-xxs:mt-32 xxs:mt-30 xs:mt-36 sm:mt-44">
@@ -63,7 +73,7 @@ return (
             <div className="relative grid grid-cols-3 gap-5">
                 <div className="relative flex flex-col items-center justify-start text-center max-xxs:h-21.5 xxs:h-21.5 xs:w-27 xs:h-25 xm:w-29 xm:h-25 sm:w-45 sm:h-25 bg-linear-to-br from-[#db3189] to-[#511061] 
                     gap-0.5 rounded-[18px] sm:rounded-[20px]">
-                    <img src={TargetAttempt} alt="M" className="max-xxs:w-4 max-xxs:h-4 xxs:w-5 xxs:h-5 xs:w-6 xs:h-6 sm:w-6 sm:h-6 mt-2" /> {/* w-27 */}
+                    <img src={TargetAttempt} alt="M" className="max-xxs:w-4 max-xxs:h-4 xxs:w-5 xxs:h-5 xs:w-6 xs:h-6 sm:w-6 sm:h-6 mt-2" draggable={false} /> {/* w-27 */}
                     <span className="max-xxs:text-lg xxs:text-[20px] xs:text-[22px] font-bold">
                         {attempts}
                     </span>
@@ -74,7 +84,7 @@ return (
 
                 <div className="relative flex flex-col items-center justify-start text-center max-xxs:h-21.5 xxs:h-21.5 xs:w-27 xs:h-25 xm:w-29 xm:h-25 sm:w-45 sm:h-25 bg-linear-to-br from-[#7a4de4] to-[#1f2686] 
                     gap-0.5 rounded-[18px] sm:rounded-[20px]">
-                    <img src={RankPosition} alt="P" className="max-xxs:w-4 max-xxs:h-4 xxs:w-5 xxs:h-5 xs:w-6 xs:h-6 sm:w-6 sm:h-6 mt-2" />
+                    <img src={RankPosition} alt="P" className="max-xxs:w-4 max-xxs:h-4 xxs:w-5 xxs:h-5 xs:w-6 xs:h-6 sm:w-6 sm:h-6 mt-2" draggable={false} />
                     <span className="max-xxs:text-lg xxs:text-[20px] xs:text-[22px] font-bold">
                         {userRank}
                     </span>
@@ -85,7 +95,7 @@ return (
 
                 <div className="relative flex flex-col items-center justify-start text-center max-xxs:h-21.5 xxs:h-21.5 xs:w-27 xs:h-25 xm:w-29 xm:h-25 sm:w-45 sm:h-25 bg-linear-to-br from-[#ec5e65] to-[#802256] 
                     gap-0.5 rounded-[18px] sm:rounded-[20px]">
-                    <img src={PositionTrend} alt="S" className="max-xxs:w-4 max-xxs:h-4 xxs:w-5 xxs:h-5 xs:w-6 xs:h-6 sm:w-6 sm:h-6 mt-2" />
+                    <img src={PositionTrend} alt="S" className="max-xxs:w-4 max-xxs:h-4 xxs:w-5 xxs:h-5 xs:w-6 xs:h-6 sm:w-6 sm:h-6 mt-2" draggable={false} />
                     <span className="max-xxs:text-lg xxs:text-[20px] xs:text-[22px] font-bold">
                         {userScore?.toFixed(2)}
                     </span>
@@ -109,7 +119,7 @@ return (
 
                     <div className="flex flex-row w-full h-full items-center justify-start max-xxs:pr-0 xxs:pr-2 xs:pr-4 xm:pr-2 sm:pr-4 ml-10 sm:ml-20 gap-2 sm:gap-6">
                         <img src={`${import.meta.env.VITE_IMAGE_BUCKET_URL}${yesterdayIdolImage}`} alt="Idol" className="max-xxs:w-16 max-xxs:h-16 xxs:w-20 xxs:h-20 xs:w-22 xs:h-22 sm:w-28 sm:h-28 rounded-full sm:rounded-full object-cover object-center hover:scale-105 
-                        select-none transition-transform duration-500 will-change-transform transform-gpu" />
+                        select-none transition-transform duration-500 will-change-transform transform-gpu" draggable={false} />
 
                         <div className="max-xxs:text-[15px] xxs:text-base xs:text-[18px] xm:text-xl sm:text-2xl font-semibold select-none transform-gpu ml-4 sm:ml-0">
                             <span className="bg-linear-to-r from-[#db3189] via-[#e44d86] to-[#ec5e65] text-transparent bg-clip-text brightness-105">
@@ -145,15 +155,32 @@ return (
         </div>
 
         {/* Other Game Modes */}
-        <div className="relative w-full sm:h-28 mb-5 px-4 sm:px-6">
+        <div className="relative w-full sm:h-fit mb-5 px-4 sm:px-6">
             <div className="relative flex flex-col w-full h-full items-start justify-start text-center gap-1 mt-4">
                 <span className="text-[14px] sm:text-base drop-shadow-2xl">Other Game Modes</span>
                 
-                <div className="relative flex w-full h-12 sm:h-17 items-center justify-start text-center px-3.5 bg-transparent 
-                border border-white/20 rounded-xl hover:text-white/20 hover:border-white/10 transition-all duration-300">
-                    <span className="text-[14px] sm:text-base font-semibold transition-all duration-300">
-                        soon...
-                    </span>
+                <div className="relative flex w-full h-fit sm:h-fit items-center justify-start text-center px-3.5 bg-transparent 
+                border border-white/60 rounded-xl transition-all duration-300">
+                        {otherGameModes && otherGameModes.length > 0 ? (
+                            otherGameModes.map((mode) => (
+                                <Link key={mode.id} to={mode.path}>
+                                    <div 
+                                        className={`flex w-16 h-16 mt-2 mb-2 rounded-2xl items-center justify-center 
+                                    text-center border border-r-4 border-b-4 border-white/30
+                                    hover:scale-105 hover:cursor-pointer active:scale-95 ease-[cubic-bezier(0.34,1.56,0.64,1)] transition-all duration-500 transform-gpu
+                                    ${mode.won ? "opacity-50" : "opacity-100"}`}
+                                    >
+                                        <img
+                                            src="/kpopit-icon-svg.svg"
+                                            alt="Kpopit Icon"
+                                            draggable={false}
+                                            className={`${mode.photoSpecs} w-10 h-10 sm:w-11 sm:h-11 object-contain`}
+                                        />
+                                        <span className="absolute text-white font-semibold text-sm [text-shadow:1px_1px_4px_rgba(0,0,0,0.7)]">{mode.name}</span>
+                                    </div>
+                                </Link>
+                            ))
+                        ) : null}
                 </div>
             </div>
         </div>

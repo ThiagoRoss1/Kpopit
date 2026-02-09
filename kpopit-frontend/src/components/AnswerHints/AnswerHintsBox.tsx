@@ -116,11 +116,11 @@ const AnswerHintsBox = (props: AnswerHintsBoxProps) => {
                             stiffness: 200,
                             damping: 20
                         }}
-                        className="w-lg h-28 max-w-full sm:w-lg sm:h-30 mx-auto 
-                        flex flex-row items-center justify-between gap-0 px-1 sm:px-0 sm:gap-4 rounded-[15px] sm:rounded-[15px] bg-linear-to-b from-white/0 to-[#b4b4b4]/0 perspective-distant">
+                        className="w-lg max-xxs:h-auto h-28 max-w-full sm:w-lg sm:h-30 mx-auto 
+                        flex max-xxs:flex-col flex-row items-center max-xxs:justify-center justify-between max-xxs:gap-3 gap-0 px-1 sm:px-0 sm:gap-4 rounded-[15px] sm:rounded-[15px] bg-linear-to-b from-white/0 to-[#b4b4b4]/0 perspective-distant">
 
             {/* Box 1 */}
-            <div className="relative perspective-distant">
+            <div className="relative perspective-distant max-xxs:w-full">
                 <motion.div
                     initial={ isFlipped1 ? { rotateY: -180 } : { rotateY: 0 } }
                     animate={canFlipCard1 ? isFlipped1 ? { rotateY: -180 } : { rotateY: 0 } : {}}
@@ -135,7 +135,7 @@ const AnswerHintsBox = (props: AnswerHintsBoxProps) => {
                         initial={{ scale: 0.9 }}
                         animate={canFlipCard1 ? { scale: 1 } : { scale: 0.9 }}
                         transition={{ duration: 0.4, ease: "easeInOut" }}
-                        className="relative max-xxs:w-40 max-xxs:h-24 xxs:w-45 xxs:h-24 xs:w-50 xs:h-26 sm:w-60 sm:h-30 border-2 border-white/50 rounded-2xl backdrop-blur-md flex items-center justify-center text-center 
+                        className="relative max-xxs:w-full max-sxs:w-full max-sxs:h-22 sxs:w-40 sxs:h-24 xxs:w-42 xxs:h-24 xs:w-48 zm:w-54 xs:h-26 sm:w-60 sm:h-30 border-2 border-white/50 rounded-2xl backdrop-blur-md flex items-center justify-center text-center 
                         backface-hidden shadow-[4px_4px_4px_1px_rgba(0,0,0,0.15),inset_0_4px_4px_0_rgba(0,0,0,0.15)] transform-3d transform-gpu">
                             <div className="flex flex-col z-10 gap-1 sm:gap-2 [text-shadow:1.2px_1.2px_4px_rgba(0,0,0,0.8)]">     
                                 <h3 className="relative font-bold max-xxs:text-base xxs:text-base xs:text-[18px] sm:text-[20px] text-[#ce757a] drop-shadow-lg">
@@ -148,8 +148,8 @@ const AnswerHintsBox = (props: AnswerHintsBoxProps) => {
                     </motion.div>
 
                     {/* Box 1 Front */}
-                    <div className={`absolute inset-0 -rotate-y-180 backface-hidden max-xxs:w-40 max-xxs:h-24 xxs:w-45 xxs:h-24 xs:w-50 xs:h-26 sm:w-60 sm:h-30 border-2 border-white/50 rounded-2xl backdrop-blur-md 
-                    flex items-center justify-center text-center shadow-[4px_4px_4px_1px_rgba(0,0,0,0.15),inset_0_4px_4px_0_rgba(0,0,0,0.15)] ${colorize1 ? "bg-black/80 transition-colors duration-2000" : ""}`}>
+                    <div className={`absolute inset-0 -rotate-y-180 backface-hidden max-xxs:w-full max-sxs:w-full max-sxs:h-22 sxs:w-40 sxs:h-24 xxs:w-42 xxs:h-24 xs:w-48 zm:w-54 xs:h-26 sm:w-60 sm:h-30 border-2 border-white/50 rounded-2xl backdrop-blur-md 
+                    flex items-center justify-center text-center shadow-[4px_4px_4px_1px_rgba(0,0,0,0.15),inset_0_4px_4px_0_rgba(0,0,0,0.15)] ${colorize1 ? "bg-black transition-colors duration-2000" : ""}`}>
                         <div className="flex flex-col gap-1 sm:gap-3">
                             <h3 className="relative font-bold max-xxs:text-base xxs:text-lg xs:text-[20px] sm:text-[22px] text-[#b43777] drop-shadow-lg 
                             [text-shadow:1.2px_1.2px_4px_rgba(0,0,0,0.8),0_0_12px_rgba(180,55,119,0.55)]">
@@ -178,7 +178,7 @@ const AnswerHintsBox = (props: AnswerHintsBoxProps) => {
             </div>
 
             {/* Box 2 */}
-            <div className="relative perspective-distant">
+            <div className="relative perspective-distant max-xxs:w-full">
                 <motion.div
                     initial= { isFlipped2 ? { rotateY: -180 } : { rotateY: 0 } }
                     animate={canFlipCard2 ? isFlipped2 ? { rotateY: -180 } : { rotateY: 0 } : {}}
@@ -193,7 +193,7 @@ const AnswerHintsBox = (props: AnswerHintsBoxProps) => {
                         initial={{ scale: 0.9 }}
                         animate={canFlipCard2 ? { scale: 1 } : { scale: 0.9 }}
                         transition={{ duration: 0.4, ease: "easeInOut" }}
-                        className="relative max-xxs:w-40 max-xxs:h-24 xxs:w-45 xxs:h-24 xs:w-50 xs:h-26 sm:w-60 sm:h-30 border-2 border-white/50 rounded-2xl backdrop-blur-md flex items-center justify-center text-center 
+                        className="relative max-sxs:w-full max-sxs:h-22 sxs:w-40 sxs:h-24 xxs:w-42 xxs:h-24 xs:w-48 zm:w-54 xs:h-26 sm:w-60 sm:h-30 border-2 border-white/50 rounded-2xl backdrop-blur-md flex items-center justify-center text-center 
                         backface-hidden shadow-[4px_4px_4px_1px_rgba(0,0,0,0.15),inset_0_4px_4px_0_rgba(0,0,0,0.15)] transform-3d transform-gpu">
                             <div className="flex flex-col gap-1 sm:gap-2 [text-shadow:1.2px_1.2px_4px_rgba(0,0,0,0.8)]">
                                 <h3 className="relative font-bold max-xxs:text-base xxs:text-base xs:text-[18px] sm:text-[20px] text-[#ce757a] drop-shadow-lg">
@@ -206,10 +206,10 @@ const AnswerHintsBox = (props: AnswerHintsBoxProps) => {
                     </motion.div>
 
                     {/* Box 2 Front */}
-                    <div className={`absolute inset-0 -rotate-y-180 backface-hidden max-xxs:w-40 max-xxs:h-24 xxs:w-45 xxs:h-24 xs:w-50 xs:h-26 sm:w-60 sm:h-30 border-2 border-white/50 rounded-2xl backdrop-blur-md 
-                    flex items-center justify-center text-center shadow-[4px_4px_4px_1px_rgba(0,0,0,0.15),inset_0_4px_4px_0_rgba(0,0,0,0.15)] ${colorize2 ? "bg-black/80 transition-colors duration-2000" : ""}`}>
-                        <div className="flex flex-col gap-2 sm:gap-4">
-                            <h3 className="relative font-bold max-xxs:text-base xxs:text-lg xs:text-[20px] sm:text-[22px] text-[#b43777] drop-shadow-lg
+                    <div className={`absolute inset-0 -rotate-y-180 backface-hidden max-xxs:w-full max-sxs:w-full max-sxs:h-22 sxs:w-40 sxs:h-24 xxs:w-42 xxs:h-24 xs:w-48 zm:w-54 xs:h-26 sm:w-60 sm:h-30 border-2 border-white/50 rounded-2xl backdrop-blur-md 
+                    flex items-center justify-center text-center shadow-[4px_4px_4px_1px_rgba(0,0,0,0.15),inset_0_4px_4px_0_rgba(0,0,0,0.15)] ${colorize2 ? "bg-black transition-colors duration-2000" : ""}`}>
+                        <div className="flex flex-col gap-2 sm:gap-4 w-full overflow-hidden px-3">
+                            <h3 className="relative font-bold max-xxs:text-base xxs:text-lg xs:text-xl sm:text-[22px] text-[#b43777] drop-shadow-lg
                             [text-shadow:1.2px_1.2px_4px_rgba(0,0,0,0.8),0_0_12px_rgba(180,55,119,0.55)]">
                                 {groupsDisplay.length > 1 ? "Groups" : "Group"}
                             </h3>
@@ -226,7 +226,7 @@ const AnswerHintsBox = (props: AnswerHintsBoxProps) => {
                                     filter: { duration: 0.8, ease: "easeOut" },
                                     scale: { duration: 0.3, ease: "easeInOut" },
                                 }}
-                                className={`text-white max-xxs:text-xl xxs:text-xl xs:text-xl sm:text-2xl font-semibold 
+                                className={`block w-full wrap-break-word text-white max-xxs:text-lg xxs:text-xl xs:text-xl sm:text-2xl font-semibold 
                                 [text-shadow:1.2px_1.2px_4px_rgba(0,0,0,0.8),0_0_12px_rgba(180,55,119,0.25)] ${!showHint2 ? "cursor-pointer select-none transform-gpu" : ""}`}>
                                     {groupsDisplay.join(", ")}
                             </motion.span>

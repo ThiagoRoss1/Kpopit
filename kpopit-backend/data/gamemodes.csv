@@ -1,0 +1,3 @@
+id,name,description,is_active
+1,classic,Classic is the standard gamemode where players guess the daily idol based on clues.,1
+2,blurry,Blurry mode presents a blurry image of the idol that gradually becomes clearer with each guess.,1

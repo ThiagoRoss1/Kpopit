@@ -1,5 +1,5 @@
 //import React from "react";
-import type { GuessedIdolData, GuessResponse, UserStats } from "../../interfaces/gameInterfaces";
+import type {  FeedbackData, GuessedIdolData, GuessResponse, UserStats } from "../../interfaces/gameInterfaces";
 import { useIsMobile, isSafari, isGeckoEngine } from "../../hooks/useIsDevice";
 import { useState } from "react";
 import { AnimatePresence, motion } from "motion/react";
@@ -8,19 +8,22 @@ import trophyIcon from "../../assets/icons/trophy.svg";
 import TwitterLogo from "../../assets/icons/twitter.svg";
 import { X, Download } from 'lucide-react';
 
-interface VictoryCardSmallProps {
+interface VictoryCardSmallProps<T = FeedbackData> {
     onClose?: () => void;
     cardInfo: GuessedIdolData;
-    guesses: GuessResponse[];
+    guesses?: GuessResponse<T>[];
     attempts: number;
     stats: UserStats | undefined;
     userRank?: number | null;
     userScore?: number | null;
     nextReset: () => { timeRemaining: number | null; formattedTime: string; };
+    gameMode: 'classic' | 'blurry' | null;
+    wonWithHardMode?: boolean;
+    wonWithoutColors?: boolean;
 }
 
-const VictoryCardSmall = (props: VictoryCardSmallProps) => {
-    const { guesses, cardInfo, attempts, stats, userRank, userScore, nextReset, onClose } = props;
+const VictoryCardSmall = <T = FeedbackData, >(props: VictoryCardSmallProps<T>) => {
+    const { guesses, cardInfo, attempts, stats, userRank, userScore, nextReset, onClose, gameMode, wonWithHardMode, wonWithoutColors } = props;
 
     const [copied, setCopied] = useState<boolean>(false);
     const [downloaded, setDownloaded] = useState<boolean>(false);
@@ -50,10 +53,24 @@ const VictoryCardSmall = (props: VictoryCardSmallProps) => {
         return header + body + siteLink;
     };
 
+    const textToCopyCategoriesBlurry = (attempts?: number) => {
+        const header = `I found today's #KpopIt Blurry Idol in ${attempts} ${attempts === 1 ? "attempt" : "attempts"}! 🎤\n\n`;
+        const bodyHardmode = `Hardmode ${wonWithHardMode ? "✅" : "❌"}\n`;
+        const bodyGrayscale = `Grayscale ${wonWithoutColors ? "✅" : "❌"}`;
+        const siteLink = `\n\n${window.location.href}`;
+
+        return header + bodyHardmode + bodyGrayscale + siteLink;
+        
+    };
+
     const categories = ["groups", "companies", "nationality", "birth_date", "idol_debut_year", "height", "position"] as const;
 
     const handleCopy = () => {
-        navigator.clipboard.writeText(textToCopyCategories(guesses, attempts));
+        if (gameMode === 'blurry')
+            navigator.clipboard.writeText(textToCopyCategoriesBlurry(attempts));
+        else {
+            navigator.clipboard.writeText(textToCopyCategories(guesses as GuessResponse<FeedbackData>[], attempts));
+        }
 
         setCopied(true);
         setTimeout(() => setCopied(false), 1000);
@@ -61,7 +78,7 @@ const VictoryCardSmall = (props: VictoryCardSmallProps) => {
 
     const textToCopy = (attempts: number, stats: UserStats | undefined, userRank?: number | null, userScore?: number | null) => {
         const header = `I found today's #KpopIt Idol in ${attempts} ${attempts === 1 ? "attempt" : "attempts"}! 🎤\n\n`;
-        const body = `My statistics:\nPosition: ${userRank}\nScore: ${userScore}\nStreak: ${stats?.current_streak}`;
+        const body = `My statistics:\nPosition: ${userRank}\nScore: ${userScore?.toFixed(2)}\nStreak: ${stats?.current_streak}`;
         const siteLink = `\n\n${window.location.href}`;
 
         return header + body + siteLink;
@@ -134,7 +151,7 @@ const VictoryCardSmall = (props: VictoryCardSmallProps) => {
 
                     {/* Idol Container */}
                     <div className="flex w-full items-center justify-center h-25 sm:h-25 mb-4">
-                        <div className={`relative flex items-center justify-center ${isOnMobile ? "bg-black/80" : "bg-black/70"} w-80 h-24 p-5 sm:w-80 sm:h-24 sm:p-5 rounded-[20px]
+                        <div className={`relative flex items-center justify-center ${isOnMobile ? "bg-black/80" : "bg-black/70"} max-xxs:w-75 max-xxs:h-24 xxs:w-80 xxs:h-24 p-5 sm:w-80 sm:h-24 sm:p-5 rounded-[20px]
                         hover:scale-105 hover:bg-black hover:brightness-110 hover:cursor-default transform duration-300 transform-gpu`}> {/* Maybe shadow-2xl or lg */}
 
                             <div className="absolute left-5 flex items-center justify-center h-20 w-20 sm:h-20 sm:w-20 bg-transparent rounded-[20px] hover:scale-110 hover:rotate-4 transition-transform duration-500 will-change-transform transform-gpu">
@@ -146,7 +163,7 @@ const VictoryCardSmall = (props: VictoryCardSmallProps) => {
                                     {cardInfo.artist_name}
                                 </p>
                                 <p className="text-base sm:text-[16px] leading-tight bg-linear-to-b from-[#ce757a] to-white brightness-105 text-transparent bg-clip-text">
-                                    ({cardInfo.groups.join(", ")|| "Soloist"})
+                                    {cardInfo.groups && cardInfo.groups.length > 0 ? `(${cardInfo.groups.join(", ")})` : ""}
                                 </p>
                             </div>
                         </div>
@@ -154,8 +171,8 @@ const VictoryCardSmall = (props: VictoryCardSmallProps) => {
 
                     {/* Stats Container */}
                     <div className="flex w-full items-center justify-center h-20 sm:h-20 mb-4">
-                        <div className="flex flex-row items-center justify-between w-80 h-20 sm:w-80 sm:h-20">
-                            <div className={`relative flex items-center justify-center text-center ${isOnMobile ? "bg-black/80" : "bg-black/70"} w-36 h-20 sm:w-36 sm:h-20 rounded-[20px] 
+                        <div className="flex flex-row items-center justify-between max-xxs:px-3 xxs:px-0 w-80 h-20 sm:w-80 sm:h-20">
+                            <div className={`relative flex items-center justify-center text-center ${isOnMobile ? "bg-black/80" : "bg-black/70"} max-xxs:w-30 max-xxs:h-20 xxs:w-36 xxs:h-20 sm:w-36 sm:h-20 rounded-[20px] 
                             hover:scale-105 hover:bg-black hover:brightness-110 hover:cursor-default transform duration-300 shadow-2xl transform-gpu`}>
                                 <div className="flex flex-col items-center justify-center text-center gap-0.5">
                                     <p className="font-bold text-base sm:text-[18px] text-[#ce757a] brightness-105">
@@ -168,7 +185,7 @@ const VictoryCardSmall = (props: VictoryCardSmallProps) => {
                                 </div>
                             </div>
 
-                            <div className={`relative flex items-center justify-center text-center ${isOnMobile ? "bg-black/80" : "bg-black/70"} w-36 h-20 sm:w-36 sm:h-20 rounded-[20px] 
+                            <div className={`relative flex items-center justify-center text-center ${isOnMobile ? "bg-black/80" : "bg-black/70"} max-xxs:w-30 max-xxs:h-20 xxs:w-36 xxs:h-20 sm:w-36 sm:h-20 rounded-[20px] 
                             hover:scale-105 hover:bg-black hover:brightness-110 hover:cursor-default transform duration-300 shadow-2xl transform-gpu`}>
                                 <div className="flex flex-col items-center justify-center text-center gap-0.5">
                                     <span className="font-bold text-base sm:text-[18px] text-[#ce757a] brightness-105">
@@ -186,7 +203,7 @@ const VictoryCardSmall = (props: VictoryCardSmallProps) => {
                     {/* Share Container */}
                     <div className="flex w-full items-center justify-center h-29 sm:h-29 mb-5">
                         <div className="flex flex-col items-center w-80 h-29 sm:w-80 sm:h-29">
-                            <button className="relative top-0 flex items-center justify-center text-center bg-black w-80 h-13 sm:w-80 sm:h-13 rounded-2xl mb-4
+                            <button className="relative top-0 flex items-center justify-center text-center bg-black max-xxs:w-75 max-xxs:h-13 xxs:w-80 xxs:h-13 sm:w-80 sm:h-13 rounded-2xl mb-4
                             hover:scale-105 hover:brightness-110 hover:bg-black/0 transform duration-300 shadow-2xl hover:shadow-[0px] hover:cursor-pointer transform-gpu" 
                             onClick={() => handleCopy()}>
                                 <div className="flex items-center justify-center text-center">

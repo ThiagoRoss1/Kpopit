@@ -4,36 +4,50 @@ import { useQuery } from "@tanstack/react-query";
 import { useState, useEffect } from "react";
 
 export const useResetTimer = () => {
-    const { data } = useQuery<ResetTimer>({
+    const { data, dataUpdatedAt } = useQuery<ResetTimer>({
         queryKey: ['resetTimer'],
         queryFn: getResetTimer,
-        staleTime: 1000 * 60 * 60,
-        refetchOnWindowFocus: false,
+        staleTime: 1000 * 60 * 10, // 10 minutes
+        refetchOnWindowFocus: true,
     });
 
     const [timeRemaining, setTimeRemaining] = useState<number | null>(null);
+    const [targetTime, setTargetTime] = useState<number | null>(null);
+    const [dayHasChanged, setDayHasChanged] = useState<boolean>(false);
 
     useEffect(() => {
-        if (data) {
-            const totalSeconds = data?.total_seconds || 0;
-            setTimeRemaining(totalSeconds);
+        if (data?.total_seconds && dataUpdatedAt) {
+            const end = dataUpdatedAt + data.total_seconds * 1000;
+
+            setTargetTime((prev) => {
+                if (!prev || Math.abs(prev - end) > 2000) {
+                    return end;
+                }
+                return prev;
+            });
         }
-    }, [data]);
+    }, [data, dataUpdatedAt]);
 
     useEffect(() => {
-        if (timeRemaining === 0) {
-            console.log("New day has started, reloading the page.");
-            window.location.reload();
-            return;
-        }
-        if (timeRemaining === null || timeRemaining === 0) return;
+        if (!targetTime || dayHasChanged) return;
+
+        const updateTimer = () => {
+            const now = Date.now();
+            const diff = Math.max(0, Math.floor((targetTime - now) / 1000));
+
+            if (diff <= 0) {
+                setDayHasChanged(true);
+                window.location.reload();
+            }
+            setTimeRemaining(diff);
+        };
+
+        updateTimer();
         
-        const interval = setInterval(() => {
-            setTimeRemaining(prev => (prev && prev > 0 ? prev - 1 : 0));
-        }, 1000);
+        const interval = setInterval(updateTimer, 1000);
 
         return () => clearInterval(interval);
-    }, [timeRemaining]);
+    }, [targetTime, dayHasChanged]);
 
     const hours = timeRemaining !== null ? Math.floor(timeRemaining / 3600) : 0;
     const minutes = timeRemaining !== null ? Math.floor((timeRemaining % 3600) / 60) : 0;
@@ -41,7 +55,7 @@ export const useResetTimer = () => {
 
     const formattedTime = `${hours.toString().padStart(2, '0')}:${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
 
-    return { timeRemaining, formattedTime };
+    return { timeRemaining, formattedTime, dayHasChanged };
 };
 
 export default useResetTimer;
