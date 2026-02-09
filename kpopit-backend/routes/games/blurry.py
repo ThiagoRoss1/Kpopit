@@ -1,8 +1,5 @@
-import sqlite3
 import os
-from datetime import datetime, timezone, timedelta, date
-import random
-from flask import Blueprint, jsonify, request, g
+from flask import Blueprint, jsonify, request
 from dotenv import load_dotenv
 from services.get_db import get_db, get_idol_repo
 from services.idol_service import IdolService

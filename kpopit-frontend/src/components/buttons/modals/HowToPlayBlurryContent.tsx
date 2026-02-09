@@ -1,9 +1,7 @@
-interface HowToPlayBlurryContentProps {
-    nextReset: () => { timeRemaining: number | null; formattedTime: string; };
-}
+import useResetTimer from "../../../hooks/useResetTimer";
 
-const HowToPlayBlurryContent = (props: HowToPlayBlurryContentProps) => {
-    const { nextReset } = props;
+const HowToPlayBlurryContent = () => {
+    const nextReset = useResetTimer();
 
     return (
         <div className="w-full">
@@ -15,7 +13,7 @@ const HowToPlayBlurryContent = (props: HowToPlayBlurryContentProps) => {
             </div>
                 <div className="flex flex-col w-full justify-center items-center mt-6 gap-1.5">
                     <span className="text-[18px]">Next idol in</span>
-                    <span className="text-3xl">{nextReset().formattedTime}</span>
+                    <span className="text-3xl">{nextReset.formattedTime}</span>
                     <span className="text-[12px]">Timezone: America (EST)</span>
                     <span className="text-[12px]">(Midnight at UTC-5)</span>
                 </div>

@@ -1,4 +1,4 @@
-from flask import Blueprint, jsonify, request, g
+from flask import Blueprint, jsonify, g
 from services.get_db import get_db
 from utils.dates import get_today_date_str
 from datetime import datetime

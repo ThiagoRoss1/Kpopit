@@ -1,24 +1,10 @@
-import sqlite3
 import os
-from datetime import datetime, timezone, timedelta, date
-from zoneinfo import ZoneInfo
-import random
-from flask import Flask, jsonify, request, redirect, session, g
+from flask import Flask, request, g
 from flask_cors import CORS
-import uuid
-import math
-import secrets
-import json
 from routes.admin import admin_bp
 from routes.tasks import tasks_bp
 from dotenv import load_dotenv
-from utils.dates import (get_today_now, get_today_date, get_today_date_str, get_current_timestamp)
-from utils.game_feedback_logic import partial_feedback_function, numerical_feedback_function
-from services.get_db import get_db, get_idol_repo, init_app
-from services.user_service import UserService
-from services.idol_service import IdolService
-from services.game_service import GameService
-from repositories.idol_repository import IdolRepository
+from services.get_db import init_app
 from routes.games.blurry import blurry_bp
 from routes.games.classic import classic_bp
 from routes.users import user_bp
@@ -27,8 +13,6 @@ from routes.game_logic import game_logic_bp
 from routes.general import general_bp
 from routes.ranking import ranking_bp
 from routes.session_info import session_info
-# from flask_babel import Babel
-# from flask_session import Session
 load_dotenv()
 
 # Global variables
@@ -85,19 +69,10 @@ app.register_blueprint(general_bp, url_prefix="/api")
 # Ranking routes blueprint - Daily users count and rank routes
 app.register_blueprint(ranking_bp, url_prefix="/api")
 
-# class Config:
-#     # Configure session
-#     LANGUAGES = ['en'] # Just english for now
-#     BABEL_DEFAULT_LOCALE = 'en'
-
-# app.config.from_object(Config)
-# babel = Babel(app)
-# Session(app)
-
-# Do it later for repositories 
-# @app.before_request
-# def load_repositories():
-#     g.repository = get_idol_repo()
+# Repository loading hook (optional future enhancement):
+# If needed, a before_request handler can be added here to attach
+# a repository instance (for example, an IdolRepository) to flask.g
+# for each request.
 
 if __name__ == "__main__":
     app.run(debug=True)

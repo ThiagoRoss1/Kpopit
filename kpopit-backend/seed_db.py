@@ -3,7 +3,6 @@ import csv
 import sqlite3
 import os
 from dotenv import load_dotenv
-from services.get_db import get_db
 
 load_dotenv()
 DB_FILE = os.getenv("DB_FILE")

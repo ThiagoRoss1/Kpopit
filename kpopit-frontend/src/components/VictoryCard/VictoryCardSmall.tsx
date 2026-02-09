@@ -77,7 +77,7 @@ const VictoryCardSmall = <T = FeedbackData, >(props: VictoryCardSmallProps<T>) =
     }
 
     const textToCopy = (attempts: number, stats: UserStats | undefined, userRank?: number | null, userScore?: number | null) => {
-        const header = `I found today's #KpopIt Idol in ${attempts} ${attempts === 1 ? "attempt" : "attempts"}! 🎤\n\n`;
+        const header = `I found today's #KpopIt ${gameMode === 'blurry' ? 'blurry ' : ''}Idol in ${attempts} ${attempts === 1 ? "attempt" : "attempts"}! 🎤\n\n`;
         const body = `My statistics:\nPosition: ${userRank}\nScore: ${userScore?.toFixed(2)}\nStreak: ${stats?.current_streak}`;
         const siteLink = `\n\n${window.location.href}`;
 

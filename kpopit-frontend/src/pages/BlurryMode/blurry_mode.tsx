@@ -70,7 +70,7 @@ function BlurryMode() {
         queryFn: getDailyUserCount,
         staleTime: 1000 * 60 * 5,
         refetchOnWindowFocus: false,
-    })
+    });
 
 
     // Blurry game data
@@ -99,9 +99,17 @@ function BlurryMode() {
                 }
             };
 
+            img.onerror = () => {
+                if (!isCancelled) {
+                    console.error("Error loading image:", img.src);
+                    setIsImageLoading(false);
+                }
+            };
+
             return () => {
                 isCancelled = true;
                 img.onload = null;
+                img.onerror = null;
             }
         }
     }, [blurryGameData?.blur_image_path]);
@@ -395,7 +403,7 @@ function BlurryMode() {
                     onSubmitShare={() => {setShowModal("share")}}
                 />
                 {showModal === "stats" && <Modal isOpen onClose={() => setShowModal(null)} title="Stats..."><StatsText stats={userStatsData} onSubmitTransferData={() => {setShowModal("transfer-data")}} /></Modal>}
-                {showModal === "how-to-play-blurry" && <Modal isOpen onClose={() => setShowModal(null)} title="How to Play..." isHowToPlay={true}><HowToPlayBlurryContent  nextReset={useResetTimer} /></Modal>}
+                {showModal === "how-to-play-blurry" && <Modal isOpen onClose={() => setShowModal(null)} title="How to Play..." isHowToPlay={true}><HowToPlayBlurryContent /></Modal>}
                 {showModal === "share" && <Modal isOpen onClose={() => setShowModal(null)} title="Share..."><ShareText guesses={guesses as GuessResponse[]} hasWon={isCorrect} attempts={attempts} gameMode={'blurry'} wonWithHardMode={wonWithHardMode} wonWithoutColors={wonWithoutColors} /></Modal>}
 
                 {/* Sub-Stats Modals */}
@@ -442,6 +450,7 @@ function BlurryMode() {
                         style={{filter: `${endGame ? "blur(0px)" : `blur(${currentBlur}px)`} ${endGame ? "grayscale(0%)" : `grayscale(${blurryToggleOptions.color ? 0 : 100}%)`}`}}
                         alt={`Blurry image of ${artistName}`}
                         onLoad={() => setIsImageLoading(false)}
+                        onError={() => setIsImageLoading(false)}
                         draggable={false}
                         className={`max-xxs:w-55 max-xxs:h-80 xxs:w-60 xxs:h-88 xs:w-70 xs:h-98 xm:w-70 xm:h-98 zm:w-80 zm:h-108 sm:w-100 sm:h-128 object-cover transition-all duration-1000
                         ${isImageLoading ? 'opacity-0' : 'opacity-100'}`} // load image (TODO)
@@ -534,7 +543,7 @@ function BlurryMode() {
             )}
         </div>
         </>
-    )
-}
+    );
+};
 
 export default BlurryMode;

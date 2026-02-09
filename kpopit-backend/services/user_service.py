@@ -1,9 +1,6 @@
-import sqlite3
 from flask import request
 from datetime import date
-from services.get_db import get_db
 from utils.dates import get_today_date_str
-
 
 class UserService:
     def __init__(self, db):
@@ -17,14 +14,12 @@ class UserService:
         if not user_token:
             return None
 
-
         cursor.execute("""
                 SELECT id FROM users
                 WHERE token = ?
             """, (user_token,))
 
         user_row = cursor.fetchone()
-
 
         if user_row:
             user_id = user_row["id"]

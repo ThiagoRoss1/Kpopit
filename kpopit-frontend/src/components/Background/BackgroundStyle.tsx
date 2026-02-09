@@ -142,6 +142,4 @@ const BackgroundStyle = (props: BackgroundStyleProps) => {
   );
 };
 
-export default React.memo(BackgroundStyle, (prev, next) => {
-    return prev.attempts === next.attempts;
-});
+export default React.memo(BackgroundStyle);

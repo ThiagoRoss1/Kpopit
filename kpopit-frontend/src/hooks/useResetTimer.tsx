@@ -16,8 +16,8 @@ export const useResetTimer = () => {
     const [dayHasChanged, setDayHasChanged] = useState<boolean>(false);
 
     useEffect(() => {
-        if (data?.total_seconds && dataUpdatedAt) {
-            const end = dataUpdatedAt + data.total_seconds * 1000;
+        if (data?.total_seconds !== undefined && data?.total_seconds !== null && dataUpdatedAt) {
+            const end = dataUpdatedAt + (data.total_seconds * 1000);
 
             setTargetTime((prev) => {
                 if (!prev || Math.abs(prev - end) > 2000) {

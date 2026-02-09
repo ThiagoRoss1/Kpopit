@@ -1,4 +1,4 @@
-from flask import Blueprint, request, jsonify
+from flask import Blueprint, jsonify
 from utils.analytics import get_analytics_data, get_country_name
 
 session_info = Blueprint('session_info', __name__)

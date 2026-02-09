@@ -2,14 +2,10 @@ import ArrowUp from "../../../assets/icons/arrow-fat-line-up-fill.svg";
 import ArrowDown from "../../../assets/icons/arrow-fat-line-down-fill.svg";
 import ChaewonBanner from "../../../assets/imgs/chaewon_guess.png";
 import EunbiBanner from "../../../assets/imgs/eunbi_guess.png";
+import useResetTimer from "../../../hooks/useResetTimer";
 
-interface HowToPlayTextProps {
-    nextReset: () => { timeRemaining: number | null; formattedTime: string; };
-}
-
-
-const HowToPlayText = (props: HowToPlayTextProps) => {
-    const { nextReset } = props;
+const HowToPlayText = () => {
+    const nextReset  = useResetTimer();
 
     return (
         <div className="w-full [text-shadow:1.6px_1.6px_3px_rgba(0,0,0,0.5)]">
@@ -21,7 +17,7 @@ const HowToPlayText = (props: HowToPlayTextProps) => {
             </div>
                 <div className="flex flex-col w-full justify-center items-center mt-6 gap-1.5">
                     <span className="text-[18px]">Next Idol in</span>
-                    <span className="text-3xl">{nextReset().formattedTime}</span>
+                    <span className="text-3xl">{nextReset.formattedTime}</span>
                     <span className="text-[12px]">Timezone: America (EST)</span>
                     <span className="text-[12px]">(Midnight at UTC-5)</span>
                 </div>

@@ -93,7 +93,7 @@ class IdolRepository:
                 i.image_path,
                 b.blur_image_path
             FROM idols AS i
-            LEFT JOIN blurry_mode_data AS b ON i.id = b.idol_id
+            INNER JOIN blurry_mode_data AS b ON i.id = b.idol_id AND b.is_active = 1
             WHERE i.id = ? AND i.is_published = 1
         """
 

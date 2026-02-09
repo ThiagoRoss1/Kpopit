@@ -219,10 +219,4 @@ const ButtonsListMobile = (props: ButtonsListMobileProps) => {
     )
 }
 
-
-
-
-
-
-
 export default ButtonsListMobile;
