@@ -31,8 +31,8 @@ const ButtonsDroplist = (props: ButtonsDroplistProps) => {
                     <span className="flex flex-row text-white max-xxs:text-[14px] xxs:text-[14px] xs:text-[14px] sm:text-base gap-1 sm:gap-1.5 text-center items-center justify-center">{buttonName} <ChevronDown className={`w-3.5 h-3.5 sm:w-4.5 sm:h-4.5 transition-all duration-300 transform-gpu ${isOpen ? "rotate-180" : ""}`} /></span>
                 </button>
 
-                <DroplistBase isOpen={isOpen} onClose={() => setIsOpen(false)} containerRef={containerRef} className={`${isGrid ? "max-xxs:w-45 xxs:w-55 xm:w-65 sm:w-80 lg:w-100" : "w-50"} h-auto`}>
-                    <div className={`flex ${isGrid ? "grid grid-cols-1 lg:grid-cols-2" : "flex flex-col"} gap-2 p-2`}> {/* hover aumenta */}
+                <DroplistBase isOpen={isOpen} onClose={() => setIsOpen(false)} containerRef={containerRef} className={`${isGrid ? "max-xxs:w-45 xxs:w-55 xm:w-65 sm:w-80 lg:w-80 xl:w-90 2xl:w-100" : "w-50"} h-auto`}>
+                    <div className={`flex ${isGrid ? "grid grid-cols-1 xl:grid-cols-2" : "flex flex-col"} gap-2 p-2`}>
                         {items.map((item) => { 
                             const isPath = location.pathname.includes(item.path);
 

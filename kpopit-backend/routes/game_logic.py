@@ -9,7 +9,7 @@ game_logic_bp = Blueprint('game_logic', __name__)
 @game_logic_bp.route("/store-yesterdays-idol")
 def store_yesterdays_idol():
     """Store yesterday's idol pick in the database"""
-    print(f"gamemode id {g.gamemode_id}")
+    print(f"Gamemode id {g.gamemode_id}")
     
     # Start db connection
     connect = get_db()

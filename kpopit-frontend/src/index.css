@@ -12,10 +12,12 @@
 }
 
 @theme {
+  --breakpoint-sxs: 340px;
   --breakpoint-xxs: 370px;
   --breakpoint-xs: 414px;
   --breakpoint-xm: 430px;
   --breakpoint-zm: 480px;
+  --breakpoint-3xl: 1728px;
 }
 
 body {

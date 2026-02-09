@@ -57,11 +57,11 @@ const ButtonsListMobile = (props: ButtonsListMobileProps) => {
             transition-opacity duration-500 ${isOpen ? "opacity-100" : "opacity-0 pointer-events-none"}`}
         >
             <ul 
-                className={`flex flex-col ${isOpen ? "mobile-navbar-enter" : "mobile-navbar-exit"} items-center justify-start gap-4 w-110 h-fit bg-white/10 border border-white/20 rounded-2xl mt-20 py-6 px-8`}
+                className={`flex flex-col ${isOpen ? "mobile-navbar-enter" : "mobile-navbar-exit"} items-center justify-start gap-4 max-xxs:w-75 xxs:w-90 xs:w-100 sm:w-100 h-fit bg-white/10 border border-white/20 rounded-2xl mt-20 py-6 px-8`}
                 ref={containerRef}
             >
                 {/* Home */}
-                <li className="flex w-full h-18 bg-linear-to-r from-[#FF3399] to-[#df4a83] rounded-2xl items-center justify-center text-center text-white">
+                <li className="flex w-full max-xxs:h-12 xxs:h-14 xs:h-16 bg-linear-to-r from-[#FF3399] to-[#df4a83] rounded-2xl items-center justify-center text-center text-white">
                     <Link
                         to="/" onClick={onClose} className={`flex w-full h-full items-center justify-center rounded-2xl text-center ${text}`}>
                             <span className={text}>Home</span>
@@ -70,7 +70,7 @@ const ButtonsListMobile = (props: ButtonsListMobileProps) => {
                 {/* Games Section */}
                 <li className="flex w-full flex-col items-center justify-center">
                     <button
-                        className={`w-full h-18 rounded-2xl bg-black text-white transition-transform duration-300 transform-gpu ${activeSection === "games" ? "bg-white/20 scale-105 border border-white/60" : ""}`}
+                        className={`w-full max-xxs:h-12 xxs:h-14 xs:h-16 rounded-2xl bg-black text-white transition-transform duration-300 transform-gpu ${activeSection === "games" ? "bg-white/20 scale-105 border border-white/60" : ""}`}
                         onClick={() => setActiveSection((prev) => prev === "games" ? null : "games")}
                     >
                         <span className={`flex flex-row items-center justify-center gap-4 ${text}`}>Games <ChevronDown className={`w-8 h-8 transition-all duration-300 transform-gpu ${activeSection === "games" ? "rotate-180" : ""}`} /></span>
@@ -90,7 +90,7 @@ const ButtonsListMobile = (props: ButtonsListMobileProps) => {
                                 return (
                                     <li 
                                         key={game.path}
-                                        className="flex w-full h-18 bg-black/40 rounded-2xl items-center px-4 gap-3 cursor-default"
+                                        className="flex w-full max-xxs:h-12 xxs:h-14 xs:h-16 bg-black/40 rounded-2xl items-center px-4 gap-3 cursor-default"
                                     >
                                         {game.icon && (
                                             <img 
@@ -107,7 +107,7 @@ const ButtonsListMobile = (props: ButtonsListMobileProps) => {
                             return (
                                 <li 
                                     key={game.path}
-                                    className={`flex w-full h-18 rounded-2xl items-center justify-center px-4 gap-3 hover:bg-[#FF3399]/80 transition-colors ${
+                                    className={`flex w-full max-xxs:h-12 xxs:h-14 xs:h-16 rounded-2xl items-center justify-center px-4 gap-3 hover:bg-[#FF3399]/80 transition-colors ${
                                         isPath ? "bg-white/10" : "bg-black/0"
                                     }`}
                                 >
@@ -139,7 +139,7 @@ const ButtonsListMobile = (props: ButtonsListMobileProps) => {
                 {/* Idols Section */}
                 <li className="w-full flex flex-col items-center justify-center list-none">
                     <button
-                        className={`w-full h-18 rounded-2xl bg-black text-white transition-transform duration-300 transform-gpu ${activeSection === "idols" ? "bg-white/20 scale-105 border border-white/60" : ""}`}
+                        className={`w-full max-xxs:h-12 xxs:h-14 xs:h-16 rounded-2xl bg-black text-white transition-transform duration-300 transform-gpu ${activeSection === "idols" ? "bg-white/20 scale-105 border border-white/60" : ""}`}
                         onClick={() => setActiveSection((prev) => prev === "idols" ? null : "idols")}
                     >
                         <span className={`flex flex-row items-center justify-center gap-4 ${text}`}>Idols <ChevronDown className={`w-8 h-8 transition-all duration-300 transform-gpu ${activeSection === "idols" ? "rotate-180" : ""}`} /></span>
@@ -159,7 +159,7 @@ const ButtonsListMobile = (props: ButtonsListMobileProps) => {
                                 return (
                                     <li 
                                         key={idol.path}
-                                        className="flex w-full h-18 bg-black/40 rounded-2xl items-center px-4 gap-3 cursor-default"
+                                        className="flex w-full max-xxs:h-12 xxs:h-14 xs:h-16 bg-black/40 rounded-2xl items-center px-4 gap-3 cursor-default"
                                     >
                                         {idol.icon && (
                                             <img 
@@ -168,7 +168,7 @@ const ButtonsListMobile = (props: ButtonsListMobileProps) => {
                                                 className="grayscale w-9 h-9"
                                             />
                                         )}
-                                        <span className="text-white/40 italic text-lg">{idol.label}</span>
+                                        <span className="text-white/40 italic max-xxs:text-sm xxs:text-base xs:text-lg">{idol.label}</span>
                                     </li>
                                 );
                             }
@@ -176,7 +176,7 @@ const ButtonsListMobile = (props: ButtonsListMobileProps) => {
                             return (
                                 <li 
                                     key={idol.path}
-                                    className={`flex w-full h-18 rounded-2xl items-center px-4 gap-3 hover:bg-[#FF3399]/80 transition-colors ${
+                                    className={`flex w-full max-xxs:h-12 xxs:h-14 xs:h-16 rounded-2xl items-center px-4 gap-3 hover:bg-[#FF3399]/80 transition-colors ${
                                         isPath ? "bg-white/10" : "bg-black/80"
                                     }`}
                                 >
@@ -210,7 +210,7 @@ const ButtonsListMobile = (props: ButtonsListMobileProps) => {
                     <Link
                         to="/contact" 
                         onClick={onClose} 
-                        className={`flex w-full h-18 bg-linear-to-r from-[#FF3399] to-[#df4a83] rounded-2xl items-center justify-center text-center ${text}`}>
+                        className={`flex w-full max-xxs:h-12 xxs:h-14 xs:h-16 bg-linear-to-r from-[#FF3399] to-[#df4a83] rounded-2xl items-center justify-center text-center ${text}`}>
                             <span className={text}>Contact</span>
                     </Link>
                 </li>

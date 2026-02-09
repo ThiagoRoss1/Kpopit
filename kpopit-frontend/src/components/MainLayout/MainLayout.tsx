@@ -19,7 +19,7 @@ const MainLayout = () => {
         <div className="min-h-screen flex flex-col bg-transparent text-foreground selection:bg-pink-800">
             <NavBar />
 
-            <main className="flex-1 max-w-screen-2xl mx-auto px-4 sm:px-0 lg:px-8 w-full">
+            <main className="flex-1 max-w-screen-2xl mx-auto px-2 sm:px-4 lg:px-8 w-full">
                 <Outlet />
             </main>
 

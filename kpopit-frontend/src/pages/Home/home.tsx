@@ -9,8 +9,16 @@ import ChangelogText from "../../components/buttons/modals/ChangelogContent";
 import AboutText from "../../components/buttons/modals/AboutContent";
 
 function Home() {
-
     const [showModal, setShowModal] = useState<null | "changelog" | "about">(null);
+
+    if (import.meta.env.VITE_MAINTENANCE_MODE === "true") {
+        return (
+            <div className="fixed inset-0 z-100 flex w-full h-screen bg-black justify-center items-center">
+                <span className="text-white animate-pulse">Server under maintenance, applying updates. Try again later.</span>
+            </div>
+        );
+    };
+    
     return (
         <>
         <BackgroundStyle />
@@ -48,13 +56,15 @@ function Home() {
                 <div className="flex flex-col items-center justify-center w-fit h-fit mb-25">
                     <div className="w-full h-fit flex flex-col bg-transparent items-center justify-center gap-6 sm:gap-10">
                         {/* Classic */}
-                        <div 
-                            className="flex max-xxs:w-70 xxs:w-80 xs:w-90 xm:w-94 sm:w-117.5 h-20 sm:h-25 max-xxs:px-1 xxs:px-1 xm:px-2 bg-transparent border border-white rounded-3xl
+                        <Link
+                            to="/classic"
+                            className="group flex max-xxs:w-70 xxs:w-80 xs:w-90 xm:w-94 sm:w-117.5 h-20 sm:h-25 max-xxs:px-1 xxs:px-1 xm:px-2 bg-transparent border border-white rounded-3xl
                             items-center justify-start max-xxs:gap-0 xxs:gap-1 xs:gap-2 shadow-[4px_4px_0px_0px_rgba(255,255,255,1)] hover:shadow-[0px_0px_0px_0px_rgba(255,255,255,1)]
-                            hover:bg-black hover:translate-x-1 hover:translate-y-1 transition-all duration-200 transform-gpu">
+                            hover:bg-black hover:translate-x-1 hover:translate-y-1 transition-all duration-200 transform-gpu
+                            active:shadow-[0px_0px_0px_0px_rgba(255,255,255,1)] active:bg-black active:translate-x-1 active:translate-y-1">
                             <div className="flex w-20 h-20 bg-white/0 rounded-full items-center text-center justify-center">
                                 <img
-                                    src="/public/kpopit-icon.png"
+                                    src="/kpopit-icon-svg.svg"
                                     alt="Kpopit Icon"
                                     className="max-xxs:w-10 max-xxs:h-10 xxs:w-10 xxs:h-10 xs:w-12 xs:h-12 sm:w-12 sm:h-12"
                                     draggable={false} />
@@ -76,26 +86,27 @@ function Home() {
                                     </span>
                                 </div>
                                 
-                                <Link
-                                    to="/classic"
+                                <div
                                     className="flex max-xxs:w-14 max-xxs:h-12 xxs:w-16 xxs:h-12 xs:w-18 xs:h-12 xm:w-20 xm:h-12 sm:w-22.5 sm:h-15 bg-transparent border border-white 
                                     rounded-2xl text-white items-center justify-center text-center
-                                    hover:scale-105 hover:bg-[#e70a7d]
+                                    hover:scale-105 hover:bg-[#e70a7d] group-active:scale-95 ease-[cubic-bezier(0.34,1.56,0.64,1)] group-active:bg-[#e70a7d]
                                     transition-all duration-500 transform-gpu mr-3.5"
                                     draggable={false}>
                                         Play
-                                </Link>
+                                </div>
                             </div>
-                        </div>
+                        </Link>
 
                         {/* Blurry */}
-                        <div 
-                            className="flex max-xxs:w-70 xxs:w-80 xs:w-90 xm:w-94 sm:w-117.5 max-xxs:h-20 xxs:h-20 xs:h-20 xm:h-20 sm:h-25 max-xxs:px-1 xxs:px-1 xm:px-2 bg-transparent border border-white rounded-3xl
+                        <Link 
+                            to="/blurry"
+                            className="group flex max-xxs:w-70 xxs:w-80 xs:w-90 xm:w-94 sm:w-117.5 max-xxs:h-20 xxs:h-20 xs:h-20 xm:h-20 sm:h-25 max-xxs:px-1 xxs:px-1 xm:px-2 bg-transparent border border-white rounded-3xl
                             items-center justify-start max-xxs:gap-0 xxs:gap-1 xs:gap-2 shadow-[4px_4px_0px_0px_rgba(255,255,255,1)] hover:shadow-[0px_0px_0px_0px_rgba(255,255,255,1)]
-                            hover:bg-black hover:translate-x-1 hover:translate-y-1 transition-all duration-200 transform-gpu">
+                            hover:bg-black hover:translate-x-1 hover:translate-y-1 transition-all duration-200 transform-gpu
+                            active:shadow-[0px_0px_0px_0px_rgba(255,255,255,1)] active:bg-black active:translate-x-1 active:translate-y-1">
                             <div className="flex w-20 h-20 bg-white/0 rounded-full items-center text-center justify-center">
                                 <img
-                                    src="/public/kpopit-icon.png"
+                                    src="/kpopit-icon-svg.svg"
                                     alt="Kpopit Icon"
                                     className="max-xxs:w-10 max-xxs:h-10 xxs:w-10 xxs:h-10 xs:w-12 xs:h-12 sm:w-12 sm:h-12 blur-[2px]"
                                     draggable={false} />
@@ -117,17 +128,16 @@ function Home() {
                                     </span>
                                 </div>
                                 
-                                <Link
-                                    to="/blurry"
+                                <div
                                     className="flex max-xxs:w-14 max-xxs:h-12 xxs:w-16 xxs:h-12 xs:w-18 xs:h-12 xm:w-20 xm:h-12 sm:w-22.5 sm:h-15 bg-transparent border border-white 
                                     rounded-2xl text-white items-center justify-center text-center
-                                    hover:scale-105 hover:bg-[#e70a7d]
+                                    hover:scale-105 hover:bg-[#e70a7d] group-active:scale-95 ease-[cubic-bezier(0.34,1.56,0.64,1)] group-active:bg-[#e70a7d]
                                     transition-all duration-500 transform-gpu mr-3.5"
                                     draggable={false}>
                                         Play
-                                </Link>
+                                </div>
                             </div>
-                        </div>
+                        </Link>
                     </div>
                 </div>
 

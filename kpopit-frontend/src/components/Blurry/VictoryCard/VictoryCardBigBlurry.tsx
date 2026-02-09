@@ -32,7 +32,7 @@ const VictoryCardBigBlurry = (props: BlurryVictoryCardBigProps) => {
 
     return (
         <div className="relative flex flex-col items-center justify-start
-        max-xxs:w-80 xxs:w-92 xs:w-100 xm:w-106 h-fit sm:w-157 sm:h-fit 
+        max-xxs:w-80 xxs:w-92 xs:w-100 xm:w-106 zm:w-116 h-fit sm:w-157 sm:h-fit 
         rounded-3xl border-2 border-white/50 bg-black/50 mb-10 text-white 
         shadow-[2px_2px_10px_2px_rgba(0,0,0,0.25)]">
 
@@ -202,10 +202,10 @@ const VictoryCardBigBlurry = (props: BlurryVictoryCardBigProps) => {
                                         ${mode.won ? "opacity-50" : "opacity-100"}`}
                                         >
                                             <img
-                                                src="/kpopit-icon.png"
+                                                src="/kpopit-icon-svg.svg"
                                                 alt="Kpopit Icon"
                                                 draggable={false}
-                                                className="w-12 h-12 sm:w-12 sm:h-12 object-contain"
+                                                className="w-10 h-10 sm:w-11 sm:h-11 object-contain"
                                             />
                                             <span className="absolute text-white font-semibold text-sm [text-shadow:1px_1px_4px_rgba(0,0,0,0.7)]">{mode.name}</span>
                                         </div>

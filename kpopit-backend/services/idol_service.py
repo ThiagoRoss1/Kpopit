@@ -47,7 +47,7 @@ class IdolService:
                 SELECT i.id, (SELECT MAX(pick_date) FROM daily_picks WHERE idol_id = i.id AND gamemode_id = ? AND pick_date <= ?) AS last_picked_date
                 FROM idols AS i
                 INNER JOIN blurry_mode_data AS b ON i.id = b.idol_id
-                WHERE i.is_published = 1
+                WHERE i.is_published = 1 AND b.is_active = 1
                 AND i.id NOT IN (SELECT idol_id FROM daily_picks WHERE pick_date >= ? AND gamemode_id = ?)
             """
             cursor.execute(sql_query, (gamemode_id, today_date, date_limit, gamemode_id))
@@ -94,7 +94,7 @@ class IdolService:
                 cursor.execute("""
                         SELECT i.id FROM idols AS i
                         INNER JOIN blurry_mode_data AS b ON i.id = b.idol_id
-                        WHERE i.is_published = 1
+                        WHERE i.is_published = 1 AND b.is_active = 1
                     """)  
 
             # Transform 'Row object' list to a simple list of ids

@@ -17,8 +17,8 @@ const NavBar = () => {
     const [isMobileMenuOpen, setIsMobileMenuOpen] = useState<boolean>(false);
 
     return (
-        <nav className="sticky top-0 z-100 w-full sm:w-full h-12 sm:h-15 border-b border-[#FF3399]/40 bg-black/50 backdrop-blur-xl px-2 sm:px-4">
-            <div className="max-w-full sm:max-w-360 mx-auto px-2 sm:px-0 h-full flex items-center justify-between">
+        <nav className="sticky top-0 z-100 w-full h-12 sm:h-15 border-b border-[#FF3399]/40 bg-black/50 backdrop-blur-xl px-2 sm:px-4">
+            <div className="max-w-screen-2xl mx-auto h-full flex items-center justify-between">
 
                 {/* Logo - Left part */}
                 <div className="flex items-center hover:scale-105 active:scale-95 ease-[cubic-bezier(0.34,1.56,0.64,1)] transition-all duration-300 transform-gpu">
@@ -27,7 +27,7 @@ const NavBar = () => {
                         className="flex items-center gap-1 hover:opacity-80 transition-opacity duration-300"
                     >
                         <img 
-                            src="/kpopit-icon.png"
+                            src="/kpopit-icon-svg.svg"
                             alt="Kpopit logo"
                             className="max-xxs:w-7 max-xxs:h-7 xxs:w-8 xxs:h-8 xs:w-9 xs:h-9 sm:w-12 sm:h-12 object-contain"
                             draggable={false}

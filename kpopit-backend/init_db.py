@@ -73,7 +73,7 @@ idol_career_sql = """
     end_year INTEGER,
 
     /* --- Primary Key --- */
-    PRIMARY KEY(idol_id, group_id)
+    PRIMARY KEY(idol_id, group_id),
 
     /* --- Foreign Keys --- */
     FOREIGN KEY(idol_id) REFERENCES idols(id),

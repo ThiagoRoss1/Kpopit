@@ -171,10 +171,10 @@ return (
                                     ${mode.won ? "opacity-50" : "opacity-100"}`}
                                     >
                                         <img
-                                            src="/kpopit-icon.png"
+                                            src="/kpopit-icon-svg.svg"
                                             alt="Kpopit Icon"
                                             draggable={false}
-                                            className={`${mode.photoSpecs} sm:w-12 sm:h-12 object-contain`}
+                                            className={`${mode.photoSpecs} w-10 h-10 sm:w-11 sm:h-11 object-contain`}
                                         />
                                         <span className="absolute text-white font-semibold text-sm [text-shadow:1px_1px_4px_rgba(0,0,0,0.7)]">{mode.name}</span>
                                     </div>

@@ -12,15 +12,15 @@ const TopButtons = (props: TopButtonsProps) => {
     const { onSubmitStats, onSubmitHowToPlay, onSubmitShare } = props;
 
     // Middle Button Styles //
-    const centerButtonCardStyle = "inline-flex relative max-xxs:w-28 max-xxs:h-10 xxs:w-32 xxs:h-10 xs:w-34.5 xs:h-10.5 xm:36.5 xs:h-10.5 sm:w-46.5 sm:h-12.5 overflow-hidden rounded-2xl sm:rounded-[20px] p-[1px] focus:outline-none focus:ring-2 focus:ring-[#000000] focus:ring-offset-1 focus:ring-offset-[#242424] firefox:isolate firefox:z-0 shadow-[4px_4px_4px_1px_rgba(0,0,0,0.25),inset_0_4px_4px_0_rgba(0,0,0,0.25)]";   
+    const centerButtonCardStyle = "inline-flex relative max-xxs:w-28 max-xxs:h-10 xxs:w-32 xxs:h-10 xs:w-34.5 xs:h-10.5 xm:w-36.5 xs:h-10.5 zm:w-44 zm:h-11 sm:w-46.5 sm:h-12.5 overflow-hidden rounded-2xl sm:rounded-[20px] p-[1px] focus:outline-none focus:ring-2 focus:ring-[#000000] focus:ring-offset-1 focus:ring-offset-[#242424] firefox:isolate firefox:z-0 shadow-[4px_4px_4px_1px_rgba(0,0,0,0.25),inset_0_4px_4px_0_rgba(0,0,0,0.25)]";   
     const centerButtonAnimation = "absolute inset-[-300%] animate-[spin_2s_linear_infinite] bg-[conic-gradient(from_90deg_at_50%_50%,#b43777_0%,#ffffff_50%,#b43777_100%)] firefox:transform-3d firefox:will-change-transform";
-    const centerButtonTextStyle = "inline-flex h-full w-full items-center justify-center rounded-2xl sm:rounded-[20px] bg-black px-1 max-xxs:text-[14px] xxs:text-[14px] xs:text-base sm:text-[20px] text-[#b43777] font-semibold backdrop-blur-2xl";
+    const centerButtonTextStyle = "inline-flex h-full w-full items-center justify-center rounded-2xl sm:rounded-[20px] bg-black px-1 max-xxs:text-[14px] xxs:text-[14px] xs:text-base zm:text-lg sm:text-xl text-[#b43777] font-semibold backdrop-blur-2xl";
 
     // Hover //
     const centerHoverEffect = "hover:brightness-125 hover:scale-105 firefox:hover:scale-100 hover:cursor-pointer transition-transform transform-gpu firefox:will-change-transform duration-500";
 
     // Rounded Button Styles - Stats / Share //
-    const RoundedButtonStyle = "inline-flex relative max-xxs:h-9 max-xxs:w-9 xxs:h-9 xxs:w-9 xs:h-9 xs:w-9 sm:h-12.5 sm:w-12.5 overflow-hidden rounded-full p-[1px] focus:outline-none focus:ring-2 focus:ring-[#000000] focus:ring-offset-1 focus:ring-offset-[#242424] hover:brightness-110 firefox:hover:brightness-140 hover:scale-105 firefox:hover:scale-100 transform duration-300";
+    const RoundedButtonStyle = "inline-flex relative max-xxs:h-9 max-xxs:w-9 xxs:h-9 xxs:w-9 xs:h-9 xs:w-9 zm:w-10 zm:h-10 sm:h-12.5 sm:w-12.5 overflow-hidden rounded-full p-[1px] focus:outline-none focus:ring-2 focus:ring-[#000000] focus:ring-offset-1 focus:ring-offset-[#242424] hover:brightness-110 firefox:hover:brightness-140 hover:scale-105 firefox:hover:scale-100 transform duration-300";
     const ImageStyle = "flex items-center justify-center max-xxs:w-8 max-xxs:h-8 xxs:w-8 xxs:h-8 xs:w-8 xs:h-8 sm:w-9 sm:h-9 rounded-full transform-gpu";
 
     // Rounded Button Animation - Stats / Share //
