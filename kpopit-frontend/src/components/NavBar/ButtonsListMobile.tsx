@@ -216,7 +216,7 @@ const ButtonsListMobile = (props: ButtonsListMobileProps) => {
                 </li>
             </ul>
         </div>
-    )
-}
+    );
+};
 
 export default ButtonsListMobile;

@@ -17,8 +17,10 @@ interface BlurryVictoryCardBigProps {
     cardInfo: GuessedIdolData;
     attempts: number;
     idol_blur_image: string;
+    idol_blur_image_version?: string | null;
     yesterdayIdol: string;
     yesterdayIdolImage?: YesterdayIdol["image_path"];
+    yesterdayIdolImageVersion?: YesterdayIdol["image_version"];
     userPosition?: number | null;
     userRank?: number | null;
     userScore?: number | null;
@@ -28,7 +30,7 @@ interface BlurryVictoryCardBigProps {
 }
 
 const VictoryCardBigBlurry = (props: BlurryVictoryCardBigProps) => {
-    const { cardInfo, attempts, idol_blur_image, yesterdayIdol, yesterdayIdolImage, userPosition, userRank, userScore, nextReset, onShareClick, otherGameModes } = props;
+    const { cardInfo, attempts, idol_blur_image, idol_blur_image_version, yesterdayIdol, yesterdayIdolImage, yesterdayIdolImageVersion, userPosition, userRank, userScore, nextReset, onShareClick, otherGameModes } = props;
 
     return (
         <div className="relative flex flex-col items-center justify-start
@@ -47,7 +49,7 @@ const VictoryCardBigBlurry = (props: BlurryVictoryCardBigProps) => {
                 <div className="absolute flex items-center justify-center max-xxs:w-24 max-xxs:h-24 xxs:w-27 xxs:h-27 xs:w-30 xs:h-30 sm:w-35 sm:h-35 rounded-[48px] sm:rounded-[50px] top-5 border-2 border-white/80 
                 hover:border-white hover:scale-120 hover:rotate-6 transform duration-1000 will-change-transform 
                 shadow-[0_0_20px_4px_rgba(255,255,255,0.1),0_0_40px_10px_rgba(255,255,255,0.1)]">
-                    <img src={`${import.meta.env.VITE_IMAGE_BUCKET_URL}${cardInfo.image_path}`} alt="Idol" className="max-xxs:w-23 max-xxs:h-23 xxs:w-26 xxs:h-26 xs:w-29 xs:h-29 sm:w-34 sm:h-34 rounded-[48px] sm:rounded-[50px] object-cover object-top transform-gpu" draggable={false} />
+                    <img src={`${import.meta.env.VITE_IMAGE_BUCKET_URL}${cardInfo.image_path}?v=${cardInfo.image_version}`} alt="Idol" className="max-xxs:w-23 max-xxs:h-23 xxs:w-26 xxs:h-26 xs:w-29 xs:h-29 sm:w-34 sm:h-34 rounded-[48px] sm:rounded-[50px] object-cover object-top transform-gpu" draggable={false} />
                 </div>
 
                 <div className="absolute flex flex-col items-center justify-center w-full sm:w-145 max-h-20 sm:max-h-20 max-xxs:mt-32 xxs:mt-30 xs:mt-36 sm:mt-44">
@@ -109,7 +111,7 @@ const VictoryCardBigBlurry = (props: BlurryVictoryCardBigProps) => {
                 w-fit h-64 sm:w-50 sm:h-64 rounded-[46px] overflow-hidden -rotate-8 z-0 left-40 opacity-30 mb-4">
                 {/* hover:opacity-100 hover:z-30 hover:scale-105 transition-all duration-500 transform-gpu - see it later*/}
                     <img
-                        src={`${import.meta.env.VITE_IMAGE_BUCKET_URL}${idol_blur_image}`}
+                        src={`${import.meta.env.VITE_IMAGE_BUCKET_URL}${idol_blur_image}?v=${idol_blur_image_version}`}
                         alt={`Blurry image of ${cardInfo.artist_name}`}
                         draggable={false}
                         className="w-50 h-64 sm:w-50 sm:h-64 object-cover" 
@@ -120,7 +122,7 @@ const VictoryCardBigBlurry = (props: BlurryVictoryCardBigProps) => {
                 w-fit h-64 sm:w-50 sm:h-64 rounded-[46px] overflow-hidden z-20 mb-4
                 hover:scale-110 hover:z-30 hover:brightness-110 hover:cursor-pointer transition-all duration-500 transform-gpu">
                     <img
-                        src={`${import.meta.env.VITE_IMAGE_BUCKET_URL}${idol_blur_image}`}
+                        src={`${import.meta.env.VITE_IMAGE_BUCKET_URL}${idol_blur_image}?v=${idol_blur_image_version}`}
                         alt={`Blurry image of ${cardInfo.artist_name}`}
                         draggable={false}
                         className="w-50 h-64 sm:w-50 sm:h-64 object-cover" 
@@ -131,7 +133,7 @@ const VictoryCardBigBlurry = (props: BlurryVictoryCardBigProps) => {
                 w-fit h-64 sm:w-50 sm:h-64 rounded-[46px] overflow-hidden rotate-8 z-0 right-40 opacity-30 mb-4">
                 {/* hover:opacity-100 hover:z-30 hover:scale-105 transition-all duration-500 transform-gpu - see it later */}
                     <img
-                        src={`${import.meta.env.VITE_IMAGE_BUCKET_URL}${idol_blur_image}`}
+                        src={`${import.meta.env.VITE_IMAGE_BUCKET_URL}${idol_blur_image}?v=${idol_blur_image_version}`}
                         alt={`Blurry image of ${cardInfo.artist_name}`}
                         draggable={false}
                         className="w-50 h-64 sm:w-50 sm:h-64 object-cover" 
@@ -151,7 +153,7 @@ const VictoryCardBigBlurry = (props: BlurryVictoryCardBigProps) => {
                         </span>
 
                         <div className="flex flex-row w-full h-full items-center justify-start max-xxs:pr-0 pl-8 sm:pl-12 max-xxs:gap-2 xxs:gap-4 sm:gap-8">
-                            <img src={`${import.meta.env.VITE_IMAGE_BUCKET_URL}${yesterdayIdolImage}`} alt="Idol" className="max-xxs:w-16 max-xxs:h-16 xxs:w-20 xxs:h-20 xs:w-22 xs:h-22 sm:w-28 sm:h-28 rounded-full sm:rounded-full object-cover object-center hover:scale-105 
+                            <img src={`${import.meta.env.VITE_IMAGE_BUCKET_URL}${yesterdayIdolImage}?v=${yesterdayIdolImageVersion}`} alt="Idol" className="max-xxs:w-16 max-xxs:h-16 xxs:w-20 xxs:h-20 xs:w-22 xs:h-22 sm:w-28 sm:h-28 rounded-full sm:rounded-full object-cover object-center hover:scale-105 
                             select-none border-b-4 border-r-4 border-black/30 transition-transform duration-500 will-change-transform transform-gpu" draggable={false} />
 
                             <div className="max-xxs:text-lg xxs:text-xl xm:text-xl sm:text-2xl font-semibold select-none transform-gpu ml-4 sm:ml-0">

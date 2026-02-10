@@ -106,6 +106,7 @@ function ClassicMode() {
   const yesterdayArtistGroup = yesterday.data?.groups ?? null;
 
   const yesterdayIdolImage = yesterday.data?.image_path ?? null;
+  const yesterdayIdolImageVersion = yesterday.data?.image_version ?? null;
 
   useEffect(() => {
     if (!gameData) return;
@@ -462,6 +463,7 @@ function ClassicMode() {
             yesterdayIdol={yesterdayArtist || "Unknown"}
             yesterdayIdolGroup={yesterdayArtistGroup}
             yesterdayIdolImage={yesterdayIdolImage}
+            yesterdayIdolImageVersion={yesterdayIdolImageVersion}
             userPosition={userPositionData}
             userRank={userRankData}
             userScore={userScoreData}
@@ -472,7 +474,7 @@ function ClassicMode() {
         </div>
       )}
 
-      {!showVictoryCard && yesterdayArtist && yesterdayArtistGroup && yesterdayIdolImage && (
+      {!showVictoryCard && yesterdayArtist && yesterdayArtistGroup && yesterdayIdolImage && yesterdayIdolImageVersion && (
       <div className={`w-full flex flex-col items-center justify-center mt-10 mb-26`}>
         <span className="font-semibold max-xxs:text-[14px] xxs:text-[15px] xs:text-base sm:text-[18px] leading-tight">
           <span className="text-white">

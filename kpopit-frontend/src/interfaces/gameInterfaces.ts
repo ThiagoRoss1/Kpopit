@@ -12,6 +12,7 @@ export interface IdolListItem {
   id: number;
   artist_name: string;
   image_path: string;
+  image_version: string;
   gender: string;
   nationality: string[];
   idol_debut_year: number;
@@ -24,6 +25,7 @@ export interface IdolListItem {
   active_group?: string | null;
   companies: string[];
   blur_image_path?: string | null;
+  blur_image_version?: string | null;
 }
 
 export interface FeedbackItem {
@@ -58,8 +60,10 @@ export interface GuessedIdolData {
   position: string[];
   companies: string[];
   image_path: string;
+  image_version: string;
   member_count?: number;
   blur_image_path?: string | null;
+  blur_image_version?: string | null;
 }
 
 export interface GuessResponse<T = FeedbackData> {
@@ -93,6 +97,7 @@ export interface YesterdayIdol {
   artist_name: string;
   groups?: string[];
   image_path: string;
+  image_version: string;
 }
 
 export interface ResetTimer {
@@ -128,6 +133,7 @@ export interface AddIdolRequest {
   height?: number;
   position?: string[];
   image_path?: string;
+  image_version?: string;
   is_published?: number;
 }
 
@@ -146,4 +152,5 @@ export interface RedeemUserToken {
 
 export interface BlurryGameData extends GameData {
   blur_image_path: string;
+  blur_image_version: string;
 }

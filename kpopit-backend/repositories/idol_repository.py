@@ -16,6 +16,7 @@ class IdolRepository:
                 i.position,
                 i.height,
                 i.image_path,
+                i.image_version,
                 i.is_published,
                 g.id AS group_id,
                 g.name AS group_name,
@@ -91,7 +92,9 @@ class IdolRepository:
                 i.id AS idol_id,
                 i.artist_name,
                 i.image_path,
-                b.blur_image_path
+                i.image_version,
+                b.blur_image_path,
+                b.blur_image_version
             FROM idols AS i
             INNER JOIN blurry_mode_data AS b ON i.id = b.idol_id AND b.is_active = 1
             WHERE i.id = ? AND i.is_published = 1

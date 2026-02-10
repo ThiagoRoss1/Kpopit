@@ -18,8 +18,10 @@ interface BlurryVictoryCardHudProps {
     guesses: GuessResponse<Partial<FeedbackData>>[];
     attempts: number;
     idol_blur_image: string;
+    idol_blur_image_version: string;
     yesterdayIdol: string;
     yesterdayIdolImage?: string | null;
+    yesterdayIdolImageVersion?: string | null;
     userPosition?: number | null;
     userRank?: number | null;
     userScore?: number | null;
@@ -31,7 +33,7 @@ interface BlurryVictoryCardHudProps {
 }
 
 const VictoryCardHudBlurry = (props: BlurryVictoryCardHudProps) => {
-    const { cardInfo, guesses, attempts, idol_blur_image, yesterdayIdol, yesterdayIdolImage, userPosition, userRank, userScore, nextReset, stats, otherGameModes, wonWithHardMode, wonWithoutColors } = props;
+    const { cardInfo, guesses, attempts, idol_blur_image, idol_blur_image_version, yesterdayIdol, yesterdayIdolImage, yesterdayIdolImageVersion, userPosition, userRank, userScore, nextReset, stats, otherGameModes, wonWithHardMode, wonWithoutColors } = props;
 
     const [showSmallModal, setShowSmallModal] = useState(false);
     const bigCardRef = useRef<HTMLDivElement>(null);
@@ -62,8 +64,10 @@ const VictoryCardHudBlurry = (props: BlurryVictoryCardHudProps) => {
                         cardInfo={cardInfo}
                         attempts={attempts}
                         idol_blur_image={idol_blur_image}
+                        idol_blur_image_version={idol_blur_image_version}
                         yesterdayIdol={yesterdayIdol}
                         yesterdayIdolImage={yesterdayIdolImage ?? undefined}
+                        yesterdayIdolImageVersion={yesterdayIdolImageVersion ?? undefined}
                         userPosition={userPosition}
                         userRank={userRank}
                         userScore={userScore}

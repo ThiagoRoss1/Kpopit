@@ -97,7 +97,7 @@ function BlurryMode() {
         if (blurryGameData?.blur_image_path) {
             let isCancelled = false;
             const img = new Image();
-            img.src = `${import.meta.env.VITE_IMAGE_BUCKET_URL}${blurryGameData.blur_image_path}`;
+            img.src = `${import.meta.env.VITE_IMAGE_BUCKET_URL}${blurryGameData.blur_image_path}?v=${blurryGameData.blur_image_version}`;
             img.onload = () => {
                 if (!isCancelled) {
                     setIsImageLoading(false);
@@ -117,7 +117,7 @@ function BlurryMode() {
                 img.onerror = null;
             }
         }
-    }, [blurryGameData?.blur_image_path]);
+    }, [blurryGameData?.blur_image_path, blurryGameData?.blur_image_version]);
 
     // Yesterday idol
     const yesterdayIdol = useQuery<YesterdayIdol>({
@@ -133,6 +133,7 @@ function BlurryMode() {
     )?.artist_name;
 
     const yesterdayIdolImage = yesterdayIdol.data?.image_path ?? null;
+    const yesterdayIdolImageVersion = yesterdayIdol.data?.image_version ?? null;
     
     useEffect(() => {
         if (!blurryGameData?.server_date) return;
@@ -451,7 +452,7 @@ function BlurryMode() {
 
                     {/* Image */}
                     <img
-                        src={`${import.meta.env.VITE_IMAGE_BUCKET_URL}${blurryGameData.blur_image_path}`}
+                        src={`${import.meta.env.VITE_IMAGE_BUCKET_URL}${blurryGameData.blur_image_path}?v=${blurryGameData.blur_image_version}`}
                         style={{filter: `${endGame ? "blur(0px)" : `blur(${currentBlur}px)`} ${endGame ? "grayscale(0%)" : `grayscale(${blurryToggleOptions.color ? 0 : 100}%)`}`}}
                         alt={`Blurry image of ${artistName}`}
                         onLoad={() => setIsImageLoading(false)}
@@ -533,8 +534,10 @@ function BlurryMode() {
                         guesses={guesses}
                         attempts={attempts}
                         idol_blur_image={blurryGameData.blur_image_path}
+                        idol_blur_image_version={blurryGameData.blur_image_version}
                         yesterdayIdol={yesterdayArtist || "Unknown"}
                         yesterdayIdolImage={yesterdayIdolImage}
+                        yesterdayIdolImageVersion={yesterdayIdolImageVersion}
                         userPosition={userPositionData}
                         userRank={userRankData}
                         userScore={userScoreData}

@@ -155,7 +155,7 @@ const VictoryCardSmall = <T = FeedbackData, >(props: VictoryCardSmallProps<T>) =
                         hover:scale-105 hover:bg-black hover:brightness-110 hover:cursor-default transform duration-300 transform-gpu`}> {/* Maybe shadow-2xl or lg */}
 
                             <div className="absolute left-5 flex items-center justify-center h-20 w-20 sm:h-20 sm:w-20 bg-transparent rounded-[20px] hover:scale-110 hover:rotate-4 transition-transform duration-500 will-change-transform transform-gpu">
-                                <img src={`${import.meta.env.VITE_IMAGE_BUCKET_URL}${cardInfo.image_path}`} alt="Idol" className="w-20 h-20 sm:w-full sm:h-full rounded-[20px] object-cover object-top transform-gpu" draggable={false} />
+                                <img src={`${import.meta.env.VITE_IMAGE_BUCKET_URL}${cardInfo.image_path}?v=${cardInfo.image_version}`} alt="Idol" className="w-20 h-20 sm:w-full sm:h-full rounded-[20px] object-cover object-top transform-gpu" draggable={false} />
                             </div>
 
                             <div className="ml-20 flex flex-col text-center items-center justify-center w-full gap-0.5">

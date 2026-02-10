@@ -73,7 +73,7 @@ def run_seed():
         # Idols Table Seeding
         idols_columns = [
             "id", "artist_name", "real_name", "gender", "debut_year", "nationality", 
-            "birth_date", "height", "position", "image_path", "is_published", "release_date"
+            "birth_date", "height", "position", "image_path", "is_published", "release_date", "image_version"
         ]
         seed_table(cursor, IDOLS_CSV_FILE, 'idols', idols_columns)
 
@@ -116,7 +116,7 @@ def run_seed():
 
         # Blurry idol Table Seeding
         blurry_idols_columns = [
-            "idol_id", "blur_image_path", "is_active"
+            "idol_id", "blur_image_path", "is_active", "blur_image_version"
         ]
         seed_table(cursor, BLURRY_IDOLS_CSV_FILE, 'blurry_mode_data', blurry_idols_columns, conflict_column=["idol_id"])
 

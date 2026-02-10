@@ -59,12 +59,13 @@ def store_yesterdays_idol():
 
          # --- Fetch idol image ---
         image_sql = """
-            SELECT image_path FROM idols WHERE id = ?
+            SELECT image_path, image_version FROM idols WHERE id = ?
         """
 
         cursor.execute(image_sql, (result["idol_id"],))
         image_result = cursor.fetchone()
         image_path = image_result["image_path"] if image_result else None
+        image_version = image_result["image_version"] if image_result else "1"
 
         
 
@@ -73,7 +74,8 @@ def store_yesterdays_idol():
             "yesterdays_pick_date": yesterday_str,
             "artist_name": artist_name,
             "groups": [group_result["name"]] if group_result else [],
-            "image_path": image_path
+            "image_path": image_path,
+            "image_version": image_version
         })
 
     else:      

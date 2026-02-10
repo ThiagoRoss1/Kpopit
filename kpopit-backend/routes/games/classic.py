@@ -85,6 +85,7 @@ def get_daily_idol():
         "groups": groups,
         # Image path for frontend to display
         "image_path": idol_data_dict.get("image_path"),
+        "image_version": idol_data_dict.get("image_version"),
         # Server date for timezone consistency
         "server_date": get_today_date_str(),
         # "server_date": get_server_date(),
