@@ -77,7 +77,7 @@ export const useSharedGameData = () => {
     });
 
     const userStats = useQuery<UserStats>({
-        queryKey: ["userStats", userToken],
+        queryKey: ["userStats", userToken.data?.id],
         queryFn: async () => getUserStats(await initUser() || ""),
         enabled: !!localStorage.getItem("userToken"),
         refetchOnWindowFocus: false,
