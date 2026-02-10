@@ -293,7 +293,7 @@ const SearchBar = (props: SearchBarProps) => {
                 >
                   {suggestion.image_path && (
                     <motion.img 
-                    src={`${import.meta.env.VITE_IMAGE_BUCKET_URL}${suggestion.image_path}`}
+                    src={`${import.meta.env.VITE_IMAGE_BUCKET_URL}${suggestion.image_path}?v=${suggestion.image_version}`}
                     alt={"Idol image"}
                     className="w-11 h-11 object-cover rounded-full border border-white"
                     loading="eager"

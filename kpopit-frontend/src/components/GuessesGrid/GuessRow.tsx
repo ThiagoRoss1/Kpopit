@@ -136,7 +136,7 @@ const GuessRow = (props: GuessRowProps) => {
                     onTouchEnd={handleTouchEnd}   
                     >
                     <img
-                        src={`${import.meta.env.VITE_IMAGE_BUCKET_URL}${guess.guessed_idol_data.image_path}`}
+                        src={`${import.meta.env.VITE_IMAGE_BUCKET_URL}${guess.guessed_idol_data.image_path}?v=${guess.guessed_idol_data.image_version}`}
                         alt="Idol"
                         className="w-20 h-20 sm:w-28 sm:h-28 object-cover select-none" // object-cover kinda bugged (#TODO - fix later)
                         draggable={false}

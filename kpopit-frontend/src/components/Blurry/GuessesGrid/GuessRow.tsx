@@ -60,7 +60,7 @@ const GuessRow = (props: GuessRowProps) => {
             {/* Photo and name */}
             <div className="relative flex items-center justify-start gap-2 w-full h-fit">
                 <img
-                    src={`${import.meta.env.VITE_IMAGE_BUCKET_URL}${guess.guessed_idol_data.image_path}`}
+                    src={`${import.meta.env.VITE_IMAGE_BUCKET_URL}${guess.guessed_idol_data.image_path}?v=${guess.guessed_idol_data.image_version}`}
                     alt="Idol image"
                     className={`${shouldAnimate ? 'guess-photo-enter' : ''} 
                     max-xxs:w-16 xxs:w-18 xm:w-20 max-xxs:h-16 xxs:h-18 xm:h-20 sm:w-20 sm:h-20 hover:w-full hover:border-0 hover:cursor-pointer transition-all duration-300 transform-gpu

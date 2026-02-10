@@ -51,7 +51,9 @@ def get_daily_blurry_idol():
         "answer_id": idol_blurry_data["idol_id"],
         "artist_name": idol_blurry_data["artist_name"],
         "image_path": idol_blurry_data["image_path"],
+        "image_version": idol_blurry_data["image_version"],
         "blur_image_path": idol_blurry_data["blur_image_path"],
+        "blur_image_version": idol_blurry_data["blur_image_version"],
         "server_date": get_today_date_str()
     }
 

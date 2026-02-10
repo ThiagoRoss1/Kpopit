@@ -21,6 +21,7 @@ interface VictoryCardHudProps {
     yesterdayIdol: string;
     yesterdayIdolGroup?: string[] | null;
     yesterdayIdolImage?: string | null;
+    yesterdayIdolImageVersion?: string | null;
     idolActiveGroup?: string[] | null;
     userPosition?: number | null;
     userRank?: number | null;
@@ -31,7 +32,7 @@ interface VictoryCardHudProps {
 }
 
 const VictoryCardHud = (props: VictoryCardHudProps) => {
-    const { cardInfo, guesses, attempts, nextReset, yesterdayIdol, yesterdayIdolGroup, yesterdayIdolImage, idolActiveGroup, userPosition, userRank, userScore, stats, otherGameModes } = props;
+    const { cardInfo, guesses, attempts, nextReset, yesterdayIdol, yesterdayIdolGroup, yesterdayIdolImage, yesterdayIdolImageVersion, idolActiveGroup, userPosition, userRank, userScore, stats, otherGameModes } = props;
     
     const [showSmallModal, setShowSmallModal] = useState(false);
     const bigCardRef = useRef<HTMLDivElement>(null);
@@ -74,6 +75,7 @@ return (
                     yesterdayIdol={yesterdayIdol}
                     yesterdayIdolGroup={yesterdayIdolGroup ?? null}
                     yesterdayIdolImage={yesterdayIdolImage ?? undefined}
+                    yesterdayIdolImageVersion={yesterdayIdolImageVersion ?? undefined}
                     userPosition={userPosition}
                     userRank={userRank}
                     userScore={userScore}

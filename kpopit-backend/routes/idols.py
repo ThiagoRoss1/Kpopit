@@ -18,13 +18,15 @@ def get_idols_list():
             i.id,
             i.artist_name, 
             i.image_path,
+            i.image_version,
             i.gender,
             i.debut_year AS idol_debut_year,
             i.nationality,
             i.birth_date,
             i.height,
             i.position,
-            b.blur_image_path
+            b.blur_image_path,
+            b.blur_image_version
             FROM idols AS i
             LEFT JOIN blurry_mode_data AS b ON i.id = b.idol_id AND b.is_active = 1
             WHERE i.is_published = 1 
