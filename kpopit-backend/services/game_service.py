@@ -42,6 +42,15 @@ class GameService:
         try:
             cursor.execute("BEGIN TRANSACTION")
 
+            # Check if user has already won today to prevent duplicate win stats
+            already_won_today = False
+            if is_correct:
+                cursor.execute("""
+                    SELECT won FROM daily_user_history
+                    WHERE user_id = ? AND date = ? AND gamemode_id = ? AND won = 1
+                """, (user_id, today, gamemode_id))
+                already_won_today = cursor.fetchone() is not None
+
             cursor.execute(
                 """
                     INSERT INTO daily_user_history (user_id, date, gamemode_id, guesses_count, won, one_shot_win, won_at, started_at)
@@ -76,9 +85,11 @@ class GameService:
                         WHERE user_id = ? AND date = ? AND gamemode_id = ?
                     """, (score, user_id, today, gamemode_id))
 
-                # Calculate streak function
-                streak = self.streak_calculation(cursor, user_id, gamemode_id)
-                self._update_user_history(cursor, user_id, gamemode_id, streak, current_attempt, one_shot_win, today)
+                # Only update stats / streak if this is the first win today
+                if not already_won_today:
+                    # Calculate streak
+                    streak = self.streak_calculation(cursor, user_id, gamemode_id)
+                    self._update_user_history(cursor, user_id, gamemode_id, streak, current_attempt, one_shot_win, today)
 
             connect.commit()
             return is_correct
