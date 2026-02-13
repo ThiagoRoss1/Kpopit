@@ -149,6 +149,7 @@ function BlurryMode() {
             localStorage.removeItem("blurryGameWon");
             localStorage.removeItem("blurryHardcoreMode");
             localStorage.removeItem("blurryColorMode");
+            localStorage.removeItem("blurryHintClicked");
             localStorage.removeItem("blurryAnimatedIdols");
             localStorage.removeItem("confettiShownBlurry");
 
@@ -465,13 +466,16 @@ function BlurryMode() {
             </div>
 
             {/* Mode Options */}
+            {!endGame && !showVictoryCard && (
             <div className="w-full h-fit flex items-center justify-center mb-4">
                 <ModeOptions
                     options={blurryToggleOptions}
                     onToggle={handleToggleOption}
                     attempts={attempts}
+                    groups={targetIdol?.groups || null}
                  />
             </div>
+            )}
 
             {!endGame && !showVictoryCard && (
             <div className="w-full h-fit flex items-center justify-center mb-4">
