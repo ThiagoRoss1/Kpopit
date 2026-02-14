@@ -20,6 +20,10 @@
   --breakpoint-3xl: 1728px;
 }
 
+html, body {
+  overscroll-behavior: none;
+}
+
 body {
   @apply min-h-screen font-[DynaPuff];
   /* Default gradient - will be overridden by dynamic class */

@@ -87,7 +87,17 @@ const BackgroundStyle = (props: BackgroundStyleProps) => {
 
 
   return (
-    <div className="fixed inset-0 overflow-hidden pointer-events-none -z-10">
+    <div 
+      className="fixed inset-0 overflow-hidden pointer-events-none -z-10" 
+      style={{ 
+        height: '100%',
+        minHeight: '100vh',
+        maxHeight: '100lvh',
+        transform: 'translateZ(0)',
+        WebkitTransform: 'translateZ(0)',
+        backfaceVisibility: 'hidden',
+      }}
+    >
       <div className="absolute inset-0 bg-linear-to-br from-[#090311] via-[#050416] to-[#050822]" />
         <div className="absolute inset-0 top-0 bg-black/0" />
         {attempts ? attempts < 1 && (
