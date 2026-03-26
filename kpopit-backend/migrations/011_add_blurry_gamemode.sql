@@ -1,20 +1,19 @@
 /* Add new gamemode 'blurry' and gamemodes table */
 
-BEGIN TRANSACTION;
-
-PRAGMA foreign_keys=OFF;
+BEGIN;
 
 CREATE TABLE IF NOT EXISTS gamemodes (
-    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    id SERIAL PRIMARY KEY NOT NULL,
     name TEXT UNIQUE NOT NULL,
     description TEXT,
-    is_active BOOLEAN DEFAULT 1
+    is_active BOOLEAN DEFAULT TRUE
 );
 
 /* Insert all current gamemodes */
-INSERT OR IGNORE INTO gamemodes (name, description, is_active) VALUES
-('classic', 'Classic is the standard gamemode where players guess the daily idol based on clues.', 1),
-('blurry', 'Blurry mode presents a pixelated image of the idol that gradually becomes clearer with each guess.', 1);
+INSERT INTO gamemodes (name, description, is_active) VALUES
+('classic', 'Classic is the standard gamemode where players guess the daily idol based on clues.', TRUE),
+('blurry', 'Blurry mode presents a pixelated image of the idol that gradually becomes clearer with each guess.', TRUE)
+ON CONFLICT (name) DO NOTHING;
 
 /* Alter daily_picks, yesterday_picks, daily_user_history and user_history to include gamemode_id */
 ALTER TABLE daily_picks ADD COLUMN gamemode_id INTEGER DEFAULT 1 REFERENCES gamemodes(id);
@@ -46,7 +45,5 @@ CREATE INDEX IF NOT EXISTS idx_daily_picks_gamemode ON daily_picks (gamemode_id)
 CREATE INDEX IF NOT EXISTS idx_yesterday_picks_gamemode ON yesterday_picks (gamemode_id);
 CREATE INDEX IF NOT EXISTS idx_daily_user_history_gamemode ON daily_user_history (gamemode_id);
 CREATE INDEX IF NOT EXISTS idx_user_history_gamemode_single ON user_history (gamemode_id);
-
-PRAGMA foreign_keys=ON;
 
 COMMIT;

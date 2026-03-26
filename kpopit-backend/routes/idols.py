@@ -28,14 +28,12 @@ def get_idols_list():
             b.blur_image_path,
             b.blur_image_version
             FROM idols AS i
-            LEFT JOIN blurry_mode_data AS b ON i.id = b.idol_id AND b.is_active = 1
-            WHERE i.is_published = 1 
+            LEFT JOIN blurry_mode_data AS b ON i.id = b.idol_id AND b.is_active = TRUE
+            WHERE i.is_published = TRUE
             ORDER BY artist_name ASC
     """
     cursor.execute(idol_query)
-    results = cursor.fetchall()
-
-    idols_list = [dict(row) for row in results]
+    idols_list = cursor.fetchall()
 
     member_count_query = """
             SELECT ic.idol_id, g.member_count
@@ -45,12 +43,12 @@ def get_idols_list():
                 -- Subquery to get the first / main group for each idol
                 SELECT idol_id, MIN(start_year) as first_start_year
                 FROM idol_career
-                WHERE is_active = 1
+                WHERE is_active = TRUE
                 GROUP BY idol_id
             ) AS main_group
             ON ic.idol_id = main_group.idol_id
             AND ic.start_year = main_group.first_start_year
-            WHERE ic.is_active = 1
+            WHERE ic.is_active = TRUE
     """
     cursor.execute(member_count_query)
     member_count_results = cursor.fetchall()
@@ -61,7 +59,7 @@ def get_idols_list():
         SELECT ic.idol_id, g.name AS group_name
         FROM idol_career AS ic
         JOIN groups AS g ON ic.group_id = g.id
-        WHERE ic.is_active = 1
+        WHERE ic.is_active = TRUE
     """
     cursor.execute(groups_query)
     results = cursor.fetchall()
@@ -98,7 +96,7 @@ def get_idols_list():
             FROM idol_career AS icar
             JOIN group_company_affiliation AS gca ON icar.group_id = gca.group_id
             JOIN companies AS c ON gca.company_id = c.id
-            WHERE icar.is_active = 1
+            WHERE icar.is_active = TRUE
         """
     cursor.execute(companies_query)
     results = cursor.fetchall()
@@ -121,7 +119,6 @@ def get_idols_list():
             elif field not in idol or idol[field] is None:
                 idol[field] = []
 
-    
+    cursor.close()
 
     return jsonify(idols_list)
-

@@ -21,7 +21,7 @@ def store_yesterdays_idol():
 
     # Get idol id for yesterday
     select_sql = """
-        SELECT idol_id FROM daily_picks WHERE pick_date = ? AND gamemode_id = ?
+        SELECT idol_id FROM daily_picks WHERE pick_date = %s AND gamemode_id = %s
     """
     cursor.execute(select_sql, (yesterday_str, g.gamemode_id,))
     result = cursor.fetchone()
@@ -30,7 +30,7 @@ def store_yesterdays_idol():
         # Insert or Update yesterday's pick
         insert_sql = """
             INSERT INTO yesterday_picks (past_idol_id, yesterdays_pick_date, gamemode_id)
-            VALUES (?, ?, ?)
+            VALUES (%s, %s, %s)
             ON CONFLICT(yesterdays_pick_date, gamemode_id)
             DO UPDATE SET past_idol_id = excluded.past_idol_id
         """
@@ -40,7 +40,7 @@ def store_yesterdays_idol():
     
         # --- Fetch idol name ---
         name_sql = """
-            SELECT artist_name FROM idols WHERE id = ?
+            SELECT artist_name FROM idols WHERE id = %s
         """
         cursor.execute(name_sql, (result["idol_id"],))
         artist_name = cursor.fetchone()["artist_name"]
@@ -49,7 +49,7 @@ def store_yesterdays_idol():
         group_sql = """
             SELECT g.name FROM groups AS g
             LEFT JOIN idol_career AS ic ON g.id = ic.group_id
-            WHERE ic.idol_id = ? AND ic.is_active = 1
+            WHERE ic.idol_id = %s AND ic.is_active = TRUE
         """
 
         # Remove left join after testing (not all idols have a career entry)
@@ -59,7 +59,7 @@ def store_yesterdays_idol():
 
          # --- Fetch idol image ---
         image_sql = """
-            SELECT image_path, image_version FROM idols WHERE id = ?
+            SELECT image_path, image_version FROM idols WHERE id = %s
         """
 
         cursor.execute(image_sql, (result["idol_id"],))
@@ -67,7 +67,7 @@ def store_yesterdays_idol():
         image_path = image_result["image_path"] if image_result else None
         image_version = image_result["image_version"] if image_result else "1"
 
-        
+        cursor.close()
 
         return jsonify({
             "past_idol_id": result["idol_id"], 
@@ -78,6 +78,7 @@ def store_yesterdays_idol():
             "image_version": image_version
         })
 
-    else:      
+    else:  
+        cursor.close()    
         return jsonify({"message": "First day - no yesterday pick to store"})
     

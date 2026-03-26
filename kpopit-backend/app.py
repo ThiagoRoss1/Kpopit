@@ -16,7 +16,7 @@ from routes.session_info import session_info
 load_dotenv()
 
 # Global variables
-DB_FILE = os.getenv("DB_FILE")
+DB_URL = os.getenv("DB_URL")
 ADMIN_ENABLED = os.getenv("ADMIN_ENABLED", "false").lower() == "true"
 FLASK_ENV = os.getenv("FLASK_ENV", "production").lower()
 FRONTEND_URL = os.getenv("FRONTEND_URL")

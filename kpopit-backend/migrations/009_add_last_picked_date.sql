@@ -1,7 +1,7 @@
 /* Add last_picked_date column to idols table */
 
-BEGIN TRANSACTION;
+BEGIN;
 
-ALTER TABLE idols ADD COLUMN last_picked_date DATETIME DEFAULT NULL;
+ALTER TABLE idols ADD COLUMN last_picked_date DATE DEFAULT NULL;
 
 COMMIT;

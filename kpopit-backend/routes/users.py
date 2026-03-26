@@ -1,4 +1,3 @@
-import sqlite3
 import uuid
 import json
 import secrets
@@ -22,6 +21,7 @@ def generate_user_token():
 
     while not token_sucessfuly_generated and attempts < 5:
         connect = None
+        cursor = None
         try:
             token = str(uuid.uuid4())
 
@@ -30,23 +30,23 @@ def generate_user_token():
             cursor = connect.cursor()
             
             token_insert_sql = """
-                INSERT INTO users (token, created_at) VALUES (?, ?)
+                INSERT INTO users (token, created_at) VALUES (%s, %s)
             """
             cursor.execute(token_insert_sql, (token, current_timestamp))
             connect.commit()
             
             token_sucessfuly_generated = True
-    
-        except sqlite3.IntegrityError as e:
-            attempts += 1
-            print(f"Token generation attempt {attempts} failed: {e}")
-            error += str(e)
-
+            
         except Exception as e:
+            if connect is not None:
+                connect.rollback()
             attempts += 1
             print(f"Token generation attempt {attempts} failed: {e}")
             error += str(e)
         
+        finally:
+            if cursor is not None:
+                cursor.close()
 
     if token_sucessfuly_generated:
         return jsonify({"token": token})
@@ -64,13 +64,13 @@ def get_user_stats(user_token):
 
     # Validate user token 
     cursor.execute("""
-            SELECT id FROM users WHERE token = ?
+            SELECT id FROM users WHERE token = %s
         """, (user_token,))
     
     user_row = cursor.fetchone()
 
     if not user_row:
-        
+        cursor.close()
         return jsonify({"error": "Invalid user token"}), 400
     
     user_id = user_row["id"]
@@ -79,13 +79,14 @@ def get_user_stats(user_token):
     cursor.execute("""
             SELECT current_streak, max_streak, wins_count, average_guesses, one_shot_wins
             FROM user_history
-            WHERE user_id = ? AND gamemode_id = ?
+            WHERE user_id = %s AND gamemode_id = %s
         """, (user_id, gamemode_id))
     
     stats_row = cursor.fetchone()
+    cursor.close()
 
     if stats_row:
-        user_stats = dict(stats_row)
+        user_stats = stats_row
     else:
         user_stats = {
             "current_streak": 0,
@@ -95,7 +96,6 @@ def get_user_stats(user_token):
             "one_shot_wins": 0
         }
     
-
     return jsonify(user_stats)
 
 @user_bp.route("/game-state/<user_token>", methods=["GET", "POST"])
@@ -113,13 +113,13 @@ def get_game_state(user_token):
     # Validate user token
     cursor.execute("""
             SELECT id FROM users
-            WHERE token = ?
+            WHERE token = %s
         """, (user_token,))
     
     user_row = cursor.fetchone()
 
     if not user_row:
-        
+        cursor.close()
         return jsonify({"error": "Invalid user token"}), 400
     
     user_id = user_row["id"]
@@ -130,25 +130,31 @@ def get_game_state(user_token):
 
         cursor.execute("""
                 UPDATE daily_user_history
-                SET game_state = ?
-                WHERE user_id = ? AND date = ? AND gamemode_id = ?
+                SET game_state = %s
+                WHERE user_id = %s AND date = %s AND gamemode_id = %s
             """, (game_state_json, user_id, today, gamemode_id))
         
         connect.commit()
-        
+        cursor.close()
+
         return jsonify({"message": "Game state updated successfully"}), 200
     
     else:
         cursor.execute("""
                 SELECT game_state FROM daily_user_history
-                WHERE user_id = ? AND date = ? AND gamemode_id = ?
+                WHERE user_id = %s AND date = %s AND gamemode_id = %s
             """, (user_id, today, gamemode_id))
         
         result = cursor.fetchone()
-        
+        cursor.close()
 
         if result and result["game_state"]:
-            return jsonify(json.loads(result["game_state"]))
+            state = result["game_state"]
+
+            if isinstance(state, str):
+                return jsonify(json.loads(state))
+            
+            return jsonify(state)
         
         return jsonify({"game_state": None})
     
@@ -165,13 +171,13 @@ def generate_transfer_code(user_token):
 
     # Validate user token
     cursor.execute("""
-            SELECT id FROM users WHERE token = ?
+            SELECT id FROM users WHERE token = %s
         """, (user_token,))
     
     user_row = cursor.fetchone()
 
     if not user_row:
-        
+        cursor.close()
         return jsonify({"error": "Invalid user token"}), 400
 
     # today = get_server_date()
@@ -179,7 +185,7 @@ def generate_transfer_code(user_token):
     # Delete expired codes
     cursor.execute("""
             DELETE FROM transfer_data
-            WHERE expires_at < ?
+            WHERE expires_at < %s
         """, (current_timestamp,))
 
     # Generate unique transfer code
@@ -190,12 +196,13 @@ def generate_transfer_code(user_token):
             # Guarantee uniqueness by checking existing codes
             cursor.execute("""
                     SELECT code, expires_at FROM transfer_data
-                    WHERE user_token = ? AND expires_at >= ? AND used = 0
+                    WHERE user_token = %s AND expires_at >= %s AND used = FALSE
                 """, (user_token, current_timestamp))
             existing_code = cursor.fetchone()
 
             if existing_code:
-                
+                cursor.close()
+
                 return jsonify({
                     "transfer_code": existing_code["code"],
                     "expires_at": existing_code["expires_at"]
@@ -209,23 +216,19 @@ def generate_transfer_code(user_token):
             # Insert transfer code into database
             cursor.execute("""
                 INSERT INTO transfer_data (user_token, code, created_at, expires_at)
-                VALUES (?, ?, ?, ?)
+                VALUES (%s, %s, %s, %s)
             """, (user_token, code, current_timestamp, expires_at.isoformat()))
                 
             connect.commit()
             code_generated = True
-        
-        except sqlite3.IntegrityError as e:
-            attempts += 1
-            print(f"Transfer code generation attempt {attempts} failed: {e}")
-            error += str(e)
 
         except Exception as e:
+            connect.rollback()
             attempts += 1
             print(f"Transfer code generation attempt {attempts} failed: {e}")
             error += str(e)
 
-    
+    cursor.close()
 
     if code_generated:
         return jsonify({"transfer_code": code, "expires_at": expires_at.isoformat()})
@@ -248,23 +251,26 @@ def transfer_data():
     # Validate transfer code
     cursor.execute("""
             SELECT code, user_token, expires_at, used FROM transfer_data
-            WHERE code = ?
+            WHERE code = %s
         """, (transfer_code,))
         
     code_row = cursor.fetchone()
 
     if not code_row:
-        
+        cursor.close()
         return jsonify({"error": "Invalid transfer code"}), 400
     
     if code_row["used"]:
-        
+        cursor.close()
         return jsonify({"error": "Transfer code has already been used"}), 400
     
-    expires_at = datetime.fromisoformat(code_row["expires_at"])
+    expires_at = code_row["expires_at"]
+    if isinstance(expires_at, str):
+        expires_at = datetime.fromisoformat(expires_at)
+
     if expires_at < get_today_now():
     # if expires_at < get_server_datetime_now():
-        
+        cursor.close()
         return jsonify({"error": "Transfer code has expired"}), 400
     
     user_token = code_row["user_token"]
@@ -272,11 +278,11 @@ def transfer_data():
     # Mark code as used
     cursor.execute("""
             UPDATE transfer_data
-            SET used = 1
-            WHERE code = ? AND used = 0
+            SET used = TRUE
+            WHERE code = %s AND used = FALSE
         """, (transfer_code,))
     connect.commit()
-    
+    cursor.close()
 
     return jsonify({"user_token": user_token})
 
@@ -295,23 +301,23 @@ def get_active_transfer_code(user_token):
     # Validate user token 
     cursor.execute("""
             SELECT id FROM users
-            WHERE token = ?
+            WHERE token = %s
         """, (user_token,))
     
     user_row = cursor.fetchone()
 
     if not user_row:
-        
+        cursor.close()
         return jsonify({"error": "Invalid user token"}), 400
     
     # Get active transfer code 
     cursor.execute("""
             SELECT code, expires_at FROM transfer_data
-            WHERE user_token = ? AND used = 0 AND expires_at >= ?
+            WHERE user_token = %s AND used = FALSE AND expires_at >= %s
         """, (user_token, current_timestamp))
     
     result = cursor.fetchone()
-    
+    cursor.close()
 
     if result:
         return jsonify({

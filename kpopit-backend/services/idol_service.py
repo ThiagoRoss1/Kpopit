@@ -20,7 +20,7 @@ class IdolService:
 
         # Query to select today's idol
         sql_query = """
-            SELECT idol_id FROM daily_picks WHERE pick_date = ? AND gamemode_id = ?
+            SELECT idol_id FROM daily_picks WHERE pick_date = %s AND gamemode_id = %s
         """
         cursor.execute(sql_query, (today_date, gamemode_id))
         todays_pick = cursor.fetchone()
@@ -35,20 +35,20 @@ class IdolService:
         # If no pick for today, select a random idol - if is_published = 1
         if gamemode_id == 1:
             sql_query = """
-                SELECT id, (SELECT MAX(pick_date) FROM daily_picks WHERE idol_id = idols.id AND gamemode_id = ? AND pick_date <= ?) AS last_picked_date 
+                SELECT id, (SELECT MAX(pick_date) FROM daily_picks WHERE idol_id = idols.id AND gamemode_id = %s AND pick_date <= %s) AS last_picked_date 
                 FROM idols
-                WHERE is_published = 1 
-                AND id NOT IN (SELECT idol_id FROM daily_picks WHERE pick_date >= ? AND gamemode_id = ?)
+                WHERE is_published = TRUE
+                AND id NOT IN (SELECT idol_id FROM daily_picks WHERE pick_date >= %s AND gamemode_id = %s)
             """
             cursor.execute(sql_query, (gamemode_id, today_date, date_limit, gamemode_id))
 
         elif gamemode_id == 2:
             sql_query = """
-                SELECT i.id, (SELECT MAX(pick_date) FROM daily_picks WHERE idol_id = i.id AND gamemode_id = ? AND pick_date <= ?) AS last_picked_date
+                SELECT i.id, (SELECT MAX(pick_date) FROM daily_picks WHERE idol_id = i.id AND gamemode_id = %s AND pick_date <= %s) AS last_picked_date
                 FROM idols AS i
                 INNER JOIN blurry_mode_data AS b ON i.id = b.idol_id
-                WHERE i.is_published = 1 AND b.is_active = 1
-                AND i.id NOT IN (SELECT idol_id FROM daily_picks WHERE pick_date >= ? AND gamemode_id = ?)
+                WHERE i.is_published = TRUE AND b.is_active = TRUE
+                AND i.id NOT IN (SELECT idol_id FROM daily_picks WHERE pick_date >= %s AND gamemode_id = %s)
             """
             cursor.execute(sql_query, (gamemode_id, today_date, date_limit, gamemode_id))
 
@@ -66,7 +66,7 @@ class IdolService:
                 last_picked_date = idol['last_picked_date'] or None
 
                 try:
-                    last_date = date.fromisoformat(last_picked_date) if last_picked_date else None
+                    last_date = last_picked_date if isinstance(last_picked_date, date) else date.fromisoformat(last_picked_date) if last_picked_date else None
                     days_waiting = (today_date_obj - last_date).days if last_date else BOOST_DAYS
 
                 except Exception as e:
@@ -87,14 +87,14 @@ class IdolService:
         
         else:
             if gamemode_id == 1:
-                cursor.execute("SELECT id FROM idols WHERE is_published = 1")
+                cursor.execute("SELECT id FROM idols WHERE is_published = TRUE")
           
                 
             elif gamemode_id == 2:
                 cursor.execute("""
                         SELECT i.id FROM idols AS i
                         INNER JOIN blurry_mode_data AS b ON i.id = b.idol_id
-                        WHERE i.is_published = 1 AND b.is_active = 1
+                        WHERE i.is_published = TRUE AND b.is_active = TRUE
                     """)  
 
             # Transform 'Row object' list to a simple list of ids
@@ -107,12 +107,12 @@ class IdolService:
             selected_idol_id = random.choice(available_idols_ids)
 
         cursor.execute("""
-            INSERT INTO daily_picks (pick_date, idol_id, gamemode_id) VALUES (?, ?, ?)
+            INSERT INTO daily_picks (pick_date, idol_id, gamemode_id) VALUES (%s, %s, %s)
         """, (today_date, selected_idol_id, gamemode_id))
         
         cursor.execute("""
-                UPDATE idols SET last_picked_date = ?
-                WHERE id = ?
+                UPDATE idols SET last_picked_date = %s
+                WHERE id = %s
             """, (today_date, selected_idol_id))
 
         # Return the selected idol id

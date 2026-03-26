@@ -10,7 +10,7 @@ class GameService:
     def streak_calculation(self, cursor, user_id, gamemode_id):
             cursor.execute("""
                     SELECT date, won FROM daily_user_history
-                    WHERE user_id = ? AND won = 1 AND gamemode_id = ?
+                    WHERE user_id = %s AND won = TRUE AND gamemode_id = %s
                     ORDER BY date DESC
                 """, (user_id, gamemode_id))
             
@@ -24,7 +24,7 @@ class GameService:
             # expected_date = get_server_date_obj()
             
             for row in results:
-                game_date = date.fromisoformat(row["date"])
+                game_date = row["date"] if isinstance(row["date"], date) else date.fromisoformat(row["date"])
 
                 if game_date == expected_date:
                     streak += 1
@@ -40,34 +40,32 @@ class GameService:
     
         # Update user history in the database 
         try:
-            cursor.execute("BEGIN TRANSACTION")
-
             # Check if user has already won today to prevent duplicate win stats
             already_won_today = False
             if is_correct:
                 cursor.execute("""
                     SELECT won FROM daily_user_history
-                    WHERE user_id = ? AND date = ? AND gamemode_id = ? AND won = 1
+                    WHERE user_id = %s AND date = %s AND gamemode_id = %s AND won = TRUE
                 """, (user_id, today, gamemode_id))
                 already_won_today = cursor.fetchone() is not None
+
+            won_at = current_timestamp if is_correct else None
+            started_at_value = current_timestamp if current_attempt == 1 else None
 
             cursor.execute(
                 """
                     INSERT INTO daily_user_history (user_id, date, gamemode_id, guesses_count, won, one_shot_win, won_at, started_at)
-                    VALUES (?, ?, ?, ?, ?, ?, 
-                        CASE WHEN ? = 1 THEN ? ELSE NULL END, 
-                        CASE WHEN ? = 1 THEN ? ELSE NULL END)
+                    VALUES (%s, %s, %s, %s, %s, %s, %s, %s)
                     ON CONFLICT(user_id, date, gamemode_id) DO UPDATE SET   
-                    guesses_count = excluded.guesses_count,
-                    won = excluded.won OR won,
-                    one_shot_win = excluded.one_shot_win OR one_shot_win,
-                    won_at = CASE WHEN excluded.won = 1 AND daily_user_history.won_at IS NULL
-                    THEN excluded.won_at ELSE daily_user_history.won_at END,
-                    started_at = CASE WHEN excluded.guesses_count = 1 AND daily_user_history.started_at IS NULL
-                    THEN excluded.started_at ELSE daily_user_history.started_at END
+                    guesses_count = EXCLUDED.guesses_count,
+                    won = EXCLUDED.won OR daily_user_history.won,
+                    one_shot_win = EXCLUDED.one_shot_win OR daily_user_history.one_shot_win,
+                    won_at = CASE WHEN EXCLUDED.won IS TRUE AND daily_user_history.won_at IS NULL
+                    THEN EXCLUDED.won_at ELSE daily_user_history.won_at END,
+                    started_at = CASE WHEN EXCLUDED.guesses_count = 1 AND daily_user_history.started_at IS NULL
+                    THEN EXCLUDED.started_at ELSE daily_user_history.started_at END
                 """, (user_id, today, gamemode_id, current_attempt, is_correct, 
-                    one_shot_win, is_correct, current_timestamp, 
-                    current_attempt, current_timestamp))
+                    one_shot_win, won_at, started_at_value))
                             
             if is_correct:
                 formatted_analytics_data = ' | '.join([f"{key.capitalize()}: {value}" for key, value in analytics_data.items()])
@@ -81,8 +79,8 @@ class GameService:
 
                 cursor.execute("""
                         UPDATE daily_user_history
-                        SET score = ?
-                        WHERE user_id = ? AND date = ? AND gamemode_id = ?
+                        SET score = %s
+                        WHERE user_id = %s AND date = %s AND gamemode_id = %s
                     """, (score, user_id, today, gamemode_id))
 
                 # Only update stats / streak if this is the first win today
@@ -104,26 +102,20 @@ class GameService:
         cursor.execute("""
             INSERT INTO user_history 
             (user_id, gamemode_id, current_streak, max_streak, wins_count, average_guesses, one_shot_wins, last_played_date)
-            VALUES (?, ?, ?, ?, 1, ?, ?, ?)
+            VALUES (%s, %s, %s, %s, 1, %s, %s, %s)
             ON CONFLICT(user_id, gamemode_id) DO UPDATE SET
-                    current_streak = ?,
-                    max_streak = MAX(max_streak, ?),
-                    wins_count = wins_count + 1,
-                    average_guesses = ROUND((average_guesses * (wins_count) + ? ) / (wins_count + 1), 2),
-                    one_shot_wins = one_shot_wins + ?,
-                    last_played_date = ?
+                    current_streak = EXCLUDED.current_streak,
+                    max_streak = GREATEST(user_history.max_streak, EXCLUDED.max_streak),
+                    wins_count = user_history.wins_count + 1,
+                    average_guesses = ROUND(((user_history.average_guesses * user_history.wins_count + EXCLUDED.average_guesses) / (user_history.wins_count + 1))::numeric, 2),
+                    one_shot_wins = user_history.one_shot_wins + EXCLUDED.one_shot_wins,
+                    last_played_date = EXCLUDED.last_played_date
             """, (
                 user_id, 
                 gamemode_id,
                 streak,
                 streak, 
-                current_attempt, 
-                1 if one_shot_win else 0,
-                today,           
-                # Update values:
-                streak,
-                streak,
-                current_attempt,
+                float(current_attempt), 
                 1 if one_shot_win else 0,
                 today
             )

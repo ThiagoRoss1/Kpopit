@@ -1,12 +1,12 @@
 --- Add Users --- 
 
-BEGIN TRANSACTION;
+BEGIN;
 
 -- Users table
 CREATE TABLE IF NOT EXISTS users (
-    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    id SERIAL PRIMARY KEY NOT NULL,
     token TEXT UNIQUE NOT NULL,
-    created_at DATETIME DEFAULT CURRENT_TIMESTAMP
+    created_at TIMESTAMPTZ DEFAULT CURRENT_TIMESTAMP
 );
 
 -- Users history table
@@ -16,17 +16,17 @@ CREATE TABLE IF NOT EXISTS user_history (
     current_streak INTEGER DEFAULT 0,
     max_streak INTEGER DEFAULT 0,
     wins_count INTEGER DEFAULT 0,
-    average_guesses FLOAT DEFAULT 0.0,
+    average_guesses REAL DEFAULT 0.0,
     one_shot_wins INTEGER DEFAULT 0,
 
     /* Foreign Key */
-    FOREIGN KEY (user_id) REFERENCES users(id)
+    CONSTRAINT fk_user_history_user_id FOREIGN KEY (user_id) REFERENCES users(id)
 );
 
 -- Daily history table 
 
 CREATE TABLE IF NOT EXISTS daily_user_history (
-    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    id SERIAL PRIMARY KEY NOT NULL,
     user_id INTEGER NOT NULL,
     date DATE NOT NULL,
     guesses_count INTEGER DEFAULT 0,
@@ -34,10 +34,10 @@ CREATE TABLE IF NOT EXISTS daily_user_history (
     one_shot_win BOOLEAN DEFAULT FALSE,
 
     /* Foreign Key */
-    FOREIGN KEY (user_id) REFERENCES users(id),
+    CONSTRAINT fk_daily_user_history_user_id FOREIGN KEY (user_id) REFERENCES users(id),
 
     /* Unique Constraint */
-    UNIQUE (user_id, date)
+    CONSTRAINT fk_unique_user_date UNIQUE (user_id, date)
 );
 
 COMMIT;
