@@ -9,6 +9,7 @@ import PrivacyPolicy from './pages/privacy-policy/PrivacyPolicy';
 import Contact from './pages/contact/Contact'
 import MainLayout from './components/MainLayout/MainLayout'
 import ScrollToTop from './hooks/useScrollToTop'
+import MaintenancePage from './pages/Maintenance/MaintenancePage'
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
 import { BrowserRouter, Route, Navigate, Routes } from 'react-router-dom'
 import { SpeedInsights } from "@vercel/speed-insights/react"
@@ -21,6 +22,11 @@ createRoot(document.getElementById('root')!).render(
       <QueryClientProvider client={queryClient}>
         <BrowserRouter>
           <ScrollToTop />
+            {import.meta.env.VITE_MAINTENANCE_MODE === "true" ? (
+              <Routes>
+                <Route path="*" element={<MaintenancePage type="database" />} />
+              </Routes>
+            ) : (
             <Routes>
               <Route element={<MainLayout />}>
                 <Route path="/" element={<Home />} />
@@ -41,6 +47,7 @@ createRoot(document.getElementById('root')!).render(
               {/* Catch inexistent / invalid routes and redirect to home */}
               <Route path="*" element={<Navigate to="/" replace />} />
             </Routes>
+            )}
         </BrowserRouter>
       </QueryClientProvider>
 
