@@ -1,162 +1,146 @@
 # Seed the database with csv data
 import csv 
-import sqlite3
+import psycopg
 import os
 from dotenv import load_dotenv
 
 # Database file
 load_dotenv()
-DB_FILE = os.getenv("DB_FILE")
+DB_URL = os.getenv("DB_URL")
 DATA_FOLDER = os.getenv("DATA_FOLDER")
 
-if DB_FILE:
-    db_dir = os.path.dirname(DB_FILE)
-    if db_dir:
-        os.makedirs(db_dir, exist_ok=True)
-        print(f"Ensured database directory exists: {db_dir}")
+def init_db():
+    try:
+        with psycopg.connect(DB_URL) as conn:
+            with conn.cursor() as cursor:
 
-try:
-    connect = sqlite3.connect(DB_FILE)
-    cursor = connect.cursor()
-    
-except Exception as e:
-    print(f"Error connecting to database: {e}")
-    exit(1)
+                # --- IDOLS TABLE ---
+                cursor.execute("""
+                    CREATE TABLE IF NOT EXISTS idols (
+                    /* --- Idol identifier --- */
+                    id SERIAL PRIMARY KEY NOT NULL,
+                    artist_name TEXT NOT NULL,
+                    real_name TEXT,
+                    gender TEXT NOT NULL,
+                    debut_year INTEGER,
 
-idols_sql = """
-    CREATE TABLE IF NOT EXISTS idols (
-    /* --- Idol identifier --- */
-    id INTEGER PRIMARY KEY AUTOINCREMENT,
-    artist_name TEXT NOT NULL,
-    real_name TEXT,
-    gender TEXT NOT NULL,
-    debut_year INTEGER,
+                    /* --- Game Data --- */
+                    nationality TEXT NOT NULL,
+                    birth_date TEXT,
+                    height INTEGER,
+                    position TEXT,
 
-    /* --- Game Data --- */
-    nationality TEXT NOT NULL,
-    birth_date TEXT,
-    height INTEGER,
-    position TEXT,
+                    /* --- Visual --- */
+                    image_path TEXT
+                    );
+                """)
 
-    /* --- Visual --- */
-    image_path TEXT
-    );
-"""
-# Execute the SQL command to create the table
-cursor.execute(idols_sql)
+                # --- GROUPS TABLE ---
+                cursor.execute("""
+                    CREATE TABLE IF NOT EXISTS groups (
+                    /* --- Group identifier --- */
+                    id SERIAL PRIMARY KEY NOT NULL,
+                    name TEXT NOT NULL UNIQUE,
 
-groups_sql = """
-    CREATE TABLE IF NOT EXISTS groups (
-    /* --- Group identifier --- */
-    id INTEGER PRIMARY KEY AUTOINCREMENT,
-    name TEXT NOT NULL UNIQUE,
+                    /* --- Group Data --- */
+                    group_debut_year INTEGER,
+                    member_count INTEGER,
+                    generation INTEGER,
 
-    /* --- Group Data --- */
-    group_debut_year INTEGER,
-    member_count INTEGER,
-    generation INTEGER,
+                    /* --- Fandom Data --- */
+                    fandom_name TEXT
+                    );
+                """)
 
-    /* --- Fandom Data --- */
-    fandom_name TEXT
-    );
-"""
+                # --- IDOL CAREER TABLE ---
+                cursor.execute("""
+                    CREATE TABLE IF NOT EXISTS idol_career (
+                    idol_id INTEGER,
+                    group_id INTEGER,
+                    is_active BOOLEAN NOT NULL,
+                    start_year INTEGER,
+                    end_year INTEGER,
 
-# Execute the SQL command to create the table
-cursor.execute(groups_sql)
+                    /* --- Primary Key --- */
+                    PRIMARY KEY(idol_id, group_id),
 
-idol_career_sql = """
-    CREATE TABLE IF NOT EXISTS idol_career (
-    idol_id INTEGER,
-    group_id INTEGER,
-    is_active BOOLEAN NOT NULL,
-    start_year INTEGER,
-    end_year INTEGER,
+                    /* --- Foreign Keys --- */
+                    FOREIGN KEY(idol_id) REFERENCES idols(id),
+                    FOREIGN KEY(group_id) REFERENCES groups(id)
+                    );
+                """)
 
-    /* --- Primary Key --- */
-    PRIMARY KEY(idol_id, group_id),
+                # --- COMPANIES TABLE ---
+                cursor.execute("""
+                    CREATE TABLE IF NOT EXISTS companies (
+                    id SERIAL PRIMARY KEY NOT NULL,
+                    name TEXT NOT NULL UNIQUE,
+                    parent_company_id INTEGER,
 
-    /* --- Foreign Keys --- */
-    FOREIGN KEY(idol_id) REFERENCES idols(id),
-    FOREIGN KEY(group_id) REFERENCES groups(id)
-    );
-"""
+                    /* --- Foreign Key --- */
+                    FOREIGN KEY(parent_company_id) REFERENCES companies(id)
+                    );
+                """)
 
-# Execute the SQL command to create the table
-cursor.execute(idol_career_sql)
+                # --- GROUP-COMPANY AFFILIATION TABLE ---
+                cursor.execute("""
+                    CREATE TABLE IF NOT EXISTS group_company_affiliation (
+                    group_id INTEGER,
+                    company_id INTEGER,
+                    role TEXT, -- 'Label', 'Parent Company', 'Distributor'...
 
-companies_sql = """
-    CREATE TABLE IF NOT EXISTS companies (
-    id INTEGER PRIMARY KEY AUTOINCREMENT,
-    name TEXT NOT NULL UNIQUE,
-    parent_company_id INTEGER,
+                    /* --- Primary Key --- */
+                    PRIMARY KEY(group_id, company_id),
 
-    /* --- Foreign Key --- */
-    FOREIGN KEY(parent_company_id) REFERENCES companies(id)
-    );
-"""
+                    /* --- Foreign Keys --- */    
+                    FOREIGN KEY(group_id) REFERENCES groups(id),
+                    FOREIGN KEY(company_id) REFERENCES companies(id)
+                    );
+                """)
 
-# Execute the SQL command to create the table
-cursor.execute(companies_sql)
+                # --- IDOL-COMPANY AFFILIATION TABLE ---
+                cursor.execute("""
+                    CREATE TABLE IF NOT EXISTS idol_company_affiliation (
+                    id SERIAL PRIMARY KEY,
+                    idol_id INTEGER NOT NULL,
+                    company_id INTEGER,
+                    role TEXT, -- 'Solo Management', 'Group Management'...
+                               
+                    /* --- Foreign Keys --- */
+                    FOREIGN KEY(idol_id) REFERENCES idols(id),
+                    FOREIGN KEY(company_id) REFERENCES companies(id),
+                                      
+                    /* --- Unique Constraint --- */
+                    CONSTRAINT fk_unique_idol_company_pair UNIQUE (idol_id, company_id)
+                    );
+                """)
 
-group_ca_sql = """
-    CREATE TABLE IF NOT EXISTS group_company_affiliation (
-    group_id INTEGER,
-    company_id INTEGER,
-    role TEXT, -- 'Label', 'Parent Company', 'Distributor'...
+                # --- DAILY PICKS TABLE ---
+                cursor.execute("""
+                    CREATE TABLE IF NOT EXISTS daily_picks (
+                    id SERIAL PRIMARY KEY NOT NULL,
+                    pick_date DATE NOT NULL UNIQUE,
+                    idol_id INTEGER NOT NULL,
 
-    /* --- Primary Key --- */
-    PRIMARY KEY(group_id, company_id),
+                    /* --- Foreign Key --- */
+                    FOREIGN KEY(idol_id) REFERENCES idols(id)
+                    );
+                """)
 
-    /* --- Foreign Keys --- */    
-    FOREIGN KEY(group_id) REFERENCES groups(id),
-    FOREIGN KEY(company_id) REFERENCES companies(id)
-    );
-"""
+                # --- YESTERDAY PICKS TABLE ---
+                cursor.execute("""
+                        CREATE TABLE IF NOT EXISTS yesterday_picks (
+                        past_idol_id INTEGER NOT NULL,
+                        yesterdays_pick_date DATE PRIMARY KEY,
 
-# Execute the SQL command to create the table
-cursor.execute(group_ca_sql)
+                        /* --- Foreign Key --- */
+                        FOREIGN KEY(past_idol_id) REFERENCES idols(id)
+                        );
+                    """)
 
-idol_ca_sql = """
-    CREATE TABLE IF NOT EXISTS idol_company_affiliation (
-    idol_id INTEGER,
-    company_id INTEGER,
-    role TEXT, -- 'Solo Management', 'Group Management'...
+    except Exception as e:
+        print(f"Error connecting to database: {e}")
+        exit(1)
 
-    /* --- Primary Key --- */
-    PRIMARY KEY(idol_id, company_id),
-
-    /* --- Foreign Keys --- */
-    FOREIGN KEY(idol_id) REFERENCES idols(id),
-    FOREIGN KEY(company_id) REFERENCES companies(id)
-    );
-"""
-
-# Execute the SQL command to create the table
-cursor.execute(idol_ca_sql)
-
-daily_picks_sql = """
-    CREATE TABLE IF NOT EXISTS daily_picks (
-    id INTEGER PRIMARY KEY AUTOINCREMENT,
-    pick_date DATE NOT NULL UNIQUE,
-    idol_id INTEGER NOT NULL,
-
-    /* --- Foreign Key --- */
-    FOREIGN KEY(idol_id) REFERENCES idols(id)
-    );
-"""
-
-# Execute the SQL command to create the table
-cursor.execute(daily_picks_sql)
-
-sql_query = """
-        CREATE TABLE IF NOT EXISTS yesterday_picks (
-        past_idol_id INTEGER NOT NULL,
-        yesterdays_pick_date DATE PRIMARY KEY,
-
-        /* --- Foreign Key --- */
-        FOREIGN KEY(past_idol_id) REFERENCES idols(id)
-        );
-    """  
-
-# Execute the SQL command to create the table
-cursor.execute(sql_query)
+if __name__ == "__main__":
+    init_db()

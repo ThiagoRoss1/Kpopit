@@ -1,5 +1,5 @@
 from flask import Blueprint, request, jsonify
-from services.backup_service import sqlite_backup_to_s3
+from services.backup_service import postgresql_backup_to_s3
 import os
 
 tasks_bp = Blueprint('tasks', __name__)
@@ -10,7 +10,7 @@ def backup_database():
     if auth_key != os.getenv("BACKUP_AUTH_KEY"):
         return jsonify({"error": "Unauthorized"}), 401
     
-    success, message = sqlite_backup_to_s3()
+    success, message = postgresql_backup_to_s3()
     if success:
         return jsonify({"message": f"Backup successful: {message}"}), 200
     else:

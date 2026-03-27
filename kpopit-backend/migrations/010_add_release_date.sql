@@ -1,7 +1,7 @@
 /* Add release date column to idols table */
 
-BEGIN TRANSACTION;
+BEGIN;
 
-ALTER TABLE idols ADD COLUMN release_date DATETIME DEFAULT NULL;
+ALTER TABLE idols ADD COLUMN release_date DATE DEFAULT NULL;
 
 COMMIT;

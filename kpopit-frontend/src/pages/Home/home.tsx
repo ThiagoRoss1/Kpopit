@@ -11,14 +11,6 @@ import AboutText from "../../components/buttons/modals/AboutContent";
 function Home() {
     const [showModal, setShowModal] = useState<null | "changelog" | "about">(null);
 
-    if (import.meta.env.VITE_MAINTENANCE_MODE === "true") {
-        return (
-            <div className="fixed inset-0 z-100 flex w-full h-screen bg-black justify-center items-center">
-                <span className="text-white animate-pulse">Server under maintenance, applying updates. Try again later.</span>
-            </div>
-        );
-    };
-    
     return (
         <>
         <BackgroundStyle />

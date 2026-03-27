@@ -1,5 +1,5 @@
 import os
-from flask import Flask, request, g
+from flask import Flask, request, g, jsonify
 from flask_cors import CORS
 from routes.admin import admin_bp
 from routes.tasks import tasks_bp
@@ -16,10 +16,11 @@ from routes.session_info import session_info
 load_dotenv()
 
 # Global variables
-DB_FILE = os.getenv("DB_FILE")
+DB_URL = os.getenv("DB_URL")
 ADMIN_ENABLED = os.getenv("ADMIN_ENABLED", "false").lower() == "true"
 FLASK_ENV = os.getenv("FLASK_ENV", "production").lower()
 FRONTEND_URL = os.getenv("FRONTEND_URL")
+MAINTENANCE_MODE = os.getenv("MAINTENANCE_MODE", "false").lower() == "true"
 
 app = Flask(__name__)
 
@@ -32,6 +33,14 @@ else:
     urls_string = FRONTEND_URL if FRONTEND_URL else ""
     frontend_urls = urls_string.split(",")
     CORS(app, resources={r"/*": {"origins": frontend_urls}}) # Restrict to frontend URL
+
+@app.before_request
+def check_maintenance_mode():
+    """Check if the application is in maintenance mode before processing any request"""
+    if MAINTENANCE_MODE and request.path.startswith("/api"):
+        if request.method == "OPTIONS":
+            return
+        return jsonify({"error": "The service is currently under maintenance. Please try again later."}), 503 
 
 @app.before_request
 def load_gamemode():
