@@ -17,8 +17,11 @@ IDOL_CA_CSV_FILE = os.path.join(DATA_FOLDER, "idol_company_affiliation.csv")
 GAME_MODES_CSV_FILE = os.path.join(DATA_FOLDER, "gamemodes.csv")
 BLURRY_IDOLS_CSV_FILE = os.path.join(DATA_FOLDER, "blurry_idols.csv")
 
-def seed_table(cursor, csv_file, table_name, columns, conflict_column=["id"]):
+def seed_table(cursor, csv_file, table_name, columns, conflict_column=None):
     """Read data from a CSV file and insert it into a database table."""
+    if conflict_column is None:
+        conflict_column = ["id"]
+
     stats = {"inserted": 0, "updated": 0, "skipped": 0}
 
     with open(csv_file, "r", encoding="utf-8") as file:
@@ -37,19 +40,63 @@ def seed_table(cursor, csv_file, table_name, columns, conflict_column=["id"]):
             VALUES ({placeholders})
             ON CONFLICT({", ".join(conflict_column)})
             DO UPDATE SET {update_set}
-            WHERE {where_condition}                
+            WHERE {where_condition}
+            RETURNING (xmax = 0) AS inserted_flag
         """
 
         # Insert each row in database - List appending
         for row in reader:
-            main_id = row[conflict_column[0]]
-            cursor.execute(f"SELECT 1 FROM {table_name} WHERE {conflict_column[0]} = %s", (main_id,))
-            exists = cursor.fetchone()
-            values = [row[column] if row[column] != "" else None for column in columns]
-            cursor.execute(insert_sql, values)
+            values_by_column = {column: (row[column] if row[column] != "" else None) for column in columns}
+            values = [values_by_column[column] for column in columns]
 
-            if cursor.rowcount > 0:
-                if not exists:
+            conflict_values = [values_by_column[column] for column in conflict_column]
+            key_condition = " AND ".join([f"{column} IS NOT DISTINCT FROM %s" for column in conflict_column])
+
+            # ON CONFLICT does not catch rows when nullable conflict keys are NULL
+            # In those cases, its necessary to do a manual null-safe upsert check to prevent duplicate rows
+            if any(value is None for value in conflict_values):
+                cursor.execute(
+                    f"SELECT 1 FROM {table_name} WHERE {key_condition} LIMIT 1",
+                    conflict_values,
+                )
+                exists = cursor.fetchone() is not None
+
+                if exists: 
+                    if update_cols:
+                        manual_update_set = ", ".join([f"{col} = %s" for col in update_cols])
+                        changed_condition = " OR ".join([f"{col} IS DISTINCT FROM %s" for col in update_cols])
+                        update_values = [values_by_column[col] for col in update_cols]
+
+                        cursor.execute(
+                            f"""
+                                UPDATE {table_name}
+                                SET {manual_update_set}
+                                WHERE {key_condition}
+                                AND ({changed_condition})
+                            """,
+                            update_values + conflict_values + update_values,
+                        )
+
+                        if cursor.rowcount > 0:
+                            stats["updated"] += 1
+                        else:
+                            stats["skipped"] += 1
+                    else:
+                        stats["skipped"] += 1
+                else:
+                    cursor.execute(
+                        f"INSERT INTO {table_name} ({', '.join(columns)}) VALUES ({placeholders})",
+                        values,
+                    )
+                    stats["inserted"] += 1
+
+                continue
+
+            cursor.execute(insert_sql, values)
+            result = cursor.fetchone()
+
+            if result:
+                if result["inserted_flag"]:
                     stats["inserted"] += 1
                 else:
                     stats["updated"] += 1
@@ -57,8 +104,7 @@ def seed_table(cursor, csv_file, table_name, columns, conflict_column=["id"]):
                 stats["skipped"] += 1
 
         print(f"Seeded {table_name}: {stats['inserted']} inserted, {stats['updated']} updated, {stats['skipped']} skipped.")
-
-
+        
 def run_seed():
     with get_manual_db() as connect:
         with connect.cursor() as cursor:
