@@ -6,13 +6,9 @@ __pycache__/
 
 # Ignore backup
 backup_kpopit.b64
-backup_kpopit_before_2.b64
-backup_prod.b64
-backup_dev.b64
 backup_dev2.b64
 backup_kpopitprevention.b64
 backup_predeploy.b64
-kpopit_prod_backup_full.b64
 
 # Ignore environment variable files
 .env

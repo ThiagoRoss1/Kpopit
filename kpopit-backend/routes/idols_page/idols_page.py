@@ -1,0 +1,73 @@
+from flask import Blueprint, jsonify
+from services.get_db import get_db
+from repositories.idol_repository import IdolRepository
+
+idols_page_bp = Blueprint('idols_page', __name__)
+
+@idols_page_bp.route("/idols-page", methods=["GET"])
+def get_idols_page():
+    """Return a list of all idols in game as JSON"""
+
+    with get_db() as connect:
+        with connect.cursor() as cursor:
+            try:
+                # Not using IdolRepository here because we just need a simple list for the general page
+                idol_page_query = """
+                    SELECT DISTINCT ON (i.id)
+                        i.id,
+                        i.artist_name,
+                        i.image_path,
+                        i.image_version,
+                        i.is_published,
+                        g.id AS group_id,
+                        g.name AS group_name,
+                        c.id AS company_id,
+                        c.name AS company_name
+                    FROM idols AS i
+                    LEFT JOIN idol_career AS ic ON i.id = ic.idol_id AND ic.is_active = TRUE
+                    LEFT JOIN groups AS g ON g.id = ic.group_id
+                    LEFT JOIN group_company_affiliation AS gca ON gca.group_id = g.id
+                    LEFT JOIN companies AS c ON c.id = gca.company_id
+                    WHERE i.is_published = TRUE
+                    ORDER BY i.id ASC, g.id ASC, c.id ASC
+                """
+                cursor.execute(idol_page_query)
+                return jsonify(cursor.fetchall())
+
+            except Exception as e:
+                print(f"Error fetching idols page data: {e}")
+                return jsonify({"error": str(e)}), 500
+        
+@idols_page_bp.route("/idols-page/<int:idol_id>", methods=["GET"])
+def get_idols_page_idol(idol_id):
+    """Return detailed information about a specific idol by ID as JSON"""
+
+    with get_db() as connect:
+        with connect.cursor() as cursor:
+            try:
+                # Here we can use the IdolRepository to fetch detailed idol data
+                idol_repo = IdolRepository(cursor)
+
+                idol_data = idol_repo.fetch_full_idol_data(idol_id)
+                idol_career = idol_repo.fetch_full_idol_career(idol_id)
+
+                group_id = idol_data.get("group_id") if idol_data else None
+
+                idol_companies = idol_repo.fetch_idol_companies(idol_id)
+                group_companies = idol_repo.fetch_group_companies(group_id) if idol_career else []
+
+                if idol_data:
+                    response = {
+                        "idol_data": idol_data,
+                        "idol_career": idol_career,
+                        "idol_companies": idol_companies,
+                        "group_companies": group_companies
+                    }
+                return jsonify(response)
+            
+            except Exception as e:
+                print(f"Error fetching idol data: {e}")
+                return jsonify({"error": str(e)}), 500
+        
+    
+            

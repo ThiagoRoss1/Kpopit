@@ -13,6 +13,7 @@ from routes.game_logic import game_logic_bp
 from routes.general import general_bp
 from routes.ranking import ranking_bp
 from routes.session_info import session_info
+from routes.idols_page.idols_page import idols_page_bp
 load_dotenv()
 
 # Global variables
@@ -77,6 +78,9 @@ app.register_blueprint(general_bp, url_prefix="/api")
 
 # Ranking routes blueprint - Daily users count and rank routes
 app.register_blueprint(ranking_bp, url_prefix="/api")
+
+# Idols page blueprint - Register idols page route
+app.register_blueprint(idols_page_bp, url_prefix="/api")
 
 # Repository loading hook (optional future enhancement):
 # If needed, a before_request handler can be added here to attach

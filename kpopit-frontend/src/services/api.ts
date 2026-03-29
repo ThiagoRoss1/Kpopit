@@ -163,3 +163,15 @@ export const getUserAnalytics = async () => {
     const response = await api.post('/analytics', trafficData);
     return response.data;
 }
+
+// Get minimum idol data for idol page
+export const getIdolsPage = async () => {
+    const response = await api.get('/idols-page');
+    return response.data;
+}
+
+// Get entire idol data for a specific idol
+export const getIdolInfo = async (idol_id: number) => {
+    const response = await api.get(`/idols-page/${idol_id}`);
+    return response.data;
+}

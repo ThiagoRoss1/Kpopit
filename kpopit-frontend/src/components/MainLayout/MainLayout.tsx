@@ -27,7 +27,7 @@ const MainLayout = () => {
                 />
             }
 
-            <main className="flex-1 max-w-screen-2xl mx-auto px-2 sm:px-4 lg:px-8 w-full">
+            <main className="flex-1 w-full px-2 sm:px-4 lg:px-4">
                 <Outlet />
             </main>
 

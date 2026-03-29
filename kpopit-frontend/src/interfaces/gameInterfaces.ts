@@ -154,3 +154,15 @@ export interface BlurryGameData extends GameData {
   blur_image_path: string;
   blur_image_version: string;
 }
+
+// Specific interface for Idols Page
+export interface IdolsPageData extends Pick<IdolListItem,
+  "id" | "artist_name" | "image_path" | "image_version" > {
+
+    // New fields specifically for the idols page
+    "company_id": number;
+    "company_name": string;
+    "group_id": number;
+    "group_name": string;
+    "is_published": boolean;
+  }
