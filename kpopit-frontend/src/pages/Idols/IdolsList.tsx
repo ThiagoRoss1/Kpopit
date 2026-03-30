@@ -1,3 +1,4 @@
+import "./IdolsList.css";
 import { useState, useEffect, useMemo } from "react"; // maybe useMemo
 import { useQuery } from "@tanstack/react-query";
 import { getIdolsPage } from "../../services/api";
@@ -72,7 +73,7 @@ function IdolsList() {
             <div className="flex flex-col w-full h-full justify-start items-center">
                 {/* Title */}
                 <div className="flex items-center justify-center w-full h-fit mt-10 mb-5">
-                    <h1 className="text-5xl [text-shadow:1.2px_1.6px_2.0px_rgba(255,51,153,1)] 
+                    <h1 className="text-4xl xs:text-5xl [text-shadow:1.2px_1.6px_2.0px_rgba(255,51,153,1)] 
                     font-bold text-center text-white">
                         List of Idols
                     </h1>
@@ -89,12 +90,14 @@ function IdolsList() {
 
                 <div className="w-full h-fit flex justify-center items-center text-center mb-4">
                     <span className="text-white text-xl font-semibold [text-shadow:1px_1px_10px_rgba(255,255,255,0.6)]">
-                        Showing {filteredIdols?.length || 0} idols
+                        {`Showing ${filteredIdols?.length || 0} ${filteredIdols?.length === 1 ? 'idol' : 'idols'}`}
                     </span>
                 </div>
 
-                <div className="grid grid-cols-8 flex-wrap w-full h-fit gap-5 mb-6">
-                    {filteredIdols?.map((idol) => (
+                <div className="grid w-full h-fit gap-5 mb-6 px-2 md:px-6 
+                grid-cols-[repeat(auto-fill,minmax(150px,1fr))] sm:grid-cols-[repeat(auto-fill,minmax(150px,1fr))] lg:grid-cols-[repeat(auto-fill,minmax(200px,1fr))]">
+                    {filteredIdols?.map((idol, i) => (
+                        <div className="idol-card-enter" style={{ animationDelay: `${i * 0.02}s` }}>
                         <IdolsCards
                             key={idol.id}
                             idolImage={`${import.meta.env.VITE_IMAGE_BUCKET_URL}${idol.image_path}?v=${idol.image_version}`}
@@ -102,6 +105,7 @@ function IdolsList() {
                             groupName={idol.group_name}
                             companyName={idol.company_name ? formatCompanyName(idol.company_name) : idol.company_name}
                         />
+                        </div>
                     ))}
                 </div>
                 

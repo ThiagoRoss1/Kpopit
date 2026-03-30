@@ -76,9 +76,6 @@ def get_daily_rank(user_token):
         started_at_dt = started_at
         won_at_dt = won_at
 
-    time_to_win = won_at_dt - started_at_dt  # With python - (Can use julianday in SQL too)
-    time_to_win_seconds = int(time_to_win.total_seconds())
-
     # Fetch ranks and count user's rank
     cursor.execute("""
             SELECT COUNT(*) + 1 AS position FROM daily_user_history
@@ -91,12 +88,27 @@ def get_daily_rank(user_token):
 
     # Fetch ranks and count user's rank
     cursor.execute("""
-            SELECT COUNT(*) + 1 AS rank FROM daily_user_history
-            WHERE date = %s AND won = TRUE AND user_id != %s
-            AND (guesses_count < %s
-            OR (guesses_count = %s AND EXTRACT(EPOCH FROM (won_at - started_at)) <= %s))
-            AND gamemode_id = %s
-        """, (today, user_id, guesses_count, guesses_count, time_to_win_seconds, g.gamemode_id))
+            SELECT COUNT(*) + 1 AS rank FROM daily_user_history d
+            WHERE date = %s AND won = TRUE AND user_id != %s AND gamemode_id = %s
+            AND (  
+                d.guesses_count < %s
+                OR (
+                   d.guesses_count = %s 
+                   AND (
+                        (d.won_at - d.started_at) < (%s::timestamptz - %s::timestamptz)
+                        OR (
+                            (d.won_at - d.started_at) = (%s::timestamptz - %s::timestamptz)
+                            AND (d.won_at < %s)
+                        )
+                    )
+                )
+            )
+        """, 
+            (
+            today, user_id, g.gamemode_id, guesses_count, guesses_count, 
+            won_at, started_at, won_at, started_at, won_at
+            )
+        )
     
     # past calc using sqlite (julianday(won_at) - julianday(started_at)) * 24 * 60 * 60 <= %s)
     

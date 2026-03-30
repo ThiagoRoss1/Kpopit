@@ -166,3 +166,28 @@ export interface IdolsPageData extends Pick<IdolListItem,
     "group_name": string;
     "is_published": boolean;
   }
+
+// Sub interfaces for the idols page
+// Change this after (clean the backend response)
+export interface IdolsGameModes {
+  Classic: boolean;
+  Blurry: boolean;
+}
+
+export interface IdolsCompanyInfo {
+  name: string;
+  parent_company_id: number | null;
+}
+
+export interface IdolsCareerInfo {
+  group_name: string;
+  start_year: number;
+  end_year: number | null;
+  is_active: boolean;
+}
+
+export interface IdolsPageIdolInfo extends Pick<IdolListItem,
+  "artist_name" | "image_path" | "image_version" | "gender" | "nationality" | "idol_debut_year" | "birth_date" | "height" | "position" | "member_count"> {
+
+    "idol_id": number;
+  } 

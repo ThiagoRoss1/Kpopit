@@ -56,18 +56,33 @@ def get_idols_page_idol(idol_id):
                 idol_companies = idol_repo.fetch_idol_companies(idol_id)
                 group_companies = idol_repo.fetch_group_companies(group_id) if idol_career else []
 
+                # Check which modes idol is in and add that to the response
+                # Classic will always be true
+                game_modes = {
+                    "Classic": True,
+                }
+
+                blurry_check = cursor.execute(
+                    """ 
+                        SELECT i.id FROM idols AS i
+                        INNER JOIN blurry_mode_data AS bi ON bi.idol_id = i.id
+                        WHERE i.id = %s 
+                        AND bi.is_active = TRUE
+                    """, (idol_id,))
+                
+                game_modes["Blurry"] = blurry_check.fetchone() is not None 
+
                 if idol_data:
                     response = {
                         "idol_data": idol_data,
                         "idol_career": idol_career,
                         "idol_companies": idol_companies,
-                        "group_companies": group_companies
+                        "group_companies": group_companies,
+                        "game_modes_available": game_modes
                     }
                 return jsonify(response)
             
             except Exception as e:
                 print(f"Error fetching idol data: {e}")
                 return jsonify({"error": str(e)}), 500
-        
-    
             

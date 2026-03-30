@@ -15,11 +15,11 @@ const IdolsSearchBar = (props: IdolsSearchBarProps) => {
     };
 
     return (
-        <div className="relative w-fit h-fit">
-            <div className="relative flex items-center justify-center w-141 h-12">
+        <div className="flex relative w-full h-fit justify-center items-center">
+            <div className="relative flex items-center justify-center px-6 sm:px-0 max-xxs:w-full xxs:w-120 h-10 sm:w-141 sm:h-12">
                 <input
                     className="w-full h-full text-white bg-black/50 rounded-3xl px-4
-                    border border-white/60"
+                    border border-white/60 focus:outline-none focus:ring-1 focus:ring-white/60"
                     type="text"
                     onChange={handleInputChange}
                     placeholder="Search an Idol"
