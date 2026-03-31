@@ -73,13 +73,47 @@ def get_idols_page_idol(idol_id):
                 game_modes["Blurry"] = blurry_check.fetchone() is not None 
 
                 if idol_data:
-                    response = {
-                        "idol_data": idol_data,
-                        "idol_career": idol_career,
+                    
+                    idol_profile = {
+                        "idol_id": idol_data.get("idol_id"),
+                        "artist_name": idol_data.get("artist_name"),
+                        "real_name": idol_data.get("real_name"),
+                        "birth_date": idol_data.get("birth_date"),
+                        "nationality": idol_data.get("nationality"),
+                        "height": idol_data.get("height"),
+                        "position": idol_data.get("position"),
+                        "image_path": idol_data.get("image_path"),
+                        "image_version": idol_data.get("image_version")
+                    }
+
+                    idol_career = {
+                        "group_name": idol_data.get("group_name"),
+                        "idol_debut_year": idol_data.get("idol_debut_year"),
+                        "fandom_name": idol_data.get("fandom_name"),
                         "idol_companies": idol_companies,
                         "group_companies": group_companies,
+                        "idol_career": idol_career
+                    }
+
+                    game_info = {
                         "game_modes_available": game_modes
                     }
+
+                    response = {
+                        "idol_profile": idol_profile,
+                        "idol_career": idol_career,
+                        "game_info": game_info
+                    }
+
+                    # past response with everything 
+                    # response = {
+                    #     "idol_data": idol_data,
+                    #     "idol_career": idol_career,
+                    #     "idol_companies": idol_companies,
+                    #     "group_companies": group_companies,
+                    #     "game_modes_available": game_modes
+                    # }
+
                 return jsonify(response)
             
             except Exception as e:

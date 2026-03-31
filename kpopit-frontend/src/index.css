@@ -18,6 +18,8 @@
   --breakpoint-xm: 430px;
   --breakpoint-zm: 480px;
   --breakpoint-3xl: 1728px;
+
+  --color-neon-pink: #FF3399;
 }
 
 html, body {
@@ -28,8 +30,8 @@ body {
   @apply min-h-screen font-[DynaPuff];
   /* Default gradient - will be overridden by dynamic class */
   background: linear-gradient(
-  rgb(0, 0, 0) 30%,
-  #000000 100%
+  #0a0a0a 30%,
+  #0a0a0a 100%
   );
 }
 

@@ -1,5 +1,6 @@
 import "./IdolsList.css";
-import { useState, useEffect, useMemo } from "react"; // maybe useMemo
+import { useState, useEffect, useMemo } from "react";
+import { Link } from "react-router-dom";
 import { useQuery } from "@tanstack/react-query";
 import { getIdolsPage } from "../../services/api";
 import type { IdolsPageData } from "../../interfaces/gameInterfaces";
@@ -9,6 +10,13 @@ import { formatCompanyName } from "../../utils/formatters";
 
 function IdolsList() {
     const [searchTerm, setSearchTerm] = useState("");
+
+    useEffect(() => {
+        if ('scrollRestoration' in window.history) {
+            window.history.scrollRestoration = 'manual';
+        }
+        window.scrollTo(0, 0);
+    }, []);
 
     const {
         data: idolsData,
@@ -69,13 +77,13 @@ function IdolsList() {
     }
 
     return (
-        <div className="w-full min-h-full">
+        <div className="w-full min-h-full bg-[#0a0a0a]">
             <div className="flex flex-col w-full h-full justify-start items-center">
                 {/* Title */}
                 <div className="flex items-center justify-center w-full h-fit mt-10 mb-5">
-                    <h1 className="text-4xl xs:text-5xl [text-shadow:1.2px_1.6px_2.0px_rgba(255,51,153,1)] 
+                    <h1 className="text-4xl xs:text-5xl [text-shadow:0px_0px_4px_rgba(255,255,255,1)] 
                     font-bold text-center text-white">
-                        List of Idols
+                        Kpopit Idols
                     </h1>
                 </div>
                 
@@ -88,16 +96,23 @@ function IdolsList() {
                     />
                 </div>
 
-                <div className="w-full h-fit flex justify-center items-center text-center mb-4">
-                    <span className="text-white text-xl font-semibold [text-shadow:1px_1px_10px_rgba(255,255,255,0.6)]">
+                <div className="w-full h-fit flex flex-col justify-center items-start text-center mb-4 px-60 gap-4">
+                    <span className="text-white text-6xl font-sans font-black">
+                        List of <span className="text-neon-pink [text-shadow:0px_0px_10px_rgba(255,51,153,0.5),0px_0px_20px_rgba(255,51,153,0.3)]">Idols</span>
+                    </span>
+                    
+                    <span className="text-white text-xl font-sans font-semibold opacity-60 [text-shadow:1px_1px_10px_rgba(255,255,255,0.6)]">
                         {`Showing ${filteredIdols?.length || 0} ${filteredIdols?.length === 1 ? 'idol' : 'idols'}`}
                     </span>
                 </div>
 
-                <div className="grid w-full h-fit gap-5 mb-6 px-2 md:px-6 
+                <div className="grid w-full h-fit gap-6 mb-6 max-xxs:px-2 xs:px-4 md:px-6 lg:px-14 xl:px-20 2xl:px-60
                 grid-cols-[repeat(auto-fill,minmax(150px,1fr))] sm:grid-cols-[repeat(auto-fill,minmax(150px,1fr))] lg:grid-cols-[repeat(auto-fill,minmax(200px,1fr))]">
                     {filteredIdols?.map((idol, i) => (
-                        <div className="idol-card-enter" style={{ animationDelay: `${i * 0.02}s` }}>
+                        <Link
+                            key={idol.id}
+                            to={`/idols/${idol.id}/${idol.artist_name.toLowerCase()}-${idol.group_name.toLowerCase()}`.trim().replace(/\s+/g, '-')}
+                            className="idol-card-enter" style={{ animationDelay: `${i * 0.02}s` }}>
                         <IdolsCards
                             key={idol.id}
                             idolImage={`${import.meta.env.VITE_IMAGE_BUCKET_URL}${idol.image_path}?v=${idol.image_version}`}
@@ -105,7 +120,7 @@ function IdolsList() {
                             groupName={idol.group_name}
                             companyName={idol.company_name ? formatCompanyName(idol.company_name) : idol.company_name}
                         />
-                        </div>
+                        </Link>
                     ))}
                 </div>
                 

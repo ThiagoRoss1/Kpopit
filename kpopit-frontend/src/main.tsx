@@ -11,6 +11,7 @@ import MainLayout from './components/MainLayout/MainLayout'
 import ScrollToTop from './hooks/useScrollToTop'
 import MaintenancePage from './pages/Maintenance/MaintenancePage'
 import IdolsList from './pages/Idols/IdolsList'
+import IdolProfile from './pages/Idols/IdolProfile'
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
 import { BrowserRouter, Route, Navigate, Routes } from 'react-router-dom'
 import { SpeedInsights } from "@vercel/speed-insights/react"
@@ -37,6 +38,8 @@ createRoot(document.getElementById('root')!).render(
                 <Route path="/blurry" element={<BlurryMode />} />
 
                 <Route path="/idols" element={<IdolsList />} />
+
+                <Route path="/idols/:id/:slug" element={<IdolProfile />} />
 
                 <Route path="/privacy-policy" element={<PrivacyPolicy />} />
 
