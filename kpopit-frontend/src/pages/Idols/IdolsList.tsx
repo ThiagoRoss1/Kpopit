@@ -96,8 +96,9 @@ function IdolsList() {
                     />
                 </div>
 
-                <div className="w-full h-fit flex flex-col justify-center items-start text-center mb-4 px-60 gap-4">
-                    <span className="text-white text-6xl font-sans font-black">
+                <div className="w-full h-fit flex flex-col justify-center items-start text-center mb-4 
+                max-xxs:px-2 xs:px-4 md:px-6 lg:px-14 xl:px-20 2xl:px-60 gap-4">
+                    <span className="text-white max-xxs:text-4xl xxs:text-4xl sm:text-5xl lg:text-6xl font-sans font-black">
                         List of <span className="text-neon-pink [text-shadow:0px_0px_10px_rgba(255,51,153,0.5),0px_0px_20px_rgba(255,51,153,0.3)]">Idols</span>
                     </span>
                     
