@@ -22,14 +22,18 @@ def get_idols_page():
                         g.id AS group_id,
                         g.name AS group_name,
                         c.id AS company_id,
-                        c.name AS company_name
+                        c.name AS company_name,
+                        (SELECT STRING_AGG(DISTINCT g2.name, ', ')
+                            FROM idol_career AS ic2
+                            JOIN groups AS g2 ON ic2.group_id = g2.id
+                            WHERE ic2.idol_id = i.id) AS all_groups
                     FROM idols AS i
                     LEFT JOIN idol_career AS ic ON i.id = ic.idol_id AND ic.is_active = TRUE
                     LEFT JOIN groups AS g ON g.id = ic.group_id
                     LEFT JOIN group_company_affiliation AS gca ON gca.group_id = g.id
                     LEFT JOIN companies AS c ON c.id = gca.company_id
                     WHERE i.is_published = TRUE
-                    ORDER BY i.id ASC, g.id ASC, c.id ASC
+                    ORDER BY i.id ASC, g.id ASC, gca.role DESC
                 """
                 cursor.execute(idol_page_query)
                 return jsonify(cursor.fetchall())

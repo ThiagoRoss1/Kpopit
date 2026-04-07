@@ -4,13 +4,14 @@ interface InfoItemProps {
     icon: LucideIcon;
     label: string;
     value: React.ReactNode;
+    size?: "small" | "large";
 }
 
 const InfoItem = (props: InfoItemProps) => {
-    const { icon: Icon, label, value } = props;
+    const { icon: Icon, label, value, size } = props;
 
     return (
-        <div className="flex flex-col justify-start items-start gap-2 py-5 bg-[#252525] rounded-3xl border border-white/5">
+        <div className={`flex flex-col h-full w-full justify-center ${size === "small" ? "items-start" : "items-center"} gap-2 py-5 bg-[#252525] rounded-3xl border border-white/5`}>
             <div className="flex items-center flex-row gap-3 px-4">
                 <div className="flex w-10 h-10 rounded-[10px] bg-[#1f1f1f] overflow-hidden justify-center items-center">
                     <Icon className="text-neon-pink w-7 h-7" size={20} />
@@ -21,7 +22,9 @@ const InfoItem = (props: InfoItemProps) => {
                 </span>
             </div>
             
-            <span className="flex font-sans font-bold text-2xl text-white px-8 gap-2 [text-shadow:2px_2px_2px_rgba(0,0,0,0.8)]">
+            <span className={`flex font-sans font-bold text-2xl text-white px-8 gap-2 
+                [text-shadow:2px_2px_2px_rgba(0,0,0,0.8)] ${typeof value === "string" && value.length > 20 && size === "small" ?
+                "text-xl" : "text-2xl"} leading-tight`}>
                 {value || "N/A"}
             </span>
         </div>

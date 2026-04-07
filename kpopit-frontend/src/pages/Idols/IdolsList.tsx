@@ -42,7 +42,8 @@ function IdolsList() {
         return idolsData?.filter(idol =>
             idol.artist_name.toLowerCase().includes(term) || 
             idol.group_name.toLowerCase().includes(term) ||
-            idol.company_name?.toLowerCase().includes(term)
+            idol.company_name?.toLowerCase().includes(term) || 
+            idol.all_groups.toLowerCase().includes(term)
         ).sort((a, b) => {
             const aName = a.artist_name.toLowerCase();
             const bName = b.artist_name.toLowerCase();

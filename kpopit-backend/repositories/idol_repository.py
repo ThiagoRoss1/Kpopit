@@ -55,7 +55,8 @@ class IdolRepository:
         sql_query = """
             SELECT
                 c.name,
-                c.parent_company_id
+                c.parent_company_id,
+                gca.role
             FROM companies AS c
             JOIN group_company_affiliation AS gca ON c.id = gca.company_id
             WHERE gca.group_id = %s

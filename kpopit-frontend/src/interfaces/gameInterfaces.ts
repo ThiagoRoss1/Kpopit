@@ -165,6 +165,7 @@ export interface IdolsPageData extends Pick<IdolListItem,
     "group_id": number;
     "group_name": string;
     "is_published": boolean;
+    "all_groups": string;
   }
   
 export interface IdolsPageIdolInfo extends Pick<IdolListItem,
@@ -181,6 +182,7 @@ export interface GameModes {
 export interface Company {
   name: string;
   parent_company_id: number | null;
+  role: string;
 }
 
 export interface CareerHistory {

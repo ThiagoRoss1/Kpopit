@@ -1,6 +1,6 @@
 group_id,company_id,role
-1,1,Label
-1,2,Parent Company
+1,1,Parent Company
+1,2,Label
 2,4,Label
 2,3,Parent Company
 3,5,Label

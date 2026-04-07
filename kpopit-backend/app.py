@@ -24,6 +24,7 @@ FRONTEND_URL = os.getenv("FRONTEND_URL")
 MAINTENANCE_MODE = os.getenv("MAINTENANCE_MODE", "false").lower() == "true"
 
 app = Flask(__name__)
+app.json.sort_keys = False
 
 init_app(app)
 
