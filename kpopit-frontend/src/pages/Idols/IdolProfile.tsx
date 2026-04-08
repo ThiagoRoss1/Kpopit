@@ -1,7 +1,8 @@
-import { useState, useMemo } from "react";
+import "./IdolProfile.css";
+import { useState, useMemo, useEffect } from "react";
 import { useQuery } from "@tanstack/react-query";
-import { getIdolInfo } from "../../services/api";
-import type { IdolProfileData } from "../../interfaces/gameInterfaces";
+import { getIdolsPage, getIdolInfo } from "../../services/api";
+import type { IdolsPageData, IdolProfileData } from "../../interfaces/gameInterfaces";
 import { Link, useParams } from "react-router";
 import { CircleChevronLeft, MicVocal, SquareUserRound, CalendarDays, Cake, Ruler, MapPinHouse, UserStar } from "lucide-react";
 import { motion } from "framer-motion";
@@ -9,6 +10,8 @@ import InfoItem from "./InfoItem";
 import useCalculateAge from "../../hooks/useCalculateAge";
 import { getNationalityFlag } from "../../utils/getFlags";
 import { useDateLocale } from "../../hooks/useDateLocale";
+import IdolsProfileSearch from "../../components/IdolsSearchBar/IdolsProfileSearch";
+import { useIsMobile } from "../../hooks/useIsDevice";
 
 function IdolProfile() {
 
@@ -17,6 +20,27 @@ function IdolProfile() {
     const { id } = useParams<{ id: string }>();
 
     const [activeTab, setActiveTab] = useState<string>("Profile");
+    const [isFirstLoad, setIsFirstLoad] = useState(true);
+    const [searchTerm, setSearchTerm] = useState("");
+
+    useEffect(() => {
+        const time = setTimeout(() => setIsFirstLoad(false), 2000);
+        return () => clearTimeout(time);
+    }, []);
+
+    const isMobile = useIsMobile();
+
+    const shouldStagger = activeTab === "Profile" && isFirstLoad;
+
+    const {
+        data: idolPageData,
+    } = useQuery<IdolsPageData[]>({
+        queryKey: ["idolsPageData"],
+        queryFn: getIdolsPage,
+        staleTime: 1000 * 60 * 60 * 4,
+        refetchOnWindowFocus: false,
+        enabled: true,
+    })
 
     const {
         data: idolProfileData,
@@ -103,63 +127,77 @@ function IdolProfile() {
                     <div className="flex flex-row w-full justify-start items-center gap-6">
                         <Link
                             to="/idols" 
-                            className="group w-15 h-15 rounded-full flex items-center justify-center hover:scale-105 transition-transform duration-300">
+                            className="group w-14 h-14 sm:w-15 sm:h-15 rounded-full flex items-center justify-center hover:scale-105 transition-transform duration-300">
                             <CircleChevronLeft className="text-white/50 group-hover:text-white w-15 h-15 transition-colors duration-300" size={24} />
                         </Link>
 
-                        <input className="w-92.5 h-15 bg-transparent text-white px-4 border-2 border-white/50 rounded-3xl" />
+                        <IdolsProfileSearch
+                            idolsData={idolPageData || []} 
+                            searchTerm={searchTerm}
+                            onChange={(term) => setSearchTerm(term)}
+                            onChoose={() => {}}
+                        />
+
                     </div>
 
+                    {!isMobile && (
                     <div className="flex flex-row w-full justify-end items-center gap-4">
-                        <span className="font-sans font-bold text-white text-xl">
+                        <span className="font-sans font-bold text-white text-lg sm:text-xl">
                             Wrong info ?
                         </span>
 
                         <Link 
                             to="/contact"
-                            className="font-sans text-white text-xl font-bold bg-neon-pink px-2 py-1 rounded-xl hover:bg-neon-pink/80 transition-colors duration-300">
+                            className="font-sans text-white text-lg sm:text-xl font-bold bg-neon-pink px-2 py-1 rounded-xl hover:bg-neon-pink/80 transition-colors duration-300">
                                 Contact me
                         </Link>
                     </div>
+                    )}
                 </div>
 
                 {/* Idol profile content */}
-                <div className="flex flex-col lg:flex-row w-full h-fit bg-white/20">
+                <div className="idol-profile-enter flex flex-col lg:flex-row w-full h-fit bg-white/0 max-lg:border-b-2 max-lg:border-t-2 lg:border-r-2 lg:border-b-2 border-neon-pink rounded-4xl">
                     {/* Idol card */}
-                    <div className="group flex w-114 h-160 rounded-3xl shrink-0 overflow-hidden border-2 border-white/20">
+                    <div className="group flex md:w-120 md:h-120 lg:w-90 lg:h-160 xl:w-114 xl:h-160 rounded-3xl shrink-0 overflow-hidden max-lg:border-2 lg:border-t-2 lg:border-r-2 border-neon-pink max-lg:mt-4">
                         <img
                             src={`${import.meta.env.VITE_IMAGE_BUCKET_URL}${idolProfile?.image_path}?v=${idolProfile?.image_version}`}
                             alt={`${idolProfile?.artist_name} photo`}
-                            className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-700 transform-gpu"
-                            draggable={false} 
+                            className="idol-photo-enter w-full h-full object-cover group-hover:scale-105 transition-transform duration-700 transform-gpu"
+                            draggable={false}                    
                         />
 
                         {/* Idol name and group */}
-                        <div className="absolute bottom-0 left-0">
-                            <div className="flex flex-col justify-center items-start w-full h-full px-8 py-5 gap-1.5">
-                                <div className="px-2 bg-neon-pink rounded-2xl">
-                                    <span className="font-bold text-white text-lg">
+                        <div className="absolute md:top-80 lg:top-115 lg:bottom-0 lg:left-0">
+                            <div className="names-enter flex flex-col justify-center items-start w-full h-full px-4 py-5 xl:px-8 sm:py-5 gap-1.5">
+                                <div 
+                                    className="names-enter px-2 bg-neon-pink rounded-2xl"
+                                    style={{ animationDelay: "0.8s" }}>
+                                    <span className="font-bold text-white text-base md:text-lg">
                                         {idolCareer?.group_name}
                                     </span>
                                 </div>
 
-                                <span className={`font-sans font-black text-white ${(idolProfile?.artist_name.length ?? 0) >= 10 
-                                && (idolProfile?.artist_name.length ?? 0) < 12 ? 'text-6xl' : 
-                                (idolProfile?.artist_name.length ?? 0) >= 12 && (idolProfile?.artist_name.length ?? 0) <= 14 ? 'text-5xl' :
-                                (idolProfile?.artist_name.length ?? 0) > 14 ? 'text-4xl' : 'text-7xl'}
-                                [text-shadow:4px_4px_2px_rgba(255,51,153,0.8)]`}>
-                                    {idolProfile?.artist_name}
+                                <span 
+                                    className={`main-name-enter font-sans font-black text-white ${(idolProfile?.artist_name.length ?? 0) >= 10 
+                                    && (idolProfile?.artist_name.length ?? 0) < 12 ? 'text-5xl xl:text-6xl' : 
+                                    (idolProfile?.artist_name.length ?? 0) >= 12 && (idolProfile?.artist_name.length ?? 0) <= 14 ? 'text-4xl xl:text-5xl' :
+                                    (idolProfile?.artist_name.length ?? 0) > 14 ? 'text-4xl' : 'text-6xl xl:text-7xl'}
+                                    [text-shadow:4px_4px_2px_rgba(255,51,153,0.8)]`}
+                                    style={{ animationDelay: "1.0s" }}>
+                                        {idolProfile?.artist_name}
                                 </span>
 
-                                <span className="font-sans font-bold text-white text-lg [text-shadow:2px_2px_2px_rgba(0,0,0,0.8),0px_0px_10px_rgba(255,255,255,0.6)]">
-                                    {idolProfile?.real_name}
+                                <span 
+                                    className="names-enter font-sans font-bold text-white text-base md:text-lg [text-shadow:2px_2px_2px_rgba(0,0,0,0.8),0px_0px_10px_rgba(255,255,255,0.6)]"
+                                    style={{ animationDelay: "1.4s" }}>
+                                        {idolProfile?.real_name}
                                 </span>
                             </div>
                         </div>
                     </div>
 
                     {/* Idols details - profile / career */}
-                    <div className="flex flex-col w-full justify-start items-center p-6">
+                    <div className="flex flex-col w-full justify-start items-center p-6 lg:py-6 lg:px-4 xl:p-6">
                         {/* Tab selection */}
                         <div className="flex flex-row w-full overflow-x-auto justify-start items-center gap-6 border-b border-white/20">
                             {["Profile", "Career", "Status"].map((tab) => (
@@ -182,49 +220,60 @@ function IdolProfile() {
 
                         {/* Tab content */}
                         {activeTab === "Profile" && (
-                            <div className="grid grid-cols-1 md:grid-cols-2 w-full h-fit gap-5 mt-5">
+                            <div className="fill-mode-forwards grid grid-cols-1 md:grid-cols-2 w-full h-fit gap-5 mt-5">
                                 {/* Artist Name */}
                                 <InfoItem
+                                    index={1}
                                     icon={MicVocal}
                                     label="Artist Name"
                                     value={idolProfile?.artist_name}
                                     size="small"
+                                    shouldStagger={shouldStagger}
                                 />
 
                                 {/* Real Name */}
                                 <InfoItem
+                                    index={2}
                                     icon={SquareUserRound}
                                     label="Real Name"
                                     value={idolProfile?.real_name} 
                                     size="small"
+                                    shouldStagger={shouldStagger}
                                 />
 
                                 {/* Birth Date */}
                                 <InfoItem
+                                    index={3}
                                     icon={CalendarDays}
                                     label="Birth Date"
                                     value={idolProfile?.birth_date ? formatBirthDate(idolProfile.birth_date) : "N/A"} 
                                     size="small"
+                                    shouldStagger={shouldStagger}
                                 />
 
                                 {/* Age */}
                                 <InfoItem
+                                    index={4}
                                     icon={Cake}
                                     label="Age"
                                     value={age !== 0 ? age.toString() : "N/A"} 
                                     size="small"
+                                    shouldStagger={shouldStagger}
                                 />
 
                                 {/* Height */}
                                 <InfoItem
+                                    index={5}
                                     icon={Ruler}
                                     label="Height"
                                     value={`${idolProfile?.height} cm`} 
                                     size="small"
+                                    shouldStagger={shouldStagger}
                                 />
 
                                 {/* Nationality */}
                                 <InfoItem
+                                    index={6}
                                     icon={MapPinHouse}
                                     label={`${nationalities.length > 1 ? "Nationalities" : "Nationality"}`}
                                     value={nationalities.map((nat, i) => {
@@ -234,15 +283,18 @@ function IdolProfile() {
                                         ) : nat })
                                     }
                                     size="small"
+                                    shouldStagger={shouldStagger}
                                 />
 
                                 {/* Positions */}
                                 <div className="flex md:col-span-2 h-full w-full wrap-anywhere md:truncate">
                                     <InfoItem
+                                        index={7}
                                         icon={UserStar}
                                         label={`${idolProfile?.position.includes(",") ? "Positions" : "Position"}`}
                                         value={idolProfile?.position}
                                         size="large" 
+                                        shouldStagger={shouldStagger}
                                     />
                                 </div>
                             </div>
@@ -325,6 +377,20 @@ function IdolProfile() {
                         )}
                     </div>
                 </div>
+                
+                {isMobile && (
+                     <div className="flex flex-row w-full justify-center items-center gap-4 mt-6">
+                        <span className="font-sans font-bold text-white text-lg sm:text-xl">
+                            Wrong info ?
+                        </span>
+
+                        <Link 
+                            to="/contact"
+                            className="font-sans text-white text-lg sm:text-xl font-bold bg-neon-pink px-2 py-1 rounded-xl hover:bg-neon-pink/80 transition-colors duration-300">
+                                Contact me
+                        </Link>
+                    </div>
+                )}
             </div>
         </div>
     );

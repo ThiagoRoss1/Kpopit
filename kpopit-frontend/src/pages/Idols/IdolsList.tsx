@@ -82,7 +82,7 @@ function IdolsList() {
             <div className="flex flex-col w-full h-full justify-start items-center">
                 {/* Title */}
                 <div className="flex items-center justify-center w-full h-fit mt-10 mb-5">
-                    <h1 className="text-4xl xs:text-5xl [text-shadow:0px_0px_4px_rgba(255,255,255,1)] 
+                    <h1 className="text-4xl xs:text-5xl [text-shadow:3px_3px_4px_rgba(255,51,153,1)] 
                     font-bold text-center text-white">
                         Kpopit Idols
                     </h1>
