@@ -16,7 +16,7 @@ const IdolsCards = (props: IdolsCardsProps) => {
                 <img 
                     src={idolImage} 
                     alt={`${artistName} image`} 
-                    className="w-full h-full object-cover transform-gpu hover:scale-110 transition-transform duration-700" 
+                    className="w-full h-full object-cover transform-gpu hover:scale-110 transition-transform duration-700 " 
                     draggable={false}
                 />
             </div>

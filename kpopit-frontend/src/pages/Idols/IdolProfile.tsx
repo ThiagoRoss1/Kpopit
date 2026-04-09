@@ -3,8 +3,12 @@ import { useState, useMemo, useEffect } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { getIdolsPage, getIdolInfo } from "../../services/api";
 import type { IdolsPageData, IdolProfileData } from "../../interfaces/gameInterfaces";
-import { Link, useParams } from "react-router";
-import { CircleChevronLeft, MicVocal, SquareUserRound, CalendarDays, Cake, Ruler, MapPinHouse, UserStar } from "lucide-react";
+import { Link, useParams, useNavigate } from "react-router";
+import { 
+    CircleChevronLeft, MicVocal, SquareUserRound, CalendarDays, 
+    Cake, Ruler, MapPinHouse, UserStar, Users, MessageSquareHeart, 
+    Building2, Disc3, Sparkles, Building, UsersRound, BadgeCheck
+} from "lucide-react";
 import { motion } from "framer-motion";
 import InfoItem from "./InfoItem";
 import useCalculateAge from "../../hooks/useCalculateAge";
@@ -17,7 +21,8 @@ function IdolProfile() {
 
     const { formatBirthDate } = useDateLocale();
 
-    const { id } = useParams<{ id: string }>();
+    const { id, slug } = useParams<{ id: string; slug: string }>();
+    const navigate = useNavigate();
 
     const [activeTab, setActiveTab] = useState<string>("Profile");
     const [isFirstLoad, setIsFirstLoad] = useState(true);
@@ -27,7 +32,7 @@ function IdolProfile() {
         const time = setTimeout(() => setIsFirstLoad(false), 2000);
         return () => clearTimeout(time);
     }, []);
-
+    
     const isMobile = useIsMobile();
 
     const shouldStagger = activeTab === "Profile" && isFirstLoad;
@@ -56,6 +61,16 @@ function IdolProfile() {
 
     const idolProfile = idolProfileData?.idol_profile;
     const idolCareer = idolProfileData?.idol_career;
+
+    useEffect(() => {
+        if (idolProfile) {
+            const correctSlug = `${idolProfile.artist_name.toLowerCase()}-${idolCareer?.group_name.toLowerCase()}`.trim().replace(/\s+/g, '-');
+
+            if (slug !== correctSlug) {
+                navigate(`/idols/${id}/${correctSlug}`, { replace: true });
+            }
+        }
+    }, [idolProfile, idolCareer, id, slug, navigate]);
 
     const age = useCalculateAge(idolProfile?.birth_date || "");
 
@@ -124,7 +139,7 @@ function IdolProfile() {
         <div className="w-full min-h-full bg-[#0a0a0a]">
             <div className="flex flex-col relative max-w-7xl mx-auto">
                 <div className="flex flex-row w-full mt-7 justify-between items-center mb-8">
-                    <div className="flex flex-row w-full justify-start items-center gap-6">
+                    <div className="flex flex-row w-full justify-center md:justify-start items-center gap-6">
                         <Link
                             to="/idols" 
                             className="group w-14 h-14 sm:w-15 sm:h-15 rounded-full flex items-center justify-center hover:scale-105 transition-transform duration-300">
@@ -136,6 +151,7 @@ function IdolProfile() {
                             searchTerm={searchTerm}
                             onChange={(term) => setSearchTerm(term)}
                             onChoose={() => {}}
+                            excludedIdols={id ? [Number(id)] : []}
                         />
 
                     </div>
@@ -156,19 +172,19 @@ function IdolProfile() {
                 </div>
 
                 {/* Idol profile content */}
-                <div className="idol-profile-enter flex flex-col lg:flex-row w-full h-fit bg-white/0 max-lg:border-b-2 max-lg:border-t-2 lg:border-r-2 lg:border-b-2 border-neon-pink rounded-4xl">
+                <div className="idol-profile-enter justify-center flex max-lg:items-center flex-col lg:flex-row w-full h-fit bg-white/0 max-lg:border-b-2 max-lg:border-t-2 lg:border-r-2 lg:border-b-2 border-neon-pink rounded-4xl">
                     {/* Idol card */}
-                    <div className="group flex md:w-120 md:h-120 lg:w-90 lg:h-160 xl:w-114 xl:h-160 rounded-3xl shrink-0 overflow-hidden max-lg:border-2 lg:border-t-2 lg:border-r-2 border-neon-pink max-lg:mt-4">
+                    <div className="group relative flex zm:w-100 zm:h-120 sm:w-120 sm:h-120 md:w-120 md:h-120 lg:w-90 lg:h-160 xl:w-114 xl:h-160 rounded-3xl shrink-0 overflow-hidden max-zm:border-b-2 zm:border-2 lg:border-0 lg:border-t-2 lg:border-r-2 border-neon-pink max-lg:mt-4">
                         <img
                             src={`${import.meta.env.VITE_IMAGE_BUCKET_URL}${idolProfile?.image_path}?v=${idolProfile?.image_version}`}
                             alt={`${idolProfile?.artist_name} photo`}
-                            className="idol-photo-enter w-full h-full object-cover group-hover:scale-105 transition-transform duration-700 transform-gpu"
+                            className="idol-photo-enter w-full h-full object-cover group-hover:scale-105 transition-transform firefox:duration-500 duration-700 transform-gpu"
                             draggable={false}                    
                         />
 
                         {/* Idol name and group */}
-                        <div className="absolute md:top-80 lg:top-115 lg:bottom-0 lg:left-0">
-                            <div className="names-enter flex flex-col justify-center items-start w-full h-full px-4 py-5 xl:px-8 sm:py-5 gap-1.5">
+                        <div className="absolute lg:top-115 bottom-0 left-0 bg-linear-to-t from-[#0a0a0a] via-[#0a0a0a]/60 to-transparent w-full">
+                            <div className="names-enter flex flex-col justify-center items-start w-full h-full px-4 py-5 xl:px-8 sm:py-5 gap-1.5 whitespace-nowrap">
                                 <div 
                                     className="names-enter px-2 bg-neon-pink rounded-2xl"
                                     style={{ animationDelay: "0.8s" }}>
@@ -179,9 +195,9 @@ function IdolProfile() {
 
                                 <span 
                                     className={`main-name-enter font-sans font-black text-white ${(idolProfile?.artist_name.length ?? 0) >= 10 
-                                    && (idolProfile?.artist_name.length ?? 0) < 12 ? 'text-5xl xl:text-6xl' : 
-                                    (idolProfile?.artist_name.length ?? 0) >= 12 && (idolProfile?.artist_name.length ?? 0) <= 14 ? 'text-4xl xl:text-5xl' :
-                                    (idolProfile?.artist_name.length ?? 0) > 14 ? 'text-4xl' : 'text-6xl xl:text-7xl'}
+                                    && (idolProfile?.artist_name.length ?? 0) < 12 ? 'text-4xl xxs:text-5xl xl:text-6xl' : 
+                                    (idolProfile?.artist_name.length ?? 0) >= 12 && (idolProfile?.artist_name.length ?? 0) <= 14 ? 'text-3xl sxs:text-4xl xl:text-5xl' :
+                                    (idolProfile?.artist_name.length ?? 0) > 14 ? 'text-3xl xxs:text-4xl' : 'text-5xl xxs:text-6xl xl:text-7xl'}
                                     [text-shadow:4px_4px_2px_rgba(255,51,153,0.8)]`}
                                     style={{ animationDelay: "1.0s" }}>
                                         {idolProfile?.artist_name}
@@ -287,7 +303,7 @@ function IdolProfile() {
                                 />
 
                                 {/* Positions */}
-                                <div className="flex md:col-span-2 h-full w-full wrap-anywhere md:truncate">
+                                <div className="flex md:col-span-2 h-full w-full">
                                     <InfoItem
                                         index={7}
                                         icon={UserStar}
@@ -304,7 +320,7 @@ function IdolProfile() {
                             <div className="grid grid-cols-1 md:grid-cols-2 w-full h-fit gap-5 mt-5">
                                 {/* Current Group Name */}
                                 <InfoItem
-                                    icon={MicVocal}
+                                    icon={Users}
                                     label={`${careerData.currentGroupName?.includes(",") ? "Current Groups" : "Current Group"}`}
                                     value={careerData.currentGroupName || idolCareer?.group_name || "N/A"}
                                     size="small" 
@@ -312,7 +328,7 @@ function IdolProfile() {
 
                                 {/* Fandom Name */}
                                 <InfoItem
-                                    icon={MicVocal}
+                                    icon={MessageSquareHeart}
                                     label="Fandom Name"
                                     value={idolCareer?.fandom_name || "N/A"}
                                     size="small" 
@@ -320,7 +336,7 @@ function IdolProfile() {
 
                                 {/* Parent Companies */}
                                 <InfoItem
-                                    icon={MicVocal}
+                                    icon={Building2}
                                     label={`${groupCompaniesData.parentCompanies?.includes(",") ? "Parent Companies" : "Parent Company"}`}
                                     value={groupCompaniesData.parentCompanies}
                                     size="small" 
@@ -328,7 +344,7 @@ function IdolProfile() {
 
                                 {/* Label Companies */}
                                 <InfoItem
-                                    icon={MicVocal}
+                                    icon={Disc3}
                                     label={`${groupCompaniesData.labelCompanies?.includes(",") ? "Labels" : "Label"}`}
                                     value={groupCompaniesData.labelCompanies}
                                     size="small" 
@@ -336,7 +352,7 @@ function IdolProfile() {
 
                                 {/* Debut Year */}
                                 <InfoItem
-                                    icon={MicVocal}
+                                    icon={Sparkles}
                                     label="Debut Year"
                                     value={idolCareer?.idol_debut_year}
                                     size="small" 
@@ -344,16 +360,16 @@ function IdolProfile() {
 
                                 {/* Idol Companies */}
                                 <InfoItem
-                                    icon={MicVocal}
+                                    icon={Building}
                                     label={`${idolCompanies.includes(",") ? "Idol Companies" : "Idol Company"}`}
                                     value={idolCompanies}
                                     size="small" 
                                 />
 
                                 {/* Past Groups */}
-                                <div className="flex md:col-span-2 h-full w-full wrap-anywhere md:truncate">
+                                <div className="flex md:col-span-2 h-full w-full ">
                                     <InfoItem
-                                        icon={MicVocal}
+                                        icon={UsersRound}
                                         label={`${careerData.pastGroups?.includes(",") ? "Past Groups" : "Past Group"}`}
                                         value={careerData.pastGroups}
                                         size="large" 
@@ -365,9 +381,9 @@ function IdolProfile() {
                         {activeTab === "Status" && (
                             <div className="grid grid-cols-1 md:grid-cols-2 w-full h-fit gap-5 mt-5">
                                 {/* Game modes Available */}
-                                <div className="flex md:col-span-2 h-full w-full wrap-anywhere md:truncate">
+                                <div className="flex md:col-span-2 h-full w-full ">
                                     <InfoItem
-                                        icon={MicVocal}
+                                        icon={BadgeCheck}
                                         label="Available in"
                                         value={gameModeLinks}
                                         size="large" 

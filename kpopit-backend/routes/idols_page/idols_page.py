@@ -53,6 +53,10 @@ def get_idols_page_idol(idol_id):
                 idol_repo = IdolRepository(cursor)
 
                 idol_data = idol_repo.fetch_full_idol_data(idol_id)
+
+                if not idol_data:
+                    return jsonify({"error": "Idol not found"}), 404
+                
                 idol_career = idol_repo.fetch_full_idol_career(idol_id)
 
                 group_id = idol_data.get("group_id") if idol_data else None
@@ -66,7 +70,7 @@ def get_idols_page_idol(idol_id):
                     "Classic": True,
                 }
 
-                blurry_check = cursor.execute(
+                cursor.execute(
                     """ 
                         SELECT i.id FROM idols AS i
                         INNER JOIN blurry_mode_data AS bi ON bi.idol_id = i.id
@@ -74,7 +78,7 @@ def get_idols_page_idol(idol_id):
                         AND bi.is_active = TRUE
                     """, (idol_id,))
                 
-                game_modes["Blurry"] = blurry_check.fetchone() is not None 
+                game_modes["Blurry"] = cursor.fetchone() is not None 
 
                 if idol_data:
                     
@@ -121,6 +125,6 @@ def get_idols_page_idol(idol_id):
                 return jsonify(response)
             
             except Exception as e:
-                print(f"Error fetching idol data: {e}")
-                return jsonify({"error": str(e)}), 500
+                print(f"Error fetching idol data: {str(e)}")
+                return jsonify({"error": "Internal Server Error"}), 500
             

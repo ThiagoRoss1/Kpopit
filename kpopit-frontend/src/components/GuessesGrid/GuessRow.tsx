@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from "react";
+import { Link } from "react-router-dom";
 import { motion } from "motion/react";
 import type { GuessResponse } from "../../interfaces/gameInterfaces";
 import ArrowUp from "../../assets/icons/arrow-fat-line-up-fill.svg";
@@ -135,19 +136,22 @@ const GuessRow = (props: GuessRowProps) => {
                     onTouchStart={handleTouchStart}
                     onTouchEnd={handleTouchEnd}   
                     >
-                    <img
-                        src={`${import.meta.env.VITE_IMAGE_BUCKET_URL}${guess.guessed_idol_data.image_path}?v=${guess.guessed_idol_data.image_version}`}
-                        alt="Idol"
-                        className="w-20 h-20 sm:w-28 sm:h-28 object-cover select-none" // object-cover kinda bugged (#TODO - fix later)
-                        draggable={false}
-                        style={{ 
-                        transform: 'translate3d(0, 0, 0)',
-                        backfaceVisibility: 'hidden',      
-                        imageRendering: 'crisp-edges'
-                        }}
-                        loading={isMobile ? "lazy" : "eager"}
-                    />
-                    <span className="font-light absolute bottom-0.5 text-[9px] sm:text-[13px] text-white [text-shadow:0.6px_1.6px_4px_rgba(0,0,0,1),1px_1px_2px_rgba(0,0,0,0.9),2px_2px_4px_rgba(0,0,0,0.8)] px-1">
+                    <Link 
+                        to={`/idols/${guess.guessed_idol_data.idol_id}/${guess.guessed_idol_data.artist_name.toLowerCase()}-${guess.guessed_idol_data.active_group?.toLowerCase()}`.trim().replace(/\s+/g, '-')}>
+                        <img
+                            src={`${import.meta.env.VITE_IMAGE_BUCKET_URL}${guess.guessed_idol_data.image_path}?v=${guess.guessed_idol_data.image_version}`}
+                            alt="Idol"
+                            className="w-20 h-20 sm:w-28 sm:h-28 object-cover select-none"
+                            draggable={false}
+                            style={{ 
+                            transform: 'translate3d(0, 0, 0)',
+                            backfaceVisibility: 'hidden',      
+                            imageRendering: 'crisp-edges'
+                            }}
+                            loading={isMobile ? "lazy" : "eager"}
+                        />
+                    </Link>
+                    <span className="font-light absolute bottom-0.5 text-[9px] sm:text-[13px] text-white [text-shadow:0.6px_1.6px_4px_rgba(0,0,0,1),1px_1px_2px_rgba(0,0,0,0.9),2px_2px_4px_rgba(0,0,0,0.8)] px-1 pointer-events-none">
                         {guess.guessed_idol_data.artist_name}
                         {guess.guessed_idol_data.active_group && guess.guessed_idol_data.active_group !== "Soloist" ? (
                         <span className="font-light text-[9px] sm:text-[13px] text-white [text-shadow:0.6px_1.6px_4px_rgba(0,0,0,1),1px_1px_2px_rgba(0,0,0,0.9),2px_2px_4px_rgba(0,0,0,0.8)]"> ({guess.guessed_idol_data.active_group})</span>

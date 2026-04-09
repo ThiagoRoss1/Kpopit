@@ -116,7 +116,6 @@ function IdolsList() {
                             to={`/idols/${idol.id}/${idol.artist_name.toLowerCase()}-${idol.group_name.toLowerCase()}`.trim().replace(/\s+/g, '-')}
                             className="idol-card-enter" style={{ animationDelay: `${i * 0.02}s` }}>
                         <IdolsCards
-                            key={idol.id}
                             idolImage={`${import.meta.env.VITE_IMAGE_BUCKET_URL}${idol.image_path}?v=${idol.image_version}`}
                             artistName={idol.artist_name}
                             groupName={idol.group_name}
@@ -127,8 +126,10 @@ function IdolsList() {
                 </div>
                 
                 {filteredIdols?.length === 0 && (
-                <div className="absolute top-1/2 text-white font-semibold text-xl [text-shadow:1px_1px_10px_rgba(255,255,255,0.6)]">
-                    No idols found
+                <div className="w-full flex justify-center items-center">
+                    <span className="text-white font-semibold text-xl [text-shadow:1px_1px_10px_rgba(255,255,255,0.6)]">
+                        No idols found
+                    </span>
                 </div>
                 )}
             </div>            

@@ -1,5 +1,6 @@
 import "./guessgrid.css";
 import React, { useState, useEffect, useCallback, useMemo } from "react";
+import { Link } from "react-router-dom";
 import type { FeedbackData, GuessResponse } from "../../../interfaces/gameInterfaces";
 
 interface GuessRowProps {
@@ -50,6 +51,7 @@ const GuessRow = (props: GuessRowProps) => {
     }, [isLatest, isAnimated, idolId, onIdolAnimated]);
 
     return (
+        <Link to={`/idols/${guess.guessed_idol_data.idol_id}/${guess.guessed_idol_data.artist_name}-${guess.guessed_idol_data.active_group}`.trim().replace(/\s+/g, '-').toLowerCase()}>
         <div 
             style={{'--status-bg-color': statusColorRgb} as React.CSSProperties}
             className={`guess-card-color-container ${shouldAnimate ? 'guess-card-color-fade' : ''} flex items-center justify-center 
@@ -78,7 +80,9 @@ const GuessRow = (props: GuessRowProps) => {
                     </span>
                 </div>
             </div>
+            
         </div>
+        </Link>
     )
 }
 

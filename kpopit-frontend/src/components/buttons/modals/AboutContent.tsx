@@ -1,3 +1,5 @@
+import { Link } from "react-router-dom";
+
 const AboutText = () => {
     return (
         <div className="w-full [text-shadow:1.6px_1.6px_3px_rgba(0,0,0,0.5)]">
@@ -5,7 +7,7 @@ const AboutText = () => {
             {/* Introduction Section */}
             <div className="w-full flex flex-col items-start justify-center">
                 <span className="normal-font text-[18px]">KpopIt is a <b>daily idol guessing game</b>.</span>
-                <span className="normal-font text-[18px]">It's a Wordle-inspired project created by <b><a className="text-blue-500" href="https://github.com/ThiagoRoss1">ThiagoRoss1</a></b>, a K-pop fan and Computer Science student.</span>
+                <span className="normal-font text-[18px]">It's a Wordle-inspired project created by <b><a className="text-blue-500 underline" href="https://github.com/ThiagoRoss1">ThiagoRoss1</a></b>, a K-pop fan and Computer Science student.</span>
             </div>
 
             {/* Game data Section */}
@@ -16,8 +18,8 @@ const AboutText = () => {
             </div>
 
             <div className="w-full flex flex-col items-start justify-center border-t border-white mt-2">
-                <span className="normal-font pt-1">Currently, there isn't a dedicated page for game data (idols, groups, etc.).</span>
-                <span className="normal-font">But don't worry! That feature is on the way.</span>
+                <span className="normal-font pt-1">Want to browse the Kpopit database? </span>
+                <span className="normal-font">Check out the Idols, Groups and Companies <b><Link to="/idols" className="text-blue-500 underline">here</Link></b>.</span>
             </div>
 
             {/* Credits Section */}
@@ -31,7 +33,7 @@ const AboutText = () => {
                 <span className="normal-font pt-1">I initially drew inspiration from several word-guessing games and wanted to create something based on that concept.</span>
                 <span className="normal-font">Then I thought — why not make a Wordle-like game for K-pop fans?</span>
                 <span className="normal-font">During development, I discovered other K-pop guessing games and took inspiration from them as well.</span>
-                <span className="normal-font">The games that inspired me the most were <b><a className="text-blue-500" href="https://onepiecedle.net/">Onepiecedle</a></b> and <b><a className="text-blue-500" href="https://www.kpople.net/">Kpople</a></b>.</span>
+                <span className="normal-font">The games that inspired me the most were <b><a className="text-blue-500 underline" href="https://onepiecedle.net/">Onepiecedle</a></b> and <b><a className="text-blue-500 underline" href="https://www.kpople.net/">Kpople</a></b>.</span>
             </div>
 
             {/* Contact Section */}
@@ -42,7 +44,7 @@ const AboutText = () => {
             </div>
 
             <div className="w-full flex flex-col items-start justify-center border-t border-white mt-2">
-                <span className="normal-font pt-1">You can reach me on Twitter <b><a className="text-blue-500" href="https://x.com/TgoRoss1">@TgoRoss1</a></b></span>
+                <span className="normal-font pt-1">You can reach me on Twitter <b><a className="text-blue-500 underline" href="https://x.com/TgoRoss1">@TgoRoss1</a></b></span>
                 <span className="normal-font">Feel free to DM me if you have any questions, feedback, or suggestions!</span>
             </div>
 
@@ -81,7 +83,7 @@ const AboutText = () => {
                     <div className="w-full flex flex-col items-start justify-center">
                         <span className="normal-font pt-1">🟪 Frontend: <b>React</b> + <b>Vite</b> and <b>Typescript</b>.</span>
                         <span className="normal-font">🟦 Backend: <b>Python</b> + <b>Flask</b>.</span>
-                        <span className="normal-font">🟨 Database: <b>SQLite</b>.</span>
+                        <span className="normal-font">🟨 Database: <b>PostgreSQL</b>.</span>
                     </div>
                 </div>
 

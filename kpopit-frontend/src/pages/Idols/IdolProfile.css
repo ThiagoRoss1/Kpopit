@@ -16,7 +16,7 @@
     will-change: transform, opacity;
 }
 
-@keyframes photoEntry {
+@keyframes IdolProfilePhotoEntry {
     from {
         opacity: 0;
         transform: scale(1.2);
@@ -31,8 +31,16 @@
 
 .idol-photo-enter {
     opacity: 0;
-    animation: photoEntry 1.2s ease-out forwards;
+    animation: IdolProfilePhotoEntry 1.2s ease-out forwards;
     will-change: transform, opacity;
+
+    image-rendering: -webkit-optimize-contrast;
+    image-rendering: crisp-edges;
+    image-rendering: auto;
+
+    backface-visibility: hidden;
+    -webkit-backface-visibility: hidden;
+    transform: translateZ(0);
 }
 
 @keyframes idolNamesEntry {

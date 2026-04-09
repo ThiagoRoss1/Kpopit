@@ -2,7 +2,7 @@ import "./IdolsSearchBar.css";
 import { useEffect, useRef, useState } from "react";
 import { useIdolSearch } from "../../hooks/useIdolSearch";
 import type { IdolsPageData } from "../../interfaces/gameInterfaces";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 
 interface IdolsProfileSearchProps {
     idolsData: IdolsPageData[];
@@ -20,6 +20,8 @@ const IdolsProfileSearch = (props: IdolsProfileSearchProps) => {
     const [showList, setShowList] = useState(false);
 
     const containerRef = useRef<HTMLDivElement>(null);
+
+    const navigate = useNavigate();
 
     useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
@@ -50,10 +52,25 @@ const IdolsProfileSearch = (props: IdolsProfileSearchProps) => {
         <div ref={containerRef} className="relative h-full w-full sm:max-w-92.5">
             <div className="flex w-full h-full bg-transparent text-white border-2 border-white/50 rounded-3xl justify-center items-center overflow-hidden">
                 <form 
-                    className="flex flex-col w-full h-full gap-2">
+                    className="flex flex-col w-full h-full gap-2"
+                    onSubmit={(e) => {
+                        e.preventDefault();
+                        if (hasQuery && searchResults.length > 0) {
+                            const firstResult = searchResults[0];
+
+                            onChoose(firstResult);
+
+                            const slug = `${firstResult.id}/${firstResult.artist_name}-${firstResult.group_name}`.trim().replace(/\s+/g, '-').toLowerCase();
+                            navigate(`/idols/${slug}`);
+
+                            onChange?.("");
+                            setShowList(false);
+                        }
+                    }}
+                    >
                     <div className="flex items-center gap-2 w-full h-full">
                         <input 
-                            className="flex max-w-full h-13 sm:w-92.5 sm:h-15 grow placeholder-white/60 px-4 rounded-3xl"
+                            className="flex w-full h-13 sm:w-92.5 sm:h-15 grow placeholder-white/60 px-4 rounded-3xl"
                             type="text"
                             value={searchTerm}
                             onChange={handleInputChange}
@@ -70,13 +87,15 @@ const IdolsProfileSearch = (props: IdolsProfileSearchProps) => {
                         {searchResults.map((idol) => {
                             return (
                                 <Link 
-                                    to={`/idols/${idol.id}/${idol.artist_name}`}
+                                    to={`/idols/${idol.id}/${idol.artist_name}-${idol.group_name}`.trim().replace(/\s+/g, '-').toLowerCase()}
                                     key={idol.id}
-                                    onClick={() => onChoose(idol)}
+                                    onClick={() => {
+                                        onChoose(idol)
+                                        onChange?.("");
+                                        setShowList(false);
+                                    }}
                                 >
                                     <li 
-                                        key={idol.id} 
-                                        onClick={() => onChoose(idol)}
                                         className="group relative px-4 py-3 bg-[#0a0a0a]/80 hover:bg-[#1f1f1f] cursor-pointer 
                                         transition-all duration-300"
                                     >
