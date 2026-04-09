@@ -61,7 +61,7 @@ const ButtonsListMobile = (props: ButtonsListMobileProps) => {
                 ref={containerRef}
             >
                 {/* Home */}
-                <li className="flex w-full max-xxs:h-12 xxs:h-14 xs:h-16 bg-linear-to-r from-[#FF3399] to-[#df4a83] rounded-2xl items-center justify-center text-center text-white">
+                <li className="flex w-full max-xxs:h-12 xxs:h-14 xs:h-16 bg-linear-to-r from-neon-pink to-[#df4a83] rounded-2xl items-center justify-center text-center text-white">
                     <Link
                         to="/" onClick={onClose} className={`flex w-full h-full items-center justify-center rounded-2xl text-center ${text}`}>
                             <span className={text}>Home</span>
@@ -80,7 +80,7 @@ const ButtonsListMobile = (props: ButtonsListMobileProps) => {
                     <ul className={`flex flex-col w-full rounded-2xl gap-2 text-white border-b
                     transition-all duration-300 ease-in-out overflow-hidden transform-gpu
                     ${activeSection === "games"
-                        ? "max-h-150 opacity-100 bg-black/40 border-[#FF3399] mt-4 mb-2 p-4"
+                        ? "max-h-150 opacity-100 bg-black/40 border-neon-pink mt-4 mb-2 p-4"
                         : "max-h-0 opacity-0 mt-0 p-0 border-transparent"}
                     `}>
                         {GAMES_LINKS.map((game) => {
@@ -107,7 +107,7 @@ const ButtonsListMobile = (props: ButtonsListMobileProps) => {
                             return (
                                 <li 
                                     key={game.path}
-                                    className={`flex w-full max-xxs:h-12 xxs:h-14 xs:h-16 rounded-2xl items-center justify-center px-4 gap-3 hover:bg-[#FF3399]/80 transition-colors ${
+                                    className={`flex w-full max-xxs:h-12 xxs:h-14 xs:h-16 rounded-2xl items-center justify-center px-4 gap-3 hover:bg-neon-pink/80 transition-colors ${
                                         isPath ? "bg-white/10" : "bg-black/0"
                                     }`}
                                 >
@@ -125,7 +125,7 @@ const ButtonsListMobile = (props: ButtonsListMobileProps) => {
                                         )}
                                         <span className={text}>
                                             {isPath && (
-                                                <span className="text-[#FF3399] [text-shadow:1px_1px_10px_#FF3399,1px_1px_10px_#FF3399] pr-1">• </span>
+                                                <span className="text-neon-pink [text-shadow:1px_1px_10px_#FF3399,1px_1px_10px_#FF3399] pr-1">• </span>
                                             )}
                                             <span className="[text-shadow:1.2px_1.6px_2.0px_rgba(255,51,153,1)]">{game.label}</span>
                                         </span>
@@ -149,7 +149,7 @@ const ButtonsListMobile = (props: ButtonsListMobileProps) => {
                     <ul className={`flex flex-col w-full rounded-2xl gap-2 text-white border-b
                         transition-all duration-300 ease-in-out overflow-hidden transform-gpu
                         ${activeSection === "idols" 
-                            ? "max-h-150 opacity-100 border-[#FF3399] mt-2 mb-2 p-2"
+                            ? "max-h-150 opacity-100 border-neon-pink mt-2 mb-2 p-2"
                             : "max-h-0 opacity-0 mt-0 mb-0 p-0 border-transparent"}
                     `}>
                         {IDOLS_LINKS.map((idol) => {
@@ -176,7 +176,7 @@ const ButtonsListMobile = (props: ButtonsListMobileProps) => {
                             return (
                                 <li 
                                     key={idol.path}
-                                    className={`flex w-full max-xxs:h-12 xxs:h-14 xs:h-16 rounded-2xl items-center px-4 gap-3 hover:bg-[#FF3399]/80 transition-colors ${
+                                    className={`flex w-full max-xxs:h-12 xxs:h-14 xs:h-16 rounded-2xl items-center px-4 gap-3 hover:bg-neon-pink/80 transition-colors ${
                                         isPath ? "bg-white/10" : "bg-black/80"
                                     }`}
                                 >
@@ -194,7 +194,7 @@ const ButtonsListMobile = (props: ButtonsListMobileProps) => {
                                         )}
                                         <span className={text}>
                                             {isPath && (
-                                                <span className="text-[#FF3399] [text-shadow:1px_1px_10px_#FF3399,1px_1px_10px_#FF3399] pr-1">• </span>
+                                                <span className="text-neon-pink [text-shadow:1px_1px_10px_#FF3399,1px_1px_10px_#FF3399] pr-1">• </span>
                                             )}
                                             <span className="[text-shadow:1.2px_1.6px_2.0px_rgba(255,51,153,1)]">{idol.label}</span>
                                         </span>
@@ -210,7 +210,7 @@ const ButtonsListMobile = (props: ButtonsListMobileProps) => {
                     <Link
                         to="/contact" 
                         onClick={onClose} 
-                        className={`flex w-full max-xxs:h-12 xxs:h-14 xs:h-16 bg-linear-to-r from-[#FF3399] to-[#df4a83] rounded-2xl items-center justify-center text-center ${text}`}>
+                        className={`flex w-full max-xxs:h-12 xxs:h-14 xs:h-16 bg-linear-to-r from-neon-pink to-[#df4a83] rounded-2xl items-center justify-center text-center ${text}`}>
                             <span className={text}>Contact</span>
                     </Link>
                 </li>

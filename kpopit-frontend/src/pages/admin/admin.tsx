@@ -1,4 +1,3 @@
-import "./admin.css";
 import { useState } from "react";
 import { Navigate } from "react-router";
 import { addNewIdol } from "../../services/api";
@@ -91,7 +90,7 @@ const Admin = () => {
     
     if (!isAuthenticated) {
         return (
-            <div className="w-full h-screen flex flex-col justify-center items-center bg-black text-white">
+            <div className="w-full h-screen flex flex-col justify-center items-center text-white">
                 <h1>Admin Login</h1>
                 <input 
                 type="password"

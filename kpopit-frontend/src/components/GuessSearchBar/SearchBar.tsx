@@ -302,7 +302,7 @@ const SearchBar = (props: SearchBarProps) => {
                     transition={{ type: "spring", stiffness: 300, damping: 25 }}/>
                   )}
                   <p className="relative">
-                  <span className=" font-normal text-base">
+                  <span className="font-normal text-base">
                     {`${suggestion.artist_name}`}
                   </span> <span className="text-base text-white">
                     {`(${suggestion.active_group ? suggestion.active_group : "Soloist"})`}

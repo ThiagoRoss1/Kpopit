@@ -460,6 +460,7 @@ function ClassicMode() {
             guesses={guesses}
             attempts={attempts}
             nextReset={useResetTimer}
+            yesterdayIdolId={yesterday.data?.past_idol_id ?? 0}
             yesterdayIdol={yesterdayArtist || "Unknown"}
             yesterdayIdolGroup={yesterdayArtistGroup}
             yesterdayIdolImage={yesterdayIdolImage}
@@ -479,9 +480,13 @@ function ClassicMode() {
         <span className="font-semibold max-xxs:text-[14px] xxs:text-[15px] xs:text-base sm:text-[18px] leading-tight">
           <span className="text-white">
             Yesterday's idol was
-          </span> <span className="text-[#b43777] [text-shadow:1.2px_1.2px_4px_rgba(0,0,0,1.8),0_0_12px_rgba(180,55,119,1.0)] brightness-105">
-            {yesterdayArtist ? `${yesterdayArtist} (${yesterdayArtistGroup && yesterdayArtistGroup.length > 0 ? yesterdayArtistGroup : "Soloist"})` : "Unknown"}
-          </span>
+          </span> <Link 
+                  to={`/idols/${yesterday.data?.past_idol_id}/${yesterdayArtist}-${yesterdayArtistGroup}`.trim().replace(/\s+/g, '-').toLowerCase()}>
+              <span 
+                  className="text-[#b43777] [text-shadow:1.2px_1.2px_4px_rgba(0,0,0,1.8),0_0_12px_rgba(180,55,119,1.0)] brightness-105 underline hover:brightness-125 transition-all duration-300">
+                  {yesterdayArtist ? `${yesterdayArtist} (${yesterdayArtistGroup && yesterdayArtistGroup.length > 0 ? yesterdayArtistGroup : "Soloist"})` : "Unknown"}
+              </span>
+          </Link>
         </span>
       </div>
       )}

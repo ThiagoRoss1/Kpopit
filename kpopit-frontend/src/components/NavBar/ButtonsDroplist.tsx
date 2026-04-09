@@ -42,7 +42,7 @@ const ButtonsDroplist = (props: ButtonsDroplistProps) => {
                                     <div
                                         key={item.path}
                                         className={`relative flex w-full items-center text-white/40 max-xxs:text-[14px] xxs:text-[14px] xs:text-[14px] sm:text-base rounded-xl h-15 sm:h-17 px-2 sm:px-4 gap-4 sm:gap-4 
-                                        hover:bg-[#FF3399]/20 cursor-default select-none ${dropdownClassName || ""}
+                                        hover:bg-neon-pink/20 cursor-default select-none ${dropdownClassName || ""}
                                         ${isPath ? "bg-white/10" : ""}`}>
                                             {item.icon && <img src={item.icon} alt={`${item.label} icon`} className="grayscale w-9 h-9 sm:w-10 sm:h-10" />}
                                             <span className="italic">{item.label}</span>
@@ -54,7 +54,7 @@ const ButtonsDroplist = (props: ButtonsDroplistProps) => {
                                 <Link 
                                     key={item.path}
                                     to={item.path}
-                                    className={`relative flex w-full items-center text-white max-xxs:text-[14px] xxs:text-base xs:text-base xm:text-lg sm:text-xl rounded-xl h-15 sm:h-17 px-4 gap-2 hover:bg-[#FF3399]/80 
+                                    className={`relative flex w-full items-center text-white max-xxs:text-[14px] xxs:text-base xs:text-base xm:text-lg sm:text-xl rounded-xl h-15 sm:h-17 px-4 gap-2 hover:bg-neon-pink/80 
                                     transition-[flex,background-color,transform]  ${dropdownClassName || ""} 
                                     ${isPath ? "bg-white/10" : ""}`}
                                     onClick={() => setIsOpen(false)}
@@ -62,7 +62,7 @@ const ButtonsDroplist = (props: ButtonsDroplistProps) => {
                                     {item.icon && <img src={item.icon} alt={`${item.label} icon`} className="w-8 h-8 sm:w-10 sm:h-10" />}
                                     <span className="font-normal">
                                         {isPath && (
-                                        <span className="text-[#FF3399] [text-shadow:1px_1px_10px_#FF3399,1px_1px_10px_#FF3399] pr-1">• </span>
+                                        <span className="text-neon-pink [text-shadow:1px_1px_10px_#FF3399,1px_1px_10px_#FF3399] pr-1">• </span>
                                         )}
                                             <span className="[text-shadow:1.2px_1.6px_2.0px_rgba(255,51,153,1)]">{item.label}</span>
                                     </span>

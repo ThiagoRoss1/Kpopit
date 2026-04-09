@@ -154,3 +154,65 @@ export interface BlurryGameData extends GameData {
   blur_image_path: string;
   blur_image_version: string;
 }
+
+// Specific interface for Idols Page
+export interface IdolsPageData extends Pick<IdolListItem,
+  "id" | "artist_name" | "image_path" | "image_version" > {
+
+    // New fields specifically for the idols page
+    "company_id": number;
+    "company_name": string;
+    "group_id": number;
+    "group_name": string;
+    "is_published": boolean;
+    "all_groups": string;
+  }
+  
+export interface IdolsPageIdolInfo extends Pick<IdolListItem,
+  "artist_name" | "image_path" | "image_version" | "gender" | "nationality" | "idol_debut_year" | "birth_date" | "height" | "position" | "member_count"> {
+
+    "idol_id": number;
+  } 
+
+export interface GameModes {
+  Classic: boolean;
+  Blurry: boolean;
+}
+
+export interface Company {
+  name: string;
+  parent_company_id: number | null;
+  role: string;
+}
+
+export interface CareerHistory {
+  group_name: string;
+  start_year: number;
+  end_year: number | null;
+  is_active: boolean;
+}
+  
+export interface IdolProfileData {
+  idol_profile: {
+    idol_id: number;
+    artist_name: string;
+    real_name: string;
+    birth_date: string;
+    height: number;
+    nationality: string;
+    position: string;
+    image_path: string;
+    image_version: string;
+  };
+  idol_career: {
+    fandom_name: string | null;
+    group_name: string;
+    idol_debut_year: number;
+    group_companies: Company[];
+    idol_companies: Company[];
+    idol_career: CareerHistory[];
+  };
+  game_info: {
+    game_modes_available: GameModes;
+  };
+}

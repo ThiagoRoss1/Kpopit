@@ -5,8 +5,8 @@ import ButtonsListMobile from "./ButtonsListMobile";
 import { GAMES_LINKS, IDOLS_LINKS } from "./navigation";
 import { Menu, X } from "lucide-react";
 
-export type GameMode = "classic" | "blurry" | "popIt";
-const MODES: GameMode[] = ["classic", "blurry"];
+export type PageName = "classic" | "blurry" | "idols" | "popIt";
+const MODES: PageName[] = ["classic", "blurry", "idols"];
 
 
 const NavBar = () => {
@@ -17,7 +17,7 @@ const NavBar = () => {
     const [isMobileMenuOpen, setIsMobileMenuOpen] = useState<boolean>(false);
 
     return (
-        <nav className="sticky top-0 z-100 w-full h-12 sm:h-15 border-b border-[#FF3399]/40 bg-black/50 backdrop-blur-xl px-2 sm:px-4">
+        <nav className="sticky top-0 z-100 w-full h-12 sm:h-15 border-b border-neon-pink/40 bg-black/50 backdrop-blur-xl px-2 sm:px-4">
             <div className="max-w-screen-2xl mx-auto h-full flex items-center justify-between">
 
                 {/* Logo - Left part */}
@@ -33,7 +33,7 @@ const NavBar = () => {
                             draggable={false}
                         />
 
-                        <span className="text-[#FF3399] max-xxs:text-[12px] xxs:text-[14px] xs:text-base xm:text-lg sm:text-xl whitespace-nowrap [text-shadow:2px_2px_0px_rgba(0,0,0,0.5),0px_0px_6px_#FF3399] transform-gpu">• {currentPage}</span>
+                        <span className="text-neon-pink max-xxs:text-[12px] xxs:text-[14px] xs:text-base xm:text-lg sm:text-xl whitespace-nowrap [text-shadow:2px_2px_0px_rgba(0,0,0,0.5),0px_0px_6px_#FF3399] transform-gpu">• {currentPage}</span>
                     </Link>
                 </div>
 

@@ -21,9 +21,8 @@ export const GAMES_LINKS: DropLink[] = [
 
 export const IDOLS_LINKS: DropLink[] = [
     {
-        label: "All Idols - Soon",
+        label: "All Idols",
         path: "/idols",
         icon: "/kpopit-icon-svg.svg",
-        isWip: true,
     }
 ]

@@ -134,6 +134,7 @@ function BlurryMode() {
 
     const yesterdayIdolImage = yesterdayIdol.data?.image_path ?? null;
     const yesterdayIdolImageVersion = yesterdayIdol.data?.image_version ?? null;
+    const yesterdayIdolGroup = yesterdayIdol.data?.groups ?? null; 
     
     useEffect(() => {
         if (!blurryGameData?.server_date) return;
@@ -516,9 +517,12 @@ function BlurryMode() {
                 <span className="font-semibold max-xxs:text-[14px] xxs:text-[15px] xs:text-base sm:text-[18px] leading-tight">
                 <span className="text-white">
                     Yesterday's idol was
-                </span> <span className="text-[#b43777] [text-shadow:1.2px_1.2px_4px_rgba(0,0,0,1.8),0_0_12px_rgba(180,55,119,1.0)] brightness-105">
-                    {yesterdayArtist ? `${yesterdayArtist}` : "Unknown"}
-                </span>
+                </span> <Link 
+                        to={`/idols/${yesterdayIdol.data?.past_idol_id}/${yesterdayArtist}-${yesterdayIdolGroup}`.trim().replace(/\s+/g, '-').toLowerCase()}>
+                        <span className="text-[#b43777] [text-shadow:1.2px_1.2px_4px_rgba(0,0,0,1.8),0_0_12px_rgba(180,55,119,1.0)] brightness-105 underline hover:brightness-125 transition-all duration-300">
+                            {yesterdayArtist ? `${yesterdayArtist}` : "Unknown"}
+                        </span>
+                    </Link>
                 </span>
             </div>
             )}
@@ -539,7 +543,9 @@ function BlurryMode() {
                         attempts={attempts}
                         idol_blur_image={blurryGameData.blur_image_path}
                         idol_blur_image_version={blurryGameData.blur_image_version}
+                        yesterdayIdolId={yesterdayIdol.data?.past_idol_id || 0}
                         yesterdayIdol={yesterdayArtist || "Unknown"}
+                        yesterdayIdolGroup={yesterdayIdolGroup}
                         yesterdayIdolImage={yesterdayIdolImage}
                         yesterdayIdolImageVersion={yesterdayIdolImageVersion}
                         userPosition={userPositionData}
