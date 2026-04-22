@@ -1,5 +1,6 @@
 import os
-from flask import Blueprint, jsonify, request
+from flask import Blueprint, jsonify, request, g
+from utils.auth_decorators import optional_auth
 from dotenv import load_dotenv
 from services.get_db import get_db, get_idol_repo
 from services.idol_service import IdolService
@@ -64,19 +65,19 @@ def get_daily_blurry_idol():
         cursor.close()
 
 @blurry_bp.route("/game/blurry/guess", methods=["POST"])
+@optional_auth
 def guess_blurry_idol():
     """Get idol guess and return comparison data as JSON"""
 
     data = request.get_json()
     guessed_idol_id = data.get("guessed_idol_id")
     answer_id = data.get("answer_id")
-    user_token = data.get("user_token")
     current_attempt = data.get("current_attempt")
     game_date = data.get("game_date")
     analytics_data = get_analytics_data()
     country_name, flag = get_country_name(analytics_data.get("country"))
     analytics_data['country'] = f"{country_name} {flag}"
-    
+
     # Start db connection
     connect = get_db()
     cursor = connect.cursor()
@@ -87,23 +88,41 @@ def guess_blurry_idol():
 
         if game_date != today:
             return jsonify({"error": "Game date mismatch"}), 400
-        
+
         if not guessed_idol_id or not answer_id:
             return jsonify({"error": "Missing guessed_idol_id or answer_id"}), 400
-        
-        if not user_token:
-            return jsonify({"error": "Missing user_token"}), 400
-        
+
         repository = get_idol_repo()
         game_service = GameService(connect, repository)
 
-        cursor.execute("""SELECT id FROM users WHERE token = %s""", (user_token,))
-        user_row = cursor.fetchone()
+        # Resolve user identity — JWT (header) takes priority over body token
+        auth = g.auth
 
-        if not user_row:
-            return jsonify({"error": "Invalid user token"}), 400
-        
-        user_id = user_row["id"]
+        if auth["source"] == "jwt":
+            user_id = auth["user_id"]
+
+        elif auth["source"] == "anonymous":
+            cursor.execute("SELECT id FROM users WHERE token = %s", (auth["token"],))
+            user_row = cursor.fetchone()
+
+            if not user_row:
+                return jsonify({"error": "Invalid user token"}), 400
+            user_id = user_row["id"]
+
+        else:
+            # Legacy: body token for clients that don't set Authorization header
+            user_token = data.get("user_token")
+
+            if not user_token:
+                return jsonify({"error": "Missing user_token"}), 400
+            
+            cursor.execute("SELECT id FROM users WHERE token = %s", (user_token,))
+            user_row = cursor.fetchone()
+
+            if not user_row:
+                return jsonify({"error": "Invalid user token"}), 400
+            
+            user_id = user_row["id"]
 
         guessed_idol = dict(repository.fetch_full_idol_data(guessed_idol_id))
         answer_data = dict(repository.fetch_full_idol_data(answer_id))

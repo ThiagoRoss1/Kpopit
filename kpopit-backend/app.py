@@ -14,6 +14,7 @@ from routes.general import general_bp
 from routes.ranking import ranking_bp
 from routes.session_info import session_info
 from routes.idols_page.idols_page import idols_page_bp
+from routes.auth import auth_bp
 load_dotenv()
 
 # Global variables
@@ -22,6 +23,9 @@ ADMIN_ENABLED = os.getenv("ADMIN_ENABLED", "false").lower() == "true"
 FLASK_ENV = os.getenv("FLASK_ENV", "production").lower()
 FRONTEND_URL = os.getenv("FRONTEND_URL")
 MAINTENANCE_MODE = os.getenv("MAINTENANCE_MODE", "false").lower() == "true"
+JWT_SECRET_KEY = os.getenv("JWT_SECRET_KEY")
+if not JWT_SECRET_KEY or len(JWT_SECRET_KEY) < 32:
+    raise RuntimeError("JWT_SECRET_KEY not set in environment variables (min 32 chars).")
 
 app = Flask(__name__)
 app.json.sort_keys = False
@@ -29,12 +33,12 @@ app.json.sort_keys = False
 init_app(app)
 
 if FLASK_ENV == "development":
-    CORS(app, resources={r"/*": {"origins": "*"}})  # Allow all origins for static files
+    CORS(app, resources={r"/*": {"origins": "*"}}, supports_credentials=True)
 
 else:
     urls_string = FRONTEND_URL if FRONTEND_URL else ""
     frontend_urls = urls_string.split(",")
-    CORS(app, resources={r"/*": {"origins": frontend_urls}}) # Restrict to frontend URL
+    CORS(app, resources={r"/*": {"origins": frontend_urls}}, supports_credentials=True)
 
 @app.before_request
 def check_maintenance_mode():
@@ -82,6 +86,9 @@ app.register_blueprint(ranking_bp, url_prefix="/api")
 
 # Idols page blueprint - Register idols page route
 app.register_blueprint(idols_page_bp, url_prefix="/api")
+
+# Auth blueprint - Register, login, logout, refresh, me, claim routes
+app.register_blueprint(auth_bp, url_prefix="/api")
 
 # Repository loading hook (optional future enhancement):
 # If needed, a before_request handler can be added here to attach
