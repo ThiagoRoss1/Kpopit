@@ -1,6 +1,7 @@
 import os
 from flask import Flask, request, g, jsonify
 from flask_cors import CORS
+from werkzeug.middleware.proxy_fix import ProxyFix
 from routes.admin import admin_bp
 from routes.tasks import tasks_bp
 from dotenv import load_dotenv
@@ -15,6 +16,8 @@ from routes.ranking import ranking_bp
 from routes.session_info import session_info
 from routes.idols_page.idols_page import idols_page_bp
 from routes.auth import auth_bp
+from utils.rate_limiter import limiter
+from flask_limiter import RateLimitExceeded
 load_dotenv()
 
 # Global variables
@@ -30,15 +33,31 @@ if not JWT_SECRET_KEY or len(JWT_SECRET_KEY) < 32:
 app = Flask(__name__)
 app.json.sort_keys = False
 
+# Trust one proxy hop (Railway/Render/Vercel) so request.remote_addr returns
+# the real client IP. Required for Flask-Limiter to key buckets per user
+# rather than per platform proxy.
+app.wsgi_app = ProxyFix(app.wsgi_app, x_for=1, x_proto=1, x_host=1)
+
 init_app(app)
+limiter.init_app(app)
+
+@app.errorhandler(RateLimitExceeded)
+def handle_rate_limit_exceeded(e):
+    response = jsonify({"error": "Too many requests. Please try again later."})
+    response.status_code = 429
+    # Preserve Retry-After from Flask-Limiter so clients can back off correctly.
+    for name, value in e.get_headers():
+        if name.lower() == "retry-after":
+            response.headers[name] = value
+    return response
 
 if FLASK_ENV == "development":
-    CORS(app, resources={r"/*": {"origins": "*"}}, supports_credentials=True)
+    CORS(app, resources={r"/*": {"origins": "*"}}, supports_credentials=True, expose_headers=["Retry-After"])
 
 else:
     urls_string = FRONTEND_URL if FRONTEND_URL else ""
     frontend_urls = urls_string.split(",")
-    CORS(app, resources={r"/*": {"origins": frontend_urls}}, supports_credentials=True)
+    CORS(app, resources={r"/*": {"origins": frontend_urls}}, supports_credentials=True, expose_headers=["Retry-After"])
 
 @app.before_request
 def check_maintenance_mode():

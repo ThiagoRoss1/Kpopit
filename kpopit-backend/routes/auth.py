@@ -1,4 +1,5 @@
 import os
+import logging
 from flask import Blueprint, request, jsonify, make_response, g
 from dotenv import load_dotenv
 from services.get_db import get_db
@@ -8,8 +9,11 @@ from utils.auth_decorators import require_auth
 from utils.auth_helpers import (
     detect_user, validate_username, validate_email, validate_password
 )
+from utils.rate_limiter import limiter
 
 load_dotenv()
+
+logger = logging.getLogger(__name__)
 
 FLASK_ENV = os.getenv("FLASK_ENV", "production").lower()
 IS_PRODUCTION = FLASK_ENV != "development"
@@ -25,7 +29,7 @@ def _set_refresh_cookie(response, raw_refresh_token: str) -> None:
         httponly=True,
         secure=IS_PRODUCTION,
         samesite="Strict",
-        path="/api/auth/refresh",
+        path="/api/auth",
     )
 
 def _clear_refresh_cookie(response) -> None:
@@ -36,12 +40,13 @@ def _clear_refresh_cookie(response) -> None:
         httponly=True,
         secure=IS_PRODUCTION,
         samesite="Strict",
-        path="/api/auth/refresh",
+        path="/api/auth",
     )
 
 
 # POST /api/auth/register
 @auth_bp.route("/auth/register", methods=["POST"])
+@limiter.limit("5 per minute; 20 per hour")
 def register():
     data = request.get_json() or {}
     username = (data.get("username") or "").strip()
@@ -71,11 +76,12 @@ def register():
         if msg == "email_taken":
             return jsonify({"error": "Email is already registered"}), 409
         return jsonify({"error": "Registration failed"}), 400
-    
-    except Exception as e:
+
+    except Exception:
         connect.rollback()
-        return jsonify({"error": str(e)}), 500
-    
+        logger.exception("Unexpected error during registration")
+        return jsonify({"error": "Registration failed"}), 500
+
     finally:
         cursor.close()
 
@@ -86,6 +92,7 @@ def register():
 
 # POST /api/auth/login
 @auth_bp.route("/auth/login", methods=["POST"])
+@limiter.limit("10 per minute; 60 per hour")
 def login():
     data = request.get_json() or {}
     identifier = (data.get("identifier") or "").strip()
@@ -107,13 +114,14 @@ def login():
 
         if str(e) == "invalid_credentials":
             return jsonify({"error": "Invalid username, email or password"}), 401
-        
+
         return jsonify({"error": "Login failed"}), 400
-    
-    except Exception as e:
+
+    except Exception:
         connect.rollback()
-        return jsonify({"error": str(e)}), 500
-    
+        logger.exception("Unexpected error during login")
+        return jsonify({"error": "Login failed"}), 500
+
     finally:
         cursor.close()
 
@@ -146,6 +154,7 @@ def logout():
 
 # POST /api/auth/refresh
 @auth_bp.route("/auth/refresh", methods=["POST"])
+@limiter.limit("30 per minute")
 def refresh():
     """
     Issues a new access token from the httpOnly refresh cookie.
@@ -167,18 +176,19 @@ def refresh():
         if "new_refresh_token" in result:
             _set_refresh_cookie(response, result["new_refresh_token"])
 
-    except ValueError as e:
+    except ValueError:
         connect.rollback()
         resp = make_response(jsonify({"error": "Session expired. Please log in again."}), 401)
-
-        if str(e) in ("token_revoked", "token_expired"):
-            _clear_refresh_cookie(resp)
+        _clear_refresh_cookie(resp)
         return resp
-    
-    except Exception as e:
+
+    except Exception:
         connect.rollback()
-        return jsonify({"error": str(e)}), 500
-    
+        logger.exception("Unexpected error during token refresh")
+        resp = make_response(jsonify({"error": "Could not refresh session"}), 500)
+        _clear_refresh_cookie(resp)
+        return resp
+
     finally:
         cursor.close()
 
@@ -215,15 +225,17 @@ def me():
             }
         }), 200
 
-    except Exception as e:
-        return jsonify({"error": str(e)}), 500
-    
+    except Exception:
+        logger.exception("Unexpected error resolving current user")
+        return jsonify({"error": "Could not load user"}), 500
+
     finally:
         cursor.close()
 
 
 # POST /api/auth/claim - Create an authenticated account
 @auth_bp.route("/auth/claim", methods=["POST"])
+@limiter.limit("5 per minute; 20 per hour")
 def claim():
     """
     Convert an existing anonymous user (UUID in Authorization header)
@@ -269,11 +281,12 @@ def claim():
         msg, code = error_map.get(str(e), ("Claim failed", 400))
 
         return jsonify({"error": msg}), code
-    
-    except Exception as e:
+
+    except Exception:
         connect.rollback()
-        return jsonify({"error": str(e)}), 500
-    
+        logger.exception("Unexpected error during account claim")
+        return jsonify({"error": "Claim failed"}), 500
+
     finally:
         cursor.close()
 
@@ -293,6 +306,7 @@ def claim():
 # POST /api/auth/forgot
 # ------------------------------------------------------------------ #
 @auth_bp.route("/auth/forgot", methods=["POST"])
+@limiter.limit("3 per minute; 10 per hour")
 def forgot_password():
     """
     Always returns 200 regardless of whether the email is registered.
@@ -314,10 +328,10 @@ def forgot_password():
         if raw_token and FLASK_ENV == "development":
             print(f"[DEV] Password reset token for {email}: {raw_token}")
 
-    except Exception as e:
+    except Exception:
         connect.rollback()
-        return jsonify({"error": str(e)}), 500
-    
+        logger.exception("Unexpected error initiating password reset")
+
     finally:
         cursor.close()
 
@@ -325,6 +339,7 @@ def forgot_password():
 
 # POST /api/auth/reset
 @auth_bp.route("/auth/reset", methods=["POST"])
+@limiter.limit("5 per minute; 20 per hour")
 def reset_password():
     data = request.get_json() or {}
     raw_token = data.get("token", "")
@@ -351,9 +366,10 @@ def reset_password():
         }
         msg, code = error_map.get(str(e), ("Password reset failed", 400))
         return jsonify({"error": msg}), code
-    except Exception as e:
+    except Exception:
         connect.rollback()
-        return jsonify({"error": str(e)}), 500
+        logger.exception("Unexpected error completing password reset")
+        return jsonify({"error": "Password reset failed"}), 500
     finally:
         cursor.close()
 

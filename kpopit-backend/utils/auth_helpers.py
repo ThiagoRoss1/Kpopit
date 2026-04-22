@@ -127,4 +127,8 @@ def validate_password(password: str) -> str | None:
     """Returns None if valid, error string otherwise."""
     if not password or len(password) < 8:
         return "Password must be at least 8 characters."
+    # bcrypt runs a cost-12 hash on the input; cap length so an unauthenticated
+    # attacker cannot trigger multi-second hashes via giant password payloads.
+    if len(password) > 128:
+        return "Password must be at most 128 characters."
     return None
