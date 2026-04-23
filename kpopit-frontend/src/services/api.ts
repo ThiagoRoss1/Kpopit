@@ -1,6 +1,7 @@
 import axios from 'axios';
 import type { AddIdolRequest, CompleteGuessTrafficRequest } from '../interfaces/gameInterfaces';
 import { decryptToken } from '../utils/tokenEncryption';
+import { setAccessToken, getAccessToken, clearAccessToken } from './tokenStore';
 // Api instance with base URL
 const api = axios.create({
     baseURL: `${import.meta.env.VITE_API_URL}/api`,
@@ -15,7 +16,26 @@ const MODES: Record<string, number> = {
 // Response interceptor to handle invalid user token globally
 api.interceptors.response.use(
     (response) => response,
-    (error) => {
+    async (error) => {
+        const original = error.config;
+
+        const isAuthRoute = original.url?.includes('/auth/login') ||
+                            original.url?.includes('/auth/register') ||
+                            original.url?.includes('/auth/claim') || 
+                            original.url?.includes('/auth/refresh');
+
+        if (error.response?.status === 401 && !original._retry && !isAuthRoute) {
+            original._retry = true;
+            try {
+                const data = await refreshToken();
+                setAccessToken(data.access_token);
+                original.headers['Authorization'] = `Bearer ${data.access_token}`;
+                return api(original);
+            } catch {
+                clearAccessToken();
+                if (getAccessToken()) window.location.reload();
+            }
+        }
         if (error.response?.status === 400) {
             if (error.response?.data?.error === 'Invalid user token') {
                 console.warn("Invalid user token detected. Removing from localStorage.");
@@ -173,5 +193,47 @@ export const getIdolsPage = async () => {
 // Get entire idol data for a specific idol
 export const getIdolInfo = async (idol_id: number) => {
     const response = await api.get(`/idols-page/${idol_id}`);
+    return response.data;
+}
+
+// Register user account
+export const registerUser = async (username: string, email: string | undefined, password: string) => {
+    const response = await api.post('/auth/register', {
+        username,
+        email,
+        password
+    });
+    return response.data;
+}
+
+export const claimUser = async (token: string, username: string, email: string | undefined, password: string) => {
+    const response = await api.post('/auth/claim', {
+        username,
+        email,
+        password
+    },
+        { headers: { 'Authorization': token} }
+    );
+    return response.data;
+}
+
+export const loginUser = async (identifier: string, password: string, rememberMe: boolean) => {
+    const response = await api.post('/auth/login', {
+        identifier,
+        password,
+        remember_me: rememberMe
+    });
+    return response.data;
+}
+
+export const logoutUser = async () => {
+    const response = await api.post('/auth/logout');
+    return response.data;
+}
+
+export const refreshToken = async () => {
+    const response = await api.post('/auth/refresh', {}, {
+        withCredentials: true
+    });
     return response.data;
 }

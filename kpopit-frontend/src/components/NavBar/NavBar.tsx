@@ -5,14 +5,14 @@ import ButtonsListMobile from "./ButtonsListMobile";
 import { GAMES_LINKS, IDOLS_LINKS } from "./navigation";
 import { Menu, X } from "lucide-react";
 
-export type PageName = "classic" | "blurry" | "idols" | "popIt";
-const MODES: PageName[] = ["classic", "blurry", "idols"];
+export type PageName = "classic" | "blurry" | "idols" | "login" | "register";
+const MODES: PageName[] = ["classic", "blurry", "idols", "login", "register"];
 
 
 const NavBar = () => {
     const location = useLocation();
     const path = location.pathname;
-    const currentPage = path === "/" ? "" : MODES.find(m => path.includes(m)) || "classic";
+    const currentPage = path === "/" ? "" : MODES.find(m => path.includes(m)) || "";
 
     const [isMobileMenuOpen, setIsMobileMenuOpen] = useState<boolean>(false);
 

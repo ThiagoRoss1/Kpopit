@@ -12,6 +12,7 @@ import ScrollToTop from './hooks/useScrollToTop'
 import MaintenancePage from './pages/Maintenance/MaintenancePage'
 import IdolsList from './pages/Idols/IdolsList'
 import IdolProfile from './pages/Idols/IdolProfile'
+import AuthPage from './pages/AuthUser/AuthPage'
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
 import { BrowserRouter, Route, Navigate, Routes } from 'react-router-dom'
 import { SpeedInsights } from "@vercel/speed-insights/react"
@@ -32,6 +33,10 @@ createRoot(document.getElementById('root')!).render(
             <Routes>
               <Route element={<MainLayout />}>
                 <Route path="/" element={<Home />} />
+
+                <Route path="/login" element={<AuthPage />} />
+
+                <Route path="/register" element={<AuthPage />} />
 
                 <Route path="/classic" element={<ClassicMode />} />
                 

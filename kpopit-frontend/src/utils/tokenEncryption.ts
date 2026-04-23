@@ -34,6 +34,7 @@ export async function encryptToken(token: string): Promise<string> {
     const data = encoder.encode(token);
 
     const password = import.meta.env.VITE_ENCRYPTION_KEY;
+    
     if (!password) {
         throw new Error("Encryption key is not set in environment variables.");
     }
@@ -61,7 +62,11 @@ export async function encryptToken(token: string): Promise<string> {
 
 // Decrypt token
 export async function decryptToken(encryptedToken: string): Promise<string> {
-    const password = import.meta.env.VITE_ENCRYPTION_KEY || "default-password";
+    const password = import.meta.env.VITE_ENCRYPTION_KEY;
+
+    if (!password) {
+        throw new Error("Encryption key is not set in environment variables.");
+    }
 
     const combined = Uint8Array.from(atob(encryptedToken), c => c.charCodeAt(0));
 

@@ -21,11 +21,11 @@ JWT_REFRESH_EXPIRES_SECONDS = int(os.getenv("JWT_REFRESH_TOKEN_EXPIRES", "259200
 
 auth_bp = Blueprint("auth", __name__)
 
-def _set_refresh_cookie(response, raw_refresh_token: str) -> None:
+def _set_refresh_cookie(response, raw_refresh_token: str, remember_me: bool) -> None:
     response.set_cookie(
         "refresh_token",
         value=raw_refresh_token,
-        max_age=JWT_REFRESH_EXPIRES_SECONDS,
+        max_age=JWT_REFRESH_EXPIRES_SECONDS if remember_me else None,
         httponly=True,
         secure=IS_PRODUCTION,
         samesite="Strict",
@@ -97,6 +97,7 @@ def login():
     data = request.get_json() or {}
     identifier = (data.get("identifier") or "").strip()
     password = data.get("password", "")
+    remember_me = bool(data.get("remember_me", False))
 
     if not identifier:
         return jsonify({"error": "Username or email is required"}), 400
@@ -126,7 +127,7 @@ def login():
         cursor.close()
 
     response = make_response(jsonify({"access_token": result["access_token"], "user": result["user"]}), 200)
-    _set_refresh_cookie(response, result["refresh_token"])
+    _set_refresh_cookie(response, result["refresh_token"], remember_me)
 
     return response
 
@@ -366,10 +367,12 @@ def reset_password():
         }
         msg, code = error_map.get(str(e), ("Password reset failed", 400))
         return jsonify({"error": msg}), code
+    
     except Exception:
         connect.rollback()
         logger.exception("Unexpected error completing password reset")
         return jsonify({"error": "Password reset failed"}), 500
+    
     finally:
         cursor.close()
 

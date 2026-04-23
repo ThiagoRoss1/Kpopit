@@ -94,6 +94,7 @@ class AuthService:
                 "email": user.get("email"),
                 "is_admin": bool(user.get("is_admin", False)),
                 "is_authenticated": True,
+                "user_token": user["token"]
             }
         }
 
@@ -127,6 +128,7 @@ class AuthService:
                 "email": user.get("email"),
                 "is_admin": bool(user.get("is_admin", False)),
                 "is_authenticated": True,
+                "user_token": user["token"]
             }
         }
 
