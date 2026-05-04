@@ -101,6 +101,20 @@ class UserRepository:
             (user_id, display_name, avatar_url)
         )
         return cursor.fetchone()
+    
+    def get_random_avatar(self, cursor) -> str:
+        cursor.execute(
+            """
+                SELECT image_path FROM idols
+                WHERE image_path IS NOT NULL
+                AND is_published = TRUE
+                ORDER BY RANDOM()
+                LIMIT 1
+            """
+        )
+        result = cursor.fetchone()
+        return result["image_path"] if result else None
+        
 
     # Refresh tokens
     def store_refresh_token(self, cursor, user_id: int, token_hash: str, expires_at) -> None:
@@ -108,6 +122,7 @@ class UserRepository:
             """
                 INSERT INTO refresh_tokens (user_id, token_hash, expires_at)
                 VALUES (%s, %s, %s)
+                ON CONFLICT (token_hash) DO NOTHING
             """, (user_id, token_hash, expires_at)
         )
 

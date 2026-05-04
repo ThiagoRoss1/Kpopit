@@ -1,10 +1,12 @@
 import axios from 'axios';
 import type { AddIdolRequest, CompleteGuessTrafficRequest } from '../interfaces/gameInterfaces';
+import type { MeResponse } from '../interfaces/authInterfaces';
 import { decryptToken } from '../utils/tokenEncryption';
 import { setAccessToken, getAccessToken, clearAccessToken } from './tokenStore';
 // Api instance with base URL
 const api = axios.create({
     baseURL: `${import.meta.env.VITE_API_URL}/api`,
+    withCredentials: true,
 });
 
 // Game modes
@@ -55,14 +57,23 @@ api.interceptors.response.use(
 
 api.interceptors.request.use(
     (config) => {
-        const activeMode = localStorage.getItem("kpopit_gamemode") || "classic";
+        const token = getAccessToken();
+        const isRefreshRoute = config.url?.includes('/auth/refresh');
 
-        const modeId = MODES[activeMode] || MODES["classic"];
+        if (token && !isRefreshRoute) {
+            config.headers['Authorization'] = `Bearer ${token}`;
+        }
 
-        config.params = {
-            ...config.params,
-            gamemode_id: modeId
-        };
+        if (!config.url?.includes('/auth')) {
+            const activeMode = localStorage.getItem("kpopit_gamemode") || "classic";
+
+            const modeId = MODES[activeMode] || MODES["classic"];
+
+            config.params = {
+                ...config.params,
+                gamemode_id: modeId
+            };
+        }
         return config;
     }, (error) => {
         return Promise.reject(error);
@@ -226,6 +237,15 @@ export const loginUser = async (identifier: string, password: string, rememberMe
     return response.data;
 }
 
+export const authError = (error: unknown): error is { response: { data: { error: string } } } => {
+    return (
+        typeof error === 'object' &&
+        error !== null &&
+        'response' in error &&
+        typeof (error as { response: { data: { error: string } } }).response?.data?.error === "string"
+    );
+}
+
 export const logoutUser = async () => {
     const response = await api.post('/auth/logout');
     return response.data;
@@ -235,5 +255,10 @@ export const refreshToken = async () => {
     const response = await api.post('/auth/refresh', {}, {
         withCredentials: true
     });
+    return response.data;
+}
+
+export const getMe = async (): Promise<MeResponse> => {
+    const response = await api.get('/auth/me');
     return response.data;
 }

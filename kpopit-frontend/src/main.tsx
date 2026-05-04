@@ -13,6 +13,7 @@ import MaintenancePage from './pages/Maintenance/MaintenancePage'
 import IdolsList from './pages/Idols/IdolsList'
 import IdolProfile from './pages/Idols/IdolProfile'
 import AuthPage from './pages/AuthUser/AuthPage'
+import { AuthProvider } from './contexts/AuthProvider'
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
 import { BrowserRouter, Route, Navigate, Routes } from 'react-router-dom'
 import { SpeedInsights } from "@vercel/speed-insights/react"
@@ -25,6 +26,7 @@ createRoot(document.getElementById('root')!).render(
       <QueryClientProvider client={queryClient}>
         <BrowserRouter>
           <ScrollToTop />
+          <AuthProvider>
             {import.meta.env.VITE_MAINTENANCE_MODE === "true" ? (
               <Routes>
                 <Route path="*" element={<MaintenancePage type="database" />} />
@@ -39,7 +41,7 @@ createRoot(document.getElementById('root')!).render(
                 <Route path="/register" element={<AuthPage />} />
 
                 <Route path="/classic" element={<ClassicMode />} />
-                
+
                 <Route path="/blurry" element={<BlurryMode />} />
 
                 <Route path="/idols" element={<IdolsList />} />
@@ -49,7 +51,7 @@ createRoot(document.getElementById('root')!).render(
                 <Route path="/privacy-policy" element={<PrivacyPolicy />} />
 
                 <Route path="/contact" element={<Contact />} />
-                
+
                 {import.meta.env.VITE_ADMIN_ROUTE && import.meta.env.VITE_ADMIN_ENABLED === "true" && (
                   <Route path={import.meta.env.VITE_ADMIN_ROUTE} element={<Admin />} />
                 )}
@@ -59,6 +61,7 @@ createRoot(document.getElementById('root')!).render(
               <Route path="*" element={<Navigate to="/" replace />} />
             </Routes>
             )}
+          </AuthProvider>
         </BrowserRouter>
       </QueryClientProvider>
 

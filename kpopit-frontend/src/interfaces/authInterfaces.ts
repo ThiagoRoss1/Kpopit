@@ -18,3 +18,15 @@ export interface AuthUser {
     is_admin: boolean;
     is_authenticated: boolean;
 }
+
+export interface UserProfile {
+    display_name: string;
+    avatar_url: string;
+    created_at: string;
+    updated_at: string;
+}
+
+export interface MeResponse {
+    user_credentials: AuthUser;
+    profile: UserProfile;
+}

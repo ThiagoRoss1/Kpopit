@@ -18,8 +18,11 @@ logger = logging.getLogger(__name__)
 FLASK_ENV = os.getenv("FLASK_ENV", "production").lower()
 IS_PRODUCTION = FLASK_ENV != "development"
 JWT_REFRESH_EXPIRES_SECONDS = int(os.getenv("JWT_REFRESH_TOKEN_EXPIRES", "2592000"))
+COOKIE_DOMAIN = os.getenv("COOKIE_DOMAIN") if IS_PRODUCTION else None
 
 auth_bp = Blueprint("auth", __name__)
+
+samesite = "Lax" if FLASK_ENV == "development" else "Strict"
 
 def _set_refresh_cookie(response, raw_refresh_token: str, remember_me: bool) -> None:
     response.set_cookie(
@@ -28,8 +31,9 @@ def _set_refresh_cookie(response, raw_refresh_token: str, remember_me: bool) -> 
         max_age=JWT_REFRESH_EXPIRES_SECONDS if remember_me else None,
         httponly=True,
         secure=IS_PRODUCTION,
-        samesite="Strict",
-        path="/api/auth",
+        domain=COOKIE_DOMAIN,
+        samesite=samesite,
+        path="/api/auth" if IS_PRODUCTION else "/",
     )
 
 def _clear_refresh_cookie(response) -> None:
@@ -39,10 +43,10 @@ def _clear_refresh_cookie(response) -> None:
         max_age=0,
         httponly=True,
         secure=IS_PRODUCTION,
-        samesite="Strict",
-        path="/api/auth",
+        domain=COOKIE_DOMAIN,
+        samesite=samesite,
+        path="/api/auth" if IS_PRODUCTION else "/",
     )
-
 
 # POST /api/auth/register
 @auth_bp.route("/auth/register", methods=["POST"])
@@ -86,7 +90,7 @@ def register():
         cursor.close()
 
     response = make_response(jsonify({"access_token": result["access_token"], "user": result["user"]}), 201)
-    _set_refresh_cookie(response, result["refresh_token"])
+    _set_refresh_cookie(response, result["refresh_token"], remember_me=True)
 
     return response
 
@@ -175,7 +179,7 @@ def refresh():
         response = make_response(jsonify({"access_token": result["access_token"]}), 200)
 
         if "new_refresh_token" in result:
-            _set_refresh_cookie(response, result["new_refresh_token"])
+            _set_refresh_cookie(response, result["new_refresh_token"], remember_me=True)
 
     except ValueError:
         connect.rollback()
@@ -299,7 +303,7 @@ def claim():
         }), 200
     )
 
-    _set_refresh_cookie(response, result["refresh_token"])
+    _set_refresh_cookie(response, result["refresh_token"], remember_me=True)
 
     return response
 

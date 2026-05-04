@@ -2,8 +2,11 @@ import { Link, useLocation } from "react-router-dom";
 import { useState } from "react";
 import ButtonsDroplist from "./ButtonsDroplist";
 import ButtonsListMobile from "./ButtonsListMobile";
+import UserDropdown from "./UserDropdown";
+import UserDropdownMobile from "./UserDropdownMobile";
 import { GAMES_LINKS, IDOLS_LINKS } from "./navigation";
 import { Menu, X } from "lucide-react";
+import { useAuth } from "../../hooks/useAuth";
 
 export type PageName = "classic" | "blurry" | "idols" | "login" | "register";
 const MODES: PageName[] = ["classic", "blurry", "idols", "login", "register"];
@@ -14,7 +17,49 @@ const NavBar = () => {
     const path = location.pathname;
     const currentPage = path === "/" ? "" : MODES.find(m => path.includes(m)) || "";
 
+    const { isAuthenticated, isLoading, user } = useAuth();
+
     const [isMobileMenuOpen, setIsMobileMenuOpen] = useState<boolean>(false);
+    const [isUserModalOpen, setIsUserModalOpen] = useState<boolean>(false);
+
+    const renderDesktopAuthSlot = () => {
+        if (isLoading) return null;
+        if (isAuthenticated && user) {
+            return <UserDropdown />;
+        }
+        return (
+            <Link
+                to="/login"
+                className="flex items-center justify-center rounded-3xl border-r-2 border-neon-pink
+                text-neon-pink hover:bg-neon-pink  hover:text-white hover:[text-shadow:2px_2px_0px_rgba(0,0,0,0.5),0px_0px_6px_#FF3399] transition-all duration-300
+                transform-gpu max-xxs:w-16 max-xxs:h-10 xxs:w-19 xxs:h-10 sm:w-25 sm:h-12
+                text-sm sm:text-base font-bold"
+            >
+                Login
+            </Link>
+        );
+    };
+
+    const renderMobileAuthSlot = () => {
+        if (isLoading) return null;
+        if (!isAuthenticated || !user) return null;
+        const avatarSrc = `${import.meta.env.VITE_IMAGE_BUCKET_URL}${user.profile.avatar_url}`;
+        return (
+            <button
+                id="user-menu-trigger"
+                type="button"
+                onClick={() => setIsUserModalOpen(true)}
+                className="w-8 h-8 rounded-full overflow-hidden bg-transparent"
+                aria-label="Open user menu"
+            >
+                <img
+                    src={avatarSrc}
+                    alt="User avatar"
+                    className="w-full h-full rounded-full object-cover"
+                />
+            </button>
+        );
+    };
 
     return (
         <nav className="sticky top-0 z-100 w-full h-12 sm:h-15 border-b border-neon-pink/40 bg-black/50 backdrop-blur-xl px-2 sm:px-4">
@@ -22,11 +67,11 @@ const NavBar = () => {
 
                 {/* Logo - Left part */}
                 <div className="flex items-center hover:scale-105 active:scale-95 ease-[cubic-bezier(0.34,1.56,0.64,1)] transition-all duration-300 transform-gpu">
-                    <Link 
+                    <Link
                         to="/"
                         className="flex items-center gap-1 hover:opacity-80 transition-opacity duration-300"
                     >
-                        <img 
+                        <img
                             src="/kpopit-icon-svg.svg"
                             alt="Kpopit logo"
                             className="max-xxs:w-7 max-xxs:h-7 xxs:w-8 xxs:h-8 xs:w-9 xs:h-9 sm:w-12 sm:h-12 object-contain"
@@ -41,8 +86,8 @@ const NavBar = () => {
                 <div className="hidden md:flex items-center gap-1 sm:gap-4">
                     {/* Games */}
                     <ButtonsDroplist
-                        buttonName="Games" 
-                        items={GAMES_LINKS} 
+                        buttonName="Games"
+                        items={GAMES_LINKS}
                         className="bg-white/0 max-xxs:w-19 max-xxs:h-10 xxs:w-20 xxs:h-10 sm:w-26 sm:h-12"
                         dropdownClassName=""
                     />
@@ -61,20 +106,28 @@ const NavBar = () => {
                     >
                         <span className="flex flex-row text-white max-xxs:text-[14px] xxs:text-[14px] xs:text-[14px] sm:text-base gap-1">Contact</span>
                     </Link>
+
+                    {/* Auth slot — extra ml so the avatar/Login sits slightly apart from Contact */}
+                    <div className="ml-1 sm:ml-2">
+                        {renderDesktopAuthSlot()}
+                    </div>
                 </div>
 
                 {/* Buttons Mobile - Right part */}
-                <div className="md:hidden flex items-center">
-                    <button 
+                <div className="md:hidden flex items-center gap-2">
+                    {/* Auth slot (mobile) */}
+                    {renderMobileAuthSlot()}
+
+                    <button
                         id="mobile-menu-button"
                         className="w-12 h-12 bg-transparent"
                         onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
                     >
-                        <div 
+                        <div
                             className={`relative w-full h-full flex items-center justify-center transition-all duration-500 ease-in-out
                             transform-gpu ${isMobileMenuOpen ? "rotate-180" : "rotate-0"}`}>
 
-                            <Menu 
+                            <Menu
                                 className={`absolute w-8 h-8 text-[#e70a7d] mx-auto transition-all duration-500 transform-gpu ease-in-out
                                 ${isMobileMenuOpen ? "opacity-0 scale-50 rotate-90" : "opacity-100 scale-100 rotate-0"}`} />
 
@@ -85,6 +138,7 @@ const NavBar = () => {
                     </button>
 
                     <ButtonsListMobile isOpen={isMobileMenuOpen} onClose={() => setIsMobileMenuOpen(false)} />
+                    <UserDropdownMobile isOpen={isUserModalOpen} onClose={() => setIsUserModalOpen(false)} />
                 </div>
             </div>
         </nav>

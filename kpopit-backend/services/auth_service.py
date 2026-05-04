@@ -12,6 +12,7 @@ load_dotenv()
 JWT_SECRET_KEY = os.getenv("JWT_SECRET_KEY")
 JWT_ACCESS_EXPIRES_SECONDS  = int(os.getenv("JWT_ACCESS_TOKEN_EXPIRES",  "3600"))
 JWT_REFRESH_EXPIRES_SECONDS = int(os.getenv("JWT_REFRESH_TOKEN_EXPIRES", "2592000"))
+IS_PRODUCTION = os.getenv("FLASK_ENV") == "production"
 
 # Pre-computed at module load to prevent timing-based user enumeration.
 # Any login for a non-existent user runs checkpw against this, making
@@ -81,7 +82,10 @@ class AuthService:
         token = str(uuid.uuid4())
         password_hash = self.hash_password(password)
         user = self.user_repo.create_with_credentials(cursor, token, username, password_hash, email)
-        self.db.commit()
+
+        # Create an initial profile record for the new user
+        avatar = self.user_repo.get_random_avatar(cursor)
+        self.user_repo.upsert_profile(cursor, user["id"], username, avatar)
 
         tokens = self._build_token_pair(cursor, user)
         self.db.commit()
@@ -153,6 +157,11 @@ class AuthService:
 
         password_hash = self.hash_password(password)
         updated_user = self.user_repo.upgrade_to_authenticated(cursor, anon_token, username, password_hash, email)
+
+        # Create an initial profile record for the new user
+        avatar = self.user_repo.get_random_avatar(cursor)
+        self.user_repo.upsert_profile(cursor, updated_user["id"], username, avatar)
+
         tokens = self._build_token_pair(cursor, updated_user)
         self.db.commit()
 
@@ -197,19 +206,25 @@ class AuthService:
         if not user:
             raise ValueError("user_not_found")
         
-        self.user_repo.revoke_refresh_token(cursor, token_hash)
+        if IS_PRODUCTION:
+            self.user_repo.revoke_refresh_token(cursor, token_hash)
 
-        new_raw_refresh = self.generate_refresh_token(user)
-        new_hash = UserRepository.hash_token_for_storage(new_raw_refresh)
-        expires_at = datetime.now(timezone.utc) + timedelta(seconds=JWT_REFRESH_EXPIRES_SECONDS)
-        self.user_repo.store_refresh_token(cursor, user["id"], new_hash, expires_at)
+            new_raw_refresh = self.generate_refresh_token(user)
+            new_hash = UserRepository.hash_token_for_storage(new_raw_refresh)
+            expires_at = datetime.now(timezone.utc) + timedelta(seconds=JWT_REFRESH_EXPIRES_SECONDS)
 
+            self.user_repo.store_refresh_token(cursor, user["id"], new_hash, expires_at)
+
+            self.db.commit()
+
+            return {
+                "access_token": self.generate_access_token(user),
+                "new_refresh_token": new_raw_refresh
+            }
+        
         self.db.commit()
 
-        return {
-            "access_token": self.generate_access_token(user),
-            "new_refresh_token": new_raw_refresh
-        }
+        return {"access_token": self.generate_access_token(user)}
 
     # Logout
     def logout(self, cursor, raw_refresh_token: str) -> None:
