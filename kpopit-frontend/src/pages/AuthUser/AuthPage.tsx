@@ -5,13 +5,13 @@ import { useMutation, useQuery } from "@tanstack/react-query";
 import { User, Lock, Check, Eye, EyeOff } from "lucide-react";
 import { useAuthUser } from "../../hooks/useAuthUser";
 import { useAuth } from "../../hooks/useAuth";
-import { getIdolsPage } from "../../services/api";
+import { getIdolsPage, getGameModesCount } from "../../services/api";
 import type { IdolsPageData } from "../../interfaces/gameInterfaces";
 import type { LoginData, RegisterData } from "../../interfaces/authInterfaces";
 import "./authPage.css";
 
-// TODO: replace with a backend endpoint when game modes become dynamic.
-const GAME_MODE_COUNT = 2;
+// Mirrors backend validate_username in utils/auth_helpers.py
+const USERNAME_REGEX = /^[a-zA-Z0-9_-]+$/;
 
 function getPasswordStrength(pass: string) {
     if (!pass) return null;
@@ -66,6 +66,14 @@ const AuthPage = () => {
     });
     const idolCount = idolsData?.length?? null;
 
+    const { data: gameModesData } = useQuery<{ gamemodes_count: number }>({
+        queryKey: ["gameModesCount"],
+        queryFn: getGameModesCount,
+        staleTime: 1000 * 60 * 60 * 4,
+        refetchOnWindowFocus: false,
+    });
+    const gameModeCount = gameModesData?.gamemodes_count ?? null;
+
     const loginMutation = useMutation({
         mutationFn: (data: LoginData) => login(data),
         onSuccess: async () => {
@@ -118,9 +126,11 @@ const AuthPage = () => {
             registerFormData.confirmPassword.length > 0,
         ];
 
-    const isValidIdentifier = isLoginTab
-        ? loginFormData.identifier.length > 2 && loginFormData.identifier.length < 31
-        : registerFormData.username.length > 2 && registerFormData.username.length < 31;
+    // Mirrors backend validate_username — only used for the register tab's Check icon.
+    const isValidUsername =
+        registerFormData.username.length >= 3
+        && registerFormData.username.length <= 30
+        && USERNAME_REGEX.test(registerFormData.username);
 
     if (!isAuthLoading && isAuthenticated) {
         return <Navigate to="/" replace />;
@@ -220,7 +230,7 @@ const AuthPage = () => {
                                             autoComplete="username"
                                             className="w-full h-full pl-11 pr-11 bg-[#0a0a0a] text-sm font-bold text-white placeholder:text-neutral-700 focus:outline-none"
                                         />
-                                        {isValidIdentifier && !isLoginTab && (
+                                        {isValidUsername && !isLoginTab && (
                                             <Check className="absolute right-4 top-1/2 w-4 h-4 -translate-y-1/2 text-green-500" />
                                         )}
                                     </div>
@@ -418,7 +428,7 @@ const AuthPage = () => {
                             <span className="text-neon-pink">{idolCount ?? "—"} <span className="text-white/30">Idols</span></span>
                         </Link>
                         <div className="w-1.5 h-1.5 bg-neon-pink rounded-full" />
-                        <span className="text-neon-pink">{GAME_MODE_COUNT} <span className="text-white/30">Game Modes</span></span>
+                        <span className="text-neon-pink">{gameModeCount ?? "—"} <span className="text-white/30">Game Modes</span></span>
                         <div className="w-1.5 h-1.5 bg-neon-pink rounded-full" />
                         <span className="text-neon-pink">Daily <span className="text-white/30">Challenges</span></span>
                     </div>

@@ -113,6 +113,11 @@ export const getResetTimer = async () => {
     return response.data;
 };
 
+export const getGameModesCount = async (): Promise<{ gamemodes_count: number }> => {
+    const response = await api.get('/gamemodes-count');
+    return response.data;
+};
+
 // Get user token
 export const getUserToken = async () => {
     const response = await api.post('/user/init');

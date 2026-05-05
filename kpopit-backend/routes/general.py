@@ -1,8 +1,26 @@
 from flask import Blueprint, jsonify
 from utils.dates import get_today_now
+from services.get_db import get_db
 from datetime import timedelta
 
 general_bp = Blueprint('general', __name__)
+
+# Get total number of game modes
+@general_bp.route("/gamemodes-count", methods=["GET"])
+def get_game_modes_count():
+    """Return the total count of game modes available"""
+    
+    connect = get_db()
+    cursor = connect.cursor()
+
+    cursor.execute("SELECT COUNT(*) AS gamemodes_count FROM gamemodes")
+    result = cursor.fetchone()
+
+    gamemodes_count = result["gamemodes_count"] if result and result["gamemodes_count"] is not None else 0
+
+    cursor.close()
+
+    return jsonify({"gamemodes_count": gamemodes_count})
 
 # Get reset timer for next idol
 @general_bp.route("/reset-timer")

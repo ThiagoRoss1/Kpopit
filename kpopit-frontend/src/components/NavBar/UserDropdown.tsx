@@ -35,6 +35,7 @@ const UserDropdown = () => {
         try {
             await logout();
             await refreshAuth();
+
             navigate("/login");
         } catch (error) {
             console.error("Logout failed:", error);
@@ -88,7 +89,7 @@ const UserDropdown = () => {
                         className="flex items-center justify-start gap-4 px-4 h-12 text-left text-white rounded-[10px]
                         bg-transparent hover:bg-gray-700/30 hover:text-neon-pink transition-colors duration-300"
                     >
-                        <User size={16} />
+                        <User className="w-4 h-4" />
                         <span className="text-sm sm:text-base">Profile</span>
                     </Link>
 
@@ -99,7 +100,7 @@ const UserDropdown = () => {
                         bg-transparent hover:bg-gray-700/30 hover:text-neon-pink
                         hover:cursor-pointer transition-colors duration-300"
                     >
-                        <LogOut size={16} />
+                        <LogOut className="w-4 h-4" />
                         <span className="text-sm sm:text-base">Logout</span>
                     </button>
                 </div>

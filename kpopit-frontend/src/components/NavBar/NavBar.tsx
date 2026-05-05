@@ -20,7 +20,6 @@ const NavBar = () => {
     const { isAuthenticated, isLoading, user } = useAuth();
 
     const [isMobileMenuOpen, setIsMobileMenuOpen] = useState<boolean>(false);
-    const [isUserModalOpen, setIsUserModalOpen] = useState<boolean>(false);
 
     const renderDesktopAuthSlot = () => {
         if (isLoading) return null;
@@ -42,25 +41,23 @@ const NavBar = () => {
 
     const renderMobileAuthSlot = () => {
         if (isLoading) return null;
-        if (!isAuthenticated || !user) return null;
-        const avatarSrc = `${import.meta.env.VITE_IMAGE_BUCKET_URL}${user.profile.avatar_url}`;
+        if (isAuthenticated && user) {
+            return <UserDropdownMobile />;
+        };
         return (
-            <button
-                id="user-menu-trigger"
-                type="button"
-                onClick={() => setIsUserModalOpen(true)}
-                className="w-8 h-8 rounded-full overflow-hidden bg-transparent"
-                aria-label="Open user menu"
+            <Link
+                to="/login"
+                className="flex items-center justify-center rounded-3xl border-r-2 border-neon-pink
+                text-neon-pink hover:bg-neon-pink  hover:text-white hover:[text-shadow:2px_2px_0px_rgba(0,0,0,0.5),0px_0px_6px_#FF3399] transition-all duration-300
+                transform-gpu max-xxs:w-16 max-xxs:h-10 xxs:w-19 xxs:h-10 sm:w-25 sm:h-12
+                text-sm sm:text-base font-bold"
             >
-                <img
-                    src={avatarSrc}
-                    alt="User avatar"
-                    className="w-full h-full rounded-full object-cover"
-                />
-            </button>
+                Login
+            </Link>
         );
-    };
-
+        
+    }
+    
     return (
         <nav className="sticky top-0 z-100 w-full h-12 sm:h-15 border-b border-neon-pink/40 bg-black/50 backdrop-blur-xl px-2 sm:px-4">
             <div className="max-w-screen-2xl mx-auto h-full flex items-center justify-between">
@@ -107,7 +104,7 @@ const NavBar = () => {
                         <span className="flex flex-row text-white max-xxs:text-[14px] xxs:text-[14px] xs:text-[14px] sm:text-base gap-1">Contact</span>
                     </Link>
 
-                    {/* Auth slot — extra ml so the avatar/Login sits slightly apart from Contact */}
+                    {/* Auth slot */}
                     <div className="ml-1 sm:ml-2">
                         {renderDesktopAuthSlot()}
                     </div>
@@ -138,7 +135,6 @@ const NavBar = () => {
                     </button>
 
                     <ButtonsListMobile isOpen={isMobileMenuOpen} onClose={() => setIsMobileMenuOpen(false)} />
-                    <UserDropdownMobile isOpen={isUserModalOpen} onClose={() => setIsUserModalOpen(false)} />
                 </div>
             </div>
         </nav>

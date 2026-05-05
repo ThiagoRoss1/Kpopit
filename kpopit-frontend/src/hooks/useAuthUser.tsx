@@ -59,6 +59,7 @@ export const useAuthUser = () => {
             const response = await logoutUser();
             clearAccessToken();
             localStorage.removeItem('kpopit_session');
+            localStorage.removeItem('userToken');
             return response;
         } catch (error) {
             throw new Error(extractBackendError(error, "Logout failed"));
