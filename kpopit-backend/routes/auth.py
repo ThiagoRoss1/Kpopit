@@ -22,7 +22,10 @@ COOKIE_DOMAIN = os.getenv("COOKIE_DOMAIN") if IS_PRODUCTION else None
 
 auth_bp = Blueprint("auth", __name__)
 
-samesite = "Lax" if FLASK_ENV == "development" else "Strict"
+samesite = "None" if FLASK_ENV == "development" else "Strict"
+secure = samesite == "None"
+# samesite = "Lax" if FLASK_ENV == "development" else "Strict"
+# secure = IS_PRODUCTION
 
 def _set_refresh_cookie(response, raw_refresh_token: str, remember_me: bool) -> None:
     response.set_cookie(
@@ -30,7 +33,7 @@ def _set_refresh_cookie(response, raw_refresh_token: str, remember_me: bool) -> 
         value=raw_refresh_token,
         max_age=JWT_REFRESH_EXPIRES_SECONDS if remember_me else None,
         httponly=True,
-        secure=IS_PRODUCTION,
+        secure=secure,
         domain=COOKIE_DOMAIN,
         samesite=samesite,
         path="/api/auth" if IS_PRODUCTION else "/",
@@ -42,7 +45,7 @@ def _clear_refresh_cookie(response) -> None:
         value="",
         max_age=0,
         httponly=True,
-        secure=IS_PRODUCTION,
+        secure=secure,
         domain=COOKIE_DOMAIN,
         samesite=samesite,
         path="/api/auth" if IS_PRODUCTION else "/",
