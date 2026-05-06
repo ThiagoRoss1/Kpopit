@@ -20,7 +20,9 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
     const restoreSession = useCallback(async () => {
         if (isRefreshingRef.current) return;
 
-        const hadSession = localStorage.getItem('kpopit_session');
+        const hadSession =
+            localStorage.getItem('kpopit_session') ??
+            sessionStorage.getItem('kpopit_session');
         if (!hadSession) {
             setState({ isAuthenticated: false, isLoading: false, user: null });
             return;
@@ -40,6 +42,7 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
         } catch {
             clearAccessToken();
             localStorage.removeItem('kpopit_session');
+            sessionStorage.removeItem('kpopit_session');
             if (cancelledRef.current) return;
 
             setState({ isAuthenticated: false, isLoading: false, user: null });

@@ -9,10 +9,10 @@ import GlobalNotices from "../GlobalNotices/GlobalNotices";
 const MainLayout = () => {
     useEffect(() => {
         // Track only once per session (tab/window)
-        if (!sessionStorage.getItem('kpopit_session_tracked')) {
+        if (!sessionStorage.getItem('kpopit_analytics_tracked')) {
             getUserAnalytics()
                 .then(() => {
-                    sessionStorage.setItem('kpopit_session_tracked', 'true');
+                    sessionStorage.setItem('kpopit_analytics_tracked', 'true');
                 });
         }
     }, []);

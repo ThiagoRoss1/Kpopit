@@ -112,7 +112,7 @@ def login():
     cursor = connect.cursor()
 
     try:
-        result = AuthService(connect).login(cursor, identifier, password)
+        result = AuthService(connect).login(cursor, identifier, password, remember_me)
 
     except ValueError as e:
         connect.rollback()
@@ -179,7 +179,7 @@ def refresh():
         response = make_response(jsonify({"access_token": result["access_token"]}), 200)
 
         if "new_refresh_token" in result:
-            _set_refresh_cookie(response, result["new_refresh_token"], remember_me=True)
+            _set_refresh_cookie(response, result["new_refresh_token"], remember_me=result["remember_me"])
 
     except ValueError:
         connect.rollback()

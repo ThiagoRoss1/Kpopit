@@ -117,19 +117,19 @@ class UserRepository:
         
 
     # Refresh tokens
-    def store_refresh_token(self, cursor, user_id: int, token_hash: str, expires_at) -> None:
+    def store_refresh_token(self, cursor, user_id: int, token_hash: str, expires_at, remember_me: bool) -> None:
         cursor.execute(
             """
-                INSERT INTO refresh_tokens (user_id, token_hash, expires_at)
-                VALUES (%s, %s, %s)
+                INSERT INTO refresh_tokens (user_id, token_hash, expires_at, remember_me)
+                VALUES (%s, %s, %s, %s)
                 ON CONFLICT (token_hash) DO NOTHING
-            """, (user_id, token_hash, expires_at)
+            """, (user_id, token_hash, expires_at, remember_me)
         )
 
     def find_refresh_token(self, cursor, token_hash: str) -> dict | None:
         cursor.execute(
             """
-                SELECT id, user_id, expires_at, revoked FROM refresh_tokens
+                SELECT id, user_id, expires_at, revoked, remember_me FROM refresh_tokens
                 WHERE token_hash = %s
             """, (token_hash,)
         )

@@ -59,15 +59,15 @@ class AuthService:
         }
         return jwt.encode(payload, JWT_SECRET_KEY, algorithm="HS256")
 
-    def _store_refresh_token(self, cursor, user_id: int, raw_refresh: str) -> None:
+    def _store_refresh_token(self, cursor, user_id: int, raw_refresh: str, remember_me: bool) -> None:
         token_hash = UserRepository.hash_token_for_storage(raw_refresh)
         expires_at = datetime.now(timezone.utc) + timedelta(seconds=JWT_REFRESH_EXPIRES_SECONDS)
-        self.user_repo.store_refresh_token(cursor, user_id, token_hash, expires_at)
+        self.user_repo.store_refresh_token(cursor, user_id, token_hash, expires_at, remember_me)
 
-    def _build_token_pair(self, cursor, user: dict) -> dict:
+    def _build_token_pair(self, cursor, user: dict, remember_me: bool) -> dict:
         access = self.generate_access_token(user)
         refresh = self.generate_refresh_token(user)
-        self._store_refresh_token(cursor, user["id"], refresh)
+        self._store_refresh_token(cursor, user["id"], refresh, remember_me)
 
         return {"access_token": access, "refresh_token": refresh}
 
@@ -87,7 +87,7 @@ class AuthService:
         avatar = self.user_repo.get_random_avatar(cursor)
         self.user_repo.upsert_profile(cursor, user["id"], username, avatar)
 
-        tokens = self._build_token_pair(cursor, user)
+        tokens = self._build_token_pair(cursor, user, remember_me=True)
         self.db.commit()
 
         return {
@@ -103,7 +103,7 @@ class AuthService:
         }
 
     # Login
-    def login(self, cursor, identifier: str, password: str) -> dict:
+    def login(self, cursor, identifier: str, password: str, remember_me: bool) -> dict:
         if "@" in identifier:
             user = self.user_repo.find_by_email(cursor, identifier)
         else:
@@ -121,11 +121,12 @@ class AuthService:
             raise ValueError("invalid_credentials")
 
         self.user_repo.update_last_login(cursor, user["id"])
-        tokens = self._build_token_pair(cursor, user)
+        tokens = self._build_token_pair(cursor, user, remember_me)
         self.db.commit()
 
         return {
             **tokens,
+            "remember_me": remember_me,
             "user": {
                 "user_id": user["id"],
                 "username": user["username"],
@@ -162,7 +163,7 @@ class AuthService:
         avatar = self.user_repo.get_random_avatar(cursor)
         self.user_repo.upsert_profile(cursor, updated_user["id"], username, avatar)
 
-        tokens = self._build_token_pair(cursor, updated_user)
+        tokens = self._build_token_pair(cursor, updated_user, remember_me=True)
         self.db.commit()
 
         return {
@@ -205,7 +206,9 @@ class AuthService:
         user = self.user_repo.find_by_id(cursor, db_record["user_id"])
         if not user:
             raise ValueError("user_not_found")
-        
+
+        remember_me = bool(db_record.get("remember_me", False))
+
         if IS_PRODUCTION:
             self.user_repo.revoke_refresh_token(cursor, token_hash)
 
@@ -213,18 +216,22 @@ class AuthService:
             new_hash = UserRepository.hash_token_for_storage(new_raw_refresh)
             expires_at = datetime.now(timezone.utc) + timedelta(seconds=JWT_REFRESH_EXPIRES_SECONDS)
 
-            self.user_repo.store_refresh_token(cursor, user["id"], new_hash, expires_at)
+            self.user_repo.store_refresh_token(cursor, user["id"], new_hash, expires_at, remember_me)
 
             self.db.commit()
 
             return {
                 "access_token": self.generate_access_token(user),
-                "new_refresh_token": new_raw_refresh
+                "new_refresh_token": new_raw_refresh,
+                "remember_me": remember_me,
             }
-        
+
         self.db.commit()
 
-        return {"access_token": self.generate_access_token(user)}
+        return {
+            "access_token": self.generate_access_token(user),
+            "remember_me": remember_me,
+        }
 
     # Logout
     def logout(self, cursor, raw_refresh_token: str) -> None:

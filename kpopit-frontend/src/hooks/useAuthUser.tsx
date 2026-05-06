@@ -41,8 +41,15 @@ export const useAuthUser = () => {
         try {
             const response = await loginUser(data.identifier, data.password, data.rememberMe);
             setAccessToken(response.access_token);
-            localStorage.setItem('kpopit_session', 'true');
-            
+
+            if (data.rememberMe) {
+                localStorage.setItem('kpopit_session', 'true');
+                sessionStorage.removeItem('kpopit_session');
+            } else {
+                sessionStorage.setItem('kpopit_session', 'true');
+                localStorage.removeItem('kpopit_session');
+            }
+
             if (response.user?.user_token) {
                 const encryptedToken = await encryptToken(response.user.user_token);
                 localStorage.setItem('userToken', encryptedToken);
@@ -59,6 +66,7 @@ export const useAuthUser = () => {
             const response = await logoutUser();
             clearAccessToken();
             localStorage.removeItem('kpopit_session');
+            sessionStorage.removeItem('kpopit_session');
             localStorage.removeItem('userToken');
             return response;
         } catch (error) {
