@@ -106,7 +106,7 @@ const UserDropdownMobile = () => {
                     <div className="w-full border-t border-neon-pink/40 my-2" />
 
                     <Link
-                        to="/"
+                        to="/profile"
                         onClick={() => setIsOpen(false)}
                         className="flex items-center justify-start gap-4 px-4 h-12 w-full text-left text-white rounded-[10px] bg-transparent hover:bg-gray-700/30 hover:text-neon-pink transition-colors duration-300 font-sans font-bold"
                     >

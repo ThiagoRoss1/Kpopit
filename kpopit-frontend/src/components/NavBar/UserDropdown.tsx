@@ -84,7 +84,7 @@ const UserDropdown = () => {
                 {/* Buttons */}
                 <div className="flex flex-col gap-1.5 px-2 py-2 font-sans font-bold">
                     <Link
-                        to="/"
+                        to="/profile"
                         onClick={() => setIsOpen(false)}
                         className="flex items-center justify-start gap-4 px-4 h-12 text-left text-white rounded-[10px]
                         bg-transparent hover:bg-gray-700/30 hover:text-neon-pink transition-colors duration-300"
