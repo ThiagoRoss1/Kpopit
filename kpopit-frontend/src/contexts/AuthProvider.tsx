@@ -2,6 +2,7 @@ import { useCallback, useEffect, useRef, useState, type ReactNode } from "react"
 import { AuthContext, type AuthState } from "./auth_context";
 import { getMe, refreshToken } from "../services/api";
 import { setAccessToken, clearAccessToken } from "../services/tokenStore";
+import { useClearGameStorage } from "../hooks/useClearGameStorage";
 
 interface AuthProviderProps {
     children: ReactNode;
@@ -13,6 +14,10 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
         isLoading: true,
         user: null,
     });
+
+    const { clearAll } = useClearGameStorage(); 
+    const clearAllRef = useRef(clearAll);
+    clearAllRef.current = clearAll;
     
     const cancelledRef = useRef(false);
     const isRefreshingRef = useRef(false);
@@ -24,6 +29,12 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
             localStorage.getItem('kpopit_session') ??
             sessionStorage.getItem('kpopit_session');
         if (!hadSession) {
+            const wasAuthenticated = localStorage.getItem('kpopit_was_authenticated') === 'true';
+            if (wasAuthenticated) {
+                localStorage.removeItem('userToken');
+                localStorage.removeItem('kpopit_was_authenticated');
+                clearAllRef.current();
+            }
             setState({ isAuthenticated: false, isLoading: false, user: null });
             return;
         }
@@ -43,6 +54,9 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
             clearAccessToken();
             localStorage.removeItem('kpopit_session');
             sessionStorage.removeItem('kpopit_session');
+            localStorage.removeItem('userToken');
+            localStorage.removeItem('kpopit_was_authenticated');
+            clearAllRef.current();
             if (cancelledRef.current) return;
 
             setState({ isAuthenticated: false, isLoading: false, user: null });

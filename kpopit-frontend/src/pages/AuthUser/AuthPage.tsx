@@ -1,13 +1,14 @@
-import { useState, useMemo, useEffect } from "react";
+import { useState, useMemo, useEffect, useRef } from "react";
 import { Link, Navigate, useLocation, useNavigate } from "react-router-dom";
 import { motion, AnimatePresence } from "motion/react";
 import { useMutation, useQuery } from "@tanstack/react-query";
-import { User, Lock, Check, Eye, EyeOff } from "lucide-react";
+import { User, Lock, Check, Eye, EyeOff, Loader2, X } from "lucide-react";
 import { useAuthUser } from "../../hooks/useAuthUser";
 import { useAuth } from "../../hooks/useAuth";
-import { getIdolsPage, getGameModesCount } from "../../services/api";
+import { getIdolsPage, getGameModesCount, checkUsernameAvailability } from "../../services/api";
 import type { IdolsPageData } from "../../interfaces/gameInterfaces";
 import type { LoginData, RegisterData } from "../../interfaces/authInterfaces";
+import AuthBackground from "./AuthBackground";
 import "./authPage.css";
 
 // Mirrors backend validate_username in utils/auth_helpers.py
@@ -30,6 +31,8 @@ const AuthPage = () => {
     const { register, login } = useAuthUser();
     const { isAuthenticated, isLoading: isAuthLoading, refreshAuth } = useAuth();
 
+    type UsernameStatus = "idle" | "checking" | "available" | "taken";
+
     useEffect(() => {
         setError(null);
     }, [location.pathname]);
@@ -50,6 +53,10 @@ const AuthPage = () => {
     const [error, setError] = useState<string | null>(null);
     const [showPassword, setShowPassword] = useState(false);
     const [showConfirmPassword, setShowConfirmPassword] = useState(false);
+
+    const [usernameStatus, setUsernameStatus] = useState<UsernameStatus>("idle");
+    const debounceTimerRef = useRef<number | null>(null);
+    const abortControllerRef = useRef<AbortController | null>(null);
 
     const activePassword = isLoginTab ? loginFormData.password : registerFormData.password;
 
@@ -132,28 +139,62 @@ const AuthPage = () => {
         && registerFormData.username.length <= 30
         && USERNAME_REGEX.test(registerFormData.username);
 
+    useEffect(() => {
+        if (debounceTimerRef.current !== null) {
+            clearTimeout(debounceTimerRef.current);
+            debounceTimerRef.current = null;
+        }
+        if (abortControllerRef.current) {
+            abortControllerRef.current.abort();
+            abortControllerRef.current = null;
+        }
+
+        if (isLoginTab || !isValidUsername) {
+            setUsernameStatus("idle");
+            return;
+        }
+
+        setUsernameStatus("checking");
+
+        const username = registerFormData.username;
+        debounceTimerRef.current = window.setTimeout(() => {
+            const controller = new AbortController();
+            abortControllerRef.current = controller;
+
+            const check = async () => {
+                try {
+                    const res = await checkUsernameAvailability(username, controller.signal);
+                    if (controller.signal.aborted) return;
+                    setUsernameStatus(res.available ? "available" : "taken");
+                } catch (error: unknown) {
+                    const e = error as { code?: string; name?: string };
+                    if (e?.code === "ERR_CANCELED" || e?.name === "AbortError") return;
+                    setUsernameStatus("idle");
+                }
+            };
+
+            check();
+        }, 400);
+
+        return () => {
+            if (debounceTimerRef.current !== null) {
+                clearTimeout(debounceTimerRef.current);
+                debounceTimerRef.current = null;
+            }
+            if (abortControllerRef.current) {
+                abortControllerRef.current.abort();
+                abortControllerRef.current = null;
+            }
+        };
+    }, [registerFormData.username, isLoginTab, isValidUsername]);
+
     if (!isAuthLoading && isAuthenticated) {
         return <Navigate to="/" replace />;
     }
 
     return (
         <>
-            {/* Background layer */}
-            <div className="noise-bg fixed inset-0 -z-10 overflow-hidden pointer-events-none bg-[#0a0a0a]">
-
-                <div className="absolute inset-0 flex items-center justify-center overflow-hidden select-none">
-                    <span className="whitespace-nowrap text-white font-korean text-[600px] font-black leading-none tracking-tighter opacity-[0.06] rotate-[-15deg]">
-                        케이팝잇
-                    </span>
-                </div>
-
-                {/* Corner circles */}
-                <div className="absolute -top-20 -left-20 w-80 h-80 border-2 border-neon-pink rounded-full opacity-20" />
-                <div className="absolute -bottom-10 -left-10 w-48 h-48 border-2 border-neon-pink rounded-full opacity-10" />
-                <div className="absolute top-10 -right-10 w-32 h-32 border-2 border-neon-pink rounded-full opacity-10" />
-                <div className="absolute -bottom-10 -right-16 w-72 h-72 border-2 border-neon-pink rounded-full opacity-[0.07]" />
-            </div>
-
+            <AuthBackground />
             <div className="relative flex flex-col items-center justify-center min-h-full w-full">
 
                 {/* Main content */}
@@ -197,9 +238,8 @@ const AuthPage = () => {
 
                             {/* Title */}
                             <div className="mb-6 text-center">
-                                <h1 className="text-4xl sxs:text-5xl font-sans font-black uppercase leading-tight">
+                                <h1 className="text-4xl sxs:text-5xl font-sans flex flex-col font-black uppercase leading-tight">
                                     <span className="text-white">{isLoginTab ? "Ready to" : "Join the"}</span>
-                                    <br />
                                     <span className="text-neon-pink">{isLoginTab ? "Stand Out?" : "Universe."}</span>
                                 </h1>
                                 <p className="mt-3 text-[12px] text-white/40 font-black uppercase tracking-[0.5em]">
@@ -230,10 +270,23 @@ const AuthPage = () => {
                                             autoComplete="username"
                                             className="w-full h-full pl-11 pr-11 bg-[#0a0a0a] text-sm font-bold text-white placeholder:text-neutral-700 focus:outline-none"
                                         />
-                                        {isValidUsername && !isLoginTab && (
+
+                                        {!isLoginTab && isValidUsername && usernameStatus === "checking" && (
+                                            <Loader2 className="absolute right-4 top-1/2 w-4 h-4 -translate-y-1/2 text-neutral-400 animate-spin" />
+                                        )}
+                                        {!isLoginTab && isValidUsername && usernameStatus === "available" && (
                                             <Check className="absolute right-4 top-1/2 w-4 h-4 -translate-y-1/2 text-green-500" />
                                         )}
+                                        {!isLoginTab && isValidUsername && usernameStatus === "taken" && (
+                                            <X className="absolute right-4 top-1/2 w-4 h-4 -translate-y-1/2 text-red-500" />
+                                        )}
+
                                     </div>
+                                    {!isLoginTab && usernameStatus === "taken" && (
+                                        <p className="pl-1 max-xxs:text-[10px] xxs:text-[12px] font-black uppercase tracking-widest text-red-500">
+                                            Username already taken
+                                        </p>
+                                    )}
                                 </div>
 
                                 {/* Email (register only) */}
@@ -242,7 +295,7 @@ const AuthPage = () => {
                                         <label className="flex justify-between items-center pl-1 text-[12px] text-white/90 font-black uppercase tracking-[0.15em]">
                                             <span>Email Address</span>
 
-                                            <span className="text-[12px] text-neutral-600 italic normal-case tracking-normal pr-1">Optional — for password recovery</span>
+                                            <span className="text-[12px] text-neutral-500 italic normal-case tracking-normal pr-1">Optional — for password recovery</span>
                                         </label>
 
                                         <div className="neo-input-modal relative h-14 rounded-2xl overflow-hidden">
@@ -266,12 +319,13 @@ const AuthPage = () => {
                                             Password
                                         </label>
                                         {isLoginTab && (
-                                            <a
-                                                href="#"
-                                                className="text-[9px] text-neutral-600 font-black uppercase tracking-tight hover:text-white transition-colors"
+                                            <Link
+                                                to="/forgot-password"
+                                                className="text-[12px] text-neutral-500 font-black hover:text-white
+                                                hover:underline hover:underline-offset-2 transition-all duration-300"
                                             >
                                                 Forgot password?
-                                            </a>
+                                            </Link>
                                         )}
                                     </div>
                                     <div className="neo-input-modal relative h-14 rounded-2xl overflow-hidden">
@@ -419,11 +473,10 @@ const AuthPage = () => {
                     </div>
 
                     {/* Bottom stats */}
-                    <div className="relative z-10 flex items-center gap-6 mt-10 text-[12px] font-sans font-black uppercase tracking-[0.5em]">
+                    <div className="relative z-10 flex flex-col xm:flex-row justify-center items-center gap-6 mt-10 max-zm:text-sm zm:text-[12px] font-sans font-black uppercase zm:tracking-[0.2em] sm:tracking-[0.5em]">
                         <Link 
                             to="/idols"
                             className="hover:underline text-white/30"
-                            
                             >
                             <span className="text-neon-pink">{idolCount ?? "—"} <span className="text-white/30">Idols</span></span>
                         </Link>

@@ -8,6 +8,7 @@ from dotenv import load_dotenv
 from services.get_db import init_app
 from routes.games.blurry import blurry_bp
 from routes.games.classic import classic_bp
+from routes.games.restore import restore_bp
 from routes.users import user_bp
 from routes.idols import idol_bp
 from routes.game_logic import game_logic_bp
@@ -16,6 +17,7 @@ from routes.ranking import ranking_bp
 from routes.session_info import session_info
 from routes.idols_page.idols_page import idols_page_bp
 from routes.auth import auth_bp
+from routes.email import email_bp
 from utils.rate_limiter import limiter
 from flask_limiter import RateLimitExceeded
 load_dotenv()
@@ -91,6 +93,9 @@ app.register_blueprint(blurry_bp, url_prefix="/api")
 # Classic game blueprint - Register routes
 app.register_blueprint(classic_bp, url_prefix="/api")
 
+# Restore session blueprint - Per-mode game state for authenticated users
+app.register_blueprint(restore_bp, url_prefix="/api")
+
 # Users blueprint - User token generation and stats routes
 app.register_blueprint(user_bp, url_prefix="/api")
 
@@ -108,6 +113,9 @@ app.register_blueprint(idols_page_bp, url_prefix="/api")
 
 # Auth blueprint - Register, login, logout, refresh, me, claim routes
 app.register_blueprint(auth_bp, url_prefix="/api")
+
+# Email blueprint - Register email verification and password reset routes
+app.register_blueprint(email_bp, url_prefix="/api")
 
 # Repository loading hook (optional future enhancement):
 # If needed, a before_request handler can be added here to attach

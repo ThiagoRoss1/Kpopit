@@ -33,6 +33,7 @@ import TransferDataText from "../../components/buttons/modals/TransferDataConten
 import ImportDataText from "../../components/buttons/modals/ImportDataContent";
 import ExportDataText from "../../components/buttons/modals/ExportDataContent";
 import { WinnerExplosion } from "../../utils/confetti";
+import { useClearGameStorage } from "../../hooks/useClearGameStorage";
 
 function BlurryMode() {
     const gameMode = useGameMode();
@@ -55,8 +56,10 @@ function BlurryMode() {
     // Mobile
     const [isTouched, setIsTouched] = useState<boolean>(false);
 
-    const { userToken, initUser, decryptedTokenRef, allIdolsData, isLoadingAllIdols, 
+    const { userToken, initUser, decryptedTokenRef, allIdolsData, isLoadingAllIdols,
         isInitialized, userStatsData, transferData, isErrorAllIdols, queryClient} = useSharedGameData();
+
+    const { clearBlurry } = useClearGameStorage();
 
     const isCorrect = guesses.some(g => g.guess_correct === true);
 
@@ -144,15 +147,7 @@ function BlurryMode() {
 
         if (lastGameDate !== serverDate) {
             console.log("New day detected, clearing cache.");
-            localStorage.removeItem("blurryGuessesDetails");
-            localStorage.removeItem("blurryGuessedIdols");
-            localStorage.removeItem("blurryGameComplete");
-            localStorage.removeItem("blurryGameWon");
-            localStorage.removeItem("blurryHardcoreMode");
-            localStorage.removeItem("blurryColorMode");
-            localStorage.removeItem("blurryHintClicked");
-            localStorage.removeItem("blurryAnimatedIdols");
-            localStorage.removeItem("confettiShownBlurry");
+            clearBlurry();
 
             setGuesses([]);
             setAttempts(0);
@@ -190,7 +185,7 @@ function BlurryMode() {
             setDayChecked(true);
             setConfetti(confettiShown);
         }
-    }, [blurryGameData]);
+    }, [blurryGameData, clearBlurry]);
 
     const blurryIdols = useMemo(() => {
         if (!allIdolsData) return [];

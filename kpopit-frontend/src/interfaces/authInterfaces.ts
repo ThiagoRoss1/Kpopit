@@ -22,6 +22,7 @@ export interface AuthUser {
 export interface UserProfile {
     display_name: string;
     avatar_url: string;
+    email_verified: boolean;
     created_at: string;
     updated_at: string;
 }

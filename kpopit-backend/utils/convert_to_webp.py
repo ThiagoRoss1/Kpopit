@@ -1,5 +1,6 @@
 from PIL import Image
 from pathlib import Path
+import io
 
 SOURCE_FOLDER = '../../Kpopit-images/kpopit-idols-png'
 DESTINATION_FOLDER = '../../Kpopit-images/kpopit-idols-webp'
@@ -60,3 +61,15 @@ def convert_images_to_webp(source_folder, destination_folder, webp_quality):
 
 if __name__ == "__main__":
     convert_images_to_webp(SOURCE_FOLDER, DESTINATION_FOLDER, WEBP_QUALITY)
+
+def convert_to_webp_bytes(file_bytes: bytes, quality: int = WEBP_QUALITY) -> bytes:
+    """Convert image bytes to WebP format and return the new bytes."""
+    img = Image.open(io.BytesIO(file_bytes))
+
+    if img.mode in ('P', 'L'):
+        img = img.convert("RGBA")
+
+    output = io.BytesIO()
+    img.save(output, format="WEBP", quality=quality, optimize=True)
+    output.seek(0)
+    return output.getvalue()

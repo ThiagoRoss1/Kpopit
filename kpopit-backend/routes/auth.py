@@ -230,12 +230,44 @@ def me():
             "profile": {
                 "display_name": profile["display_name"] if profile else None,
                 "avatar_url": profile["avatar_url"]   if profile else None,
+                "email_verified": bool(user.get("email_verified", False)),
+                "created_at": profile["created_at"].isoformat() if profile and profile.get("created_at") else None,
+                "updated_at": profile["updated_at"].isoformat() if profile and profile.get("updated_at") else None,
             }
         }), 200
 
     except Exception:
         logger.exception("Unexpected error resolving current user")
         return jsonify({"error": "Could not load user"}), 500
+
+    finally:
+        cursor.close()
+
+
+# GET /api/auth/check-username/<username>
+@auth_bp.route("/auth/check-username/<username>", methods=["GET"])
+@limiter.limit("120 per minute")
+def check_username(username):
+    """
+    UX helper for the register form. Returns whether a username is available.
+    """
+    username = (username or "").strip()
+
+    error = validate_username(username)
+    if error:
+        return jsonify({"error": error}), 400
+
+    connect = get_db()
+    cursor = connect.cursor()
+
+    try:
+        repo = UserRepository(connect)
+        existing = repo.check_username_exists(cursor, username)
+        return jsonify({"available": not existing}), 200
+
+    except Exception:
+        logger.exception("Unexpected error checking username availability")
+        return jsonify({"error": "Could not check username"}), 500
 
     finally:
         cursor.close()

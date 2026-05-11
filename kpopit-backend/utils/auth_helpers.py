@@ -96,6 +96,15 @@ def _no_auth() -> dict:
         "is_authenticated": False,
     }
 
+def validate_display_name(display_name: str) -> str | None:
+    """Returns None if valid, error string otherwise."""
+    if not display_name or not isinstance(display_name, str):
+        return "Display name is required."
+    
+    if len(display_name) > 30:
+        return "Display name must be at most 30 characters."
+    return None
+
 def validate_username(username: str) -> str | None:
     """Returns None if valid, error string otherwise."""
     if not username or not isinstance(username, str):

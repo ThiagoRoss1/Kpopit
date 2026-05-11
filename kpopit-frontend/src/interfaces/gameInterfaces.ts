@@ -216,3 +216,29 @@ export interface IdolProfileData {
     game_modes_available: GameModes;
   };
 }
+
+export interface ClassicGameState {
+  today_guesses_details?: GuessResponse[];
+  guessed_idols?: string[];
+  game_complete?: boolean;
+  game_won?: boolean;
+  hints_revealed?: { hint1?: boolean; hint2?: boolean };
+  show_hints?: { hint1?: boolean; hint2?: boolean };
+  colorize_hints?: { hint1?: boolean; hint2?: boolean };
+  animated_idols?: unknown[];
+  game_date?: string;
+}
+
+export interface BlurryGameState {
+  blurry_guesses_details?: GuessResponse<Partial<FeedbackData>>[];
+  guessed_idols?: string[];
+  game_complete?: boolean;
+  game_won?: boolean;
+  game_date?: string;
+}
+
+export interface RestoreSessionResponse {
+  classic: ClassicGameState | null;
+  blurry: BlurryGameState | null;
+  server_date: string;
+}

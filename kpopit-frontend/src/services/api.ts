@@ -1,5 +1,5 @@
 import axios from 'axios';
-import type { AddIdolRequest, CompleteGuessTrafficRequest } from '../interfaces/gameInterfaces';
+import type { AddIdolRequest, CompleteGuessTrafficRequest, RestoreSessionResponse } from '../interfaces/gameInterfaces';
 import type { MeResponse } from '../interfaces/authInterfaces';
 import { decryptToken } from '../utils/tokenEncryption';
 import { setAccessToken, getAccessToken, clearAccessToken } from './tokenStore';
@@ -166,6 +166,11 @@ export const fetchGameState = async (user_token: string) => {
     return response.data;
 }
 
+export const restoreSession = async (): Promise<RestoreSessionResponse> => {
+    const response = await api.get('/game/restore-session');
+    return response.data;
+}
+
 export const getActiveTransferCode = async (user_token: string) => {
     const response = await api.get(`/get-active-transfer-code/${user_token}`);
     return response.data;
@@ -233,6 +238,11 @@ export const claimUser = async (token: string, username: string, email: string |
     return response.data;
 }
 
+export const checkUsernameAvailability = async (username: string, signal?: AbortSignal): Promise<{ available: boolean }> => {
+    const response = await api.get(`/auth/check-username/${encodeURIComponent(username)}`, { signal });
+    return response.data;
+}
+
 export const loginUser = async (identifier: string, password: string, rememberMe: boolean) => {
     const response = await api.post('/auth/login', {
         identifier,
@@ -265,5 +275,25 @@ export const refreshToken = async () => {
 
 export const getMe = async (): Promise<MeResponse> => {
     const response = await api.get('/auth/me');
+    return response.data;
+}
+
+export const forgotPassword = async (email: string) => {
+    const response = await api.post('/email/forgot-password', { email });
+    return response.data;
+}
+
+export const resetPassword = async (token: string, password: string) => {
+    const response = await api.post('/email/reset-password', { token, password });
+    return response.data;
+}
+
+export const sendVerificationEmail = async () => {
+    const response = await api.post('/email/send-verification-email');
+    return response.data;
+}
+
+export const verifyEmail = async (token: string) => {
+    const response = await api.post('/email/verify-email', { token });
     return response.data;
 }

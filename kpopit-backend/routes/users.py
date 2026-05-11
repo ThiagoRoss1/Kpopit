@@ -1,12 +1,21 @@
 import uuid
 import json
 import secrets
-from datetime import datetime, timedelta
+from datetime import datetime, timedelta, timezone
 from services.get_db import get_db
 from utils.dates import get_today_now, get_current_timestamp, get_today_date_str
-from flask import Blueprint, request, jsonify
+from flask import Blueprint, request, jsonify, g
+from utils.auth_decorators import require_auth
+from repositories.user_repository import UserRepository
+from utils.auth_helpers import validate_display_name, validate_username
+from utils.convert_to_webp import convert_to_webp_bytes
+from utils.r2 import R2Client
+from utils.rate_limiter import limiter
+import logging
 
 user_bp = Blueprint('users', __name__)
+
+logger = logging.getLogger(__name__)
 
 # Generate a new user token and stores it in the database
 @user_bp.route("/user/init", methods=["POST"])
@@ -329,3 +338,148 @@ def get_active_transfer_code(user_token):
             "transfer_code": None,
             "expires_at": None,
         })
+
+@user_bp.route("/user/profile", methods=["PATCH"])
+@require_auth
+def update_display_name():
+    """Update the user's display name"""
+
+    data = request.get_json()
+    display_name = data.get("display_name")
+    username = data.get("username")
+
+    if not display_name and not username:
+        return jsonify({"error": "No display name or username provided"}), 400
+
+    user_id = g.auth["user_id"]
+
+    if display_name: 
+        display_name_error = validate_display_name(display_name)
+
+        if display_name_error:
+            return jsonify({"error": display_name_error}), 400
+        
+    if username:
+        username_error = validate_username(username)
+        
+        if username_error:
+            return jsonify({"error": username_error}), 400
+        
+    connect = get_db()
+    cursor = connect.cursor()
+
+    try:
+        repository = UserRepository(connect)
+        result = {}
+
+        if display_name:
+            result["display_name"] = repository.update_display_name(cursor, user_id, display_name)
+
+        if username:
+            user = repository.find_by_id(cursor, user_id)
+            if user["username_changed_at"]:
+                days_since = (datetime.now(timezone.utc) - user["username_changed_at"]).days
+                if days_since < 5:
+                    return jsonify({"error": f"Username can only be changed once every 5 days. Please wait {5 - days_since} more day(s)."}), 400
+                
+            if repository.check_username_exists(cursor, username):
+                return jsonify({"error": "Username already exists"}), 400
+            
+            result["username"] = repository.update_username(cursor, user_id, username)
+
+        connect.commit()
+        return jsonify(result), 200
+    
+    except Exception:
+        connect.rollback()
+        logger.exception("Failed to update display name")
+        return jsonify({"error": "Failed to update display name"}), 500
+    
+    finally:
+        cursor.close()
+
+@user_bp.route("/user/avatar", methods=["PATCH"])
+@require_auth
+def update_avatar():
+    """Update the user's avatar URL (Kpopit idol's picture)"""
+    data = request.get_json()
+    avatar_url = data.get("avatar_url")
+
+    if not avatar_url:
+        return jsonify({"error": "Missing avatar_url"}), 400
+    
+    connect = get_db()
+    cursor = connect.cursor()
+
+    try:
+
+        cursor.execute(
+            """
+                SELECT id FROM idols WHERE image_path = %s
+            """, (avatar_url,)
+        )
+        idol = cursor.fetchone()
+
+        if not idol:
+            return jsonify({"error": "Invalid avatar_url"}), 400
+        
+
+        user_id = g.auth["user_id"]
+        repository = UserRepository(connect)
+        repository.update_avatar(cursor, user_id, avatar_url)
+
+        connect.commit()
+        return jsonify({"avatar_url": avatar_url}), 200
+    
+    except Exception:
+        connect.rollback()
+        logger.exception("Failed to update avatar")
+        return jsonify({"error": "Failed to update avatar"}), 500
+    
+    finally:
+        cursor.close()
+
+@user_bp.route("/user/avatar", methods=["POST"])
+@require_auth
+@limiter.limit("3 per minute; 10 per hour")
+def update_avatar_webp():
+    """Update the user's avatar URL with a image provided by user and transformed to webp"""
+    file = request.files.get("avatar")
+
+    if not file:
+        return jsonify({"error": "Missing avatar file"}), 400
+    
+    user_id = g.auth["user_id"]
+
+    try:
+        file_bytes = file.read()
+        webp_image_bytes = convert_to_webp_bytes(file_bytes)
+    
+    except Exception:
+        logger.exception("Failed to convert image to webp")
+        return jsonify({"error": "Failed to process image file"}), 400
+    
+    try:
+        r2_client = R2Client()
+        key = r2_client.upload_file(user_id, webp_image_bytes)
+
+    except Exception:
+        logger.exception("Failed to upload avatar image to R2")
+        return jsonify({"error": "Failed to upload avatar image"}), 500
+
+    connect = get_db()
+    cursor = connect.cursor()
+
+    try:
+        repository = UserRepository(connect)
+        repository.update_avatar(cursor, user_id, key)
+        connect.commit()
+        return jsonify({"avatar_url": key}), 200
+    
+    except Exception:
+        connect.rollback()
+        logger.exception("Failed to update avatar with webp image")
+        return jsonify({"error": "Failed to update avatar with webp image"}), 500
+    
+    finally:
+        cursor.close()

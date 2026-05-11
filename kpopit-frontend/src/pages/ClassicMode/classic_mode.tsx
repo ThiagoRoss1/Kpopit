@@ -34,6 +34,7 @@ import FeedbackSquares from "../../components/FeedbackSquares/FeedbackSquares.ts
 import { WinnerExplosion } from "../../utils/confetti.tsx";
 import { calculateFeedback } from "../../utils/calculateFeedback.ts";
 import { useAllGameModes } from "../../hooks/useAllGameModes.tsx";
+import { useClearGameStorage } from "../../hooks/useClearGameStorage.tsx";
 // import { Input } from "@chakra-ui/react"; - Css framework import example
 
 function ClassicMode() {
@@ -59,8 +60,10 @@ function ClassicMode() {
 
   // Transfer data logic hook
   
-  const { userToken, initUser, decryptedTokenRef, allIdolsData, isLoadingAllIdols, isErrorAllIdols, 
+  const { userToken, initUser, decryptedTokenRef, allIdolsData, isLoadingAllIdols, isErrorAllIdols,
     isInitialized, userStatsData, transferData, queryClient } = useSharedGameData();
+
+  const { clearClassic } = useClearGameStorage();
 
   const handleGuessAttempts = () => {
     setAttempts(prev => prev + 1);
@@ -116,19 +119,7 @@ function ClassicMode() {
    
     if (lastGameDate !== serverDate) {
       console.log("New day detected, clearing cache.");
-      localStorage.removeItem("todayGuessesDetails");
-      localStorage.removeItem("GuessedIdols");
-      localStorage.removeItem("gameComplete");
-      localStorage.removeItem("gameWon");
-      localStorage.removeItem("hint1Revealed");
-      localStorage.removeItem("showHint1");
-      localStorage.removeItem("colorize1");
-      localStorage.removeItem("hint2Revealed");
-      localStorage.removeItem("showHint2");
-      localStorage.removeItem("colorize2");
-      localStorage.removeItem("animatedIdols");
-      localStorage.removeItem("closeFeedbackSquares");
-      localStorage.removeItem("confettiShown");
+      clearClassic();
 
       localStorage.setItem("gameDate", serverDate || "");
 
@@ -165,7 +156,7 @@ function ClassicMode() {
       setDayChecked(true);
       setConfetti(confettiShown);
     }
-  }, [gameData]);
+  }, [gameData, clearClassic]);
 
   const guessMutation = useMutation({
     mutationFn: async (guessData: CompleteGuessRequest) => {

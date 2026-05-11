@@ -48,8 +48,8 @@
 
 .profile-bg-glow {
     background-image:
-        radial-gradient(ellipse at 20% 0%, rgba(255, 51, 153, 0.06), transparent 55%),
-        radial-gradient(ellipse at 90% 100%, rgba(231, 10, 125, 0.05), transparent 55%),
+        radial-gradient(ellipse at 20% 0%, rgba(0, 0, 0, 0.06), transparent 55%),
+        radial-gradient(ellipse at 90% 100%, rgba(0, 0, 0, 0.05), transparent 55%),
         radial-gradient(rgba(255, 255, 255, 0.015) 1px, transparent 1px);
     background-size: auto, auto, 4px 4px;
 }

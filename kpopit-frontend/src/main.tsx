@@ -13,6 +13,9 @@ import MaintenancePage from './pages/Maintenance/MaintenancePage'
 import IdolsList from './pages/Idols/IdolsList'
 import IdolProfile from './pages/Idols/IdolProfile'
 import AuthPage from './pages/AuthUser/AuthPage'
+import ForgotPassword from './pages/AuthUser/ForgotPassword'
+import ResetPassword from './pages/AuthUser/ResetPassword'
+import VerifyEmail from './pages/AuthUser/VerifyEmail'
 import UserProfile from './pages/User/UserProfile'
 import { AuthProvider } from './contexts/AuthProvider'
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
@@ -41,6 +44,12 @@ createRoot(document.getElementById('root')!).render(
                 <Route path="/login" element={<AuthPage />} />
 
                 <Route path="/register" element={<AuthPage />} />
+
+                <Route path="/forgot-password" element={<ForgotPassword />} />
+
+                <Route path="/reset-password" element={<ResetPassword />} />
+
+                <Route path="/verify-email" element={<VerifyEmail />} />
 
                 <Route path="/classic" element={<ClassicMode />} />
 

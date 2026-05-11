@@ -40,6 +40,14 @@ class UserRepository:
             """, (user_id,)
         )
         return cursor.fetchone()
+    
+    def check_username_exists(self, cursor, username: str) -> bool:
+        cursor.execute(
+            """
+                SELECT 1 FROM users WHERE LOWER(username) = LOWER(%s)
+            """, (username,)
+        )
+        return cursor.fetchone() is not None
 
     # Mutations
     def upgrade_to_authenticated(self, cursor, token: str, username: str, password_hash: str, email: str | None) -> dict | None:
@@ -177,6 +185,42 @@ class UserRepository:
             (token_hash,)
         )
 
+    # Profile changes
+    def update_display_name(self, cursor, user_id: int, display_name: str) -> dict:
+        cursor.execute(
+            """
+                UPDATE user_profiles
+                SET display_name = %s,
+                    updated_at = CURRENT_TIMESTAMP
+                WHERE user_id = %s
+                RETURNING display_name, updated_at
+            """, (display_name, user_id)
+        )
+        return cursor.fetchone()
+    
+    def update_username(self, cursor, user_id: int, username: str) -> dict:
+        cursor.execute(
+            """
+                UPDATE users
+                SET username = %s
+                WHERE id = %s
+                RETURNING username, username_changed_at
+            """, (username, user_id)
+        )
+        return cursor.fetchone()
+
+    def update_avatar(self, cursor, user_id: int, avatar_url: str) -> dict:
+        cursor.execute(
+            """
+                UPDATE user_profiles
+                SET avatar_url = %s,
+                    updated_at = CURRENT_TIMESTAMP
+                WHERE user_id = %s
+                RETURNING avatar_url, updated_at
+            """, (avatar_url, user_id)
+        )
+        return cursor.fetchone()
+    
     # Utility
     @staticmethod
     def hash_token_for_storage(raw_token: str) -> str:
