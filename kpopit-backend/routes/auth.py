@@ -218,6 +218,8 @@ def me():
             return jsonify({"error": "User not found"}), 404
 
         profile = repo.get_profile(cursor, user_id)
+        auth_fields = repo.find_auth_fields_by_id(cursor, user_id)
+        username_changed_at = auth_fields.get("username_changed_at") if auth_fields else None
 
         return jsonify({
             "user_credentials": {
@@ -225,7 +227,8 @@ def me():
                 "username": user.get("username"),
                 "email": user.get("email"),
                 "is_admin": bool(user.get("is_admin", False)),
-                "is_authenticated": bool(user.get("is_authenticated", False))
+                "is_authenticated": bool(user.get("is_authenticated", False)),
+                "username_changed_at": username_changed_at.isoformat() if username_changed_at else None,
             },
             "profile": {
                 "display_name": profile["display_name"] if profile else None,

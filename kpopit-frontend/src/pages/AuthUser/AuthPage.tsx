@@ -8,21 +8,12 @@ import { useAuth } from "../../hooks/useAuth";
 import { getIdolsPage, getGameModesCount, checkUsernameAvailability } from "../../services/api";
 import type { IdolsPageData } from "../../interfaces/gameInterfaces";
 import type { LoginData, RegisterData } from "../../interfaces/authInterfaces";
+import { getPasswordStrength } from "../../utils/getPasswordStrength";
 import AuthBackground from "./AuthBackground";
 import "./authPage.css";
 
 // Mirrors backend validate_username in utils/auth_helpers.py
 const USERNAME_REGEX = /^[a-zA-Z0-9_-]+$/;
-
-function getPasswordStrength(pass: string) {
-    if (!pass) return null;
-    if (pass.length < 8) return { label: "Weak", color: "#ff4444", width: "33%" };
-    const hasLetter = /[a-zA-Z]/.test(pass);
-    const hasNumber = /[0-9]/.test(pass);
-    const hasSpecial = /[^A-Za-z0-9]/.test(pass);
-    if (hasLetter && hasNumber && hasSpecial) return { label: "Strong", color: "#00C851", width: "100%" };
-    return { label: "Medium", color: "#ffbb33", width: "66%" };
-}
 
 const AuthPage = () => {
     const location = useLocation();
@@ -136,7 +127,7 @@ const AuthPage = () => {
     // Mirrors backend validate_username — only used for the register tab's Check icon.
     const isValidUsername =
         registerFormData.username.length >= 3
-        && registerFormData.username.length <= 30
+        && registerFormData.username.length <= 12
         && USERNAME_REGEX.test(registerFormData.username);
 
     useEffect(() => {

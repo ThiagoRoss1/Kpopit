@@ -113,8 +113,8 @@ def validate_username(username: str) -> str | None:
     if len(username) < 3:
         return "Username must be at least 3 characters."
     
-    if len(username) > 30:
-        return "Username must be at most 30 characters."
+    if len(username) > 12:
+        return "Username must be at most 12 characters."
     
     if not re.match(r'^[a-zA-Z0-9_-]+$', username):
         return "Username may only contain letters, numbers, underscores, and hyphens."

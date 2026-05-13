@@ -143,11 +143,6 @@ const GuessRow = (props: GuessRowProps) => {
                             alt="Idol"
                             className="w-20 h-20 sm:w-28 sm:h-28 object-cover select-none"
                             draggable={false}
-                            style={{ 
-                            transform: 'translate3d(0, 0, 0)',
-                            backfaceVisibility: 'hidden',      
-                            imageRendering: 'crisp-edges'
-                            }}
                             loading={isMobile ? "lazy" : "eager"}
                         />
                     </Link>

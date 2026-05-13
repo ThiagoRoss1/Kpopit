@@ -7,10 +7,11 @@ from utils.dates import get_today_now, get_current_timestamp, get_today_date_str
 from flask import Blueprint, request, jsonify, g
 from utils.auth_decorators import require_auth
 from repositories.user_repository import UserRepository
-from utils.auth_helpers import validate_display_name, validate_username
+from utils.auth_helpers import validate_display_name, validate_username, validate_password
 from utils.convert_to_webp import convert_to_webp_bytes
 from utils.r2 import R2Client
 from utils.rate_limiter import limiter
+from services.auth_service import AuthService
 import logging
 
 user_bp = Blueprint('users', __name__)
@@ -342,29 +343,34 @@ def get_active_transfer_code(user_token):
 @user_bp.route("/user/profile", methods=["PATCH"])
 @require_auth
 def update_display_name():
-    """Update the user's display name"""
+    """Update the user's display name and/or username.
 
-    data = request.get_json()
+    When `username` is being changed, `current_password` is required and
+    verified, and the 5-day cooldown is enforced.
+    """
+
+    data = request.get_json() or {}
     display_name = data.get("display_name")
     username = data.get("username")
+    current_password = data.get("current_password", "")
 
     if not display_name and not username:
         return jsonify({"error": "No display name or username provided"}), 400
 
     user_id = g.auth["user_id"]
 
-    if display_name: 
+    if display_name:
         display_name_error = validate_display_name(display_name)
-
         if display_name_error:
             return jsonify({"error": display_name_error}), 400
-        
+
     if username:
         username_error = validate_username(username)
-        
         if username_error:
             return jsonify({"error": username_error}), 400
-        
+        if not current_password:
+            return jsonify({"error": "Current password is required to change username"}), 400
+
     connect = get_db()
     cursor = connect.cursor()
 
@@ -376,25 +382,33 @@ def update_display_name():
             result["display_name"] = repository.update_display_name(cursor, user_id, display_name)
 
         if username:
-            user = repository.find_by_id(cursor, user_id)
-            if user["username_changed_at"]:
-                days_since = (datetime.now(timezone.utc) - user["username_changed_at"]).days
+            auth_fields = repository.find_auth_fields_by_id(cursor, user_id)
+            if not auth_fields or not auth_fields.get("password_hash"):
+                return jsonify({"error": "Current password is incorrect"}), 401
+            if not AuthService(connect).verify_password(current_password, auth_fields["password_hash"]):
+                return jsonify({"error": "Current password is incorrect"}), 401
+
+            changed_at = auth_fields.get("username_changed_at")
+            if changed_at:
+                if changed_at.tzinfo is None:
+                    changed_at = changed_at.replace(tzinfo=timezone.utc)
+                days_since = (datetime.now(timezone.utc) - changed_at).days
                 if days_since < 5:
                     return jsonify({"error": f"Username can only be changed once every 5 days. Please wait {5 - days_since} more day(s)."}), 400
-                
+
             if repository.check_username_exists(cursor, username):
                 return jsonify({"error": "Username already exists"}), 400
-            
+
             result["username"] = repository.update_username(cursor, user_id, username)
 
         connect.commit()
         return jsonify(result), 200
-    
+
     except Exception:
         connect.rollback()
-        logger.exception("Failed to update display name")
-        return jsonify({"error": "Failed to update display name"}), 500
-    
+        logger.exception("Failed to update profile")
+        return jsonify({"error": "Failed to update profile"}), 500
+
     finally:
         cursor.close()
 
@@ -448,12 +462,16 @@ def update_avatar_webp():
 
     if not file:
         return jsonify({"error": "Missing avatar file"}), 400
-    
+
+    print(f"[avatar] file received: {file.filename!r}, mimetype={file.mimetype}, content_length={file.content_length}")
+
     user_id = g.auth["user_id"]
 
     try:
         file_bytes = file.read()
+        print(f"[avatar] read {len(file_bytes)} bytes from request")
         webp_image_bytes = convert_to_webp_bytes(file_bytes)
+        print(f"[avatar] converted to webp: {len(webp_image_bytes)} bytes")
     
     except Exception:
         logger.exception("Failed to convert image to webp")
@@ -475,11 +493,63 @@ def update_avatar_webp():
         repository.update_avatar(cursor, user_id, key)
         connect.commit()
         return jsonify({"avatar_url": key}), 200
-    
+
     except Exception:
         connect.rollback()
         logger.exception("Failed to update avatar with webp image")
         return jsonify({"error": "Failed to update avatar with webp image"}), 500
-    
+
+    finally:
+        cursor.close()
+
+@user_bp.route("/user/change-password", methods=["PATCH"])
+@require_auth
+@limiter.limit("5 per hour")
+def change_password():
+    """Change the password of the currently authenticated user.
+
+    Requires the current password for re-authentication. Revokes all
+    refresh tokens to force re-login on other devices.
+    """
+    data = request.get_json() or {}
+    current_password = data.get("current_password", "")
+    new_password = data.get("new_password", "")
+    confirm_password = data.get("confirm_password", "")
+
+    if not current_password:
+        return jsonify({"error": "Current password is required"}), 400
+    if new_password != confirm_password:
+        return jsonify({"error": "New passwords do not match"}), 400
+
+    err = validate_password(new_password)
+    if err:
+        return jsonify({"error": err}), 400
+
+    user_id = g.auth["user_id"]
+    connect = get_db()
+    cursor = connect.cursor()
+
+    try:
+        repository = UserRepository(connect)
+        auth_fields = repository.find_auth_fields_by_id(cursor, user_id)
+
+        if not auth_fields or not auth_fields.get("password_hash"):
+            return jsonify({"error": "Current password is incorrect"}), 401
+
+        auth_service = AuthService(connect)
+        if not auth_service.verify_password(current_password, auth_fields["password_hash"]):
+            return jsonify({"error": "Current password is incorrect"}), 401
+
+        new_hash = auth_service.hash_password(new_password)
+        repository.update_password_hash(cursor, user_id, new_hash)
+        repository.revoke_all_user_refresh_tokens(cursor, user_id)
+        connect.commit()
+        return jsonify({"message": "Password updated"}), 200
+
+    except Exception:
+        connect.rollback()
+        logger.exception("Failed to change password")
+        return jsonify({"error": "Failed to change password"}), 500
+
     finally:
         cursor.close()

@@ -1,0 +1,101 @@
+@keyframes ep-overlay-in {
+    from { opacity: 0; }
+    to { opacity: 1; }
+}
+
+@keyframes ep-panel-in {
+    from {
+        opacity: 0;
+        transform: scale(0.97);
+    }
+    to {
+        opacity: 1;
+        transform: scale(1);
+    }
+}
+
+@keyframes ep-error-in {
+    from {
+        opacity: 0;
+        transform: translateY(-3px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+@keyframes ep-field-in {
+    from {
+        opacity: 0;
+        transform: translateY(4px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+.ep-overlay {
+    animation: ep-overlay-in 0.18s ease-out;
+}
+
+.ep-panel {
+    animation: ep-panel-in 0.22s cubic-bezier(0.34, 1.56, 0.64, 1);
+    transform-origin: center top;
+}
+
+.ep-error {
+    animation: ep-error-in 0.18s ease-out;
+}
+
+.ep-field {
+    animation: ep-field-in 0.22s ease-out;
+}
+
+.ep-tab-pill {
+    transition: left 0.28s;
+}
+
+/* Input frame — solid retro border, neon-pink offset shadow on focus */
+.ep-input {
+    border: 3px solid #2a2a2a;
+    transition: border-color 0.15s ease, box-shadow 0.15s ease;
+}
+.ep-input:focus-within {
+    border-color: #ff3399;
+    box-shadow: 4px 4px 0px #ff3399;
+}
+
+/* Password strength bar */
+.ep-strength {
+    height: 3px;
+    transition: width 0.3s ease, background-color 0.3s ease;
+    border-radius: 99px;
+}
+
+/* Custom scrollbar inside the idol grid */
+.ep-idol-grid::-webkit-scrollbar {
+    width: 6px;
+}
+.ep-idol-grid::-webkit-scrollbar-track {
+    background: rgba(0, 0, 0, 0.4);
+    border-radius: 3px;
+}
+.ep-idol-grid::-webkit-scrollbar-thumb {
+    background: linear-gradient(180deg, #b43777, #ec4850);
+    border-radius: 3px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: linear-gradient(180deg, #e44798, #ff5c64);
+}
+
+/* Keep autofill from painting inputs blue */
+.ep-input input:-webkit-autofill,
+.ep-input input:-webkit-autofill:hover,
+.ep-input input:-webkit-autofill:focus {
+    -webkit-box-shadow: 0 0 0px 1000px #0a0a0a inset !important;
+    -webkit-text-fill-color: white !important;
+    caret-color: white;
+}

@@ -117,7 +117,7 @@ const AnswerHintsBox = (props: AnswerHintsBoxProps) => {
                             damping: 20
                         }}
                         className="w-lg max-xxs:h-auto h-28 max-w-full sm:w-lg sm:h-30 mx-auto 
-                        flex max-xxs:flex-col flex-row items-center max-xxs:justify-center justify-between max-xxs:gap-3 gap-0 px-1 sm:px-0 sm:gap-4 rounded-[15px] sm:rounded-[15px] bg-linear-to-b from-white/0 to-[#b4b4b4]/0 perspective-distant">
+                        flex max-sxs:flex-col flex-row items-center max-xxs:justify-center justify-between max-xxs:gap-3 gap-0 px-1 sm:px-0 sm:gap-4 rounded-[15px] sm:rounded-[15px] bg-linear-to-b from-white/0 to-[#b4b4b4]/0 perspective-distant">
 
             {/* Box 1 */}
             <div className="relative perspective-distant max-xxs:w-full">

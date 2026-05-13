@@ -1,6 +1,6 @@
 import axios from 'axios';
 import type { AddIdolRequest, CompleteGuessTrafficRequest, RestoreSessionResponse } from '../interfaces/gameInterfaces';
-import type { MeResponse } from '../interfaces/authInterfaces';
+import type { MeResponse, UpdateProfilePayload } from '../interfaces/authInterfaces';
 import { decryptToken } from '../utils/tokenEncryption';
 import { setAccessToken, getAccessToken, clearAccessToken } from './tokenStore';
 // Api instance with base URL
@@ -295,5 +295,35 @@ export const sendVerificationEmail = async () => {
 
 export const verifyEmail = async (token: string) => {
     const response = await api.post('/email/verify-email', { token });
+    return response.data;
+}
+
+export const updateProfile = async (payload: UpdateProfilePayload) => {
+    const response = await api.patch('/user/profile', payload);
+    return response.data;
+}
+
+export const uploadAvatarFile = async (blob: Blob) => {
+    const formData = new FormData();
+    formData.append('avatar', blob, 'avatar.png');
+    if (import.meta.env.DEV) {
+        console.log('[uploadAvatarFile] blob size:', blob.size, 'type:', blob.type);
+        console.log('[uploadAvatarFile] formData avatar:', formData.get('avatar'));
+    }
+    const response = await api.post('/user/avatar', formData);
+    return response.data;
+}
+
+export const setAvatarFromIdol = async (avatar_url: string) => {
+    const response = await api.patch('/user/avatar', { avatar_url });
+    return response.data;
+}
+
+export const changePassword = async (current_password: string, new_password: string, confirm_password: string) => {
+    const response = await api.patch('/user/change-password', {
+        current_password,
+        new_password,
+        confirm_password,
+    });
     return response.data;
 }

@@ -4,6 +4,7 @@ import { Link, useNavigate } from "react-router-dom";
 import { LogOut, User } from "lucide-react";
 import { useAuth } from "../../hooks/useAuth";
 import { useAuthUser } from "../../hooks/useAuthUser";
+import { resolveAvatarUrl } from "../../utils/resolveAvatarUrl";
 
 const UserDropdown = () => {
     const { user, refreshAuth } = useAuth();
@@ -27,7 +28,7 @@ const UserDropdown = () => {
 
     if (!user) return null;
 
-    const avatarSrc = `${import.meta.env.VITE_IMAGE_BUCKET_URL}${user.profile.avatar_url}`;
+    const avatarSrc = `${resolveAvatarUrl(user.profile.avatar_url)}`;
     const displayName = user.profile.display_name;
     const username = user.user_credentials.username;
 

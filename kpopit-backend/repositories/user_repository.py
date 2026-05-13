@@ -35,8 +35,20 @@ class UserRepository:
     def find_by_id(self, cursor, user_id: int) -> dict | None:
         cursor.execute(
             """
-                SELECT id, token, username, email, email_verified, is_authenticated, 
+                SELECT id, token, username, email, email_verified, is_authenticated,
                 is_admin, last_login_at, created_at FROM users WHERE id = %s
+            """, (user_id,)
+        )
+        return cursor.fetchone()
+
+    def find_auth_fields_by_id(self, cursor, user_id: int) -> dict | None:
+        """Returns password_hash + username_changed_at for a logged-in user.
+        Kept separate from find_by_id so that endpoint shapes don't accidentally
+        leak the password hash."""
+        cursor.execute(
+            """
+                SELECT password_hash, username_changed_at
+                FROM users WHERE id = %s
             """, (user_id,)
         )
         return cursor.fetchone()
@@ -202,7 +214,8 @@ class UserRepository:
         cursor.execute(
             """
                 UPDATE users
-                SET username = %s
+                SET username = %s,
+                    username_changed_at = CURRENT_TIMESTAMP
                 WHERE id = %s
                 RETURNING username, username_changed_at
             """, (username, user_id)

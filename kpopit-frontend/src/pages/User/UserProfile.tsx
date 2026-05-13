@@ -8,8 +8,10 @@ import { getUserStats, sendVerificationEmail } from "../../services/api";
 import { decryptToken } from "../../utils/tokenEncryption";
 import type { UserStats } from "../../interfaces/gameInterfaces";
 import StatsCard from "./StatsCard";
+import EditProfile from "./EditProfile";
 import HaerinGif from "../../assets/imgs/haerin.gif";
 import HaerinWebp from "../../assets/imgs/haerinok.webp";
+import { resolveAvatarUrl } from "../../utils/resolveAvatarUrl";
 
 const EMAIL_BANNER_DISMISS_KEY = "emailVerifiedBannerDismissed";
 
@@ -61,10 +63,12 @@ const UserProfile = () => {
     const [filter, setFilter] = useState<GamemodeFilter>("all");
     const [decryptedToken, setDecryptedToken] = useState<string | null>(null);
     const [isGif, setIsGif] = useState(true);
-    const [bannerDismissed, setBannerDismissed] = useState<boolean>(
-        () => sessionStorage.getItem(EMAIL_BANNER_DISMISS_KEY) === "true"
-    );
+    const [bannerDismissed, setBannerDismissed] = useState<boolean>(() => sessionStorage.getItem(EMAIL_BANNER_DISMISS_KEY) === "true");
     const [resendSent, setResendSent] = useState(false);
+    const [editModal, setEditModal] = useState<{ open: boolean; initialTab: "fields" | "avatar" }>({
+        open: false,
+        initialTab: "fields",
+    });
 
     const resendMutation = useMutation({
         mutationFn: () => sendVerificationEmail(),
@@ -152,7 +156,7 @@ const UserProfile = () => {
     const displayName = user?.profile.display_name ?? null;
     const username = user?.user_credentials.username ?? null;
     const avatarSrc = user?.profile.avatar_url
-        ? `${import.meta.env.VITE_IMAGE_BUCKET_URL}${user.profile.avatar_url}`
+        ? resolveAvatarUrl(user.profile.avatar_url, user.profile.updated_at)
         : null;
     const joinedDisplay = formatJoined(user?.profile.created_at);
 
@@ -253,12 +257,16 @@ const UserProfile = () => {
                                                 <img
                                                     src={avatarSrc}
                                                     alt={`${displayName} avatar`}
-                                                    className="w-full h-full object-cover"
+                                                    className="w-full h-full object-cover hover:cursor-pointer hover:brightness-90"
                                                     draggable={false}
-                                                    onClick={() => {console.log("Edit profile")}}
+                                                    onClick={() => setEditModal({ open: true, initialTab: "avatar" })}
                                                 />
                                             ) : (
-                                                <div className="w-full h-full bg-linear-to-b from-[#2a2a2a] to-[#0e0e0e]" />
+                                                <button
+                                                    type="button"
+                                                    onClick={() => setEditModal({ open: true, initialTab: "avatar" })}
+                                                    className="w-full h-full bg-linear-to-b from-[#2a2a2a] to-[#0e0e0e] hover:cursor-pointer"
+                                                />
                                             )}
                                         </div>
 
@@ -290,7 +298,7 @@ const UserProfile = () => {
                                 {/* Edit profile */}
                                 <button
                                     type="button"
-                                    onClick={() => console.log("Edit profile working")}
+                                    onClick={() => setEditModal({ open: true, initialTab: "fields" })}
                                     className="w-full mt-1 px-4 py-2.5 rounded-lg text-base font-black [text-shadow:2px_2px_0px_#000000]
                                     border border-white bg-neon-pink/0 text-white
                                     shadow-[3px_3px_0px_#ffffff]
@@ -464,6 +472,12 @@ const UserProfile = () => {
                     )}
                 </div>
             </main>
+
+            <EditProfile
+                isOpen={editModal.open}
+                onClose={() => setEditModal((m) => ({ ...m, open: false }))}
+                initialTab={editModal.initialTab}
+            />
         </>
     );
 };
