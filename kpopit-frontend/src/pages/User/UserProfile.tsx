@@ -178,20 +178,19 @@ const UserProfile = () => {
                     {showEmailBanner && (
                         <div
                             role="status"
-                            className="relative flex flex-col xxs:flex-row items-start xxs:items-center gap-3 xxs:gap-4 mb-5
-                            px-4 sxs:px-5 py-3 sxs:py-3.5
-                            bg-[#111111] border-2 border-neon-pink rounded-xl
-                            shadow-[3px_3px_0px_rgba(255,51,153,0.35)]"
+                            className="relative flex flex-col xxs:flex-row justify-center items-start xxs:items-center gap-3 xxs:gap-6 mb-5
+                            px-4 sxs:px-5 py-3 sxs:py-3.5 bg-[#111111] rounded-xl
+                            shadow-[3px_3px_0px_rgba(255,255,255,1)]"
                         >
-                            <Mail className="w-5 h-5 text-neon-pink shrink-0" />
+                            <Mail className="w-5 h-5 text-white shrink-0" />
 
                             <div className="flex-1 min-w-0">
                                 {resendSent ? (
-                                    <span className="text-[12px] sxs:text-[13px] text-white/85 font-bold">
+                                    <span className="text-[12px] sxs:text-sm text-white/85 font-bold">
                                         Verification email sent — check your inbox.
                                     </span>
                                 ) : (
-                                    <span className="text-[12px] sxs:text-[13px] text-white/85 font-bold leading-snug">
+                                    <span className="text-[12px] sxs:text-sm text-white/85 font-bold leading-snug">
                                         Your email isn't verified yet.
                                     </span>
                                 )}
@@ -202,9 +201,9 @@ const UserProfile = () => {
                                     type="button"
                                     onClick={() => resendMutation.mutate()}
                                     disabled={resendMutation.isPending}
-                                    className={`shrink-0 px-3.5 py-2 rounded-lg text-[10px] sxs:text-[11px] font-black uppercase tracking-widest
-                                    bg-neon-pink text-white [text-shadow:1px_1px_0px_rgba(0,0,0,1)]
-                                    shadow-[2px_2px_0px_#000] hover:translate-x-0.5 hover:translate-y-0.5 hover:shadow-[0px_0px_0px_#000]
+                                    className={`shrink-0 px-3.5 py-2 rounded-lg text-[10px] sxs:text-[12px] font-black uppercase tracking-widest
+                                    bg-neon-pink text-white [text-shadow:1.5px_1.5px_2px_rgba(0,0,0,0.9)] shadow-[3px_3px_0px_rgba(255,255,255,1)] 
+                                    hover:translate-x-1 hover:translate-y-1 hover:shadow-[0px_0px_0px_#000]
                                     hover:cursor-pointer transition-all duration-150 transform-gpu
                                     ${resendMutation.isPending ? "opacity-70" : ""}`}
                                 >
@@ -217,10 +216,11 @@ const UserProfile = () => {
                                 onClick={dismissBanner}
                                 aria-label="Dismiss"
                                 className="absolute top-1.5 right-1.5 xxs:static xxs:top-auto xxs:right-auto
-                                shrink-0 grid place-items-center w-7 h-7 rounded-md text-white/50
-                                hover:text-white hover:bg-white/10 hover:cursor-pointer transition-colors"
+                                shrink-0 grid place-items-center w-10 h-10 rounded-2xl border-2 border-white/15
+                                    text-white/70 hover:text-white hover:bg-white/5 hover:border-white
+                                    hover:cursor-pointer transition-colors duration-300"
                             >
-                                <X className="w-4 h-4" />
+                                <X className="w-5 h-5" />
                             </button>
                         </div>
                     )}

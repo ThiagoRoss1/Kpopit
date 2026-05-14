@@ -94,6 +94,7 @@ const AvatarModal = ({ isOpen, onClose, onBack, avatarUrl }: AvatarModalProps) =
             setIdolSearch("");
             setUploadError(null);
             setSaveError(null);
+            setHasChosen(false);
             return;
         }
         const tracked = blobUrlsRef.current;

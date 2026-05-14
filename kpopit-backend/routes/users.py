@@ -542,7 +542,6 @@ def change_password():
 
         new_hash = auth_service.hash_password(new_password)
         repository.update_password_hash(cursor, user_id, new_hash)
-        repository.revoke_all_user_refresh_tokens(cursor, user_id)
         connect.commit()
         return jsonify({"message": "Password updated"}), 200
 

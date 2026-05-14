@@ -48,7 +48,7 @@ const UserDropdown = () => {
             <button
                 type="button"
                 onClick={() => setIsOpen(prev => !prev)}
-                className="w-9 h-9 sm:w-10 sm:h-10 rounded-full overflow-hidden bg-transparent hover:scale-105 hover:cursor-pointer transition-transform duration-300 transform-gpu"
+                className="flex items-center justify-center w-9 h-9 sm:w-10 sm:h-10 rounded-full overflow-hidden bg-transparent hover:scale-105 hover:cursor-pointer transition-transform duration-300 transform-gpu"
                 aria-label="User menu"
                 aria-expanded={isOpen}
             >

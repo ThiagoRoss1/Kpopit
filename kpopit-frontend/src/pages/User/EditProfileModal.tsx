@@ -59,13 +59,13 @@ const EditProfileModal = ({ isOpen, onClose, title, subtitle, children }: EditPr
                         className="ep-panel relative z-10 flex flex-col bg-[#111111] border-4 border-neon-pink
                             rounded-4xl shadow-[4px_4px_0px_rgba(255,51,153,0.4)] overflow-hidden"
                     >
-                        <header className="flex items-center justify-between gap-3 px-5 sxs:px-6 pt-5 pb-3 border-b border-white/20">
-                            <div className="flex flex-col min-w-0">
-                                <h2 className="text-xl sxs:text-2xl font-sans italic font-black uppercase text-white tracking-wide">
+                        <header className="flex items-center justify-between gap-2 sxs:gap-3 px-4 sxs:px-6 pt-5 pb-3 border-b border-white/20">
+                            <div className="flex flex-col flex-1 min-w-0">
+                                <h2 className="block text-xl sxs:text-2xl font-sans italic font-black uppercase text-white tracking-wide">
                                     {title}
                                 </h2>
                                 {subtitle && (
-                                    <span className="font-sans italic text-[10px] text-white/40 font-black uppercase tracking-[0.4em]">
+                                    <span className="block truncate font-sans italic text-[10px] text-white/40 font-black uppercase tracking-[0.25em] sxs:tracking-[0.4em]">
                                         {subtitle}
                                     </span>
                                 )}

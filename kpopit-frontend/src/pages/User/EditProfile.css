@@ -37,7 +37,7 @@
 }
 
 .ep-overlay {
-    animation: ep-overlay-in 0.18s ease-out;
+    opacity: 1;
 }
 
 .ep-panel {

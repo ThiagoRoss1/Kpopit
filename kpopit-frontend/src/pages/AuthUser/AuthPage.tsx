@@ -258,6 +258,7 @@ const AuthPage = () => {
                                             value={isLoginTab ? loginFormData.identifier : registerFormData.username}
                                             onChange={isLoginTab ? handleLoginChange : handleRegisterChange}
                                             placeholder={isLoginTab ? "@username or email" : "Pick your stage name"}
+                                            maxLength={isLoginTab ? undefined : 12}
                                             autoComplete="username"
                                             className="w-full h-full pl-11 pr-11 bg-[#0a0a0a] text-sm font-bold text-white placeholder:text-neutral-700 focus:outline-none"
                                         />

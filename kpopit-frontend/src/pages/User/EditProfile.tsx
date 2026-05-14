@@ -250,7 +250,7 @@ const EditProfile = (props: EditProfileProps) => {
                             saveMutation.mutate(trimmedName);
                         }}
                         disabled={!canSave}
-                        className={`flex items-center gap-2 px-8 py-3 rounded-xl text-[12px] font-black uppercase tracking-[0.18em]
+                        className={`flex justify-center items-center gap-2 px-8 py-3 rounded-xl text-[12px] font-black uppercase tracking-[0.18em]
                             bg-neon-pink text-white [text-shadow:1.5px_1.5px_2px_rgba(0,0,0,0.9)] ${canSave ? "shadow-[3px_3px_0px_rgba(255,255,255,1)]" : ""}
                             hover:translate-x-1 hover:translate-y-1 hover:shadow-[1px_1px_0px_rgba(0,0,0,1)]
                             hover:cursor-pointer transition-all duration-300 transform-gpu
