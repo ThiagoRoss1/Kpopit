@@ -102,6 +102,18 @@ const AvatarModal = ({ isOpen, onClose, onBack, avatarUrl }: AvatarModalProps) =
         tracked.clear();
     }, [isOpen]);
 
+    // Unmount safety net: revoke any blob URLs still alive if the component
+    // is unmounted while isOpen is still true (e.g. parent closes EditProfile
+    // while the user is on the avatar sub-modal). The effect above does NOT
+    // run in that path because isOpen never transitions to false here.
+    useEffect(() => {
+        const tracked = blobUrlsRef.current;
+        return () => {
+            tracked.forEach((u) => URL.revokeObjectURL(u));
+            tracked.clear();
+        };
+    }, []);
+
     const handleFile = useCallback(async (file: File) => {
         setUploadError(null);
         if (!file.type.startsWith("image/")) {
@@ -439,7 +451,7 @@ const AvatarModal = ({ isOpen, onClose, onBack, avatarUrl }: AvatarModalProps) =
                             saveMutation.mutate();
                         }}
                         disabled={!canSave}
-                        className="flex-1 px-4 py-2.5 rounded-xl text-sm font-black
+                        className="flex flex-row justify-center items-center gap-1 px-4 py-2.5 rounded-xl text-sm font-black
                         bg-transparent border-2 border-neon-pink text-white [text-shadow:1.5px_1.5px_2px_rgba(0,0,0,0.9)]
                         hover:bg-neon-pink hover:cursor-pointer transition-all duration-300
                         disabled:opacity-50 disabled:cursor-not-allowed

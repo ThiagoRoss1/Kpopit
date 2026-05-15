@@ -28,7 +28,7 @@ const UserDropdown = () => {
 
     if (!user) return null;
 
-    const avatarSrc = `${resolveAvatarUrl(user.profile.avatar_url)}`;
+    const avatarSrc = resolveAvatarUrl(user.profile.avatar_url);
     const displayName = user.profile.display_name;
     const username = user.user_credentials.username;
 
@@ -52,12 +52,16 @@ const UserDropdown = () => {
                 aria-label="User menu"
                 aria-expanded={isOpen}
             >
-                <img
-                    src={avatarSrc}
-                    alt="User avatar"
-                    className="w-full h-full rounded-full object-cover"
-                    draggable={false}
-                />
+                {avatarSrc ? (
+                    <img
+                        src={avatarSrc}
+                        alt="User avatar"
+                        className="w-full h-full rounded-full object-cover"
+                        draggable={false}
+                    />
+                ) : (
+                    <div className="w-full h-full rounded-full bg-linear-to-b from-[#2a2a2a] to-[#0e0e0e]" />
+                )}
             </button>
 
             <div
@@ -66,12 +70,16 @@ const UserDropdown = () => {
             >
                 {/* Header */}
                 <div className="flex flex-row items-center gap-3 px-4 py-3 border-b border-neon-pink/20">
-                    <img
-                        src={avatarSrc}
-                        alt="User avatar"
-                        className="w-10 h-10 rounded-full object-cover shrink-0"
-                        draggable={false}
-                    />
+                    {avatarSrc ? (
+                        <img
+                            src={avatarSrc}
+                            alt="User avatar"
+                            className="w-10 h-10 rounded-full object-cover shrink-0"
+                            draggable={false}
+                        />
+                    ) : (
+                        <div className="w-10 h-10 rounded-full shrink-0 bg-linear-to-b from-[#2a2a2a] to-[#0e0e0e]" />
+                    )}
                     <div className="flex flex-col min-w-0 font-sans">
                         <span title={displayName} className="text-white font-black truncate max-w-35">
                             {displayName}

@@ -229,12 +229,12 @@ const AuthPage = () => {
 
                             {/* Title */}
                             <div className="mb-6 text-center">
-                                <h1 className="text-4xl sxs:text-5xl font-sans flex flex-col font-black uppercase leading-tight">
-                                    <span className="text-white">{isLoginTab ? "Ready to" : "Join the"}</span>
-                                    <span className="text-neon-pink">{isLoginTab ? "Stand Out?" : "Universe."}</span>
+                                <h1 className="text-4xl sxs:text-5xl justify-center items-center font-sans flex flex-col font-black uppercase leading-tight">
+                                    <span className="text-white">{isLoginTab ? "Welcome" : "Welcome to"}</span>
+                                    <span className="text-neon-pink">{isLoginTab ? "Back!" : "KpopIt!"}</span>
                                 </h1>
-                                <p className="mt-3 text-[12px] text-white/40 font-black uppercase tracking-[0.5em]">
-                                    {isLoginTab ? "Spotlight awaits" : "Start your streak today"}
+                                <p className="mt-3 text-sm text-white/40 font-black uppercase tracking-[0.3em]">
+                                    {isLoginTab ? "Spotlight awaits" : "Make your debut today"}
                                 </p>
                             </div>
 
@@ -430,7 +430,10 @@ const AuthPage = () => {
                                 <button
                                     type="submit"
                                     disabled={isPending}
-                                    className={`flex items-center justify-center w-full h-16 font-sans italic gap-1.5 bg-neon-pink rounded-2xl shadow-[4px_4px_0px_rgba(0,0,0,1)] text-center text-lg text-white font-black [text-shadow:2px_2px_4px_rgba(0,0,0,1)] hover:translate-x-1 hover:translate-y-1 hover:shadow-[0px_0px_0px_rgba(0,0,0,0)] hover:cursor-pointer transition-all duration-200 transform-gpu center-stage-btn ${isPending ? "opacity-70" : ""}`}
+                                    className={`flex items-center justify-center w-full h-16 font-sans italic gap-1.5 bg-neon-pink rounded-2xl 
+                                    shadow-[4px_4px_0px_rgba(255,255,255,1)] text-center text-lg text-white font-black 
+                                    [text-shadow:2px_2px_4px_rgba(0,0,0,1)] hover:translate-x-1 hover:translate-y-1 hover:shadow-[0px_0px_0px_rgba(0,0,0,0)] 
+                                    hover:cursor-pointer transition-all duration-200 transform-gpu center-stage-btn ${isPending ? "opacity-70" : ""}`}
                                 >
                                     {isPending
                                         ? (isLoginTab ? "Signing in..." : "Creating account...")
@@ -474,8 +477,6 @@ const AuthPage = () => {
                         </Link>
                         <div className="w-1.5 h-1.5 bg-neon-pink rounded-full" />
                         <span className="text-neon-pink">{gameModeCount ?? "—"} <span className="text-white/30">Game Modes</span></span>
-                        <div className="w-1.5 h-1.5 bg-neon-pink rounded-full" />
-                        <span className="text-neon-pink">Daily <span className="text-white/30">Challenges</span></span>
                     </div>
                 </div>
             </div>

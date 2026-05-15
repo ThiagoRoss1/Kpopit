@@ -24,7 +24,6 @@ const UserDropdownMobile = () => {
                 !containerRef.current.contains(target) &&
                 !target.closest("#user-menu-trigger")
             ) {
-                console.log("clicked outside")
                 setIsOpen(false);
             }
         };
@@ -34,7 +33,7 @@ const UserDropdownMobile = () => {
 
     if (!user) return null;
 
-    const avatarSrc = `${resolveAvatarUrl(user.profile.avatar_url)}`;
+    const avatarSrc = resolveAvatarUrl(user.profile.avatar_url);
     const displayName = user.profile.display_name;
     const username = user.user_credentials.username;
 
@@ -55,18 +54,22 @@ const UserDropdownMobile = () => {
                 className="flex justify-center items-center"
                 id="user-menu-trigger"
             >
-                <button 
+                <button
                     type="button"
                     onClick={() => setIsOpen(true)}
                     className="w-8 h-8 rounded-full overflow-hidden bg-transparent"
                     aria-label="Open user menu"
                 >
-                    <img
-                        src={avatarSrc}
-                        alt="User avatar"
-                        className="w-full h-full rounded-full object-cover"
-                        draggable={false}
-                    />
+                    {avatarSrc ? (
+                        <img
+                            src={avatarSrc}
+                            alt="User avatar"
+                            className="w-full h-full rounded-full object-cover"
+                            draggable={false}
+                        />
+                    ) : (
+                        <div className="w-full h-full rounded-full bg-linear-to-b from-[#2a2a2a] to-[#0e0e0e]" />
+                    )}
                 </button>
             </div>
 
@@ -88,12 +91,16 @@ const UserDropdownMobile = () => {
                     ref={containerRef}
                     className={`flex flex-col ${isOpen ? "mobile-navbar-enter" : "mobile-navbar-exit"} items-center gap-3 max-xxs:w-75 xxs:w-90 xs:w-100 sm:w-100 bg-[#0a0a0a] border-b-2 border-t-2 border-neon-pink rounded-3xl mt-20 py-8 px-6`}
                 >
-                    <img
-                        src={avatarSrc}
-                        alt="User avatar"
-                        className="w-16 h-16 rounded-full object-cover"
-                        draggable={false}
-                    />
+                    {avatarSrc ? (
+                        <img
+                            src={avatarSrc}
+                            alt="User avatar"
+                            className="w-16 h-16 rounded-full object-cover"
+                            draggable={false}
+                        />
+                    ) : (
+                        <div className="w-16 h-16 rounded-full bg-linear-to-b from-[#2a2a2a] to-[#0e0e0e]" />
+                    )}
                     <div className="flex flex-col items-center text-center font-sans">
                         <span title={displayName} className="text-white text-xl font-black truncate max-w-50">
                             {displayName}

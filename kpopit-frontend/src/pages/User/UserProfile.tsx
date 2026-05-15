@@ -160,10 +160,6 @@ const UserProfile = () => {
         : null;
     const joinedDisplay = formatJoined(user?.profile.created_at);
 
-    console.log("joinedDisplay raw:", user?.profile.created_at);
-    console.log("joinedDisplay result:", joinedDisplay);
-    console.log("user.profile (full):", user?.profile);
-
     const currentFilterLabel = displayed.streak_label || "null";
     const maxFilterLabel = displayed.max_streak_label || "null";
     const showGameMode = filter !== "all";

@@ -23,7 +23,7 @@ COOKIE_DOMAIN = os.getenv("COOKIE_DOMAIN") if IS_PRODUCTION else None
 auth_bp = Blueprint("auth", __name__)
 
 samesite = "None" if FLASK_ENV == "development" else "Strict"
-secure = samesite == "None"
+secure = True
 # samesite = "Lax" if FLASK_ENV == "development" else "Strict"
 # secure = IS_PRODUCTION
 
@@ -166,8 +166,9 @@ def logout():
 def refresh():
     """
     Issues a new access token from the httpOnly refresh cookie.
-    Cookie is scoped to Path=/api/auth/refresh and SameSite=Strict,
-    so it is never sent cross-site or to other endpoints.
+    Cookie path is /api/auth (prod) or / (dev); SameSite/Secure are set
+    in _set_refresh_cookie. In production the refresh token is also rotated
+    on every successful call (see AuthService.refresh_access_token).
     """
     raw_refresh = request.cookies.get("refresh_token")
 

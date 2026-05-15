@@ -22,8 +22,6 @@ class R2Client:
         """Uploads a file to R2 and returns the stored object key (no leading slash)."""
         key = f"avatars/{user_id}.webp"
 
-        print(f"[R2] uploading {len(file_bytes)} bytes to key={key!r}")
-
         try:
             self.s3.put_object(
                 Bucket=os.getenv('R2_AVATARS_BUCKET_NAME'),

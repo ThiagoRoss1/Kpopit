@@ -463,15 +463,11 @@ def update_avatar_webp():
     if not file:
         return jsonify({"error": "Missing avatar file"}), 400
 
-    print(f"[avatar] file received: {file.filename!r}, mimetype={file.mimetype}, content_length={file.content_length}")
-
     user_id = g.auth["user_id"]
 
     try:
         file_bytes = file.read()
-        print(f"[avatar] read {len(file_bytes)} bytes from request")
         webp_image_bytes = convert_to_webp_bytes(file_bytes)
-        print(f"[avatar] converted to webp: {len(webp_image_bytes)} bytes")
     
     except Exception:
         logger.exception("Failed to convert image to webp")
@@ -508,8 +504,10 @@ def update_avatar_webp():
 def change_password():
     """Change the password of the currently authenticated user.
 
-    Requires the current password for re-authentication. Revokes all
-    refresh tokens to force re-login on other devices.
+    Requires the current password for re-authentication. Refresh tokens
+    on other devices are intentionally NOT revoked here — the session JWT
+    is signed with JWT_SECRET_KEY (not the password), so existing sessions
+    keep working after a password change.
     """
     data = request.get_json() or {}
     current_password = data.get("current_password", "")

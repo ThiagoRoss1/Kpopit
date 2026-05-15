@@ -34,8 +34,9 @@ api.interceptors.response.use(
                 original.headers['Authorization'] = `Bearer ${data.access_token}`;
                 return api(original);
             } catch {
+                const hadToken = !!getAccessToken();
                 clearAccessToken();
-                if (getAccessToken()) window.location.reload();
+                if (hadToken) window.location.reload();
             }
         }
         if (error.response?.status === 400) {
@@ -266,11 +267,20 @@ export const logoutUser = async () => {
     return response.data;
 }
 
+// Single-flight guard: the 401 response interceptor and AuthProvider.restoreSession
+// can both call refreshToken() concurrently. In production the backend rotates
+// the refresh token on every call, so the second concurrent caller hits an
+// already-revoked hash and throws — logging the user out. Sharing one in-flight
+// promise across callers fixes the race without changing call-site behavior.
+let inFlightRefresh: Promise<{ access_token: string }> | null = null;
+
 export const refreshToken = async () => {
-    const response = await api.post('/auth/refresh', {}, {
-        withCredentials: true
-    });
-    return response.data;
+    if (inFlightRefresh) return inFlightRefresh;
+    inFlightRefresh = api
+        .post('/auth/refresh', {}, { withCredentials: true })
+        .then((response) => response.data)
+        .finally(() => { inFlightRefresh = null; });
+    return inFlightRefresh;
 }
 
 export const getMe = async (): Promise<MeResponse> => {

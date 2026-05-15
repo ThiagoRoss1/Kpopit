@@ -51,12 +51,18 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
 
             setState({ isAuthenticated: true, isLoading: false, user: me });
         } catch {
+            const wasAuthenticated = localStorage.getItem('kpopit_was_authenticated') === 'true';
             clearAccessToken();
             localStorage.removeItem('kpopit_session');
             sessionStorage.removeItem('kpopit_session');
-            localStorage.removeItem('userToken');
-            localStorage.removeItem('kpopit_was_authenticated');
-            clearAllRef.current();
+            if (wasAuthenticated) {
+                // Only wipe the anonymous UUID + game state if the user actually
+                // had a real session. A pure anonymous user whose refresh just
+                // happened to fail should keep their UUID and local progress.
+                localStorage.removeItem('userToken');
+                localStorage.removeItem('kpopit_was_authenticated');
+                clearAllRef.current();
+            }
             if (cancelledRef.current) return;
 
             setState({ isAuthenticated: false, isLoading: false, user: null });

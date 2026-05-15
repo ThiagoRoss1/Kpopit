@@ -23,7 +23,6 @@ const ForgotPassword = () => {
         },
         onError: (err: unknown) => {
             if (authError(err)) {
-                // 400 missing-email or similar — still don't leak. Show server message.
                 setError(err.response.data.error);
             } else {
                 setError("Something went wrong. Please try again.");
@@ -57,10 +56,10 @@ const ForgotPassword = () => {
 
                             <div className="mb-6 text-center">
                                 <h1 className="flex flex-col text-4xl sxs:text-[42px] font-sans font-black uppercase leading-tight">
-                                    <span className="text-white">Forgot</span>
-                                    <span className="text-neon-pink">Your Password?</span>
+                                    <span className="text-white">Forgot your</span>
+                                    <span className="text-neon-pink">Password?</span>
                                 </h1>
-                                <span className="mt-3 text-[12px] text-white/40 font-black uppercase tracking-[0.5em]">
+                                <span className="flex justify-center items-center mt-3 text-[12px] text-white/40 font-black uppercase tracking-[0.5em]">
                                     {submitted ? "Check your inbox" : "We'll send you a link"}
                                 </span>
                             </div>
@@ -124,7 +123,11 @@ const ForgotPassword = () => {
                                     <button
                                         type="submit"
                                         disabled={mutation.isPending}
-                                        className={`flex items-center justify-center w-full h-16 font-sans italic gap-1.5 bg-neon-pink rounded-2xl shadow-[4px_4px_0px_rgba(0,0,0,1)] text-center text-lg text-white font-black [text-shadow:2px_2px_4px_rgba(0,0,0,1)] hover:translate-x-1 hover:translate-y-1 hover:shadow-[0px_0px_0px_rgba(0,0,0,0)] hover:cursor-pointer transition-all duration-200 transform-gpu center-stage-btn ${mutation.isPending ? "opacity-70" : ""}`}
+                                        className={`flex items-center justify-center w-full h-16 font-sans italic gap-1.5 
+                                        bg-neon-pink rounded-2xl shadow-[4px_4px_0px_rgba(0,0,0,1)] text-center text-lg text-white 
+                                        font-black [text-shadow:2px_2px_4px_rgba(0,0,0,1)] hover:translate-x-1 hover:translate-y-1 
+                                        hover:shadow-[0px_0px_0px_rgba(0,0,0,0)] hover:cursor-pointer transition-all duration-200 transform-gpu 
+                                        center-stage-btn ${mutation.isPending ? "opacity-70" : ""}`}
                                     >
                                         {mutation.isPending ? "Sending..." : "Send Reset Link"}
                                     </button>
