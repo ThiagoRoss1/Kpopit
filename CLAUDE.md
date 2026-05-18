@@ -76,6 +76,40 @@ gunicorn app:app      # Production server
   - `utils/rate_limiter.py` — shared `Limiter` instance, `init_app`'d from `app.py`
 - **New tables** — `user_profiles` (display_name, avatar_url), `refresh_tokens` (SHA-256 hashed, revocable on logout/reset), `email_tokens` (SHA-256 hashed, `token_type`-discriminated for `verification` and `password_reset`, used by `routes/email.py`)
 
+## Email Workflows (`routes/email.py`)
+- **Endpoints** — All under `/api/auth/email/`: `send-verification-email` (requires auth), `verify-email`, `forgot-password`, `reset-password`, `request-email-change` (requires auth + current password), `confirm-email-change`, `revert-email-change`.
+- **Token model** — All flows use the shared `email_tokens` table. Raw token is `secrets.token_urlsafe(32)`; only the SHA-256 hash is stored. Previous unused tokens for the same `(user_id, token_type)` are deleted before issuing a new one. Every consumer endpoint validates `used_at IS NULL` and `expires_at > NOW()` (UTC) and stamps `used_at = NOW()` on success.
+- **`token_type` values** — `verify_email` (24h), `password_reset` (1h, revokes all refresh tokens on use), `email_change` (24h, metadata stores `{new_email}`, confirmation link sent to the NEW address), `email_revert` (14d, metadata stores `{old_email, new_email}`, confirmation link sent to the OLD address). `email_tokens.metadata` is a JSONB column used by the change/revert types.
+- **Email change flow** — `request-email-change` requires the current password and rejects emails already in use. `confirm-email-change` updates `users.email` + sets `email_verified=TRUE`, catches `UniqueViolation` (returns 409), then issues an `email_revert` token and emails both addresses (revert link to old, confirmation to new). `revert-email-change` restores the old email and revokes all refresh tokens.
+- **Per-endpoint rate limits** — `send-verification-email` / `forgot-password` / `request-email-change` / `confirm-email-change` / `revert-email-change`: `3 per hour; 5 per day`. `verify-email`: `10 per hour`. `reset-password`: `5 per hour; 10 per day`.
+- **Generic responses** — `forgot-password` always returns the same success message regardless of whether the email exists (prevents account enumeration).
+- **`RESEND_EMAIL_FRONTEND_URL`** — Env var used to build all email links (e.g., `${RESEND_EMAIL_FRONTEND_URL}/verify-email?token=...`, `/reset-password`, `/confirm-email-change`, `/revert-email-change`). Read once at import in both `routes/email.py` and `services/email_service.py` into a module-level constant of the same name.
+
+## Input Validators (`utils/auth_helpers.py`)
+Use these for any user-facing auth/profile input. They return `None` if valid, an error string otherwise (except `validate_and_normalize_email`, which returns the normalized email or `None`).
+- `validate_username` — 3–12 chars, `[a-zA-Z0-9_-]` only.
+- `validate_display_name` — required, max 30 chars.
+- `validate_and_normalize_email` — uses `email_validator` (no deliverability check); returns the canonical normalized form.
+- `validate_password` — 8–128 chars (upper bound prevents bcrypt-cost-12 DoS via huge payloads).
+
+## Date/Time Conventions (`utils/dates.py`)
+- **EST helpers** for daily-game logic: `get_today_now()`, `get_today_date()`, `get_today_date_str()` (ISO `YYYY-MM-DD`), `get_current_timestamp()`. Anchored to `America/New_York`.
+- **UTC helper** for token/session timestamps: `get_datetime_now_utc()` — use this for all `email_tokens.expires_at` / `refresh_tokens.expires_at` comparisons.
+- **`TEST_MODE`** — When `FLASK_ENV=development`, can be flipped on to offset "today" by `TEST_DATE_OFFSET` days; production always returns real time.
+
+## Frontend Auth Layer (`kpopit-frontend/src/`)
+- **`contexts/AuthProvider.tsx` + `contexts/auth_context.ts`** — `AuthProvider` is mounted at the app root and exposes `{ isAuthenticated, isLoading, user, refreshAuth }` via `AuthContext`. On mount it attempts a silent refresh via `/auth/refresh` → `/auth/me` if a session marker exists.
+- **`hooks/useAuth.ts`** — Consumer hook; throws if used outside `<AuthProvider>`.
+- **`services/tokenStore.ts`** — Module-level `accessToken` variable (`get/set/clearAccessToken`). The JWT access token is held in JS memory only; it is NEVER written to localStorage/sessionStorage.
+- **Session markers (localStorage / sessionStorage)**
+  - `kpopit_session` — Presence indicates a real (authenticated) session should be restored. Login writes this to `localStorage` (remember-me) or `sessionStorage` (session-only). Its absence short-circuits `restoreSession` so anonymous users don't hit `/auth/refresh`.
+  - `kpopit_was_authenticated` — Sticky `localStorage` flag that distinguishes "lost an authenticated session" from "anonymous user whose refresh just failed". Only when set do we wipe `userToken` + game state on session loss; pure anonymous users keep their UUID and local progress.
+- **`services/api.ts` interceptors**
+  - Request: attaches `Authorization: Bearer <jwt>` from `tokenStore` to every non-`/auth/refresh` call; injects `gamemode_id` query param for non-`/auth` routes.
+  - Response: on 401 (except `/auth/login|register|claim|refresh`), performs a single retry through `refreshToken()` then replays the request. The `refreshToken()` helper deduplicates concurrent calls via an `inFlightRefresh` promise so parallel 401s share one refresh.
+  - On `400 "Invalid user token"` it clears localStorage and reloads; on `"Game date mismatch"` it reloads.
+- **Anonymous-compatible game endpoints** — `getDailyIdol` and `getBlurryDailyIdol` decrypt the localStorage UUID and pass it as a bare `Authorization` header, overriding any JWT — this keeps the endpoints reachable for fully anonymous users.
+
 ## Key Environment Variables
 
 ### Frontend (`.env`)
@@ -94,7 +128,9 @@ gunicorn app:app      # Production server
 | `FRONTEND_URL` | Comma-separated CORS allowlist |
 | `ADMIN_ENABLED` | Enables admin blueprint |
 | `MAINTENANCE_MODE` | Disables all `/api` routes |
-| `R2_*` | Cloudflare R2 credentials for idol photo storage and DB backups |
+| `R2_*` | Cloudflare R2 credentials/bucket names for idol photos, user avatars (`R2_AVATARS_BUCKET_NAME`), and DB backups |
+| `JWT_*` | JWT signing + expiry (`JWT_SECRET_KEY` ≥32 chars, `JWT_ACCESS_TOKEN_EXPIRES`, `JWT_REFRESH_TOKEN_EXPIRES`) |
+| `RESEND_*` | Resend email delivery (`RESEND_API_KEY`, `RESEND_EMAIL_FROM`, `RESEND_EMAIL_FRONTEND_URL` — base URL used to build all email links) |
 
 ## Security
 - NEVER read, expose or display the contents of any `.env` file

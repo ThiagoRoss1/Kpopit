@@ -1,10 +1,12 @@
-import os
+﻿import os
 import resend
 import logging
 
 resend.api_key = os.getenv("RESEND_API_KEY")
 
 SENDER_EMAIL = os.getenv("RESEND_EMAIL_FROM")
+
+RESEND_EMAIL_FRONTEND_URL = os.getenv("RESEND_EMAIL_FRONTEND_URL")
 
 logger = logging.getLogger(__name__)
 
@@ -35,7 +37,7 @@ class EmailService:
                                         <!-- Header -->
                                         <tr>
                                             <td style="background:#000000;padding:32px;text-align:center;border-bottom:3px solid #FF3399;">
-                                                <a href="{os.getenv('EMAIL_FRONTEND_URL')}" style="text-decoration:none;">
+                                                <a href="{RESEND_EMAIL_FRONTEND_URL}" style="text-decoration:none;">
                                                     <span style="font-size:28px;font-weight:900;color:#FF3399;text-shadow:2px 2px 0px rgba(0,0,0,0.5),0px 0px 8px #FF3399;letter-spacing:2px;">
                                                         KpopIt
                                                     </span>
@@ -82,7 +84,7 @@ class EmailService:
                                         <tr>
                                             <td style="background:#f9f9f9;padding:20px 48px;text-align:center;border-top:1px solid #eeeeee;">
                                                 <p style="margin:0;font-size:12px;color:#aaaaaa;">
-                                                    © 2026 <a href="{os.getenv('EMAIL_FRONTEND_URL')}" style="color:#FF3399;text-decoration:underline;">KpopIt</a> · All rights reserved
+                                                    © 2026 <a href="{RESEND_EMAIL_FRONTEND_URL}" style="color:#FF3399;text-decoration:underline;">KpopIt</a> · All rights reserved
                                                 </p>
                                             </td>
                                         </tr>
@@ -126,7 +128,7 @@ class EmailService:
                                         <!-- Header -->
                                         <tr>
                                             <td style="background:#000000;padding:32px;text-align:center;border-bottom:3px solid #FF3399;">
-                                                <a href="{os.getenv('EMAIL_FRONTEND_URL')}" style="text-decoration:none;">
+                                                <a href="{RESEND_EMAIL_FRONTEND_URL}" style="text-decoration:none;">
                                                     <span style="font-size:28px;font-weight:900;color:#FF3399;text-shadow:2px 2px 0px rgba(0,0,0,0.5),0px 0px 8px #FF3399;letter-spacing:2px;">
                                                         KpopIt
                                                     </span>
@@ -177,7 +179,7 @@ class EmailService:
                                         <tr>
                                             <td style="background:#f9f9f9;padding:20px 48px;text-align:center;border-top:1px solid #eeeeee;">
                                                 <p style="margin:0;font-size:12px;color:#aaaaaa;">
-                                                    © 2026 <a href="{os.getenv('EMAIL_FRONTEND_URL')}" style="color:#FF3399;text-decoration:underline;">KpopIt</a> · All rights reserved
+                                                    © 2026 <a href="{RESEND_EMAIL_FRONTEND_URL}" style="color:#FF3399;text-decoration:underline;">KpopIt</a> · All rights reserved
                                                 </p>
                                             </td>
                                         </tr>
@@ -220,7 +222,7 @@ class EmailService:
                                         <!-- Header -->
                                         <tr>
                                             <td style="background:#000000;padding:32px;text-align:center;border-bottom:3px solid #FF3399;">
-                                                <a href="{os.getenv('EMAIL_FRONTEND_URL')}" style="text-decoration:none;">
+                                                <a href="{RESEND_EMAIL_FRONTEND_URL}" style="text-decoration:none;">
                                                     <span style="font-size:28px;font-weight:900;color:#FF3399;text-shadow:2px 2px 0px rgba(0,0,0,0.5),0px 0px 8px #FF3399;letter-spacing:2px;">
                                                         KpopIt
                                                     </span>
@@ -271,7 +273,7 @@ class EmailService:
                                         <tr>
                                             <td style="background:#f9f9f9;padding:20px 48px;text-align:center;border-top:1px solid #eeeeee;">
                                                 <p style="margin:0;font-size:12px;color:#aaaaaa;">
-                                                    © 2026 <a href="{os.getenv('EMAIL_FRONTEND_URL')}" style="color:#FF3399;text-decoration:underline;">KpopIt</a> · All rights reserved
+                                                    © 2026 <a href="{RESEND_EMAIL_FRONTEND_URL}" style="color:#FF3399;text-decoration:underline;">KpopIt</a> · All rights reserved
                                                 </p>
                                             </td>
                                         </tr>
@@ -315,7 +317,7 @@ class EmailService:
                                         <!-- Header -->
                                         <tr>
                                             <td style="background:#000000;padding:32px;text-align:center;border-bottom:3px solid #FF3399;">
-                                                <a href="{os.getenv('EMAIL_FRONTEND_URL')}" style="text-decoration:none;">
+                                                <a href="{RESEND_EMAIL_FRONTEND_URL}" style="text-decoration:none;">
                                                     <span style="font-size:28px;font-weight:900;color:#FF3399;text-shadow:2px 2px 0px rgba(0,0,0,0.5),0px 0px 8px #FF3399;letter-spacing:2px;">
                                                         KpopIt
                                                     </span>
@@ -373,7 +375,7 @@ class EmailService:
                                         <tr>
                                             <td style="background:#f9f9f9;padding:20px 48px;text-align:center;border-top:1px solid #eeeeee;">
                                                 <p style="margin:0;font-size:12px;color:#aaaaaa;">
-                                                    © 2026 <a href="{os.getenv('EMAIL_FRONTEND_URL')}" style="color:#FF3399;text-decoration:underline;">KpopIt</a> · All rights reserved
+                                                    © 2026 <a href="{RESEND_EMAIL_FRONTEND_URL}" style="color:#FF3399;text-decoration:underline;">KpopIt</a> · All rights reserved
                                                 </p>
                                             </td>
                                         </tr>
@@ -418,7 +420,7 @@ class EmailService:
                                         <!-- Header -->
                                         <tr>
                                             <td style="background:#000000;padding:32px;text-align:center;border-bottom:3px solid #FF3399;">
-                                                <a href="{os.getenv('EMAIL_FRONTEND_URL')}" style="text-decoration:none;">
+                                                <a href="{RESEND_EMAIL_FRONTEND_URL}" style="text-decoration:none;">
                                                     <span style="font-size:28px;font-weight:900;color:#FF3399;text-shadow:2px 2px 0px rgba(0,0,0,0.5),0px 0px 8px #FF3399;letter-spacing:2px;">
                                                         KpopIt
                                                     </span>
@@ -453,7 +455,7 @@ class EmailService:
                                         <tr>
                                             <td style="background:#f9f9f9;padding:20px 48px;text-align:center;border-top:1px solid #eeeeee;">
                                                 <p style="margin:0;font-size:12px;color:#aaaaaa;">
-                                                    © 2026 <a href="{os.getenv('EMAIL_FRONTEND_URL')}" style="color:#FF3399;text-decoration:underline;">KpopIt</a> · All rights reserved
+                                                    © 2026 <a href="{RESEND_EMAIL_FRONTEND_URL}" style="color:#FF3399;text-decoration:underline;">KpopIt</a> · All rights reserved
                                                 </p>
                                             </td>
                                         </tr>
@@ -496,7 +498,7 @@ class EmailService:
                                         <!-- Header -->
                                         <tr>
                                             <td style="background:#000000;padding:32px;text-align:center;border-bottom:3px solid #FF3399;">
-                                                <a href="{os.getenv('EMAIL_FRONTEND_URL')}" style="text-decoration:none;">
+                                                <a href="{RESEND_EMAIL_FRONTEND_URL}" style="text-decoration:none;">
                                                     <span style="font-size:28px;font-weight:900;color:#FF3399;text-shadow:2px 2px 0px rgba(0,0,0,0.5),0px 0px 8px #FF3399;letter-spacing:2px;">
                                                         KpopIt
                                                     </span>
@@ -528,7 +530,7 @@ class EmailService:
                                         <tr>
                                             <td style="background:#f9f9f9;padding:20px 48px;text-align:center;border-top:1px solid #eeeeee;">
                                                 <p style="margin:0;font-size:12px;color:#aaaaaa;">
-                                                    © 2026 <a href="{os.getenv('EMAIL_FRONTEND_URL')}" style="color:#FF3399;text-decoration:underline;">KpopIt</a> · All rights reserved
+                                                    © 2026 <a href="{RESEND_EMAIL_FRONTEND_URL}" style="color:#FF3399;text-decoration:underline;">KpopIt</a> · All rights reserved
                                                 </p>
                                             </td>
                                         </tr>

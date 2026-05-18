@@ -16,7 +16,7 @@ import logging
 
 email_bp = Blueprint('email', __name__)
 
-EMAIL_FRONTEND_URL = os.getenv("EMAIL_FRONTEND_URL")
+RESEND_EMAIL_FRONTEND_URL = os.getenv("RESEND_EMAIL_FRONTEND_URL")
 
 logger = logging.getLogger(__name__)
 
@@ -65,7 +65,7 @@ def send_verification_email():
         connect.commit()
 
         # Send email
-        verification_url = f"{EMAIL_FRONTEND_URL}/verify-email?token={raw_token}"
+        verification_url = f"{RESEND_EMAIL_FRONTEND_URL}/verify-email?token={raw_token}"
         email_sent = EmailService.send_email_verification(
             to_email=user["email"],
             username=user["username"],
@@ -188,7 +188,7 @@ def forgot_password():
         connect.commit()
 
         # Send password reset email
-        reset_url = f"{EMAIL_FRONTEND_URL}/reset-password?token={raw_token}"
+        reset_url = f"{RESEND_EMAIL_FRONTEND_URL}/reset-password?token={raw_token}"
         EmailService.send_password_reset(
             to_email=user["email"],
             username=user["username"],
@@ -336,7 +336,7 @@ def request_email_change():
         connect.commit()
 
         # Send confirmation email to new address
-        confirmation_url = f"{EMAIL_FRONTEND_URL}/confirm-email-change?token={raw_token}"
+        confirmation_url = f"{RESEND_EMAIL_FRONTEND_URL}/confirm-email-change?token={raw_token}"
         EmailService.send_email_change_link(
             to_email=new_email,
             username=user["username"],
@@ -435,7 +435,7 @@ def confirm_email_change():
         connect.commit()
 
         if old_email:
-            revert_url = f"{EMAIL_FRONTEND_URL}/revert-email-change?token={raw_revert_token}"
+            revert_url = f"{RESEND_EMAIL_FRONTEND_URL}/revert-email-change?token={raw_revert_token}"
             EmailService.send_email_change_confirmation(
                 to_email=old_email,
                 new_email=new_email,
