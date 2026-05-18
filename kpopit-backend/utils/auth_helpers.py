@@ -120,18 +120,6 @@ def validate_username(username: str) -> str | None:
         return "Username may only contain letters, numbers, underscores, and hyphens."
     return None
 
-def validate_email(email: str) -> str | None:
-    """Basic format check. Returns None if valid or empty (email is optional)."""
-    if not email:
-        return None
-    
-    try:
-        validate_email_format(email, check_deliverability=False)
-        return None
-    
-    except EmailNotValidError:
-        return "Invalid email format."
-    
 def validate_and_normalize_email(email: str) -> str | None:
     """Returns normalized email if valid, None if invalid or empty."""
     if not email:

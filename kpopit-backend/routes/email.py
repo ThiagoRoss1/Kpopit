@@ -1,4 +1,5 @@
 import os
+import psycopg
 from flask import Blueprint, request, jsonify, g, json
 from utils.auth_decorators import require_auth
 from utils.auth_helpers import validate_password, validate_and_normalize_email
@@ -275,7 +276,7 @@ def reset_password():
 
 @email_bp.route("/auth/email/request-email-change", methods=["PATCH"])
 @require_auth
-@limiter.limit("300 per hour; 500 per day")
+@limiter.limit("3 per hour; 5 per day")
 def request_email_change():
     """Endpoint to request an email change, which sends a confirmation link to the new email address."""
     user_id = g.auth["user_id"]
@@ -353,7 +354,7 @@ def request_email_change():
         cursor.close()
 
 @email_bp.route("/auth/email/confirm-email-change", methods=["POST"])
-@limiter.limit("300 per hour; 500 per day")
+@limiter.limit("3 per hour; 5 per day")
 def confirm_email_change():
     """Endpoint to confirm the email change using the token sent to the new email address."""
     data = request.get_json()
@@ -397,15 +398,18 @@ def confirm_email_change():
 
         if not new_email:
             return jsonify({"error": "Invalid token metadata"}), 400
-        
-        cursor.execute(
-            """
-                UPDATE users
-                SET email = %s, email_verified = TRUE
-                WHERE id = %s
-            """, (new_email, token_record["user_id"])
-            
-        )
+
+        try:
+            cursor.execute(
+                """
+                    UPDATE users
+                    SET email = %s, email_verified = TRUE
+                    WHERE id = %s
+                """, (new_email, token_record["user_id"])
+            )
+        except psycopg.errors.UniqueViolation:
+            connect.rollback()
+            return jsonify({"error": "This email is no longer available. Please request the change again."}), 409
 
         cursor.execute(
             """
@@ -463,7 +467,7 @@ def confirm_email_change():
         cursor.close()
 
 @email_bp.route("/auth/email/revert-email-change", methods=["POST"])
-@limiter.limit("300 per hour; 500 per day")
+@limiter.limit("3 per hour; 5 per day")
 def revert_email_change():
     """Endpoint to revert an email change using the token sent to the old email address."""
     data = request.get_json()
@@ -523,6 +527,8 @@ def revert_email_change():
                 WHERE id = %s
             """, (token_record["id"],)
         )
+
+        repo.revoke_all_user_refresh_tokens(cursor, token_record["user_id"])
 
         connect.commit()
 

@@ -5,6 +5,7 @@ import bcrypt
 import jwt
 from dotenv import load_dotenv
 from repositories.user_repository import UserRepository
+from utils.dates import get_datetime_now_utc
 
 load_dotenv()
 
@@ -32,7 +33,7 @@ class AuthService:
 
     # JWT helpers
     def generate_access_token(self, user: dict) -> str:
-        now = datetime.now(timezone.utc)
+        now = get_datetime_now_utc()
         payload = {
             "sub": user["token"],
             "user_id": user["id"],
@@ -46,7 +47,7 @@ class AuthService:
         return jwt.encode(payload, JWT_SECRET_KEY, algorithm="HS256")
 
     def generate_refresh_token(self, user: dict) -> str:
-        now = datetime.now(timezone.utc)
+        now = get_datetime_now_utc()
         payload = {
             "sub":  user["token"],
             "type": "refresh",
@@ -57,7 +58,7 @@ class AuthService:
 
     def _store_refresh_token(self, cursor, user_id: int, raw_refresh: str, remember_me: bool) -> None:
         token_hash = UserRepository.hash_token_for_storage(raw_refresh)
-        expires_at = datetime.now(timezone.utc) + timedelta(seconds=JWT_REFRESH_EXPIRES_SECONDS)
+        expires_at = get_datetime_now_utc() + timedelta(seconds=JWT_REFRESH_EXPIRES_SECONDS)
         self.user_repo.store_refresh_token(cursor, user_id, token_hash, expires_at, remember_me)
 
     def _build_token_pair(self, cursor, user: dict, remember_me: bool) -> dict:
@@ -190,7 +191,7 @@ class AuthService:
         if db_record["revoked"]:
             raise ValueError("token_revoked")
 
-        now = datetime.now(timezone.utc)
+        now = get_datetime_now_utc()
         exp = db_record["expires_at"]
 
         if hasattr(exp, "tzinfo") and exp.tzinfo is None:
@@ -210,7 +211,7 @@ class AuthService:
 
             new_raw_refresh = self.generate_refresh_token(user)
             new_hash = UserRepository.hash_token_for_storage(new_raw_refresh)
-            expires_at = datetime.now(timezone.utc) + timedelta(seconds=JWT_REFRESH_EXPIRES_SECONDS)
+            expires_at = get_datetime_now_utc() + timedelta(seconds=JWT_REFRESH_EXPIRES_SECONDS)
 
             self.user_repo.store_refresh_token(cursor, user["id"], new_hash, expires_at, remember_me)
 

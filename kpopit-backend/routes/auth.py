@@ -6,9 +6,7 @@ from services.get_db import get_db
 from services.auth_service import AuthService
 from repositories.user_repository import UserRepository
 from utils.auth_decorators import require_auth
-from utils.auth_helpers import (
-    detect_user, validate_username, validate_email, validate_password
-)
+from utils.auth_helpers import detect_user, validate_username, validate_and_normalize_email, validate_password
 from utils.rate_limiter import limiter
 
 load_dotenv()
@@ -66,9 +64,10 @@ def register():
     err = validate_password(password)
     if err:
         return jsonify({"error": err}), 400
-    err = validate_email(email)
-    if err:
-        return jsonify({"error": err}), 400
+    if email:
+        email = validate_and_normalize_email(email)
+        if not email:
+            return jsonify({"error": "Invalid email format."}), 400
 
     connect = get_db()
     cursor = connect.cursor()
@@ -303,9 +302,11 @@ def claim():
     err = validate_password(password)
     if err:
         return jsonify({"error": err}), 400
-    err = validate_email(email)
-    if err:
-        return jsonify({"error": err}), 400
+    
+    if email:
+        email = validate_and_normalize_email(email)
+        if not email:
+            return jsonify({"error": "Invalid email format."}), 400
 
     connect = get_db()
     cursor = connect.cursor()

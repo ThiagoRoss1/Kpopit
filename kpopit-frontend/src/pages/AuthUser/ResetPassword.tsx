@@ -1,5 +1,6 @@
 import { useMemo, useState } from "react";
 import { Link, Navigate, useSearchParams } from "react-router-dom";
+import { Helmet } from "react-helmet-async";
 import { motion, AnimatePresence } from "motion/react";
 import { useMutation } from "@tanstack/react-query";
 import { Lock, Eye, EyeOff, CheckCircle } from "lucide-react";
@@ -66,6 +67,10 @@ const ResetPassword = () => {
 
     return (
         <>
+            <Helmet>
+                <title>KpopIt - Reset Password</title>
+                <meta name="robots" content="noindex" />
+            </Helmet>
             <AuthBackground />
             <div className="relative flex flex-col items-center justify-center min-h-full w-full">
                 <div className="relative z-10 flex flex-col items-center justify-center w-full px-2 sxs:px-3 sm:px-4 pt-15 pb-8">

@@ -3,7 +3,7 @@ import json
 import secrets
 from datetime import datetime, timedelta, timezone
 from services.get_db import get_db
-from utils.dates import get_today_now, get_current_timestamp, get_today_date_str
+from utils.dates import get_today_now, get_current_timestamp, get_today_date_str, get_datetime_now_utc
 from flask import Blueprint, request, jsonify, g
 from utils.auth_decorators import require_auth
 from repositories.user_repository import UserRepository
@@ -342,6 +342,7 @@ def get_active_transfer_code(user_token):
 
 @user_bp.route("/user/profile", methods=["PATCH"])
 @require_auth
+@limiter.limit("10 per minute; 30 per hour")
 def update_display_name():
     """Update the user's display name and/or username.
 
@@ -378,13 +379,11 @@ def update_display_name():
         repository = UserRepository(connect)
         result = {}
 
-        if display_name:
-            result["display_name"] = repository.update_display_name(cursor, user_id, display_name)
-
         if username:
             auth_fields = repository.find_auth_fields_by_id(cursor, user_id)
             if not auth_fields or not auth_fields.get("password_hash"):
                 return jsonify({"error": "Current password is incorrect"}), 401
+            
             if not AuthService(connect).verify_password(current_password, auth_fields["password_hash"]):
                 return jsonify({"error": "Current password is incorrect"}), 401
 
@@ -392,13 +391,18 @@ def update_display_name():
             if changed_at:
                 if changed_at.tzinfo is None:
                     changed_at = changed_at.replace(tzinfo=timezone.utc)
-                days_since = (datetime.now(timezone.utc) - changed_at).days
+                days_since = (get_datetime_now_utc() - changed_at).days
+
                 if days_since < 5:
                     return jsonify({"error": f"Username can only be changed once every 5 days. Please wait {5 - days_since} more day(s)."}), 400
 
             if repository.check_username_exists(cursor, username):
                 return jsonify({"error": "Username already exists"}), 400
+            
+        if display_name:
+            result["display_name"] = repository.update_display_name(cursor, user_id, display_name)
 
+        if username:    
             result["username"] = repository.update_username(cursor, user_id, username)
 
         connect.commit()
@@ -426,7 +430,6 @@ def update_avatar():
     cursor = connect.cursor()
 
     try:
-
         cursor.execute(
             """
                 SELECT id FROM idols WHERE image_path = %s

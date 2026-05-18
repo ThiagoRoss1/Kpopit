@@ -42,7 +42,9 @@ export const useAuthUser = () => {
                 await hydrateAuthenticatedSession();
 
                 try {
-                    await sendVerificationEmail();
+                    if (response.user?.email) {
+                        await sendVerificationEmail();
+                    }
                 } catch (error) {
                     console.warn("Failed to send verification email:", error);
                 }
@@ -62,7 +64,9 @@ export const useAuthUser = () => {
                 await hydrateAuthenticatedSession();
 
                 try {
-                    await sendVerificationEmail();
+                    if (response.user?.email) {
+                        await sendVerificationEmail();
+                    }
                 } catch (error) {
                     console.warn("Failed to send verification email:", error);
                 }
