@@ -131,11 +131,10 @@ const UsernameModal = ({ isOpen, onClose, onBack }: UsernameModalProps) => {
             isOpen={isOpen}
             onClose={onClose}
             title="Change Username"
-            subtitle="Pick a new handle"
         >
             <div className="px-5 sxs:px-6 py-5 flex flex-col gap-5">
                 <div className="ep-field flex flex-col gap-2">
-                    <label className="pl-1 text-[12px] font-black uppercase tracking-[0.25em] text-white/70">
+                    <label className="pl-1 text-[12px] font-black uppercase tracking-[0.15em] text-white/70">
                         New Username
                     </label>
 
@@ -181,7 +180,7 @@ const UsernameModal = ({ isOpen, onClose, onBack }: UsernameModalProps) => {
                 </div>
 
                 <div className="ep-field flex flex-col gap-2">
-                    <label className="pl-1 text-[12px] font-black uppercase tracking-[0.25em] text-white/70">
+                    <label className="pl-1 text-[12px] font-black uppercase tracking-[0.15em] text-white/70">
                         Confirm Password
                     </label>
                     
@@ -205,7 +204,7 @@ const UsernameModal = ({ isOpen, onClose, onBack }: UsernameModalProps) => {
                             saveMutation.mutate();
                         }}
                         disabled={!canSave}
-                        className={`flex justify-center items-center gap-2 px-8 py-3 rounded-xl text-[12px] font-black uppercase tracking-[0.18em]
+                        className={`flex justify-center items-center gap-2 px-8 py-4 rounded-xl text-[12px] font-black uppercase tracking-[0.18em]
                             bg-neon-pink text-white [text-shadow:1.5px_1.5px_2px_rgba(0,0,0,0.9)] ${canSave ? "shadow-[3px_3px_0px_rgba(255,255,255,1)]" : ""}
                             hover:translate-x-1 hover:translate-y-1 hover:shadow-[1px_1px_0px_rgba(0,0,0,1)]
                             hover:cursor-pointer transition-all duration-300 transform-gpu

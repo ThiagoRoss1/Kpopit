@@ -8,8 +8,8 @@ import { GAMES_LINKS, IDOLS_LINKS } from "./navigation";
 import { Menu, X } from "lucide-react";
 import { useAuth } from "../../hooks/useAuth";
 
-export type PageName = "classic" | "blurry" | "idols" | "login" | "register";
-const MODES: PageName[] = ["classic", "blurry", "idols", "login", "register"];
+export type PageName = "classic" | "blurry" | "contact" | "idols" | "login" | "register" | "profile";
+const MODES: PageName[] = ["classic", "blurry", "contact", "idols", "login", "register", "profile"];
 
 
 const NavBar = () => {

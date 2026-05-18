@@ -34,6 +34,7 @@ if not JWT_SECRET_KEY or len(JWT_SECRET_KEY) < 32:
 
 app = Flask(__name__)
 app.json.sort_keys = False
+app.config["MAX_CONTENT_LENGTH"] = 20 * 1024 * 1024 # 20 MB limit for incoming requests to prevent attacks and accidental overload. Adjust as needed.
 
 # Trust one proxy hop (Railway/Render/Vercel) so request.remote_addr returns
 # the real client IP. Required for Flask-Limiter to key buckets per user

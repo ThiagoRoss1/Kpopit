@@ -1,6 +1,7 @@
 import "../BlurryMode/blurry_mode.css";
 import { AxiosError } from "axios";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
+import { Helmet } from "react-helmet-async";
 import { useSharedGameData } from "../../hooks/useSharedGameData";
 import { useGameMode } from "../../hooks/useGameMode";
 import { useState, useEffect, useMemo, useCallback, useRef } from "react";
@@ -47,11 +48,6 @@ function BlurryMode() {
     const [showVictoryCard, setShowVictoryCard] = useState<boolean>(false);
     const [confetti, setConfetti] = useState<boolean>(false);
     const [attempts, setAttempts] = useState<number>(0);
-
-    // Page title //
-    useEffect(() => {
-        document.title = "KpopIt Blurry - K-pop Idol Image Guessing Game";
-    }, []);
 
     // Mobile
     const [isTouched, setIsTouched] = useState<boolean>(false);
@@ -387,6 +383,14 @@ function BlurryMode() {
 
     return (
         <>
+        <Helmet>
+            <title>KpopIt Blurry - K-pop Idol Image Guessing Game</title>
+            <meta name="description" content="Identify today's K-pop idol from a gradually unblurred photo in KpopIt's daily Blurry mode." />
+            <link rel="canonical" href={`https://kpopit.net/blurry`} />
+            <meta property="og:title" content="KpopIt Blurry - K-pop Idol Image Guessing Game" />
+            <meta property="og:description" content="Identify today's K-pop idol from a gradually unblurred photo in KpopIt's daily Blurry mode." />
+        </Helmet>
+
         <BackgroundStyle attempts={attempts} />
         <div className="min-h-full w-full flex flex-col items-center justify-start mt-4">
             <Link 

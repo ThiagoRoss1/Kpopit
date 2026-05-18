@@ -267,21 +267,22 @@ export const logoutUser = async () => {
     return response.data;
 }
 
-// Single-flight guard: the 401 response interceptor and AuthProvider.restoreSession
-// can both call refreshToken() concurrently. In production the backend rotates
-// the refresh token on every call, so the second concurrent caller hits an
-// already-revoked hash and throws — logging the user out. Sharing one in-flight
-// promise across callers fixes the race without changing call-site behavior.
 let inFlightRefresh: Promise<{ access_token: string }> | null = null;
 
-export const refreshToken = async () => {
+export const refreshToken = async (): Promise<{ access_token: string }> => {
     if (inFlightRefresh) return inFlightRefresh;
-    inFlightRefresh = api
-        .post('/auth/refresh', {}, { withCredentials: true })
-        .then((response) => response.data)
-        .finally(() => { inFlightRefresh = null; });
+
+    inFlightRefresh = (async () => {
+        try {
+            const response = await api.post('/auth/refresh', {}, { withCredentials: true });
+            return response.data;
+        } finally {
+            inFlightRefresh = null;
+        }
+    })();
+
     return inFlightRefresh;
-}
+};
 
 export const getMe = async (): Promise<MeResponse> => {
     const response = await api.get('/auth/me');
@@ -289,22 +290,22 @@ export const getMe = async (): Promise<MeResponse> => {
 }
 
 export const forgotPassword = async (email: string) => {
-    const response = await api.post('/email/forgot-password', { email });
+    const response = await api.post('/auth/email/forgot-password', { email });
     return response.data;
 }
 
 export const resetPassword = async (token: string, password: string) => {
-    const response = await api.post('/email/reset-password', { token, password });
+    const response = await api.post('/auth/email/reset-password', { token, password });
     return response.data;
 }
 
 export const sendVerificationEmail = async () => {
-    const response = await api.post('/email/send-verification-email');
+    const response = await api.post('/auth/email/send-verification-email');
     return response.data;
 }
 
 export const verifyEmail = async (token: string) => {
-    const response = await api.post('/email/verify-email', { token });
+    const response = await api.post('/auth/email/verify-email', { token });
     return response.data;
 }
 
@@ -335,5 +336,20 @@ export const changePassword = async (current_password: string, new_password: str
         new_password,
         confirm_password,
     });
+    return response.data;
+}
+
+export const requestEmailChange = async (new_email: string, current_password: string) => {
+    const response = await api.patch('/auth/email/request-email-change', { new_email, current_password });
+    return response.data;
+}
+
+export const confirmEmailChange = async (token: string) => {
+    const response = await api.post('/auth/email/confirm-email-change', { token });
+    return response.data;
+}
+
+export const revertEmailChange = async (token: string) => {
+    const response = await api.post('/auth/email/revert-email-change', { token });
     return response.data;
 }

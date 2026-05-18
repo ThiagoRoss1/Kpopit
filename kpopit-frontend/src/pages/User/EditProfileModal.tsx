@@ -5,11 +5,10 @@ interface EditProfileModalProps {
     isOpen: boolean;
     onClose: () => void;
     title: string;
-    subtitle?: string;
     children: ReactNode;
 }
 
-const EditProfileModal = ({ isOpen, onClose, title, subtitle, children }: EditProfileModalProps) => {
+const EditProfileModal = ({ isOpen, onClose, title, children }: EditProfileModalProps) => {
     const mouseDownTarget = useRef<EventTarget | null>(null);
 
     useEffect(() => {
@@ -61,14 +60,9 @@ const EditProfileModal = ({ isOpen, onClose, title, subtitle, children }: EditPr
                     >
                         <header className="flex items-center justify-between gap-2 sxs:gap-3 px-4 sxs:px-6 pt-5 pb-3 border-b border-white/20">
                             <div className="flex flex-col flex-1 min-w-0">
-                                <h2 className="block text-xl sxs:text-2xl font-sans italic font-black uppercase text-white tracking-wide">
+                                <h2 className="block text-xl sxs:text-2xl italic font-black text-white tracking-wide">
                                     {title}
                                 </h2>
-                                {subtitle && (
-                                    <span className="block truncate font-sans italic text-[10px] text-white/40 font-black uppercase tracking-[0.25em] sxs:tracking-[0.4em]">
-                                        {subtitle}
-                                    </span>
-                                )}
                             </div>
                             <button
                                 type="button"

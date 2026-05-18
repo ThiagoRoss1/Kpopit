@@ -28,7 +28,7 @@ const UserDropdown = () => {
 
     if (!user) return null;
 
-    const avatarSrc = resolveAvatarUrl(user.profile.avatar_url);
+    const avatarSrc = resolveAvatarUrl(user.profile.avatar_url, user.profile.updated_at);
     const displayName = user.profile.display_name;
     const username = user.user_credentials.username;
 
@@ -93,7 +93,7 @@ const UserDropdown = () => {
                 {/* Buttons */}
                 <div className="flex flex-col gap-1.5 px-2 py-2 font-sans font-bold">
                     <Link
-                        to="/profile"
+                        to={`/profile/${username.toLowerCase()}`}
                         onClick={() => setIsOpen(false)}
                         className="flex items-center justify-start gap-4 px-4 h-12 text-left text-white rounded-[10px]
                         bg-transparent hover:bg-gray-700/30 hover:text-neon-pink transition-colors duration-300"

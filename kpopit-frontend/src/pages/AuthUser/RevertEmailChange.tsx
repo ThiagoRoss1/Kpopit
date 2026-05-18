@@ -1,53 +1,40 @@
 import { useEffect, useRef, useState } from "react";
 import { Link, useSearchParams } from "react-router-dom";
-import { useMutation } from "@tanstack/react-query";
-import { CheckCircle, XCircle, Loader2 } from "lucide-react";
+import { CheckCircle, Loader2, XCircle } from "lucide-react";
 import { useAuth } from "../../hooks/useAuth";
-import { verifyEmail, sendVerificationEmail, authError } from "../../services/api";
+import { revertEmailChange, authError } from "../../services/api";
 import AuthBackground from "./AuthBackground";
 import { Helmet } from "react-helmet-async";
 import "./authPage.css";
 
 type Status = "loading" | "success" | "error";
 
-const VerifyEmail = () => {
+const RevertEmailChange = () => {
     const { isAuthenticated, refreshAuth } = useAuth();
     const [searchParams] = useSearchParams();
     const token = searchParams.get("token");
 
     const [status, setStatus] = useState<Status>("loading");
     const [errorMessage, setErrorMessage] = useState<string | null>(null);
-    const [resendSent, setResendSent] = useState(false);
-    const verifiedOnce = useRef(false);
-
-    const resendMutation = useMutation({
-        mutationFn: () => sendVerificationEmail(),
-        onSuccess: () => setResendSent(true),
-    });
+    const ranOnce = useRef(false);
 
     useEffect(() => {
-        if (verifiedOnce.current) return;
-        verifiedOnce.current = true;
+        if (ranOnce.current) return;
+        ranOnce.current = true;
 
         if (!token) {
             setStatus("error");
-            setErrorMessage("Invalid verification link.");
+            setErrorMessage("Invalid revert link.");
             return;
         }
 
         const run = async () => {
             try {
-                await verifyEmail(token);
-                if (isAuthenticated) {
-                    await refreshAuth();
-                }
+                await revertEmailChange(token);
+                if (isAuthenticated) await refreshAuth();
                 setStatus("success");
             } catch (err: unknown) {
-                if (authError(err)) {
-                    setErrorMessage(err.response.data.error);
-                } else {
-                    setErrorMessage("Something went wrong verifying your email.");
-                }
+                setErrorMessage(authError(err) ? err.response.data.error : "Something went wrong reverting your email change.");
                 setStatus("error");
             }
         };
@@ -58,10 +45,10 @@ const VerifyEmail = () => {
     return (
         <>
             <Helmet>
-                <title>KpopIt - Verify Email</title>
+                <title>KpopIt - Revert Email Change</title>
                 <meta name="robots" content="noindex" />
             </Helmet>
-            
+
             <AuthBackground />
             <div className="relative flex flex-col items-center justify-center min-h-full w-full">
                 <div className="relative z-10 flex flex-col items-center justify-center w-full px-2 sxs:px-3 sm:px-4 pt-15 pb-8">
@@ -74,14 +61,14 @@ const VerifyEmail = () => {
                                 <h1 className="flex flex-col text-4xl sxs:text-5xl font-sans font-black uppercase leading-tight">
                                     <span className="text-white">Email</span>
                                     <span className="text-neon-pink">
-                                        {status === "loading" && "Verifying..."}
-                                        {status === "success" && "Verified!"}
-                                        {status === "error" && "Not Verified."}
+                                        {status === "loading" && "Reverting..."}
+                                        {status === "success" && "Reverted!"}
+                                        {status === "error" && "Not Reverted."}
                                     </span>
                                 </h1>
                                 <p className="mt-3 text-sm text-white/40 font-black uppercase tracking-[0.15em]">
                                     {status === "loading" && "Hold on a sec"}
-                                    {status === "success" && "You're all set"}
+                                    {status === "success" && "Original email restored"}
                                     {status === "error" && "Something's off"}
                                 </p>
                             </div>
@@ -90,7 +77,7 @@ const VerifyEmail = () => {
                                 <div className="flex flex-col items-center gap-3 px-2 py-8 text-center">
                                     <Loader2 className="w-12 h-12 text-neon-pink animate-spin" />
                                     <p className="text-sm text-white/60 font-bold uppercase tracking-widest">
-                                        Verifying your email
+                                        Reverting your email change
                                     </p>
                                 </div>
                             )}
@@ -100,15 +87,15 @@ const VerifyEmail = () => {
                                     <div className="flex flex-col items-center gap-3 px-2 py-4 text-center">
                                         <CheckCircle className="w-12 h-12 text-neon-pink" />
                                         <p className="text-sm text-white/80 font-bold leading-relaxed">
-                                            Your email has been verified.
+                                            Your email has been restored to the original address.
                                         </p>
                                     </div>
 
                                     <Link
                                         to={isAuthenticated ? "/" : "/login"}
-                                        className="flex items-center justify-center w-full h-16 font-sans italic gap-1.5 
-                                        bg-neon-pink rounded-2xl shadow-[4px_4px_0px_rgba(255,255,255,1)] text-center text-lg text-white 
-                                        font-black [text-shadow:2px_2px_4px_rgba(0,0,0,1)] hover:translate-x-1 hover:translate-y-1 
+                                        className="flex items-center justify-center w-full h-16 font-sans italic gap-1.5
+                                        bg-neon-pink rounded-2xl shadow-[4px_4px_0px_rgba(255,255,255,1)] text-center text-lg text-white
+                                        font-black [text-shadow:2px_2px_4px_rgba(0,0,0,1)] hover:translate-x-1 hover:translate-y-1
                                         hover:shadow-[0px_0px_0px_rgba(0,0,0,0)] hover:cursor-pointer transition-all duration-200 transform-gpu center-stage-btn"
                                     >
                                         {isAuthenticated ? "Continue" : "Sign In"}
@@ -121,30 +108,9 @@ const VerifyEmail = () => {
                                     <div className="flex flex-col items-center gap-3 px-2 py-4 text-center">
                                         <XCircle className="w-12 h-12 text-red-400" />
                                         <p className="text-sm text-white/80 font-bold leading-relaxed">
-                                            {errorMessage ?? "We couldn't verify your email."}
+                                            {errorMessage ?? "We couldn't revert your email change."}
                                         </p>
                                     </div>
-
-                                    {isAuthenticated && (
-                                        resendSent ? (
-                                            <p className="text-center text-[12px] text-neon-pink font-black uppercase tracking-widest">
-                                                Verification email sent — check your inbox
-                                            </p>
-                                        ) : (
-                                            <button
-                                                type="button"
-                                                onClick={() => resendMutation.mutate()}
-                                                disabled={resendMutation.isPending}
-                                                className={`flex items-center justify-center w-full h-16 font-sans italic gap-1.5 
-                                                    bg-neon-pink rounded-2xl shadow-[4px_4px_0px_rgba(255,255,255,1)] text-center text-lg 
-                                                    text-white font-black [text-shadow:2px_2px_4px_rgba(0,0,0,1)] hover:translate-x-1 
-                                                    hover:translate-y-1 hover:shadow-[0px_0px_0px_rgba(0,0,0,0)] hover:cursor-pointer transition-all 
-                                                    duration-200 transform-gpu center-stage-btn ${resendMutation.isPending ? "opacity-70" : ""}`}
-                                            >
-                                                {resendMutation.isPending ? "Sending..." : "Resend Verification Email"}
-                                            </button>
-                                        )
-                                    )}
 
                                     <div className="pt-4 border-t border-white/5 text-center">
                                         <p className="text-[12px] text-white/60 font-bold uppercase tracking-widest">
@@ -166,4 +132,4 @@ const VerifyEmail = () => {
     );
 };
 
-export default VerifyEmail;
+export default RevertEmailChange;

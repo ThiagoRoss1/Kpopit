@@ -1,11 +1,11 @@
 BEGIN;
 
 CREATE TABLE IF NOT EXISTS refresh_tokens (
-    id         SERIAL PRIMARY KEY NOT NULL,
-    user_id    INTEGER NOT NULL,
+    id SERIAL PRIMARY KEY NOT NULL,
+    user_id INTEGER NOT NULL,
     token_hash TEXT NOT NULL UNIQUE,
     expires_at TIMESTAMPTZ NOT NULL,
-    revoked    BOOLEAN DEFAULT FALSE,
+    revoked BOOLEAN DEFAULT FALSE,
     created_at TIMESTAMPTZ DEFAULT CURRENT_TIMESTAMP,
 
     CONSTRAINT fk_refresh_tokens_user_id FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE

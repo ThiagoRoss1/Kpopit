@@ -65,16 +65,16 @@ gunicorn app:app      # Production server
 
 ## Authentication
 - **Auth approach** — Optional JWT layer on top of the anonymous UUID flow. Access token (1h) lives in React memory; refresh token (30d) is an httpOnly cookie scoped to `/api/auth`; anonymous UUID stays in encrypted localStorage for users who never sign up. `Authorization` header accepts either `Bearer <jwt>` (authenticated) or a bare UUID (anonymous) — all existing game routes keep working with both via `@optional_auth`.
-- **Endpoints** — All under `/api/auth/`: `register`, `login`, `logout`, `refresh`, `me`, `claim` (upgrades an anonymous UUID into a real account without losing history — `users.id` never changes), `forgot`, `reset`
-- **Rate limiting** — Flask-Limiter keyed per client IP (via `ProxyFix(x_for=1)` on `app.wsgi_app`), in-memory storage. Limits per route: `forgot` 3/min, `register`/`claim`/`reset` 5/min, `login` 10/min, `refresh` 30/min. A custom `RateLimitExceeded` handler returns JSON 429 and preserves the `Retry-After` header (exposed through CORS so the frontend can read it).
+- **Endpoints** — All under `/api/auth/`: `register`, `login`, `logout`, `refresh`, `me`, `claim` (upgrades an anonymous UUID into a real account without losing history — `users.id` never changes). Password-reset and email-verification flows live under `/api/auth/email/` (see `routes/email.py`) and use the unified `email_tokens` table.
+- **Rate limiting** — Flask-Limiter keyed per client IP (via `ProxyFix(x_for=1)` on `app.wsgi_app`), in-memory storage. Limits per route: `register`/`claim` 5/min, `login` 10/min, `refresh` 30/min. A custom `RateLimitExceeded` handler returns JSON 429 and preserves the `Retry-After` header (exposed through CORS so the frontend can read it).
 - **New files**
   - `routes/auth.py` — all `/api/auth/*` endpoints with `@limiter.limit` decorators
-  - `services/auth_service.py` — bcrypt (cost 12), JWT encode/decode, register/login/claim/reset flows
+  - `services/auth_service.py` — bcrypt (cost 12), JWT encode/decode, register/login/claim flows
   - `repositories/user_repository.py` — all auth + profile DB queries
   - `utils/auth_helpers.py` — `detect_user()` (UUID vs JWT), `decode_jwt()` (HS256-pinned, `type` claim validated), input validators
   - `utils/auth_decorators.py` — `@optional_auth`, `@require_auth`, `@require_admin`
   - `utils/rate_limiter.py` — shared `Limiter` instance, `init_app`'d from `app.py`
-- **New tables** — `user_profiles` (display_name, avatar_url), `refresh_tokens` (SHA-256 hashed, revocable on logout/reset), `password_reset_tokens` (SHA-256 hashed, single-use, 1h TTL)
+- **New tables** — `user_profiles` (display_name, avatar_url), `refresh_tokens` (SHA-256 hashed, revocable on logout/reset), `email_tokens` (SHA-256 hashed, `token_type`-discriminated for `verification` and `password_reset`, used by `routes/email.py`)
 
 ## Key Environment Variables
 

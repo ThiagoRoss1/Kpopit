@@ -1,0 +1,6 @@
+BEGIN;
+
+ALTER TABLE users
+ADD COLUMN IF NOT EXISTS username_changed_at TIMESTAMPTZ;
+
+COMMIT;

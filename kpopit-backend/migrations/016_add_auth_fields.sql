@@ -1,17 +1,17 @@
 BEGIN;
 
 ALTER TABLE users
-    ADD COLUMN IF NOT EXISTS username         TEXT UNIQUE,
-    ADD COLUMN IF NOT EXISTS password_hash    TEXT,
-    ADD COLUMN IF NOT EXISTS email            TEXT UNIQUE,
-    ADD COLUMN IF NOT EXISTS email_verified   BOOLEAN DEFAULT FALSE,
-    ADD COLUMN IF NOT EXISTS google_id        TEXT UNIQUE,
+    ADD COLUMN IF NOT EXISTS username TEXT,
+    ADD COLUMN IF NOT EXISTS password_hash TEXT,
+    ADD COLUMN IF NOT EXISTS email TEXT,
+    ADD COLUMN IF NOT EXISTS email_verified BOOLEAN DEFAULT FALSE,
+    ADD COLUMN IF NOT EXISTS google_id TEXT UNIQUE,
     ADD COLUMN IF NOT EXISTS is_authenticated BOOLEAN DEFAULT FALSE,
-    ADD COLUMN IF NOT EXISTS is_admin         BOOLEAN DEFAULT FALSE,
-    ADD COLUMN IF NOT EXISTS last_login_at    TIMESTAMPTZ;
+    ADD COLUMN IF NOT EXISTS is_admin BOOLEAN DEFAULT FALSE,
+    ADD COLUMN IF NOT EXISTS last_login_at TIMESTAMPTZ;
 
-CREATE INDEX IF NOT EXISTS idx_users_username_lower ON users (LOWER(username));
-CREATE INDEX IF NOT EXISTS idx_users_email_lower    ON users (LOWER(email));
+CREATE UNIQUE INDEX IF NOT EXISTS idx_users_username_lower ON users (LOWER(username)) WHERE username IS NOT NULL;
+CREATE UNIQUE INDEX IF NOT EXISTS idx_users_email_lower ON users (LOWER(email)) WHERE email IS NOT NULL;
 
 COMMIT;
 

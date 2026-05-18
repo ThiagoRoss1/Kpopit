@@ -132,6 +132,18 @@ def validate_email(email: str) -> str | None:
     except EmailNotValidError:
         return "Invalid email format."
     
+def validate_and_normalize_email(email: str) -> str | None:
+    """Returns normalized email if valid, None if invalid or empty."""
+    if not email:
+        return None
+    
+    try:
+        result = validate_email_format(email, check_deliverability=False)
+        return result.normalized
+    
+    except EmailNotValidError:
+        return None
+    
 def validate_password(password: str) -> str | None:
     """Returns None if valid, error string otherwise."""
     if not password or len(password) < 8:

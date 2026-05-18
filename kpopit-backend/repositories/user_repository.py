@@ -167,36 +167,6 @@ class UserRepository:
             (user_id,)
         )
 
-    # Password reset tokens
-    def store_password_reset_token(self, cursor, user_id: int, token_hash: str, expires_at) -> None:
-        cursor.execute(
-            """
-                UPDATE password_reset_tokens SET used = TRUE
-                WHERE user_id = %s AND used = FALSE
-            """, (user_id,)
-        )
-        cursor.execute(
-            """
-                INSERT INTO password_reset_tokens (user_id, token_hash, expires_at) 
-                VALUES (%s, %s, %s)
-            """, (user_id, token_hash, expires_at)
-        )
-
-    def find_password_reset_token(self, cursor, token_hash: str) -> dict | None:
-        cursor.execute(
-            """
-                SELECT id, user_id, expires_at, used FROM password_reset_tokens
-                WHERE token_hash = %s
-            """, (token_hash,)
-        )
-        return cursor.fetchone()
-
-    def consume_password_reset_token(self, cursor, token_hash: str) -> None:
-        cursor.execute(
-            "UPDATE password_reset_tokens SET used = TRUE WHERE token_hash = %s",
-            (token_hash,)
-        )
-
     # Profile changes
     def update_display_name(self, cursor, user_id: int, display_name: str) -> dict:
         cursor.execute(

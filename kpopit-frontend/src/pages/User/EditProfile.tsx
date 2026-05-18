@@ -8,9 +8,10 @@ import EditProfileModal from "./EditProfileModal";
 import AvatarModal from "./AvatarModal";
 import UsernameModal from "./UsernameModal";
 import PasswordModal from "./PasswordModal";
+import EmailModal from "./EmailModal";
 import "./EditProfile.css";
 
-type SubModal = "none" | "avatar" | "username" | "password";
+type SubModal = "none" | "avatar" | "username" | "password" | "email";
 
 interface EditProfileProps {
     isOpen: boolean;
@@ -93,7 +94,6 @@ const EditProfile = (props: EditProfileProps) => {
                 isOpen={mainOpen}
                 onClose={onClose}
                 title="Edit Profile"
-                subtitle="Customize your account details"
             >
                 <div className="px-5 sxs:px-6 py-5 flex flex-col gap-5">
                     {/* Avatar */}
@@ -124,13 +124,13 @@ const EditProfile = (props: EditProfileProps) => {
                         </button>
                         
                         <span className="text-sm text-white/50 font-black">
-                            Tap to change avatar
+                            Tap to change your avatar
                         </span>
                     </div>
 
                     {/* Display name */}
                     <div className="ep-field flex flex-col gap-2">
-                        <label className="pl-1 text-[12px] font-black uppercase tracking-[0.25em] text-white/80">
+                        <label className="pl-1 text-[12px] font-black uppercase tracking-[0.15em] text-white/80">
                             Display Name
                         </label>
 
@@ -151,40 +151,50 @@ const EditProfile = (props: EditProfileProps) => {
                         </div>
                     </div>
 
-                    {/* Email — read-only */}
+                    {/* Email */}
                     <div className="ep-field flex flex-col gap-2">
-                        <label className="pl-1 text-[12px] font-black uppercase tracking-[0.25em] text-white/80">
+                        <label className="pl-1 text-[12px] font-black uppercase tracking-[0.15em] text-white/80">
                             Email
                         </label>
-                        <div className="ep-input relative h-13 rounded-2xl overflow-hidden bg-[#0a0a0a]">
 
-                            <Mail className="absolute left-4 top-1/2 w-4 h-4 -translate-y-1/2 text-neutral-500" />
+                        <div className="flex flex-row items-stretch gap-2">
+                            <div className="ep-input flex-1 min-w-0 relative h-13 rounded-2xl overflow-hidden bg-[#0a0a0a]">
+                                <Mail className="absolute left-4 top-1/2 w-4 h-4 -translate-y-1/2 text-neutral-500" />
 
-                            <div className="flex items-center w-full h-full pl-11 pr-12 text-sm font-bold text-white/80">
-                                {currentEmail
-                                    ? (showEmail ? currentEmail : censorEmail(currentEmail))
-                                    : <span className="text-neutral-700">No email on file</span>}
+                                <div className="flex items-center w-full h-full pl-11 pr-12 text-sm font-bold text-white/80">
+                                    {currentEmail
+                                        ? (showEmail ? currentEmail : censorEmail(currentEmail))
+                                        : <span className="text-neutral-700">No email registered</span>}
+                                </div>
+
+                                {currentEmail && (
+                                    <button
+                                        type="button"
+                                        onClick={() => setShowEmail((s) => !s)}
+                                        aria-label={showEmail ? "Hide email" : "Show email"}
+                                        className="absolute right-4 top-1/2 -translate-y-1/2 text-neutral-500 hover:text-white hover:cursor-pointer transition-colors"
+                                    >
+                                        {showEmail ? <EyeOff className="w-6 h-6" /> : <Eye className="w-6 h-6" />}
+                                    </button>
+                                )}
                             </div>
 
-                            {currentEmail && (
-                                <button
-                                    type="button"
-                                    onClick={() => setShowEmail((s) => !s)}
-                                    aria-label={showEmail ? "Hide email" : "Show email"}
-                                    className="absolute right-4 top-1/2 -translate-y-1/2 text-neutral-500 hover:text-white hover:cursor-pointer transition-colors"
-                                >
-                                    {showEmail ? <EyeOff className="w-6 h-6" /> : <Eye className="w-6 h-6" />}
-                                </button>
-                            )}
+                            <button
+                                type="button"
+                                onClick={() => setSubModal("email")}
+                                className="shrink-0 px-4 self-stretch rounded-2xl text-[12px] font-black uppercase tracking-[0.2em]
+                                    border-2 border-white/20 text-white/80
+                                    hover:border-neon-pink hover:text-neon-pink hover:cursor-pointer
+                                    transition-colors duration-200"
+                            >
+                                Edit
+                            </button>
                         </div>
-                        <span className="pl-1 text-[12px] text-white/40 font-bold">
-                            Visible to you only · Not editable (yet)
-                        </span>
                     </div>
 
                     {/* Username */}
                     <div className="ep-field flex flex-col gap-2">
-                        <label className="pl-1 text-[12px] font-black uppercase tracking-[0.25em] text-white/80">
+                        <label className="pl-1 text-[12px] font-black uppercase tracking-[0.15em] text-white/80">
                             Username
                         </label>
 
@@ -212,7 +222,7 @@ const EditProfile = (props: EditProfileProps) => {
 
                     {/* Password */}
                     <div className="ep-field flex flex-col gap-2">
-                        <label className="pl-1 text-[12px] font-black uppercase tracking-[0.25em] text-white/80">
+                        <label className="pl-1 text-[12px] font-black uppercase tracking-[0.15em] text-white/80">
                             Password
                         </label>
                         <div className="flex items-stretch gap-2">
@@ -250,7 +260,7 @@ const EditProfile = (props: EditProfileProps) => {
                             saveMutation.mutate(trimmedName);
                         }}
                         disabled={!canSave}
-                        className={`flex justify-center items-center gap-2 px-8 py-3 rounded-xl text-[12px] font-black uppercase tracking-[0.18em]
+                        className={`flex justify-center items-center gap-2 px-8 py-4 rounded-xl text-[12px] font-black uppercase tracking-[0.18em]
                             bg-neon-pink text-white [text-shadow:1.5px_1.5px_2px_rgba(0,0,0,0.9)] ${canSave ? "shadow-[3px_3px_0px_rgba(255,255,255,1)]" : ""}
                             hover:translate-x-1 hover:translate-y-1 hover:shadow-[1px_1px_0px_rgba(0,0,0,1)]
                             hover:cursor-pointer transition-all duration-300 transform-gpu
@@ -276,6 +286,11 @@ const EditProfile = (props: EditProfileProps) => {
             />
             <PasswordModal
                 isOpen={isOpen && subModal === "password"}
+                onClose={onClose}
+                onBack={() => setSubModal("none")}
+            />
+            <EmailModal
+                isOpen={isOpen && subModal === "email"}
                 onClose={onClose}
                 onBack={() => setSubModal("none")}
             />

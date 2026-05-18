@@ -33,7 +33,7 @@ const UserDropdownMobile = () => {
 
     if (!user) return null;
 
-    const avatarSrc = resolveAvatarUrl(user.profile.avatar_url);
+    const avatarSrc = resolveAvatarUrl(user.profile.avatar_url, user.profile.updated_at);
     const displayName = user.profile.display_name;
     const username = user.user_credentials.username;
 
@@ -114,7 +114,7 @@ const UserDropdownMobile = () => {
                     <div className="w-full border-t border-neon-pink/40 my-2" />
 
                     <Link
-                        to="/profile"
+                        to={`/profile/${username.toLowerCase()}`}
                         onClick={() => setIsOpen(false)}
                         className="flex items-center justify-start gap-4 px-4 h-12 w-full text-left text-white rounded-[10px] bg-transparent hover:bg-gray-700/30 hover:text-neon-pink transition-colors duration-300 font-sans font-bold"
                     >

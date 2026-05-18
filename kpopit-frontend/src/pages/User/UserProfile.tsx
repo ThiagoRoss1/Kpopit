@@ -1,6 +1,6 @@
 import "./UserProfile.css";
 import { useEffect, useMemo, useState } from "react";
-import { Navigate } from "react-router-dom";
+import { Navigate, useNavigate, useParams } from "react-router-dom";
 import { useMutation, useQuery } from "@tanstack/react-query";
 import { Mail, X } from "lucide-react";
 import { useAuth } from "../../hooks/useAuth";
@@ -12,6 +12,7 @@ import EditProfile from "./EditProfile";
 import HaerinGif from "../../assets/imgs/haerin.gif";
 import HaerinWebp from "../../assets/imgs/haerinok.webp";
 import { resolveAvatarUrl } from "../../utils/resolveAvatarUrl";
+import { Helmet } from "react-helmet-async";
 
 const EMAIL_BANNER_DISMISS_KEY = "emailVerifiedBannerDismissed";
 
@@ -59,6 +60,9 @@ const formatJoined = (raw: string | undefined) => {
 
 const UserProfile = () => {
     const { isAuthenticated, isLoading: isAuthLoading, user } = useAuth();
+
+    const username_slug = useParams<string>().username;
+    const navigate = useNavigate();
 
     const [filter, setFilter] = useState<GamemodeFilter>("all");
     const [decryptedToken, setDecryptedToken] = useState<string | null>(null);
@@ -118,6 +122,16 @@ const UserProfile = () => {
         refetchOnWindowFocus: false,
     });
 
+    useEffect(() => {
+        if (user && user.profile && user.user_credentials) {
+            const correctSlug = user.user_credentials.username.toLowerCase();
+
+            if (username_slug !== correctSlug) {
+                navigate(`/profile/${correctSlug}`, { replace: true });
+            }
+        }
+    }, [user, navigate, username_slug]);
+
     const displayed = useMemo(() => {
         const classic_stats = combinedStats?.classic ?? EMPTY_STATS;
         const blurry_stats = combinedStats?.blurry ?? EMPTY_STATS;
@@ -166,6 +180,11 @@ const UserProfile = () => {
 
     return (
         <>
+            <Helmet>
+                <title>{`${displayName} (@${username}) Profile · KpopIt`}</title>
+                <meta name="robots" content="noindex" />
+            </Helmet>
+            
             {/* Background layer */}
             <div className="profile-bg-glow fixed inset-0 -z-10 bg-[#0a0a0a] pointer-events-none" />
 
@@ -197,7 +216,7 @@ const UserProfile = () => {
                                     type="button"
                                     onClick={() => resendMutation.mutate()}
                                     disabled={resendMutation.isPending}
-                                    className={`shrink-0 px-3.5 py-2 rounded-lg text-[10px] sxs:text-[12px] font-black uppercase tracking-widest
+                                    className={`shrink-0 px-3.5 py-2 rounded-lg text-[12px] sxs:text-sm font-black
                                     bg-neon-pink text-white [text-shadow:1.5px_1.5px_2px_rgba(0,0,0,0.9)] shadow-[3px_3px_0px_rgba(255,255,255,1)] 
                                     hover:translate-x-1 hover:translate-y-1 hover:shadow-[0px_0px_0px_#000]
                                     hover:cursor-pointer transition-all duration-150 transform-gpu

@@ -1,6 +1,5 @@
 import os
 import uuid
-import secrets
 from datetime import datetime, timedelta, timezone
 import bcrypt
 import jwt
@@ -14,9 +13,6 @@ JWT_ACCESS_EXPIRES_SECONDS  = int(os.getenv("JWT_ACCESS_TOKEN_EXPIRES",  "3600")
 JWT_REFRESH_EXPIRES_SECONDS = int(os.getenv("JWT_REFRESH_TOKEN_EXPIRES", "2592000"))
 IS_PRODUCTION = os.getenv("FLASK_ENV") == "production"
 
-# Pre-computed at module load to prevent timing-based user enumeration.
-# Any login for a non-existent user runs checkpw against this, making
-# the response time indistinguishable from a valid-user-wrong-password case.
 _DUMMY_HASH = bcrypt.hashpw(b"dummy_timing_guard", bcrypt.gensalt(rounds=12))
 
 class AuthService:
@@ -237,44 +233,4 @@ class AuthService:
     def logout(self, cursor, raw_refresh_token: str) -> None:
         token_hash = UserRepository.hash_token_for_storage(raw_refresh_token)
         self.user_repo.revoke_refresh_token(cursor, token_hash)
-        self.db.commit()
-
-    # Password reset
-    def initiate_password_reset(self, cursor, email: str) -> str | None:
-        user = self.user_repo.find_by_email(cursor, email)
-        if not user:
-            return None
-
-        raw_token  = secrets.token_urlsafe(32)
-        token_hash = UserRepository.hash_token_for_storage(raw_token)
-        expires_at = datetime.now(timezone.utc) + timedelta(hours=1)
-
-        self.user_repo.store_password_reset_token(cursor, user["id"], token_hash, expires_at)
-        self.db.commit()
-
-        return raw_token
-
-    def complete_password_reset(self, cursor, raw_token: str, new_password: str) -> None:
-        token_hash = UserRepository.hash_token_for_storage(raw_token)
-        record = self.user_repo.find_password_reset_token(cursor, token_hash)
-
-        if not record:
-            raise ValueError("invalid_token")
-        
-        if record["used"]:
-            raise ValueError("token_already_used")
-
-        now = datetime.now(timezone.utc)
-        exp = record["expires_at"]
-
-        if hasattr(exp, "tzinfo") and exp.tzinfo is None:
-            exp = exp.replace(tzinfo=timezone.utc)
-
-        if now > exp:
-            raise ValueError("token_expired")
-
-        new_hash = self.hash_password(new_password)
-        self.user_repo.update_password_hash(cursor, record["user_id"], new_hash)
-        self.user_repo.consume_password_reset_token(cursor, token_hash)
-        self.user_repo.revoke_all_user_refresh_tokens(cursor, record["user_id"])
         self.db.commit()

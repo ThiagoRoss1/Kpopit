@@ -76,18 +76,18 @@ const ResetPassword = () => {
 
                             <div className="mb-6 text-center">
                                 <h1 className="text-4xl sxs:text-5xl font-sans font-black uppercase leading-tight">
-                                    <span className="text-white">Reset</span>
+                                    <span className="text-white">{success ? "Reset" : "Reset your"}</span>
                                     <br />
-                                    <span className="text-neon-pink">{success ? "Complete." : "Your Password."}</span>
+                                    <span className="text-neon-pink">{success ? "Complete." : "Password."}</span>
                                 </h1>
-                                <p className="mt-3 text-[12px] text-white/40 font-black uppercase tracking-[0.5em]">
-                                    {success ? "You're all set" : "Pick something memorable"}
+                                <p className="mt-3 text-[12px] text-white/40 font-black uppercase tracking-[0.15em]">
+                                    {success ? "You're all set" : "Enter a new password"}
                                 </p>
                             </div>
 
                             {success ? (
                                 <div className="flex flex-col gap-6">
-                                    <div className="flex flex-col items-center gap-3 px-2 py-4 text-center">
+                                    <div className="flex flex-col items-center gap-3 px-2 py-1 text-center">
                                         <CheckCircle className="w-12 h-12 text-neon-pink" />
                                         <p className="text-sm text-white/80 font-bold leading-relaxed">
                                             Password reset successfully.
@@ -96,7 +96,10 @@ const ResetPassword = () => {
 
                                     <Link
                                         to="/login"
-                                        className="flex items-center justify-center w-full h-16 font-sans italic gap-1.5 bg-neon-pink rounded-2xl shadow-[4px_4px_0px_rgba(0,0,0,1)] text-center text-lg text-white font-black [text-shadow:2px_2px_4px_rgba(0,0,0,1)] hover:translate-x-1 hover:translate-y-1 hover:shadow-[0px_0px_0px_rgba(0,0,0,0)] hover:cursor-pointer transition-all duration-200 transform-gpu center-stage-btn"
+                                        className="flex items-center justify-center w-full h-16 font-sans italic gap-1.5 
+                                        bg-neon-pink rounded-2xl shadow-[4px_4px_0px_rgba(255,255,255,1)] text-center text-lg text-white 
+                                        font-black [text-shadow:2px_2px_4px_rgba(0,0,0,1)] hover:translate-x-1 hover:translate-y-1 
+                                        hover:shadow-[0px_0px_0px_rgba(0,0,0,0)] hover:cursor-pointer transition-all duration-200 transform-gpu center-stage-btn"
                                     >
                                         Sign In
                                     </Link>
@@ -191,14 +194,18 @@ const ResetPassword = () => {
                                     <button
                                         type="submit"
                                         disabled={mutation.isPending}
-                                        className={`flex items-center justify-center w-full h-16 font-sans italic gap-1.5 bg-neon-pink rounded-2xl shadow-[4px_4px_0px_rgba(0,0,0,1)] text-center text-lg text-white font-black [text-shadow:2px_2px_4px_rgba(0,0,0,1)] hover:translate-x-1 hover:translate-y-1 hover:shadow-[0px_0px_0px_rgba(0,0,0,0)] hover:cursor-pointer transition-all duration-200 transform-gpu center-stage-btn ${mutation.isPending ? "opacity-70" : ""}`}
+                                        className={`flex items-center justify-center w-full h-16 font-sans italic gap-1.5 bg-neon-pink 
+                                            rounded-2xl shadow-[4px_4px_0px_rgba(255,255,255,1)] text-center text-lg text-white font-black 
+                                            [text-shadow:2px_2px_4px_rgba(0,0,0,1)] hover:translate-x-1 hover:translate-y-1 
+                                            hover:shadow-[0px_0px_0px_rgba(0,0,0,0)] hover:cursor-pointer transition-all duration-200 transform-gpu 
+                                            center-stage-btn ${mutation.isPending ? "opacity-70" : ""}`}
                                     >
                                         {mutation.isPending ? "Resetting..." : "Reset Password"}
                                     </button>
 
                                     <div className="pt-4 border-t border-white/5 text-center">
                                         <p className="text-[12px] text-white/60 font-bold uppercase tracking-widest">
-                                            Remember it after all?{" "}
+                                            Remember your password?{" "}
                                             <Link
                                                 to="/login"
                                                 className="ml-1 text-neon-pink font-black decoration-2 underline-offset-4 hover:underline transition-all"

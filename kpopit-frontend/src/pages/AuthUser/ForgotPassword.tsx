@@ -6,6 +6,7 @@ import { Mail, CheckCircle } from "lucide-react";
 import { useAuth } from "../../hooks/useAuth";
 import { forgotPassword, authError } from "../../services/api";
 import AuthBackground from "./AuthBackground";
+import { Helmet } from "react-helmet-async";
 import "./authPage.css";
 
 const ForgotPassword = () => {
@@ -46,6 +47,11 @@ const ForgotPassword = () => {
 
     return (
         <>
+            <Helmet>
+                <title>KpopIt - Forgot Password</title>
+                <meta name="robots" content="noindex" />
+            </Helmet>
+            
             <AuthBackground />
             <div className="relative flex flex-col items-center justify-center min-h-full w-full">
                 <div className="relative z-10 flex flex-col items-center justify-center w-full px-2 sxs:px-3 sm:px-4 pt-15 pb-8">
@@ -59,14 +65,14 @@ const ForgotPassword = () => {
                                     <span className="text-white">Forgot your</span>
                                     <span className="text-neon-pink">Password?</span>
                                 </h1>
-                                <span className="flex justify-center items-center mt-3 text-[12px] text-white/40 font-black uppercase tracking-[0.5em]">
+                                <span className="flex justify-center items-center mt-3 text-sm text-white/40 font-black uppercase tracking-[0.15em]">
                                     {submitted ? "Check your inbox" : "We'll send you a link"}
                                 </span>
                             </div>
 
                             {submitted ? (
                                 <div className="flex flex-col gap-6">
-                                    <div className="flex flex-col items-center gap-3 px-2 py-4 text-center">
+                                    <div className="flex flex-col items-center gap-3 px-2 py-1 text-center">
                                         <CheckCircle className="w-12 h-12 text-neon-pink" />
                                         <span className="text-sm text-white/80 font-bold leading-relaxed">
                                             If an account with that email exists, a reset link has been sent.
@@ -78,7 +84,10 @@ const ForgotPassword = () => {
 
                                     <Link
                                         to="/login"
-                                        className="flex items-center justify-center w-full h-16 font-sans italic gap-1.5 bg-neon-pink rounded-2xl shadow-[4px_4px_0px_rgba(0,0,0,1)] text-center text-lg text-white font-black [text-shadow:2px_2px_4px_rgba(0,0,0,1)] hover:translate-x-1 hover:translate-y-1 hover:shadow-[0px_0px_0px_rgba(0,0,0,0)] hover:cursor-pointer transition-all duration-200 transform-gpu center-stage-btn"
+                                        className="flex items-center justify-center w-full h-16 font-sans italic gap-1.5 bg-neon-pink 
+                                        rounded-2xl shadow-[4px_4px_0px_rgba(255,255,255,1)] text-center text-lg text-white font-black 
+                                        [text-shadow:2px_2px_4px_rgba(0,0,0,1)] hover:translate-x-1 hover:translate-y-1 
+                                        hover:shadow-[0px_0px_0px_rgba(0,0,0,0)] hover:cursor-pointer transition-all duration-200 transform-gpu center-stage-btn"
                                     >
                                         Back to Login
                                     </Link>
@@ -124,7 +133,7 @@ const ForgotPassword = () => {
                                         type="submit"
                                         disabled={mutation.isPending}
                                         className={`flex items-center justify-center w-full h-16 font-sans italic gap-1.5 
-                                        bg-neon-pink rounded-2xl shadow-[4px_4px_0px_rgba(0,0,0,1)] text-center text-lg text-white 
+                                        bg-neon-pink rounded-2xl shadow-[4px_4px_0px_rgba(255,255,255,1)] text-center text-lg text-white 
                                         font-black [text-shadow:2px_2px_4px_rgba(0,0,0,1)] hover:translate-x-1 hover:translate-y-1 
                                         hover:shadow-[0px_0px_0px_rgba(0,0,0,0)] hover:cursor-pointer transition-all duration-200 transform-gpu 
                                         center-stage-btn ${mutation.isPending ? "opacity-70" : ""}`}

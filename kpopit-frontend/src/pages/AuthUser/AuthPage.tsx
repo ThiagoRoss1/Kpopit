@@ -10,6 +10,7 @@ import type { IdolsPageData } from "../../interfaces/gameInterfaces";
 import type { LoginData, RegisterData } from "../../interfaces/authInterfaces";
 import { getPasswordStrength } from "../../utils/getPasswordStrength";
 import AuthBackground from "./AuthBackground";
+import { Helmet } from "react-helmet-async";
 import "./authPage.css";
 
 // Mirrors backend validate_username in utils/auth_helpers.py
@@ -185,6 +186,11 @@ const AuthPage = () => {
 
     return (
         <>
+            <Helmet>
+                <title>{`KpopIt - ${isLoginTab ? "Login" : "Register"}`}</title>
+                <meta name="robots" content="noindex" />
+            </Helmet>
+            
             <AuthBackground />
             <div className="relative flex flex-col items-center justify-center min-h-full w-full">
 
@@ -287,7 +293,7 @@ const AuthPage = () => {
                                         <label className="flex justify-between items-center pl-1 text-[12px] text-white/90 font-black uppercase tracking-[0.15em]">
                                             <span>Email Address</span>
 
-                                            <span className="text-[12px] text-neutral-500 italic normal-case tracking-normal pr-1">Optional — for password recovery</span>
+                                            <span className="text-[12px] text-neutral-500 italic normal-case tracking-normal pr-1">Optional</span>
                                         </label>
 
                                         <div className="neo-input-modal relative h-14 rounded-2xl overflow-hidden">
@@ -301,6 +307,10 @@ const AuthPage = () => {
                                                 className="w-full h-full px-5 bg-[#0a0a0a] text-sm font-bold text-white placeholder:text-neutral-700 focus:outline-none"
                                             />
                                         </div>
+
+                                        <span className="text-[12px] text-neutral-500 italic normal-case tracking-normal pl-1 font-black">
+                                            Used for account recovery · Can be changed any time.
+                                        </span>
                                     </div>
                                 )}
 
@@ -437,7 +447,7 @@ const AuthPage = () => {
                                 >
                                     {isPending
                                         ? (isLoginTab ? "Signing in..." : "Creating account...")
-                                        : (isLoginTab ? "Login to Stage" : "Join the Stage")
+                                        : (isLoginTab ? "Login to KpopIt" : "Join KpopIt")
                                     }
                                 </button>
 
