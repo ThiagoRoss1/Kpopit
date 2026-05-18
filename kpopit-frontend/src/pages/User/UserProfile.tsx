@@ -451,11 +451,11 @@ const UserProfile = () => {
                                     </span>
 
                                     <span>
-                                        I'm currently working on some features for registered users (and i hope to build them asap).
+                                        I'm currently working on some features for registered users (and I hope to build them asap).
                                     </span>
                                     
                                     <span>
-                                        Sorry for the wait, but I promise that i'll keep doing my best at Kpopit!
+                                        Sorry for the wait, but I promise that I'll keep doing my best at Kpopit!
                                     </span>
                                     </div>
                                 </div>

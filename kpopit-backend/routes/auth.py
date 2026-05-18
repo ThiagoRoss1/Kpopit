@@ -1,5 +1,6 @@
 import os
 import logging
+import psycopg
 from flask import Blueprint, request, jsonify, make_response, g
 from dotenv import load_dotenv
 from services.get_db import get_db
@@ -49,6 +50,17 @@ def _clear_refresh_cookie(response) -> None:
         path="/api/auth" if IS_PRODUCTION else "/",
     )
 
+def _unique_violation_response(err: psycopg.errors.UniqueViolation):
+    """Map a UniqueViolation on the users table to a 409 with the right field."""
+    constraint = (getattr(err.diag, "constraint_name", "") or "").lower()
+    detail = (getattr(err.diag, "message_detail", "") or "").lower()
+
+    if "username" in constraint or "username" in detail:
+        return jsonify({"error": "Username is already taken"}), 409
+    if "email" in constraint or "email" in detail:
+        return jsonify({"error": "Email is already registered"}), 409
+    return jsonify({"error": "Username or email is already taken"}), 409
+
 # POST /api/auth/register
 @auth_bp.route("/auth/register", methods=["POST"])
 @limiter.limit("5 per minute; 20 per hour")
@@ -82,6 +94,10 @@ def register():
         if msg == "email_taken":
             return jsonify({"error": "Email is already registered"}), 409
         return jsonify({"error": "Registration failed"}), 400
+
+    except psycopg.errors.UniqueViolation as e:
+        connect.rollback()
+        return _unique_violation_response(e)
 
     except Exception:
         connect.rollback()
@@ -326,6 +342,10 @@ def claim():
         msg, code = error_map.get(str(e), ("Claim failed", 400))
 
         return jsonify({"error": msg}), code
+
+    except psycopg.errors.UniqueViolation as e:
+        connect.rollback()
+        return _unique_violation_response(e)
 
     except Exception:
         connect.rollback()

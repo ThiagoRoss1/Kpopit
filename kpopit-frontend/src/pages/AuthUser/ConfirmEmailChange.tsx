@@ -16,6 +16,7 @@ const ConfirmEmailChange = () => {
 
     const [status, setStatus] = useState<Status>("loading");
     const [errorMessage, setErrorMessage] = useState<string | null>(null);
+    const [wasAdded, setWasAdded] = useState(false);
     const ranOnce = useRef(false);
 
     useEffect(() => {
@@ -30,8 +31,9 @@ const ConfirmEmailChange = () => {
 
         const run = async () => {
             try {
-                await confirmEmailChange(token);
+                const data = await confirmEmailChange(token);
                 if (isAuthenticated) await refreshAuth();
+                setWasAdded(typeof data?.message === "string" && data.message.toLowerCase().includes("added"));
                 setStatus("success");
             } catch (err: unknown) {
                 setErrorMessage(authError(err) ? err.response.data.error : "Something went wrong confirming your email change.");
@@ -68,7 +70,7 @@ const ConfirmEmailChange = () => {
                                 </h1>
                                 <p className="mt-3 text-sm text-white/40 font-black uppercase tracking-[0.15em]">
                                     {status === "loading" && "Hold on a sec"}
-                                    {status === "success" && "Your email has been changed"}
+                                    {status === "success" && (wasAdded ? "Your email has been added" : "Your email has been changed")}
                                     {status === "error" && "Something's off"}
                                 </p>
                             </div>
@@ -87,7 +89,9 @@ const ConfirmEmailChange = () => {
                                     <div className="flex flex-col items-center gap-3 px-2 py-4 text-center">
                                         <CheckCircle className="w-12 h-12 text-neon-pink" />
                                         <p className="text-sm text-white/80 font-bold leading-relaxed">
-                                            Your email has been updated. A revert link has been sent to your previous address in case this wasn't you.
+                                            {wasAdded
+                                                ? "Your email address has been added to your account. You'll now receive account notifications and password reset links at this address."
+                                                : "Your email has been updated. A revert link has been sent to your previous address in case this wasn't you."}
                                         </p>
                                     </div> 
 
