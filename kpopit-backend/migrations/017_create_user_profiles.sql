@@ -14,6 +14,3 @@ CREATE TABLE IF NOT EXISTS user_profiles (
 CREATE INDEX IF NOT EXISTS idx_user_profiles_user_id ON user_profiles(user_id);
 
 COMMIT;
-
--- DOWN
--- DROP TABLE IF EXISTS user_profiles;

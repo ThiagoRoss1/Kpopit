@@ -16,6 +16,3 @@ CREATE INDEX IF NOT EXISTS idx_refresh_tokens_token_hash ON refresh_tokens(token
 CREATE INDEX IF NOT EXISTS idx_refresh_tokens_expires_at ON refresh_tokens(expires_at);
 
 COMMIT;
-
--- DOWN
--- DROP TABLE IF EXISTS refresh_tokens;

@@ -4,6 +4,3 @@ ALTER TABLE refresh_tokens
 ADD COLUMN IF NOT EXISTS remember_me BOOLEAN NOT NULL DEFAULT FALSE;
 
 COMMIT;
-
--- DOWN
--- ALTER TABLE refresh_tokens DROP COLUMN IF EXISTS remember_me;
