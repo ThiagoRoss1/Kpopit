@@ -71,17 +71,34 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
         }
     }, []);
 
+    const refetchUser = useCallback(async (): Promise<void> => {
+        try {
+            const me = await getMe();
+            if (cancelledRef.current) return;
+            setState(s => ({ ...s, user: me }));
+        } catch (err) {
+            // 401 is already handled by the api interceptor (single refresh + retry,
+            // or page reload on refresh failure) — by the time we see it here, the
+            // recovery path has already run. For everything else (network, 5xx) the
+            // existing user state is still valid: the mutation that called us already
+            // succeeded server-side, we just couldn't refetch the latest snapshot.
+            if (import.meta.env.DEV) {
+                console.warn("[AuthProvider] refetchUser failed:", err);
+            }
+        }
+    }, []);
+
     useEffect(() => {
         cancelledRef.current = false;
         restoreSession();
-        
+
         return () => {
             cancelledRef.current = true;
         };
     }, [restoreSession]);
 
     return (
-        <AuthContext.Provider value={{ ...state, refreshAuth: restoreSession }}>
+        <AuthContext.Provider value={{ ...state, refreshAuth: restoreSession, refetchUser }}>
             {children}
         </AuthContext.Provider>
     );

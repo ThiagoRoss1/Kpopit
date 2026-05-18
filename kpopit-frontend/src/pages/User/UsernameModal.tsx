@@ -26,7 +26,7 @@ const extractError = (err: unknown): string | null => {
 };
 
 const UsernameModal = ({ isOpen, onClose, onBack }: UsernameModalProps) => {
-    const { user, refreshAuth } = useAuth();
+    const { user, refetchUser } = useAuth();
     const currentUsername = user?.user_credentials?.username ?? "";
     const usernameChangedAt = user?.user_credentials?.username_changed_at ?? null;
 
@@ -110,7 +110,7 @@ const UsernameModal = ({ isOpen, onClose, onBack }: UsernameModalProps) => {
     const saveMutation = useMutation({
         mutationFn: () => updateProfile({ username, current_password: password }),
         onSuccess: async () => {
-            await refreshAuth();
+            await refetchUser();
             onBack();
         },
         onError: (err) => {

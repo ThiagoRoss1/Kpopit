@@ -22,7 +22,7 @@ const extractError = (err: unknown): string | null => {
 };
 
 const PasswordModal = ({ isOpen, onClose, onBack }: PasswordModalProps) => {
-    const { refreshAuth } = useAuth();
+    const { refetchUser } = useAuth();
 
     const [currentPassword, setCurrentPassword] = useState("");
     const [newPassword, setNewPassword] = useState("");
@@ -44,7 +44,7 @@ const PasswordModal = ({ isOpen, onClose, onBack }: PasswordModalProps) => {
     const saveMutation = useMutation({
         mutationFn: () => changePassword(currentPassword, newPassword, confirmPassword),
         onSuccess: async () => {
-            await refreshAuth();
+            await refetchUser();
             onBack();
         },
         onError: (err) => {

@@ -30,7 +30,7 @@ const extractError = (err: unknown): string | null => {
 };
 
 const AvatarModal = ({ isOpen, onClose, onBack, avatarUrl }: AvatarModalProps) => {
-    const { refreshAuth } = useAuth();
+    const { refetchUser } = useAuth();
 
     const [tab, setTab] = useState<Tab>("upload");
     const [cropSrc, setCropSrc] = useState<string | null>(null);
@@ -190,7 +190,7 @@ const AvatarModal = ({ isOpen, onClose, onBack, avatarUrl }: AvatarModalProps) =
             }
         },
         onSuccess: async () => {
-            await refreshAuth();
+            await refetchUser();
             onClose();
         },
         onError: (err) => {

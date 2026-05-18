@@ -9,6 +9,7 @@ export interface AuthState {
 
 export interface AuthContextValue extends AuthState {
     refreshAuth: () => Promise<void>;
+    refetchUser: () => Promise<void>;
 }
 
 export const AuthContext = createContext<AuthContextValue>({
@@ -16,6 +17,9 @@ export const AuthContext = createContext<AuthContextValue>({
     isLoading: true,
     user: null,
     refreshAuth: () => {
+        throw new Error("useAuth must be used within an <AuthProvider>");
+    },
+    refetchUser: () => {
         throw new Error("useAuth must be used within an <AuthProvider>");
     },
 });

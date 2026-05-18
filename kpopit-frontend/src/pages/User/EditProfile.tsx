@@ -37,7 +37,7 @@ const extractError = (err: unknown): string | null => {
 const EditProfile = (props: EditProfileProps) => {
     const { isOpen, onClose, initialTab = "fields" } = props;
 
-    const { user, refreshAuth } = useAuth();
+    const { user, refetchUser } = useAuth();
 
     const credentials = user?.user_credentials;
     const profile = user?.profile;
@@ -66,7 +66,7 @@ const EditProfile = (props: EditProfileProps) => {
     const saveMutation = useMutation({
         mutationFn: (name: string) => updateProfile({ display_name: name }),
         onSuccess: async () => {
-            await refreshAuth();
+            await refetchUser();
             onClose();
         },
         onError: (err) => {
