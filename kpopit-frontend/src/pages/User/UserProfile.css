@@ -1,0 +1,55 @@
+@keyframes profileEntry {
+    from {
+        opacity: 0;
+        transform: translateY(20px);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+.profile-entry {
+    animation: profileEntry 0.6s ease-out forwards;
+}
+
+@keyframes statValueFadeIn {
+    0% {
+        opacity: 0;
+    }
+
+    100% {
+        opacity: 1;
+    }
+}
+
+.stat-value-fade-in {
+    animation: statValueFadeIn 0.6s ease-in-out forwards;
+}
+
+@keyframes constructionDots {
+    0%, 100% {
+        opacity: 0.6;
+    }
+
+    50% {
+        opacity: 1;
+    }
+}
+
+/* .construction-dots {
+    background-image: radial-gradient(rgba(255, 51, 153, 0.08) 1px, transparent 1px);
+    background-size: 22px 22px;
+    -webkit-mask-image: radial-gradient(ellipse at center, black 30%, transparent 75%);
+    mask-image: radial-gradient(ellipse at center, black 30%, transparent 75%);
+    animation: constructionDots 4s ease-in-out infinite;
+}
+
+.profile-bg-glow {
+    background-image:
+        radial-gradient(ellipse at 20% 0%, rgba(0, 0, 0, 0.06), transparent 55%),
+        radial-gradient(ellipse at 90% 100%, rgba(0, 0, 0, 0.05), transparent 55%),
+        radial-gradient(rgba(255, 255, 255, 0.015) 1px, transparent 1px);
+    background-size: auto, auto, 4px 4px;
+} */

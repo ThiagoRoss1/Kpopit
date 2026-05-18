@@ -2,6 +2,7 @@ import "./IdolsList.css";
 import { useState, useEffect, useMemo } from "react";
 import { Link } from "react-router-dom";
 import { useQuery } from "@tanstack/react-query";
+import { Helmet } from "react-helmet-async";
 import { getIdolsPage } from "../../services/api";
 import type { IdolsPageData } from "../../interfaces/gameInterfaces";
 import IdolsSearchBar from "../../components/IdolsSearchBar/IdolsSearchBar";
@@ -29,10 +30,6 @@ function IdolsList() {
         refetchOnWindowFocus: false,
         enabled: true,
     });
-
-    useEffect(() => {
-        document.title = "KpopIt - Idols List";
-    }, []);
 
     // Idol filtering
     const filteredIdols = useMemo(() => {
@@ -79,6 +76,14 @@ function IdolsList() {
 
     return (
         <div className="w-full min-h-full bg-[#0a0a0a]">
+            <Helmet>
+                <title>KpopIt - Idols List</title>
+                <meta name="description" content="Browse every K-pop idol featured in KpopIt's daily guessing game." />
+                <link rel="canonical" href="https://kpopit.net/idols" />
+                <meta property="og:title" content="KpopIt - Idols List" />
+                <meta property="og:description" content="Browse every K-pop idol featured in KpopIt's daily guessing game." />
+            </Helmet>
+            
             <div className="flex flex-col w-full h-full justify-start items-center">
                 {/* Title */}
                 <div className="flex items-center justify-center w-full h-fit mt-10 mb-5">

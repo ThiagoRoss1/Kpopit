@@ -2,6 +2,7 @@ import "./home.css";
 import "../../index.css";
 import { Link } from "react-router-dom";
 import { useState } from "react";
+import { Helmet } from "react-helmet-async";
 import BackgroundStyle from "../../components/Background/BackgroundStyle";
 import InfoButtons from "../../components/buttons/InfoButtons";
 import Modal from "../../components/buttons/modals/Modal";
@@ -13,6 +14,14 @@ function Home() {
 
     return (
         <>
+        <Helmet>
+            <title>KpopIt - Daily K-pop Idol Wordle Guessing Game</title>
+            <meta name="description" content="Test your K-pop knowledge with KpopIt, the daily K-pop Wordle-inspired game (Kpopdle)! Guess the secret idol of the day and show your mastery by solving the challenge in the fewest attempts." />
+            <link rel="canonical" href="https://kpopit.net/" />
+            <meta property="og:title" content="KpopIt - Daily K-pop Idol Wordle Guessing Game" />
+            <meta property="og:description" content="Test your K-pop knowledge with KpopIt, the daily K-pop Wordle-inspired game (Kpopdle)! Guess the secret idol of the day and show your mastery by solving the challenge in the fewest attempts." />
+        </Helmet>
+        
         <BackgroundStyle />
             <div className="min-h-full w-full flex flex-col items-center justify-start">
                 <div className="flex flex-col items-center justify-center h-fit w-fit mt-10 sm:mt-25 mb-10 gap-0">

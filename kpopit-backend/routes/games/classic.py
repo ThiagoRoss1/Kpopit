@@ -11,7 +11,8 @@ from dotenv import load_dotenv
 load_dotenv()
 FLASK_ENV = os.getenv("FLASK_ENV", "production")
 
-from flask import Blueprint, request, jsonify
+from flask import Blueprint, request, jsonify, g
+from utils.auth_decorators import optional_auth
 
 classic_bp = Blueprint('classic', __name__)
 
@@ -99,13 +100,13 @@ def get_daily_idol():
 
 # Create idol guess route
 @classic_bp.route("/game/classic/guess", methods=["POST"])
+@optional_auth
 def guess_idol():
     """Get idol guess and return comparison data as JSON"""
 
     data = request.get_json()
     guessed_idol_id = data.get("guessed_idol_id")
     answer_id = data.get("answer_id")
-    user_token = data.get("user_token")
     current_attempt = data.get("current_attempt")
     game_date = data.get("game_date")
     analytics_data = get_analytics_data()
@@ -124,23 +125,42 @@ def guess_idol():
 
         if not guessed_idol_id or not answer_id:
             return jsonify({"error": "Missing guessed_idol_id or answer_id"}), 400
-        
-        if not user_token:
-            return jsonify({"error": "Missing user token"}), 400
 
         repository = get_idol_repo()
         game_service = GameService(connect, repository)
 
-        # Validate user token
-        cursor.execute("""SELECT id FROM users WHERE token = %s""", (user_token,))
-        user_row = cursor.fetchone()
+        # Resolve user identity — JWT (header) takes priority over body token
+        auth = g.auth
 
-        if not user_row:
-            if FLASK_ENV == "development":
-                print("Invalid user token provided:", user_token)
-            return jsonify({"error": "Invalid user token"}), 400
-        
-        user_id = user_row["id"]
+        if auth["source"] == "jwt":
+            user_id = auth["user_id"]
+
+        elif auth["source"] == "anonymous":
+            cursor.execute("SELECT id FROM users WHERE token = %s", (auth["token"],))
+            user_row = cursor.fetchone()
+
+            if not user_row:
+                return jsonify({"error": "Invalid user token"}), 400
+            
+            user_id = user_row["id"]
+
+        else:
+            # Legacy: body token for clients that don't set Authorization header
+            user_token = data.get("user_token")
+
+            if not user_token:
+                return jsonify({"error": "Missing user token"}), 400
+            
+            cursor.execute("SELECT id FROM users WHERE token = %s", (user_token,))
+            user_row = cursor.fetchone()
+
+            if not user_row:
+                if FLASK_ENV == "development":
+                    print("Invalid user token provided:", user_token)
+
+                return jsonify({"error": "Invalid user token"}), 400
+            
+            user_id = user_row["id"]
 
         # Fetch full data for guessed idol and answer idol
         guessed_idol = dict(repository.fetch_full_idol_data(guessed_idol_id))

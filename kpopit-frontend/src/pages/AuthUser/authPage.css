@@ -1,0 +1,58 @@
+/* Grain texture overlay — consumer must provide a positioned ancestor (relative/fixed/absolute) */
+/* .noise-bg::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  opacity: 0.04;
+  background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noiseFilter'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.65' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noiseFilter)'/%3E%3C/svg%3E");
+  z-index: 1;
+} */
+
+/* Modal layering */
+.modal-outer-shadow {
+  box-shadow: 12px 12px 0px rgba(0, 0, 0, 0.4);
+}
+.modal-inner-shadow {
+  box-shadow: 6px 6px 0px rgba(255, 51, 153, 0.3);
+}
+
+/* Input retro-pop focus effect */
+.neo-input-modal {
+  border: 3px solid #2a2a2a;
+}
+.neo-input-modal:focus-within {
+  border-width: 3px;
+  border-color: var(--neo-accent, #ff3399);
+  box-shadow: 4px 4px 0px var(--neo-accent, #ff3399);
+}
+
+/* Progress dots */
+.validation-dot {
+  transition: all 0.2s ease;
+  border: 2px solid var(--neo-accent, #ff3399);
+}
+.validation-dot.filled {
+  background-color: var(--neo-accent, #ff3399);
+}
+
+/* Password strength bar */
+.strength-bar {
+  height: 3px;
+  transition: all 0.3s ease;
+  border-radius: 99px;
+}
+
+/* Floating background squares */
+.bg-square {
+  background: linear-gradient(135deg, rgba(255, 255, 255, 0.05) 0%, transparent 100%);
+  border: 1px solid rgba(255, 255, 255, 0.03);
+}
+
+input:-webkit-autofill,
+input:-webkit-autofill:hover,
+input:-webkit-autofill:focus {
+  -webkit-box-shadow: 0 0 0px 1000px #0a0a0a inset !important;
+  -webkit-text-fill-color: white !important;
+  caret-color: white;
+}

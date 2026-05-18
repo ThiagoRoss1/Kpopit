@@ -16,6 +16,7 @@ import { getNationalityFlag } from "../../utils/getFlags";
 import { useDateLocale } from "../../hooks/useDateLocale";
 import IdolsProfileSearch from "../../components/IdolsSearchBar/IdolsProfileSearch";
 import { useIsMobile } from "../../hooks/useIsDevice";
+import { Helmet } from "react-helmet-async";
 
 function IdolProfile() {
 
@@ -135,8 +136,25 @@ function IdolProfile() {
         );
     }
 
+    // Helmet SEO
+    const artistName = idolProfileData.idol_profile.artist_name;
+    const groupName = idolProfileData.idol_career.group_name;
+    const canonicalUrl = `https://kpopit.net/idols/${idolProfileData.idol_profile.idol_id}/${artistName.toLowerCase()}-${groupName.toLowerCase()}`.trim().replace(/\s+/g, '-');
+    const idolTitle = `${artistName} (${groupName}) · Stats & Profile - KpopIt`;
+    const idolDescription = `Stats and profile for ${artistName} of ${groupName} on KpopIt.`;
+    const ogTitle = `${artistName} (${groupName}) · KpopIt`;
+    const ogDescription = `Stats, profile and career info for ${artistName} of ${groupName}.`;
+
     return (
         <div className="w-full min-h-full bg-[#0a0a0a]">
+            <Helmet>
+                <title>{idolTitle}</title>
+                <meta name="description" content={idolDescription} />
+                <link rel="canonical" href={canonicalUrl} />
+                <meta property="og:title" content={ogTitle} />
+                <meta property="og:description" content={ogDescription} />
+            </Helmet>
+            
             <div className="flex flex-col relative max-w-7xl mx-auto">
                 <div className="flex flex-row w-full mt-7 justify-between items-center mb-8">
                     <div className="flex flex-row w-full justify-center md:justify-start items-center gap-6">

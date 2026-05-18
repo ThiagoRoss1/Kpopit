@@ -1,9 +1,12 @@
 import axios from 'axios';
-import type { AddIdolRequest, CompleteGuessTrafficRequest } from '../interfaces/gameInterfaces';
+import type { AddIdolRequest, CompleteGuessTrafficRequest, RestoreSessionResponse } from '../interfaces/gameInterfaces';
+import type { MeResponse, UpdateProfilePayload } from '../interfaces/authInterfaces';
 import { decryptToken } from '../utils/tokenEncryption';
+import { setAccessToken, getAccessToken, clearAccessToken } from './tokenStore';
 // Api instance with base URL
 const api = axios.create({
     baseURL: `${import.meta.env.VITE_API_URL}/api`,
+    withCredentials: true,
 });
 
 // Game modes
@@ -15,7 +18,27 @@ const MODES: Record<string, number> = {
 // Response interceptor to handle invalid user token globally
 api.interceptors.response.use(
     (response) => response,
-    (error) => {
+    async (error) => {
+        const original = error.config;
+
+        const isAuthRoute = original.url?.includes('/auth/login') ||
+                            original.url?.includes('/auth/register') ||
+                            original.url?.includes('/auth/claim') || 
+                            original.url?.includes('/auth/refresh');
+
+        if (error.response?.status === 401 && !original._retry && !isAuthRoute) {
+            original._retry = true;
+            try {
+                const data = await refreshToken();
+                setAccessToken(data.access_token);
+                original.headers['Authorization'] = `Bearer ${data.access_token}`;
+                return api(original);
+            } catch {
+                const hadToken = !!getAccessToken();
+                clearAccessToken();
+                if (hadToken) window.location.reload();
+            }
+        }
         if (error.response?.status === 400) {
             if (error.response?.data?.error === 'Invalid user token') {
                 console.warn("Invalid user token detected. Removing from localStorage.");
@@ -35,14 +58,23 @@ api.interceptors.response.use(
 
 api.interceptors.request.use(
     (config) => {
-        const activeMode = localStorage.getItem("kpopit_gamemode") || "classic";
+        const token = getAccessToken();
+        const isRefreshRoute = config.url?.includes('/auth/refresh');
 
-        const modeId = MODES[activeMode] || MODES["classic"];
+        if (token && !isRefreshRoute) {
+            config.headers['Authorization'] = `Bearer ${token}`;
+        }
 
-        config.params = {
-            ...config.params,
-            gamemode_id: modeId
-        };
+        if (!config.url?.includes('/auth')) {
+            const activeMode = localStorage.getItem("kpopit_gamemode") || "classic";
+
+            const modeId = MODES[activeMode] || MODES["classic"];
+
+            config.params = {
+                ...config.params,
+                gamemode_id: modeId
+            };
+        }
         return config;
     }, (error) => {
         return Promise.reject(error);
@@ -79,6 +111,11 @@ export const getYesterdaysIdol = async () => {
 
 export const getResetTimer = async () => {
     const response = await api.get('/reset-timer');
+    return response.data;
+};
+
+export const getGameModesCount = async (): Promise<{ gamemodes_count: number }> => {
+    const response = await api.get('/gamemodes-count');
     return response.data;
 };
 
@@ -130,6 +167,11 @@ export const fetchGameState = async (user_token: string) => {
     return response.data;
 }
 
+export const restoreSession = async (): Promise<RestoreSessionResponse> => {
+    const response = await api.get('/game/restore-session');
+    return response.data;
+}
+
 export const getActiveTransferCode = async (user_token: string) => {
     const response = await api.get(`/get-active-transfer-code/${user_token}`);
     return response.data;
@@ -173,5 +215,141 @@ export const getIdolsPage = async () => {
 // Get entire idol data for a specific idol
 export const getIdolInfo = async (idol_id: number) => {
     const response = await api.get(`/idols-page/${idol_id}`);
+    return response.data;
+}
+
+// Register user account
+export const registerUser = async (username: string, email: string | undefined, password: string) => {
+    const response = await api.post('/auth/register', {
+        username,
+        email,
+        password
+    });
+    return response.data;
+}
+
+export const claimUser = async (token: string, username: string, email: string | undefined, password: string) => {
+    const response = await api.post('/auth/claim', {
+        username,
+        email,
+        password
+    },
+        { headers: { 'Authorization': token} }
+    );
+    return response.data;
+}
+
+export const checkUsernameAvailability = async (username: string, signal?: AbortSignal): Promise<{ available: boolean }> => {
+    const response = await api.get(`/auth/check-username/${encodeURIComponent(username)}`, { signal });
+    return response.data;
+}
+
+export const loginUser = async (identifier: string, password: string, rememberMe: boolean) => {
+    const response = await api.post('/auth/login', {
+        identifier,
+        password,
+        remember_me: rememberMe
+    });
+    return response.data;
+}
+
+export const authError = (error: unknown): error is { response: { data: { error: string } } } => {
+    return (
+        typeof error === 'object' &&
+        error !== null &&
+        'response' in error &&
+        typeof (error as { response: { data: { error: string } } }).response?.data?.error === "string"
+    );
+}
+
+export const logoutUser = async () => {
+    const response = await api.post('/auth/logout');
+    return response.data;
+}
+
+let inFlightRefresh: Promise<{ access_token: string }> | null = null;
+
+export const refreshToken = async (): Promise<{ access_token: string }> => {
+    if (inFlightRefresh) return inFlightRefresh;
+
+    inFlightRefresh = (async () => {
+        try {
+            const response = await api.post('/auth/refresh', {}, { withCredentials: true });
+            return response.data;
+        } finally {
+            inFlightRefresh = null;
+        }
+    })();
+
+    return inFlightRefresh;
+};
+
+export const getMe = async (): Promise<MeResponse> => {
+    const response = await api.get('/auth/me');
+    return response.data;
+}
+
+export const forgotPassword = async (email: string) => {
+    const response = await api.post('/auth/email/forgot-password', { email });
+    return response.data;
+}
+
+export const resetPassword = async (token: string, password: string) => {
+    const response = await api.post('/auth/email/reset-password', { token, password });
+    return response.data;
+}
+
+export const sendVerificationEmail = async () => {
+    const response = await api.post('/auth/email/send-verification-email');
+    return response.data;
+}
+
+export const verifyEmail = async (token: string) => {
+    const response = await api.post('/auth/email/verify-email', { token });
+    return response.data;
+}
+
+export const updateProfile = async (payload: UpdateProfilePayload) => {
+    const response = await api.patch('/user/profile', payload);
+    return response.data;
+}
+
+export const uploadAvatarFile = async (blob: Blob) => {
+    const formData = new FormData();
+    formData.append('avatar', blob, 'avatar.png');
+    if (import.meta.env.DEV) {
+        console.log('[uploadAvatarFile] blob size:', blob.size, 'type:', blob.type);
+        console.log('[uploadAvatarFile] formData avatar:', formData.get('avatar'));
+    }
+    const response = await api.post('/user/avatar', formData);
+    return response.data;
+}
+
+export const setAvatarFromIdol = async (avatar_url: string) => {
+    const response = await api.patch('/user/avatar', { avatar_url });
+    return response.data;
+}
+
+export const changePassword = async (current_password: string, new_password: string, confirm_password: string) => {
+    const response = await api.patch('/user/change-password', {
+        current_password,
+        new_password,
+        confirm_password,
+    });
+    return response.data;
+}
+
+export const requestEmailChange = async (new_email: string, current_password: string) => {
+    const response = await api.patch('/auth/email/request-email-change', { new_email, current_password });
+    return response.data;
+}
+
+export const confirmEmailChange = async (token: string) => {
+    const response = await api.post('/auth/email/confirm-email-change', { token });
+    return response.data;
+}
+
+export const revertEmailChange = async (token: string) => {
+    const response = await api.post('/auth/email/revert-email-change', { token });
     return response.data;
 }

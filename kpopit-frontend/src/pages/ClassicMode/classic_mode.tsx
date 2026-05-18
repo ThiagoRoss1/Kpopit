@@ -1,6 +1,7 @@
 import "../../index.css";
 import "./style.css";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
+import { Helmet } from "react-helmet-async";
 import { useSharedGameData } from "../../hooks/useSharedGameData.tsx";
 import { useState, useEffect } from "react";
 import { getDailyIdol, getGuessIdol, getYesterdaysIdol, getDailyUserCount, getUserPosition, saveGameState } from "../../services/api.ts";
@@ -34,6 +35,7 @@ import FeedbackSquares from "../../components/FeedbackSquares/FeedbackSquares.ts
 import { WinnerExplosion } from "../../utils/confetti.tsx";
 import { calculateFeedback } from "../../utils/calculateFeedback.ts";
 import { useAllGameModes } from "../../hooks/useAllGameModes.tsx";
+import { useClearGameStorage } from "../../hooks/useClearGameStorage.tsx";
 // import { Input } from "@chakra-ui/react"; - Css framework import example
 
 function ClassicMode() {
@@ -52,15 +54,12 @@ function ClassicMode() {
   // Counter
   const [attempts, setAttempts] = useState<number>(0);
 
-  // Page title //
-  useEffect(() => {
-    document.title = "KpopIt Classic - K-pop Idol Guessing Game";
-  }, []);
-
   // Transfer data logic hook
   
-  const { userToken, initUser, decryptedTokenRef, allIdolsData, isLoadingAllIdols, isErrorAllIdols, 
+  const { userToken, initUser, decryptedTokenRef, allIdolsData, isLoadingAllIdols, isErrorAllIdols,
     isInitialized, userStatsData, transferData, queryClient } = useSharedGameData();
+
+  const { clearClassic } = useClearGameStorage();
 
   const handleGuessAttempts = () => {
     setAttempts(prev => prev + 1);
@@ -116,19 +115,7 @@ function ClassicMode() {
    
     if (lastGameDate !== serverDate) {
       console.log("New day detected, clearing cache.");
-      localStorage.removeItem("todayGuessesDetails");
-      localStorage.removeItem("GuessedIdols");
-      localStorage.removeItem("gameComplete");
-      localStorage.removeItem("gameWon");
-      localStorage.removeItem("hint1Revealed");
-      localStorage.removeItem("showHint1");
-      localStorage.removeItem("colorize1");
-      localStorage.removeItem("hint2Revealed");
-      localStorage.removeItem("showHint2");
-      localStorage.removeItem("colorize2");
-      localStorage.removeItem("animatedIdols");
-      localStorage.removeItem("closeFeedbackSquares");
-      localStorage.removeItem("confettiShown");
+      clearClassic();
 
       localStorage.setItem("gameDate", serverDate || "");
 
@@ -165,7 +152,7 @@ function ClassicMode() {
       setDayChecked(true);
       setConfetti(confettiShown);
     }
-  }, [gameData]);
+  }, [gameData, clearClassic]);
 
   const guessMutation = useMutation({
     mutationFn: async (guessData: CompleteGuessRequest) => {
@@ -347,6 +334,13 @@ function ClassicMode() {
   // Main return
   return (
     <>
+    <Helmet>
+      <title>KpopIt Classic - K-pop Idol Guessing Game</title>
+      <meta name="description" content="Guess today's K-pop idol by comparing attributes in KpopIt's daily Classic mode." />
+      <link rel="canonical" href="https://kpopit.net/classic" />
+      <meta property="og:title" content="KpopIt Classic - K-pop Idol Guessing Game" />
+      <meta property="og:description" content="Guess today's K-pop idol by comparing attributes in KpopIt's daily Classic mode." />
+    </Helmet>
     <BackgroundStyle attempts={attempts} />
     <div className="min-h-full w-full flex flex-col items-center justify-start">
       <div className="flex items-center justify-center p-2 w-3xs sm:w-3xs h-9 sm:h-20 mt-12 mb-13 text-center">

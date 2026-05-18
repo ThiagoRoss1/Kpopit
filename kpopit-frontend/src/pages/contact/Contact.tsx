@@ -1,8 +1,12 @@
 import BackgroundStyle from "../../components/Background/BackgroundStyle";
+import { Helmet } from "react-helmet-async";
 
 const Contact = () => {
     return (
         <>
+        <Helmet>
+            <title>KpopIt - Contact</title>
+        </Helmet>
         <BackgroundStyle />
         <div className="w-full flex-1 overflow-y-auto flex items-start justify-center">
             <div className="flex flex-col items-center justify-center">

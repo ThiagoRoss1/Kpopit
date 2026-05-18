@@ -12,18 +12,30 @@ import ScrollToTop from './hooks/useScrollToTop'
 import MaintenancePage from './pages/Maintenance/MaintenancePage'
 import IdolsList from './pages/Idols/IdolsList'
 import IdolProfile from './pages/Idols/IdolProfile'
+import AuthPage from './pages/AuthUser/AuthPage'
+import ForgotPassword from './pages/AuthUser/ForgotPassword'
+import ResetPassword from './pages/AuthUser/ResetPassword'
+import VerifyEmail from './pages/AuthUser/VerifyEmail'
+import ConfirmEmailChange from './pages/AuthUser/ConfirmEmailChange'
+import RevertEmailChange from './pages/AuthUser/RevertEmailChange'
+import UserProfile from './pages/User/UserProfile'
+import { AuthProvider } from './contexts/AuthProvider'
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
 import { BrowserRouter, Route, Navigate, Routes } from 'react-router-dom'
+import ProtectedRoute from './components/ProtectedRoute/ProtectedRoute'
 import { SpeedInsights } from "@vercel/speed-insights/react"
 import { Analytics } from "@vercel/analytics/react"
+import { HelmetProvider } from 'react-helmet-async'
 
 const queryClient = new QueryClient();
 
 createRoot(document.getElementById('root')!).render(
   <StrictMode>
       <QueryClientProvider client={queryClient}>
+        <HelmetProvider>
         <BrowserRouter>
           <ScrollToTop />
+          <AuthProvider>
             {import.meta.env.VITE_MAINTENANCE_MODE === "true" ? (
               <Routes>
                 <Route path="*" element={<MaintenancePage type="database" />} />
@@ -33,8 +45,22 @@ createRoot(document.getElementById('root')!).render(
               <Route element={<MainLayout />}>
                 <Route path="/" element={<Home />} />
 
+                <Route path="/login" element={<AuthPage />} />
+
+                <Route path="/register" element={<AuthPage />} />
+
+                <Route path="/forgot-password" element={<ForgotPassword />} />
+
+                <Route path="/reset-password" element={<ResetPassword />} />
+
+                <Route path="/verify-email" element={<VerifyEmail />} />
+
+                <Route path="/confirm-email-change" element={<ConfirmEmailChange />} />
+
+                <Route path="/revert-email-change" element={<RevertEmailChange />} />
+
                 <Route path="/classic" element={<ClassicMode />} />
-                
+
                 <Route path="/blurry" element={<BlurryMode />} />
 
                 <Route path="/idols" element={<IdolsList />} />
@@ -44,7 +70,12 @@ createRoot(document.getElementById('root')!).render(
                 <Route path="/privacy-policy" element={<PrivacyPolicy />} />
 
                 <Route path="/contact" element={<Contact />} />
-                
+
+                {/* Protected routes - accessible only to authenticated users */}
+                <Route element={<ProtectedRoute />}>
+                  <Route path="/profile/:username" element={<UserProfile />} />
+                </Route>
+
                 {import.meta.env.VITE_ADMIN_ROUTE && import.meta.env.VITE_ADMIN_ENABLED === "true" && (
                   <Route path={import.meta.env.VITE_ADMIN_ROUTE} element={<Admin />} />
                 )}
@@ -54,7 +85,9 @@ createRoot(document.getElementById('root')!).render(
               <Route path="*" element={<Navigate to="/" replace />} />
             </Routes>
             )}
+          </AuthProvider>
         </BrowserRouter>
+        </HelmetProvider>
       </QueryClientProvider>
 
       <SpeedInsights />

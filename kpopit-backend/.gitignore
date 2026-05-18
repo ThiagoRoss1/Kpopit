@@ -10,6 +10,10 @@ backup_dev2.b64
 backup_kpopitprevention.b64
 backup_predeploy.b64
 
+# Planning .md's
+kpopit_auth_feature_tips.md
+kpopit_auth_planning.md
+
 # Ignore environment variable files
 .env
 

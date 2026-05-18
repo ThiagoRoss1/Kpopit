@@ -1,6 +1,7 @@
 import "../BlurryMode/blurry_mode.css";
 import { AxiosError } from "axios";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
+import { Helmet } from "react-helmet-async";
 import { useSharedGameData } from "../../hooks/useSharedGameData";
 import { useGameMode } from "../../hooks/useGameMode";
 import { useState, useEffect, useMemo, useCallback, useRef } from "react";
@@ -33,6 +34,7 @@ import TransferDataText from "../../components/buttons/modals/TransferDataConten
 import ImportDataText from "../../components/buttons/modals/ImportDataContent";
 import ExportDataText from "../../components/buttons/modals/ExportDataContent";
 import { WinnerExplosion } from "../../utils/confetti";
+import { useClearGameStorage } from "../../hooks/useClearGameStorage";
 
 function BlurryMode() {
     const gameMode = useGameMode();
@@ -47,16 +49,13 @@ function BlurryMode() {
     const [confetti, setConfetti] = useState<boolean>(false);
     const [attempts, setAttempts] = useState<number>(0);
 
-    // Page title //
-    useEffect(() => {
-        document.title = "KpopIt Blurry - K-pop Idol Image Guessing Game";
-    }, []);
-
     // Mobile
     const [isTouched, setIsTouched] = useState<boolean>(false);
 
-    const { userToken, initUser, decryptedTokenRef, allIdolsData, isLoadingAllIdols, 
+    const { userToken, initUser, decryptedTokenRef, allIdolsData, isLoadingAllIdols,
         isInitialized, userStatsData, transferData, isErrorAllIdols, queryClient} = useSharedGameData();
+
+    const { clearBlurry } = useClearGameStorage();
 
     const isCorrect = guesses.some(g => g.guess_correct === true);
 
@@ -144,15 +143,7 @@ function BlurryMode() {
 
         if (lastGameDate !== serverDate) {
             console.log("New day detected, clearing cache.");
-            localStorage.removeItem("blurryGuessesDetails");
-            localStorage.removeItem("blurryGuessedIdols");
-            localStorage.removeItem("blurryGameComplete");
-            localStorage.removeItem("blurryGameWon");
-            localStorage.removeItem("blurryHardcoreMode");
-            localStorage.removeItem("blurryColorMode");
-            localStorage.removeItem("blurryHintClicked");
-            localStorage.removeItem("blurryAnimatedIdols");
-            localStorage.removeItem("confettiShownBlurry");
+            clearBlurry();
 
             setGuesses([]);
             setAttempts(0);
@@ -190,7 +181,7 @@ function BlurryMode() {
             setDayChecked(true);
             setConfetti(confettiShown);
         }
-    }, [blurryGameData]);
+    }, [blurryGameData, clearBlurry]);
 
     const blurryIdols = useMemo(() => {
         if (!allIdolsData) return [];
@@ -392,6 +383,14 @@ function BlurryMode() {
 
     return (
         <>
+        <Helmet>
+            <title>KpopIt Blurry - K-pop Idol Image Guessing Game</title>
+            <meta name="description" content="Identify today's K-pop idol from a gradually unblurred photo in KpopIt's daily Blurry mode." />
+            <link rel="canonical" href={`https://kpopit.net/blurry`} />
+            <meta property="og:title" content="KpopIt Blurry - K-pop Idol Image Guessing Game" />
+            <meta property="og:description" content="Identify today's K-pop idol from a gradually unblurred photo in KpopIt's daily Blurry mode." />
+        </Helmet>
+
         <BackgroundStyle attempts={attempts} />
         <div className="min-h-full w-full flex flex-col items-center justify-start mt-4">
             <Link 
