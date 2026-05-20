@@ -35,6 +35,7 @@ import ImportDataText from "../../components/buttons/modals/ImportDataContent";
 import ExportDataText from "../../components/buttons/modals/ExportDataContent";
 import { WinnerExplosion } from "../../utils/confetti";
 import { useClearGameStorage } from "../../hooks/useClearGameStorage";
+import { areGuessesEqual } from "../../utils/areGuessesEqual";
 
 function BlurryMode() {
     const gameMode = useGameMode();
@@ -50,12 +51,6 @@ function BlurryMode() {
     const [attempts, setAttempts] = useState<number>(0);
     const [sessionRestored, setSessionRestored] = useState<number>(0);
 
-    useEffect(() => {
-        const onSessionRestored = () => setSessionRestored(prev => prev + 1);
-        window.addEventListener("session-restored", onSessionRestored);
-        return () => window.removeEventListener("session-restored", onSessionRestored);
-    }, []);
-
     // Mobile
     const [isTouched, setIsTouched] = useState<boolean>(false);
 
@@ -65,6 +60,12 @@ function BlurryMode() {
     const { clearBlurry } = useClearGameStorage();
 
     const isCorrect = guesses.some(g => g.guess_correct === true);
+
+    useEffect(() => {
+        const onSessionRestored = () => setSessionRestored(prev => prev + 1);
+        window.addEventListener("session-restored", onSessionRestored);
+        return () => window.removeEventListener("session-restored", onSessionRestored);
+    }, []);
 
     useEffect(() => {
         if (guesses.length > 0) {
@@ -172,7 +173,7 @@ function BlurryMode() {
             if (cachedGuesses) {
                 try {
                     const parsedGuesses = JSON.parse(cachedGuesses) as GuessResponse<Partial<FeedbackData>>[];
-                    setGuesses(parsedGuesses);
+                    setGuesses(prev => areGuessesEqual(prev, parsedGuesses) ? prev : parsedGuesses);
                     setAttempts(parsedGuesses.length);
                 } catch (error) {
                     console.error("Error parsing cached guesses:", error);

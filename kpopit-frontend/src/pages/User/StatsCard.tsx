@@ -1,3 +1,5 @@
+import { Loader2 } from "lucide-react";
+
 interface StatsCardProps {
     label: string;
     value: number;
@@ -5,9 +7,10 @@ interface StatsCardProps {
     sub: string;
     fadeKey: string;
     actualCard: string;
+    isLoading?: boolean;
 }
 
-const StatsCard = ({ label, value, gameMode, sub, fadeKey, actualCard }: StatsCardProps) => (
+const StatsCard = ({ label, value, gameMode, sub, fadeKey, actualCard, isLoading }: StatsCardProps) => (
     <article
         role="listitem"
         className={`flex flex-col gap-1 min-w-0 h-27.5 xs:h-34 sm:h-27.5 px-4 sm:px-4 py-1.5 sm:py-2
@@ -40,7 +43,11 @@ const StatsCard = ({ label, value, gameMode, sub, fadeKey, actualCard }: StatsCa
             className="stat-value-fade-in mt-1.5 text-3xl font-bold text-white tracking-[0.3px] leading-none
             [text-shadow:1.2px_1.2px_4px_rgba(0,0,0,0.8)]"
         >
-            {value}
+            {isLoading ? (
+                <Loader2 className="w-7.5 h-7.5 animate-spin text-neon-pink" />
+            ) : (
+                value
+            )}
         </div>
 
         <div className="font-sans max-xs:text-[12px] xs:text-sm sm:text-[10px] lg:text-[12px] text-[#666] mt-1 min-w-0 max-w-full">

@@ -36,6 +36,7 @@ import { WinnerExplosion } from "../../utils/confetti.tsx";
 import { calculateFeedback } from "../../utils/calculateFeedback.ts";
 import { useAllGameModes } from "../../hooks/useAllGameModes.tsx";
 import { useClearGameStorage } from "../../hooks/useClearGameStorage.tsx";
+import { areGuessesEqual } from "../../utils/areGuessesEqual.ts";
 // import { Input } from "@chakra-ui/react"; - Css framework import example
 
 function ClassicMode() {
@@ -55,18 +56,18 @@ function ClassicMode() {
   const [attempts, setAttempts] = useState<number>(0);
   const [sessionRestored, setSessionRestored] = useState<number>(0);
 
-  useEffect(() => {
-    const onSessionRestored = () => setSessionRestored(prev => prev + 1);
-    window.addEventListener("session-restored", onSessionRestored);
-    return () => window.removeEventListener("session-restored", onSessionRestored);
-  }, []);
-
   // Transfer data logic hook
   
   const { userToken, initUser, decryptedTokenRef, allIdolsData, isLoadingAllIdols, isErrorAllIdols,
     isInitialized, userStatsData, transferData, queryClient } = useSharedGameData();
 
   const { clearClassic } = useClearGameStorage();
+
+  useEffect(() => {
+    const onSessionRestored = () => setSessionRestored(prev => prev + 1);
+    window.addEventListener("session-restored", onSessionRestored);
+    return () => window.removeEventListener("session-restored", onSessionRestored);
+  }, []);
 
   const handleGuessAttempts = () => {
     setAttempts(prev => prev + 1);
@@ -139,8 +140,9 @@ function ClassicMode() {
 
       if (cachedGuesses) {
         try {
-          const parsedGuesses = JSON.parse(cachedGuesses);
-          setGuesses(parsedGuesses);
+          const parsedGuesses = JSON.parse(cachedGuesses) as GuessResponse[];
+
+          setGuesses(prev => areGuessesEqual(prev, parsedGuesses) ? prev : parsedGuesses);
           setAttempts(parsedGuesses.length);
         } catch (error) {
           console.error("Error parsing cached guesses:", error);

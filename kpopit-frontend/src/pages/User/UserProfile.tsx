@@ -178,6 +178,8 @@ const UserProfile = () => {
     const maxFilterLabel = displayed.max_streak_label || "null";
     const showGameMode = filter !== "all";
 
+    const isStatsReady = !!combinedStats;
+
     return (
         <>
             <Helmet>
@@ -356,6 +358,7 @@ const UserProfile = () => {
                                     }
                                     fadeKey={`current-${filter}-${displayed.current_streak}`}
                                     actualCard="currentStreak"
+                                    isLoading={!isStatsReady}
                                 />
                                 <StatsCard
                                     label="Max Streak"
@@ -370,6 +373,7 @@ const UserProfile = () => {
                                     }
                                     fadeKey={`max-${filter}-${displayed.max_streak}`}
                                     actualCard="maxStreak"
+                                    isLoading={!isStatsReady}
                                 />
                                 <StatsCard
                                     label="Wins"
@@ -378,6 +382,7 @@ const UserProfile = () => {
                                     sub="total games won"
                                     fadeKey={`wins-${displayed.wins_count}`}
                                     actualCard="wins"
+                                    isLoading={!isStatsReady}
                                 />
                             </div>
 

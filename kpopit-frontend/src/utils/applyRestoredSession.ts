@@ -10,13 +10,27 @@ const writeJson = (key: string, value: unknown) => {
     localStorage.setItem(key, JSON.stringify(value));
 };
 
+const mergeAnimatedIdols = (key: string, serverList: unknown) => {
+    if (!Array.isArray(serverList)) return;
+    let local: unknown[] = [];
+    try {
+        const raw = localStorage.getItem(key);
+        if (raw) local = JSON.parse(raw);
+    } catch {
+        local = [];
+    }
+    const localArr = Array.isArray(local) ? local : [];
+    const merged = Array.from(new Set([...localArr, ...serverList]));
+    localStorage.setItem(key, JSON.stringify(merged));
+};
+
 export const applyRestoredSession = (payload: RestoreSessionResponse) => {
     const { classic, blurry, server_date } = payload;
 
     if (classic) {
         writeJson("todayGuessesDetails", classic.today_guesses_details);
         writeJson("GuessedIdols", classic.guessed_idols);
-        writeJson("animatedIdols", classic.animated_idols);
+        mergeAnimatedIdols("animatedIdols", classic.animated_idols);
 
         writeBool("gameComplete", classic.game_complete);
         writeBool("gameWon", classic.game_won);
