@@ -41,4 +41,6 @@ export const applyRestoredSession = (payload: RestoreSessionResponse) => {
         localStorage.setItem("gameDate", server_date);
         localStorage.setItem("blurryGameDate", server_date);
     }
+
+    window.dispatchEvent(new Event("session-restored"));
 };

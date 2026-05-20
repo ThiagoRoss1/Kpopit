@@ -48,6 +48,13 @@ function BlurryMode() {
     const [showVictoryCard, setShowVictoryCard] = useState<boolean>(false);
     const [confetti, setConfetti] = useState<boolean>(false);
     const [attempts, setAttempts] = useState<number>(0);
+    const [sessionRestored, setSessionRestored] = useState<number>(0);
+
+    useEffect(() => {
+        const onSessionRestored = () => setSessionRestored(prev => prev + 1);
+        window.addEventListener("session-restored", onSessionRestored);
+        return () => window.removeEventListener("session-restored", onSessionRestored);
+    }, []);
 
     // Mobile
     const [isTouched, setIsTouched] = useState<boolean>(false);
@@ -181,7 +188,7 @@ function BlurryMode() {
             setDayChecked(true);
             setConfetti(confettiShown);
         }
-    }, [blurryGameData, clearBlurry]);
+    }, [blurryGameData, clearBlurry, sessionRestored]);
 
     const blurryIdols = useMemo(() => {
         if (!allIdolsData) return [];

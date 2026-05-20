@@ -53,6 +53,13 @@ function ClassicMode() {
   const [confetti, setConfetti] = useState<boolean>(false);
   // Counter
   const [attempts, setAttempts] = useState<number>(0);
+  const [sessionRestored, setSessionRestored] = useState<number>(0);
+
+  useEffect(() => {
+    const onSessionRestored = () => setSessionRestored(prev => prev + 1);
+    window.addEventListener("session-restored", onSessionRestored);
+    return () => window.removeEventListener("session-restored", onSessionRestored);
+  }, []);
 
   // Transfer data logic hook
   
@@ -152,7 +159,7 @@ function ClassicMode() {
       setDayChecked(true);
       setConfetti(confettiShown);
     }
-  }, [gameData, clearClassic]);
+  }, [gameData, clearClassic, sessionRestored]);
 
   const guessMutation = useMutation({
     mutationFn: async (guessData: CompleteGuessRequest) => {
