@@ -10,7 +10,6 @@ import { getCroppedImg } from "../../utils/cropImage";
 import EditProfileModal from "./EditProfileModal";
 
 const MAX_AVATAR_SIZE_BYTES = 5 * 1024 * 1024;
-const MIN_AVATAR_DIMENSION = 150;
 const ALLOWED_AVATAR_MIME_TYPES = ["image/jpeg", "image/png", "image/webp", "image/gif"];
 
 type Tab = "upload" | "idols";
@@ -112,7 +111,6 @@ const AvatarModal = ({ isOpen, onClose, onBack, avatarUrl }: AvatarModalProps) =
     }, []);
 
     const handleFile = useCallback(async (file: File) => {
-        alert(`type: ${file.type} | name: ${file.name}`);
         setUploadError(null);
         if (!file.type.startsWith("image/")) {
             setUploadError("Please select an image file");
@@ -128,28 +126,6 @@ const AvatarModal = ({ isOpen, onClose, onBack, avatarUrl }: AvatarModalProps) =
         }
 
         const previewUrl = trackBlobUrl(URL.createObjectURL(file));
-        const dimensionsResult = await new Promise<{ ok: boolean; reason?: "decode" | "too-small" }>((resolve) => {
-            const img = new Image();
-            img.onload = () => {
-                if (img.naturalWidth >= MIN_AVATAR_DIMENSION && img.naturalHeight >= MIN_AVATAR_DIMENSION) {
-                    resolve({ ok: true });
-                } else {
-                    resolve({ ok: false, reason: "too-small" });
-                }
-            };
-            img.onerror = () => resolve({ ok: false, reason: "decode" });
-            img.src = previewUrl;
-        });
-
-        if (!dimensionsResult.ok) {
-            releaseBlobUrl(previewUrl);
-            if (dimensionsResult.reason === "decode") {
-                setUploadError("Could not read image. Try a JPG, PNG or WEBP file.");
-            } else {
-                setUploadError("Image must be at least 150x150 pixels");
-            }
-            return;
-        }
 
         setCropSrc((prev) => {
             releaseBlobUrl(prev);
@@ -375,7 +351,7 @@ const AvatarModal = ({ isOpen, onClose, onBack, avatarUrl }: AvatarModalProps) =
                                 </span>
 
                                 <span className="text-[12px] font-bold text-white/35">
-                                    Max 5MB · min 150x150
+                                    Max 5MB
                                 </span>
                             </div>
                         </button>
