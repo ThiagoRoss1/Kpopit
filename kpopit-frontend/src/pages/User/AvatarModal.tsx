@@ -10,7 +10,8 @@ import { getCroppedImg } from "../../utils/cropImage";
 import EditProfileModal from "./EditProfileModal";
 
 const MAX_AVATAR_SIZE_BYTES = 5 * 1024 * 1024;
-const MIN_AVATAR_DIMENSION = 200;
+const MIN_AVATAR_DIMENSION = 150;
+const ALLOWED_AVATAR_MIME_TYPES = ["image/jpeg", "image/png", "image/webp", "image/gif"];
 
 type Tab = "upload" | "idols";
 
@@ -116,22 +117,36 @@ const AvatarModal = ({ isOpen, onClose, onBack, avatarUrl }: AvatarModalProps) =
             setUploadError("Please select an image file");
             return;
         }
+        if (!ALLOWED_AVATAR_MIME_TYPES.includes(file.type)) {
+            setUploadError("Could not read image. Try a JPG, PNG or WEBP file.");
+            return;
+        }
         if (file.size > MAX_AVATAR_SIZE_BYTES) {
             setUploadError("Image must be under 5MB");
             return;
         }
 
         const previewUrl = trackBlobUrl(URL.createObjectURL(file));
-        const dimensionsOk = await new Promise<boolean>((resolve) => {
+        const dimensionsResult = await new Promise<{ ok: boolean; reason?: "decode" | "too-small" }>((resolve) => {
             const img = new Image();
-            img.onload = () => resolve(img.width >= MIN_AVATAR_DIMENSION && img.height >= MIN_AVATAR_DIMENSION);
-            img.onerror = () => resolve(false);
+            img.onload = () => {
+                if (img.naturalWidth >= MIN_AVATAR_DIMENSION && img.naturalHeight >= MIN_AVATAR_DIMENSION) {
+                    resolve({ ok: true });
+                } else {
+                    resolve({ ok: false, reason: "too-small" });
+                }
+            };
+            img.onerror = () => resolve({ ok: false, reason: "decode" });
             img.src = previewUrl;
         });
 
-        if (!dimensionsOk) {
+        if (!dimensionsResult.ok) {
             releaseBlobUrl(previewUrl);
-            setUploadError("Image must be at least 200x200 pixels");
+            if (dimensionsResult.reason === "decode") {
+                setUploadError("Could not read image. Try a JPG, PNG or WEBP file.");
+            } else {
+                setUploadError("Image must be at least 150x150 pixels");
+            }
             return;
         }
 
@@ -359,7 +374,7 @@ const AvatarModal = ({ isOpen, onClose, onBack, avatarUrl }: AvatarModalProps) =
                                 </span>
 
                                 <span className="text-[12px] font-bold text-white/35">
-                                    Max 5MB · min 200x200
+                                    Max 5MB · min 150x150
                                 </span>
                             </div>
                         </button>
