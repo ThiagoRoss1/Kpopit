@@ -153,7 +153,8 @@ const AvatarModal = ({ isOpen, onClose, onBack, avatarUrl }: AvatarModalProps) =
             setCropSrc(null);
             setCroppedAreaPixels(null);
             setHasChosen(true);
-        } catch {
+        } catch (err) {
+            alert(`Crop error: ${err instanceof Error ? err.message : String(err)}`);
             setUploadError("Could not crop image. Try a different file.");
         }
     };
