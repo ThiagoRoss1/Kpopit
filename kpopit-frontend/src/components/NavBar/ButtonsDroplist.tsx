@@ -54,7 +54,7 @@ const ButtonsDroplist = (props: ButtonsDroplistProps) => {
                                 <Link 
                                     key={item.path}
                                     to={item.path}
-                                    className={`relative flex w-full items-center text-white max-xxs:text-[14px] xxs:text-base xs:text-base xm:text-lg sm:text-xl rounded-xl h-15 sm:h-17 px-4 gap-2 hover:bg-neon-pink/80 
+                                    className={`relative flex w-full items-center text-white max-xxs:text-[14px] xxs:text-base xs:text-base xm:text-lg 2xl:text-xl rounded-xl h-15 sm:h-17 px-4 gap-2 hover:bg-neon-pink/80 
                                     transition-[flex,background-color,transform]  ${dropdownClassName || ""} 
                                     ${isPath ? "bg-white/10" : ""}`}
                                     onClick={() => setIsOpen(false)}
