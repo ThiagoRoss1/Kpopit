@@ -52,6 +52,7 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
 
             try {
                 const gameSession = await restoreGameSession();
+                if (cancelledRef.current) return;
                 applyRestoredSession(gameSession);
             } catch (err) {
                 if (import.meta.env.DEV) {

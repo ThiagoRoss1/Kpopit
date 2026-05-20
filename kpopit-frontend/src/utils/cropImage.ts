@@ -17,6 +17,8 @@ const loadImage = (src: string): Promise<HTMLImageElement> =>
 const MAX_OUTPUT_SIZE = 512;
 
 export const getCroppedImg = async (imageSrc: string, crop: CropArea): Promise<Blob> => {
+    if (crop.width <= 0 || crop.height <= 0) throw new Error("Invalid crop dimensions");
+
     const image = await loadImage(imageSrc);
 
     const scale = Math.min(1, MAX_OUTPUT_SIZE / Math.max(crop.width, crop.height));
