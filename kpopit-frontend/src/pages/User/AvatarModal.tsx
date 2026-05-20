@@ -112,6 +112,7 @@ const AvatarModal = ({ isOpen, onClose, onBack, avatarUrl }: AvatarModalProps) =
     }, []);
 
     const handleFile = useCallback(async (file: File) => {
+        alert(`type: ${file.type} | name: ${file.name}`);
         setUploadError(null);
         if (!file.type.startsWith("image/")) {
             setUploadError("Please select an image file");
