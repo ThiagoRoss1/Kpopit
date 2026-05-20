@@ -8,7 +8,6 @@ interface CropArea {
 const loadImage = (src: string): Promise<HTMLImageElement> =>
     new Promise((resolve, reject) => {
         const img = new Image();
-        img.crossOrigin = "anonymous";
         img.onload = () => resolve(img);
         img.onerror = reject;
         img.src = src;

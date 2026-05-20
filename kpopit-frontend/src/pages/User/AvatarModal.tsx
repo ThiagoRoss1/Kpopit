@@ -125,12 +125,19 @@ const AvatarModal = ({ isOpen, onClose, onBack, avatarUrl }: AvatarModalProps) =
             return;
         }
 
-        const previewUrl = trackBlobUrl(URL.createObjectURL(file));
-
-        setCropSrc((prev) => {
-            releaseBlobUrl(prev);
-            return previewUrl;
+        const dataUrl = await new Promise<string | null>((resolve) => {
+            const reader = new FileReader();
+            reader.onload = () => resolve(typeof reader.result === "string" ? reader.result : null);
+            reader.onerror = () => resolve(null);
+            reader.readAsDataURL(file);
         });
+
+        if (!dataUrl) {
+            setUploadError("Could not read image. Try a JPG, PNG or WEBP file.");
+            return;
+        }
+
+        setCropSrc(dataUrl);
         setCrop({ x: 0, y: 0 });
         setZoom(1);
         setCroppedBlob(null);
@@ -153,8 +160,7 @@ const AvatarModal = ({ isOpen, onClose, onBack, avatarUrl }: AvatarModalProps) =
             setCropSrc(null);
             setCroppedAreaPixels(null);
             setHasChosen(true);
-        } catch (err) {
-            alert(`Crop error: ${err instanceof Error ? err.message : String(err)}`);
+        } catch {
             setUploadError("Could not crop image. Try a different file.");
         }
     };
