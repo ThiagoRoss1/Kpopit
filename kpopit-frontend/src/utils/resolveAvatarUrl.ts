@@ -13,7 +13,7 @@ export function resolveAvatarUrl(
     if (!avatar_url) return null;
 
     const path = stripLeadingSlash(avatar_url);
-    const isUserAvatar = path.startsWith("avatars/");
+    const isUserAvatar = path.startsWith("avatars/") || path.startsWith("avatars-dev/");
     const base = isUserAvatar ? avatarsBucket : kpopitIdols;
     const url = `${stripTrailingSlash(base)}/${path}`;
 

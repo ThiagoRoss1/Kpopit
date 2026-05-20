@@ -1,8 +1,9 @@
 import { useCallback, useEffect, useRef, useState, type ReactNode } from "react";
 import { AuthContext, type AuthState } from "./auth_context";
-import { getMe, refreshToken } from "../services/api";
+import { getMe, refreshToken, restoreSession as restoreGameSession } from "../services/api";
 import { setAccessToken, clearAccessToken } from "../services/tokenStore";
 import { useClearGameStorage } from "../hooks/useClearGameStorage";
+import { applyRestoredSession } from "../utils/applyRestoredSession";
 
 interface AuthProviderProps {
     children: ReactNode;
@@ -48,6 +49,16 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
             const me = await getMe();
 
             if (cancelledRef.current) return;
+
+            try {
+                const gameSession = await restoreGameSession();
+                if (cancelledRef.current) return;
+                applyRestoredSession(gameSession);
+            } catch (err) {
+                if (import.meta.env.DEV) {
+                    console.warn("Failed to restore game session after auth refresh:", err);
+                }
+            }
 
             setState({ isAuthenticated: true, isLoading: false, user: me });
         } catch {

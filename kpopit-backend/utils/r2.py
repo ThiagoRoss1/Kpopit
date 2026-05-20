@@ -20,7 +20,7 @@ class R2Client:
 
     def upload_file(self, user_id: int, file_bytes: bytes) -> str:
         """Uploads a file to R2 and returns the stored object key (no leading slash)."""
-        key = f"avatars/{user_id}.webp"
+        key = f"{os.getenv('R2_AVATARS_PREFIX')}/{user_id}.webp"
 
         try:
             self.s3.put_object(

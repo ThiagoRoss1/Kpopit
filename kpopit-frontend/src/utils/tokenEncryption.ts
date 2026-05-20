@@ -1,5 +1,8 @@
 // Token encryption // 
 
+const isDev = import.meta.env.DEV;
+const skipEncryption = isDev && typeof window !== 'undefined' && !window.isSecureContext;
+
 async function deriveKey(password: string, salt: Uint8Array): Promise<CryptoKey> {
     const encoder = new TextEncoder();
     const passwordBuffer = encoder.encode(password);
@@ -30,6 +33,7 @@ async function deriveKey(password: string, salt: Uint8Array): Promise<CryptoKey>
 
 // Encrypt token 
 export async function encryptToken(token: string): Promise<string> {
+    if (skipEncryption) return token;
     const encoder = new TextEncoder();
     const data = encoder.encode(token);
 
@@ -62,6 +66,7 @@ export async function encryptToken(token: string): Promise<string> {
 
 // Decrypt token
 export async function decryptToken(encryptedToken: string): Promise<string> {
+    if (skipEncryption) return encryptedToken;
     const password = import.meta.env.VITE_ENCRYPTION_KEY;
 
     if (!password) {
