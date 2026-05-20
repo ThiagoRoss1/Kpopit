@@ -22,7 +22,8 @@ COOKIE_DOMAIN = os.getenv("COOKIE_DOMAIN") if IS_PRODUCTION else None
 auth_bp = Blueprint("auth", __name__)
 
 samesite = "None" if FLASK_ENV == "development" else "Lax"
-secure = IS_PRODUCTION
+secure = True
+# Past used values
 # samesite = "Lax" if FLASK_ENV == "development" else "Lax"
 # secure = IS_PRODUCTION
 
