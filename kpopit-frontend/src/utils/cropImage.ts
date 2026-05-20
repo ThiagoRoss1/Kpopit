@@ -14,12 +14,18 @@ const loadImage = (src: string): Promise<HTMLImageElement> =>
         img.src = src;
     });
 
+const MAX_OUTPUT_SIZE = 512;
+
 export const getCroppedImg = async (imageSrc: string, crop: CropArea): Promise<Blob> => {
     const image = await loadImage(imageSrc);
 
+    const scale = Math.min(1, MAX_OUTPUT_SIZE / Math.max(crop.width, crop.height));
+    const outWidth = Math.round(crop.width * scale);
+    const outHeight = Math.round(crop.height * scale);
+
     const canvas = document.createElement("canvas");
-    canvas.width = crop.width;
-    canvas.height = crop.height;
+    canvas.width = outWidth;
+    canvas.height = outHeight;
 
     const ctx = canvas.getContext("2d");
     if (!ctx) throw new Error("Canvas 2D context unavailable");
@@ -32,8 +38,8 @@ export const getCroppedImg = async (imageSrc: string, crop: CropArea): Promise<B
         crop.height,
         0,
         0,
-        crop.width,
-        crop.height,
+        outWidth,
+        outHeight,
     );
 
     return new Promise<Blob>((resolve, reject) => {

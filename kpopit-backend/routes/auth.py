@@ -21,9 +21,9 @@ COOKIE_DOMAIN = os.getenv("COOKIE_DOMAIN") if IS_PRODUCTION else None
 
 auth_bp = Blueprint("auth", __name__)
 
-samesite = "None" if FLASK_ENV == "development" else "Strict"
-secure = True
-# samesite = "Lax" if FLASK_ENV == "development" else "Strict"
+samesite = "None" if FLASK_ENV == "development" else "Lax"
+secure = IS_PRODUCTION
+# samesite = "Lax" if FLASK_ENV == "development" else "Lax"
 # secure = IS_PRODUCTION
 
 def _set_refresh_cookie(response, raw_refresh_token: str, remember_me: bool) -> None:
