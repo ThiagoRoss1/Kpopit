@@ -1,6 +1,7 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { useMutation, useQuery } from "@tanstack/react-query";
 import Cropper, { type Area } from "react-easy-crop";
+import Compressor from "compressorjs";
 import { Camera, ChevronLeft, Image as ImageIcon, Loader2, Search, Upload } from "lucide-react";
 import { useAuth } from "../../hooks/useAuth";
 import { getIdolsPage, setAvatarFromIdol, uploadAvatarFile } from "../../services/api";
@@ -23,20 +24,20 @@ const validateAvatarFile = (file: File): string | null => {
     return null;
 };
 
-// const readFileAsDataUrl = (file: File): Promise<string> =>
-//     new Promise((resolve, reject) => {
-//         const reader = new FileReader();
+const readFileAsDataUrl = (file: Blob): Promise<string> =>
+    new Promise((resolve, reject) => {
+        const reader = new FileReader();
 
-//         reader.onload = () => {
-//             if (typeof reader.result === "string") {
-//                 resolve(reader.result);
-//             } else {
-//                 reject(new Error("FileReader produced non-string result"));
-//             }
-//         };
-//         reader.onerror = () => reject(reader.error ?? new Error("FileReader failed"));
-//         reader.readAsDataURL(file);
-//     });
+        reader.onload = () => {
+            if (typeof reader.result === "string") {
+                resolve(reader.result);
+            } else {
+                reject(new Error("FileReader produced non-string result"));
+            }
+        };
+        reader.onerror = () => reject(reader.error ?? new Error("FileReader failed"));
+        reader.readAsDataURL(file);
+    });
 
 type Tab = "upload" | "idols";
 
@@ -145,17 +146,34 @@ const AvatarModal = ({ isOpen, onClose, onBack, avatarUrl }: AvatarModalProps) =
         }
 
         setUploadError(null);
-        try {
-        const objectUrl = URL.createObjectURL(file);
-        setCropSrc(objectUrl);
-        setCrop({ x: 0, y: 0 });
-        setZoom(1);
-        setCroppedBlob(null);
-        setSelectedIdolUrl(null);
-        } catch (error) {
-            alert(`Could not read, Filename Error: ${error instanceof Error ? error.message : String(error)}`);
-            setUploadError("Could not read image. Try a different file.");
-        }
+
+        // Compress BEFORE reading. Smaller image stays within mobile canvas
+        // memory limit (react-easy-crop #91) and reads faster (less time on
+        // Android Photo Picker's expiring URI permission).
+        new Compressor(file, {
+            maxWidth: 1000,
+            maxHeight: 1000,
+            quality: 0.8,
+            mimeType: "auto",
+            success: (compressedBlob) => {
+                readFileAsDataUrl(compressedBlob)
+                    .then((base64String) => {
+                        setCropSrc(base64String);
+                        setCrop({ x: 0, y: 0 });
+                        setZoom(1);
+                        setCroppedBlob(null);
+                        setSelectedIdolUrl(null);
+                    })
+                    .catch((error) => {
+                        alert(`Could not read, Filename Error: ${error instanceof Error ? error.message : String(error)}`);
+                        setUploadError("Could not read image. Try a different file.");
+                    });
+            },
+            error: (err) => {
+                alert(`Could not compress, Error: ${err.message}`);
+                setUploadError("Could not read image. Try a different file.");
+            },
+        });
     }, []);
 
     const onCropComplete = useCallback((_: Area, areaPixels: Area) => {
@@ -170,7 +188,6 @@ const AvatarModal = ({ isOpen, onClose, onBack, avatarUrl }: AvatarModalProps) =
             releaseBlobUrl(croppedPreviewUrl);
             setCroppedBlob(blob);
             setCroppedPreviewUrl(previewUrl);
-            releaseBlobUrl(cropSrc);
             setCropSrc(null);
             setCroppedAreaPixels(null);
             setHasChosen(true);
