@@ -117,7 +117,7 @@ const AvatarModal = ({ isOpen, onClose, onBack, avatarUrl }: AvatarModalProps) =
             return;
         }
         if (!ALLOWED_AVATAR_MIME_TYPES.includes(file.type)) {
-            setUploadError("Could not read image. Try a JPG, PNG or WEBP file.");
+            setUploadError("Could not read image. Try a JPG, PNG or WEBP file. (Allowed type error)");
             return;
         }
         if (file.size > MAX_AVATAR_SIZE_BYTES) {
@@ -125,15 +125,27 @@ const AvatarModal = ({ isOpen, onClose, onBack, avatarUrl }: AvatarModalProps) =
             return;
         }
 
-        const dataUrl = await new Promise<string | null>((resolve) => {
-            const reader = new FileReader();
-            reader.onload = () => resolve(typeof reader.result === "string" ? reader.result : null);
-            reader.onerror = () => resolve(null);
+        const readWithRetry = (file: File, retries = 3): Promise<string | null> =>
+            new Promise((resolve) => {
+                const reader = new FileReader();
+                reader.onload = () => resolve(typeof reader.result === "string" ? reader.result : null);
+                reader.onerror = async () => {
+                    console.error("Error reading file, retrying...", reader.error);
+                    alert(`FileReader error: ${reader.error?.name} - ${reader.error?.message}}`);
+                    if (retries > 0) {
+                        await new Promise(r => setTimeout(r, 200));
+                        readWithRetry(file, retries - 1).then(resolve);
+                    } else {
+                        resolve(null);
+                    }
+                };
             reader.readAsDataURL(file);
         });
 
+        const dataUrl = await readWithRetry(file);
+
         if (!dataUrl) {
-            setUploadError("Could not read image. Try a JPG, PNG or WEBP file.");
+            setUploadError("Could not read image. Try a JPG, PNG or WEBP file. (Read with retry failed)");
             return;
         }
 
