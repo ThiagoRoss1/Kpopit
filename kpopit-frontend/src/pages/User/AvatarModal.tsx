@@ -12,6 +12,32 @@ import EditProfileModal from "./EditProfileModal";
 const MAX_AVATAR_SIZE_BYTES = 5 * 1024 * 1024;
 const ALLOWED_AVATAR_MIME_TYPES = ["image/jpeg", "image/png", "image/webp", "image/gif"];
 
+const validateAvatarFile = (file: File): string | null => {
+    if (!file.type.startsWith("image/")) return "Please select an image file";
+
+    if (!ALLOWED_AVATAR_MIME_TYPES.includes(file.type)) {
+        return "Could not read image. Try a JPG, PNG or WEBP file.";
+    }
+
+    if (file.size > MAX_AVATAR_SIZE_BYTES) return "Image must be under 5MB";
+    return null;
+};
+
+// const readFileAsDataUrl = (file: File): Promise<string> =>
+//     new Promise((resolve, reject) => {
+//         const reader = new FileReader();
+
+//         reader.onload = () => {
+//             if (typeof reader.result === "string") {
+//                 resolve(reader.result);
+//             } else {
+//                 reject(new Error("FileReader produced non-string result"));
+//             }
+//         };
+//         reader.onerror = () => reject(reader.error ?? new Error("FileReader failed"));
+//         reader.readAsDataURL(file);
+//     });
+
 type Tab = "upload" | "idols";
 
 interface AvatarModalProps {
@@ -110,50 +136,26 @@ const AvatarModal = ({ isOpen, onClose, onBack, avatarUrl }: AvatarModalProps) =
         };
     }, []);
 
-    const handleFile = useCallback(async (file: File) => {
+    const handleFile = useCallback((file: File) => {
+        const validationError = validateAvatarFile(file);
+
+        if (validationError) {
+            setUploadError(validationError);
+            return;
+        }
+
         setUploadError(null);
-        if (!file.type.startsWith("image/")) {
-            setUploadError("Please select an image file");
-            return;
-        }
-        if (!ALLOWED_AVATAR_MIME_TYPES.includes(file.type)) {
-            setUploadError("Could not read image. Try a JPG, PNG or WEBP file. (Allowed type error)");
-            return;
-        }
-        if (file.size > MAX_AVATAR_SIZE_BYTES) {
-            setUploadError("Image must be under 5MB");
-            return;
-        }
-
-        const readWithRetry = (file: File, retries = 3): Promise<string | null> =>
-            new Promise((resolve) => {
-                const reader = new FileReader();
-                reader.onload = () => resolve(typeof reader.result === "string" ? reader.result : null);
-                reader.onerror = async () => {
-                    console.error("Error reading file, retrying...", reader.error);
-                    alert(`FileReader error: ${reader.error?.name} - ${reader.error?.message}}`);
-                    if (retries > 0) {
-                        await new Promise(r => setTimeout(r, 200));
-                        readWithRetry(file, retries - 1).then(resolve);
-                    } else {
-                        resolve(null);
-                    }
-                };
-            reader.readAsDataURL(file);
-        });
-
-        const dataUrl = await readWithRetry(file);
-
-        if (!dataUrl) {
-            setUploadError("Could not read image. Try a JPG, PNG or WEBP file. (Read with retry failed)");
-            return;
-        }
-
-        setCropSrc(dataUrl);
+        try {
+        const objectUrl = URL.createObjectURL(file);
+        setCropSrc(objectUrl);
         setCrop({ x: 0, y: 0 });
         setZoom(1);
         setCroppedBlob(null);
         setSelectedIdolUrl(null);
+        } catch (error) {
+            alert(`Could not read, Filename Error: ${error instanceof Error ? error.message : String(error)}`);
+            setUploadError("Could not read image. Try a different file.");
+        }
     }, []);
 
     const onCropComplete = useCallback((_: Area, areaPixels: Area) => {
