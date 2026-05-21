@@ -10,67 +10,7 @@ import { getCroppedImg } from "../../utils/cropImage";
 import EditProfileModal from "./EditProfileModal";
 
 const MAX_AVATAR_SIZE_BYTES = 5 * 1024 * 1024;
-const ALLOWED_AVATAR_MIME_TYPES = ["image/jpeg", "image/png", "image/webp", "image/gif", "image/avif", "image/bmp"];
-
-const validateAvatarFile = (file: File): string | null => {
-    if (!file.type.startsWith("image/")) return "Please select an image file";
-
-    if (!ALLOWED_AVATAR_MIME_TYPES.includes(file.type)) {
-        return "Could not read image. Try a JPG, PNG or WEBP file.";
-    }
-
-    if (file.size > MAX_AVATAR_SIZE_BYTES) return "Image must be under 5MB";
-    return null;
-};
-
-// const resizeImageToBlob = (file: File): Promise<Blob> =>
-//     new Promise<Blob>((resolve, reject) => {
-//         const originalUrl = URL.createObjectURL(file);
-//         const img = new Image();
-
-//         img.onload = () => {
-//             try {
-//                 const longestSide = Math.max(img.naturalWidth, img.naturalHeight);
-//                 const scale = Math.min(1, MAX_AVATAR_DIMENSION / longestSide);
-//                 const outWidth = Math.round(img.naturalWidth * scale);
-//                 const outHeight = Math.round(img.naturalHeight * scale);
-
-//                 const canvas = document.createElement("canvas");
-//                 canvas.width = outWidth;
-//                 canvas.height = outHeight;
-
-//                 const ctx = canvas.getContext("2d");
-//                 if (!ctx) {
-//                     URL.revokeObjectURL(originalUrl);
-//                     reject(new Error("Canvas 2D context unavailable"));
-//                     return;
-//                 }
-//                 ctx.drawImage(img, 0, 0, outWidth, outHeight);
-
-//                 const outputType = file.type === "image/png" ? "image/png" : "image/jpeg";
-//                 canvas.toBlob(
-//                     (blob) => {
-//                         URL.revokeObjectURL(originalUrl);
-//                         if (blob) resolve(blob);
-//                         else reject(new Error(`canvas.toBlob returned null — outputType: ${outputType}, size: ${outWidth}x${outHeight}`));
-//                     },
-//                     outputType,
-//                     0.9,
-//                 );
-//             } catch (err) {
-//                 URL.revokeObjectURL(originalUrl);
-//                 reject(err instanceof Error ? err : new Error(String(err)));
-//             }
-//         };
-
-//         img.onerror = (event) => {
-//             URL.revokeObjectURL(originalUrl);
-//             const detail = event instanceof ErrorEvent ? event.message : JSON.stringify(event);
-//             reject(new Error(`img.onerror fired — type: ${(event as Event).type}, detail: ${detail}, src: ${originalUrl}`));
-//         };
-
-//         img.src = originalUrl;
-//     });
+const ALLOWED_AVATAR_MIME_TYPES = ["image/jpeg", "image/png", "image/webp", "image/gif"];
 
 type Tab = "upload" | "idols";
 
@@ -140,6 +80,16 @@ const AvatarModal = ({ isOpen, onClose, onBack, avatarUrl }: AvatarModalProps) =
         );
     }, [idols, idolSearch]);
 
+    // Search for android (avoid photo picker - it doesn't work with the cropping code)
+    const isAndroid = useMemo(() => {
+        if (typeof window === "undefined" || !window.navigator) return false;
+        return /Android/i.test(window.navigator.userAgent);
+    }, []);
+
+    const acceptFilter = isAndroid
+        ? "image/jpeg,image/png,image/webp,application/xml"
+        : "image/*";
+
     // Reset state every time the modal opens; release any tracked blob URLs on close.
     useEffect(() => {
         if (isOpen) {
@@ -171,34 +121,37 @@ const AvatarModal = ({ isOpen, onClose, onBack, avatarUrl }: AvatarModalProps) =
     }, []);
 
     const handleFile = useCallback(async (file: File) => {
-        const validationError = validateAvatarFile(file);
-
-        if (validationError) {
-            setUploadError(validationError);
+        setUploadError(null);
+        if (!file.type.startsWith("image/")) {
+            setUploadError("Please select an image file");
+            return;
+        }
+        if (!ALLOWED_AVATAR_MIME_TYPES.includes(file.type)) {
+            setUploadError("Could not read image. Try a JPG, PNG or WEBP file.");
+            return;
+        }
+        if (file.size > MAX_AVATAR_SIZE_BYTES) {
+            setUploadError("Image must be under 5MB");
             return;
         }
 
-        setUploadError(null);
+        const dataUrl = await new Promise<string | null>((resolve) => {
+            const reader = new FileReader();
+            reader.onload = () => resolve(typeof reader.result === "string" ? reader.result : null);
+            reader.onerror = () => resolve(null);
+            reader.readAsDataURL(file);
+        });
 
-        try {
-            const tempUrl = URL.createObjectURL(file)
-        
+        if (!dataUrl) {
+            setUploadError("Could not read image. Try a JPG, PNG or WEBP file.");
+            return;
+        }
 
-        const response = await fetch(tempUrl);
-        const pureBlob = await response.blob();
-
-        URL.revokeObjectURL(tempUrl);
-
-        const finalUrl = trackBlobUrl(URL.createObjectURL(pureBlob));
-            setCropSrc(finalUrl);
-            setCrop({ x: 0, y: 0 });
-            setZoom(1);
-            setCroppedBlob(null);
-            setSelectedIdolUrl(null);
-        } catch (error) {
-                alert(`Error securing image bytes: ${error instanceof Error ? error.message : String(error)}`);
-                setUploadError("Could not read image. Try a different file.");
-        };
+        setCropSrc(dataUrl);
+        setCrop({ x: 0, y: 0 });
+        setZoom(1);
+        setCroppedBlob(null);
+        setSelectedIdolUrl(null);
     }, []);
 
     const onCropComplete = useCallback((_: Area, areaPixels: Area) => {
@@ -217,8 +170,7 @@ const AvatarModal = ({ isOpen, onClose, onBack, avatarUrl }: AvatarModalProps) =
             setCropSrc(null);
             setCroppedAreaPixels(null);
             setHasChosen(true);
-        } catch (err) {
-            alert(`getCroppedImg failed:\n${err instanceof Error ? err.message + '\n' + err.stack : String(err)}`);
+        } catch {
             setUploadError("Could not crop image. Try a different file.");
         }
     };
@@ -424,7 +376,7 @@ const AvatarModal = ({ isOpen, onClose, onBack, avatarUrl }: AvatarModalProps) =
                         <input
                             ref={fileInputRef}
                             type="file"
-                            accept="*"
+                            accept={acceptFilter}
                             className="hidden"
                             onChange={(e) => {
                                 const file = e.target.files?.[0];
