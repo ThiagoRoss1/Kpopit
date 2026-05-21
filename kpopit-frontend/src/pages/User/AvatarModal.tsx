@@ -10,7 +10,6 @@ import { getCroppedImg } from "../../utils/cropImage";
 import EditProfileModal from "./EditProfileModal";
 
 const MAX_AVATAR_SIZE_BYTES = 5 * 1024 * 1024;
-const MAX_AVATAR_DIMENSION = 2000;
 const ALLOWED_AVATAR_MIME_TYPES = ["image/jpeg", "image/png", "image/webp", "image/gif", "image/avif", "image/bmp"];
 
 const validateAvatarFile = (file: File): string | null => {
@@ -24,54 +23,54 @@ const validateAvatarFile = (file: File): string | null => {
     return null;
 };
 
-const resizeImageToBlob = (file: File): Promise<Blob> =>
-    new Promise<Blob>((resolve, reject) => {
-        const originalUrl = URL.createObjectURL(file);
-        const img = new Image();
+// const resizeImageToBlob = (file: File): Promise<Blob> =>
+//     new Promise<Blob>((resolve, reject) => {
+//         const originalUrl = URL.createObjectURL(file);
+//         const img = new Image();
 
-        img.onload = () => {
-            try {
-                const longestSide = Math.max(img.naturalWidth, img.naturalHeight);
-                const scale = Math.min(1, MAX_AVATAR_DIMENSION / longestSide);
-                const outWidth = Math.round(img.naturalWidth * scale);
-                const outHeight = Math.round(img.naturalHeight * scale);
+//         img.onload = () => {
+//             try {
+//                 const longestSide = Math.max(img.naturalWidth, img.naturalHeight);
+//                 const scale = Math.min(1, MAX_AVATAR_DIMENSION / longestSide);
+//                 const outWidth = Math.round(img.naturalWidth * scale);
+//                 const outHeight = Math.round(img.naturalHeight * scale);
 
-                const canvas = document.createElement("canvas");
-                canvas.width = outWidth;
-                canvas.height = outHeight;
+//                 const canvas = document.createElement("canvas");
+//                 canvas.width = outWidth;
+//                 canvas.height = outHeight;
 
-                const ctx = canvas.getContext("2d");
-                if (!ctx) {
-                    URL.revokeObjectURL(originalUrl);
-                    reject(new Error("Canvas 2D context unavailable"));
-                    return;
-                }
-                ctx.drawImage(img, 0, 0, outWidth, outHeight);
+//                 const ctx = canvas.getContext("2d");
+//                 if (!ctx) {
+//                     URL.revokeObjectURL(originalUrl);
+//                     reject(new Error("Canvas 2D context unavailable"));
+//                     return;
+//                 }
+//                 ctx.drawImage(img, 0, 0, outWidth, outHeight);
 
-                const outputType = file.type === "image/png" ? "image/png" : "image/jpeg";
-                canvas.toBlob(
-                    (blob) => {
-                        URL.revokeObjectURL(originalUrl);
-                        if (blob) resolve(blob);
-                        else reject(new Error(`canvas.toBlob returned null — outputType: ${outputType}, size: ${outWidth}x${outHeight}`));
-                    },
-                    outputType,
-                    0.9,
-                );
-            } catch (err) {
-                URL.revokeObjectURL(originalUrl);
-                reject(err instanceof Error ? err : new Error(String(err)));
-            }
-        };
+//                 const outputType = file.type === "image/png" ? "image/png" : "image/jpeg";
+//                 canvas.toBlob(
+//                     (blob) => {
+//                         URL.revokeObjectURL(originalUrl);
+//                         if (blob) resolve(blob);
+//                         else reject(new Error(`canvas.toBlob returned null — outputType: ${outputType}, size: ${outWidth}x${outHeight}`));
+//                     },
+//                     outputType,
+//                     0.9,
+//                 );
+//             } catch (err) {
+//                 URL.revokeObjectURL(originalUrl);
+//                 reject(err instanceof Error ? err : new Error(String(err)));
+//             }
+//         };
 
-        img.onerror = (event) => {
-            URL.revokeObjectURL(originalUrl);
-            const detail = event instanceof ErrorEvent ? event.message : JSON.stringify(event);
-            reject(new Error(`img.onerror fired — type: ${(event as Event).type}, detail: ${detail}, src: ${originalUrl}`));
-        };
+//         img.onerror = (event) => {
+//             URL.revokeObjectURL(originalUrl);
+//             const detail = event instanceof ErrorEvent ? event.message : JSON.stringify(event);
+//             reject(new Error(`img.onerror fired — type: ${(event as Event).type}, detail: ${detail}, src: ${originalUrl}`));
+//         };
 
-        img.src = originalUrl;
-    });
+//         img.src = originalUrl;
+//     });
 
 type Tab = "upload" | "idols";
 
@@ -171,7 +170,7 @@ const AvatarModal = ({ isOpen, onClose, onBack, avatarUrl }: AvatarModalProps) =
         };
     }, []);
 
-    const handleFile = useCallback((file: File) => {
+    const handleFile = useCallback(async (file: File) => {
         const validationError = validateAvatarFile(file);
 
         if (validationError) {
@@ -181,22 +180,25 @@ const AvatarModal = ({ isOpen, onClose, onBack, avatarUrl }: AvatarModalProps) =
 
         setUploadError(null);
 
-        // No FileReader. URL.createObjectURL → <img> → canvas → toBlob.
-        // Browser manages the content:// permission internally for blob URLs,
-        // unlike FileReader which trips Android's URI-permission expiry.
-        resizeImageToBlob(file)
-            .then((resizedBlob) => {
-                const resizedUrl = trackBlobUrl(URL.createObjectURL(resizedBlob));
-                setCropSrc(resizedUrl);
-                setCrop({ x: 0, y: 0 });
-                setZoom(1);
-                setCroppedBlob(null);
-                setSelectedIdolUrl(null);
-            })
-            .catch((error) => {
-                alert(`resizeImageToBlob failed:\n${error instanceof Error ? error.message + '\n' + error.stack : String(error)}`);
+        try {
+            const tempUrl = URL.createObjectURL(file)
+        
+
+        const response = await fetch(tempUrl);
+        const pureBlob = await response.blob();
+
+        URL.revokeObjectURL(tempUrl);
+
+        const finalUrl = trackBlobUrl(URL.createObjectURL(pureBlob));
+            setCropSrc(finalUrl);
+            setCrop({ x: 0, y: 0 });
+            setZoom(1);
+            setCroppedBlob(null);
+            setSelectedIdolUrl(null);
+        } catch (error) {
+                alert(`Error securing image bytes: ${error instanceof Error ? error.message : String(error)}`);
                 setUploadError("Could not read image. Try a different file.");
-            });
+        };
     }, []);
 
     const onCropComplete = useCallback((_: Area, areaPixels: Area) => {
@@ -422,7 +424,7 @@ const AvatarModal = ({ isOpen, onClose, onBack, avatarUrl }: AvatarModalProps) =
                         <input
                             ref={fileInputRef}
                             type="file"
-                            accept="image/*"
+                            accept="*"
                             className="hidden"
                             onChange={(e) => {
                                 const file = e.target.files?.[0];
