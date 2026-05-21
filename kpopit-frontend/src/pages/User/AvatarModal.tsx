@@ -146,30 +146,34 @@ const AvatarModal = ({ isOpen, onClose, onBack, avatarUrl }: AvatarModalProps) =
 
     const openFilePicker = async () => {
         setUploadError(null);
-        if ("showOpenFilePicker" in window) {
-            try {
-                const [handle] = await window.showOpenFilePicker({
-                    multiple: false,
-                    excludeAcceptAllOption: true,
-                    types: [{
-                        description: "Images",
-                        accept: {
-                            "image/jpeg": [".jpg", ".jpeg"],
-                            "image/png": [".png"],
-                            "image/webp": [".webp"],
-                            "image/gif": [".gif"],
-                        },
-                    }],
-                });
-                const file = await handle.getFile();
-                await handleFile(file);
-            } catch (err) {
-                if (err instanceof DOMException && err.name === "AbortError") return;
-                setUploadError("Could not open file picker. Try again.");
-            }
-        } else {
+        if (!("showOpenFilePicker" in window)) {
             fileInputRef.current?.click();
+            return;
         }
+
+        let file: File | null = null;
+        try {
+            const [handle] = await window.showOpenFilePicker({
+                multiple: false,
+                excludeAcceptAllOption: true,
+                types: [{
+                    description: "Images",
+                    accept: {
+                        "image/jpeg": [".jpg", ".jpeg"],
+                        "image/png": [".png"],
+                        "image/webp": [".webp"],
+                        "image/gif": [".gif"],
+                    },
+                }],
+            });
+            file = await handle.getFile();
+        } catch (err) {
+            if (err instanceof DOMException && err.name === "AbortError") return;
+            setUploadError("Could not open file picker. Try again.");
+            return;
+        }
+
+        if (file) await handleFile(file);
     };
 
     const onCropComplete = useCallback((_: Area, areaPixels: Area) => {
