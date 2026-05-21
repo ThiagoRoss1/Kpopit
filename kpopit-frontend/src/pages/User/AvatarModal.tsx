@@ -80,16 +80,6 @@ const AvatarModal = ({ isOpen, onClose, onBack, avatarUrl }: AvatarModalProps) =
         );
     }, [idols, idolSearch]);
 
-    // Search for android (avoid photo picker - it doesn't work with the cropping code)
-    const isAndroid = useMemo(() => {
-        if (typeof window === "undefined" || !window.navigator) return false;
-        return /Android/i.test(window.navigator.userAgent);
-    }, []);
-
-    const acceptFilter = isAndroid
-        ? "image/jpeg,image/png,image/webp,application/xml"
-        : "image/*";
-
     // Reset state every time the modal opens; release any tracked blob URLs on close.
     useEffect(() => {
         if (isOpen) {
@@ -153,6 +143,34 @@ const AvatarModal = ({ isOpen, onClose, onBack, avatarUrl }: AvatarModalProps) =
         setCroppedBlob(null);
         setSelectedIdolUrl(null);
     }, []);
+
+    const openFilePicker = async () => {
+        setUploadError(null);
+        if ("showOpenFilePicker" in window) {
+            try {
+                const [handle] = await window.showOpenFilePicker({
+                    multiple: false,
+                    excludeAcceptAllOption: true,
+                    types: [{
+                        description: "Images",
+                        accept: {
+                            "image/jpeg": [".jpg", ".jpeg"],
+                            "image/png": [".png"],
+                            "image/webp": [".webp"],
+                            "image/gif": [".gif"],
+                        },
+                    }],
+                });
+                const file = await handle.getFile();
+                await handleFile(file);
+            } catch (err) {
+                if (err instanceof DOMException && err.name === "AbortError") return;
+                setUploadError("Could not open file picker. Try again.");
+            }
+        } else {
+            fileInputRef.current?.click();
+        }
+    };
 
     const onCropComplete = useCallback((_: Area, areaPixels: Area) => {
         setCroppedAreaPixels(areaPixels);
@@ -338,7 +356,7 @@ const AvatarModal = ({ isOpen, onClose, onBack, avatarUrl }: AvatarModalProps) =
                     <div className="ep-field flex flex-col gap-3">
                         <button
                             type="button"
-                            onClick={() => fileInputRef.current?.click()}
+                            onClick={openFilePicker}
                             onDragEnter={(e) => { e.preventDefault(); setIsDragging(true); }}
                             onDragOver={(e) => { e.preventDefault(); setIsDragging(true); }}
                             onDragLeave={(e) => { e.preventDefault(); setIsDragging(false); }}
@@ -376,7 +394,7 @@ const AvatarModal = ({ isOpen, onClose, onBack, avatarUrl }: AvatarModalProps) =
                         <input
                             ref={fileInputRef}
                             type="file"
-                            accept={acceptFilter}
+                            accept="image/*"
                             className="hidden"
                             onChange={(e) => {
                                 const file = e.target.files?.[0];
