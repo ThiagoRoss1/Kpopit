@@ -144,6 +144,38 @@ const AvatarModal = ({ isOpen, onClose, onBack, avatarUrl }: AvatarModalProps) =
         setSelectedIdolUrl(null);
     }, []);
 
+    const openFilePicker = async () => {
+        setUploadError(null);
+        if (!("showOpenFilePicker" in window)) {
+            fileInputRef.current?.click();
+            return;
+        }
+
+        let file: File | null = null;
+        try {
+            const [handle] = await window.showOpenFilePicker({
+                multiple: false,
+                excludeAcceptAllOption: true,
+                types: [{
+                    description: "Images",
+                    accept: {
+                        "image/jpeg": [".jpg", ".jpeg"],
+                        "image/png": [".png"],
+                        "image/webp": [".webp"],
+                        "image/gif": [".gif"],
+                    },
+                }],
+            });
+            file = await handle.getFile();
+        } catch (err) {
+            if (err instanceof DOMException && err.name === "AbortError") return;
+            setUploadError("Could not open file picker. Try again.");
+            return;
+        }
+
+        if (file) await handleFile(file);
+    };
+
     const onCropComplete = useCallback((_: Area, areaPixels: Area) => {
         setCroppedAreaPixels(areaPixels);
     }, []);
@@ -328,7 +360,7 @@ const AvatarModal = ({ isOpen, onClose, onBack, avatarUrl }: AvatarModalProps) =
                     <div className="ep-field flex flex-col gap-3">
                         <button
                             type="button"
-                            onClick={() => fileInputRef.current?.click()}
+                            onClick={openFilePicker}
                             onDragEnter={(e) => { e.preventDefault(); setIsDragging(true); }}
                             onDragOver={(e) => { e.preventDefault(); setIsDragging(true); }}
                             onDragLeave={(e) => { e.preventDefault(); setIsDragging(false); }}

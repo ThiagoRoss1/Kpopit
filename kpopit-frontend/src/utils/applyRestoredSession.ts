@@ -25,7 +25,7 @@ const mergeAnimatedIdols = (key: string, serverList: unknown) => {
 };
 
 export const applyRestoredSession = (payload: RestoreSessionResponse) => {
-    const { classic, blurry, server_date } = payload;
+    const { classic, blurry } = payload;
 
     if (classic) {
         writeJson("todayGuessesDetails", classic.today_guesses_details);
@@ -49,11 +49,6 @@ export const applyRestoredSession = (payload: RestoreSessionResponse) => {
 
         writeBool("blurryGameComplete", blurry.game_complete);
         writeBool("blurryGameWon", blurry.game_won);
-    }
-
-    if (server_date) {
-        localStorage.setItem("gameDate", server_date);
-        localStorage.setItem("blurryGameDate", server_date);
     }
 
     window.dispatchEvent(new Event("session-restored"));

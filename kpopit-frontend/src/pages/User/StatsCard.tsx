@@ -44,7 +44,7 @@ const StatsCard = ({ label, value, gameMode, sub, fadeKey, actualCard, isLoading
             [text-shadow:1.2px_1.2px_4px_rgba(0,0,0,0.8)]"
         >
             {isLoading ? (
-                <Loader2 className="w-7.5 h-7.5 animate-spin text-neon-pink" />
+                <Loader2 className="w-7.5 h-7.5 animate-spin text-white" />
             ) : (
                 value
             )}
