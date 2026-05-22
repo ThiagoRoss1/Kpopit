@@ -34,15 +34,26 @@ export const useSharedGameData = () => {
         const encrypted = localStorage.getItem("userToken");
 
         if (encrypted) {
-        try {
-            const token = await decryptToken(encrypted);
-            decryptedTokenRef.current = token;
-            setIsInitialized(true);
-            return token;
-        } catch (error) {
-            console.error("Error decrypting token:", error);
+            const MAX_ATTEMPTS = 3;
+            const RETRY_DELAY_MS = 50;
+            let lastError: unknown = null;
+
+            for (let attempt = 0; attempt < MAX_ATTEMPTS; attempt++) {
+                try {
+                    const token = await decryptToken(encrypted);
+                    decryptedTokenRef.current = token;
+                    setIsInitialized(true);
+                    return token;
+                } catch (error) {
+                    lastError = error;
+                    if (attempt < MAX_ATTEMPTS - 1) {
+                        await new Promise(resolve => setTimeout(resolve, RETRY_DELAY_MS));
+                    }
+                }
+            }
+
+            console.error("Error decrypting token after retries:", lastError);
             localStorage.removeItem("userToken");
-        }
         }
 
         if (userToken.data) {

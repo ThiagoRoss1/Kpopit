@@ -2,6 +2,7 @@ import { getResetTimer } from "../services/api";
 import type { ResetTimer } from "../interfaces/gameInterfaces";
 import { useQuery } from "@tanstack/react-query";
 import { useState, useEffect } from "react";
+import { safeReload } from "../utils/safeReload";
 
 export const useResetTimer = () => {
     const { data, dataUpdatedAt } = useQuery<ResetTimer>({
@@ -37,7 +38,7 @@ export const useResetTimer = () => {
 
             if (diff <= 0) {
                 setDayHasChanged(true);
-                window.location.reload();
+                safeReload();
             }
             setTimeRemaining(diff);
         };

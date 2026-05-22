@@ -37,6 +37,7 @@ import { calculateFeedback } from "../../utils/calculateFeedback.ts";
 import { useAllGameModes } from "../../hooks/useAllGameModes.tsx";
 import { useClearGameStorage } from "../../hooks/useClearGameStorage.tsx";
 import { areGuessesEqual } from "../../utils/areGuessesEqual.ts";
+import { safeReload } from "../../utils/safeReload.ts";
 // import { Input } from "@chakra-ui/react"; - Css framework import example
 
 function ClassicMode() {
@@ -127,7 +128,7 @@ function ClassicMode() {
 
       localStorage.setItem("gameDate", serverDate || "");
 
-      window.location.reload();
+      safeReload();
 
       return;
     } else {

@@ -3,6 +3,7 @@ import type { AddIdolRequest, CompleteGuessTrafficRequest, RestoreSessionRespons
 import type { MeResponse, UpdateProfilePayload } from '../interfaces/authInterfaces';
 import { decryptToken } from '../utils/tokenEncryption';
 import { setAccessToken, getAccessToken, clearAccessToken } from './tokenStore';
+import { safeReload } from '../utils/safeReload';
 // Api instance with base URL
 const api = axios.create({
     baseURL: `${import.meta.env.VITE_API_URL}/api`,
@@ -36,20 +37,24 @@ api.interceptors.response.use(
             } catch {
                 const hadToken = !!getAccessToken();
                 clearAccessToken();
-                if (hadToken) window.location.reload();
+                if (hadToken) safeReload();
             }
         }
         if (error.response?.status === 400) {
             if (error.response?.data?.error === 'Invalid user token') {
                 console.warn("Invalid user token detected. Removing from localStorage.");
+                const session = localStorage.getItem("kpopit_session");
+                const wasAuth = localStorage.getItem("kpopit_was_authenticated");
                 localStorage.clear();
+                if (session) localStorage.setItem("kpopit_session", session);
+                if (wasAuth) localStorage.setItem("kpopit_was_authenticated", wasAuth);
 
-                window.location.reload();
+                safeReload();
             }
 
             else if (error.response?.data?.error === 'Game date mismatch') {
                 console.warn("Game date mismatch detected. Reloading the page.");
-                window.location.reload();
+                safeReload();
             }
         }
         return Promise.reject(error);
