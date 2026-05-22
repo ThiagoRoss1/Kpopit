@@ -36,6 +36,7 @@ import ExportDataText from "../../components/buttons/modals/ExportDataContent";
 import { WinnerExplosion } from "../../utils/confetti";
 import { useClearGameStorage } from "../../hooks/useClearGameStorage";
 import { areGuessesEqual } from "../../utils/areGuessesEqual";
+import { safeReload } from "../../utils/safeReload";
 
 function BlurryMode() {
     const gameMode = useGameMode();
@@ -159,7 +160,7 @@ function BlurryMode() {
 
             localStorage.setItem("blurryGameDate", serverDate);
 
-            window.location.reload();
+            safeReload();
             return;
 
         } else {

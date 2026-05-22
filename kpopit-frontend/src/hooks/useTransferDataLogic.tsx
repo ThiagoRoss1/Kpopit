@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { addGeneratedCodes, redeemTransferCode, fetchGameState, getActiveTransferCode } from '../services/api';
 import { encryptToken, decryptToken } from '../utils/tokenEncryption';
+import { safeReload } from '../utils/safeReload';
 import type { GeneratedCodes, GuessResponse, RedeemUserToken } from '../interfaces/gameInterfaces';
 import type { AxiosError } from 'axios';
 
@@ -94,7 +95,7 @@ export const useTransferDataLogic = () => {
             localStorage.setItem('userToken', encrypted);
             console.log("Redeemed user token", data.user_token);
 
-            window.location.reload();
+            safeReload();
         },
         onError: (error) => {
             const backendMessage = error?.response?.data?.error || "Unknown error";
