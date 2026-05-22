@@ -8,6 +8,7 @@ import { safeReload } from '../utils/safeReload';
 const api = axios.create({
     baseURL: `${import.meta.env.VITE_API_URL}/api`,
     withCredentials: true,
+    timeout: 15000,
 });
 
 // Game modes
@@ -15,6 +16,9 @@ const MODES: Record<string, number> = {
     "classic": 1,
     "blurry": 2
 };
+
+export const isTimeoutError = (err: unknown): boolean =>
+    axios.isAxiosError(err) && err.code === 'ECONNABORTED';
 
 // Response interceptor to handle invalid user token globally
 api.interceptors.response.use(
@@ -34,10 +38,11 @@ api.interceptors.response.use(
                 setAccessToken(data.access_token);
                 original.headers['Authorization'] = `Bearer ${data.access_token}`;
                 return api(original);
-            } catch {
+            } catch (refreshError) {
+                const isTimeout = isTimeoutError(refreshError);
                 const hadToken = !!getAccessToken();
                 clearAccessToken();
-                if (hadToken) safeReload();
+                if (hadToken && !isTimeout) safeReload();
             }
         }
         if (error.response?.status === 400) {
@@ -272,14 +277,22 @@ export const logoutUser = async () => {
     return response.data;
 }
 
+const REFRESH_GRACE_MS = 5000;
 let inFlightRefresh: Promise<{ access_token: string }> | null = null;
+let lastSuccessfulRefreshAt = 0;
 
 export const refreshToken = async (): Promise<{ access_token: string }> => {
     if (inFlightRefresh) return inFlightRefresh;
 
+    if (Date.now() - lastSuccessfulRefreshAt < REFRESH_GRACE_MS) {
+        const token = getAccessToken();
+        if (token) return { access_token: token };
+    }
+
     inFlightRefresh = (async () => {
         try {
             const response = await api.post('/auth/refresh', {}, { withCredentials: true });
+            lastSuccessfulRefreshAt = Date.now();
             return response.data;
         } finally {
             inFlightRefresh = null;

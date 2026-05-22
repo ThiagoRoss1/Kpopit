@@ -34,8 +34,8 @@ export const useSharedGameData = () => {
         const encrypted = localStorage.getItem("userToken");
 
         if (encrypted) {
-            const MAX_ATTEMPTS = 3;
-            const RETRY_DELAY_MS = 50;
+            const RETRY_DELAYS = [50, 100, 200, 400];
+            const MAX_ATTEMPTS = RETRY_DELAYS.length;
             let lastError: unknown = null;
 
             for (let attempt = 0; attempt < MAX_ATTEMPTS; attempt++) {
@@ -47,7 +47,7 @@ export const useSharedGameData = () => {
                 } catch (error) {
                     lastError = error;
                     if (attempt < MAX_ATTEMPTS - 1) {
-                        await new Promise(resolve => setTimeout(resolve, RETRY_DELAY_MS));
+                        await new Promise(resolve => setTimeout(resolve, RETRY_DELAYS[attempt]));
                     }
                 }
             }

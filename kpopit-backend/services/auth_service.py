@@ -12,7 +12,8 @@ load_dotenv()
 JWT_SECRET_KEY = os.getenv("JWT_SECRET_KEY")
 JWT_ACCESS_EXPIRES_SECONDS  = int(os.getenv("JWT_ACCESS_TOKEN_EXPIRES",  "3600"))
 JWT_REFRESH_EXPIRES_SECONDS = int(os.getenv("JWT_REFRESH_TOKEN_EXPIRES", "2592000"))
-IS_PRODUCTION = os.getenv("FLASK_ENV") == "production"
+FLASK_ENV = os.getenv("FLASK_ENV", "production").lower()
+IS_PRODUCTION = FLASK_ENV != "development"
 
 _DUMMY_HASH = bcrypt.hashpw(b"dummy_timing_guard", bcrypt.gensalt(rounds=12))
 
@@ -205,8 +206,11 @@ class AuthService:
             raise ValueError("user_not_found")
 
         remember_me = bool(db_record.get("remember_me", False))
+        
+        remaining_seconds = (exp - now).total_seconds()
+        should_rotate = remaining_seconds < (JWT_REFRESH_EXPIRES_SECONDS / 2)
 
-        if IS_PRODUCTION:
+        if IS_PRODUCTION and should_rotate:
             self.user_repo.revoke_refresh_token(cursor, token_hash)
 
             new_raw_refresh = self.generate_refresh_token(user)
