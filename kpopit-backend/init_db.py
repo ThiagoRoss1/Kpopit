@@ -1,5 +1,4 @@
 # Seed the database with csv data
-import csv 
 import psycopg
 import os
 from dotenv import load_dotenv

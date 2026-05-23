@@ -1,4 +1,5 @@
 import os
+from flask import Blueprint, request, jsonify, g
 from services.idol_service import IdolService
 from services.game_service import GameService
 from services.user_service import UserService
@@ -6,13 +7,11 @@ from utils.dates import get_today_date_str, get_current_timestamp
 from utils.game_feedback_logic import partial_feedback_function, numerical_feedback_function
 from utils.analytics import get_analytics_data, get_country_name
 from services.get_db import get_db, get_idol_repo
+from utils.auth_decorators import optional_auth
 from dotenv import load_dotenv
 
 load_dotenv()
 FLASK_ENV = os.getenv("FLASK_ENV", "production")
-
-from flask import Blueprint, request, jsonify, g
-from utils.auth_decorators import optional_auth
 
 classic_bp = Blueprint('classic', __name__)
 

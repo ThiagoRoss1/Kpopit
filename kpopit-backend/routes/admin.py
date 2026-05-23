@@ -1,4 +1,4 @@
-from flask import Blueprint, jsonify, request, send_file
+from flask import Blueprint, jsonify, request
 import os
 from dotenv import load_dotenv
 from services.get_db import get_db
