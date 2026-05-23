@@ -1,6 +1,6 @@
 import os
 import uuid
-from datetime import datetime, timedelta, timezone
+from datetime import timedelta, timezone
 import bcrypt
 import jwt
 from dotenv import load_dotenv
