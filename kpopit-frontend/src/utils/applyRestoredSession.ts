@@ -25,7 +25,7 @@ const mergeAnimatedIdols = (key: string, serverList: unknown) => {
 };
 
 export const applyRestoredSession = (payload: RestoreSessionResponse) => {
-    const { classic, blurry } = payload;
+    const { classic, blurry, pixelated } = payload;
 
     if (classic) {
         writeJson("todayGuessesDetails", classic.today_guesses_details);
@@ -49,6 +49,14 @@ export const applyRestoredSession = (payload: RestoreSessionResponse) => {
 
         writeBool("blurryGameComplete", blurry.game_complete);
         writeBool("blurryGameWon", blurry.game_won);
+    }
+
+    if (pixelated) {
+        writeJson("pixelatedGuessesDetails", pixelated.pixelated_guesses_details);
+        writeJson("pixelatedGuessedAlbums", pixelated.guessed_albums);
+
+        writeBool("pixelatedGameComplete", pixelated.game_complete);
+        writeBool("pixelatedGameWon", pixelated.game_won);
     }
 
     window.dispatchEvent(new Event("session-restored"));

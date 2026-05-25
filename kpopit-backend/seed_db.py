@@ -1,5 +1,5 @@
 # Seed the database with csv data
-import csv 
+import csv
 import os
 from dotenv import load_dotenv
 from services.get_db import get_manual_db
@@ -16,6 +16,7 @@ GROUP_CA_CSV_FILE = os.path.join(DATA_FOLDER, "group_company_affiliation.csv")
 IDOL_CA_CSV_FILE = os.path.join(DATA_FOLDER, "idol_company_affiliation.csv")
 GAME_MODES_CSV_FILE = os.path.join(DATA_FOLDER, "gamemodes.csv")
 BLURRY_IDOLS_CSV_FILE = os.path.join(DATA_FOLDER, "blurry_idols.csv")
+ALBUMS_CSV_FILE = os.path.join(DATA_FOLDER, "albums.csv")
 
 def seed_table(cursor, csv_file, table_name, columns, conflict_column=None):
     """Read data from a CSV file and insert it into a database table."""
@@ -159,6 +160,12 @@ def run_seed():
                     "idol_id", "blur_image_path", "is_active", "blur_image_version"
                 ]
                 seed_table(cursor, BLURRY_IDOLS_CSV_FILE, 'blurry_mode_data', blurry_idols_columns, conflict_column=["idol_id"])
+
+                # Albums Table Seeding
+                albums_columns = [
+                    "id", "name", "group_id", "type", "release_year", "cover_path", "palette", "is_published", "created_at"
+                ]
+                seed_table(cursor, ALBUMS_CSV_FILE, 'albums', albums_columns)
 
                 # Commit changes
                 print("Seeding completed successfully.")

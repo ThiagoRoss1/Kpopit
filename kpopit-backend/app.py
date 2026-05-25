@@ -8,6 +8,7 @@ from dotenv import load_dotenv
 from services.get_db import init_app
 from routes.games.blurry import blurry_bp
 from routes.games.classic import classic_bp
+from routes.games.pixelated import pixelated_bp
 from routes.games.restore import restore_bp
 from routes.users import user_bp
 from routes.idols import idol_bp
@@ -93,6 +94,9 @@ app.register_blueprint(blurry_bp, url_prefix="/api")
 
 # Classic game blueprint - Register routes
 app.register_blueprint(classic_bp, url_prefix="/api")
+
+# Pixelated game blueprint - Register routes
+app.register_blueprint(pixelated_bp, url_prefix="/api")
 
 # Restore session blueprint - Per-mode game state for authenticated users
 app.register_blueprint(restore_bp, url_prefix="/api")

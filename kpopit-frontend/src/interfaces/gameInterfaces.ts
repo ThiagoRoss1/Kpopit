@@ -237,8 +237,17 @@ export interface BlurryGameState {
   game_date?: string;
 }
 
+export interface PixelatedGameState {
+  pixelated_guesses_details?: GuessResponse<Partial<FeedbackData>>[];
+  guessed_albums?: string[];
+  game_complete?: boolean;
+  game_won?: boolean;
+  game_date?: string;
+}
+
 export interface RestoreSessionResponse {
   classic: ClassicGameState | null;
   blurry: BlurryGameState | null;
+  pixelated: PixelatedGameState | null;
   server_date: string;
 }
