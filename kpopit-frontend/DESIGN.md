@@ -258,7 +258,148 @@ Selection color is also custom:
 
 ---
 
-## 10. Code Patterns
+## 10. Color Theory
+
+### Color Wheel
+
+12 hues arranged in a circle — the foundation of all color decisions.
+
+- **Primary**: red, yellow, blue
+- **Secondary**: orange, green, violet (mixing two primaries)
+- **Tertiary**: the six between primary and secondary
+
+Gurney uses the **Munsell 3D model** rather than a flat wheel. Color has three independent axes:
+
+- **Hue** — position on the wheel, 0–360°
+- **Chroma** — perceived purity/intensity, from gray at center outward. More perceptual than "saturation" (which refers to light purity).
+- **Value** — lightness, 0 (black) → 10 (white)
+
+These three axes are independent. Changing value does not force a chroma change.
+
+### Peak Chroma Value
+
+Each hue reaches its maximum chroma at a specific value — not always mid-gray:
+
+- **Yellow**: maximum chroma at very light value (~8/10)
+- **Blue**: maximum chroma at very dark value (~3/10)
+- **Red**: maximum chroma at middle value (~5/10)
+
+**Kpopit implication:** `#FF3399` is both high-chroma and light in value simultaneously — rare and exactly why it reads as neon. On a dark `#111111` base it maximizes contrast on all three axes at once.
+
+### Color Harmonies
+
+- **Complementary**: 180° apart. Maximum contrast and vibrancy. Use for accents and CTAs, never for large adjacent areas (visual vibration). Kpopit: `#FF3399` ↔ green-cyan `~#33FF99`
+- **Analogous**: within 30–60°. Calm, cohesive. Kpopit: pink → purple → blue — used for secondary UI and shadow undertones
+- **Triadic**: 120° apart. Balanced and energetic; one hue dominant, two as accents
+- **Split-complementary**: a color + the two neighbors of its complement. Strong contrast with less tension than pure complementary
+- **Monochromatic**: single hue, varying chroma and value. Safe, elegant, cohesive
+
+### Color Temperature
+
+Warm colors visually **advance** (come toward the viewer); cool colors visually **recede**.
+
+| Temperature | Range | Approx rgba |
+|---|---|---|
+| Warm | Yellow-green through red | `rgba(255, 240, 200, x)` |
+| Neutral | White | `rgba(255, 255, 255, x)` |
+| Cool | Blue-green through violet | `rgba(180, 210, 240, x)` |
+
+**The Shadow Rule (from Gurney):** A warm key light always produces cool shadows, and vice versa — physics, not a choice. Outdoor shadows are blue because they receive only sky light. A neon pink key casts green-cyan shadows.
+
+**Temperature is relative:** a green can be "warm" relative to a blue-green next to it. Always compare, never judge in isolation.
+
+### The Form Principle — 8 Zones of Light and Shadow
+
+When light hits a solid surface, it creates a predictable sequence of tones:
+
+1. **Center Light** — most directly lit, lightest point on the lit side
+2. **Highlight** — specular reflection of the light source itself
+3. **Halftone** — lit side turning away, still receiving direct light
+4. **Terminator** — transition line where light rays become tangent to the surface
+5. **Core of Shadow** — darkest part of the shadow, just beyond the terminator
+6. **Reflected Light** — ambient light bouncing back into the shadow; raises shadow tone and tints it with surrounding color
+7. **Cast Shadow** — shadow projected onto another surface
+8. **Occlusion Shadow** — darkest accent where two forms press together and cut off all light
+
+**Critical rule:** Pure black (`#000`) in shadows is almost always wrong. Shadows contain reflected light — they have color and are never fully dark. Use undertoned darks instead (e.g. `#0d0008`).
+
+### Lighting Model (Key / Fill / Rim)
+
+All 3D surfaces follow three-point lighting:
+
+- **Key light**: warm (`#FFF0C8`), top-right, opacity 0.15–0.20 — defines form. The dominant source.
+- **Fill light**: cold (`#B4D2F0`), left/bottom-left, opacity 0.10–0.14 — fills shadows. Always opposing temperature to the key.
+- **Rim light**: near-white (`#FFFFFF`), edge only, opacity 0.06–0.09 — separates element from background.
+- **Vignette**: black, radial center→edge, opacity 0.45–0.55 — seats the object in space.
+
+**Non-negotiable rule:** Key and fill must ALWAYS be opposing temperatures. Two warm or two cool sources = flat, lifeless result.
+
+**Shadow undertone:** `#0d0008` (dark purple) — complementary to the warm key light, adds depth without pure black.
+
+**Tonal separation:** In direct light, maintain ~4–5 value steps between fully lit and fully shadowed zones. Less = flat/diffuse. More = dramatic/harsh.
+
+### Local Color vs Perceived Color
+
+**Local color** = the true surface color under neutral white light.
+**Perceived color** = local color modified by light temperature, intensity, reflected surroundings, and atmosphere.
+
+You never render local color directly — you always modulate it. A "black" vinyl under warm light has orange-brown highlights and purple-blue shadows, not gray halftones.
+
+### Saturation in Light and Shadow
+
+- Highlights desaturate toward the light source's color (toward white/warm)
+- Shadows saturate toward the complementary / ambient color
+- Never use pure neutral gray for shadows on colored surfaces — tint them toward the complement
+- **Chromatic grays** (mixed from complementary pairs: blue+orange, red+green) are far richer than pure neutral grays. They maintain hue identity at low chroma.
+
+### Gradation
+
+Color never appears flat in nature. It always transitions in hue, chroma, or value — even subtly. A flat color reads as artificial or graphic. CSS radial/linear gradients simulate natural gradation; this is why they read as more realistic than flat fills.
+
+### Opacity as Intensity
+
+Control light strength via rgba opacity, not color changes:
+
+- `0.05–0.08`: subtle, near-imperceptible when static — texture/rim detail
+- `0.10–0.18`: visible, defines form — fill light range
+- `0.20+`: dominant — reserve for main key light only
+
+### Gamut Mapping (Gurney)
+
+The **gamut** is the complete set of colors available in a composition — visualized as a polygon on the color wheel. Everything inside is usable; everything outside is excluded.
+
+> "Good color comes not just from what you include, but from what you leave out."
+
+Key terms:
+
+- **Subjective primaries**: the corners of the gamut polygon — the most extreme colors in the scheme
+- **Subjective neutral**: center of the polygon — the color cast of the composition. Every "gray" leans toward this hue.
+- **Saturation cost**: mixed/secondary colors are always lower chroma than the subjective primaries
+- **Excluded colors**: hues outside the polygon — their presence breaks color unity
+
+**Kpopit gamut:**
+
+- Primary 1: `#FF3399` — neon pink, warm-red quadrant, high chroma
+- Primary 2: `#b4d2f0` — cold blue-gray, fill light / ambient shadow
+- Primary 3: `#0d0008` — dark purple shadow undertone
+- Subjective neutral: desaturated warm-cool mid-gray (~`#8a8490`)
+- **Excluded**: pure greens, pure yellows, saturated oranges — these break the retro-pop color mood
+
+### Color Accent
+
+A color accent is a small high-chroma element in a neutral or monochromatic field. It draws the eye immediately and doesn't need to be large. It's usually the complement or near-complement of the dominant color.
+
+`#FF3399` functions as Kpopit's color accent — it sits in a dark neutral field and vibrates because it's the complement of that field's cool undertone. Overusing it collapses the effect.
+
+### Contrast & Accessibility
+
+- Value (lightness) contrast matters more than hue contrast for readability
+- WCAG minimums: 4.5:1 for normal text, 3:1 for large text
+- `#FF3399` on `#111111` passes; never put `#FF3399` text on white without darkening it first
+
+---
+
+## 11. Code Patterns
 
 ### Page file structure
 
