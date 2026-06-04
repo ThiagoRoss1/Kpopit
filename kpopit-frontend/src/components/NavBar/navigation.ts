@@ -13,8 +13,14 @@ export const GAMES_LINKS: DropLink[] = [
     },
     
     {
-        label: "Blurry", 
-        path: "/blurry", 
+        label: "Blurry",
+        path: "/blurry",
+        icon: "/kpopit-icon-svg.svg"
+    },
+
+    {
+        label: "Pixelated",
+        path: "/pixelated",
         icon: "/kpopit-icon-svg.svg"
     },
 ]

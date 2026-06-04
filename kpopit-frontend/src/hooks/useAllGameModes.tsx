@@ -15,6 +15,7 @@ export const useAllGameModes = (currentMode: string) => {
     const allModes = [
         { id: 'classic', name: 'Classic', path: '/classic' },
         { id: 'blurry', name: 'Blurry', path: '/blurry' },
+        { id: 'pixelated', name: 'Pixelated', path: '/pixelated' },
     ].map(mode => ({
         ...mode,
         won: isWonToday(mode.id),

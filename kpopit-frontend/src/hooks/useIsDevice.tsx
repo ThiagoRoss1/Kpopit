@@ -18,3 +18,15 @@ export const isSafari = typeof window !== "undefined" && (
 
 export const isGeckoEngine = typeof window !== "undefined" && 
   (window.CSS && CSS.supports('-moz-appearance', 'none'));
+
+export function useIsLg(breakpoint = 1024) {
+    const [isLg, setIsLg] = useState(window.innerWidth >= breakpoint);
+
+    useEffect(() => {
+        const onResize = () => setIsLg(window.innerWidth >= breakpoint);
+        window.addEventListener("resize", onResize);
+        return () => window.removeEventListener("resize", onResize);
+    }, [breakpoint]);
+
+    return isLg;
+}

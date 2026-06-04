@@ -1,9 +1,9 @@
 import { useMemo } from "react";
 import { useLocation } from "react-router-dom";
 
-export type GameMode = "classic" | "blurry";
+export type GameMode = "classic" | "blurry" | "pixelated";
 
-const MODES: GameMode[] = ["classic", "blurry"];
+const MODES: GameMode[] = ["classic", "blurry", "pixelated"];
 
 export const useGameMode = (): GameMode => {
     const location = useLocation();

@@ -30,6 +30,15 @@ const BLURRY_KEYS = [
     "blurryGameDate",
 ] as const;
 
+const PIXELATED_KEYS = [
+    "pixelatedGuessesDetails",
+    "pixelatedGuessedAlbums",
+    "pixelatedGameComplete",
+    "pixelatedGameWon",
+    "confettiShownPixelated",
+    "pixelatedGameDate",
+] as const;
+
 export const useClearGameStorage = () => {
     const clearClassic = useCallback(() => {
         CLASSIC_KEYS.forEach(k => localStorage.removeItem(k));
@@ -39,10 +48,15 @@ export const useClearGameStorage = () => {
         BLURRY_KEYS.forEach(k => localStorage.removeItem(k));
     }, []);
 
+    const clearPixelated = useCallback(() => {
+        PIXELATED_KEYS.forEach(k => localStorage.removeItem(k));
+    }, []);
+
     const clearAll = useCallback(() => {
         clearClassic();
         clearBlurry();
-    }, [clearClassic, clearBlurry]);
+        clearPixelated();
+    }, [clearClassic, clearBlurry, clearPixelated]);
 
-    return { clearClassic, clearBlurry, clearAll };
+    return { clearClassic, clearBlurry, clearPixelated, clearAll };
 };
