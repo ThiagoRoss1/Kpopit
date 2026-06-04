@@ -1,5 +1,5 @@
-id,name,group_id,type,release_year,cover_path,palette,is_published,created_at
-1,Pureflow,1,Studio Album,2020,/images/albums/image-1779577545820.jpg,,true,2020-01-01
-2,Midnight Memories,2,Studio Album,2013,/covers/midnight_memories.jpg,,true,2013-11-25
-3,Love Yourself: Tear,3,Studio Album,2018,/covers/love_yourself_tear.jpg,,true,2018-05-18
-4,The Album,4,Studio Album,2020,/covers/the_album.jpg,,true,2020-11-12
+id,name,group_id,soloist_id,type,release_year,cover_path,palette,is_published,created_at
+1,Pureflow,1,,Studio Album,2020,/images/albums/image-1779577545820.jpg,,true,2020-01-01
+2,Midnight Memories,2,,Studio Album,2013,/images/albums/kirikoyoa.jpg,,true,2013-11-25
+3,Love Yourself: Tear,3,,Studio Album,2018,/images/albums/hydronbr.jpg,,true,2018-05-18
+4,The Album,4,,Studio Album,2020,/images/albums/leoper.jpg,,true,2020-11-12

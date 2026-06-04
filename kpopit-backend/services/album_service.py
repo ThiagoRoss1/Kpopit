@@ -90,9 +90,12 @@ class AlbumService:
                        a.cover_path,
                        a.palette,
                        a.type,
-                       a.release_year
+                       a.release_year,
+                       COALESCE(i.artist_name, g.name) AS group_name
                 FROM daily_picks dp
                 JOIN albums a ON a.id = dp.album_id
+                LEFT JOIN idols i ON i.id = a.soloist_id
+                LEFT JOIN groups g ON g.id = a.group_id
                 WHERE dp.pick_date = %s AND dp.gamemode_id = %s
                 LIMIT 1
             """,
@@ -187,9 +190,12 @@ class AlbumService:
 
             cursor.execute(
                 """
-                    SELECT a.name, g.name AS group_name, a.cover_path
+                    SELECT a.name, 
+                        COALESCE(i.artist_name, g.name) AS group_name, 
+                        a.cover_path
                     FROM albums a
                     LEFT JOIN groups g ON g.id = a.group_id
+                    LEFT JOIN idols i ON i.id = a.soloist_id
                     WHERE a.id = %s
                 """, (guess_album_id,)
             )
@@ -211,24 +217,25 @@ class AlbumService:
             },
         }
 
-    def search_albums(self, cursor, query: str, limit: int = 20) -> list[dict]:
-        """ILIKE search over album name + group name. Published albums only."""
-        pattern = f"%{(query or '').strip()}%"
+    def get_all_albums(self, cursor) -> list[dict]:
+        """Return every published album for client-side search caching.
+
+        Mirrors the idol list flow (`/idols-list` → `["allIdols"]`): the frontend
+        fetches this once and filters locally, so there's no per-keystroke endpoint.
+        """
         cursor.execute(
             """
                 SELECT a.id,
                        a.name,
-                       g.name AS group_name,
+                       COALESCE(i.artist_name, g.name) AS group_name,
                        a.cover_path,
                        a.type,
                        a.release_year
                 FROM albums a
                 LEFT JOIN groups g ON g.id = a.group_id
+                LEFT JOIN idols i ON i.id = a.soloist_id
                 WHERE a.is_published = TRUE
-                  AND (a.name ILIKE %s OR g.name ILIKE %s)
                 ORDER BY a.name ASC
-                LIMIT %s
-            """,
-            (pattern, pattern, limit),
+            """
         )
         return [dict(r) for r in cursor.fetchall()]

@@ -20,7 +20,7 @@ def test_daily_album_returns_cover_and_omits_name(client, db_conn, make_group, m
     assert "cover_path" in body
     assert body["cover_path"] == "/covers/hidden.jpg"
     assert "name" not in body
-    assert "group_name" not in body
+    assert "group_name" in body
 
 
 def test_daily_album_404_when_no_published_albums(client):
@@ -109,24 +109,27 @@ def test_guess_game_date_mismatch_returns_400(client, make_user, make_group, mak
 
 
 # ---------------------------------------------------------------------------
-# GET /api/game/pixelated/albums/search
+# GET /api/game/pixelated/albums-list  (full catalog; filtered client-side)
 # ---------------------------------------------------------------------------
 
-def test_search_matches_album_or_group_name(client, make_group, make_album):
+def test_albums_list_returns_published_with_group_name(client, make_group, make_album):
     gid = make_group("Stellar")
     make_album("Galaxy Lights", gid)
 
-    by_album = client.get(f"/api/game/pixelated/albums/search?q=Galaxy&gamemode_id={GM}")
-    assert by_album.status_code == 200
-    assert any(r["name"] == "Galaxy Lights" for r in by_album.get_json())
+    resp = client.get(f"/api/game/pixelated/albums-list?gamemode_id={GM}")
+    assert resp.status_code == 200
+    body = resp.get_json()
 
-    by_group = client.get(f"/api/game/pixelated/albums/search?q=Stellar&gamemode_id={GM}")
-    assert by_group.status_code == 200
-    assert any(r["group_name"] == "Stellar" for r in by_group.get_json())
+    row = next((r for r in body if r["name"] == "Galaxy Lights"), None)
+    assert row is not None
+    assert row["group_name"] == "Stellar"
+    # Shape the client filter/guess-build depends on.
+    for key in ("id", "name", "group_name", "cover_path", "type", "release_year"):
+        assert key in row
 
 
-def test_search_empty_query_returns_empty_list(client):
-    resp = client.get(f"/api/game/pixelated/albums/search?q=&gamemode_id={GM}")
+def test_albums_list_empty_when_no_published(client):
+    resp = client.get(f"/api/game/pixelated/albums-list?gamemode_id={GM}")
     assert resp.status_code == 200
     assert resp.get_json() == []
 

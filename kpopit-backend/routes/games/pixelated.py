@@ -29,6 +29,7 @@ def get_daily_pixelated_album():
 
         return jsonify({
             "answer_id": album["album_id"],
+            "group_name": album["group_name"],
             "cover_path": album["cover_path"],
             "palette": album["palette"],
             "type": album["type"],
@@ -89,16 +90,13 @@ def guess_pixelated_album():
         cursor.close()
 
 
-@pixelated_bp.route("/game/pixelated/albums/search", methods=["GET"])
-def search_albums():
-    query = request.args.get("q", "").strip()
-    if not query:
-        return jsonify([]), 200
-
+@pixelated_bp.route("/game/pixelated/albums-list", methods=["GET"])
+def list_albums():
+    """All published albums (cached + filtered client-side, like /idols-list)."""
     connect = get_db()
     cursor = connect.cursor()
     try:
         service = AlbumService(connect)
-        return jsonify(service.search_albums(cursor, query, limit=20)), 200
+        return jsonify(service.get_all_albums(cursor)), 200
     finally:
         cursor.close()
