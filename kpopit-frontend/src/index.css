@@ -124,12 +124,12 @@ h1 {
 
 /* Selection color */
 ::selection {
-  background: #b43777;
+  background: #FF3399;
   color: white;
 }
 
 ::-moz-selection {
-  background: #b43777;
+  background: #FF3399;
   color: white;
 }
 

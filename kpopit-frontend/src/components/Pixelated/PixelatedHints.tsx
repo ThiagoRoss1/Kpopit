@@ -1,4 +1,5 @@
 import { useState } from "react";
+import "./../../pages/PixelatedMode/PixelatedMode.css";
 
 interface PixelatedHintsProps {
     guessCount: number;
@@ -15,15 +16,21 @@ interface HintDef {
     korean: string;
     unlockGuesses: number;
     stampIndex: string;
+    storageKey: string;
 }
 
 const HINTS: HintDef[] = [
-    { id: "year", sleeve: "year", label: "Release Year", korean: "연도", unlockGuesses: 3, stampIndex: "#01" },
-    { id: "artist", sleeve: "artist", label: "Artist", korean: "아티스트", unlockGuesses: 3, stampIndex: "#02" },
+    { id: "year", sleeve: "year", label: "Release Year", korean: "연도", unlockGuesses: 1, stampIndex: "#01", storageKey: "pixelatedHint1Revealed" },
+    { id: "artist", sleeve: "artist", label: "Artist", korean: "아티스트", unlockGuesses: 1, stampIndex: "#02", storageKey: "pixelatedHint2Revealed" },
 ];
 
 const PixelatedHints = ({ guessCount, releaseYear, artistName }: PixelatedHintsProps) => {
-    const [opened, setOpened] = useState<Record<HintId, boolean>>({ year: false, artist: false });
+    const [opened, setOpened] = useState<Record<HintId, boolean>>(() =>
+        HINTS.reduce((acc, h) => {
+            acc[h.id] = localStorage.getItem(h.storageKey) === "true";
+            return acc;
+        }, {} as Record<HintId, boolean>)
+    );
 
     const hintValue = (id: HintId) => (id === "year" ? String(releaseYear) : artistName);
 
@@ -33,19 +40,26 @@ const PixelatedHints = ({ guessCount, releaseYear, artistName }: PixelatedHintsP
                 const unlocked = guessCount >= hint.unlockGuesses;
                 const isOpen = unlocked && opened[hint.id];
                 const remaining = Math.max(0, hint.unlockGuesses - guessCount);
+                // Left card (year) mirrors the right card (artist) on mobile.
+                const isLeft = hint.id === "year";
                 return (
                     <div
                         key={hint.id}
-                        /* Below zm the card matches the sleeve width (so two fit) and grows
-                           downward on open to reserve room for the disc that drops out the
-                           bottom. zm+ keeps the original w-40/h-46 + sideways reveal. */
-                        className={`relative shrink-0 w-28 zm:w-40 zm:h-46
+                        className={`relative shrink-0 w-28 zm:w-40 h-37 zm:h-46
                             transition-[height] duration-550 ease-[cubic-bezier(0.34,1.4,0.64,1)] motion-reduce:transition-none
-                            ${isOpen ? "h-58" : "h-37"} ${unlocked ? "cursor-pointer" : ""}`}
+                            outline-none rounded-xl focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-neon-pink
+                            ${unlocked ? "cursor-pointer" : ""}`}
                         role={unlocked ? "button" : undefined}
                         tabIndex={unlocked ? 0 : undefined}
                         aria-label={unlocked ? `${hint.label} hint` : `${hint.label} hint, locked`}
-                        onClick={() => unlocked && setOpened((s) => ({ ...s, [hint.id]: !s[hint.id] }))}
+                        onClick={() => {
+                            if (!unlocked) return;
+                            setOpened((s) => {
+                                const next = { ...s, [hint.id]: !s[hint.id] };
+                                localStorage.setItem(hint.storageKey, next[hint.id] ? "true" : "false");
+                                return next;
+                            });
+                        }}
                     >
                         {/* Vinyl disc behind the sleeve */}
                         <div
@@ -54,7 +68,7 @@ const PixelatedHints = ({ guessCount, releaseYear, artistName }: PixelatedHintsP
                                 left-1/2 -translate-x-1/2 zm:translate-x-0
                                 transition-[top,left] duration-550 ease-[cubic-bezier(0.34,1.4,0.64,1)] motion-reduce:transition-none
                                 ${isOpen
-                                    ? "top-32 zm:top-5 zm:left-22 sm:left-26 lg:left-22 xl:left-26"
+                                    ? `${isLeft ? "pixel-hint-mobile-enter-l" : "pixel-hint-mobile-enter-r"} top-5 zm:top-5 zm:left-22 sm:left-26 lg:left-22 xl:left-26`
                                     : "top-5 zm:left-4 lg:left-0 xl:left-4"}`}
                         >
                             <div
@@ -73,9 +87,9 @@ const PixelatedHints = ({ guessCount, releaseYear, artistName }: PixelatedHintsP
                         <div
                             className={`absolute top-2 z-2 left-1/2 -translate-x-1/2 zm:translate-x-0 zm:left-0 lg:-left-4 xl:left-0
                                 w-27 h-33 sm:w-30 sm:h-36 xl:w-34 xl:h-40 px-2 py-2 border-2 rounded-lg border-ink -rotate-2
-                                flex flex-col justify-between select-none
-                                shadow-[0_4px_0_rgba(0,0,0,0.18),0_8px_16px_rgba(0,0,0,0.10)]
-                                ${hint.sleeve === "year" ? "bg-[#ffe047] text-[#422006]" : "bg-[#ffd1e8] text-[#5a1a48]"}`}
+                                flex flex-col justify-between select-none shadow-[0_4px_0_rgba(0,0,0,0.18),0_8px_16px_rgba(0,0,0,0.10)]
+                                ${isOpen ? (isLeft ? "pixel-sleeve-tilt-l" : "pixel-sleeve-tilt-r") : ""}
+                                ${hint.sleeve === "year" ? "bg-[#e4e4e4] text-[#72401a]" : "bg-[#ffd1e8] text-[#5a1a48]"}`}
                         >
                             <div className="flex justify-between text-sm font-bold uppercase">
                                 <span>Hint</span>
@@ -87,8 +101,8 @@ const PixelatedHints = ({ guessCount, releaseYear, artistName }: PixelatedHintsP
                                 <div className="font-korean text-sm opacity-60 font-bold">{hint.korean}</div>
                             </div>
                             
-                            <div className="font-bold text-[12px] uppercase">
-                                {unlocked ? (isOpen ? "← tap to hide" : "tap to reveal →") : "locked"}
+                            <div className="font-bold text-[12px] ">
+                                {unlocked ? (isOpen ? "Tap to hide" : "Tap to reveal") : "locked"}
                             </div>
 
                             {!unlocked && (

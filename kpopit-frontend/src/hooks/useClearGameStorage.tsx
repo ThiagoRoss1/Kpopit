@@ -35,6 +35,9 @@ const PIXELATED_KEYS = [
     "pixelatedGuessedAlbums",
     "pixelatedGameComplete",
     "pixelatedGameWon",
+    "pixelatedAnimatedAlbums",
+    "pixelatedHint1Revealed",
+    "pixelatedHint2Revealed",
     "confettiShownPixelated",
     "pixelatedGameDate",
 ] as const;

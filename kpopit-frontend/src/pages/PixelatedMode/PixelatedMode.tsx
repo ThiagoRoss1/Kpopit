@@ -5,13 +5,13 @@ import { Helmet } from "react-helmet-async";
 import { useSharedGameData } from "../../hooks/useSharedGameData";
 import { useGameMode } from "../../hooks/useGameMode";
 import { useState, useEffect, useCallback, useRef } from "react";
-import { getPixelatedDailyAlbum, getPixelatedGuessAlbum, getAllAlbums, getUserPosition, getDailyUserCount, saveGameState}  from "../../services/api";
-import type { PixelatedGameData, AlbumSearchResult, PixelatedGuessDetail } from "../../interfaces/gameInterfaces";
+import { getPixelatedDailyAlbum, getPixelatedGuessAlbum, getAllAlbums, getYesterdaysAlbum, getUserPosition, getDailyUserCount, saveGameState}  from "../../services/api";
+import type { PixelatedGameData, AlbumSearchResult, PixelatedGuessDetail, YesterdayAlbum } from "../../interfaces/gameInterfaces";
 import { decryptToken } from "../../utils/tokenEncryption";
 import { albumCoverUrl } from "../../utils/imageUrl";
 import PixelatedSearchBar from "../../components/Pixelated/PixelatedSearchBar";
 import PixelatedCanvas from "../../components/Pixelated/PixelatedCanvas";
-import PixelatedGuessRow from "../../components/Pixelated/PixelatedGuessRow";
+import PixelatedGuessGrid from "../../components/Pixelated/PixelatedGuessGrid";
 import PixelatedHints from "../../components/Pixelated/PixelatedHints";
 import PixelatedVictory from "../../components/Pixelated/PixelatedVictory";
 import GetPixelLevel, { PIXEL_LEVELS } from "../../utils/pixelLevels";
@@ -19,6 +19,13 @@ import { WinnerExplosion } from "../../utils/confetti";
 import { useClearGameStorage } from "../../hooks/useClearGameStorage";
 import { safeReload } from "../../utils/safeReload";
 import { useIsLg } from "../../hooks/useIsDevice";
+import { useAllGameModes } from "../../hooks/useAllGameModes";
+import { BarChart3 } from "lucide-react";
+import Modal from "../../components/buttons/modals/Modal";
+import StatsText from "../../components/buttons/modals/StatsContent";
+import TransferDataText from "../../components/buttons/modals/TransferDataContent";
+import ImportDataText from "../../components/buttons/modals/ImportDataContent";
+import ExportDataText from "../../components/buttons/modals/ExportDataContent";
 
 const REVEAL_LEVEL = PIXEL_LEVELS[PIXEL_LEVELS.length - 1]; // 1 = clear cover
 
@@ -34,11 +41,14 @@ function PixelatedMode() {
     const [confetti, setConfetti] = useState<boolean>(false);
     const [attempts, setAttempts] = useState<number>(0);
     const [sessionRestored, setSessionRestored] = useState<number>(0);
+    const [showModal, setShowModal] = useState<null | "stats" | "transfer-data" | "import-data" | "export-data">(null);
 
-    const { initUser, decryptedTokenRef, isInitialized, userStatsData, queryClient } = useSharedGameData();
+    const { initUser, decryptedTokenRef, isInitialized, queryClient, userStatsData, transferData } = useSharedGameData();
     const { clearPixelated } = useClearGameStorage();
 
     const isLg = useIsLg();
+
+    const { otherModes } = useAllGameModes(gameMode);
 
     const queryUserCount = useQueryClient();
 
@@ -85,6 +95,17 @@ function PixelatedMode() {
         gcTime: 1000 * 60 * 60 * 24 * 6,
         refetchOnWindowFocus: false,
     });
+
+    const { data: yesterdayAlbumData } = useQuery<YesterdayAlbum>({
+        queryKey: ["yesterdaysAlbum"],
+        queryFn: getYesterdaysAlbum,
+        staleTime: 1000 * 60 * 60 * 24,
+        refetchOnWindowFocus: false,
+    });
+
+    const yesterdayAlbum = yesterdayAlbumData?.past_album_id ? yesterdayAlbumData.album_name : null;
+    const yesterdayAlbumCover = yesterdayAlbumData?.cover_path ?? null;
+    const yesterdayAlbumArtist = yesterdayAlbumData?.artist ?? null;
 
     useEffect(() => {
         if (!pixelatedGameData?.server_date) return;
@@ -220,12 +241,15 @@ function PixelatedMode() {
         setCurrentGuess("");
         setSelectedAlbum(null);
         setAttempts((prev) => prev + 1);
-
-        if (guessCorrect) {
-            setEndGame(true);
-            setTimeout(() => setShowVictory(true), 1400);
-        }
     }, [decryptedTokenRef]);
+
+    const handleAnimationsComplete = useCallback(() => {
+        if (isCorrect) {
+            setEndGame(true);
+            setShowVictory(true);
+            setCurrentGuess("");
+        }
+    }, [isCorrect]);
 
     const excludedIds = guesses.map((g) => g.album_id);
     const blockSize = endGame ? REVEAL_LEVEL : GetPixelLevel(guesses.length);
@@ -255,6 +279,29 @@ function PixelatedMode() {
 
     const coverUrl = albumCoverUrl(pixelatedGameData.cover_path);
 
+    const statsButton = (
+        <button
+            type="button"
+            onClick={() => setShowModal("stats")}
+            aria-label="Your stats"
+            className="flex shrink-0 items-center justify-center w-11 h-11 sm:w-12 sm:h-12 rounded-xl bg-neon-pink border-2 border-ink text-white
+            shadow-[0_4px_0_var(--color-ink)] transition-all duration-150 transform-gpu
+            hover:brightness-110 hover:cursor-pointer active:translate-y-1 active:shadow-[0_1px_0_var(--color-ink)]
+            focus:outline-none focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ink"
+        >
+            <BarChart3 className="w-5 h-5 sm:w-6 sm:h-6" strokeWidth={2.5} />
+        </button>
+    );
+
+    const statsModals = (
+        <>
+            {showModal === "stats" && <Modal isOpen onClose={() => setShowModal(null)} title="Stats..."><StatsText stats={userStatsData} onSubmitTransferData={() => setShowModal("transfer-data")} /></Modal>}
+            {showModal === "transfer-data" && <Modal isOpen onClose={() => setShowModal(null)} title="Transfer Data..." isTransferDataSubPages returnPage={() => setShowModal("stats")}><TransferDataText onSubmitImportData={() => setShowModal("import-data")} onSubmitExportData={() => setShowModal("export-data")} /></Modal>}
+            {showModal === "import-data" && <Modal isOpen onClose={() => { transferData.clearError(); setShowModal(null); }} title="Import Data..." isTransferDataSubPages returnPage={() => setShowModal("transfer-data")}><ImportDataText handleRedeem={transferData.handleRedeem} isRedeeming={transferData.isRedeeming} redeemError={transferData.redeemError} /></Modal>}
+            {showModal === "export-data" && <Modal isOpen onClose={() => setShowModal(null)} title="Export Data..." isTransferDataSubPages returnPage={() => setShowModal("transfer-data")}><ExportDataText handleGenerate={transferData.handleGenerate} generatedCodes={transferData.generatedCodes} timeLeft={transferData.timeLeft} expires_At={transferData.expiresAt} fetchActiveCode={transferData.fetchActiveCode} /></Modal>}
+        </>
+    );
+
     return (
         <>
             <Helmet>
@@ -272,22 +319,24 @@ function PixelatedMode() {
                     <div className={`flex flex-col lg:flex-row gap-4 lg:gap-10 ${isLg ? "items-start" : "items-center"}`}>
 
                         {!isLg && (
-                        <div className="flex items-center justify-center text-5xl font-bold text-neon-pink mb-0">
-                            <h1 className="leading-tight">
-                                <span 
+                        <div className="flex flex-row items-center justify-center gap-3 mb-0">
+                            <h1 className="text-5xl font-bold text-neon-pink leading-tight">
+                                <span
                                     className="kpop-part"
                                     style={{ '--kpop-color': 'var(--color-neon-pink)' } as React.CSSProperties}
                                 >
                                     Pixel
                                 </span>
 
-                                <span 
+                                <span
                                     className="it-part"
                                     style={{ '--it-color': 'var(--color-cream)' } as React.CSSProperties}
                                 >
                                     It
                                 </span>
                             </h1>
+
+                            {statsButton}
                         </div>
                         )}
                         
@@ -315,17 +364,17 @@ function PixelatedMode() {
                                         shadow-[0_14px_30px_rgba(0,0,0,0.35),0_4px_10px_rgba(0,0,0,0.2)] rounded-2xl
                                         sm:w-80 sm:h-90 md:-translate-x-[60%] md:w-90 md:h-100 lg:left-0 lg:translate-x-0 lg:w-90 lg:h-100 xl:w-110 xl:h-120"
                                     >
-                                        <div className="relative flex items-center justify-center p-4 w-fit h-fit">
+                                        <div className="relative flex items-center justify-center p-4 w-full h-fit">
                                             <span className="pixel-washi absolute top-0 -left-6 w-[22%] h-5.5 z-4 rotate-[-34.8deg]" />
                                             <span className="pixel-washi absolute top-0 -right-6 w-[22%] h-5.5 z-5 rotate-[34.8deg]" />
 
-                                            {/* Cover well */}
-                                            <div className="relative w-full h-full rounded-xl overflow-hidden flex flex-col bg-[#14000f]">
+                                            {/* Cover */}
+                                            <div className="relative w-full aspect-square rounded-xl overflow-hidden flex flex-col bg-transparent">
                                                 <PixelatedCanvas
                                                     imageUrl={coverUrl}
                                                     blockSize={blockSize}
                                                     alt="Pixelated album cover"
-                                                    className="w-full aspect-square object-cover block"
+                                                    className="w-full h-full object-cover block"
                                                 />
                                                 {!endGame && (
                                                     <div className="absolute inset-0 z-1 flex items-center justify-center font-bold text-white/40
@@ -364,21 +413,23 @@ function PixelatedMode() {
                         <div className="flex-1 min-w-0 w-full">
                             <div className="flex flex-col mb-1">
                                 {isLg && (
-                                <div className="flex items-center justify-center gap-2 text-5xl font-bold text-neon-pink mb-6">
-                                    <h1 className="leading-tight">
-                                        <span 
+                                <div className="flex flex-row items-center justify-center gap-3 mb-6">
+                                    <h1 className="text-5xl font-bold text-neon-pink leading-tight">
+                                        <span
                                             className="kpop-part"
                                             style={{ '--kpop-color': 'var(--color-neon-pink)' } as React.CSSProperties}
                                         >
                                             Pixel
                                         </span>
-                                        <span 
+                                        <span
                                             className="it-part"
                                             style={{ '--it-color': 'var(--color-cream)' } as React.CSSProperties}
                                         >
                                             It
                                         </span>
                                     </h1>
+
+                                    {statsButton}
                                 </div>
                                 )}
                                 
@@ -416,36 +467,35 @@ function PixelatedMode() {
 
                             {/* Past guesses */}
                             {guesses.length > 0 && (
-                                <div className="flex flex-col gap-4.5">
-                                    {[...guesses].reverse().map((guess, index) => (
-                                        <PixelatedGuessRow
-                                            key={guess.album_id}
-                                            guess={guess}
-                                            tiltLeft={index % 2 === 0}
-                                            isNewest={index === 0}
-                                        />
-                                    ))}
-                                </div>
+                                <PixelatedGuessGrid
+                                    guesses={guesses}
+                                    onAnimationComplete={handleAnimationsComplete}
+                                />
                             )}
 
                             <div className="mt-6 text-[11px] font-semibold uppercase tracking-[0.15em] text-ink/60 text-center lg:text-right">
-                                ♡ unlimited tries · new album daily at midnight EST
+                                Can you guess today's album ? · new album daily at midnight EST ♡
                             </div>
                         </div>
                     </div>
 
+                    {statsModals}
+
                     {/* Victory Card */}
                     {endGame && isCorrect && showVictory && winningGuess && (
-                        <div className="mt-12">
+                        <div className="mt-25">
                             <PixelatedVictory
                                 albumName={winningGuess.album_name}
                                 groupName={pixelatedGameData.group_name}
                                 coverPath={pixelatedGameData.cover_path}
+                                yesterdayAlbum={yesterdayAlbum}
+                                yesterdayAlbumCover={yesterdayAlbumCover}
+                                yesterdayAlbumArtist={yesterdayAlbumArtist}
                                 attempts={attempts}
                                 position={userPositionData}
                                 score={userScoreData}
                                 rank={userRankData}
-                                streak={userStatsData?.current_streak}
+                                otherGamemodes={otherModes}
                             />
                         </div>
                     )}

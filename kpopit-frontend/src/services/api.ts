@@ -114,11 +114,17 @@ export const getAllIdols = async () => {
     return response.data;
 };
 
-// Export yesterday's idol date
+// Export yesterday's idol data
 export const getYesterdaysIdol = async () => {
     const response = await api.get('/store-yesterdays-idol');
     return response.data;
 };
+
+// Export yesterday's album data
+export const getYesterdaysAlbum = async () => {
+    const response = await api.get('/store-yesterdays-album');
+    return response.data;
+}
 
 export const getResetTimer = async () => {
     const response = await api.get('/reset-timer');

@@ -108,7 +108,7 @@ const PixelatedSearchBar = (props: PixelatedSearchBarProps) => {
         >
           <div className="flex items-center gap-2 w-full pl-1 pr-2 py-2">
             <input
-              className="grow h-11 px-4 bg-transparent border border-white/20 rounded-2xl text-ink placeholder-ink/40
+              className="flex grow w-full h-11 px-4 bg-transparent border border-white/20 rounded-2xl text-ink placeholder-ink/40
               shadow-[0_8px_24px_rgba(0,0,0,0.1),0_2px_6px_rgba(0,0,0,0.1)]  
               text-base sm:text-lg font-medium focus:outline-none disabled:opacity-50"
               value={value}
@@ -121,13 +121,12 @@ const PixelatedSearchBar = (props: PixelatedSearchBarProps) => {
               type="button"
               onClick={submit}
               disabled={disabled || !selectedAlbum}
-              className="shrink-0 flex items-center gap-1.5 h-11 px-4 sm:px-5 rounded-full font-bold text-sm sm:text-base
-                text-white bg-neon-pink border-b-2 border-ink shadow-[0_4px_0_var(--color-ink)] transition-all duration-150
+              className="flex items-center gap-1.5 h-11 px-4 sm:px-4 p-2 rounded-full font-bold 
+              bg-neon-pink border-b-2 border-ink shadow-[0_4px_0_var(--color-ink)] transition-all duration-150
                 hover:brightness-110 hover:cursor-pointer active:translate-y-1 active:shadow-[0_1px_0_var(--color-ink)]
                 disabled:opacity-50 disabled:pointer-events-none"
             >
-              <img src={SearchIcon} alt="Search Icon" aria-hidden="true" className="w-4 h-4 invert" draggable={false} />
-              <span className="hidden xxs:inline">Guess</span>
+              <img src={SearchIcon} alt="Search Icon" aria-hidden="true" className="w-full h-full" draggable={false} />
             </button>
 
             <AnimatePresence>
@@ -138,7 +137,7 @@ const PixelatedSearchBar = (props: PixelatedSearchBarProps) => {
                   exit={{ y: -10, opacity: 0 }}
                   transition={{ type: "spring", stiffness: 500, damping: 50 }}
                   className="absolute left-0 top-full w-full mt-2 rounded-2xl overflow-y-auto overflow-x-hidden
-                    searchbar-scroll border-2 border-ink bg-white shadow-[0_10px_30px_rgba(0,0,0,0.18)] z-50 max-h-60 sm:max-h-72 transform-gpu"
+                    searchbar-scroll border-2 border-ink/60 bg-[#fffaf3] shadow-[0_10px_30px_rgba(0,0,0,0.18)] z-50 max-h-60 sm:max-h-72 transform-gpu"
                 >
                   {suggestions.map((album) => (
                     <motion.li
@@ -147,21 +146,21 @@ const PixelatedSearchBar = (props: PixelatedSearchBarProps) => {
                       whileHover={{ x: 4 }}
                       transition={{ type: "spring", stiffness: 300, damping: 25 }}
                       className="relative px-3 py-2.5 select-none cursor-pointer transition-colors duration-150 transform-gpu
-                        hover:bg-neon-pink/10 flex gap-3 items-center text-ink border-b border-ink/10 last:border-b-0"
+                        hover:bg-neon-pink/20 flex gap-3 items-center text-ink border-b border-ink/10 last:border-b-0"
                     >
                       {album.cover_path && (
                         <img
                           src={albumCoverUrl(album.cover_path)}
                           alt=""
-                          className="w-11 h-11 object-cover rounded-lg border-2 border-ink shrink-0"
+                          className="w-12 h-12 object-cover rounded-full border-2 border-ink shrink-0"
                           loading="eager"
                           draggable={false}
                         />
                       )}
                       <p className="relative flex flex-col leading-tight min-w-0">
-                        <span className="font-semibold text-base truncate">{album.name}</span>
+                        <span className="font-bold text-ink/80 text-base truncate">{album.name}</span>
                         <span className="text-sm text-ink/55 truncate">
-                          {album.group_name} · {album.type} · {album.release_year}
+                          {album.group_name}
                         </span>
                       </p>
                     </motion.li>

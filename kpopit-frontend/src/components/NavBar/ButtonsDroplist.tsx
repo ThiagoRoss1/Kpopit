@@ -33,8 +33,9 @@ const ButtonsDroplist = (props: ButtonsDroplistProps) => {
 
                 <DroplistBase isOpen={isOpen} onClose={() => setIsOpen(false)} containerRef={containerRef} className={`${isGrid ? "max-xxs:w-45 xxs:w-55 xm:w-65 sm:w-80 lg:w-80 xl:w-90 2xl:w-100" : "w-50"} h-auto`}>
                     <div className={`flex ${isGrid ? "grid grid-cols-1 xl:grid-cols-2" : "flex flex-col"} gap-2 p-2`}>
-                        {items.map((item) => { 
+                        {items.map((item, index) => { 
                             const isPath = location.pathname.includes(item.path);
+                            const isLastOdd = isGrid && items.length % 2 !== 0 &&  index === items.length - 1;
 
                             if (item.isWip) {
                                 {/* WIP Item */}
@@ -43,7 +44,7 @@ const ButtonsDroplist = (props: ButtonsDroplistProps) => {
                                         key={item.path}
                                         className={`relative flex w-full items-center text-white/40 max-xxs:text-[14px] xxs:text-[14px] xs:text-[14px] sm:text-base rounded-xl h-15 sm:h-17 px-2 sm:px-4 gap-4 sm:gap-4 
                                         hover:bg-neon-pink/20 cursor-default select-none ${dropdownClassName || ""}
-                                        ${isPath ? "bg-white/10" : ""}`}>
+                                        ${isPath ? "bg-white/10" : ""} ${isLastOdd ? "xl:col-span-2 justify-center" : ""}`}>
                                             {item.icon && <img src={item.icon} alt={`${item.label} icon`} className="grayscale w-9 h-9 sm:w-10 sm:h-10" />}
                                             <span className="italic">{item.label}</span>
                                         </div>
@@ -56,7 +57,7 @@ const ButtonsDroplist = (props: ButtonsDroplistProps) => {
                                     to={item.path}
                                     className={`relative flex w-full items-center text-white max-xxs:text-[14px] xxs:text-base xs:text-base xm:text-lg 2xl:text-xl rounded-xl h-15 sm:h-17 px-4 gap-2 hover:bg-neon-pink/80 
                                     transition-[flex,background-color,transform]  ${dropdownClassName || ""} 
-                                    ${isPath ? "bg-white/10" : ""}`}
+                                    ${isPath ? "bg-white/10" : ""} ${isLastOdd ? "xl:col-span-2 justify-center" : ""}`}
                                     onClick={() => setIsOpen(false)}
                                     >
                                     {item.icon && <img src={item.icon} alt={`${item.label} icon`} className="w-8 h-8 sm:w-10 sm:h-10" />}

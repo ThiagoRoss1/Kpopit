@@ -34,6 +34,13 @@ interface VictoryCardBigProps {
 const VictoryCardBig = (props: VictoryCardBigProps) => {
     const { cardInfo, idolActiveGroup, attempts, yesterdayIdolId, yesterdayIdol, yesterdayIdolGroup, yesterdayIdolImage, yesterdayIdolImageVersion, userPosition, userRank, userScore, nextReset, onShareClick, otherGameModes } = props;
 
+    const ordinal = (n: number | null | undefined) => {
+        if (n === null || n === undefined) return "...";
+        const s = ["th", "st", "nd", "rd"];
+        const v = n % 100;
+        return `${n}${s[(v - 20) % 10] || s[v] || s[0]}`;
+    };
+
     const activeGroup = idolActiveGroup && idolActiveGroup.length > 0 ? idolActiveGroup.join(", ") : "Soloist";
     const yesterdayGroup = yesterdayIdolGroup && yesterdayIdolGroup.length > 0 ? yesterdayIdolGroup.join(", ") : "Soloist";
     const yesterdayImageVersion = yesterdayIdolImageVersion ? `?v=${yesterdayIdolImageVersion}` : "";
@@ -73,7 +80,7 @@ return (
 
                 <span className="max-xxs:text-[14px] xxs:text-[14px] xs:text-base sm:text-[18px] mt-2 text-center">
                     You were the <span className="font-bold bg-linear-to-r from-[#db3189] via-[#e44d86] to-[#ec5e65] text-transparent bg-clip-text brightness-110">
-                        {userPosition !== null ? `${userPosition}${userPosition === 1 ? "st" : userPosition === 2 ? "nd" : userPosition === 3 ? "rd" : "th"}` : "..."}
+                        {ordinal(userPosition)}
                     </span> fan to guess correctly!
                 </span>
             </div>
@@ -178,7 +185,7 @@ return (
                 <span className="text-[14px] sm:text-base drop-shadow-2xl">Other Game Modes</span>
                 
                 <div className="relative flex w-full h-fit sm:h-fit items-center justify-start text-center px-3.5 bg-transparent 
-                border border-white/60 rounded-xl transition-all duration-300">
+                border border-white/60 rounded-xl transition-all duration-300 gap-2">
                         {otherGameModes && otherGameModes.length > 0 ? (
                             otherGameModes.map((mode) => (
                                 <Link key={mode.id} to={mode.path}>

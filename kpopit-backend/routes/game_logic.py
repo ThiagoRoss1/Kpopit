@@ -82,3 +82,63 @@ def store_yesterdays_idol():
         cursor.close()    
         return jsonify({"message": "First day - no yesterday pick to store"})
     
+@game_logic_bp.route("/store-yesterdays-album")
+def store_yesterdays_album():
+    """Store yesterday's album pick in the database"""
+    print(f"Gamemode id {g.gamemode_id}")
+    
+    # Start db connection
+    connect = get_db()
+    cursor = connect.cursor()
+
+    # Gey yesterday's date
+    yesterday = get_today_date() - timedelta(days=1)
+    yesterday_str = yesterday.isoformat()
+
+    # Get album id for yesterday
+    select_sql = """
+        SELECT album_id FROM daily_picks WHERE pick_date = %s AND gamemode_id = %s
+    """
+    cursor.execute(select_sql, (yesterday_str, g.gamemode_id,))
+    result = cursor.fetchone()
+
+    if result and result["album_id"]:
+        # Insert or Update yesterday's pick
+        insert_sql = """
+            INSERT INTO yesterday_picks (past_album_id, yesterdays_pick_date, gamemode_id)
+            VALUES (%s, %s, %s)
+            ON CONFLICT(yesterdays_pick_date, gamemode_id)
+            DO UPDATE SET past_album_id = excluded.past_album_id
+        """
+        cursor.execute(insert_sql, (result["album_id"], yesterday_str, g.gamemode_id))
+
+        connect.commit()
+    
+        # Fetch album infos
+        album_sql = """
+            SELECT a.name AS album_name, a.cover_path, g.name AS group_name, i.artist_name
+            FROM albums AS a
+            LEFT JOIN groups AS g ON a.group_id = g.id
+            LEFT JOIN idols AS i ON a.soloist_id = i.id
+            WHERE a.id = %s
+        """
+        cursor.execute(album_sql, (result["album_id"],))
+
+        album_result = cursor.fetchone()
+        album_name = album_result["album_name"] if album_result else None
+        cover_path = album_result["cover_path"] if album_result else None
+        artist = album_result["group_name"] if album_result and album_result["group_name"] else album_result["artist_name"] if album_result else None
+
+
+        return jsonify({
+            "past_album_id": result["album_id"], 
+            "yesterdays_pick_date": yesterday_str,
+            "album_name": album_name,
+            "cover_path": cover_path,
+            "artist": artist
+        })
+
+    else:  
+        cursor.close()    
+        return jsonify({"message": "First day - no yesterday pick to store"})
+    

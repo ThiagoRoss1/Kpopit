@@ -103,6 +103,25 @@ class AlbumService:
         )
         row = cursor.fetchone()
         return dict(row) if row else None
+    
+    def get_album_by_id(self, cursor, album_id: int) -> dict | None:
+        """Fetch album by ID"""
+        cursor.execute(
+            """
+                SELECT a.id AS album_id,
+                    a.cover_path,
+                    a.palette,
+                    a.type,
+                    a.release_year,
+                COALESCE(i.artist_name, g.name) AS group_name
+                FROM albums a
+                LEFT JOIN idols i ON i.id = a.soloist_id
+                LEFT JOIN groups g ON g.id = a.group_id
+                WHERE a.id = %s
+            """, (album_id,)
+        )
+        row = cursor.fetchone()
+        return dict(row) if row else None
 
     def process_guess(
         self,

@@ -100,6 +100,14 @@ export interface YesterdayIdol {
   image_version: string;
 }
 
+export interface YesterdayAlbum {
+  past_album_id: number;
+  yesterdays_pick_date: string;
+  album_name: string;
+  cover_path: string;
+  artist: string;
+}
+
 export interface ResetTimer {
   hours: number;
   minutes: number;

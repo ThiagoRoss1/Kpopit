@@ -21,6 +21,9 @@ def get_daily_pixelated_album():
         connect.commit()
 
         album = service.get_daily_album(cursor, gamemode_id=3)
+        # For testing - Force a specific album of the day
+        # album = service.get_album_by_id(cursor, album_id=1)
+
         if not album:
             return jsonify({"error": "No album available for today"}), 404
 
