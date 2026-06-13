@@ -88,7 +88,7 @@ def guess_pixelated_album():
         return jsonify(result), 200
     except Exception as exc:
         print(f"[pixelated] guess error: {exc}")
-        return jsonify({"error": str(exc)}), 500
+        return jsonify({"error": "Internal server error"}), 500
     finally:
         cursor.close()
 

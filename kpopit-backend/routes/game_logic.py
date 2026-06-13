@@ -26,7 +26,7 @@ def store_yesterdays_idol():
     cursor.execute(select_sql, (yesterday_str, g.gamemode_id,))
     result = cursor.fetchone()
 
-    if result:
+    if result and result["idol_id"]:
         # Insert or Update yesterday's pick
         insert_sql = """
             INSERT INTO yesterday_picks (past_idol_id, yesterdays_pick_date, gamemode_id)
@@ -129,9 +129,10 @@ def store_yesterdays_album():
         cover_path = album_result["cover_path"] if album_result else None
         artist = album_result["group_name"] if album_result and album_result["group_name"] else album_result["artist_name"] if album_result else None
 
+        cursor.close()
 
         return jsonify({
-            "past_album_id": result["album_id"], 
+            "past_album_id": result["album_id"],
             "yesterdays_pick_date": yesterday_str,
             "album_name": album_name,
             "cover_path": cover_path,
