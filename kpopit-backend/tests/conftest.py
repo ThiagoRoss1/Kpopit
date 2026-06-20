@@ -208,3 +208,73 @@ def set_daily_pick(db_conn, today):
         db_conn.commit()
 
     return _set
+
+
+@pytest.fixture
+def set_yesterday_album_pick(db_conn):
+    """Pin YESTERDAY's album pick for a gamemode (store-yesterdays-* tests)."""
+    from datetime import timedelta
+
+    from utils.dates import get_today_date
+
+    yesterday = (get_today_date() - timedelta(days=1)).isoformat()
+
+    def _set(album_id: int, gamemode_id: int = 3):
+        with db_conn.cursor() as cur:
+            cur.execute(
+                """
+                INSERT INTO daily_picks (pick_date, album_id, gamemode_id)
+                VALUES (%s, %s, %s)
+                ON CONFLICT (pick_date, gamemode_id) DO UPDATE SET album_id = EXCLUDED.album_id
+                """,
+                (yesterday, album_id, gamemode_id),
+            )
+        db_conn.commit()
+        return yesterday
+
+    return _set
+
+
+@pytest.fixture
+def make_soloist_album(db_conn):
+    """Insert a soloist album and return (album_id, artist_name).
+
+    The `albums_soloist_check` constraint requires `group_id = 20 AND
+    soloist_id IS NOT NULL`, so this forces a `groups` row with id=20 and
+    attaches a real `idols` row as the soloist. Exercises the
+    COALESCE(artist_name, group_name) branch.
+    """
+
+    def _make(name: str, cover_path: str = "/covers/solo.jpg", artist_name: str = "Solo Star") -> tuple[int, str]:
+        with db_conn.cursor() as cur:
+            # The soloist group must be id 20 to satisfy albums_soloist_check.
+            cur.execute(
+                """
+                INSERT INTO groups (id, name, group_debut_year, member_count, generation, fandom_name, is_published)
+                VALUES (20, %s, 2020, 1, 4, 'SoloFans', TRUE)
+                ON CONFLICT (id) DO NOTHING
+                """,
+                ("Soloists",),
+            )
+            cur.execute(
+                """
+                INSERT INTO idols (artist_name, gender, nationality)
+                VALUES (%s, 'F', 'South Korea')
+                RETURNING id
+                """,
+                (artist_name,),
+            )
+            soloist_id = cur.fetchone()["id"]
+            cur.execute(
+                """
+                INSERT INTO albums (name, group_id, soloist_id, type, release_year, cover_path, is_published)
+                VALUES (%s, 20, %s, 'Studio Album', 2020, %s, TRUE)
+                RETURNING id
+                """,
+                (name, soloist_id, cover_path),
+            )
+            aid = cur.fetchone()["id"]
+        db_conn.commit()
+        return aid, artist_name
+
+    return _make
