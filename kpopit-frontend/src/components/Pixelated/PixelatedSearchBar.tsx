@@ -96,8 +96,8 @@ const PixelatedSearchBar = (props: PixelatedSearchBarProps) => {
   };
 
   return (
-    <div ref={containerRef} className="relative w-full rounded-2xl">
-      <div className="relative w-full xl:h-16 flex items-center rounded-3xl bg-neon-pink/5 border border-white
+    <div ref={containerRef} className="relative z-30 w-full rounded-2xl">
+      <div className="relative w-full xl:h-16 flex items-center rounded-3xl bg-neon-pink/5 border border-white backdrop-blur-lg
         shadow-[0_8px_24px_rgba(0,0,0,0.2),0_2px_6px_rgba(0,0,0,0.2)]">
         <form
           className="w-full p-2"
@@ -152,7 +152,7 @@ const PixelatedSearchBar = (props: PixelatedSearchBarProps) => {
                         <img
                           src={albumCoverUrl(album.cover_path)}
                           alt=""
-                          className="w-12 h-12 object-cover rounded-full border-2 border-ink shrink-0"
+                          className="w-12 h-12 object-cover rounded-full border-2 border-ink shrink-0 grayscale"
                           loading="eager"
                           draggable={false}
                         />

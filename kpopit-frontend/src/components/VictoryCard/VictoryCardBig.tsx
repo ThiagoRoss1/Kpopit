@@ -190,10 +190,10 @@ return (
                             otherGameModes.map((mode) => (
                                 <Link key={mode.id} to={mode.path}>
                                     <div 
-                                        className={`flex w-16 h-16 mt-2 mb-2 rounded-2xl items-center justify-center 
-                                    text-center border border-r-4 border-b-4 border-white/30
-                                    hover:scale-105 hover:cursor-pointer active:scale-95 ease-[cubic-bezier(0.34,1.56,0.64,1)] transition-all duration-500 transform-gpu
-                                    ${mode.won ? "opacity-50" : "opacity-100"}`}
+                                        className={`flex w-20 h-16 mt-2 mb-2 rounded-2xl items-center justify-center 
+                                        text-center border border-r-4 border-b-4 border-white/30
+                                        hover:scale-105 hover:cursor-pointer active:scale-95 ease-[cubic-bezier(0.34,1.56,0.64,1)] transition-all duration-500 transform-gpu
+                                        ${mode.won ? "opacity-50" : "opacity-100"}`}
                                     >
                                         <img
                                             src="/kpopit-icon-svg.svg"

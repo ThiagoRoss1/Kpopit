@@ -5,7 +5,7 @@ import { useState } from "react";
 import { AnimatePresence, motion } from "motion/react";
 import GlassSurface from "../GlassSurface";
 import trophyIcon from "../../assets/icons/trophy.svg";
-import TwitterLogo from "../../assets/icons/twitter.svg";
+import XLogo from "../../assets/icons/x-logo-small-victory.svg";
 import { X, Download } from 'lucide-react';
 
 interface VictoryCardSmallProps<T = FeedbackData> {
@@ -246,7 +246,7 @@ const VictoryCardSmall = <T = FeedbackData, >(props: VictoryCardSmallProps<T>) =
                                 hover:scale-110 hover:brightness-110 hover:cursor-pointer hover:rotate-3 hover:bg-black transform duration-300 transform-gpu`}
                                 onClick={() => shareOnTwitter(attempts, stats, userRank, userScore)}>
                                     <div className="flex w-full h-full items-center justify-center text-center brightness-100 hover:brightness-110 transform duration-300">
-                                        <img src={TwitterLogo} alt="Twt" className="w-8 h-8 sm:w-9 sm:h-9" draggable={false} />
+                                        <img src={XLogo} alt="X" className="w-8 h-8 sm:w-9 sm:h-9" draggable={false} />
                                     </div>
                                 </button>
 
@@ -322,7 +322,7 @@ return (
             {content}   
         </GlassSurface>
     ) : (
-        <div className="relative flex flex-col w-full h-fit bg-gray-900 rounded-[50px] border border-white">
+        <div className="relative flex flex-col w-full h-fit bg-gray-900 rounded-[50px] border border-white max-xs:mt-10 xs:mt-0">
             {content}
         </div>
     )}

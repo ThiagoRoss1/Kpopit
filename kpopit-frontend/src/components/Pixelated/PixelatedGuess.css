@@ -1,0 +1,72 @@
+.pixel-fabric {
+    position: absolute;
+    width: 34px;
+    height: 34px;
+    border-radius: 6px;
+    z-index: 3;
+    background:
+        repeating-linear-gradient(90deg, rgba(255,255,255,0.22) 0 1px, transparent 1px 3px),
+        repeating-linear-gradient(0deg, rgba(0,0,0,0.16) 0 1px, transparent 1px 3px),
+        radial-gradient(ellipse at 35% 28%, #ffa9ce 0%, #ff5ea3 50%, #e93b85 100%);
+    box-shadow:
+        inset 0 1px 0 rgba(255,255,255,0.55), inset 0 -1px 0 rgba(0,0,0,0.22),
+        inset 0 0 6px rgba(0,0,0,0.10), 0 1px 1px rgba(0,0,0,0.10),
+        0 4px 7px rgba(0,0,0,0.22), 0 8px 14px rgba(0,0,0,0.10);
+}
+.pixel-cluster { position: relative; width: 38px; height: 32px; flex-shrink: 0; }
+.pixel-cluster i { position: absolute; width: 11px; height: 11px; box-shadow: 0 1px 2px rgba(0, 0, 0, 0.25); }
+.pixel-cluster i:nth-child(1) { left: 0;  top: 4px;  transform: rotate(6deg); }
+.pixel-cluster i:nth-child(2) { left: 10px; top: 0;   transform: rotate(-8deg); }
+.pixel-cluster i:nth-child(3) { left: 22px; top: 7px; transform: rotate(4deg); }
+.pixel-cluster i:nth-child(4) { left: 14px; top: 17px; transform: rotate(-5deg); }
+.pixel-cluster--ok i { background: #4FFFB0; border: 1.5px solid #15803d; }
+.pixel-cluster--no i { background: #FD5C63; border: 1.5px solid #b91c1c; }
+
+/* Guess-row enter + reveal animations */
+@keyframes pixelGuessEnter {
+    from { opacity: 0; transform: translateY(-8px) scale(0.98); }
+    to { opacity: 1; transform: translateY(0) scale(1); }
+}
+
+.pixel-guess-enter { animation: pixelGuessEnter 0.4s ease-out forwards; }
+
+.pixel-guess-enter .pixel-cluster i {
+    opacity: 0;
+    scale: 0;
+    animation: pixelDotPop 0.3s cubic-bezier(0.34, 1.56, 0.64, 1) forwards;
+}
+.pixel-guess-enter .pixel-cluster i:nth-child(1) { animation-delay: 0.15s; }
+.pixel-guess-enter .pixel-cluster i:nth-child(2) { animation-delay: 0.35s; }
+.pixel-guess-enter .pixel-cluster i:nth-child(3) { animation-delay: 0.55s; }
+.pixel-guess-enter .pixel-cluster i:nth-child(4) { animation-delay: 0.75s; }
+
+.pixel-guess-enter .pixel-row--correct {
+    background-color: transparent;
+    animation: guessRowCorrect 1s ease-out 1s forwards;
+}
+.pixel-guess-enter .pixel-row--incorrect {
+    background-color: transparent;
+    animation: guessRowIncorrect 1s ease-out 1s forwards;
+}
+
+@keyframes pixelDotPop {
+    0%   { opacity: 0; scale: 0; }
+    65%  { opacity: 1; scale: 1.28; }
+    100% { opacity: 1; scale: 1; }
+}
+
+@keyframes guessRowCorrect {
+    from { background-color: transparent; }
+    to   { background-color: rgba(79, 255, 176, 1); }
+}
+@keyframes guessRowIncorrect {
+    from { background-color: transparent; }
+    to   { background-color: rgba(253, 92, 99, 1); }
+}
+
+.pixel-row--correct  { background-color: rgba(79, 255, 176, 1); }
+.pixel-row--incorrect { background-color: rgba(253, 92, 99, 1); }
+
+@media (prefers-reduced-motion: reduce) {
+    .pixel-guess-enter { animation: none; }
+}

@@ -1,10 +1,12 @@
 import { useState, useEffect, useRef } from "react";
+import "./PixelatedVictory.css";
 import { albumCoverUrl } from "../../utils/imageUrl";
 import type { YesterdayAlbum } from "../../interfaces/gameInterfaces";
 import { OtherGamemodes } from "../OtherGamemodes/OtherGamemodes";
 import TargetAttempt from "../../assets/icons/target.svg";
 import RankPosition from "../../assets/icons/ranking-fill.svg";
 import PositionTrend from "../../assets/icons/trending-up.svg";
+import Xlogo from "../../assets/icons/x-logo.svg";
 
 interface  GameMode {
     id: string;
@@ -28,7 +30,9 @@ interface PixelatedVictoryProps {
     otherGamemodes?: GameMode[];
 }
 
-const PixelatedVictory = ({albumName, groupName, coverPath, yesterdayAlbum, yesterdayAlbumCover, yesterdayAlbumArtist, attempts, position, score, rank, otherGamemodes}: PixelatedVictoryProps) => {
+const PixelatedVictory = (props: PixelatedVictoryProps) => {
+    const { albumName, groupName, coverPath, yesterdayAlbum, yesterdayAlbumCover, yesterdayAlbumArtist, attempts, position, score, rank, otherGamemodes } = props;
+    
     const [copied, setCopied] = useState<boolean>(false);
     const coverUrl = albumCoverUrl(coverPath);
     const yesterdayCoverUrl = yesterdayAlbumCover ? albumCoverUrl(yesterdayAlbumCover) : null;
@@ -48,11 +52,36 @@ const PixelatedVictory = ({albumName, groupName, coverPath, yesterdayAlbum, yest
         return () => clearTimeout(timer);
     }, []);
 
-    const handleShare = () => {
+    const textToCopy = (attempts: number) => {
         const header = `I guessed today's #KpopIt Pixelated album in ${attempts} ${attempts === 1 ? "attempt" : "attempts"}! 🎶\n\n`;
-        navigator.clipboard.writeText(`${header}\n\n${window.location.href}`);
+        const siteLink = `\n\n${window.location.href}`;
+
+        return header + siteLink;
+    }
+    
+    const handleCopy = (attempts: number) => {
+        navigator.clipboard.writeText(textToCopy(attempts));
         setCopied(true);
         setTimeout(() => setCopied(false), 1500);
+    };
+
+    const handleShare = (attempts: number) => {
+        const text = encodeURIComponent(textToCopy(attempts));
+        const twitterWebIntentUrl = `https://twitter.com/intent/tweet?text=${text}`;
+
+        const isMobile = /Android|iPhone|iPad|iPod/i.test(navigator.userAgent);
+        if (isMobile) {
+            const twitterAppUrl = `twitter://post?message=${text}`;
+            const now = Date.now();
+            window.location.href = twitterAppUrl;
+            setTimeout(() => {
+                if (Date.now() - now < 1000) {
+                    window.open(twitterWebIntentUrl, '_blank', "noopener,noreferrer");
+                }
+            }, 800);
+        } else {
+            window.open(twitterWebIntentUrl, "_blank", "noopener,noreferrer");
+        };
     };
 
     const fmt = (v: number | null | undefined) => (v === null || v === undefined ? "—" : String(v));
@@ -221,15 +250,28 @@ const PixelatedVictory = ({albumName, groupName, coverPath, yesterdayAlbum, yest
             </div>
 
             {/* Share */}
-            <div className="flex justify-center mt-6">
+            <div className="flex flex-row justify-center gap-2 mt-6">
                 <button
                     type="button"
-                    onClick={handleShare}
+                    onClick={() => handleCopy(attempts)}
                     className="kp-tilt-l flex justify-center items-center text-center gap-2 w-45 sm:w-50 h-12 px-7 rounded-full font-bold text-base text-white
                     bg-neon-pink border-2 border-ink shadow-[0_5px_0_var(--color-ink)] transition-all duration-200 transform-gpu
-                    hover:brightness-110 hover:cursor-pointer active:translate-y-1 active:shadow-[0_1px_0_var(--color-ink)]"
+                    hover:scale-101 hover:brightness-110 hover:cursor-pointer active:translate-y-1 active:shadow-[0_1px_0_var(--color-ink)]"
                 >
                     ⤳ {copied ? "Copied!" : "Share Results"}
+                </button>
+
+                <button 
+                    onClick={() => handleShare(attempts)}
+                    className="kp-tilt-r flex justify-center items-center text-center gap-2 w-12 h-12 rounded-full 
+                    bg-neon-pink border-2 border-ink shadow-[0_5px_0_var(--color-ink)] transition-all duration-200 transform-gpu
+                    hover:scale-101 hover:brightness-110 hover:cursor-pointer active:translate-y-1 active:shadow-[0_1px_0_var(--color-ink)]"
+                >
+                    <img 
+                        src={Xlogo} 
+                        alt="X" 
+                        className="w-8 h-8 object-cover" 
+                        draggable={false} />
                 </button>
             </div>
         </div>

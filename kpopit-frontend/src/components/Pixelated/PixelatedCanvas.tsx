@@ -1,22 +1,29 @@
-import { useCallback, useEffect, useRef } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import { blockSizeToGrid } from "../../utils/pixelLevels";
 
 interface PixelatedCanvasProps {
     imageUrl: string;
     blockSize: number;
+    saturationLevel?: number;
     alt?: string;
     className?: string;
 }
 
-const PixelatedCanvas = ({ imageUrl, blockSize, alt, className }: PixelatedCanvasProps) => {
+const PixelatedCanvas = ({ imageUrl, blockSize, saturationLevel, alt, className }: PixelatedCanvasProps) => {
     const canvasRef = useRef<HTMLCanvasElement>(null);
     const offscreenRef = useRef<HTMLCanvasElement | null>(null);
     const imgRef = useRef<HTMLImageElement | null>(null);
     const loadedRef = useRef<boolean>(false);
 
+    const [loadFailed, setLoadFailed] = useState<boolean>(false);
+    const [retryCount, setRetryCount] = useState<number>(0);
+
     // Read the latest blockSize inside render() without re-creating render().
     const blockSizeRef = useRef<number>(blockSize);
     blockSizeRef.current = blockSize;
+
+    const saturationRef = useRef<number>(saturationLevel);
+    saturationRef.current = saturationLevel;
 
     const render = useCallback(() => {
         const canvas = canvasRef.current;
@@ -31,6 +38,7 @@ const PixelatedCanvas = ({ imageUrl, blockSize, alt, className }: PixelatedCanva
         if (!ctx) return;
 
         const bs = blockSizeRef.current;
+        const saturation = saturationRef.current;
 
         // Mosaic resolution comes from a FIXED reference (see pixelLevels.ts),
         // never the device backing store, so a given attempt looks the same on
@@ -45,6 +53,7 @@ const PixelatedCanvas = ({ imageUrl, blockSize, alt, className }: PixelatedCanva
         if (bs <= 1 || grid >= Math.min(w, h)) {
             ctx.imageSmoothingEnabled = true;
             ctx.imageSmoothingQuality = "high";
+            ctx.filter = saturation ? `saturate(${saturation}%)` : "";
             ctx.drawImage(img, 0, 0, w, h);
             return;
         }
@@ -60,6 +69,7 @@ const PixelatedCanvas = ({ imageUrl, blockSize, alt, className }: PixelatedCanva
         off.height = grid;
         octx.imageSmoothingEnabled = true;
         octx.imageSmoothingQuality = "high";
+        octx.filter = saturation ? `saturate(${saturation}%)` : "";
         octx.drawImage(img, 0, 0, grid, grid);
 
         // Pass 2 — upscale that tiny image to the full canvas with smoothing OFF
@@ -86,9 +96,9 @@ const PixelatedCanvas = ({ imageUrl, blockSize, alt, className }: PixelatedCanva
         render();
     }, [render]);
 
-    // (Re)load the source image whenever the URL changes.
     useEffect(() => {
         loadedRef.current = false;
+        setLoadFailed(false);
         const img = new Image();
         imgRef.current = img;
 
@@ -96,34 +106,63 @@ const PixelatedCanvas = ({ imageUrl, blockSize, alt, className }: PixelatedCanva
             loadedRef.current = true;
             sizeAndRender();
         };
+        const handleError = () => setLoadFailed(true);
 
         img.addEventListener("load", handleLoad);
+        img.addEventListener("error", handleError);
         img.src = imageUrl;
         if (img.complete && img.naturalWidth > 0) handleLoad();
 
-        return () => img.removeEventListener("load", handleLoad);
-    }, [imageUrl, sizeAndRender]);
+        return () => {
+            img.removeEventListener("load", handleLoad);
+            img.removeEventListener("error", handleError);
+        };
+    }, [imageUrl, sizeAndRender, retryCount]);
 
-    // Keep the backing store in sync with the element's rendered size.
     useEffect(() => {
         const canvas = canvasRef.current;
         if (!canvas) return;
         const observer = new ResizeObserver(() => sizeAndRender());
         observer.observe(canvas);
         return () => observer.disconnect();
-    }, [sizeAndRender]);
+    }, [sizeAndRender, loadFailed]);
 
-    // Re-render when the pixelation level changes.
     useEffect(() => {
         render();
-    }, [blockSize, render]);
+    }, [blockSize, saturationLevel, render]);
+
+    if (loadFailed) {
+        return (
+            <div
+                role="img"
+                aria-label={alt}
+                className={`${className ?? ""} flex flex-col items-center justify-center gap-3 bg-ink/10 text-ink/70`}
+            >
+                <span className="text-sm font-bold">Cover failed to load</span>
+                <button
+                    type="button"
+                    onClick={() => {
+                        setLoadFailed(false);
+                        setRetryCount((c) => c + 1);
+                    }}
+                    className="px-4 py-1.5 rounded-full font-bold text-sm text-white bg-neon-pink border-2 border-ink
+                    shadow-[0_3px_0_var(--color-ink)] transition-all duration-150
+                    hover:brightness-110 hover:cursor-pointer active:translate-y-1 active:shadow-[0_1px_0_var(--color-ink)]"
+                >
+                    Retry
+                </button>
+            </div>
+        );
+    }
 
     return (
         <canvas
             ref={canvasRef}
             role="img"
             aria-label={alt}
-            className={className}
+            draggable={false}
+            onContextMenu={(e) => e.preventDefault()}
+            className={`${className ?? ""} pointer-events-none select-none`}
         />
     );
 };

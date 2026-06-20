@@ -48,8 +48,8 @@ function Home() {
                         onSubmitAbout={() => {setShowModal("about")}}
                     />
 
-                    {showModal === "changelog" && <Modal isOpen onClose={() => setShowModal(null)} title="Changelog..." isAboutOrChangelog={true}><ChangelogText /></Modal>}
-                    {showModal === "about" && <Modal isOpen onClose={() => setShowModal(null)} title="About..." isAboutOrChangelog={true}><AboutText /></Modal>}
+                    {showModal === "changelog" && <Modal isOpen onClose={() => setShowModal(null)} title="Changelog..."><ChangelogText /></Modal>}
+                    {showModal === "about" && <Modal isOpen onClose={() => setShowModal(null)} title="About..."><AboutText /></Modal>}
 
                 </div>
 

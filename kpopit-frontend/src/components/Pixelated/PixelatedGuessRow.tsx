@@ -1,4 +1,5 @@
 import React, { useState, useEffect, useCallback } from "react";
+import "./PixelatedGuess.css";
 import type { PixelatedGuessDetail } from "../../interfaces/gameInterfaces";
 import { albumCoverUrl } from "../../utils/imageUrl";
 

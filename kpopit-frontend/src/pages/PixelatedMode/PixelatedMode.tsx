@@ -14,7 +14,7 @@ import PixelatedCanvas from "../../components/Pixelated/PixelatedCanvas";
 import PixelatedGuessGrid from "../../components/Pixelated/PixelatedGuessGrid";
 import PixelatedHints from "../../components/Pixelated/PixelatedHints";
 import PixelatedVictory from "../../components/Pixelated/PixelatedVictory";
-import GetPixelLevel, { PIXEL_LEVELS } from "../../utils/pixelLevels";
+import {GetPixelLevel, GetSaturationLevel, PIXEL_LEVELS, SATURATION_LEVELS} from "../../utils/pixelLevels";
 import { WinnerExplosion } from "../../utils/confetti";
 import { useClearGameStorage } from "../../hooks/useClearGameStorage";
 import { safeReload } from "../../utils/safeReload";
@@ -26,8 +26,10 @@ import StatsText from "../../components/buttons/modals/StatsContent";
 import TransferDataText from "../../components/buttons/modals/TransferDataContent";
 import ImportDataText from "../../components/buttons/modals/ImportDataContent";
 import ExportDataText from "../../components/buttons/modals/ExportDataContent";
+import { Link } from "react-router-dom";
 
-const REVEAL_LEVEL = PIXEL_LEVELS[PIXEL_LEVELS.length - 1]; // 1 = clear cover
+const REVEAL_LEVEL = PIXEL_LEVELS[PIXEL_LEVELS.length - 1];
+const REVEAL_SATURATION = SATURATION_LEVELS[SATURATION_LEVELS.length - 1];
 
 function PixelatedMode() {
     const gameMode = useGameMode();
@@ -42,6 +44,7 @@ function PixelatedMode() {
     const [attempts, setAttempts] = useState<number>(0);
     const [sessionRestored, setSessionRestored] = useState<number>(0);
     const [showModal, setShowModal] = useState<null | "stats" | "transfer-data" | "import-data" | "export-data">(null);
+    const [isTouched, setIsTouched] = useState<boolean>(false);
 
     const { initUser, decryptedTokenRef, isInitialized, queryClient, userStatsData, transferData } = useSharedGameData();
     const { clearPixelated } = useClearGameStorage();
@@ -219,14 +222,13 @@ function PixelatedMode() {
             guess_correct: guessCorrect,
         };
 
-        setGuesses((prev) => {
-            const updatedGuesses = [...prev, localGuessResult];
-            localStorage.setItem("pixelatedGuessesDetails", JSON.stringify(updatedGuesses));
-            localStorage.setItem("pixelatedGuessedAlbums", JSON.stringify(updatedGuesses.map((g) => g.album_name)));
-            localStorage.setItem("pixelatedGameComplete", guessCorrect ? "true" : "false");
-            localStorage.setItem("pixelatedGameWon", guessCorrect ? "true" : "false");
-            return updatedGuesses;
-        });
+        const updatedGuesses = [...guesses, localGuessResult];
+        setGuesses(updatedGuesses);
+
+        localStorage.setItem("pixelatedGuessesDetails", JSON.stringify(updatedGuesses));
+        localStorage.setItem("pixelatedGuessedAlbums", JSON.stringify(updatedGuesses.map((g) => g.album_name)));
+        localStorage.setItem("pixelatedGameComplete", guessCorrect ? "true" : "false");
+        localStorage.setItem("pixelatedGameWon", guessCorrect ? "true" : "false");
 
         const encrypted = localStorage.getItem("userToken") || "";
         const token = decryptedTokenRef.current || (await decryptToken(encrypted));
@@ -253,6 +255,7 @@ function PixelatedMode() {
 
     const excludedIds = guesses.map((g) => g.album_id);
     const blockSize = endGame ? REVEAL_LEVEL : GetPixelLevel(guesses.length);
+    const saturationLevel = endGame ? REVEAL_SATURATION : GetSaturationLevel(guesses.length);
     const userCount = dailyUserCount?.data?.user_count ?? 0;
     const winningGuess = guesses.find((g) => g.guess_correct);
 
@@ -284,12 +287,12 @@ function PixelatedMode() {
             type="button"
             onClick={() => setShowModal("stats")}
             aria-label="Your stats"
-            className="flex shrink-0 items-center justify-center w-11 h-11 sm:w-12 sm:h-12 rounded-xl bg-neon-pink border-2 border-ink text-white
-            shadow-[0_4px_0_var(--color-ink)] transition-all duration-150 transform-gpu
-            hover:brightness-110 hover:cursor-pointer active:translate-y-1 active:shadow-[0_1px_0_var(--color-ink)]
+            className="flex shrink-0 items-center justify-center w-11 h-11 sm:w-11 sm:h-11 rounded-2xl bg-neon-pink border-2 border-ink text-white
+            shadow-[0_4px_0_var(--color-ink)] transition-all duration-500 transform-gpu
+            hover:brightness-110 hover:cursor-pointer hover:scale-105 active:translate-y-1 active:shadow-[0_1px_0_var(--color-ink)]
             focus:outline-none focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ink"
         >
-            <BarChart3 className="w-5 h-5 sm:w-6 sm:h-6" strokeWidth={2.5} />
+            <BarChart3 className="w-5 h-5 sm:w-6 sm:h-6" />
         </button>
     );
 
@@ -313,13 +316,25 @@ function PixelatedMode() {
             </Helmet>
 
             <div className="pixelmode min-h-full w-full">
-                <div className="pixelmode__bg" />
+                <div className="pixelmode__bg" aria-hidden="true">
+                    <div className="pixelmode__margin" />
+                </div>
+
+                {/* Mobile zoom backdrop */}
+                {isTouched && (
+                    <div
+                        className="fixed inset-0 z-40 bg-black/60"
+                        onTouchEnd={() => setIsTouched(false)}
+                    />
+                )}
 
                 <div className={`mx-auto max-w-340 px-4 zm:px-6 sm:px-12 md:px-20 lg:px-10 ${isLg ? "py-10" : "py-4"}`}>
                     <div className={`flex flex-col lg:flex-row gap-4 lg:gap-10 ${isLg ? "items-start" : "items-center"}`}>
 
                         {!isLg && (
-                        <div className="flex flex-row items-center justify-center gap-3 mb-0">
+                        <Link 
+                            to="/"
+                            className="flex flex-row items-center justify-center gap-5 mb-0">
                             <h1 className="text-5xl font-bold text-neon-pink leading-tight">
                                 <span
                                     className="kpop-part"
@@ -337,13 +352,21 @@ function PixelatedMode() {
                             </h1>
 
                             {statsButton}
-                        </div>
+                        </Link>
                         )}
                         
                         {/* ── LEFT: album sleeve + vinyl + hints ── */}
                         <div className="flex flex-col w-full lg:w-1/2 xl:w-160">
-
-                                <div className="pixel-stage relative w-full h-70 xxs:h-75 xs:h-80 xm:h-85 zm:h-95 sm:h-100 md:h-110 xl:h-130 mx-auto select-none">
+                                <div
+                                    className={`pixel-stage relative w-full h-70 xxs:h-75 xs:h-80 xm:h-85 zm:h-95 sm:h-100 md:h-110 xl:h-130 mx-auto select-none
+                                    ${isTouched ? "scale-110 z-50" : "scale-100"} transition-transform duration-300 transform-gpu`}
+                                    onTouchEnd={(e) => {
+                                        if (window.matchMedia("(orientation: portrait)").matches) {
+                                            setIsTouched(!isTouched);
+                                            e.stopPropagation();
+                                        }
+                                    }}
+                                >
                                     {/* Vinyl disc */}
                                     <div 
                                         className="absolute flex left-1/2 -translate-x-[35%] xs:-translate-x-[30%] top-5 w-55 zm:-translate-x-[30%] 
@@ -351,7 +374,15 @@ function PixelatedMode() {
                                     >
                                         <div className="pixel-vinyl">
                                             <div className="pixel-vinyl__spin">
-                                                <div className="pixel-vinyl__label"><b>KpopIt</b><span>케이팝잇</span></div>
+                                                <div className="pixel-vinyl__label overflow-hidden">
+                                                    <PixelatedCanvas
+                                                        imageUrl={coverUrl}
+                                                        blockSize={blockSize}
+                                                        saturationLevel={saturationLevel}
+                                                        alt="Pixelated album cover"
+                                                        className="w-full h-full object-cover block rounded-full"
+                                                    />
+                                                </div>
                                             </div>
                                             <div className="pixel-vinyl__light" />
                                             <div className="pixel-vinyl__hole" />
@@ -360,8 +391,8 @@ function PixelatedMode() {
 
                                     {/* Sleeve */}
                                     <div
-                                        className="absolute flex z-2 bg-ink rotate-[-4deg] left-1/2 -translate-x-[55%] xs:-translate-x-[65%] top-[2%] w-55 h-65 xxs:w-60 xxs:h-70 xs:w-65 xs:h-75 xm:w-70 xm:h-80 zm:w-76 zm:h-88
-                                        shadow-[0_14px_30px_rgba(0,0,0,0.35),0_4px_10px_rgba(0,0,0,0.2)] rounded-2xl
+                                        className="absolute flex z-2 bg-ink border-2 border-cream -rotate-4 left-1/2 -translate-x-[55%] xs:-translate-x-[65%] top-[2%] w-55 h-65 xxs:w-60 xxs:h-70 xs:w-65 xs:h-75 xm:w-70 xm:h-80 zm:w-76 zm:h-86
+                                        shadow-[0_14px_30px_rgba(0,0,0,0.35),0_4px_10px_rgba(0,0,0,0.2)] rounded-2xl rounded-b-3xl
                                         sm:w-80 sm:h-90 md:-translate-x-[60%] md:w-90 md:h-100 lg:left-0 lg:translate-x-0 lg:w-90 lg:h-100 xl:w-110 xl:h-120"
                                     >
                                         <div className="relative flex items-center justify-center p-4 w-full h-fit">
@@ -373,6 +404,7 @@ function PixelatedMode() {
                                                 <PixelatedCanvas
                                                     imageUrl={coverUrl}
                                                     blockSize={blockSize}
+                                                    saturationLevel={saturationLevel}
                                                     alt="Pixelated album cover"
                                                     className="w-full h-full object-cover block"
                                                 />
@@ -390,7 +422,7 @@ function PixelatedMode() {
                                             </div>
                                         </div>
 
-                                        <div className="absolute left-0 right-0 bottom-6 z-3 text-center text-white text-2xl leading-none
+                                        <div className="absolute left-0 right-0 bottom-4 z-3 justify-center items-center text-center text-white text-xl xs:text-2xl leading-none
                                             tracking-[0.02em] font-['Caveat',cursive] [text-shadow:0_2px_8px_rgba(0,0,0,0.6)]">
                                             Guess the album
                                         </div>
@@ -413,24 +445,29 @@ function PixelatedMode() {
                         <div className="flex-1 min-w-0 w-full">
                             <div className="flex flex-col mb-1">
                                 {isLg && (
-                                <div className="flex flex-row items-center justify-center gap-3 mb-6">
-                                    <h1 className="text-5xl font-bold text-neon-pink leading-tight">
-                                        <span
-                                            className="kpop-part"
-                                            style={{ '--kpop-color': 'var(--color-neon-pink)' } as React.CSSProperties}
+                                    <div className="flex flex-row items-center justify-center gap-5 mb-6">
+                                        <Link 
+                                            to="/"
+                                            className="inline-block bg-transparent border-0 p-0 cursor-pointer hover:scale-105
+                                            transition-all duration-500 transform-gpu"
                                         >
-                                            Pixel
-                                        </span>
-                                        <span
-                                            className="it-part"
-                                            style={{ '--it-color': 'var(--color-cream)' } as React.CSSProperties}
-                                        >
-                                            It
-                                        </span>
-                                    </h1>
-
-                                    {statsButton}
-                                </div>
+                                            <h1 className="text-5xl font-bold text-neon-pink leading-tight">
+                                                <span
+                                                    className="kpop-part"
+                                                    style={{ '--kpop-color': 'var(--color-neon-pink)' } as React.CSSProperties}
+                                                >
+                                                    Pixel
+                                                </span>
+                                                <span
+                                                    className="it-part"
+                                                    style={{ '--it-color': 'var(--color-cream)' } as React.CSSProperties}
+                                                >
+                                                    It
+                                                </span>
+                                            </h1>
+                                        </Link>
+                                        {statsButton}
+                                    </div>
                                 )}
                                 
                                 {!endGame && (
@@ -472,10 +509,6 @@ function PixelatedMode() {
                                     onAnimationComplete={handleAnimationsComplete}
                                 />
                             )}
-
-                            <div className="mt-6 text-[11px] font-semibold uppercase tracking-[0.15em] text-ink/60 text-center lg:text-right">
-                                Can you guess today's album ? · new album daily at midnight EST ♡
-                            </div>
                         </div>
                     </div>
 
