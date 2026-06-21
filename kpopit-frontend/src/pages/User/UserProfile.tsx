@@ -188,7 +188,7 @@ const UserProfile = () => {
             </Helmet>
             
             {/* Background layer */}
-            <div className="profile-bg-glow fixed inset-0 -z-10 bg-[#0a0a0a] pointer-events-none" />
+            <div className="profile-bg-glow fixed inset-0 -z-10 bg-ink pointer-events-none" />
 
             <main className="relative w-full min-h-full flex justify-center items-start md:items-center py-8 transform-gpu">
                 <div className="w-full max-w-7xl px-4 sxs:px-5 sm:px-6 md:px-8 mt-20">

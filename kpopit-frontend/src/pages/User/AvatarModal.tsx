@@ -412,7 +412,7 @@ const AvatarModal = ({ isOpen, onClose, onBack, avatarUrl }: AvatarModalProps) =
                     </div>
                 ) : (
                     <div className="ep-field flex flex-col gap-5">
-                        <div className="ep-input relative h-12 rounded-xl overflow-hidden bg-[#0a0a0a]">
+                        <div className="ep-input relative h-12 rounded-xl overflow-hidden bg-ink">
                             <Search className="absolute left-3.5 top-1/2 w-4 h-4 -translate-y-1/2 text-neutral-500" />
                             
                             <input
@@ -420,7 +420,7 @@ const AvatarModal = ({ isOpen, onClose, onBack, avatarUrl }: AvatarModalProps) =
                                 value={idolSearch}
                                 onChange={(e) => setIdolSearch(e.target.value)}
                                 placeholder="Search for an idol or group..."
-                                className="w-full h-full pl-10 pr-4 bg-[#0a0a0a] text-sm font-bold text-white placeholder:text-neutral-600 focus:outline-none"
+                                className="w-full h-full pl-10 pr-4 bg-ink text-sm font-bold text-white placeholder:text-neutral-600 focus:outline-none"
                             />
                         </div>
                         

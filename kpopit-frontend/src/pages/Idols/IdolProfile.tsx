@@ -146,7 +146,7 @@ function IdolProfile() {
     const ogDescription = `Stats, profile and career info for ${artistName} of ${groupName}.`;
 
     return (
-        <div className="w-full min-h-full bg-[#0a0a0a]">
+        <div className="w-full min-h-full bg-ink">
             <Helmet>
                 <title>{idolTitle}</title>
                 <meta name="description" content={idolDescription} />
@@ -201,7 +201,7 @@ function IdolProfile() {
                         />
 
                         {/* Idol name and group */}
-                        <div className="absolute lg:top-115 bottom-0 left-0 bg-linear-to-t from-[#0a0a0a] via-[#0a0a0a]/60 to-transparent w-full">
+                        <div className="absolute lg:top-115 bottom-0 left-0 bg-linear-to-t from-ink via-ink/60 to-transparent w-full">
                             <div className="names-enter flex flex-col justify-center items-start w-full h-full px-4 py-5 xl:px-8 sm:py-5 gap-1.5 whitespace-nowrap">
                                 <div 
                                     className="names-enter px-2 bg-neon-pink rounded-2xl"
