@@ -178,8 +178,8 @@ def make_album(db_conn):
         with db_conn.cursor() as cur:
             cur.execute(
                 """
-                INSERT INTO albums (name, group_id, type, release_year, cover_path, is_published)
-                VALUES (%s, %s, 'Studio Album', 2020, %s, TRUE)
+                INSERT INTO albums (name, group_id, type, release_date, cover_path, is_published)
+                VALUES (%s, %s, 'Studio Album', '2020-01-01', %s, TRUE)
                 RETURNING id
                 """,
                 (name, group_id, cover_path),
@@ -267,8 +267,8 @@ def make_soloist_album(db_conn):
             soloist_id = cur.fetchone()["id"]
             cur.execute(
                 """
-                INSERT INTO albums (name, group_id, soloist_id, type, release_year, cover_path, is_published)
-                VALUES (%s, 20, %s, 'Studio Album', 2020, %s, TRUE)
+                INSERT INTO albums (name, group_id, soloist_id, type, release_date, cover_path, is_published)
+                VALUES (%s, 20, %s, 'Studio Album', '2020-01-01', %s, TRUE)
                 RETURNING id
                 """,
                 (name, soloist_id, cover_path),

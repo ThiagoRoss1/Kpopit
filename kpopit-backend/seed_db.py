@@ -163,7 +163,7 @@ def run_seed():
 
                 # Albums Table Seeding
                 albums_columns = [
-                    "id", "name", "group_id", "soloist_id", "type", "release_year", "cover_path", "palette", "is_published", "created_at"
+                    "id", "name", "group_id", "soloist_id", "type", "language", "release_date", "cover_path", "palette", "is_published", "created_at"
                 ]
                 seed_table(cursor, ALBUMS_CSV_FILE, 'albums', albums_columns)
 

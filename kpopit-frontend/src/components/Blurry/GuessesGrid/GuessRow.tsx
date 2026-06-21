@@ -27,10 +27,9 @@ const getStatusColor = (status: string) => {
 const GuessRow = (props: GuessRowProps) => {
     const { guess, isLatest, isAnimated, onIdolAnimated, onAnimationComplete } = props;
 
-    const [hasAnimated, setHasAnimated] = useState(isAnimated);
+    const [shouldAnimate] = useState(isLatest && !isAnimated);
 
     const idolId = guess.guessed_idol_data.idol_id;
-    const shouldAnimate = isLatest && !hasAnimated;
 
     const statusColorRgb = useMemo(() => {
         return getStatusColor(guess.guess_correct ? "correct" : "incorrect");
@@ -39,7 +38,6 @@ const GuessRow = (props: GuessRowProps) => {
     const handleAnimationEnd = useCallback(() => {
         if (shouldAnimate) {
             onIdolAnimated(idolId);
-            setHasAnimated(true);
         }
         onAnimationComplete?.();
     }, [shouldAnimate, onIdolAnimated, idolId, onAnimationComplete]);

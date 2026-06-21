@@ -67,6 +67,42 @@
 .pixel-row--correct  { background-color: rgba(79, 255, 176, 1); }
 .pixel-row--incorrect { background-color: rgba(253, 92, 99, 1); }
 
+@supports (-moz-appearance: none) {
+    .pixel-row--correct,
+    .pixel-row--incorrect {
+        box-shadow: none;
+        filter:
+            drop-shadow(0 4px 0 var(--color-ink))
+            drop-shadow(0 6px 12px rgba(0, 0, 0, 0.08));
+    }
+
+    .pixel-guess-enter .pixel-row--correct {
+        filter: none;
+        animation:
+            guessRowCorrect 1s ease-out 1s forwards,
+            pixelRowShadowIn 1s ease-out 1.4s forwards;
+    }
+    .pixel-guess-enter .pixel-row--incorrect {
+        filter: none;
+        animation:
+            guessRowIncorrect 1s ease-out 1s forwards,
+            pixelRowShadowIn 1s ease-out 1.4s forwards;
+    }
+}
+
+@keyframes pixelRowShadowIn {
+    from {
+        filter:
+            drop-shadow(0 4px 0 transparent)
+            drop-shadow(0 6px 12px transparent);
+    }
+    to {
+        filter:
+            drop-shadow(0 4px 0 var(--color-ink))
+            drop-shadow(0 6px 12px rgba(0, 0, 0, 0.08));
+    }
+}
+
 @media (prefers-reduced-motion: reduce) {
     .pixel-guess-enter { animation: none; }
 }

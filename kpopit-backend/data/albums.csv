@@ -1,12 +1,13 @@
-id,name,group_id,soloist_id,type,release_year,cover_path,palette,is_published,created_at
-1,Pureflow,1,,Studio Album,2020,/images/albums/image-1779577545820.jpg,,true,2020-01-01
-2,Midnight Memories,2,,Studio Album,2013,/images/albums/kirikoyoa.jpg,,true,2013-11-25
-3,Love Yourself: Tear,3,,Studio Album,2018,/images/albums/hydronbr.jpg,,true,2018-05-18
-4,The Album,4,,Studio Album,2020,/images/albums/leoper.jpg,,true,2020-11-12
-5,Red Flavor,5,,Single,2017,/images/albums/lyd.jpg,,true,2017-07-09
-6,Butter,6,,Single,2021,/images/albums/lyd.jpg,,true,2021-05-21
-7,Kill This Love,7,,Single,2019,/images/albums/lyd.jpg,,true,2019-04-05
-8,DDU-DU DDU-DU,7,,Single,2018,/images/albums/lyd.jpg,,true,2018-06-15
-9,How You Like That,7,,Single,2020,/images/albums/lyd.jpg,,true,2020-06-26
-10,Ice Cream,7,,Single,2020,/images/albums/lyd.jpg,,true,2020-08-28
-
+id,name,group_id,soloist_id,type,language,release_date,cover_path,palette,is_published,created_at
+1,FEARLESS,1,,Mini Album,Korean,2022-05-02,/images/albums/fearless.jpg,,true,2026-06-21
+2,ANTIFRAGILE,1,,Mini Album,Korean,2022-10-17,/images/albums/antifragile.jpg,,true,2026-06-21
+3,UNFORGIVEN,1,,Studio Album,Korean,2023-05-01,/images/albums/unforgiven.jpg,,true,2026-06-21
+4,Perfect Night,1,,Single,Korean,2023-10-27,/images/albums/perfect_night.jpg,,true,2026-06-21
+5,EASY,1,,Mini Album,Korean,2024-02-19,/images/albums/easy.jpg,,true,2026-06-21
+6,CRAZY,1,,Mini Album,Korean,2024-08-30,/images/albums/crazy.jpg,,true,2026-06-21
+7,Star Signs,1,,Single,Korean,2024-11-13,/images/albums/star_signs.jpg,,true,2026-06-21
+8,HOT,1,,Mini Album,Korean,2025-03-14,/images/albums/hot.jpg,,true,2026-06-21
+9,Different,1,,Single,Korean,2025-06-24,/images/albums/different.jpg,,true,2026-06-21
+10,Spaghetti,1,,Single,Korean,2025-10-24,/images/albums/spaghetti.jpg,,true,2026-06-21
+11,CELEBRATION,1,,Single,Korean,2026-04-24,/images/albums/celebration.jpg,,true,2026-06-21
+12,PUREFLOW pt.1,1,,Studio Album,Korean,2026-05-22,/images/albums/pureflow.jpg,,true,2026-06-21

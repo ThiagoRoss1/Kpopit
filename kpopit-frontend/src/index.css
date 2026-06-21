@@ -54,8 +54,8 @@ body {
 .logo::after {
   content: "Kpopit";
   position: absolute;
-  top: 6px;   /* deslocamento vertical */
-  left: 6px;  /* deslocamento horizontal */
+  top: 6px;
+  left: 6px;
   z-index: -1;
   background: linear-gradient(180deg, #e70a7d, #ec4850);
   -webkit-background-clip: text;

@@ -256,8 +256,8 @@ def test_daily_album_palette_roundtrips_as_jsonb(client, db_conn, make_group):
     with db_conn.cursor() as cur:
         cur.execute(
             """
-            INSERT INTO albums (name, group_id, type, release_year, cover_path, palette, is_published)
-            VALUES (%s, %s, 'Studio Album', 2020, %s, %s, TRUE)
+            INSERT INTO albums (name, group_id, type, release_date, cover_path, palette, is_published)
+            VALUES (%s, %s, 'Studio Album', '2020-01-01', %s, %s, TRUE)
             RETURNING id
             """,
             ("Palette Album", gid, "/covers/pal.jpg", json.dumps(palette)),

@@ -122,7 +122,8 @@ const PixelatedVictory = (props: PixelatedVictoryProps) => {
 
                 {/* Album cover */}
                 <div className="absolute left-7.5 top-2 z-2 p-2 rounded-[14px] bg-[#1c1c1c] -rotate-3
-                    shadow-[0_8px_22px_rgba(10,10,10,0.25),0_0_0_2px_rgba(10,10,10,0.6)]">
+                    shadow-[0_8px_22px_rgba(10,10,10,0.25),0_0_0_2px_rgba(10,10,10,0.6)]
+                    firefox:shadow-none firefox:drop-shadow-[0_8px_22px_rgba(10,10,10,0.25)] firefox:active:drop-shadow-[0_0_0_2px_0_rgba(10,10,10,0.6)]">
                     <div className="relative w-47.5 h-47.5 sm:w-57.5 sm:h-57.5 rounded-lg overflow-hidden">
                         <img 
                             src={coverUrl} 
@@ -152,7 +153,8 @@ const PixelatedVictory = (props: PixelatedVictoryProps) => {
             {/* Yesterday's album */}
             {yesterdayAlbum && (
                 <div className="mt-4 mb-8">
-                    <div className="flex flex-col gap-3 rounded-[18px] bg-linear-to-br from-cream to-[#e4d2cc] border-2 border-ink shadow-[4px_4px_0_var(--color-ink)] px-4 py-4 sm:px-5">
+                    <div className="flex flex-col gap-3 rounded-[18px] bg-linear-to-br from-cream to-[#e4d2cc] border-2 border-ink shadow-[4px_4px_0_var(--color-ink)] px-4 py-4 sm:px-5
+                    firefox:shadow-none firefox:drop-shadow-[4px_4px_0_var(--color-ink)] firefox:active:drop-shadow-[4px_4px_0_var(--color-ink)]">
                         <span className="flex justify-center items-center text-xl sm:text-2xl font-bold text-white [text-shadow:1px_2px_4px_rgba(0,0,0,1)]">
                             Yesterday's Album
                         </span>
@@ -255,8 +257,9 @@ const PixelatedVictory = (props: PixelatedVictoryProps) => {
                     type="button"
                     onClick={() => handleCopy(attempts)}
                     className="kp-tilt-l flex justify-center items-center text-center gap-2 w-45 sm:w-50 h-12 px-7 rounded-full font-bold text-base text-white
-                    bg-neon-pink border-2 border-ink shadow-[0_5px_0_var(--color-ink)] transition-all duration-200 transform-gpu
-                    hover:scale-101 hover:brightness-110 hover:cursor-pointer active:translate-y-1 active:shadow-[0_1px_0_var(--color-ink)]"
+                    bg-neon-pink border-2 border-ink shadow-[0_5px_0_var(--color-ink)] firefox:shadow-none firefox:drop-shadow-[0_5px_0_var(--color-ink)] 
+                    firefox:active:drop-shadow-[0_1px_0_var(--color-ink)] transition-all duration-200 transform-gpu
+                    hover:scale-101 firefox:hover:scale-100 hover:brightness-110 hover:cursor-pointer active:translate-y-1 active:shadow-[0_1px_0_var(--color-ink)]"
                 >
                     ⤳ {copied ? "Copied!" : "Share Results"}
                 </button>
@@ -264,8 +267,9 @@ const PixelatedVictory = (props: PixelatedVictoryProps) => {
                 <button 
                     onClick={() => handleShare(attempts)}
                     className="kp-tilt-r flex justify-center items-center text-center gap-2 w-12 h-12 rounded-full 
-                    bg-neon-pink border-2 border-ink shadow-[0_5px_0_var(--color-ink)] transition-all duration-200 transform-gpu
-                    hover:scale-101 hover:brightness-110 hover:cursor-pointer active:translate-y-1 active:shadow-[0_1px_0_var(--color-ink)]"
+                    bg-neon-pink border-2 border-ink shadow-[0_5px_0_var(--color-ink)] firefox:shadow-none firefox:drop-shadow-[0_5px_0_var(--color-ink)] 
+                    firefox:active:drop-shadow-[0_1px_0_var(--color-ink)] transition-all duration-200 transform-gpu
+                    hover:scale-101 firefox:hover:scale-100 hover:brightness-110 hover:cursor-pointer active:translate-y-1 active:shadow-[0_1px_0_var(--color-ink)]"
                 >
                     <img 
                         src={Xlogo} 

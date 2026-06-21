@@ -90,7 +90,7 @@ class AlbumService:
                        a.cover_path,
                        a.palette,
                        a.type,
-                       a.release_year,
+                       EXTRACT(YEAR FROM a.release_date)::int AS release_year,
                        COALESCE(i.artist_name, g.name) AS group_name
                 FROM daily_picks dp
                 JOIN albums a ON a.id = dp.album_id
@@ -112,7 +112,7 @@ class AlbumService:
                     a.cover_path,
                     a.palette,
                     a.type,
-                    a.release_year,
+                    EXTRACT(YEAR FROM a.release_date)::int AS release_year,
                 COALESCE(i.artist_name, g.name) AS group_name
                 FROM albums a
                 LEFT JOIN idols i ON i.id = a.soloist_id
@@ -249,7 +249,8 @@ class AlbumService:
                        COALESCE(i.artist_name, g.name) AS group_name,
                        a.cover_path,
                        a.type,
-                       a.release_year
+                       a.language,
+                       EXTRACT(YEAR FROM a.release_date)::int AS release_year
                 FROM albums a
                 LEFT JOIN groups g ON g.id = a.group_id
                 LEFT JOIN idols i ON i.id = a.soloist_id
