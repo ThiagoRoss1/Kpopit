@@ -11,3 +11,176 @@ id,name,group_id,soloist_id,type,language,release_date,cover_path,palette,is_pub
 10,Spaghetti,1,,Single,Korean,2025-10-24,/images/albums/spaghetti.jpg,,true,2026-06-21
 11,CELEBRATION,1,,Single,Korean,2026-04-24,/images/albums/celebration.jpg,,true,2026-06-21
 12,PUREFLOW pt.1,1,,Studio Album,Korean,2026-05-22,/images/albums/pureflow.jpg,,true,2026-06-21
+13,COLOR*IZ,2,,Mini Album,Korean,2018-10-29,/images/albums/color_iz.jpg,,true,2026-06-21
+14,HEART*IZ,2,,Mini Album,Korean,2019-04-01,/images/albums/heart_iz.jpg,,true,2026-06-21
+15,BLOOM*IZ,2,,Studio Album,Korean,2020-02-17,/images/albums/bloom_iz.jpg,,true,2026-06-21
+16,Oneiric Diary,2,,Mini Album,Korean,2020-06-15,/images/albums/oneiric_diary.jpg,,true,2026-06-21
+17,Twelve,2,,Mini Album,Japanese,2020-10-21,/images/albums/twelve.jpg,,true,2026-06-21
+18,One-reeler / Act IV,2,,Mini Album,Korean,2020-12-07,/images/albums/one_reeler_act_iv.jpg,,true,2026-06-21
+19,Black Mamba,3,,Single,Korean,2020-11-17,/images/albums/black_mamba.jpg,,true,2026-06-21
+20,Forever,3,,Single,Korean,2021-02-05,/images/albums/forever.jpg,,true,2026-06-21
+21,Next Level,3,,Single,Korean,2021-05-17,/images/albums/next_level.jpg,,true,2026-06-21
+22,Savage,3,,Mini Album,Korean,2021-10-05,/images/albums/savage.jpg,,true,2026-06-21
+23,Illusion,3,,Single,Korean,2022-06-01,/images/albums/illusion.jpg,,true,2026-06-21
+24,Girls,3,,Mini Album,Korean,2022-07-08,/images/albums/girls.jpg,,true,2026-06-21
+25,MY WORLD,3,,Mini Album,Korean,2023-05-08,/images/albums/my_world.jpg,,true,2026-06-21
+26,Drama,3,,Mini Album,Korean,2023-11-10,/images/albums/drama.jpg,,true,2026-06-21
+27,Armageddon,3,,Studio Album,Korean,2024-05-27,/images/albums/armageddon.jpg,,true,2026-06-21
+28,Hot Mess,3,,Single,Japanese,2024-07-03,/images/albums/hot_mess.jpg,,true,2026-06-21
+29,SYNK : PARALLEL LINE,3,,Single,Korean,2024-10-09,/images/albums/synk_parallel_line.jpg,,true,2026-06-21
+30,Whiplash,3,,Mini Album,Korean,2024-10-21,/images/albums/whiplash.jpg,,true,2026-06-21
+31,Dirty Work,3,,Single,Korean,2025-06-27,/images/albums/dirty_work.jpg,,true,2026-06-21
+32,Dark Arts,3,,Single,English,2025-07-15,/images/albums/dark_arts.jpg,,true,2026-06-21
+33,Rich Man,3,,Mini Album,Korean,2025-09-05,/images/albums/rich_man.jpg,,true,2026-06-21
+34,LEMONADE,3,,Studio Album,Korean,2026-05-29,/images/albums/lemonade.jpg,,true,2026-06-21
+35,Step Back,4,,Single,Korean,2022-01-03,/images/albums/step_back.jpg,,true,2026-06-21
+36,Stamp On It,4,,Mini Album,Korean,2023-01-16,/images/albums/stamp_on_it.jpg,,true,2026-06-21
+37,The Story Begins,5,,Mini Album,Korean,2015-10-20,/images/albums/the_story_begins.jpg,,true,2026-06-21
+38,PAGE TWO,5,,Mini Album,Korean,2016-04-25,/images/albums/page_two.jpg,,true,2026-06-21
+39,TWICEcoaster: LANE 1,5,,Mini Album,Korean,2016-10-24,/images/albums/twicecoaster_lane_1.jpg,,true,2026-06-21
+40,TWICEcoaster: LANE 2,5,,Repackage Album,Korean,2017-02-20,/images/albums/twicecoaster_lane_2.jpg,,true,2026-06-21
+41,What's TWICE?,5,,Mini Album,Japanese,2017-02-24,/images/albums/whats_twice.jpg,,true,2026-06-21
+42,SIGNAL,5,,Mini Album,Korean,2017-05-15,/images/albums/signal.jpg,,true,2026-06-21
+43,twicetagram,5,,Studio Album,Korean,2017-10-30,/images/albums/twicetagram.jpg,,true,2026-06-21
+44,What is Love?,5,,Mini Album,Korean,2018-04-09,/images/albums/what_is_love.jpg,,true,2026-06-21
+45,Summer Nights,5,,Repackage Album,Korean,2018-07-09,/images/albums/summer_nights.jpg,,true,2026-06-21
+46,BDZ,5,,Studio Album,Japanese,2018-09-12,/images/albums/bdz.jpg,,true,2026-06-21
+47,YES or YES,5,,Mini Album,Korean,2018-11-05,/images/albums/yes_or_yes.jpg,,true,2026-06-21
+48,FANCY YOU,5,,Mini Album,Korean,2019-04-22,/images/albums/fancy_you.jpg,,true,2026-06-21
+49,Feel Special,5,,Mini Album,Korean,2019-09-23,/images/albums/feel_special.jpg,,true,2026-06-21
+50,&TWICE,5,,Studio Album,Japanese,2019-11-20,/images/albums/&twice.jpg,,true,2026-06-21
+51,MORE & MORE,5,,Mini Album,Korean,2020-06-01,/images/albums/more_&_more.jpg,,true,2026-06-21
+52,Eyes Wide Open,5,,Studio Album,Korean,2020-10-26,/images/albums/eyes_wide_open.jpg,,true,2026-06-21
+53,Taste of Love,5,,Mini Album,Korean,2021-06-11,/images/albums/taste_of_love.jpg,,true,2026-06-21
+54,Perfect World,5,,Studio Album,Japanese,2021-07-28,/images/albums/perfect_world.jpg,,true,2026-06-21
+55,Formula of Love: O+T=<3,5,,Studio Album,Korean,2021-11-12,/images/albums/formula_of_love.jpg,,true,2026-06-21
+56,Celebrate,5,,Studio Album,Japanese,2022-07-27,/images/albums/celebrate.jpg,,true,2026-06-21
+57,BETWEEN 1&2,5,,Mini Album,Korean,2022-08-26,/images/albums/between_1_&_2.jpg,,true,2026-06-21
+58,READY TO BE,5,,Mini Album,Korean,2023-03-10,/images/albums/ready_to_be.jpg,,true,2026-06-21
+59,With YOU-th,5,,Mini Album,Korean,2024-02-23,/images/albums/with_you_th.jpg,,true,2026-06-21
+60,DIVE,5,,Studio Album,Japanese,2024-07-17,/images/albums/dive.jpg,,true,2026-06-21
+61,STRATEGY,5,,Mini Album,Korean,2024-12-06,/images/albums/strategy.jpg,,true,2026-06-21
+62,The wish,5,,Single,Japanese,2024-12-15,/images/albums/the_wish.jpg,,true,2026-06-21
+63,THIS IS FOR,5,,Studio Album,Korean,2025-07-11,/images/albums/this_is_for.jpg,,true,2026-06-21
+64,ENEMY,5,,Studio Album,Japanese,2025-08-27,/images/albums/enemy.jpg,,true,2026-06-21
+65,TEN: The Story Goes On,5,,Studio Album,Korean,2025-10-10,/images/albums/ten_the_story_goes_on.jpg,,true,2026-06-21
+66,Masterpiece,6,,Mini Album,Japanese,2023-07-26,/images/albums/masterpiece.jpg,,true,2026-06-21
+67,HAUTE COUTURE,6,,Mini Album,Japanese,2024-11-06,/images/albums/haute_couture.jpg,,true,2026-06-21
+68,PLAY,6,,Studio Album,Japanese,2026-02-04,/images/albums/play.jpg,,true,2026-06-21
+69,ELEVEN,7,,Single,Korean,2021-12-01,/images/albums/eleven.jpg,,true,2026-06-21
+70,LOVE DIVE,7,,Single,Korean,2022-04-05,/images/albums/love_dive.jpg,,true,2026-06-21
+71,After LIKE,7,,Single,Korean,2022-08-22,/images/albums/after_like.jpg,,true,2026-06-21
+72,I've IVE,7,,Studio Album,Korean,2023-04-10,/images/albums/ive_ive.jpg,,true,2026-06-21
+73,WAVE,7,,Mini Album,Japanese,2023-05-31,/images/albums/wave.jpg,,true,2026-06-21
+74,I'VE MINE,7,,Mini Album,Korean,2023-10-13,/images/albums/ive_mine.jpg,,true,2026-06-21
+75,IVE Switch,7,,Mini Album,Korean,2024-04-29,/images/albums/ive_switch.jpg,,true,2026-06-21
+76,Alive,7,,Mini Album,Japanese,2024-08-28,/images/albums/alive.jpg,,true,2026-06-21
+77,IVE EMPATHY,7,,Mini Album,Korean,2025-02-03,/images/albums/ive_empathy.jpg,,true,2026-06-21
+78,Be Alright,7,,Mini Album,Japanese,2025-07-30,/images/albums/be_alright.jpg,,true,2026-06-21
+79,IVE SECRET,7,,Mini Album,Korean,2025-08-25,/images/albums/ive_secret.jpg,,true,2026-06-21
+80,REVIVE+,7,,Studio Album,Korean,2026-02-23,/images/albums/revive_plus.jpg,,true,2026-06-21
+81,Lucid Dream,7,,Mini Album,Japanese,2026-05-27,/images/albums/lucid_dream.jpg,,true,2026-06-21
+82,SQUARE ONE,8,,Single,Korean,2016-08-08,/images/albums/square_one.jpg,,true,2026-06-21
+83,SQUARE TWO,8,,Single,Korean,2016-11-01,/images/albums/square_two.jpg,,true,2026-06-21
+84,As If It's Your Last,8,,Single,Korean,2017-06-22,/images/albums/as_if_its_your_last.jpg,,true,2026-06-21
+85,SQUARE UP,8,,Mini Album,Korean,2018-06-15,/images/albums/square_up.jpg,,true,2026-06-21
+86,BLACKPINK IN YOUR AREA,8,,Studio Album,Japanese,2018-11-23,/images/albums/blackpink_in_your_area.jpg,,true,2026-06-21
+87,KILL THIS LOVE,8,,Mini Album,Korean,2019-04-05,/images/albums/kill_this_love.jpg,,true,2026-06-21
+88,THE ALBUM,8,,Studio Album,Korean,2020-10-02,/images/albums/the_album.jpg,,true,2026-06-21
+89,BORN PINK,8,,Studio Album,Korean,2022-09-16,/images/albums/born_pink.jpg,,true,2026-06-21
+90,DEADLINE,8,,Mini Album,Korean,2026-02-27,/images/albums/deadline.jpg,,true,2026-06-21
+91,BABYMONS7ER,9,,Mini Album,Korean,2024-04-01,/images/albums/babymons7er.jpg,,true,2026-06-21
+92,DRIP,9,,Studio Album,Korean,2024-11-01,/images/albums/drip.jpg,,true,2026-06-21
+93,We Go Up,9,,Mini Album,Korean,2025-10-10,/images/albums/we_go_up.jpg,,true,2026-06-21
+94,CHOOM,9,,Mini Album,Korean,2026-05-04,/images/albums/choom.jpg,,true,2026-06-21
+95,KISS OF LIFE,10,,Mini Album,Korean,2023-07-05,/images/albums/kiss_of_life.jpg,,true,2026-06-21
+96,Born to be XX,10,,Mini Album,Korean,2023-11-08,/images/albums/born_to_be_xx.jpg,,true,2026-06-21
+97,Midas Touch,10,,Single,Korean,2024-04-03,/images/albums/midas_touch.jpg,,true,2026-06-21
+98,Sticky,10,,Single,Korean,2024-07-01,/images/albums/sticky.jpg,,true,2026-06-21
+99,Lose Yourself,10,,Mini Album,Korean,2024-10-15,/images/albums/lose_yourself.jpg,,true,2026-06-21
+100,224,10,,Mini Album,Korean,2025-06-09,/images/albums/224.jpg,,true,2026-06-21
+101,TOKYO MISSION START,10,,Mini Album,Japanese,2025-11-05,/images/albums/tokyo_mission_start.jpg,,true,2026-06-21
+102,Who Is She,10,,Single,Korean,2026-04-06,/images/albums/who_is_she.jpg,,true,2026-06-21
+103,MACARONI CHEESE EP,11,,Mini Album,Korean,2023-10-18,/images/albums/macaroni_cheese_ep.jpg,,true,2026-06-21
+104,XXL,11,,Mini Album,Korean,2024-03-20,/images/albums/xxl.jpg,,true,2026-06-21
+105,ATE THAT,11,,Mini Album,Korean,2024-08-21,/images/albums/ate_that.jpg,,true,2026-06-21
+106,Cold,11,,Mini Album,Korean,2025-03-02,/images/albums/cold.jpg,,true,2026-06-21
+107,Growing Pain Pt1 : Free,11,,Mini Album,Korean,2025-08-14,/images/albums/growing_pain_pt1_free.jpg,,true,2026-06-21
+108,we don't go to bed tonight,11,,Single,Korean,2026-04-07,/images/albums/we_dont_go_to_bed_tonight.jpg,,true,2026-06-21
+109,IT'z ICY,12,,Mini Album,Korean,2019-07-29,/images/albums/itz_icy.jpg,,true,2026-06-21
+110,IT'z ME,12,,Mini Album,Korean,2020-03-09,/images/albums/itz_me.jpg,,true,2026-06-21
+111,Not Shy,12,,Mini Album,Korean,2020-08-17,/images/albums/not_shy.jpg,,true,2026-06-21
+112,GUESS WHO,12,,Mini Album,Korean,2021-04-30,/images/albums/guess_who.jpg,,true,2026-06-21
+113,CRAZY IN LOVE,12,,Mini Album,Korean,2021-09-24,/images/albums/crazy_in_love.jpg,,true,2026-06-21
+114,CHECKMATE,12,,Mini Album,Korean,2022-07-15,/images/albums/checkmate.jpg,,true,2026-06-21
+115,Cheshire,12,,Mini Album,Korean,2022-11-30,/images/albums/cheshire.jpg,,true,2026-06-21
+116,KILL MY DOUBT,12,,Mini Album,Korean,2023-07-31,/images/albums/kill_my_doubt.jpg,,true,2026-06-21
+117,BORN TO BE,12,,Mini Album,Korean,2024-01-08,/images/albums/born_to_be.jpg,,true,2026-06-21
+118,GOLD,12,,Mini Album,Korean,2024-10-15,/images/albums/gold.jpg,,true,2026-06-21
+119,Girls Will Be Girls,12,,Mini Album,Korean,2025-06-09,/images/albums/girls_will_be_girls.jpg,,true,2026-06-21
+120,Collector,12,,Studio Album,Japanese,2025-10-08,/images/albums/collector.jpg,,true,2026-06-21
+121,Tunnel Vision,12,,Mini Album,Korean,2025-11-10,/images/albums/tunnel_vision.jpg,,true,2026-06-21
+122,Motto,12,,Mini Album,Korean,2026-05-18,/images/albums/motto.jpg,,true,2026-06-21
+123,Star To A Young Culture,13,,Single,Korean,2020-11-12,/images/albums/star_to_a_young_culture.jpg,,true,2026-06-21
+124,STAYDOM,13,,Single,Korean,2021-04-08,/images/albums/staydom.jpg,,true,2026-06-21
+125,STEREOTYPE,13,,Mini Album,Korean,2021-09-06,/images/albums/stereotype.jpg,,true,2026-06-21
+126,YOUNG-LUV.COM,13,,Mini Album,Korean,2022-02-21,/images/albums/young-luv_com.jpg,,true,2026-06-21
+127,TEENFRESH,13,,Mini Album,Korean,2023-08-16,/images/albums/teenfresh.jpg,,true,2026-06-21
+128,Metamorphic,13,,Studio Album,Korean,2024-07-01,/images/albums/metamorphic.jpg,,true,2026-06-21
+129,S,13,,Single,Korean,2025-03-18,/images/albums/s.jpg,,true,2026-06-21
+130,I WANT IT,13,,Single,Korean,2025-07-23,/images/albums/i_want_it.jpg,,true,2026-06-21
+131,Stay Alive,13,,Studio Album,Japanese,2026-02-11,/images/albums/stay_alive.jpg,,true,2026-06-21
+132,2:LOVE,13,,Single,Korean,2026-06-16,/images/albums/2_love.jpg,,true,2026-06-21
+133,I am,14,,Mini Album,Korean,2018-05-02,/images/albums/i_am.jpg,,true,2026-06-21
+134,POP/STARS,14,,Studio Album,Korean,2018-11-02,/images/albums/pop_stars.jpg,,true,2026-06-21
+135,I made,14,,Mini Album,Korean,2019-02-26,/images/albums/i_made.jpg,,true,2026-06-21
+136,LATATA,14,,Mini Album,Japanese,2019-07-31,/images/albums/latata.jpg,,true,2026-06-21
+137,I trust,14,,Mini Album,Korean,2020-04-06,/images/albums/i_trust.jpg,,true,2026-06-21
+138,Oh my god,14,,Mini Album,Japanese,2020-08-26,/images/albums/oh_my_god.jpg,,true,2026-06-21
+139,I Burn,14,,Mini Album,Korean,2021-01-11,/images/albums/i_burn.jpg,,true,2026-06-21
+140,I NEVER DIE,14,,Studio Album,Korean,2022-03-14,/images/albums/i_never_die.jpg,,true,2026-06-21
+141,I love,14,,Mini Album,Korean,2022-10-17,/images/albums/i_love.jpg,,true,2026-06-21
+142,I feel,14,,Mini Album,Korean,2023-05-15,/images/albums/i_feel.jpg,,true,2026-06-21
+143,HEAT,14,,Mini Album,Korean,2023-10-06,/images/albums/heat.jpg,,true,2026-06-21
+144,2,14,,Studio Album,Korean,2024-01-29,/images/albums/2.jpg,,true,2026-06-21
+145,I SWAY,14,,Mini Album,Korean,2024-07-08,/images/albums/i_sway.jpg,,true,2026-06-21
+146,We are i-dle,14,,Mini Album,Korean,2025-05-02,/images/albums/we_are_i-dle.jpg,,true,2026-06-21
+147,We Are,14,,Mini Album,Korean,2025-05-19,/images/albums/we_are.jpg,,true,2026-06-21
+148,I-dle,14,,Mini Album,Korean,2025-10-03,/images/albums/i-dle.jpg,,true,2026-06-21
+149,AD MARE,15,,Single,Korean,2022-02-22,/images/albums/ad_mare.jpg,,true,2026-06-21
+150,expérgo,15,,Mini Album,Korean,2023-03-20,/images/albums/expergo.jpg,,true,2026-06-21
+151,Fe3O4: BREAK,15,,Mini Album,Korean,2024-01-15,/images/albums/fe3o4_break.jpg,,true,2026-06-21
+152,Fe3O4: STICK OUT,15,,Mini Album,Korean,2024-08-19,/images/albums/fe3o4_stick_out.jpg,,true,2026-06-21
+153,Fe3O4: Forward,15,,Mini Album,Korean,2025-03-17,/images/albums/fe3o4_forward.jpg,,true,2026-06-21
+154,Blue Valentine,15,,Studio Album,Korean,2025-10-13,/images/albums/blue_valentine.jpg,,true,2026-06-21
+155,Heavy Serenade,15,,Mini Album,Korean,2026-05-11,/images/albums/heavy_serenade.jpg,,true,2026-06-21
+156,NewJeans,16,,Mini Album,Korean,2022-08-01,/images/albums/newjeans.jpg,,true,2026-06-21
+157,Ditto,16,,Single,Korean,2022-12-19,/images/albums/ditto.jpg,,true,2026-06-21
+158,OMG,16,,Single,Korean,2023-01-02,/images/albums/omg.jpg,,true,2026-06-21
+159,Get Up,16,,Mini Album,Korean,2023-07-21,/images/albums/get_up.jpg,,true,2026-06-21
+160,How Sweet,16,,Single,Korean,2024-05-24,/images/albums/how_sweet.jpg,,true,2026-06-21
+161,Supernatural,16,,Single,Japanese,2024-06-21,/images/albums/supernatural.jpg,,true,2026-06-21
+162,Super Real Me,17,,Mini Album,Korean,2024-03-25,/images/albums/super_real_me.jpg,,true,2026-06-21
+163,I'LL LIKE YOU,17,,Mini Album,Korean,2024-10-21,/images/albums/ill_like_you.jpg,,true,2026-06-21
+164,bomb,17,,Mini Album,Korean,2025-06-16,/images/albums/bomb.jpg,,true,2026-06-21
+165,Not Cute Anymore,17,,Single,Korean,2025-11-24,/images/albums/not_cute_anymore.jpg,,true,2026-06-21
+166,MAMIHLAPINATAPAI,17,,Mini Album,Korean,2026-04-30,/images/albums/mamihlapinatapai.jpg,,true,2026-06-21
+167,MY EYES OPEN VVIDE,18,,Mini Album,Korean,2025-05-12,/images/albums/my_eyes_open_vvide.jpg,,true,2026-06-21
+168,BITE NOW,18,,Mini Album,Korean,2026-06-01,/images/albums/bite_now.jpg,,true,2026-06-21
+169,[+ +],19,,Mini Album,Korean,2018-08-20,/images/albums/[+_+].jpg,,true,2026-06-21
+170,[#],19,,Mini Album,Korean,2020-02-05,/images/albums/[hash].jpg,,true,2026-06-21
+171,[12:00],19,,Mini Album,Korean,2020-10-19,/images/albums/[12_00].jpg,,true,2026-06-21
+172,[&],19,,Mini Album,Korean,2021-06-28,/images/albums/[&].jpg,,true,2026-06-21
+173,Flip That,19,,Mini Album,Korean,2022-06-20,/images/albums/flip_that.jpg,,true,2026-06-21
+174,LUMINOUS,19,,Single,Japanese,2022-09-28,/images/albums/luminous.jpg,,true,2026-06-21
+175,Chuu,20,95,Single,Korean,2017-12-28,/images/albums/chuu.jpg,,true,2026-06-21
+176,Howl,20,95,Mini Album,Korean,2023-10-18,/images/albums/howl.jpg,,true,2026-06-21
+177,Strawberry Rush,20,95,Mini Album,Korean,2024-06-25,/images/albums/strawberry_rush.jpg,,true,2026-06-21
+178,Only cry in the rain,20,95,Mini Album,Korean,2025-04-21,/images/albums/only_cry_in_the_rain.jpg,,true,2026-06-21
+179,"XO, My Cyberlove",20,95,Mini Album,Korean,2026-01-07,/images/albums/xo_my_cyberlove.jpg,,true,2026-06-21
+180,Yves,20,86,Single,Korean,2017-11-28,/images/albums/yves.jpg,,true,2026-06-21
+181,LOOP,20,86,Mini Album,Korean,2024-05-29,/images/albums/loop.jpg,,true,2026-06-21
+182,I Did,20,86,Mini Album,Korean,2024-11-14,/images/albums/i_did.jpg,,true,2026-06-21
+183,Soft Error,20,86,Mini Album,Korean,2025-08-07,/images/albums/soft_error.jpg,,true,2026-06-21
+184,NAIL,20,86,Mini Album,Korean,2026-04-17,/images/albums/nail.jpg,,true,2026-06-21
+185,Test,20,58,Single,Korean,2026-06-21,/images/albums/nail.jpg,,true,2026-06-21
