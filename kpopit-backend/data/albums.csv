@@ -183,4 +183,122 @@ id,name,group_id,soloist_id,type,language,release_date,cover_path,palette,is_pub
 182,I Did,20,86,Mini Album,Korean,2024-11-14,/images/albums/i_did.jpg,,true,2026-06-21
 183,Soft Error,20,86,Mini Album,Korean,2025-08-07,/images/albums/soft_error.jpg,,true,2026-06-21
 184,NAIL,20,86,Mini Album,Korean,2026-04-17,/images/albums/nail.jpg,,true,2026-06-21
-185,Test,20,58,Single,Korean,2026-06-21,/images/albums/nail.jpg,,true,2026-06-21
+185,XOXO,20,101,Studio Album,Korean,2021-10-29,/images/albums/xoxo.jpg,,true,2026-06-21
+186,GAME PLAN,20,101,Mini Album,Korean,2023-08-07,/images/albums/game_plan.jpg,,true,2026-06-21
+187,Chaotic & Confused,20,101,Mini Album,Korean,2025-08-11,/images/albums/chaotic_&_confused.jpg,,true,2026-06-21
+188,<Dall>,21,,Studio Album,Korean,2024-05-31,/images/albums/dall.jpg,,true,2026-06-21
+189,Club Icarus,21,,Mini Album,Korean,2025-06-13,/images/albums/club_icarus.jpg,,true,2026-06-21
+190,Loossemble,22,,Mini Album,Korean,2023-09-15,/images/albums/loossemble.jpg,,true,2026-06-21
+191,One of a Kind,22,,Mini Album,Korean,2024-04-15,/images/albums/one_of_a_kind.jpg,,true,2026-06-21
+192,TTYL,22,,Mini Album,Korean,2024-09-02,/images/albums/ttyl.jpg,,true,2026-06-21
+193,Ice Cream Cake,23,,Mini Album,Korean,2015-03-17,/images/albums/ice_cream_cake.jpg,,true,2026-06-21
+194,The Red,23,,Studio Album,Korean,2015-09-09,/images/albums/the_red.jpg,,true,2026-06-21
+195,The Velvet,23,,Mini Album,Korean,2016-03-17,/images/albums/the_velvet.jpg,,true,2026-06-21
+196,Russian Roulette,23,,Mini Album,Korean,2016-09-07,/images/albums/russian_roulette.jpg,,true,2026-06-21
+197,Rookie,23,,Mini Album,Korean,2017-02-01,/images/albums/rookie.jpg,,true,2026-06-21
+198,The Red Summer,23,,Mini Album,Korean,2017-07-09,/images/albums/the_red_summer.jpg,,true,2026-06-21
+199,Perfect Velvet,23,,Studio Album,Korean,2017-11-17,/images/albums/perfect_velvet.jpg,,true,2026-06-21
+200,#Cookie Jar,23,,Mini Album,Japanese,2018-07-04,/images/albums/hash_cookie_jar.jpg,,true,2026-06-21
+201,Summer Magic,23,,Mini Album,Korean,2018-08-06,/images/albums/summer_magic.jpg,,true,2026-06-21
+202,RBB,23,,Mini Album,Korean,2018-11-30,/images/albums/rbb.jpg,,true,2026-06-21
+203,SAPPY,23,,Mini Album,Japanese,2019-05-29,/images/albums/sappy.jpg,,true,2026-06-21
+204,'The ReVe Festival' Day 1,23,,Mini Album,Korean,2019-06-19,/images/albums/the_reve_festival_day_1.jpg,,true,2026-06-21
+205,'The ReVe Festival' Day 2,23,,Mini Album,Korean,2019-08-20,/images/albums/the_reve_festival_day_2.jpg,,true,2026-06-21
+206,'The ReVe Festival' Finale,23,,Repackage Album,Korean,2019-12-23,/images/albums/the_reve_festival_finale.jpg,,true,2026-06-21
+207,Queendom,23,,Mini Album,Korean,2021-08-16,/images/albums/queendom.jpg,,true,2026-06-21
+208,The ReVe Festival 2022 - Feel My Rhythm,23,,Mini Album,Korean,2022-03-21,/images/albums/the_reve_festival_2022_feel_my_rhythm.jpg,,true,2026-06-21
+209,Bloom,23,,Studio Album,Japanese,2022-04-06,/images/albums/bloom.jpg,,true,2026-06-21
+210,The ReVe Festival 2022 - Birthday,23,,Mini Album,Korean,2022-11-28,/images/albums/the_reve_festival_2022_birthday.jpg,,true,2026-06-21
+211,Chill Kill,23,,Studio Album,Korean,2023-11-13,/images/albums/chill_kill.jpg,,true,2026-06-21
+212,Cosmic,23,,Mini Album,Korean,2024-06-24,/images/albums/cosmic.jpg,,true,2026-06-21
+213,Sweet Dreams,23,,Single,Korean,2024-08-01,/images/albums/sweet_dreams.jpg,,true,2026-06-21
+214,Chrysalis,24,,Mini Album,Korean,2016-05-04,/images/albums/chrysalis.jpg,,true,2026-06-21
+215,miss me?,24,,Mini Album,Korean,2016-10-17,/images/albums/miss_me.jpg,,true,2026-06-21
+216,LOOP,24,,Mini Album,Korean,2026-05-19,/images/albums/loop_ioi.jpg,,true,2026-06-21
+217,Girls' Generation,25,,Studio Album,Korean,2007-11-02,/images/albums/girls_generation.jpg,,true,2026-06-21
+218,Gee,25,,Mini Album,Korean,2009-01-05,/images/albums/gee.jpg,,true,2026-06-21
+219,Tell Me Your Wish (Genie),25,,Mini Album,Korean,2009-06-25,/images/albums/tell_me_your_wish_genie.jpg,,true,2026-06-21
+220,Oh!,25,,Studio Album,Korean,2010-01-28,/images/albums/oh.jpg,,true,2026-06-21
+221,Hoot,25,,Mini Album,Korean,2010-10-27,/images/albums/hoot.jpg,,true,2026-06-21
+222,The Boys,25,,Studio Album,Korean,2011-10-19,/images/albums/the_boys.jpg,,true,2026-06-21
+223,I Got A Boy,25,,Studio Album,Korean,2013-01-01,/images/albums/i_got_a_boy.jpg,,true,2026-06-21
+224,Mr.Mr.,25,,Mini Album,Korean,2014-02-24,/images/albums/mr_mr.jpg,,true,2026-06-21
+225,Lion Heart,25,,Studio Album,Korean,2015-08-18,/images/albums/lion_heart.jpg,,true,2026-06-21
+226,Holiday Night,25,,Studio Album,Korean,2017-08-04,/images/albums/holiday_night.jpg,,true,2026-06-21
+227,Forever 1,25,,Studio Album,Korean,2022-08-05,/images/albums/forever_1.jpg,,true,2026-06-21
+228,Hello,26,,Mini Album,Korean,2014-06-18,/images/albums/hello.jpg,,true,2026-06-21
+229,Piano Man,26,,Mini Album,Korean,2014-11-21,/images/albums/piano_man.jpg,,true,2026-06-21
+230,Pink Funky,26,,Mini Album,Korean,2015-06-19,/images/albums/pink_funky.jpg,,true,2026-06-21
+231,Melting,26,,Studio Album,Korean,2016-02-26,/images/albums/melting.jpg,,true,2026-06-21
+232,Memory,26,,Mini Album,Korean,2016-11-07,/images/albums/memory.jpg,,true,2026-06-21
+233,Purple,26,,Mini Album,Korean,2017-06-22,/images/albums/purple.jpg,,true,2026-06-21
+234,Yellow Flower,26,,Studio Album,Korean,2018-03-07,/images/albums/yellow_flower.jpg,,true,2026-06-21
+235,Red Moon,26,,Mini Album,Korean,2018-07-16,/images/albums/red_moon.jpg,,true,2026-06-21
+236,BLUE;S,26,,Mini Album,Korean,2018-11-29,/images/albums/blue_s.jpg,,true,2026-06-21
+237,White Wind,26,,Mini Album,Korean,2019-03-14,/images/albums/white_wind.jpg,,true,2026-06-21
+238,reality in BLACK,26,,Studio Album,Korean,2019-11-14,/images/albums/reality_in_black.jpg,,true,2026-06-21
+239,TRAVEL,26,,Mini Album,Korean,2020-11-03,/images/albums/travel.jpg,,true,2026-06-21
+240,WAW,26,,Mini Album,Korean,2021-06-02,/images/albums/waw.jpg,,true,2026-06-21
+241,I Say MAMAMOO : The Best,26,,Studio Album,Korean,2021-09-15,/images/albums/i_say_mamamoo_the_best.jpg,,true,2026-06-21
+242,Mic On,26,,Mini Album,Korean,2022-10-11,/images/albums/mic_on.jpg,,true,2026-06-21
+243,2NE1,27,,Mini Album,Korean,2009-07-08,/images/albums/2ne1.jpg,,true,2026-06-21
+244,To Anyone,27,,Studio Album,Korean,2010-09-09,/images/albums/to_anyone.jpg,,true,2026-06-21
+245,2NE1 2nd Mini Album,27,,Mini Album,Korean,2011-07-28,/images/albums/2ne1_2nd_mini_album.jpg,,true,2026-06-21
+246,COLLECTION,27,,Studio Album,Korean,2012-03-28,/images/albums/collection.jpg,,true,2026-06-21
+247,Crush,27,,Studio Album,Korean,2014-02-27,/images/albums/crush.jpg,,true,2026-06-21
+248,WELCOME BACK,27,,Studio Album,Korean,2024-12-25,/images/albums/welcome_back.jpg,,true,2026-06-21
+249,FIRST IMPACT,28,,Mini Album,Korean,2022-01-03,/images/albums/first_impact.jpg,,true,2026-06-21
+250,DOUBLAST,28,,Mini Album,Korean,2022-06-20,/images/albums/doublast.jpg,,true,2026-06-21
+251,TROUBLESHOOTER,28,,Mini Album,Korean,2022-10-13,/images/albums/troubleshooter.jpg,,true,2026-06-21
+252,LOVESTRUCK!,28,,Mini Album,Korean,2023-04-10,/images/albums/lovestruck.jpg,,true,2026-06-21
+253,Magic Hour,28,,Mini Album,Korean,2023-09-25,/images/albums/magic_hour.jpg,,true,2026-06-21
+254,Kep1going,28,,Studio Album,Korean,2024-05-08,/images/albums/kep1going.jpg,,true,2026-06-21
+255,Kep1going On,28,,Studio Album,Korean,2024-06-03,/images/albums/kep1going_on.jpg,,true,2026-06-21
+256,TIPI-TAP,28,,Mini Album,Korean,2024-11-01,/images/albums/tipi_tap.jpg,,true,2026-06-21
+257,AGAINST THE WORLD,28,,Mini Album,Japanese,2025-04-30,/images/albums/against_the_world.jpg,,true,2026-06-21
+258,BUBBLE GUM,28,,Mini Album,Korean,2025-08-19,/images/albums/bubble_gum.jpg,,true,2026-06-21
+259,CRACK CODE,28,,Mini Album,Korean,2026-03-31,/images/albums/crack_code.jpg,,true,2026-06-21
+260,First Love,29,,Mini Album,Korean,2015-03-19,/images/albums/first_love.jpg,,true,2026-06-21
+261,Question,29,,Mini Album,Korean,2015-05-28,/images/albums/question.jpg,,true,2026-06-21
+262,REFRESH,29,,Mini Album,Korean,2016-02-29,/images/albums/refresh.jpg,,true,2026-06-21
+263,High Heels,29,,Mini Album,Japanese,2016-04-13,/images/albums/high_heels.jpg,,true,2026-06-21
+264,Nu.Clear,29,,Mini Album,Korean,2016-05-30,/images/albums/nu_clear.jpg,,true,2026-06-21
+265,CRYSTYLE,29,,Mini Album,Korean,2017-01-16,/images/albums/crystyle.jpg,,true,2026-06-21
+266,FREE`SM,29,,Mini Album,Korean,2017-08-03,/images/albums/free_sm.jpg,,true,2026-06-21
+267,BLACK DRESS,29,,Mini Album,Korean,2018-02-22,/images/albums/black_dress.jpg,,true,2026-06-21
+268,No.1,29,,Mini Album,Korean,2019-01-30,/images/albums/no_1.jpg,,true,2026-06-21
+269,Rise,31,,Mini Album,Korean,2024-09-03,/images/albums/rise.jpg,,true,2026-06-21
+270,MADEIN Forever,31,,Studio Album,Korean,2025-02-14,/images/albums/madein_forever.jpg,,true,2026-06-21
+271,Girl Meets Boy,31,,Single,Korean,2026-02-09,/images/albums/girl_meets_boy.jpg,,true,2026-06-21
+272,Scenedrome,32,,Mini Album,Korean,2024-08-27,/images/albums/scenedrome.jpg,,true,2026-06-21
+273,Glow Up,32,,Mini Album,Korean,2025-02-05,/images/albums/glow_up.jpg,,true,2026-06-21
+274,Lip Bomb,32,,Mini Album,Korean,2025-11-25,/images/albums/lip_bomb.jpg,,true,2026-06-21
+275,So Cool,33,,Studio Album,Korean,2011-08-09,/images/albums/so_cool.jpg,,true,2026-06-21
+276,Hot Place,33,,Studio Album,Korean,2011-10-30,/images/albums/hot_place.jpg,,true,2026-06-21
+277,Alone,33,,Mini Album,Korean,2012-04-12,/images/albums/alone.jpg,,true,2026-06-21
+278,Give It to Me,33,,Studio Album,Korean,2013-06-11,/images/albums/give_it_to_me.jpg,,true,2026-06-21
+279,TOUCH N MOVE,33,,Mini Album,Korean,2014-07-21,/images/albums/touch_n_move.jpg,,true,2026-06-21
+280,SWEET & SOUR,33,,Mini Album,Korean,2014-08-26,/images/albums/sweet_&_sour.jpg,,true,2026-06-21
+281,SHAKE IT,33,,Mini Album,Korean,2015-06-22,/images/albums/shake_it.jpg,,true,2026-06-21
+282,INSANE LOVE,33,,Mini Album,Korean,2016-06-21,/images/albums/insane_love.jpg,,true,2026-06-21
+283,Season of Glass,34,,Mini Album,Korean,2015-01-15,/images/albums/season_of_glass.jpg,,true,2026-06-21
+284,Flower Bud,34,,Mini Album,Korean,2015-07-23,/images/albums/flower_bud.jpg,,true,2026-06-21
+285,SNOWFLAKE,34,,Mini Album,Korean,2016-01-25,/images/albums/snowflake.jpg,,true,2026-06-21
+286,LOL,34,,Studio Album,Korean,2016-07-11,/images/albums/lol.jpg,,true,2026-06-21
+287,THE AWAKENING,34,,Mini Album,Korean,2017-03-06,/images/albums/the_awakening.jpg,,true,2026-06-21
+288,PARALLEL,34,,Mini Album,Korean,2017-08-01,/images/albums/parallel.jpg,,true,2026-06-21
+289,Time for the moon night,34,,Mini Album,Korean,2018-04-30,/images/albums/time_for_the_moon_night.jpg,,true,2026-06-21
+290,Sunny Summer,34,,Mini Album,Korean,2018-07-19,/images/albums/sunny_summer.jpg,,true,2026-06-21
+291,Time for us,34,,Studio Album,Korean,2019-01-14,/images/albums/time_for_us.jpg,,true,2026-06-21
+292,FEVER SEASON,34,,Mini Album,Korean,2019-07-01,/images/albums/fever_season.jpg,,true,2026-06-21
+293,Fallin' Light,34,,Studio Album,Japanese,2019-11-13,/images/albums/fallin_light.jpg,,true,2026-06-21
+294,回:LABYRINTH,34,,Studio Album,Korean,2020-02-03,/images/albums/回_labyrinth.jpg,,true,2026-06-21
+295,回:Song of the Sirens,34,,Mini Album,Korean,2020-07-13,/images/albums/回_song_of_the_sirens.jpg,,true,2026-06-21
+296,回:Walpurgis Night,34,,Studio Album,Korean,2020-11-09,/images/albums/回_walpurgis_night.jpg,,true,2026-06-21
+297,Season of Memories (Special Album),34,,Single,Korean,2025-01-13,/images/albums/season_of_memories_special_album.jpg,,true,2026-06-21
+298,Beam of Prism,35,,Mini Album,Korean,2022-02-09,/images/albums/beam_of_prism.jpg,,true,2026-06-21
+299,Summer Vibe,35,,Mini Album,Korean,2022-07-06,/images/albums/summer_vibe.jpg,,true,2026-06-21
+300,VarioUS,35,,Mini Album,Korean,2023-01-31,/images/albums/various.jpg,,true,2026-06-21
+301,VERSUS,35,,Mini Album,Korean,2023-11-02,/images/albums/versus.jpg,,true,2026-06-21
+302,VOYAGE,35,,Mini Album,Korean,2024-11-07,/images/albums/voyage.jpg,,true,2026-06-21
+303,A Montage of ( ),35,,Studio Album,Korean,2025-07-08,/images/albums/a_montage_of.jpg,,true,2026-06-21
