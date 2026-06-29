@@ -82,8 +82,8 @@ api.interceptors.request.use(
             const modeId = MODES[activeMode] || MODES["classic"];
 
             config.params = {
-                ...config.params,
-                gamemode_id: modeId
+                gamemode_id: modeId,
+                ...config.params
             };
         }
         return config;
@@ -142,8 +142,10 @@ export const getUserToken = async () => {
     return response.data;
 }
 
-export const getUserStats = async (user_token: string) => {
-    const response = await api.get(`/stats/${user_token}`);
+export const getUserStats = async (user_token: string, gamemode_id?: number) => {
+    const response = await api.get(`/stats/${user_token}`, {
+        params: gamemode_id !== undefined ? { gamemode_id } : undefined,
+    });
     return response.data;
 }
 
