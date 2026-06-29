@@ -152,7 +152,7 @@ const PixelatedSearchBar = (props: PixelatedSearchBarProps) => {
                         <img
                           src={albumCoverUrl(album.cover_path)}
                           alt=""
-                          className="w-12 h-12 object-cover rounded-full border-2 border-ink shrink-0 grayscale"
+                          className="w-12 h-12 object-cover rounded-full border-2 border-ink shrink-0"
                           loading="eager"
                           draggable={false}
                         />

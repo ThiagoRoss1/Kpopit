@@ -51,14 +51,20 @@ const PixelatedGuessRow = ({
                 onAnimationEnd={shouldAnimate ? handleAnimationEnd : undefined}
             >
                 <span className={`pixel-fabric -top-2.5 ${tiltLeft ? "-right-2.5 rotate-[-14deg]" : "-left-2.5 rotate-14"}`} />
-                <div className={`flex items-center gap-4 py-2.5 pl-3 pr-4 rounded-full border-2 border-ink
+
+                <div className={`flex justify-center items-center gap-4 py-2.5 pl-3 pr-4 rounded-full border-2 border-ink
                     shadow-[0_4px_0_var(--color-ink),0_6px_12px_rgba(0,0,0,0.08)] ${guess.guess_correct ? "pixel-row--correct" : "pixel-row--incorrect"}`}>
-                    <img
-                        src={coverUrl}
-                        alt={`${guess.album_name} cover`}
-                        className="w-12 h-12 shrink-0 rounded-xl border-2 border-ink object-cover shadow-[3px_1.5px_0_rgba(0,0,0,1)] hover:scale-110 transition-transform duration-300 transform-gpu"
-                        draggable={false}
-                    />
+                    <div
+                        className="w-12 h-12 rounded-xl border-2 border-ink bg-ink shadow-[3px_1.5px_0_rgba(0,0,0,1)]
+                        overflow-hidden hover:scale-110 transition-transform duration-300 transform-gpu"
+                    >
+                        <img
+                            src={coverUrl}
+                            alt={`${guess.album_name} cover`}
+                            className="w-full h-full object-cover"
+                            draggable={false}
+                        />
+                    </div>
 
                     <div className="flex-1 min-w-0">
                         <div

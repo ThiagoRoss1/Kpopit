@@ -65,7 +65,7 @@ createRoot(document.getElementById('root')!).render(
                 <Route path="/blurry" element={<BlurryMode />} />
 
                 <Route path="/pixelated" element={<PixelatedMode />} />
-
+                
                 <Route path="/idols" element={<IdolsList />} />
 
                 <Route path="/idols/:id/:slug" element={<IdolProfile />} />

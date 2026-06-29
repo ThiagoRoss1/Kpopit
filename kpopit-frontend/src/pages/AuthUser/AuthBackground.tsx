@@ -2,7 +2,7 @@ import "./authPage.css";
 
 const AuthBackground = () => {
     return (
-        <div className="noise-bg fixed inset-0 -z-10 overflow-hidden pointer-events-none bg-[#0a0a0a]">
+        <div className="noise-bg fixed inset-0 -z-10 overflow-hidden pointer-events-none bg-ink">
 
             <div className="absolute inset-0 flex items-center justify-center overflow-hidden select-none">
                 <span className="whitespace-nowrap text-white font-korean text-[600px] font-black leading-none tracking-tighter opacity-[0.06] rotate-[-15deg]">

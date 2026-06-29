@@ -259,3 +259,5 @@ class AlbumService:
             """
         )
         return [dict(r) for r in cursor.fetchall()]
+    
+    # Future albums page - to_char(a.release_date, 'YYYY-MM-DD') AS release_date to fetch the entire release date.

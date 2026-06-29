@@ -89,7 +89,7 @@ const UserDropdownMobile = () => {
 
                 <div
                     ref={containerRef}
-                    className={`flex flex-col ${isOpen ? "mobile-navbar-enter" : "mobile-navbar-exit"} items-center gap-3 max-xxs:w-75 xxs:w-90 xs:w-100 sm:w-100 bg-[#0a0a0a] border-b-2 border-t-2 border-neon-pink rounded-3xl mt-20 py-8 px-6`}
+                    className={`flex flex-col ${isOpen ? "mobile-navbar-enter" : "mobile-navbar-exit"} items-center gap-3 max-xxs:w-75 xxs:w-90 xs:w-100 sm:w-100 bg-ink border-b-2 border-t-2 border-neon-pink rounded-3xl mt-20 py-8 px-6`}
                 >
                     {avatarSrc ? (
                         <img
