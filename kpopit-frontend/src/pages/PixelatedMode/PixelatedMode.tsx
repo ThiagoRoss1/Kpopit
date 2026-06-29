@@ -14,7 +14,7 @@ import PixelatedCanvas from "../../components/Pixelated/PixelatedCanvas";
 import PixelatedGuessGrid from "../../components/Pixelated/PixelatedGuessGrid";
 import PixelatedHints from "../../components/Pixelated/PixelatedHints";
 import PixelatedVictory from "../../components/Pixelated/PixelatedVictory";
-import {GetPixelLevel, GetSaturationLevel, PIXEL_LEVELS, SATURATION_LEVELS} from "../../utils/pixelLevels";
+import {GetPixelLevel, PIXEL_LEVELS} from "../../utils/pixelLevels";
 import { WinnerExplosion } from "../../utils/confetti";
 import { useClearGameStorage } from "../../hooks/useClearGameStorage";
 import { safeReload } from "../../utils/safeReload";
@@ -29,7 +29,6 @@ import ExportDataText from "../../components/buttons/modals/ExportDataContent";
 import { Link } from "react-router-dom";
 
 const REVEAL_LEVEL = PIXEL_LEVELS[PIXEL_LEVELS.length - 1];
-const REVEAL_SATURATION = SATURATION_LEVELS[SATURATION_LEVELS.length - 1];
 
 function PixelatedMode() {
     const gameMode = useGameMode();
@@ -255,7 +254,6 @@ function PixelatedMode() {
 
     const excludedIds = guesses.map((g) => g.album_id);
     const blockSize = endGame ? REVEAL_LEVEL : GetPixelLevel(guesses.length);
-    const saturationLevel = endGame ? REVEAL_SATURATION : GetSaturationLevel(guesses.length);
     const userCount = dailyUserCount?.data?.user_count ?? 0;
     const winningGuess = guesses.find((g) => g.guess_correct);
 
@@ -378,7 +376,6 @@ function PixelatedMode() {
                                                     <PixelatedCanvas
                                                         imageUrl={coverUrl}
                                                         blockSize={blockSize}
-                                                        saturationLevel={saturationLevel}
                                                         alt="Pixelated album cover"
                                                         className="w-full h-full object-cover block rounded-full"
                                                     />
@@ -404,7 +401,6 @@ function PixelatedMode() {
                                                 <PixelatedCanvas
                                                     imageUrl={coverUrl}
                                                     blockSize={blockSize}
-                                                    saturationLevel={saturationLevel}
                                                     alt="Pixelated album cover"
                                                     className="w-full h-full object-cover block"
                                                 />

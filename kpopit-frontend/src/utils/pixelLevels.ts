@@ -1,4 +1,3 @@
-// Block size per attempt. Larger = more pixelated. 1 = original (full reveal).
 export const PIXEL_LEVELS = [
     200,
     160,
@@ -12,13 +11,6 @@ export const PIXEL_LEVELS = [
     15,
     10,
     1,
-]
-
-export const SATURATION_LEVELS = [
-    20,
-    60,
-    80,
-    100,
 ]
 
 // Reference resolution (px per axis) that `blockSize` is measured against.
@@ -37,9 +29,4 @@ const GetPixelLevel = (attempts: number): number => {
     return PIXEL_LEVELS[Math.min(attempts, lastIndex)];
 }
 
-const GetSaturationLevel = (attempts: number): number => {
-    const lastIndex = SATURATION_LEVELS.length - 1;
-    return SATURATION_LEVELS[Math.min(attempts, lastIndex)];
-}
-
-export { GetPixelLevel, GetSaturationLevel };
+export { GetPixelLevel };

@@ -4,12 +4,11 @@ import { blockSizeToGrid } from "../../utils/pixelLevels";
 interface PixelatedCanvasProps {
     imageUrl: string;
     blockSize: number;
-    saturationLevel?: number;
     alt?: string;
     className?: string;
 }
 
-const PixelatedCanvas = ({ imageUrl, blockSize, saturationLevel, alt, className }: PixelatedCanvasProps) => {
+const PixelatedCanvas = ({ imageUrl, blockSize, alt, className }: PixelatedCanvasProps) => {
     const canvasRef = useRef<HTMLCanvasElement>(null);
     const offscreenRef = useRef<HTMLCanvasElement | null>(null);
     const imgRef = useRef<HTMLImageElement | null>(null);
@@ -21,9 +20,6 @@ const PixelatedCanvas = ({ imageUrl, blockSize, saturationLevel, alt, className 
     // Read the latest blockSize inside render() without re-creating render().
     const blockSizeRef = useRef<number>(blockSize);
     blockSizeRef.current = blockSize;
-
-    const saturationRef = useRef<number>(saturationLevel);
-    saturationRef.current = saturationLevel;
 
     const render = useCallback(() => {
         const canvas = canvasRef.current;
@@ -38,7 +34,6 @@ const PixelatedCanvas = ({ imageUrl, blockSize, saturationLevel, alt, className 
         if (!ctx) return;
 
         const bs = blockSizeRef.current;
-        const saturation = saturationRef.current;
 
         // Mosaic resolution comes from a FIXED reference (see pixelLevels.ts),
         // never the device backing store, so a given attempt looks the same on
@@ -53,7 +48,6 @@ const PixelatedCanvas = ({ imageUrl, blockSize, saturationLevel, alt, className 
         if (bs <= 1 || grid >= Math.min(w, h)) {
             ctx.imageSmoothingEnabled = true;
             ctx.imageSmoothingQuality = "high";
-            ctx.filter = saturation ? `saturate(${saturation}%)` : "";
             ctx.drawImage(img, 0, 0, w, h);
             return;
         }
@@ -69,7 +63,6 @@ const PixelatedCanvas = ({ imageUrl, blockSize, saturationLevel, alt, className 
         off.height = grid;
         octx.imageSmoothingEnabled = true;
         octx.imageSmoothingQuality = "high";
-        octx.filter = saturation ? `saturate(${saturation}%)` : "";
         octx.drawImage(img, 0, 0, grid, grid);
 
         // Pass 2 — upscale that tiny image to the full canvas with smoothing OFF
@@ -129,7 +122,7 @@ const PixelatedCanvas = ({ imageUrl, blockSize, saturationLevel, alt, className 
 
     useEffect(() => {
         render();
-    }, [blockSize, saturationLevel, render]);
+    }, [blockSize, render]);
 
     if (loadFailed) {
         return (
