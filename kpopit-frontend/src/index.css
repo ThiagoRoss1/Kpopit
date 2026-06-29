@@ -32,8 +32,8 @@ body {
   @apply min-h-screen font-[DynaPuff];
   /* Default gradient - will be overridden by dynamic class */
   background: linear-gradient(
-  #0a0a0a 30%,
-  #0a0a0a 100%
+  #e42b2b 30%,
+  #eb2c2c 100%
   );
 }
 
