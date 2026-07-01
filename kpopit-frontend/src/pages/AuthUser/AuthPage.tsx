@@ -198,7 +198,7 @@ const AuthPage = () => {
                 <div className="relative z-10 flex flex-col items-center justify-center w-full px-2 sxs:px-3 sm:px-4 pt-15 pb-8">
 
                     <div className="relative w-full max-w-120">
-                        <div className="absolute inset-0 z-0 bg-[#0a0a0a] border border-solid border-neon-pink/15 rounded-[40px] modal-outer-shadow translate-x-0.75 translate-y-0.75 rotate-[1.5deg] transform-gpu" />
+                        <div className="absolute inset-0 z-0 bg-ink border border-solid border-neon-pink/15 rounded-[40px] modal-outer-shadow translate-x-0.75 translate-y-0.75 rotate-[1.5deg] transform-gpu" />
 
                         <div className="relative z-10 flex flex-col bg-[#111111] border-4 border-neon-pink rounded-[40px] p-5 sxs:p-6 sm:p-8 modal-inner-shadow">
                             {/* Tab toggle */}
@@ -266,7 +266,7 @@ const AuthPage = () => {
                                             placeholder={isLoginTab ? "@username or email" : "Pick your stage name"}
                                             maxLength={isLoginTab ? undefined : 12}
                                             autoComplete="username"
-                                            className="w-full h-full pl-11 pr-11 bg-[#0a0a0a] text-sm font-bold text-white placeholder:text-neutral-700 focus:outline-none"
+                                            className="w-full h-full pl-11 pr-11 bg-ink text-sm font-bold text-white placeholder:text-neutral-700 focus:outline-none"
                                         />
 
                                         {!isLoginTab && isValidUsername && usernameStatus === "checking" && (
@@ -304,7 +304,7 @@ const AuthPage = () => {
                                                 onChange={handleRegisterChange}
                                                 placeholder="bias@example.com"
                                                 autoComplete="email"
-                                                className="w-full h-full px-5 bg-[#0a0a0a] text-sm font-bold text-white placeholder:text-neutral-700 focus:outline-none"
+                                                className="w-full h-full px-5 bg-ink text-sm font-bold text-white placeholder:text-neutral-700 focus:outline-none"
                                             />
                                         </div>
 
@@ -341,7 +341,7 @@ const AuthPage = () => {
                                             onChange={isLoginTab ? handleLoginChange : handleRegisterChange}
                                             placeholder="••••••••••••"
                                             autoComplete={isLoginTab ? "current-password" : "new-password"}
-                                            className="w-full h-full pl-11 pr-11 bg-[#0a0a0a] text-sm font-bold text-white placeholder:text-neutral-700 focus:outline-none"
+                                            className="w-full h-full pl-11 pr-11 bg-ink text-sm font-bold text-white placeholder:text-neutral-700 focus:outline-none"
                                         />
                                         <button
                                             type="button"
@@ -388,7 +388,7 @@ const AuthPage = () => {
                                                 onChange={handleRegisterChange}
                                                 placeholder="••••••••••••"
                                                 autoComplete="new-password"
-                                                className="w-full h-full pl-11 pr-11 bg-[#0a0a0a] text-sm font-bold text-white placeholder:text-neutral-700 focus:outline-none"
+                                                className="w-full h-full pl-11 pr-11 bg-ink text-sm font-bold text-white placeholder:text-neutral-700 focus:outline-none"
                                             />
                                             <button
                                                 type="button"

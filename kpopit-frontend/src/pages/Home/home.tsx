@@ -167,7 +167,7 @@ function Home() {
 
                                     <span className="text-white max-xxs:text-[11px] xxs:text-[12px] sm:text-base
                                     [text-shadow:2px_2px_0px_rgba(0,0,0,1),0_0_12px_rgba(255,255,255,0.60)]">
-                                        Guess the daily K-pop album cover
+                                        Guess the daily K-pop pixelated album
                                     </span>
                                 </div>
 
