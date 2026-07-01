@@ -23,8 +23,20 @@ const PixelatedSearchBar = (props: PixelatedSearchBarProps) => {
   const [suggestions, setSuggestions] = useState<AlbumSearchResult[]>([]);
   const [showList, setShowList] = useState<boolean>(false);
   const [selectedAlbum, setSelectedAlbum] = useState<AlbumSearchResult | null>(null);
+  // Defer the visual `disabled` state by one frame so it never lands in the same
+  // synchronous update as the dropdown close — otherwise Safari/Firefox interrupt
+  // the AnimatePresence exit animation and the list appears to collapse into the bar.
+  const [deferredDisabled, setDeferredDisabled] = useState<boolean>(!!disabled);
 
   const containerRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    if (disabled) {
+      const raf = requestAnimationFrame(() => setDeferredDisabled(true));
+      return () => cancelAnimationFrame(raf);
+    }
+    setDeferredDisabled(false);
+  }, [disabled]);
 
   useEffect(() => {
     const handleClickOutside = (e: MouseEvent) => {
@@ -114,13 +126,13 @@ const PixelatedSearchBar = (props: PixelatedSearchBarProps) => {
               value={value}
               onChange={handleInputChange}
               placeholder="Type an album or group…"
-              disabled={disabled}
+              disabled={deferredDisabled}
               onFocus={() => value.trim().length > 0 && suggestions.length > 0 && setShowList(true)}
             />
             <button
               type="button"
               onClick={submit}
-              disabled={disabled || !selectedAlbum}
+              disabled={deferredDisabled || !selectedAlbum}
               className="flex items-center gap-1.5 w-14.5 h-11 px-4 sm:px-4 p-2 rounded-full font-bold 
               bg-neon-pink border-b-2 border-ink shadow-[0_4px_0_var(--color-ink)] firefox:shadow-none firefox:drop-shadow-[0_4px_0_var(--color-ink)] firefox:active:drop-shadow-[0_1px_0_var(--color-ink)] transition-all duration-150
                 hover:brightness-110 hover:cursor-pointer active:translate-y-1 active:shadow-[0_1px_0_var(--color-ink)]
