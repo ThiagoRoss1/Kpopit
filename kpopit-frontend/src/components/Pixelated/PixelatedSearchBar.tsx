@@ -121,7 +121,7 @@ const PixelatedSearchBar = (props: PixelatedSearchBarProps) => {
               type="button"
               onClick={submit}
               disabled={disabled || !selectedAlbum}
-              className="flex items-center gap-1.5 h-11 px-4 sm:px-4 p-2 rounded-full font-bold 
+              className="flex items-center gap-1.5 w-14.5 h-11 px-4 sm:px-4 p-2 rounded-full font-bold 
               bg-neon-pink border-b-2 border-ink shadow-[0_4px_0_var(--color-ink)] firefox:shadow-none firefox:drop-shadow-[0_4px_0_var(--color-ink)] firefox:active:drop-shadow-[0_1px_0_var(--color-ink)] transition-all duration-150
                 hover:brightness-110 hover:cursor-pointer active:translate-y-1 active:shadow-[0_1px_0_var(--color-ink)]
                 disabled:opacity-50 disabled:pointer-events-none"

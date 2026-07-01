@@ -118,6 +118,29 @@
 
 @keyframes kpVinylSpin { from { transform: rotate(0); } to { transform: rotate(360deg); } }
 
+/* Mobile sleeve zoom */
+.pixel-sleeve-zoom-in,
+.pixel-sleeve-zoom-out { will-change: translate, rotate, scale; }
+
+@keyframes pixelSleeveZoomIn {
+    to { translate: -50% 0; rotate: 0deg; scale: 1.32; }
+}
+@keyframes pixelSleeveZoomOut {
+    from { translate: -50% 0; rotate: 0deg; scale: 1.32; }
+}
+
+.pixel-sleeve-zoom-in  { animation: pixelSleeveZoomIn 0.42s cubic-bezier(0.34, 1.4, 0.64, 1) forwards; }
+.pixel-sleeve-zoom-out { animation: pixelSleeveZoomOut 0.3s cubic-bezier(0.4, 0, 0.2, 1) forwards; }
+
+@keyframes pixelZoomBackdropIn { from { opacity: 0; } to { opacity: 1; } }
+@keyframes pixelZoomBackdropOut { from { opacity: 1; } to { opacity: 0; } }
+.pixel-zoom-backdrop-in  { animation: pixelZoomBackdropIn 0.28s ease forwards; }
+.pixel-zoom-backdrop-out { animation: pixelZoomBackdropOut 0.28s ease forwards; }
+
 @media (prefers-reduced-motion: reduce) {
     .pixel-vinyl__spin { animation: none; }
+    .pixel-sleeve-zoom-in,
+    .pixel-sleeve-zoom-out,
+    .pixel-zoom-backdrop-in,
+    .pixel-zoom-backdrop-out { animation-duration: 0.01ms; }
 }

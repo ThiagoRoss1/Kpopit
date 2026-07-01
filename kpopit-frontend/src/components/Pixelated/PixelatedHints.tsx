@@ -39,15 +39,17 @@ const PixelatedHints = ({ guessCount, releaseYear, artistName }: PixelatedHintsP
     const hintValue = (id: HintId) => (id === "year" ? String(releaseYear) : artistName);
 
     return (
-        <div className="pixel-hints flex w-full justify-center xl:justify-start items-start gap-6 px-0 xl:px-6 zm:gap-12 sm:gap-22 lg:gap-20 xl:gap-30">
+        <div className="pixel-hints flex w-full justify-center xl:justify-start items-start gap-6 px-0 zm:pr-4 sm:pr-0 xl:px-6 zm:gap-14 sm:gap-22 lg:gap-20 xl:gap-30">
             {HINTS.map((hint) => {
                 const unlocked = guessCount >= hint.unlockGuesses;
                 const st = status[hint.id];
+                
                 const isOpen = unlocked && st === "open";
                 const isClosing = st === "closing";
-                const remaining = Math.max(0, hint.unlockGuesses - guessCount);
-                // Left card (year) mirrors the right card (artist) on mobile.
                 const isLeft = hint.id === "year";
+
+                const remaining = Math.max(0, hint.unlockGuesses - guessCount);
+
                 return (
                     <div
                         key={hint.id}
@@ -80,17 +82,17 @@ const PixelatedHints = ({ guessCount, releaseYear, artistName }: PixelatedHintsP
                                 left-1/2 -translate-x-1/2 zm:translate-x-0
                                 transition-[top,left] duration-550 ease-[cubic-bezier(0.34,1.4,0.64,1)] motion-reduce:transition-none
                                 ${isOpen
-                                    ? `${isLeft ? "pixel-hint-mobile-enter-l" : "pixel-hint-mobile-enter-r"} top-5 zm:top-5 zm:left-22 sm:left-26 lg:left-22 xl:left-26`
+                                    ? `${isLeft ? "pixel-hint-mobile-enter-l" : "pixel-hint-mobile-enter-r"} top-5 zm:top-5 zm:left-24 sm:left-26 lg:left-22 xl:left-30`
                                     : `${isClosing ? (isLeft ? "pixel-hint-mobile-exit-l" : "pixel-hint-mobile-exit-r") : ""} top-5 zm:left-4 lg:left-0 xl:left-4`}`}
                         >
                             <div
                                 className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 w-[62%] h-[62%] rounded-full
                                     bg-neon-pink flex flex-col items-center justify-center text-center p-1
-                                    shadow-[inset_0_0_0_1px_rgba(0,0,0,0.25),inset_0_2px_4px_rgba(255,255,255,0.18)]
-                                    transition-opacity duration-350 delay-[180ms] motion-reduce:transition-none"
+                                    shadow-[inset_0_0_0_1px_rgba(0,0,0,0.25),inset_0_2px_4px_rgba(255,255,255,0.18)]"
                             >
-                                <span className={`font-bold ${hintValue(hint.id).length > 8 ? "text-[12px] xl:text-sm" : "text-sm xl:text-base"} text-white leading-[1.02] [text-shadow:0_1px_0_rgba(0,0,0,0.5)]`}>
-                                    {hintValue(hint.id)}
+                                <span className={`font-bold ${hintValue(hint.id).length > 8 ? "text-[12px] xl:text-sm" : "text-sm xl:text-base"} text-white leading-[1.02] [text-shadow:0_1px_0_rgba(0,0,0,0.5)]
+                                    transition-opacity duration-250 motion-reduce:transition-none ${isOpen ? "opacity-100" : "opacity-0"}`}>
+                                    {st !== "closed" ? `${hintValue(hint.id)}` : ""}
                                 </span>
                             </div>
                         </div>

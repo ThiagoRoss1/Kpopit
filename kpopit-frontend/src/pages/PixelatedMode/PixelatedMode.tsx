@@ -43,7 +43,8 @@ function PixelatedMode() {
     const [attempts, setAttempts] = useState<number>(0);
     const [sessionRestored, setSessionRestored] = useState<number>(0);
     const [showModal, setShowModal] = useState<null | "stats" | "transfer-data" | "import-data" | "export-data">(null);
-    const [isTouched, setIsTouched] = useState<boolean>(false);
+    const [zoom, setZoom] = useState<"closed" | "open" | "closing">("closed");
+    const touchStartRef = useRef<{ x: number; y: number } | null>(null);
 
     const { initUser, decryptedTokenRef, isInitialized, queryClient, userStatsData, transferData } = useSharedGameData();
     const { clearPixelated } = useClearGameStorage();
@@ -319,10 +320,10 @@ function PixelatedMode() {
                 </div>
 
                 {/* Mobile zoom backdrop */}
-                {isTouched && (
+                {zoom !== "closed" && (
                     <div
-                        className="fixed inset-0 z-40 bg-black/60"
-                        onTouchEnd={() => setIsTouched(false)}
+                        className={`fixed inset-0 z-40 bg-black/60 ${zoom === "closing" ? "pixel-zoom-backdrop-out" : "pixel-zoom-backdrop-in"}`}
+                        onTouchEnd={() => setZoom((z) => (z === "open" ? "closing" : z))}
                     />
                 )}
 
@@ -357,18 +358,13 @@ function PixelatedMode() {
                         <div className="flex flex-col w-full lg:w-1/2 xl:w-160">
                                 <div
                                     className={`pixel-stage relative w-full h-70 xxs:h-75 xs:h-80 xm:h-85 zm:h-95 sm:h-100 md:h-110 xl:h-130 mx-auto select-none
-                                    ${isTouched ? "scale-110 z-50" : "scale-100"} transition-transform duration-300 transform-gpu`}
-                                    onTouchEnd={(e) => {
-                                        if (window.matchMedia("(orientation: portrait)").matches) {
-                                            setIsTouched(!isTouched);
-                                            e.stopPropagation();
-                                        }
-                                    }}
+                                    ${zoom !== "closed" ? "z-50" : ""}`}
                                 >
                                     {/* Vinyl disc */}
-                                    <div 
-                                        className="absolute flex left-1/2 -translate-x-[35%] xs:-translate-x-[30%] top-5 w-55 zm:-translate-x-[30%] 
-                                        xxs:w-60 xs:w-65 xm:w-70 zm:w-76 sm:w-80 md:-translate-x-[25%] md:top-3 md:w-90 lg:-translate-x-[2%] lg:left-32 lg:w-90 xl:translate-x-[5%] xl:left-36 xl:w-110 aspect-square z-1"
+                                    <div
+                                        className={`absolute flex left-1/2 -translate-x-[35%] xs:-translate-x-[30%] top-5 w-55 zm:-translate-x-[30%]
+                                        xxs:w-60 xs:w-65 xm:w-70 zm:w-76 sm:w-80 md:-translate-x-[25%] md:top-3 md:w-90 lg:-translate-x-[2%] lg:left-32 lg:w-90 xl:translate-x-[5%] xl:left-36 xl:w-110 aspect-square z-1
+                                        transition-opacity duration-300 ${zoom === "open" ? "opacity-0" : "opacity-100"}`}
                                     >
                                         <div className="pixel-vinyl">
                                             <div className="pixel-vinyl__spin">
@@ -388,9 +384,27 @@ function PixelatedMode() {
 
                                     {/* Sleeve */}
                                     <div
-                                        className="absolute flex z-2 bg-ink border-2 border-cream -rotate-4 left-1/2 -translate-x-[55%] xs:-translate-x-[65%] top-[2%] w-55 h-65 xxs:w-60 xxs:h-70 xs:w-65 xs:h-75 xm:w-70 xm:h-80 zm:w-76 zm:h-86
+                                        className={`pixel-sleeve absolute flex z-2 bg-ink border-2 border-cream -rotate-4 left-1/2 -translate-x-[55%] xs:-translate-x-[65%] top-[2%] w-55 h-65 xxs:w-60 xxs:h-70 xs:w-65 xs:h-75 xm:w-70 xm:h-80 zm:w-76 zm:h-86
                                         shadow-[0_14px_30px_rgba(0,0,0,0.35),0_4px_10px_rgba(0,0,0,0.2)] rounded-2xl rounded-b-3xl
-                                        sm:w-80 sm:h-90 md:-translate-x-[60%] md:w-90 md:h-100 lg:left-0 lg:translate-x-0 lg:w-90 lg:h-100 xl:w-110 xl:h-120"
+                                        sm:w-80 sm:h-90 md:-translate-x-[60%] md:w-90 md:h-100 lg:left-0 lg:translate-x-0 lg:w-90 lg:h-100 xl:w-110 xl:h-120
+                                        ${zoom === "open" ? "pixel-sleeve-zoom-in" : zoom === "closing" ? "pixel-sleeve-zoom-out" : ""}`}
+                                        onTouchStart={(e) => {
+                                            const t = e.touches[0];
+                                            if (t) touchStartRef.current = { x: t.clientX, y: t.clientY };
+                                        }}
+                                        onTouchEnd={(e) => {
+                                            if (isLg || !window.matchMedia("(orientation: portrait)").matches) return;
+                                            const start = touchStartRef.current;
+                                            touchStartRef.current = null;
+                                            const t = e.changedTouches[0];
+                                            if (!start || !t) return;
+                                            if (Math.hypot(t.clientX - start.x, t.clientY - start.y) > 10) return;
+                                            e.stopPropagation();
+                                            setZoom((z) => (z === "open" ? "closing" : "open"));
+                                        }}
+                                        onAnimationEnd={(e) => {
+                                            if (e.animationName === "pixelSleeveZoomOut") setZoom("closed");
+                                        }}
                                     >
                                         <div className="relative flex items-center justify-center p-4 w-full h-fit">
                                             <span className="pixel-washi absolute top-0 -left-6 w-[22%] h-5.5 z-4 rotate-[-34.8deg]" />
@@ -505,6 +519,20 @@ function PixelatedMode() {
                                     onAnimationComplete={handleAnimationsComplete}
                                 />
                             )}
+
+                            {!showVictory && yesterdayAlbum && yesterdayAlbumArtist && yesterdayAlbumCover && (
+                                <div className="w-full flex flex-col items-center justify-center mt-10 lg:mt-20">
+                                    <span className="font-['Caveat',cursive] text-xl sm:text-2xl leading-tight">
+                                        <span className="text-ink/70">
+                                            Yesterday's album was
+                                        </span>{" "}
+                                        <span className="text-neon-pink font-bold [text-shadow:1.2px_1.2px_2px_rgba(0,0,0,0.6),0_0_4px_rgba(255,51,153,1)]">
+                                            {yesterdayAlbum}
+                                        </span>
+                                    </span>
+                                </div>
+                            )}
+
                         </div>
                     </div>
 

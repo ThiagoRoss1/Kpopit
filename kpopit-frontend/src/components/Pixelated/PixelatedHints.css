@@ -9,14 +9,14 @@
         radial-gradient(circle at 50% 50%, #262626 0%, #060606 65%, #1a1a1a 100%);
 }
 
-/* ── Mobile reveal choreography (disc slides out, sleeve tilts) ── */
+/* Mobile reveal animation */
 @keyframes hintDiscRevealR {
     0%   { translate: -50% 0; z-index: 1; animation-timing-function: cubic-bezier(0.16, 1, 0.3, 1); }
     60%  { translate: 33% 0;  z-index: 1; }
     61%  { translate: 33% 0;  z-index: 5; animation-timing-function: cubic-bezier(0.34, 1.4, 0.64, 1); }
     100% { translate: -50% 0; z-index: 5; }
 }
-/* Disc — left card: mirror (peeks left). */
+/* Disc — left card */
 @keyframes hintDiscRevealL {
     0%   { translate: -50% 0;  z-index: 1; animation-timing-function: cubic-bezier(0.16, 1, 0.3, 1); }
     60%  { translate: -133% 0; z-index: 1; }
@@ -40,7 +40,7 @@
     100% { rotate: -2deg; }
 }
 
-/* ── Mobile hide choreography (reverse: disc drops back behind the sleeve) ── */
+/* Mobile hide animation */
 @keyframes hintDiscHideR {
     0%   { translate: -50% 0; z-index: 5; animation-timing-function: cubic-bezier(0.34, 1.4, 0.64, 1); }
     40%  { translate: 33% 0;  z-index: 5; }
