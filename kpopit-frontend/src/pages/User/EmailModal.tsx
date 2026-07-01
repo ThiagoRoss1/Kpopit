@@ -71,7 +71,7 @@ const EmailModal = ({ isOpen, onClose, onBack }: EmailModalProps) => {
                         New Email
                     </label>
 
-                    <div className="ep-input relative h-13 rounded-2xl overflow-hidden bg-[#0a0a0a]">
+                    <div className="ep-input relative h-13 rounded-2xl overflow-hidden bg-ink">
                         <Mail className="absolute left-4 top-1/2 w-4 h-4 -translate-y-1/2 text-white" />
 
                         <input
@@ -82,7 +82,7 @@ const EmailModal = ({ isOpen, onClose, onBack }: EmailModalProps) => {
                             disabled={sent}
                             onChange={(e) => setNewEmail(e.target.value)}
                             placeholder="you@example.com"
-                            className="w-full h-full pl-11 pr-4 bg-[#0a0a0a] text-sm font-bold text-white placeholder:text-neutral-700 focus:outline-none disabled:opacity-50"
+                            className="w-full h-full pl-11 pr-4 bg-ink text-sm font-bold text-white placeholder:text-neutral-700 focus:outline-none disabled:opacity-50"
                         />
                     </div>
 
