@@ -21,8 +21,8 @@ interface HintDef {
 }
 
 const HINTS: HintDef[] = [
-    { id: "year", sleeve: "year", label: "Release Year", korean: "발매년도", unlockGuesses: 1, stampIndex: "#01", storageKey: "pixelatedHint1Revealed" },
-    { id: "artist", sleeve: "artist", label: "Artist", korean: "가수", unlockGuesses: 1, stampIndex: "#02", storageKey: "pixelatedHint2Revealed" },
+    { id: "year", sleeve: "year", label: "Release Year", korean: "발매년도", unlockGuesses: 3, stampIndex: "#01", storageKey: "pixelatedHint1Revealed" },
+    { id: "artist", sleeve: "artist", label: "Artist", korean: "가수", unlockGuesses: 6, stampIndex: "#02", storageKey: "pixelatedHint2Revealed" },
 ];
 
 const PixelatedHints = ({ guessCount, releaseYear, artistName }: PixelatedHintsProps) => {
