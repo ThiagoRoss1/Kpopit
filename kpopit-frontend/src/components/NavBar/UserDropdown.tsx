@@ -66,7 +66,7 @@ const UserDropdown = () => {
 
             <div
                 data-state={isOpen ? "open" : "closed"}
-                className="droplist-base absolute right-0 top-full mt-3 w-60 z-50 bg-[#0a0a0a] rounded-2xl shadow-[4px_4px_0px_rgba(255,51,153,1)] border-t border-neon-pink overflow-hidden"
+                className="droplist-base absolute right-0 top-full mt-3 w-60 z-50 bg-ink rounded-2xl shadow-[4px_4px_0px_rgba(255,51,153,1)] border-t border-neon-pink overflow-hidden"
             >
                 {/* Header */}
                 <div className="flex flex-row items-center gap-3 px-4 py-3 border-b border-neon-pink/20">

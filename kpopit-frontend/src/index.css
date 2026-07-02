@@ -20,10 +20,12 @@
   --breakpoint-3xl: 1728px;
 
   --color-neon-pink: #FF3399;
+  --color-cream: #FAF6F0;
+  --color-ink: #0a0a0a;
 }
 
 html, body {
-  overscroll-behavior: none;
+  overscroll-behavior-y: auto;
 }
 
 body {
@@ -52,8 +54,8 @@ body {
 .logo::after {
   content: "Kpopit";
   position: absolute;
-  top: 6px;   /* deslocamento vertical */
-  left: 6px;  /* deslocamento horizontal */
+  top: 6px;
+  left: 6px;
   z-index: -1;
   background: linear-gradient(180deg, #e70a7d, #ec4850);
   -webkit-background-clip: text;
@@ -91,12 +93,11 @@ h1 {
 }
   
 .kpop-part {
-  background: linear-gradient(180deg, #f17bb8, #b43777);
+  background: linear-gradient(180deg, #f17bb8, var(--kpop-color, #b43777));
   -webkit-background-clip: text;
   background-clip: text;
   color: transparent; 
   
-  /* Sombra indo pra direita com blur progressivo */
   filter:
     drop-shadow(0 0 4px rgba(226, 35, 134, 0.4))
     drop-shadow(1px 1px 0 rgba(0, 0, 0, 0.8))
@@ -105,12 +106,11 @@ h1 {
 }
 
 .it-part {
-  background: linear-gradient(180deg, #ffffff, #ad7894);
+  background: linear-gradient(180deg, #ffffff, var(--it-color, #ad7894));
   -webkit-background-clip: text;
   background-clip: text;
   color: transparent; 
   
-  /* Sombra indo pra direita com blur progressivo */
   filter: 
     drop-shadow(0 0 4px rgba(255, 255, 255, 0.4))
     drop-shadow(1px 1px 0 rgba(0, 0, 0, 0.8))
@@ -124,12 +124,12 @@ h1 {
 
 /* Selection color */
 ::selection {
-  background: #b43777;
+  background: #FF3399;
   color: white;
 }
 
 ::-moz-selection {
-  background: #b43777;
+  background: #FF3399;
   color: white;
 }
 

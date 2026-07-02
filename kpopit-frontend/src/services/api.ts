@@ -1,5 +1,5 @@
 import axios from 'axios';
-import type { AddIdolRequest, CompleteGuessTrafficRequest, RestoreSessionResponse } from '../interfaces/gameInterfaces';
+import type { AddIdolRequest, CompleteGuessTrafficRequest, RestoreSessionResponse, PixelatedGameData, PixelatedGuessPayload, AlbumSearchResult } from '../interfaces/gameInterfaces';
 import type { MeResponse, UpdateProfilePayload } from '../interfaces/authInterfaces';
 import { decryptToken } from '../utils/tokenEncryption';
 import { setAccessToken, getAccessToken, clearAccessToken } from './tokenStore';
@@ -14,7 +14,8 @@ const api = axios.create({
 // Game modes
 const MODES: Record<string, number> = {
     "classic": 1,
-    "blurry": 2
+    "blurry": 2,
+    "pixelated": 3
 };
 
 export const isTimeoutError = (err: unknown): boolean =>
@@ -81,8 +82,8 @@ api.interceptors.request.use(
             const modeId = MODES[activeMode] || MODES["classic"];
 
             config.params = {
-                ...config.params,
-                gamemode_id: modeId
+                gamemode_id: modeId,
+                ...config.params
             };
         }
         return config;
@@ -113,11 +114,17 @@ export const getAllIdols = async () => {
     return response.data;
 };
 
-// Export yesterday's idol date
+// Export yesterday's idol data
 export const getYesterdaysIdol = async () => {
     const response = await api.get('/store-yesterdays-idol');
     return response.data;
 };
+
+// Export yesterday's album data
+export const getYesterdaysAlbum = async () => {
+    const response = await api.get('/store-yesterdays-album');
+    return response.data;
+}
 
 export const getResetTimer = async () => {
     const response = await api.get('/reset-timer');
@@ -135,8 +142,10 @@ export const getUserToken = async () => {
     return response.data;
 }
 
-export const getUserStats = async (user_token: string) => {
-    const response = await api.get(`/stats/${user_token}`);
+export const getUserStats = async (user_token: string, gamemode_id?: number) => {
+    const response = await api.get(`/stats/${user_token}`, {
+        params: gamemode_id !== undefined ? { gamemode_id } : undefined,
+    });
     return response.data;
 }
 
@@ -202,6 +211,30 @@ export const getBlurryGuessIdol = async (payload: CompleteGuessTrafficRequest) =
     if (import.meta.env.DEV) {
         console.log("Answer received from API /blurry/guess:", response.data);
     };
+    return response.data;
+}
+
+export const getPixelatedDailyAlbum = async (): Promise<PixelatedGameData> => {
+    const encrypted = localStorage.getItem('userToken');
+    const token = encrypted ? await decryptToken(encrypted) : null;
+    const response = await api.get('/game/pixelated/daily-album', {
+        headers: token ? { 'Authorization': token } : {}
+    });
+    return response.data;
+}
+
+export const getPixelatedGuessAlbum = async (payload: PixelatedGuessPayload) => {
+    const response = await api.post('/game/pixelated/guess', payload);
+    if (import.meta.env.DEV) {
+        console.log("Answer received from API /pixelated/guess:", response.data);
+    };
+    return response.data;
+}
+
+// All published albums — fetched once and filtered client-side (mirrors getAllIdols
+// → ["allIdols"]). Replaces the old per-keystroke /albums/search endpoint.
+export const getAllAlbums = async (): Promise<AlbumSearchResult[]> => {
+    const response = await api.get('/game/pixelated/albums-list');
     return response.data;
 }
 

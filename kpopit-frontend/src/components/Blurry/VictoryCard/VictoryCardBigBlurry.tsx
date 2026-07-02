@@ -212,15 +212,15 @@ const VictoryCardBigBlurry = (props: BlurryVictoryCardBigProps) => {
                     <span className="text-[14px] sm:text-base drop-shadow-2xl">Other Game Modes</span>
                     
                     <div className="relative flex w-full h-fit sm:h-fit items-center justify-start text-center px-3.5 bg-transparent 
-                    border border-white/60 rounded-xl transition-all duration-300">
+                    border border-white/60 rounded-xl transition-all duration-300 gap-2">
                             {otherGameModes && otherGameModes.length > 0 ? (
                                 otherGameModes.map((mode) => (
                                     <Link key={mode.id} to={mode.path}>
                                         <div 
-                                            className={`flex w-16 h-16 mt-2 mb-2 rounded-2xl items-center justify-center 
-                                        text-center border border-r-4 border-b-4 border-white/30
-                                        hover:scale-105 hover:cursor-pointer active:scale-95 ease-[cubic-bezier(0.34,1.56,0.64,1)] transition-all duration-500 transform-gpu
-                                        ${mode.won ? "opacity-50" : "opacity-100"}`}
+                                            className={`flex w-20 h-16 mt-2 mb-2 rounded-2xl items-center justify-center 
+                                            text-center border border-r-4 border-b-4 border-white/30
+                                            hover:scale-105 hover:cursor-pointer active:scale-95 ease-[cubic-bezier(0.34,1.56,0.64,1)] transition-all duration-500 transform-gpu
+                                            ${mode.won ? "opacity-50" : "opacity-100"}`}
                                         >
                                             <img
                                                 src="/kpopit-icon-svg.svg"

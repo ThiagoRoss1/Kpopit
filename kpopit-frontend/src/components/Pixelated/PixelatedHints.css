@@ -1,0 +1,76 @@
+.pixel-hint-disc {
+    background:
+        repeating-radial-gradient(circle at center,
+            transparent 0px,
+            transparent 1.5px,
+            rgba(255, 255, 255, 0.06) 2.5px,
+            transparent 3.5px,
+            transparent 5px),
+        radial-gradient(circle at 50% 50%, #262626 0%, #060606 65%, #1a1a1a 100%);
+}
+
+/* Mobile reveal animation */
+@keyframes hintDiscRevealR {
+    0%   { translate: -50% 0; z-index: 1; animation-timing-function: cubic-bezier(0.16, 1, 0.3, 1); }
+    60%  { translate: 33% 0;  z-index: 1; }
+    61%  { translate: 33% 0;  z-index: 5; animation-timing-function: cubic-bezier(0.34, 1.4, 0.64, 1); }
+    100% { translate: -50% 0; z-index: 5; }
+}
+/* Disc — left card */
+@keyframes hintDiscRevealL {
+    0%   { translate: -50% 0;  z-index: 1; animation-timing-function: cubic-bezier(0.16, 1, 0.3, 1); }
+    60%  { translate: -133% 0; z-index: 1; }
+    61%  { translate: -133% 0; z-index: 5; animation-timing-function: cubic-bezier(0.34, 1.4, 0.64, 1); }
+    100% { translate: -50% 0;  z-index: 5; }
+}
+
+/* Sleeve — right card */
+@keyframes hintSleeveTiltR {
+    0%   { rotate: -2deg;  animation-timing-function: cubic-bezier(0.16, 1, 0.3, 1); }
+    18%  { rotate: -13deg; animation-timing-function: linear; }
+    70%  { rotate: -13deg; animation-timing-function: cubic-bezier(0.34, 1.2, 0.64, 1); }
+    100% { rotate: -2deg; }
+}
+
+/* Sleeve — left card */
+@keyframes hintSleeveTiltL {
+    0%   { rotate: -2deg; animation-timing-function: cubic-bezier(0.16, 1, 0.3, 1); }
+    18%  { rotate: 9deg;  animation-timing-function: linear; }
+    70%  { rotate: 9deg;  animation-timing-function: cubic-bezier(0.34, 1.2, 0.64, 1); }
+    100% { rotate: -2deg; }
+}
+
+/* Mobile hide animation */
+@keyframes hintDiscHideR {
+    0%   { translate: -50% 0; z-index: 5; animation-timing-function: cubic-bezier(0.34, 1.4, 0.64, 1); }
+    40%  { translate: 33% 0;  z-index: 5; }
+    41%  { translate: 33% 0;  z-index: 1; animation-timing-function: cubic-bezier(0.16, 1, 0.3, 1); }
+    100% { translate: -50% 0; z-index: 1; }
+}
+@keyframes hintDiscHideL {
+    0%   { translate: -50% 0;  z-index: 5; animation-timing-function: cubic-bezier(0.34, 1.4, 0.64, 1); }
+    40%  { translate: -133% 0; z-index: 5; }
+    41%  { translate: -133% 0; z-index: 1; animation-timing-function: cubic-bezier(0.16, 1, 0.3, 1); }
+    100% { translate: -50% 0;  z-index: 1; }
+}
+
+@media (max-width: 479px) {
+    .pixel-hint-mobile-enter-r,
+    .pixel-hint-mobile-enter-l,
+    .pixel-hint-mobile-exit-r,
+    .pixel-hint-mobile-exit-l { will-change: translate; }
+    .pixel-sleeve-tilt-r,
+    .pixel-sleeve-tilt-l,
+    .pixel-sleeve-untilt-r,
+    .pixel-sleeve-untilt-l { will-change: rotate; }
+
+    .pixel-hint-mobile-enter-r { animation: hintDiscRevealR 0.9s forwards; }
+    .pixel-hint-mobile-enter-l { animation: hintDiscRevealL 0.9s forwards; }
+    .pixel-sleeve-tilt-r { animation: hintSleeveTiltR 0.9s forwards; }
+    .pixel-sleeve-tilt-l { animation: hintSleeveTiltL 0.9s forwards; }
+
+    .pixel-hint-mobile-exit-r { animation: hintDiscHideR 0.9s forwards; }
+    .pixel-hint-mobile-exit-l { animation: hintDiscHideL 0.9s forwards; }
+    .pixel-sleeve-untilt-r { animation: hintSleeveTiltR 0.9s forwards; }
+    .pixel-sleeve-untilt-l { animation: hintSleeveTiltL 0.9s forwards; }
+}

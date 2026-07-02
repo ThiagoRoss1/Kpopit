@@ -29,7 +29,7 @@ const Footer = () => {
 
             <div className="w-full flex items-center justify-center">
                 <Link to="/privacy-policy">
-                    <span className="normal-font font-bold text-white max-xxs:text-[14px] xxs:text-[14px] xs:text-base sm:text-base hover:underline">Privacy Policy</span>
+                    <span className="normal-font font-bold text-white max-xxs:text-[14px] xxs:text-[14px] xs:text-base sm:text-base hover:underline [text-shadow:1px_1px_4px_rgba(0,0,0,1)]">Privacy Policy</span>
                 </Link>
                 </div>
         </div>

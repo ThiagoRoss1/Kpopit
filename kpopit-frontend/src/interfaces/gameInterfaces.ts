@@ -100,6 +100,14 @@ export interface YesterdayIdol {
   image_version: string;
 }
 
+export interface YesterdayAlbum {
+  past_album_id: number;
+  yesterdays_pick_date: string;
+  album_name: string;
+  cover_path: string;
+  artist: string;
+}
+
 export interface ResetTimer {
   hours: number;
   minutes: number;
@@ -237,8 +245,51 @@ export interface BlurryGameState {
   game_date?: string;
 }
 
+export interface PixelatedGameData {
+  answer_id: number;
+  group_name: string;
+  cover_path: string;
+  palette: string[];
+  type: string;
+  release_year: number;
+  server_date: string;
+}
+
+export interface AlbumSearchResult {
+  id: number;
+  name: string;
+  group_name: string;
+  cover_path: string;
+  type: string;
+  release_year: number;
+}
+
+export interface PixelatedGuessPayload {
+  album_id: number;
+  current_attempt: number;   // 1-based; attempts + 1
+  game_date: string;
+  user_token: string;
+}
+
+export interface PixelatedGuessDetail {
+  album_id: number;
+  album_name: string;
+  group_name: string;
+  cover_path: string;
+  guess_correct: boolean;
+}
+
+export interface PixelatedGameState {
+  pixelated_guesses_details?: PixelatedGuessDetail[];
+  guessed_albums?: string[];
+  game_complete?: boolean;
+  game_won?: boolean;
+  game_date?: string;
+}
+
 export interface RestoreSessionResponse {
   classic: ClassicGameState | null;
   blurry: BlurryGameState | null;
+  pixelated: PixelatedGameState | null;
   server_date: string;
 }

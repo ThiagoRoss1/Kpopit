@@ -96,7 +96,7 @@ const IdolsProfileSearch = (props: IdolsProfileSearchProps) => {
                                     }}
                                 >
                                     <li 
-                                        className="group relative px-4 py-3 bg-[#0a0a0a]/80 hover:bg-[#1f1f1f] cursor-pointer 
+                                        className="group relative px-4 py-3 bg-ink/80 hover:bg-[#1f1f1f] cursor-pointer 
                                         transition-all duration-300"
                                     >
                                         {idol.image_path && (

@@ -2,10 +2,11 @@ from PIL import Image
 from pathlib import Path
 import io
 
-SOURCE_FOLDER = '../../Kpopit-images/kpopit-idols-png'
-DESTINATION_FOLDER = '../../Kpopit-images/kpopit-idols-webp'
-WEBP_QUALITY = 90
+SOURCE_FOLDER = '../../../Kpopit-images/kpopit-albums-raw'
+DESTINATION_FOLDER = '../../../Kpopit-images/kpopit-albums-webp'
+WEBP_QUALITY = 85
 WEBP_QUALITY_AVATARS = 80
+SUPPORTED_EXTENSIONS = ('.png', '.jpg', '.jpeg', '.webp', '.bmp', '.tiff', '.gif')
 
 def convert_images_to_webp(source_folder, destination_folder, webp_quality):
     source_folder_path = Path(source_folder)
@@ -25,11 +26,15 @@ def convert_images_to_webp(source_folder, destination_folder, webp_quality):
     errors = 0
     skipped = 0
 
-    files = list(source_folder_path.glob("*.png"))
+    files = sorted(
+        f for f in source_folder_path.iterdir()
+        if f.is_file() and f.suffix.lower() in SUPPORTED_EXTENSIONS
+    )
     total_files = len(files)
 
     if total_files == 0:
-        print("No PNG files found in the source folder.")
+        print(f"No supported image files found in the source folder. "
+              f"Supported: {', '.join(SUPPORTED_EXTENSIONS)}")
         return
 
     for image_file in files:
@@ -42,8 +47,10 @@ def convert_images_to_webp(source_folder, destination_folder, webp_quality):
 
         try:
             with Image.open(image_file) as img:
-                if img.mode in ('P', 'L'):
+                if img.mode in ('P', 'L', 'LA'):
                     img = img.convert("RGBA")
+                elif img.mode == 'CMYK':
+                    img = img.convert("RGB")
 
                 img.save(webp_image_path, "WEBP", quality=webp_quality, optimize=True)
 
@@ -67,8 +74,10 @@ def convert_to_webp_bytes(file_bytes: bytes, quality: int = WEBP_QUALITY_AVATARS
     """Convert image bytes to WebP format and return the new bytes."""
     img = Image.open(io.BytesIO(file_bytes))
 
-    if img.mode in ('P', 'L'):
+    if img.mode in ('P', 'L', 'LA'):
         img = img.convert("RGBA")
+    elif img.mode == 'CMYK':
+        img = img.convert("RGB")
 
     if img.width > max_size or img.height > max_size:
         img.thumbnail((max_size, max_size), Image.LANCZOS)

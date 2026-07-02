@@ -19,7 +19,7 @@ const PasswordInput = ({
     const [show, setShow] = useState(false);
 
     return (
-        <div className="ep-input relative h-13 rounded-2xl overflow-hidden bg-[#0a0a0a]">
+        <div className="ep-input relative h-13 rounded-2xl overflow-hidden bg-ink">
             <Lock className="absolute left-4 top-1/2 w-4 h-4 -translate-y-1/2 text-white" />
             <input
                 autoFocus={autoFocus}
@@ -28,7 +28,7 @@ const PasswordInput = ({
                 onChange={(e) => onChange(e.target.value)}
                 placeholder={placeholder}
                 autoComplete={autoComplete}
-                className="w-full h-full pl-11 pr-11 bg-[#0a0a0a] text-sm font-bold text-white placeholder:text-neutral-700 focus:outline-none"
+                className="w-full h-full pl-11 pr-11 bg-ink text-sm font-bold text-white placeholder:text-neutral-700 focus:outline-none"
             />
             <button
                 type="button"

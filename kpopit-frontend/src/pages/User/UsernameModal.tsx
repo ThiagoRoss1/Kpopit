@@ -138,7 +138,7 @@ const UsernameModal = ({ isOpen, onClose, onBack }: UsernameModalProps) => {
                         New Username
                     </label>
 
-                    <div className="ep-input relative h-13 rounded-2xl overflow-hidden bg-[#0a0a0a]">
+                    <div className="ep-input relative h-13 rounded-2xl overflow-hidden bg-ink">
                         <User className="absolute left-4 top-1/2 w-4 h-4 -translate-y-1/2 text-white" />
                         
                         <input
@@ -149,7 +149,7 @@ const UsernameModal = ({ isOpen, onClose, onBack }: UsernameModalProps) => {
                             disabled={locked}
                             onChange={(e) => setUsername(e.target.value)}
                             placeholder="@your-new-handle"
-                            className="w-full h-full pl-11 pr-12 bg-[#0a0a0a] text-sm font-bold text-white placeholder:text-neutral-700 focus:outline-none disabled:opacity-50"
+                            className="w-full h-full pl-11 pr-12 bg-ink text-sm font-bold text-white placeholder:text-neutral-700 focus:outline-none disabled:opacity-50"
                         />
                         {!unchanged && isValid && status === "checking" && (
                             <Loader2 className="absolute right-4 top-1/2 w-4 h-4 -translate-y-1/2 text-neutral-400 animate-spin" />

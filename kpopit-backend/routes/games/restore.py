@@ -6,7 +6,7 @@ from utils.dates import get_today_date_str
 
 restore_bp = Blueprint('restore', __name__)
 
-GAMEMODES = [(1, "classic"), (2, "blurry")]
+GAMEMODES = [(1, "classic"), (2, "blurry"), (3, "pixelated")]
 
 
 @restore_bp.route("/game/restore-session", methods=["GET"])
@@ -24,7 +24,7 @@ def restore_session():
     cursor = connect.cursor()
 
     try:
-        result = {"server_date": today, "classic": None, "blurry": None}
+        result = {"server_date": today, "classic": None, "blurry": None, "pixelated": None}
 
         for gamemode_id, key in GAMEMODES:
             cursor.execute(

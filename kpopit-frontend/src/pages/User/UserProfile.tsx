@@ -16,11 +16,12 @@ import { Helmet } from "react-helmet-async";
 
 const EMAIL_BANNER_DISMISS_KEY = "emailVerifiedBannerDismissed";
 
-type GamemodeFilter = "all" | "classic" | "blurry";
+type GamemodeFilter = "all" | "classic" | "blurry" | "pixelated";
 
 interface CombinedStats {
     classic: UserStats;
     blurry: UserStats;
+    pixelated: UserStats;
 }
 
 const EMPTY_STATS: UserStats = {
@@ -31,21 +32,20 @@ const EMPTY_STATS: UserStats = {
     one_shot_wins: 0,
 };
 
-const fetchBothModeStats = async (userToken: string): Promise<CombinedStats> => {
-    const original = localStorage.getItem("kpopit_gamemode");
+const GAMEMODE_IDS: Record<Exclude<GamemodeFilter, "all">, number> = {
+    classic: 1,
+    blurry: 2,
+    pixelated: 3,
+};
 
-    try {
-        localStorage.setItem("kpopit_gamemode", "classic");
-        const classic: UserStats = await getUserStats(userToken);
+const fetchAllModeStats = async (userToken: string): Promise<CombinedStats> => {
+    const [classic, blurry, pixelated] = await Promise.all([
+        getUserStats(userToken, GAMEMODE_IDS.classic) as Promise<UserStats>,
+        getUserStats(userToken, GAMEMODE_IDS.blurry) as Promise<UserStats>,
+        getUserStats(userToken, GAMEMODE_IDS.pixelated) as Promise<UserStats>,
+    ]);
 
-        localStorage.setItem("kpopit_gamemode", "blurry");
-        const blurry: UserStats = await getUserStats(userToken);
-
-        return { classic, blurry };
-    } finally {
-        if (original === null) localStorage.removeItem("kpopit_gamemode");
-        else localStorage.setItem("kpopit_gamemode", original);
-    }
+    return { classic, blurry, pixelated };
 };
 
 const formatJoined = (raw: string | undefined) => {
@@ -115,7 +115,7 @@ const UserProfile = () => {
 
     const { data: combinedStats, isLoading: isStatsLoading } = useQuery<CombinedStats>({
         queryKey: ["userProfileStats", decryptedToken],
-        queryFn: () => fetchBothModeStats(decryptedToken as string),
+        queryFn: () => fetchAllModeStats(decryptedToken as string),
         enabled: !!decryptedToken && isAuthenticated,
         staleTime: 5 * 60 * 1000,
         gcTime: 10 * 60 * 1000,
@@ -133,33 +133,44 @@ const UserProfile = () => {
     }, [user, navigate, username_slug]);
 
     const displayed = useMemo(() => {
-        const classic_stats = combinedStats?.classic ?? EMPTY_STATS;
-        const blurry_stats = combinedStats?.blurry ?? EMPTY_STATS;
+        const gamemodes = {
+            classic: { label: "Classic", stats: combinedStats?.classic ?? EMPTY_STATS },
+            blurry: { label: "Blurry", stats: combinedStats?.blurry ?? EMPTY_STATS },
+            pixelated: { label: "Pixelated", stats: combinedStats?.pixelated ?? EMPTY_STATS },
+        } as const;
 
-        if (filter === "classic") {
+        if (filter !== "all") {
+            const { label, stats } = gamemodes[filter];
             return {
-                current_streak: classic_stats.current_streak,
-                max_streak: classic_stats.max_streak,
-                wins_count: classic_stats.wins_count + blurry_stats.wins_count,
-                streak_label: "Classic",
-                max_streak_label: "Classic"
+                current_streak: stats.current_streak,
+                max_streak: stats.max_streak,
+                wins_count: stats.wins_count,
+                streak_label: label,
+                max_streak_label: label
             };
         }
-        if (filter === "blurry") {
+
+        const entries = Object.values(gamemodes);
+
+        const pickLeader = (statKey: "current_streak" | "max_streak") => {
+            const maxValue = Math.max(...entries.map(e => e.stats[statKey]));
+            const leaders = entries.filter(e => e.stats[statKey] === maxValue);
+
             return {
-                current_streak: blurry_stats.current_streak,
-                max_streak: blurry_stats.max_streak,
-                wins_count: classic_stats.wins_count + blurry_stats.wins_count,
-                streak_label: "Blurry",
-                max_streak_label: "Blurry"
+                value: maxValue,
+                label: leaders.length > 1 ? "Tied" : leaders[0].label
             };
-        }
+        };
+
+        const current = pickLeader("current_streak");
+        const max = pickLeader("max_streak");
+
         return {
-            current_streak: classic_stats.current_streak > blurry_stats.current_streak ? classic_stats.current_streak : blurry_stats.current_streak,
-            max_streak: classic_stats.max_streak > blurry_stats.max_streak ? classic_stats.max_streak : blurry_stats.max_streak,
-            wins_count: classic_stats.wins_count + blurry_stats.wins_count,
-            streak_label: `${classic_stats.current_streak > blurry_stats.current_streak ? "Classic" : classic_stats.current_streak === blurry_stats.current_streak ? "Tied" : "Blurry"}`,
-            max_streak_label: `${classic_stats.max_streak > blurry_stats.max_streak ? "Classic" : classic_stats.max_streak === blurry_stats.max_streak ? "Tied" : "Blurry"}`
+            current_streak: current.value,
+            max_streak: max.value,
+            wins_count: entries.reduce((sum, e) => sum + e.stats.wins_count, 0),
+            streak_label: current.label,
+            max_streak_label: max.label
         };
     }, [combinedStats, filter]);
 
@@ -174,8 +185,8 @@ const UserProfile = () => {
         : null;
     const joinedDisplay = formatJoined(user?.profile.created_at);
 
-    const currentFilterLabel = displayed.streak_label || "null";
-    const maxFilterLabel = displayed.max_streak_label || "null";
+    const currentFilterLabel = displayed.streak_label || "";
+    const maxFilterLabel = displayed.max_streak_label || "";
     const showGameMode = filter !== "all";
 
     const isStatsReady = !!combinedStats;
@@ -188,7 +199,7 @@ const UserProfile = () => {
             </Helmet>
             
             {/* Background layer */}
-            <div className="profile-bg-glow fixed inset-0 -z-10 bg-[#0a0a0a] pointer-events-none" />
+            <div className="profile-bg-glow fixed inset-0 -z-10 bg-ink pointer-events-none" />
 
             <main className="relative w-full min-h-full flex justify-center items-start md:items-center py-8 transform-gpu">
                 <div className="w-full max-w-7xl px-4 sxs:px-5 sm:px-6 md:px-8 mt-20">
@@ -352,9 +363,7 @@ const UserProfile = () => {
                                     sub={
                                         filter === "all"
                                             ? `personal best · ${currentFilterLabel.toLowerCase()}`
-                                            : filter === "classic"
-                                                ? "in classic mode"
-                                                : "in blurry mode"
+                                            : `in ${filter} mode`
                                     }
                                     fadeKey={`current-${filter}-${displayed.current_streak}`}
                                     actualCard="currentStreak"
@@ -367,9 +376,7 @@ const UserProfile = () => {
                                     sub={
                                         filter === "all"
                                             ? `personal best · ${maxFilterLabel.toLowerCase()}`
-                                            : filter === "classic"
-                                                ? "in classic mode"
-                                                : "in blurry mode"
+                                            : `in ${filter} mode`
                                     }
                                     fadeKey={`max-${filter}-${displayed.max_streak}`}
                                     actualCard="maxStreak"
@@ -391,15 +398,15 @@ const UserProfile = () => {
                                 bg-[#111111] rounded-lg
                                 border-r-2 border-b-2 border-l-2 border-neon-pink">
                                 <span className="font-sans text-[12px] text-[#888888] font-black uppercase tracking-[1.5px]">
-                                    Streak gamemode
+                                    Select Gamemode
                                 </span>
 
                                 <div
                                     role="group"
-                                    aria-label="Streak gamemode"
+                                    aria-label="Select Gamemode"
                                     className="inline-flex gap-0.5 p-0.75 rounded-full bg-[#1a1a1a] border border-[#2a2a2a]"
                                 >
-                                    {(["all", "classic", "blurry"] as const).map(mode => {
+                                    {(["all", "classic", "blurry", "pixelated"] as const).map(mode => {
                                         const active = filter === mode;
                                         return (
                                             <button
@@ -414,7 +421,7 @@ const UserProfile = () => {
                                                         ? "bg-neon-pink text-black shadow-[2px_2px_0px_#000]"
                                                         : "bg-transparent text-[#888] hover:text-[#ddd]"}`}
                                             >
-                                                {mode === "all" ? "All" : mode === "classic" ? "Classic" : "Blurry"}
+                                                {mode.charAt(0).toUpperCase() + mode.slice(1)}
                                             </button>
                                         );
                                     })}

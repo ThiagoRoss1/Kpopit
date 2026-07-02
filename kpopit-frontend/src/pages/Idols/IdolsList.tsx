@@ -75,7 +75,7 @@ function IdolsList() {
     }
 
     return (
-        <div className="w-full min-h-full bg-[#0a0a0a]">
+        <div className="w-full min-h-full bg-ink">
             <Helmet>
                 <title>KpopIt - Idols List</title>
                 <meta name="description" content="Browse every K-pop idol featured in KpopIt's daily guessing game." />

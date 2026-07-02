@@ -134,7 +134,7 @@ const EditProfile = (props: EditProfileProps) => {
                             Display Name
                         </label>
 
-                        <div className="ep-input relative h-13 rounded-2xl overflow-hidden bg-[#0a0a0a]">
+                        <div className="ep-input relative h-13 rounded-2xl overflow-hidden bg-ink">
                             <User className="absolute left-4 top-1/2 w-4 h-4 -translate-y-1/2 text-white" />
 
                             <input
@@ -143,7 +143,7 @@ const EditProfile = (props: EditProfileProps) => {
                                 maxLength={DISPLAY_NAME_MAX_LENGTH}
                                 onChange={(e) => setDisplayName(e.target.value)}
                                 placeholder="Your stage name"
-                                className="w-full h-full pl-11 pr-14 bg-[#0a0a0a] text-sm font-bold text-white placeholder:text-neutral-700 focus:outline-none"
+                                className="w-full h-full pl-11 pr-14 bg-ink text-sm font-bold text-white placeholder:text-neutral-700 focus:outline-none"
                             />
                             <span className="absolute right-3 top-1/2 -translate-y-1/2 text-[12px] font-black uppercase tracking-widest text-white/40">
                                 {displayName.length}/{DISPLAY_NAME_MAX_LENGTH}
@@ -158,7 +158,7 @@ const EditProfile = (props: EditProfileProps) => {
                         </label>
 
                         <div className="flex flex-row items-stretch gap-2">
-                            <div className="ep-input flex-1 min-w-0 relative h-13 rounded-2xl overflow-hidden bg-[#0a0a0a]">
+                            <div className="ep-input flex-1 min-w-0 relative h-13 rounded-2xl overflow-hidden bg-ink">
                                 <Mail className="absolute left-4 top-1/2 w-4 h-4 -translate-y-1/2 text-neutral-500" />
 
                                 <div className="flex items-center w-full h-full pl-11 pr-12 text-sm font-bold text-white/80">
@@ -199,7 +199,7 @@ const EditProfile = (props: EditProfileProps) => {
                         </label>
 
                         <div className="flex flex-row items-stretch gap-2">
-                            <div className="ep-input flex-1 min-w-0 relative h-13 rounded-2xl overflow-hidden bg-[#0a0a0a]">
+                            <div className="ep-input flex-1 min-w-0 relative h-13 rounded-2xl overflow-hidden bg-ink">
                                 <User className="absolute left-4 top-1/2 w-4 h-4 -translate-y-1/2 text-neutral-500" />
 
                                 <div className="flex items-center w-full h-full pl-11 pr-3 text-sm font-bold text-white/80 truncate">
@@ -226,7 +226,7 @@ const EditProfile = (props: EditProfileProps) => {
                             Password
                         </label>
                         <div className="flex items-stretch gap-2">
-                            <div className="ep-input flex-1 min-w-0 relative h-13 rounded-2xl overflow-hidden bg-[#0a0a0a]">
+                            <div className="ep-input flex-1 min-w-0 relative h-13 rounded-2xl overflow-hidden bg-ink">
                                 <Lock className="absolute left-4 top-1/2 w-4 h-4 -translate-y-1/2 text-neutral-500" />
 
                                 <div className="flex items-center w-full h-full pl-11 pr-3 text-sm font-bold text-white/80 truncate">

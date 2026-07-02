@@ -15,10 +15,11 @@ export const useAllGameModes = (currentMode: string) => {
     const allModes = [
         { id: 'classic', name: 'Classic', path: '/classic' },
         { id: 'blurry', name: 'Blurry', path: '/blurry' },
+        { id: 'pixelated', name: 'Pixelated', path: '/pixelated' },
     ].map(mode => ({
         ...mode,
         won: isWonToday(mode.id),
-        photoSpecs: mode.id === 'classic' ? "" : "blur-[2px]"
+        photoSpecs: mode.id === 'classic' ? "" : mode.id === 'blurry' ? "blur-[2px]" : ""
     }));
 
     const otherModes = allModes.filter(mode => mode.id !== currentMode);

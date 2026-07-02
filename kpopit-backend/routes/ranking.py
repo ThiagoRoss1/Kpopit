@@ -1,7 +1,6 @@
 from flask import Blueprint, jsonify, g
 from services.get_db import get_db
 from utils.dates import get_today_date_str
-from datetime import datetime
 
 ranking_bp = Blueprint('ranking', __name__)
 
@@ -67,14 +66,6 @@ def get_daily_rank(user_token):
     started_at = result["started_at"]
     guesses_count = result["guesses_count"]
     won_at = result["won_at"]
-
-    # Calculate time to win
-    if isinstance(started_at, str):
-        started_at_dt = datetime.fromisoformat(started_at) # noqa: F841
-        won_at_dt = datetime.fromisoformat(won_at) # noqa: F841
-    else:
-        started_at_dt = started_at # noqa: F841
-        won_at_dt = won_at # noqa: F841
 
     # Fetch ranks and count user's rank
     cursor.execute("""

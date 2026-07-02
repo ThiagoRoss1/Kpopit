@@ -48,8 +48,8 @@ function Home() {
                         onSubmitAbout={() => {setShowModal("about")}}
                     />
 
-                    {showModal === "changelog" && <Modal isOpen onClose={() => setShowModal(null)} title="Changelog..." isAboutOrChangelog={true}><ChangelogText /></Modal>}
-                    {showModal === "about" && <Modal isOpen onClose={() => setShowModal(null)} title="About..." isAboutOrChangelog={true}><AboutText /></Modal>}
+                    {showModal === "changelog" && <Modal isOpen onClose={() => setShowModal(null)} title="Changelog..."><ChangelogText /></Modal>}
+                    {showModal === "about" && <Modal isOpen onClose={() => setShowModal(null)} title="About..."><AboutText /></Modal>}
 
                 </div>
 
@@ -130,7 +130,49 @@ function Home() {
                                 </div>
                                 
                                 <div
-                                    className="flex max-xxs:w-14 max-xxs:h-12 xxs:w-16 xxs:h-12 xs:w-18 xs:h-12 xm:w-20 xm:h-12 sm:w-22.5 sm:h-15 bg-transparent border border-white 
+                                    className="flex max-xxs:w-14 max-xxs:h-12 xxs:w-16 xxs:h-12 xs:w-18 xs:h-12 xm:w-20 xm:h-12 sm:w-22.5 sm:h-15 bg-transparent border border-white
+                                    rounded-2xl text-white items-center justify-center text-center
+                                    hover:scale-105 hover:bg-[#e70a7d] group-active:scale-95 ease-[cubic-bezier(0.34,1.56,0.64,1)] group-active:bg-[#e70a7d]
+                                    transition-all duration-500 transform-gpu mr-3.5"
+                                    draggable={false}>
+                                        Play
+                                </div>
+                            </div>
+                        </Link>
+
+                        {/* Pixelated */}
+                        <Link
+                            to="/pixelated"
+                            className="group flex max-xxs:w-70 xxs:w-80 xs:w-90 xm:w-94 sm:w-117.5 max-xxs:h-20 xxs:h-20 xs:h-20 xm:h-20 sm:h-25 max-xxs:px-1 xxs:px-1 xm:px-2 bg-transparent border border-white rounded-3xl
+                            items-center justify-start max-xxs:gap-0 xxs:gap-1 xs:gap-2 shadow-[4px_4px_0px_0px_rgba(255,255,255,1)] hover:shadow-[0px_0px_0px_0px_rgba(255,255,255,1)]
+                            hover:bg-black hover:translate-x-1 hover:translate-y-1 transition-all duration-200 transform-gpu
+                            active:shadow-[0px_0px_0px_0px_rgba(255,255,255,1)] active:bg-black active:translate-x-1 active:translate-y-1">
+                            <div className="flex w-20 h-20 bg-white/0 rounded-full items-center text-center justify-center">
+                                <img
+                                    src="/kpopit-icon-svg.svg"
+                                    alt="Kpopit Icon"
+                                    className="max-xxs:w-10 max-xxs:h-10 xxs:w-10 xxs:h-10 xs:w-12 xs:h-12 sm:w-12 sm:h-12 [image-rendering:pixelated]"
+                                    draggable={false} />
+                            </div>
+
+                            <div className="flex-1 flex flex-row items-center justify-center gap-2 sm:gap-6">
+                                <div
+                                    className="flex-1 flex flex-col items-start justify-center gap-0.5">
+                                    <div className="flex items-center justify-center text-center border-b border-[#e70a7d] gap-0">
+                                        <h2 className="text-[#e70a7d] brightness-110 [text-shadow:2px_2px_0px_rgba(0,0,0,1),0_0_12px_rgba(231,10,125,0.60)]
+                                        max-xxs:text-base xxs:text-lg xs:text-lg xm:text-xl sm:text-2xl font-bold">
+                                            Pixelated
+                                        </h2>
+                                    </div>
+
+                                    <span className="text-white max-xxs:text-[11px] xxs:text-[12px] sm:text-base
+                                    [text-shadow:2px_2px_0px_rgba(0,0,0,1),0_0_12px_rgba(255,255,255,0.60)]">
+                                        Guess the daily K-pop pixelated album
+                                    </span>
+                                </div>
+
+                                <div
+                                    className="flex max-xxs:w-14 max-xxs:h-12 xxs:w-16 xxs:h-12 xs:w-18 xs:h-12 xm:w-20 xm:h-12 sm:w-22.5 sm:h-15 bg-transparent border border-white
                                     rounded-2xl text-white items-center justify-center text-center
                                     hover:scale-105 hover:bg-[#e70a7d] group-active:scale-95 ease-[cubic-bezier(0.34,1.56,0.64,1)] group-active:bg-[#e70a7d]
                                     transition-all duration-500 transform-gpu mr-3.5"

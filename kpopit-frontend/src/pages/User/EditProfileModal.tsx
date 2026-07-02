@@ -50,7 +50,7 @@ const EditProfileModal = ({ isOpen, onClose, title, children }: EditProfileModal
                 >
                     <div
                         aria-hidden="true"
-                        className="absolute inset-0 z-0 bg-[#0a0a0a] border border-solid border-neon-pink/15
+                        className="absolute inset-0 z-0 bg-ink border border-solid border-neon-pink/15
                             rounded-4xl translate-x-0.75 translate-y-0.75 rotate-1 transform-gpu
                             shadow-[12px_12px_0px_rgba(0,0,0,0.4)]"
                     />

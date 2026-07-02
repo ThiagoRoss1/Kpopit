@@ -22,7 +22,6 @@ def get_daily_blurry_idol():
     cursor = connect.cursor()
 
     try:
-
         idol_service = IdolService(connect, repository)
 
         # Choose idol of the day

@@ -17,6 +17,7 @@ if not DB_URL:
 
 pool = ConnectionPool(
     conninfo=DB_URL,
+    open=True,
     min_size=1,
     max_size=5,
     timeout=5.0,

@@ -419,7 +419,7 @@ function BlurryMode() {
                     onSubmitShare={() => {setShowModal("share")}}
                 />
                 {showModal === "stats" && <Modal isOpen onClose={() => setShowModal(null)} title="Stats..."><StatsText stats={userStatsData} onSubmitTransferData={() => {setShowModal("transfer-data")}} /></Modal>}
-                {showModal === "how-to-play-blurry" && <Modal isOpen onClose={() => setShowModal(null)} title="How to Play..." isHowToPlay={true}><HowToPlayBlurryContent /></Modal>}
+                {showModal === "how-to-play-blurry" && <Modal isOpen onClose={() => setShowModal(null)} title="How to Play..."><HowToPlayBlurryContent /></Modal>}
                 {showModal === "share" && <Modal isOpen onClose={() => setShowModal(null)} title="Share..."><ShareText guesses={guesses as GuessResponse[]} hasWon={isCorrect} attempts={attempts} gameMode={'blurry'} wonWithHardMode={wonWithHardMode} wonWithoutColors={wonWithoutColors} /></Modal>}
 
                 {/* Sub-Stats Modals */}
