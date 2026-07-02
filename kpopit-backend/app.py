@@ -21,6 +21,8 @@ from routes.auth import auth_bp
 from routes.email import email_bp
 from utils.rate_limiter import limiter
 from flask_limiter import RateLimitExceeded
+import logging
+
 load_dotenv()
 
 # Global variables
@@ -36,6 +38,11 @@ if not JWT_SECRET_KEY or len(JWT_SECRET_KEY) < 32:
 app = Flask(__name__)
 app.json.sort_keys = False
 app.config["MAX_CONTENT_LENGTH"] = 20 * 1024 * 1024 # 20 MB limit for incoming requests to prevent attacks and accidental overload. Adjust as needed.
+
+logging.basicConfig(
+    level=logging.INFO,
+    format="%(asctime)s [%(name)s] %(levelname)s: %(message)s"
+)
 
 # Trust one proxy hop (Railway/Render/Vercel) so request.remote_addr returns
 # the real client IP. Required for Flask-Limiter to key buckets per user

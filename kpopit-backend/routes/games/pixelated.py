@@ -1,13 +1,15 @@
 from flask import Blueprint, g, jsonify, request
-
 from services.album_service import AlbumService
 from services.get_db import get_db
 from services.user_service import UserService
+from utils.analytics import get_analytics_data, get_country_name
 from utils.auth_decorators import optional_auth
 from utils.dates import get_today_date_str
+import logging
 
 pixelated_bp = Blueprint("pixelated", __name__)
 
+logger = logging.getLogger(__name__)
 
 @pixelated_bp.route("/game/pixelated/daily-album", methods=["GET"])
 def get_daily_pixelated_album():
@@ -78,16 +80,21 @@ def guess_pixelated_album():
                 return jsonify({"error": "Invalid user token"}), 400
             user_id = row["id"]
 
+        analytics_data = get_analytics_data()
+        country_name, flag = get_country_name(analytics_data.get("country"))
+        analytics_data['country'] = f"{country_name} {flag}"
+
         service = AlbumService(connect)
         result = service.process_guess(
-            cursor, connect, user_id, int(guess_album_id), int(current_attempt), gamemode_id=3
+            cursor, connect, user_id, int(guess_album_id), int(current_attempt),
+            analytics_data, gamemode_id=3,
         )
         if "error" in result:
             return jsonify(result), 400
 
         return jsonify(result), 200
-    except Exception as exc:
-        print(f"[pixelated] guess error: {exc}")
+    except Exception:
+        logger.exception("[pixelated] guess error")
         return jsonify({"error": "Internal server error"}), 500
     finally:
         cursor.close()

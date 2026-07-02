@@ -130,13 +130,17 @@ class AlbumService:
         user_id: int,
         guess_album_id: int,
         current_attempt: int,
+        analytics_data: dict,
         gamemode_id: int = 3,
     ) -> dict:
         """Compare guess vs today's correct album and persist to daily_user_history.
 
-        On a win: also writes `score`, bumps aggregate stats / streaks in
-        `user_history` (mirrors GameService.save_user_history), and guards
-        against double-counting replays after a win.
+        Persistence is delegated to GameService.save_user_history (shared with
+        the classic/blurry modes), which owns the daily_user_history upsert,
+        `score`, aggregate stats / streaks in `user_history`, the double-count
+        guard, and the commit. This method only resolves the correct album,
+        builds the answer payload for logging, and fetches the guessed album
+        for the response.
         """
         today = get_today_date_str()
         current_timestamp = get_current_timestamp()
@@ -153,78 +157,44 @@ class AlbumService:
             return {"error": "No daily pick found"}
 
         correct_id = pick["album_id"]
-        is_correct = int(guess_album_id) == int(correct_id)
-        one_shot_win = is_correct and current_attempt == 1
-        won_at = current_timestamp if is_correct else None
-        started_at = current_timestamp if current_attempt == 1 else None
 
-        try:
-            already_won_today = False
-            if is_correct:
-                cursor.execute(
-                    """
-                        SELECT won FROM daily_user_history
-                        WHERE user_id = %s AND date = %s AND gamemode_id = %s AND won = TRUE
-                    """,
-                    (user_id, today, gamemode_id),
-                )
-                already_won_today = cursor.fetchone() is not None
+        # Answer payload for save_user_history's victory log (album_name/group_name).
+        cursor.execute(
+            """
+                SELECT a.name AS album_name,
+                       COALESCE(i.artist_name, g.name) AS group_name
+                FROM albums a
+                LEFT JOIN groups g ON g.id = a.group_id
+                LEFT JOIN idols i ON i.id = a.soloist_id
+                WHERE a.id = %s
+            """,
+            (correct_id,),
+        )
+        answer_row = cursor.fetchone()
+        answer_data = {
+            "album_name": answer_row["album_name"] if answer_row else None,
+            "group_name": answer_row["group_name"] if answer_row else None,
+        }
 
-            cursor.execute(
-                """
-                    INSERT INTO daily_user_history
-                        (user_id, date, gamemode_id, guesses_count, won, one_shot_win, won_at, started_at)
-                    VALUES (%s, %s, %s, %s, %s, %s, %s, %s)
-                    ON CONFLICT(user_id, date, gamemode_id) DO UPDATE SET
-                        guesses_count = EXCLUDED.guesses_count,
-                        won = EXCLUDED.won OR daily_user_history.won,
-                        one_shot_win = EXCLUDED.one_shot_win OR daily_user_history.one_shot_win,
-                        won_at = CASE WHEN EXCLUDED.won IS TRUE AND daily_user_history.won_at IS NULL
-                                    THEN EXCLUDED.won_at ELSE daily_user_history.won_at END,
-                        started_at = CASE WHEN EXCLUDED.guesses_count = 1 AND daily_user_history.started_at IS NULL
-                                    THEN EXCLUDED.started_at ELSE daily_user_history.started_at END
-                """,
-                (user_id, today, gamemode_id, current_attempt, is_correct, one_shot_win, won_at, started_at),
-            )
+        game_service = GameService(connect, None)
+        is_correct = game_service.save_user_history(
+            connect, cursor, user_id, gamemode_id, guess_album_id, answer_data,
+            correct_id, current_attempt, today, current_timestamp, analytics_data,
+        )
 
-            if is_correct:
-                S0 = 10
-                decay_rate = 0.1
-                score = S0 * round(math.exp(-decay_rate * (current_attempt - 1)), 3)
-                cursor.execute(
-                    """
-                        UPDATE daily_user_history
-                        SET score = %s
-                        WHERE user_id = %s AND date = %s AND gamemode_id = %s
-                    """,
-                    (score, user_id, today, gamemode_id),
-                )
-
-                if not already_won_today:
-                    game_service = GameService(connect, None)
-                    streak = game_service.streak_calculation(cursor, user_id, gamemode_id)
-                    game_service._update_user_history(
-                        cursor, user_id, gamemode_id, streak, current_attempt, one_shot_win, today
-                    )
-
-            cursor.execute(
-                """
-                    SELECT a.name, 
-                        COALESCE(i.artist_name, g.name) AS group_name, 
-                        a.cover_path
-                    FROM albums a
-                    LEFT JOIN groups g ON g.id = a.group_id
-                    LEFT JOIN idols i ON i.id = a.soloist_id
-                    WHERE a.id = %s
-                """, (guess_album_id,)
-            )
-            guessed = cursor.fetchone()
-
-            connect.commit()
-
-        except Exception:
-            cursor.execute("ROLLBACK")
-            raise
+        # Guessed album for the response (pure read; runs after the commit above).
+        cursor.execute(
+            """
+                SELECT a.name,
+                    COALESCE(i.artist_name, g.name) AS group_name,
+                    a.cover_path
+                FROM albums a
+                LEFT JOIN groups g ON g.id = a.group_id
+                LEFT JOIN idols i ON i.id = a.soloist_id
+                WHERE a.id = %s
+            """, (guess_album_id,)
+        )
+        guessed = cursor.fetchone()
 
         return {
             "guess_correct": is_correct,
