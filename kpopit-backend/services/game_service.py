@@ -1,6 +1,9 @@
 from utils.dates import get_today_date
 from datetime import timedelta, date
 import math
+import logging
+
+logger = logging.getLogger(__name__)
 
 class GameService:
     def __init__(self, db, repository):
@@ -35,6 +38,8 @@ class GameService:
             return streak
     
     def save_user_history(self, connect, cursor, user_id, gamemode_id, guessed_id, answer_data, answer_id, current_attempt, today, current_timestamp, analytics_data):
+        analytics_data = analytics_data or {}
+        answer_data = answer_data or {}
         is_correct = int(guessed_id) == int(answer_id)
         one_shot_win = is_correct and current_attempt == 1
     
@@ -69,7 +74,9 @@ class GameService:
                             
             if is_correct:
                 formatted_analytics_data = ' | '.join([f"{key.capitalize()}: {value}" for key, value in analytics_data.items()])
-                print(f"Victory! User {user_id} from {analytics_data.get('country', 'Unknown')} guessed correctly idol {answer_data.get('artist_name')} of ID {answer_id} in {current_attempt} attempts at date {today}.")
+                answer_label = answer_data.get('artist_name') or answer_data.get('album_name')
+                answer_type = 'album' if gamemode_id == 3 else 'idol'
+                print(f"Victory! User {user_id} from {analytics_data.get('country', 'Unknown')} guessed correctly {answer_type} {answer_label} of ID {answer_id} in {current_attempt} attempts at date {today}.")
                 print(f"Entire analytics data for User {user_id}: {formatted_analytics_data}")
                 S0 = 10
                 decay_rate = 0.1
@@ -93,8 +100,8 @@ class GameService:
             return is_correct
 
         except Exception as e:
-            cursor.execute("ROLLBACK")
-            print(f"Error updating user history: {e}")
+            connect.rollback()
+            logger.exception("Error updating user history")
             raise e
     
     def _update_user_history(self, cursor, user_id, gamemode_id, streak, current_attempt, one_shot_win, today):
