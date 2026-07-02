@@ -80,7 +80,7 @@ def guess_pixelated_album():
                 return jsonify({"error": "Invalid user token"}), 400
             user_id = row["id"]
 
-        analytics_data = get_analytics_data()
+        analytics_data = get_analytics_data() or {}
         country_name, flag = get_country_name(analytics_data.get("country"))
         analytics_data['country'] = f"{country_name} {flag}"
 

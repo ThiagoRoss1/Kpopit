@@ -1,10 +1,8 @@
 import math
 import random
 from datetime import date, timedelta
-
 from services.game_service import GameService
 from utils.dates import get_current_timestamp, get_today_date, get_today_date_str
-
 
 class AlbumService:
     """Business logic for the Pixelated gamemode (gamemode_id = 3)."""
@@ -145,56 +143,61 @@ class AlbumService:
         today = get_today_date_str()
         current_timestamp = get_current_timestamp()
 
-        cursor.execute(
-            """
-                SELECT album_id FROM daily_picks
-                WHERE pick_date = %s AND gamemode_id = %s
-            """,
-            (today, gamemode_id),
-        )
-        pick = cursor.fetchone()
-        if not pick:
-            return {"error": "No daily pick found"}
+        try:
+            cursor.execute(
+                """
+                    SELECT album_id FROM daily_picks
+                    WHERE pick_date = %s AND gamemode_id = %s
+                """,
+                (today, gamemode_id),
+            )
+            pick = cursor.fetchone()
+            if not pick:
+                return {"error": "No daily pick found"}
 
-        correct_id = pick["album_id"]
+            correct_id = pick["album_id"]
 
-        # Answer payload for save_user_history's victory log (album_name/group_name).
-        cursor.execute(
-            """
-                SELECT a.name AS album_name,
-                       COALESCE(i.artist_name, g.name) AS group_name
-                FROM albums a
-                LEFT JOIN groups g ON g.id = a.group_id
-                LEFT JOIN idols i ON i.id = a.soloist_id
-                WHERE a.id = %s
-            """,
-            (correct_id,),
-        )
-        answer_row = cursor.fetchone()
-        answer_data = {
-            "album_name": answer_row["album_name"] if answer_row else None,
-            "group_name": answer_row["group_name"] if answer_row else None,
-        }
+            # Answer payload for save_user_history's victory log (album_name/group_name).
+            cursor.execute(
+                """
+                    SELECT a.name AS album_name,
+                        COALESCE(i.artist_name, g.name) AS group_name
+                    FROM albums a
+                    LEFT JOIN groups g ON g.id = a.group_id
+                    LEFT JOIN idols i ON i.id = a.soloist_id
+                    WHERE a.id = %s
+                """,
+                (correct_id,),
+            )
+            answer_row = cursor.fetchone()
+            answer_data = {
+                "album_name": answer_row["album_name"] if answer_row else None,
+                "group_name": answer_row["group_name"] if answer_row else None,
+            }
 
-        game_service = GameService(connect, None)
-        is_correct = game_service.save_user_history(
-            connect, cursor, user_id, gamemode_id, guess_album_id, answer_data,
-            correct_id, current_attempt, today, current_timestamp, analytics_data,
-        )
+            # Guessed album for the response (pure read; fetched before delegating to save_user_history).
+            cursor.execute(
+                """
+                    SELECT a.name,
+                        COALESCE(i.artist_name, g.name) AS group_name,
+                        a.cover_path
+                    FROM albums a
+                    LEFT JOIN groups g ON g.id = a.group_id
+                    LEFT JOIN idols i ON i.id = a.soloist_id
+                    WHERE a.id = %s
+                """, (guess_album_id,)
+            )
+            guessed = cursor.fetchone()
 
-        # Guessed album for the response (pure read; runs after the commit above).
-        cursor.execute(
-            """
-                SELECT a.name,
-                    COALESCE(i.artist_name, g.name) AS group_name,
-                    a.cover_path
-                FROM albums a
-                LEFT JOIN groups g ON g.id = a.group_id
-                LEFT JOIN idols i ON i.id = a.soloist_id
-                WHERE a.id = %s
-            """, (guess_album_id,)
-        )
-        guessed = cursor.fetchone()
+            game_service = GameService(connect, None)
+            is_correct = game_service.save_user_history(
+                connect, cursor, user_id, gamemode_id, guess_album_id, answer_data,
+                correct_id, current_attempt, today, current_timestamp, analytics_data,
+            )
+
+        except Exception as e:
+            connect.rollback()
+            raise e
 
         return {
             "guess_correct": is_correct,
