@@ -4,10 +4,10 @@
 
 [KpopIt](https://www.kpopit.net/) is a web-based interactive game designed for the global K-pop community. Inspired by Wordle, [KpopIt](https://www.kpopit.net/) adapts deductive reasoning mechanics to South Korean music. It is designed for K-pop fans to test their knowledge of idols, groups, and South Korean music.
 
-At **Midnight (EST)**, the daily idol resets, bringing players a fresh challenge.
+At **Midnight (EST)**, the daily challenge resets across every mode, bringing players a fresh idol (or album) to guess.
 
 
-By the end of 2025, KpopIt only has the classic game mode, in the future I plan to bring new games though.
+KpopIt launched at the end of 2025 with the Classic mode, and has since grown to include **Blurry** and **Pixelated** modes — with more planned for the future.
 
 ## 🧠 Core Gameplay Mechanics
 
@@ -49,6 +49,14 @@ If the idol is currently a **soloist**, this hint will display **"Soloist"** ins
 - **Group Name** <br/>
 This hint will be unlocked after 8 guesses and it will reveal the **current** idol's **group**.
 
+### 1.4 - Blurry Mode
+
+A visual challenge where players identify the daily idol from a photo that starts heavily **blurred** and progressively sharpens with each guess. Like Classic, the idol is synchronized worldwide and resets at Midnight (EST).
+
+### 1.5 - Pixelated Mode
+
+Players guess the daily K-pop **album** from its cover art, which starts fully **pixelated** and de-pixelates with each guess. Unlike Classic and Blurry, the answer is an album rather than an idol, giving fans a fresh way to test their knowledge of K-pop discographies.
+
 ## 🔧 Architecture and Technologies
 
 ### 2.1 - Backend
@@ -59,9 +67,9 @@ The core logic of [KpopIt](https://www.kpopit.net/) is powered by **Python**, us
 
 ### 2.2 - Database
 
-Currently, [KpopIt](https://www.kpopit.net/) utilizes **SQLite** for data persistence. It was chosen for its simplicity and power, making it the ideal choice for the MVP stage. The database schema is carefully designed to handle complex queries regarding idol attributes while maintaining fast response times.
+[KpopIt](https://www.kpopit.net/) uses **PostgreSQL** for data persistence. It started on **SQLite** during the MVP stage for its simplicity, and was migrated to PostgreSQL to support enterprise-grade backups, higher traffic, and long-term scalability. The database schema is carefully designed to handle complex queries regarding idol and album attributes while maintaining fast response times.
 
-- **Scalability Note**: Plans are in place to migrate to **PostgreSQL** in the near future to support enterprise-grade backups and higher traffic.
+- **Migration Note**: The move from SQLite to PostgreSQL was completed in March 2026.
 
 #### 2.3 - Frontend
 
@@ -79,17 +87,23 @@ Our idol selection algorithm is designed for maximum variety. It is designed to 
 
 ## 🤔 Roadmap and Future Plans
 
-While the Classic mode is currently the heart of [KpopIt](https://www.kpopit.net/), I'm already planning new game modes and I hope to share it with you as soon as possible.
+[KpopIt](https://www.kpopit.net/) has grown a lot since launch. Here's what's already shipped and what's still ahead.
 
-The current roadmap for 2026 includes:
+### ✅ Delivered
 
-1 - **Blurry Mode**: A visual challenge where users identify idols through pixelated or distorted images.
+- **Blurry Mode**: A visual challenge where users identify idols through a progressively unblurred photo.
 
-2 - **User Profiles**: Currently [KpopIt](https://www.kpopit.net/) only uses **Local Storage** to hold users' profiles and stats, but in the future I plan to create an account system, allowing users to track their **streaks** and **wins** accurately.
+- **Pixelated Mode**: Guess the daily K-pop album from its de-pixelating cover art.
 
-3 -  **Global / Local Leaderboards**: Introducing a competitive layer for the most dedicated fans.
+- **User Accounts & Profiles**: An account system with **Login / Register**, so users can track their **streaks** and **wins** accurately across devices (previously **Local Storage** only).
 
-4 - **Design**: Creating a better and unique K-pop vibe, I plan to re-design [KpopIt](https://www.kpopit.net/) for better visuals and experience.
+### 🚧 Upcoming
+
+- **Global / Local Leaderboards**: Introducing a competitive layer for the most dedicated fans.
+
+- **Album Collection**: A personal gallery where players collect and revisit the albums they've guessed, building their own K-pop discography over time.
+
+- **Design**: Creating a better and unique K-pop vibe, I plan to re-design [KpopIt](https://www.kpopit.net/) for better visuals and experience.
 
 ## 💭 Final Thoughts
 
@@ -99,7 +113,7 @@ Thanks for stopping by and have fun playing [KpopIt](https://www.kpopit.net/).
 
 ![Python](https://img.shields.io/badge/python-3670A0?style=for-the-badge&logo=python&logoColor=ffdd54)
 ![Flask](https://img.shields.io/badge/flask-%23000.svg?style=for-the-badge&logo=flask&logoColor=white)
-![SQLite](https://img.shields.io/badge/sqlite-%2307405e.svg?style=for-the-badge&logo=sqlite&logoColor=white)
+![PostgreSQL](https://img.shields.io/badge/postgres-%23316192.svg?style=for-the-badge&logo=postgresql&logoColor=white)
 ![React](https://img.shields.io/badge/react-%2320232a.svg?style=for-the-badge&logo=react&logoColor=%2361DAFB)
 ![Vite](https://img.shields.io/badge/vite-%23646CFF.svg?style=for-the-badge&logo=vite&logoColor=white)
 ![TypeScript](https://img.shields.io/badge/typescript-%23007ACC.svg?style=for-the-badge&logo=typescript&logoColor=white)

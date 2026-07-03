@@ -4,7 +4,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## Project Overview
 
-**KpopIt** is a Wordle-inspired daily K-pop idol guessing game. Users guess a randomly selected idol each day by comparing attributes (Classic Mode) or identifying an increasingly unblurred photo (Blurry Mode). All users worldwide share the same daily idol, resetting at midnight EST.
+**KpopIt** is a Wordle-inspired daily K-pop guessing game with three live modes: **Classic** (`gamemode_id=1`) — guess the daily idol by comparing attributes; **Blurry** (`gamemode_id=2`) — identify the idol from an increasingly unblurred photo; **Pixelated** (`gamemode_id=3`) — guess the daily album from progressively de-pixelating cover art. All users worldwide share the same daily challenge per mode, resetting at midnight EST.
 
 ## Repository Structure
 
@@ -36,15 +36,15 @@ gunicorn app:app      # Production server
 
 ### Data Flow
 1. Frontend generates a UUID user token via `POST /api/user/init` and encrypts it in localStorage
-2. On game load, frontend fetches the daily idol challenge — Classic: `GET /api/game/classic/daily-idol`, Blurry: `GET /api/game/blurry/daily-idol`
+2. On game load, frontend fetches the daily challenge — Classic: `GET /api/game/classic/daily-idol`, Blurry: `GET /api/game/blurry/daily-idol`, Pixelated: `GET /api/game/pixelated/daily-album`
 3. User guesses are submitted and the backend returns per-attribute feedback (`correct`, `partial`, `higher`, `lower`, `incorrect`)
 4. Game state (guesses, completion, hints revealed) is persisted in localStorage and cleared on new day detection
 5. All stats and history are stored server-side in PostgreSQL, keyed by user token
 
 ### Backend (`kpopit-backend/`)
-- **`app.py`** — Flask entry point; registers 9 blueprints, handles CORS and maintenance mode
-- **`routes/games/`** — Game endpoints for classic and blurry modes; all support `gamemode_id` query param (1=classic, 2=blurry)
-- **`services/`** — Business logic layer: `idol_service.py` runs the exponential-weighted daily pick algorithm (cooldown: 10 days, weight: `A * exp(K * days_waiting)` where K=0.08); `game_service.py` handles streaks and scoring
+- **`app.py`** — Flask entry point; registers 14 blueprints under `/api` (+ `admin` when `ADMIN_ENABLED`), handles CORS and maintenance mode
+- **`routes/games/`** — Game endpoints for classic, blurry, and pixelated modes; all support `gamemode_id` query param (1=classic, 2=blurry, 3=pixelated)
+- **`services/`** — Business logic layer: `idol_service.py` runs the exponential-weighted daily pick algorithm (cooldown: 10 days, weight: `A * exp(K * days_waiting)` where K=0.08); `game_service.py` handles streaks and scoring; `album_service.py` handles Pixelated mode — `AlbumService.process_guess` delegates to `GameService.save_user_history` (single source of truth for upsert/score/streak/commit — never duplicate this logic for new modes)
 - **`repositories/`** — Data access layer over PostgreSQL
 - **`utils/game_feedback_logic.py`** — Feedback comparison engine (exact match, partial group match, higher/lower for numerical fields)
 - **`utils/dates.py`** — All daily reset logic is EST-anchored
@@ -54,7 +54,7 @@ gunicorn app:app      # Production server
 - **`hooks/useSharedGameData.tsx`** — Core state hook; owns the localStorage game state lifecycle (reads on load, clears on new day, triggers page reload)
 - **`hooks/`** — `useGameMode`, `useResetTimer`, `useIdolSearch`, `useTransferDataLogic`
 - **`services/api.ts`** — Axios client; attaches decrypted user token to every request via interceptor
-- **`pages/`** — `ClassicMode/`, `BlurryMode/`, `Idols/` (list + `/:id/:slug` profile), `Home/`, `admin/`
+- **`pages/`** — `ClassicMode/`, `BlurryMode/`, `PixelatedMode/`, `Idols/` (list + `/:id/:slug` profile), `Home/`, `admin/`. Pixelated uses client-side album search (`["allAlbums"]` cached, no search endpoint) and `components/Pixelated/` (canvas, search bar, guess grid, hints, victory card)
 - **`interfaces/gameInterfaces.ts`** — Central TypeScript type definitions for all game data shapes
 - **`utils/tokenEncryption.ts`** — AES encryption/decryption for localStorage token storage
 
@@ -143,6 +143,45 @@ Use these for any user-facing auth/profile input. They return `None` if valid, a
 - `daily_user_history` — Per-user, per-day game results (guesses, win, one-shot, score)
 - `user_history` — Aggregate stats per gamemode (streaks, average guesses)
 - `blurry_mode_data` — Blurry-mode specific data per idol
+- `albums` — Pixelated-mode source table (album equivalent of `idols`); `is_published` gates daily selection
+
+## Code Conventions
+Recurring patterns across the codebase — follow them in new code.
+
+**Backend**
+- **Thin routes, service-owned logic** — Route handlers acquire `get_db()` + a cursor, wrap the body in `try/finally: cursor.close()`, and delegate to a Service class (`AlbumService`, `GameService`, `UserService`). Services receive `connect`/`cursor` as arguments and never call `get_db()` themselves.
+- **Pooled, dict-row connections** — `get_db()` returns a request-scoped connection from the shared `ConnectionPool` (stored on `flask.g`); `row_factory=dict_row` is set pool-wide, so rows are accessed by key (`row["album_id"]`). Teardown rolls back and returns the connection to the pool.
+- **Roll back on error** — On any exception mid-transaction use `connect.rollback()` (never leave a transaction open; the pool enforces `idle_in_transaction_session_timeout`). Services re-raise after rolling back; teardown rolls back defensively.
+- **Reads before the write/commit** — Run all `SELECT`s before the mutating call. `process_guess` fetches the answer payload and guessed album first, then delegates to `save_user_history`, which owns the upsert + the single `commit()`.
+- **Defensively normalize external input** — `request.get_json() or {}`, `get_analytics_data() or {}` before use.
+
+**Frontend**
+- **Gate debug logs behind `import.meta.env.DEV`** — Standard across `api.ts`, `tokenEncryption.ts`, `AuthProvider.tsx`, Classic/Blurry pages. (`PixelatedMode.tsx` still logs raw — the current exception.)
+- **Selective localStorage removal, never a blind wipe** — Per-mode key lists in `useClearGameStorage` (`CLASSIC_KEYS` / `BLURRY_KEYS` / `PIXELATED_KEYS`) removed key-by-key on new-day detection. The one deliberate `localStorage.clear()` (invalid-token reset in `api.ts`) still re-preserves `kpopit_session` + `kpopit_was_authenticated`.
+- **Reload via `safeReload()`** — Not `window.location.reload()` directly; its one-shot guard prevents reload loops when multiple triggers fire.
+- **Per-mode React Query keys** — `["pixelatedDailyAlbum", gameMode]`, `["dailyUserCount", gameMode]`, etc. Client-side search lists (`["allAlbums"]`, `["allIdols"]`) are fetched once and filtered locally — no per-keystroke endpoint.
+
+## Architecture — Adding a New Game Mode
+Every mode follows the same shape (Classic → Blurry → Pixelated) on both stacks. Reuse it; don't invent a parallel structure. (Visual/design architecture lives in `kpopit-frontend/DESIGN.md`.)
+
+> **Design scope is a baseline, not a hard rule.** `kpopit-frontend/DESIGN.md` is the default visual language, but individual features may intentionally diverge from it (e.g. an album view with a look of its own). When the user asks to change the scope or explore a new visual direction for a feature, follow their new direction — don't force it back to DESIGN.md — and update DESIGN.md if they want the change to become the new baseline.
+
+### Backend
+- **Blueprint + `gamemode_id`** — Add `routes/games/<mode>.py`, register it under `/api` in `app.py`, and assign the next `gamemode_id`. The active mode is read per-request into `g.gamemode_id` from the `gamemode_id` query param (`load_gamemode` in `app.py`, defaults to 1).
+- **A Service owns the mode's logic** — Put it in `services/<x>_service.py` (e.g. `AlbumService`), constructed with the connection and given `cursor`/`connect` per call. It provides three things:
+  1. **Daily pick** — reuse the exponential-weighting algorithm (`weight = exp(0.08 · days_waiting)`, 10-day cooldown, boost for never-picked), writing the winner to `daily_picks` keyed by `(pick_date, gamemode_id)`.
+  2. **Daily fetch** — return only what the client needs to render/play (no answer-revealing extras beyond what the UI already uses as hints).
+  3. **`process_guess`** — resolve the correct answer, then **delegate persistence** (see below).
+- **Scoring is centralized — never reimplemented per mode** — `process_guess` delegates to `GameService.save_user_history`, the single owner of the `daily_user_history` upsert, `score`, `user_history` streaks/aggregates, the double-count guard, and the `commit()`. A new mode adds *zero* scoring/streak code.
+- **Source table gated by `is_published`** — Mirror `idols` / `albums`: only published rows are eligible for daily selection.
+- **Dates over the wire** — Send derived/minimal fields (e.g. `release_year` via `EXTRACT(YEAR FROM release_date)::int`), never full timestamps; expose full dates only through dedicated detail endpoints. Use `utils/dates.py` — EST for daily-reset logic, UTC for token/session timestamps.
+
+### Frontend
+- **Page + route** — Add `pages/<Mode>/`, register a `<Route path="/<mode>" …>` under `MainLayout` in `main.tsx`, and extend the `GameMode` union + `MODES` list in `hooks/useGameMode.tsx`. `useGameMode` derives the active mode from the URL path and writes it to `localStorage["kpopit_gamemode"]`.
+- **`gamemode_id` is injected globally** — The `api.ts` request interceptor reads `kpopit_gamemode`, maps it via the `MODES` name→id table, and attaches `gamemode_id` to every non-`/auth` request. New endpoints don't pass it manually; just add the mode to the map.
+- **Endpoints, types, components** — Add the mode's calls to `services/api.ts`, its data shapes to `interfaces/gameInterfaces.ts`, and its UI under `components/<Mode>/`.
+- **Game-state lifecycle** — Register the mode's `localStorage` keys as a `<MODE>_KEYS` array in `useClearGameStorage`. The page compares the server's `server_date` against the stored `<mode>GameDate`; on mismatch it clears those keys and calls `safeReload()`. Stats/history stay server-side; only per-day game state lives in `localStorage`.
+- **Per-mode React Query keys** — Key every query by mode (`["<mode>DailyAlbum", gameMode]`); reuse the fetch-once-filter-locally search cache pattern (`["allAlbums"]` / `["allIdols"]`) instead of a per-keystroke endpoint.
 
 ## Tech Stack
 - **Frontend:** React 19, TypeScript 5.8, Vite 7, Tailwind CSS 4, Chakra UI, React Router 7, TanStack Query 5, Framer Motion, Axios
