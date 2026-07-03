@@ -98,7 +98,7 @@ const PixelatedVictory = (props: PixelatedVictoryProps) => {
         };
     };
 
-    const fmt = (v: number | null | undefined) => (v === null || v === undefined ? "—" : String(v.toFixed(2)));
+    const fmt = (v: number | null | undefined, decimals?: number) => (v === null || v === undefined ? "—" : v.toFixed(decimals ?? 0));
 
     const ordinal = (n: number | null | undefined) => {
         if (n === null || n === undefined) return "—";
@@ -276,7 +276,7 @@ const PixelatedVictory = (props: PixelatedVictoryProps) => {
                 >
                     <img src={PositionTrend} alt="Position Icon" className="w-4 h-4 sm:w-6 sm:h-6" draggable={false} />
 
-                    <div className="font-bold max-xxs:text-xl text-2xl">{fmt(score)}</div>
+                    <div className="font-bold max-xxs:text-xl text-2xl">{fmt(score, 2)}</div>
 
                     <div className="font-bold max-xxs:text-[11px] text-sm uppercase">Score</div>
                 </div>
