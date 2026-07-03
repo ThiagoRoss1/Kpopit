@@ -98,7 +98,7 @@ const PixelatedVictory = (props: PixelatedVictoryProps) => {
         };
     };
 
-    const fmt = (v: number | null | undefined) => (v === null || v === undefined ? "—" : String(v));
+    const fmt = (v: number | null | undefined) => (v === null || v === undefined ? "—" : String(v.toFixed(2)));
 
     const ordinal = (n: number | null | undefined) => {
         if (n === null || n === undefined) return "—";
