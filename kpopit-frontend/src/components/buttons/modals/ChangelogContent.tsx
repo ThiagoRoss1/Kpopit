@@ -8,6 +8,28 @@ const ChangelogText = () => {
         <div className="w-full bg-transparent mt-5 mb-5">
             <div className="w-full flex flex-col justify-center items-center gap-y-4">
 
+                {/* Changelog 6 */}
+                <div className={`${divClass} bg-gray-900 border-2 border-white`}>
+                    <h3 className={textClass}>July 02, 2026</h3>
+                        <p className={`${textClass} text-center`}>
+                            New Game mode: Pixelated
+                        </p>
+                        <p className={`${textClass} text-center`}>
+                            Guess the daily K-pop album from its progressively de-pixelating cover art.
+                        </p>
+                </div>
+
+                {/* Changelog 5 */}
+                <div className={`${divClass} bg-gray-900 border-2 border-white`}>
+                    <h3 className={textClass}>May 18, 2026</h3>
+                        <p className={`${textClass} text-center`}>
+                            New Feature: Accounts
+                        </p>
+                        <p className={`${textClass} text-center`}>
+                            Login and Register to save your progress and stats across devices.
+                        </p>
+                </div>
+
                 {/* Changelog 4 */}
                 <div className={`${divClass} bg-gray-900 border-2 border-white`}>
                     <h3 className={textClass}>April 08, 2026</h3>

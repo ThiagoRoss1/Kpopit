@@ -160,7 +160,7 @@ const PixelatedVictory = (props: PixelatedVictoryProps) => {
 
             <span className="flex justify-center items-center text-center mb-4">
                 <span className="font-['Caveat',cursive] text-2xl text-ink">
-                    You were the <span className="text-neon-pink font-bold">{ordinal(rank)}</span> fan to guess the album!
+                    You were the <span className="text-neon-pink font-bold">{ordinal(position)}</span> fan to guess the album!
                 </span>
             </span>
 
@@ -265,7 +265,7 @@ const PixelatedVictory = (props: PixelatedVictoryProps) => {
                 >
                     <img src={RankPosition} alt="Rank Icon" className="w-4 h-4 sm:w-6 sm:h-6" draggable={false} />
 
-                    <div className="font-bold max-xxs:text-xl text-2xl">{fmt(position)}</div>
+                    <div className="font-bold max-xxs:text-xl text-2xl">{fmt(rank)}</div>
 
                     <div className="font-bold max-xxs:text-[11px] text-sm uppercase">Position</div>
                 </div>
