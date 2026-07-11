@@ -8,9 +8,9 @@ CREATE TABLE IF NOT EXISTS collections (
 );
 
 CREATE TABLE IF NOT EXISTS collection_group_eligibility (
-    collection_id INTEGER NOT NULL REFERENCES collections(id) ON DELETE CASCADE,
+    collection_id INTEGER NOT NULL REFERENCES collections(id),
     group_id INTEGER NOT NULL REFERENCES groups(id),
-    is_eligible BOOLEAN NOT NULL DEFAULT TRUE,
+    is_eligible BOOLEAN NOT NULL DEFAULT FALSE,
     has_bonus_cover BOOLEAN NOT NULL DEFAULT TRUE,
 
     PRIMARY KEY (collection_id, group_id)
@@ -18,7 +18,7 @@ CREATE TABLE IF NOT EXISTS collection_group_eligibility (
 
 CREATE TABLE IF NOT EXISTS cards (
     id SERIAL PRIMARY KEY,
-    collection_id INTEGER NOT NULL REFERENCES collections(id) ON DELETE CASCADE,
+    collection_id INTEGER NOT NULL REFERENCES collections(id),
     idol_id INTEGER REFERENCES idols(id),
     group_id INTEGER REFERENCES groups(id),
     card_type TEXT NOT NULL DEFAULT 'idol',
