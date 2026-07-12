@@ -1,7 +1,10 @@
+import logging
 from flask import Blueprint, jsonify, g
 from services.get_db import get_db
 from services.collection_service import CollectionService
 from utils.auth_decorators import optional_auth
+
+logger = logging.getLogger(__name__)
 
 collection_bp = Blueprint('collection', __name__)
 
@@ -32,6 +35,7 @@ def overview():
         result = service.get_overview(cursor, resolve_user_id(cursor))
         return jsonify(result), 200
     except Exception:
+        logger.exception("Error fetching collection overview")
         return jsonify({"error": "An error occurred while fetching collection overview."}), 500
     finally:
         cursor.close()
@@ -48,6 +52,7 @@ def group_page(group_id):
             return jsonify({"error": "Group page not found."}), 404
         return jsonify(result), 200
     except Exception:
+        logger.exception("Error fetching collection group page (group_id=%s)", group_id)
         return jsonify({"error": "An error occurred while fetching group page."}), 500
     finally:
         cursor.close()

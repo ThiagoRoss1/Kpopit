@@ -121,8 +121,8 @@ def run_seed():
 
                 # Groups Table Seeding
                 groups_columns = [
-                    "id", "name", "group_debut_year", 
-                    "member_count", "generation", "fandom_name", "is_published"
+                    "id", "name", "group_debut_year",
+                    "member_count", "generation", "fandom_name", "is_published", "image_path"
                 ]
 
                 seed_table(cursor, GROUPS_CSV_FILE, 'groups', groups_columns)

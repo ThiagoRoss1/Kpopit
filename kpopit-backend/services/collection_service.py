@@ -177,15 +177,22 @@ class CollectionService:
         members = cursor.fetchall()
         if not members:
             return None
-        
+
+        cursor.execute("SELECT name FROM groups WHERE id = %s", (group_id,))
+        group_row = cursor.fetchone()
+        group_name = group_row["name"] if group_row else None
+
         cursor.execute(
             """
-                SELECT c.id AS card_id, c.image_path, uc.id IS NOT NULL AS owned
+                SELECT c.id AS card_id,
+                    COALESCE(c.image_path, g.image_path) AS image_path,
+                    uc.id IS NOT NULL AS owned
                 FROM cards AS c
+                JOIN groups AS g ON g.id = c.group_id
                 LEFT JOIN user_cards AS uc ON uc.user_id = %s AND uc.card_id = c.id
                 WHERE c.collection_id = %s AND c.group_id = %s AND c.card_type = 'group_photo'
             """, (user_id, collection_id, group_id)
         )
         group_photo = cursor.fetchone()
 
-        return {"group_id": group_id, "members": members, "group_photo": group_photo}
+        return {"group_id": group_id, "group_name": group_name, "members": members, "group_photo": group_photo}

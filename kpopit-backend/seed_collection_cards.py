@@ -35,12 +35,33 @@ def seed_group_photo_cards(cursor, collection_id=1):
     )
     print(f"Group photo cards: {cursor.rowcount} inserted")
 
+def warn_cardless_eligible_pages(cursor, collection_id=1):
+    """Warns about eligible pages with zero idol cards (invisible on the overview, 404 on their page)."""
+    cursor.execute(
+        """
+            SELECT cge.group_id, g.name
+            FROM collection_group_eligibility AS cge
+            JOIN groups AS g ON g.id = cge.group_id
+            WHERE cge.collection_id = %s AND cge.is_eligible = TRUE
+                AND NOT EXISTS (
+                    SELECT 1
+                    FROM idol_career AS ic
+                    JOIN cards AS c ON c.collection_id = cge.collection_id
+                        AND c.idol_id = ic.idol_id AND c.card_type = 'idol'
+                    WHERE ic.group_id = cge.group_id
+                )
+        """, (collection_id,)
+    )
+    for row in cursor.fetchall():
+        print(f"WARNING: eligible page has no idol cards (hidden until its idols are published): group {row['group_id']} ({row['name']})")
+
 def run_seed_cards():
     with get_manual_db() as connect:
         with connect.cursor() as cursor:
             try:
                 seed_idol_cards(cursor)
                 seed_group_photo_cards(cursor)
+                warn_cardless_eligible_pages(cursor)
 
                 connect.commit()
                 print("Collection cards seeded successfully.")

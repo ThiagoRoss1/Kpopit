@@ -55,6 +55,10 @@ os.environ.setdefault(
     "test_jwt_secret_key_at_least_32_chars_long_for_pytest_runs",
 )
 os.environ.setdefault("FLASK_ENV", "development")
+# Force the collection feature on for the suite: collection_bp registration and
+# the grant hook both read this at import time. Hook on/off behaviour is still
+# exercised per-test via monkeypatch on services.game_service.COLLECTION_ENABLED.
+os.environ["COLLECTION_ENABLED"] = "true"
 
 import psycopg  # noqa: E402
 import pytest  # noqa: E402
@@ -72,6 +76,10 @@ TRUNCATE_SQL = """
         yesterday_picks,
         albums,
         blurry_mode_data,
+        user_cards,
+        cards,
+        collection_group_eligibility,
+        collections,
         idol_career,
         idol_company_affiliation,
         group_company_affiliation,
@@ -90,6 +98,11 @@ SEED_GAMEMODES_SQL = """
         (1, 'classic',   'classic',   TRUE),
         (2, 'blurry',    'blurry',    TRUE),
         (3, 'pixelated', 'pixelated', FALSE)
+    ON CONFLICT (id) DO NOTHING
+"""
+
+SEED_COLLECTIONS_SQL = """
+    INSERT INTO collections (id, name) VALUES (1, 'Album 1')
     ON CONFLICT (id) DO NOTHING
 """
 
@@ -119,6 +132,7 @@ def reset_db(db_conn):
     with db_conn.cursor() as cur:
         cur.execute(TRUNCATE_SQL)
         cur.execute(SEED_GAMEMODES_SQL)
+        cur.execute(SEED_COLLECTIONS_SQL)
     db_conn.commit()
     yield
 
@@ -276,5 +290,149 @@ def make_soloist_album(db_conn):
             aid = cur.fetchone()["id"]
         db_conn.commit()
         return aid, artist_name
+
+    return _make
+
+
+# --- Collection fixtures (Album 1) ---
+
+
+@pytest.fixture
+def make_idol(db_conn):
+    """Insert an `idols` row (published by default); return its id."""
+
+    def _make(artist_name: str = "Test Idol", is_published: bool = True,
+              image_path: str | None = None) -> int:
+        with db_conn.cursor() as cur:
+            cur.execute(
+                """
+                INSERT INTO idols (artist_name, gender, nationality, is_published, image_path)
+                VALUES (%s, 'F', 'South Korea', %s, %s)
+                RETURNING id
+                """,
+                (artist_name, is_published, image_path),
+            )
+            idol_id = cur.fetchone()["id"]
+        db_conn.commit()
+        return idol_id
+
+    return _make
+
+
+@pytest.fixture
+def make_career(db_conn):
+    """Insert an `idol_career` stint linking an idol to a group."""
+
+    def _make(idol_id: int, group_id: int, is_active: bool = True,
+              start_year: int | None = 2020, end_year: int | None = None) -> None:
+        with db_conn.cursor() as cur:
+            cur.execute(
+                """
+                INSERT INTO idol_career (idol_id, group_id, is_active, start_year, end_year)
+                VALUES (%s, %s, %s, %s, %s)
+                ON CONFLICT (idol_id, group_id) DO NOTHING
+                """,
+                (idol_id, group_id, is_active, start_year, end_year),
+            )
+        db_conn.commit()
+
+    return _make
+
+
+@pytest.fixture
+def make_eligible_group(make_group, db_conn):
+    """Create a group and its `collection_group_eligibility` row; return the group id."""
+
+    def _make(name: str = "CollectGroup", is_eligible: bool = True,
+              has_bonus_cover: bool = True, collection_id: int = 1) -> int:
+        group_id = make_group(name)
+        with db_conn.cursor() as cur:
+            cur.execute(
+                """
+                INSERT INTO collection_group_eligibility (collection_id, group_id, is_eligible, has_bonus_cover)
+                VALUES (%s, %s, %s, %s)
+                """,
+                (collection_id, group_id, is_eligible, has_bonus_cover),
+            )
+        db_conn.commit()
+        return group_id
+
+    return _make
+
+
+@pytest.fixture
+def make_card(db_conn):
+    """Insert a `cards` catalog row (idol / group_photo); return its id."""
+
+    def _make(idol_id: int | None = None, group_id: int | None = None,
+              card_type: str = "idol", image_path: str | None = None,
+              collection_id: int = 1) -> int:
+        with db_conn.cursor() as cur:
+            cur.execute(
+                """
+                INSERT INTO cards (collection_id, idol_id, group_id, card_type, image_path)
+                VALUES (%s, %s, %s, %s, %s)
+                RETURNING id
+                """,
+                (collection_id, idol_id, group_id, card_type, image_path),
+            )
+            card_id = cur.fetchone()["id"]
+        db_conn.commit()
+        return card_id
+
+    return _make
+
+
+@pytest.fixture
+def collection_page(make_eligible_group, make_idol, make_career, make_card):
+    """Build a full eligible page: group + N carded members (+ optional group_photo card).
+
+    Returns {"group_id", "idol_ids", "card_ids", "group_photo_card_id"}.
+    """
+
+    def _make(name: str = "PageGroup", n_members: int = 2, has_bonus_cover: bool = True,
+              with_group_photo: bool = True) -> dict:
+        group_id = make_eligible_group(name, has_bonus_cover=has_bonus_cover)
+        idol_ids, card_ids = [], []
+        for i in range(n_members):
+            idol_id = make_idol(f"{name} Member {i + 1}")
+            make_career(idol_id, group_id)
+            idol_ids.append(idol_id)
+            card_ids.append(make_card(idol_id=idol_id))
+        group_photo_card_id = None
+        if has_bonus_cover and with_group_photo:
+            group_photo_card_id = make_card(group_id=group_id, card_type="group_photo")
+        return {
+            "group_id": group_id,
+            "idol_ids": idol_ids,
+            "card_ids": card_ids,
+            "group_photo_card_id": group_photo_card_id,
+        }
+
+    return _make
+
+
+@pytest.fixture
+def make_access_jwt():
+    """Mint an access JWT for a user, mirroring AuthService.generate_access_token."""
+    from datetime import timedelta
+
+    import jwt as pyjwt
+
+    from utils.dates import get_datetime_now_utc
+
+    def _make(user_id: int, token: str, username: str = "testuser") -> str:
+        now = get_datetime_now_utc()
+        payload = {
+            "sub": token,
+            "user_id": user_id,
+            "username": username,
+            "is_admin": False,
+            "is_authenticated": True,
+            "type": "access",
+            "iat": now,
+            "exp": now + timedelta(hours=1),
+        }
+        return pyjwt.encode(payload, os.environ["JWT_SECRET_KEY"], algorithm="HS256")
 
     return _make

@@ -1,20 +1,17 @@
 # Album 1 Collection System — Implementation Plan
 
-> **Status: BACKEND COMPLETE, verified end-to-end (grant → hook → routes → response) with real requests as of 2026-07-11. Sections 2–4 describe the implementation as built. Pending: `card_granted` response surfacing (§3.2), backfill script (§5), tests (§7b), cleanup items (§7), entire frontend (§6).**
+> **Status: BACKEND FULLY COMPLETE (2026-07-11 — schema, seeding, service, hook incl. `card_granted` response, routes, backfill script, 24 passing tests). Only the frontend (§6) and the launch runbook remain.**
 > During implementation, check off steps (`- [x]`) as each phase completes.
 
 ---
 
 ## 0. Status & Pending
 
-**Done:** migration `025_add_albums_collection.sql`; CSV seeding of `collections` + `collection_group_eligibility` via `seed_db.py`; derived card catalog via `seed_collection_cards.py`; `CollectionService` (grant + bonus unlock + reads); grant hook in `GameService.save_user_history`; routes at `routes/collections/collection.py`, registered flag-gated in `app.py`.
+**Done:** migrations `025_add_albums_collection.sql` + `026_add_group_image_path.sql`; CSV seeding of `collections` + `collection_group_eligibility` via `seed_db.py` (and `groups.image_path` via `groups.csv`); derived card catalog via `seed_collection_cards.py` (with cardless-page warning); `CollectionService` (grant + bonus unlock + reads, incl. `group_name` and both image fallbacks); SAVEPOINT-isolated grant hook in `GameService.save_user_history` returning `(is_correct, card_granted)`; `card_granted` in the Classic/Blurry guess responses; routes at `routes/collections/collection.py` (with `logger.exception`); `backfill_collection_cards.py` (guard + `--dry-run` verified on dev: 4,467 wins replayed, rolled back); `tests/test_collection.py` (24 tests) + conftest fixtures — full suite green (53 passed).
 
 **Pending:**
-- Re-surface `card_granted` in the guess response (§3.2 — return contract + classic/blurry routes; the service already returns the dict).
-- `backfill_collection_cards.py` (§5).
-- `tests/test_collection.py` + `conftest.py` updates (§7b Test Plan).
-- Cleanup: delete dead `data/cards.csv`; revert the `idol_id = 1` debug line in `routes/games/classic.py` before committing.
 - Entire frontend (§6).
+- Launch runbook execution (§5 header of the backfill script): publish launch pages → reseed → real backfill run → enable flags.
 
 **Changelog — bugs found & fixed during backend review (2026-07-11):**
 - *Anonymous read-path ownership:* the routes originally passed `g.auth["user_id"]` directly, which `detect_user()` leaves `None` for anonymous UUID users (it never hits the DB) → anonymous users were granted cards on win but saw zero ownership on overview/group pages. Fixed with `resolve_user_id(cursor)` in `routes/collections/collection.py` (anonymous UUID → `users.id` lookup, mirroring the guess routes).
@@ -140,11 +137,14 @@ Module constants: `COLLECTION_ENABLED` (env, read once at import — same conven
 
 **`get_overview(cursor, user_id, collection_id=1) -> list[dict]`** — returns a **bare list** of per-group rows: `group_id, group_name, total_idol_cards, owned_idol_cards, has_bonus_cover, bonus_owned` (`COUNT(DISTINCT …)` for multi-stint safety; `BOOL_OR` over a second `user_cards` LEFT JOIN for the bonus). No wrapping object, no collection-wide `total_cards`/`owned_cards`. Ordered by `group_id`. `user_id=None` → catalog with zero ownership. Groups whose idols have no cards yet are absent (INNER JOIN through `cards`).
 
-**`get_group_page(cursor, user_id, group_id, collection_id=1) -> dict | None`** — two queries:
+**`get_group_page(cursor, user_id, group_id, collection_id=1) -> dict | None`** — three queries:
 1. Roster: `SELECT DISTINCT ON (ic.idol_id) idol_id, artist_name, card_id, COALESCE(c.image_path, i.image_path) AS image_path, owned, level, first_won_at … ORDER BY ic.idol_id`. Members do **not** ship `is_active`/`start_year`/`end_year` (dropped from the original plan; re-add later if departed-member styling is wanted). No `i.is_published` filter needed — unpublished idols have no card row, so the INNER JOIN through `cards` excludes them.
-2. Bonus: the page's `group_photo` card (`card_id, image_path, owned`), or `None` when the page has no bonus card. **No image fallback for group_photo yet — see the group-art decision (§4b #9 / chat discussion).**
+2. `group_name` from `groups` (added per §4b #9 — the frontend title no longer depends on the overview cache).
+3. Bonus: the page's `group_photo` card (`card_id, image_path, owned`) with `COALESCE(c.image_path, g.image_path)` — Q7 Option A: falls back to the CSV-seeded `groups.image_path` (migration 026) — or `None` when the page has no bonus card.
 
-Returns `{"group_id", "members", "group_photo"}` — no `group_name`, no counts (flagged in §4b). Empty roster (unknown/ineligible group, or eligible-but-cardless page) → `None` → route 404s.
+Returns `{"group_id", "group_name", "members", "group_photo"}` — no counts. Empty roster (unknown/ineligible group, or eligible-but-cardless page) → `None` → route 404s.
+
+> **Schema note (found while writing T13):** `idol_career`'s PK is `(idol_id, group_id)`, so two stints in the *same* group cannot exist as separate rows — the `DISTINCT ON` is defense-in-depth, not load-bearing. The multi-stint test (T13) instead locks in multi-*group* count integrity.
 
 ### 3.2 Hook in `GameService.save_user_history` (as built)
 
@@ -152,12 +152,21 @@ Inside `if is_correct:` → `if not already_won_today:`, after the streak update
 
 ```python
 if COLLECTION_ENABLED and gamemode_id in COLLECTION_GAMEMODE_IDS:
-    CollectionService(self.db).grant_card_for_win(cursor, user_id, int(answer_id), current_timestamp)
+    cursor.execute("SAVEPOINT collection_grant")
+    try:
+        card_granted = CollectionService(self.db).grant_card_for_win(
+            cursor, user_id, int(answer_id), current_timestamp
+        )
+        cursor.execute("RELEASE SAVEPOINT collection_grant")
+    except Exception:
+        cursor.execute("ROLLBACK TO SAVEPOINT collection_grant")
+        card_granted = None
+        logger.exception("Collection card grant failed; win saved without a card")
 ```
 
-The return value is **currently discarded** and `save_user_history` still returns a bare `is_correct` — no call-site changes shipped.
+**SAVEPOINT isolation (§4b #7, implemented):** a collection failure can never cost the user their win — the grant rolls back to the savepoint, is logged, and the win commits normally.
 
-**Pending (decided 2026-07-11): re-surface `card_granted`.** Change the hook to capture the dict, return `(is_correct, card_granted)`, and update the three call sites (`classic.py`/`blurry.py` add `"card_granted"` to the guess response; `AlbumService.process_guess` discards it). The response field mirrors the service dict: `{card_id, is_new, level, times_won, group_photo: [group_id, …]} | null` — non-null only on the first winning guess of the day, exactly when the celebration fires. Until this lands, the frontend win celebration cannot rely on the response — §6 assumes this task lands first.
+**`card_granted` surfaced (implemented 2026-07-11):** `save_user_history` returns `(is_correct, card_granted)`; `classic.py`/`blurry.py` add `"card_granted"` to their guess responses and `AlbumService.process_guess` discards it. The field mirrors the service dict: `{card_id, is_new, level, times_won, group_photo: [group_id, …]} | null` — non-null only on the first winning guess of the day, exactly when the celebration fires.
 
 All the original placement rationale stands:
 - **Zero duplication** — Classic, Blurry (and any future idol mode) all converge on `save_user_history`; no per-route code.
@@ -171,7 +180,7 @@ All the original placement rationale stands:
 
 ### 3.3 Routes — `routes/collections/collection.py` (as built)
 
-`collection_bp`, registered in `app.py` under `/api` **only when `COLLECTION_ENABLED`** (mirrors the `ADMIN_ENABLED` gating pattern). Both routes: `@optional_auth`, thin `get_db()` + cursor + `try/finally: cursor.close()`, generic 500 JSON on exception. The interceptor-injected `gamemode_id` query param is simply ignored (harmless, same as `/idols-list`).
+`collection_bp`, registered in `app.py` under `/api` **only when `COLLECTION_ENABLED`** (mirrors the `ADMIN_ENABLED` gating pattern). Both routes: `@optional_auth`, thin `get_db()` + cursor + `try/finally: cursor.close()`, generic 500 JSON on exception with `logger.exception` server-side (§4b #8, implemented). The interceptor-injected `gamemode_id` query param is simply ignored (harmless, same as `/idols-list`).
 
 **`resolve_user_id(cursor)`** — JWT → `g.auth["user_id"]`; anonymous → `SELECT id FROM users WHERE token = %s` (because `detect_user()` never touches the DB); anything else → `None` (catalog visible, nothing owned — degrades, never errors).
 
@@ -195,6 +204,7 @@ All the original placement rationale stands:
 ```json
 {
   "group_id": 3,
+  "group_name": "TWICE",
   "members": [
     {
       "idol_id": 5,
@@ -224,20 +234,20 @@ All the original placement rationale stands:
 **The derived card catalog comes from `seed_collection_cards.py`** (renamed from the planned `populate_collection_cards.py`; standalone, `get_manual_db()`, single commit, rollback on error — it does NOT seed the collection row or eligibility):
 - `seed_idol_cards` — one `'idol'` card per `DISTINCT` published idol (`i.is_published = TRUE`, Q4) on any `is_eligible = TRUE` page, `ON CONFLICT (collection_id, idol_id) WHERE card_type='idol' DO NOTHING`.
 - `seed_group_photo_cards` — one `'group_photo'` card per `is_eligible AND has_bonus_cover` page, `ON CONFLICT (collection_id, group_id) WHERE card_type='group_photo' DO NOTHING`.
-- Prints per-step insert counts. Idempotent only through the `DO NOTHING`s (no other guards). `image_path` stays `NULL` — idol cards fall back to `idols.image_path` at read time; group_photo art sourcing is the open decision (§4b #9 / chat).
+- Prints per-step insert counts **and a warning for eligible pages with zero idol cards** (§4b #11, implemented). Idempotent only through the `DO NOTHING`s (no other guards). `image_path` stays `NULL` — idol cards fall back to `idols.image_path` and group_photo cards to `groups.image_path` (Q7 Option A, migration 026 + `groups.csv` column) at read time.
 
 **Publish flow:** flip `is_eligible` in the CSV → `python seed_db.py` → `python seed_collection_cards.py`. An idol already carded via another eligible page needs nothing new — her single card starts appearing on the new page through the read-time join.
 
-**`data/cards.csv` is dead** — an abandoned early experiment (unread by any seeder; its rows would violate `chk_cards_identity`). Delete it (§7 cleanup item).
+**`data/cards.csv` (dead early experiment) was deleted** (2026-07-11) — `seed_collection_cards.py` is the sole card-catalog source.
 
 ---
 
-## 4b. Improvement Suggestions (reviewed 2026-07-11 — proposals only, nothing implemented)
+## 4b. Improvement Suggestions (reviewed 2026-07-11 — **#2, #7, #8, #9, #11, #14 implemented same day**; #1, #3–#6, #12, #13 accepted as documented; #10 deferred to Phase 6)
 
 ### Performance
 
 1. **No index on `idol_career(group_id)` — skip for now (speculative).** The PK is `(idol_id, group_id)`, so every group-side join in `get_overview` / `get_group_page` / `_get_completed_group_ids` seq-scans `idol_career`. At current volume (tens of groups, hundreds of career rows) a seq scan beats index access; adding the index now is premature. *Recommendation: don't add; revisit with `EXPLAIN ANALYZE` only if collection reads ever show up slow.*
-2. **`idx_user_cards_user_id` is redundant — drop opportunistically.** `uq_user_card UNIQUE (user_id, card_id)` already provides a btree with `user_id` as the leading column, covering every `user_id` probe. The extra index only adds write overhead. *Recommendation: fold `DROP INDEX idx_user_cards_user_id` into the next migration that touches this area; not worth its own migration.*
+2. **`idx_user_cards_user_id` is redundant — drop opportunistically.** `uq_user_card UNIQUE (user_id, card_id)` already provides a btree with `user_id` as the leading column, covering every `user_id` probe. The extra index only adds write overhead. ✅ **Implemented:** dropped in migration 026 (which adds `groups.image_path`).
 3. **No query restructure needed.** All hot lookups are covered: idol cards by `uq_member_card` (partial, matches the `card_type='idol'` filter), group_photo cards by `uq_group_card`, ownership probes by `uq_user_card`, `resolve_user_id` by the `users.token UNIQUE` index. `get_overview` is one aggregate query per page load over a small catalog. *Recommendation: no action.*
 
 ### Security
@@ -248,18 +258,18 @@ All the original placement rationale stands:
 
 ### Reliability / edge cases
 
-7. **Isolate the grant hook with a SAVEPOINT — top recommendation.** Today an exception inside `grant_card_for_win` aborts the whole `save_user_history` transaction: the user's win, score, and streak roll back because a decorative side-feature failed. A bare `try/except` is NOT enough — psycopg poisons the transaction after any errored statement, so the subsequent `commit()` would fail. Wrap the hook: `SAVEPOINT collection_grant` → on exception `ROLLBACK TO SAVEPOINT collection_grant` + `logger.exception` → continue to commit the win. *Recommendation: implement before launch; the core game must never lose a win to a collection bug.*
-8. **Route handlers swallow exceptions blind.** Both routes `except Exception: return 500` with no `logger.exception` — a production failure is undiagnosable. The generic client message is correct; the missing server-side log isn't. *Recommendation: add `logger.exception(...)` in both handlers.*
-9. **`get_group_page` response lacks `group_name` (and counts).** The frontend group page needs a title; today it must be fished out of the overview cache (fragile on deep-link/refresh: `["collectionGroup", id]` can resolve before `["collectionOverview"]`). *Recommendation: add `g.name AS group_name` (one extra join to `groups`) to the roster query before Phase 6.*
+7. **Isolate the grant hook with a SAVEPOINT — top recommendation.** An exception inside `grant_card_for_win` would abort the whole `save_user_history` transaction: the user's win, score, and streak roll back because a decorative side-feature failed. A bare `try/except` is NOT enough — psycopg poisons the transaction after any errored statement. ✅ **Implemented:** `SAVEPOINT collection_grant` → on exception `ROLLBACK TO SAVEPOINT` + `logger.exception` → the win still commits (§3.2).
+8. **Route handlers swallow exceptions blind.** ✅ **Implemented:** both handlers now `logger.exception` before returning the generic 500.
+9. **`get_group_page` response lacks `group_name`.** The frontend group page needs a title without depending on the overview cache (fragile on deep-link/refresh). ✅ **Implemented:** `get_group_page` returns `group_name` (dedicated `groups` lookup after the roster query).
 10. **Overview has no collection-wide totals.** `CollectionProgress` (§6) wants distinct owned/total counts; per-page sums overcount multi-page idols, and the client cannot dedupe (it doesn't know which idols repeat across pages). *Recommendation: when Phase 6 starts, either add a small totals query to the overview endpoint or drop the header component; decide then.*
-11. **Eligible-but-cardless pages vanish.** A group flipped `is_eligible` before its idols are published/carded is absent from the overview and 404s on its page (INNER JOIN through `cards`). Consistent, but operationally surprising mid-publish. *Recommendation: accept + documented in the §4 publish flow; optionally have `seed_collection_cards.py` print a warning for eligible pages with zero cards.*
+11. **Eligible-but-cardless pages vanish.** A group flipped `is_eligible` before its idols are published/carded is absent from the overview and 404s on its page (INNER JOIN through `cards`). Consistent, but operationally surprising mid-publish. ✅ **Implemented (warning half):** `seed_collection_cards.py` prints a warning per eligible zero-card page; the vanish behavior itself stays as documented.
 12. **Same-day concurrent double-win race — accept.** Two simultaneous first-win submissions can both pass `already_won_today` and both grant → the second becomes a level-up (level 2 on day one). Requires duplicate wins in-flight within milliseconds; consequence is cosmetic. *Recommendation: no action; documented.*
 13. **`COLLECTION_ENABLED` is read once at import — testing consequence.** The hook check uses the value imported into `game_service`'s namespace, so tests toggle it via `monkeypatch.setattr("services.game_service.COLLECTION_ENABLED", False)`. Blueprint registration in `app.py` is also import-time — the "routes 404 when flag off" state can't be toggled per-test in-process (see §7b T25). *Recommendation: accept; no code change.*
-14. **Uncommitted debug line in `routes/games/classic.py`** — `idol_id = 1` (the testing override) is active in the working tree, pinning the daily idol. *Recommendation: revert before committing the collection work (§7 cleanup item).*
+14. **Uncommitted debug line in `routes/games/classic.py`** — `idol_id = 1` (the testing override) was active in the working tree, pinning the daily idol. ✅ **Resolved:** reverted (verified via `git diff`).
 
 ---
 
-## 5. Backfill Script (`backfill_collection_cards.py`, backend root) — PENDING
+## 5. Backfill Script (`backfill_collection_cards.py`, backend root) — ✅ IMPLEMENTED (real run pending launch)
 
 Standalone, manual, **one-time before public launch**. NOT a migration. Walks history and replays every win through the **same `CollectionService.grant_card_for_win()`** used by the live path — no duplicate INSERT logic anywhere.
 
@@ -359,33 +369,34 @@ The Classic/Blurry win handlers read `card_granted` **directly from the guess re
 
 ## 7. Implementation Checklist (ordered)
 
-### Phase 1 — Backend schema ✅ (except tests item)
+### Phase 1 — Backend schema ✅
 - [x] 1. Create `kpopit-backend/migrations/025_add_albums_collection.sql` with the §2 schema (DDL only, `BEGIN/COMMIT`, `IF NOT EXISTS`, named constraints, partial unique indexes).
 - [x] 2. Run `python migrations/migrations.py` against the dev DB; verify all four tables + partial unique indexes exist.
-- [ ] 3. Add the four new tables to `TRUNCATE_SQL` in `kpopit-backend/tests/conftest.py` (+ `SEED_COLLECTIONS_SQL`) and apply the migration to the `kpopit_test` DB (§7b T1–T2).
+- [x] 3. Add the four new tables to `TRUNCATE_SQL` in `kpopit-backend/tests/conftest.py` (+ `SEED_COLLECTIONS_SQL`) and apply the migrations to the `kpopit_test` DB (024–026 applied 2026-07-11).
+- [x] 3b. Migration `026_add_group_image_path.sql`: `groups.image_path` (Q7 Option A) + drop redundant `idx_user_cards_user_id` (§4b #2). Applied to dev + test DBs.
 
-### Phase 2 — Seeding ✅ (except idempotency double-run check)
-- [x] 4. Seed `collections` + `collection_group_eligibility` from `data/collections.csv` / `data/collection_group_eligibility.csv` via `seed_db.py`; create `kpopit-backend/seed_collection_cards.py` (§4): one idol card per distinct published idol on eligible pages, group_photo cards for `has_bonus_cover` eligible pages, per-step insert counts.
-- [ ] 5. Run `seed_collection_cards.py` twice against dev DB (with at least one page flipped to eligible in between); verify idempotency (second identical run inserts 0 rows) and that a multi-group idol gets exactly **one** card row.
+### Phase 2 — Seeding ✅
+- [x] 4. Seed `collections` + `collection_group_eligibility` from `data/collections.csv` / `data/collection_group_eligibility.csv` via `seed_db.py`; create `kpopit-backend/seed_collection_cards.py` (§4): one idol card per distinct published idol on eligible pages, group_photo cards for `has_bonus_cover` eligible pages, per-step insert counts + cardless-page warning. `groups.csv` gained the `image_path` column.
+- [x] 5. Run `seed_collection_cards.py` twice against dev DB: idempotent (both runs 0 inserts on the seeded catalog) and no idol has more than one card row (spot-checked via SQL). Fresh-catalog creation paths are covered by the §7b test suite.
 
-### Phase 3 — Domain service ✅ (except card_granted + tests)
+### Phase 3 — Domain service ✅
 - [x] 6. Create `kpopit-backend/services/collection_service.py`: `COLLECTION_ENABLED` + `COLLECTION_GAMEMODE_IDS = (1, 2)` + `LEVEL_CAP = 3` constants, `grant_card_for_win` (+ `_insert_new_card`, `_upgrade_card_level`, `_get_completed_group_ids`, `_insert_group_photo_card`, `_grant_completed_group_photos`), `get_overview`, `get_group_page` (§3.1) — no commits inside.
-- [x] 7. Hook `GameService.save_user_history` (§3.2) inside the `not already_won_today` block, guarded by flag + gamemode.
-- [ ] 8. **Re-surface `card_granted` (§3.2 pending task):** capture the grant dict, return `(is_correct, card_granted)`, update the three call sites (`classic.py` + `blurry.py` add `"card_granted"` to the guess response; `AlbumService.process_guess` discards it).
-- [ ] 9. Write `kpopit-backend/tests/test_collection.py` per the §7b Test Plan; run the full backend suite (`pytest kpopit-backend/tests -v`) — existing `test_pixelated.py` must stay green.
+- [x] 7. Hook `GameService.save_user_history` (§3.2) inside the `not already_won_today` block, guarded by flag + gamemode, isolated with `SAVEPOINT collection_grant` (§4b #7).
+- [x] 8. **Re-surface `card_granted`:** hook captures the grant dict, `save_user_history` returns `(is_correct, card_granted)`, all three call sites updated (`classic.py` + `blurry.py` add `"card_granted"` to the guess response; `AlbumService.process_guess` discards it).
+- [x] 9. Write `kpopit-backend/tests/test_collection.py` per the §7b Test Plan; full backend suite green (53 passed: 24 collection + 29 pixelated, 2026-07-11).
 
-### Phase 4 — Routes ✅ (except tests)
-- [x] 10. Create `kpopit-backend/routes/collections/collection.py`: `collection_bp`, `resolve_user_id`, the two GET endpoints (§3.3) with `@optional_auth`, thin-route + `try/finally` convention.
+### Phase 4 — Routes ✅
+- [x] 10. Create `kpopit-backend/routes/collections/collection.py`: `collection_bp`, `resolve_user_id`, the two GET endpoints (§3.3) with `@optional_auth`, thin-route + `try/finally` convention, `logger.exception` on failure.
 - [x] 11. Register `collection_bp` in `app.py` under `/api`, gated by `COLLECTION_ENABLED`; env var in backend `.env` (dev value `true`).
-- [ ] 12. Endpoint tests per §7b T21–T25.
+- [x] 12. Endpoint tests per §7b T21–T25.
 
-### Phase 4b — Cleanup (new)
-- [ ] 12a. Delete dead `kpopit-backend/data/cards.csv` (§4).
-- [ ] 12b. Revert the `idol_id = 1` debug line in `kpopit-backend/routes/games/classic.py` before committing (§4b #14).
+### Phase 4b — Cleanup ✅
+- [x] 12a. Delete dead `kpopit-backend/data/cards.csv` (§4).
+- [x] 12b. Revert the `idol_id = 1` debug line in `kpopit-backend/routes/games/classic.py` (verified via `git diff`).
 
-### Phase 5 — Backfill script
-- [ ] 13. Create `kpopit-backend/backfill_collection_cards.py` (§5): chronological replay through `grant_card_for_win`, `--dry-run` (transaction + rollback + report), non-empty `user_cards` guard with `--force`, single final commit.
-- [ ] 14. Test on a dev DB copy: dry-run counts match a hand-checked sample; real run then a second run aborts on the guard; document the launch runbook (migrate → seed CSVs → publish pages → seed cards → backfill → enable flags) at the top of the script.
+### Phase 5 — Backfill script ✅ (real run reserved for launch)
+- [x] 13. Create `kpopit-backend/backfill_collection_cards.py` (§5): chronological replay through `grant_card_for_win`, `--dry-run` (transaction + rollback + report), non-empty `user_cards` guard with `--force`, single final commit.
+- [x] 14. Verified on dev DB (2026-07-11): guard aborts on non-empty `user_cards`; `--dry-run --force` replayed 4,467 wins (398 new cards, 107 level-ups, 14 bonus unlocks, 3,962 non-collectible skips) and rolled back; launch runbook documented at the top of the script. **The real (committing) run happens at launch, after publishing the launch pages.**
 
 ### Phase 6 — Frontend
 - [ ] 15. Add types to `src/interfaces/gameInterfaces.ts` (§6 collection payloads + `CardGranted` on the guess-response types); add `getCollectionOverview` / `getCollectionGroupPage` to `src/services/api.ts` (anonymous-header pattern, §6).
@@ -401,46 +412,46 @@ The Classic/Blurry win handlers read `card_granted` **directly from the guess re
 
 ---
 
-## 7b. Test Plan — Collection feature (proposed 2026-07-11, not yet written)
+## 7b. Test Plan — Collection feature ✅ (implemented 2026-07-11 — `tests/test_collection.py`, 24 tests, all green)
 
 All tests live in `kpopit-backend/tests/test_collection.py`, using the existing conftest scaffolding (session `app`, `client`, `db_conn`, autouse `reset_db` truncation, `make_user`, `make_group`). Run with `pytest kpopit-backend/tests -v`; `test_pixelated.py` must stay green.
 
 ### Fixtures (`tests/conftest.py`)
-- [ ] T1. Add `collections, collection_group_eligibility, cards, user_cards` to `TRUNCATE_SQL` explicitly (today only implicit CASCADE via users/groups/idols covers three of them; `collections` is never reset).
-- [ ] T2. Add `SEED_COLLECTIONS_SQL` (`INSERT INTO collections (id, name) VALUES (1, 'Album 1') ON CONFLICT (id) DO NOTHING`) to `reset_db`, mirroring `SEED_GAMEMODES_SQL`.
-- [ ] T3. New fixtures: `make_idol` (published `idols` row), `make_career(idol_id, group_id)`, `make_eligible_group(group_id, is_eligible=True, has_bonus_cover=True)`, `make_card(idol_id=… | group_id=…, card_type)` — plus a composed `collection_page` fixture building group + N idols + careers + cards in one call.
+- [x] T1. Add `collections, collection_group_eligibility, cards, user_cards` to `TRUNCATE_SQL` explicitly (today only implicit CASCADE via users/groups/idols covers three of them; `collections` is never reset).
+- [x] T2. Add `SEED_COLLECTIONS_SQL` (`INSERT INTO collections (id, name) VALUES (1, 'Album 1') ON CONFLICT (id) DO NOTHING`) to `reset_db`, mirroring `SEED_GAMEMODES_SQL`.
+- [x] T3. New fixtures: `make_idol` (published `idols` row), `make_career(idol_id, group_id)`, `make_eligible_group(group_id, is_eligible=True, has_bonus_cover=True)`, `make_card(idol_id=… | group_id=…, card_type)` — plus a composed `collection_page` fixture building group + N idols + careers + cards in one call.
 
 ### `CollectionService` — grant paths (service-level, real DB)
-- [ ] T4. New card: `grant_card_for_win` → row with `level=1, times_won=1, first_won_at=passed timestamp`; returns `is_new: True`.
-- [ ] T5. Level-up: second grant → `level=2, times_won=2`, `is_new: False`; `first_won_at` unchanged.
-- [ ] T6. Capped: grants beyond `LEVEL_CAP` → `level` stays 3, `times_won` keeps incrementing (4, 5, …).
-- [ ] T7. Idol with no card row → returns `None`, zero `user_cards` writes.
+- [x] T4. New card: `grant_card_for_win` → row with `level=1, times_won=1, first_won_at=passed timestamp`; returns `is_new: True`.
+- [x] T5. Level-up: second grant → `level=2, times_won=2`, `is_new: False`; `first_won_at` unchanged.
+- [x] T6. Capped: grants beyond `LEVEL_CAP` → `level` stays 3, `times_won` keeps incrementing (4, 5, …).
+- [x] T7. Idol with no card row → returns `None`, zero `user_cards` writes.
 
 ### `CollectionService` — group_photo unlock
-- [ ] T8. Completing a page's last idol card → result `group_photo` contains the group id and the bonus `user_cards` row exists.
-- [ ] T9. Multi-group idol whose win completes TWO pages at once → both group ids granted (single-card design consequence, §1).
-- [ ] T10. Bonus re-grant is a no-op (`DO NOTHING`) — completing an already-bonused page grants nothing new.
-- [ ] T11. `has_bonus_cover = FALSE` page (Soloist) never unlocks a bonus even when complete.
-- [ ] T12. Eligible bonus page whose `group_photo` card row is missing → no grant, no error.
-- [ ] T13. Multi-stint idol (two `idol_career` rows, same group) doesn't break the completion count (`COUNT(DISTINCT …)`).
+- [x] T8. Completing a page's last idol card → result `group_photo` contains the group id and the bonus `user_cards` row exists.
+- [x] T9. Multi-group idol whose win completes TWO pages at once → both group ids granted (single-card design consequence, §1).
+- [x] T10. Bonus re-grant is a no-op (`DO NOTHING`) — completing an already-bonused page grants nothing new.
+- [x] T11. `has_bonus_cover = FALSE` page (Soloist) never unlocks a bonus even when complete.
+- [x] T12. Eligible bonus page whose `group_photo` card row is missing → no grant, no error.
+- [x] T13. Multi-stint idol (two `idol_career` rows, same group) doesn't break the completion count (`COUNT(DISTINCT …)`).
 
 ### `CollectionService` — read shapes
-- [ ] T14. `get_overview`: per-group rows carry `group_id, group_name, total_idol_cards, owned_idol_cards, has_bonus_cover, bonus_owned`; a multi-stint idol counts once; `bonus_owned` flips after unlock.
-- [ ] T15. `get_overview` with `user_id=None` → full catalog, all owned counts 0, `bonus_owned` false.
-- [ ] T16. `get_group_page`: multi-stint idol appears once (`DISTINCT ON` regression test); `image_path` falls back to `idols.image_path` when card art is NULL; `group_photo` is `None` for a no-bonus page; unknown/ineligible group → `None`.
+- [x] T14. `get_overview`: per-group rows carry `group_id, group_name, total_idol_cards, owned_idol_cards, has_bonus_cover, bonus_owned`; a multi-stint idol counts once; `bonus_owned` flips after unlock.
+- [x] T15. `get_overview` with `user_id=None` → full catalog, all owned counts 0, `bonus_owned` false.
+- [x] T16. `get_group_page`: multi-stint idol appears once (`DISTINCT ON` regression test); `image_path` falls back to `idols.image_path` when card art is NULL; `group_photo` is `None` for a no-bonus page; unknown/ineligible group → `None`.
 
 ### Hook (`save_user_history`) — through the real guess flow
-- [ ] T17. Winning Classic guess (flag on, carded idol) → one `user_cards` row; a second correct submission the same day does NOT re-grant (`times_won` unchanged — `already_won_today` guard).
-- [ ] T18. Blurry (gamemode 2) win grants; Pixelated (gamemode 3) win writes nothing to `user_cards`.
-- [ ] T19. Flag off — `monkeypatch.setattr("services.game_service.COLLECTION_ENABLED", False)` (the hook checks the value imported into `game_service`'s namespace, NOT the env var) → win recorded, `user_cards` untouched.
-- [ ] T20. Losing guess grants nothing.
+- [x] T17. Winning Classic guess (flag on, carded idol) → one `user_cards` row; a second correct submission the same day does NOT re-grant (`times_won` unchanged — `already_won_today` guard).
+- [x] T18. Blurry (gamemode 2) win grants; Pixelated (gamemode 3) win writes nothing to `user_cards`.
+- [x] T19. Flag off — `monkeypatch.setattr("services.game_service.COLLECTION_ENABLED", False)` (the hook checks the value imported into `game_service`'s namespace, NOT the env var) → win recorded, `user_cards` untouched.
+- [x] T20. Losing guess grants nothing.
 
 ### Routes (`test_client`)
-- [ ] T21. `GET /api/collection/overview` with anonymous UUID `Authorization` header → owned counts reflect that user's cards (regression test for the fixed anonymous-ownership bug).
-- [ ] T22. Same endpoint with a JWT `Bearer` token → ownership resolves via `g.auth["user_id"]`.
-- [ ] T23. No/garbage `Authorization` header → 200, catalog with zero ownership (never a 401/500).
-- [ ] T24. `GET /api/collection/groups/<id>` for an eligible page → 200 with `{group_id, members, group_photo}`; ineligible or unknown id → 404.
-- [ ] T25. Flag-off blueprint gating: NOT per-test toggleable (registration happens at `app.py` import, and conftest imports `app` once per session). Cover the off-state at the hook level (T19) and verify route absence manually / in the §7 item 21 flag-off regression pass — do not attempt to re-import the app inside a test.
+- [x] T21. `GET /api/collection/overview` with anonymous UUID `Authorization` header → owned counts reflect that user's cards (regression test for the fixed anonymous-ownership bug).
+- [x] T22. Same endpoint with a JWT `Bearer` token → ownership resolves via `g.auth["user_id"]`.
+- [x] T23. No/garbage `Authorization` header → 200, catalog with zero ownership (never a 401/500).
+- [x] T24. `GET /api/collection/groups/<id>` for an eligible page → 200 with `{group_id, members, group_photo}`; ineligible or unknown id → 404.
+- [x] T25. Flag-off blueprint gating: NOT per-test toggleable (registration happens at `app.py` import, and conftest imports `app` once per session). Cover the off-state at the hook level (T19) and verify route absence manually / in the §7 item 21 flag-off regression pass — do not attempt to re-import the app inside a test.
 
 ---
 
@@ -455,8 +466,9 @@ All tests live in `kpopit-backend/tests/test_collection.py`, using the existing 
 | `kpopit-backend/seed_collection_cards.py` | ✅ done | Derived card catalog (idol + group_photo cards) |
 | `kpopit-backend/services/collection_service.py` | ✅ done | Grant + bonus + read logic, flag/gamemode/cap constants |
 | `kpopit-backend/routes/collections/collection.py` | ✅ done | `resolve_user_id`, `GET /api/collection/overview`, `GET /api/collection/groups/<id>` |
-| `kpopit-backend/backfill_collection_cards.py` | pending | One-time historical win replay (`--dry-run`/`--force`) |
-| `kpopit-backend/tests/test_collection.py` | pending | §7b service + hook + route tests |
+| `kpopit-backend/backfill_collection_cards.py` | ✅ done | One-time historical win replay (`--dry-run`/`--force`, runbook in header) |
+| `kpopit-backend/tests/test_collection.py` | ✅ done | §7b service + hook + route tests (24 tests) |
+| `kpopit-backend/migrations/026_add_group_image_path.sql` | ✅ done | `groups.image_path` (Q7 Option A) + drop redundant `idx_user_cards_user_id` |
 
 **Created — frontend (all pending)**
 | File | Purpose |
@@ -472,14 +484,15 @@ All tests live in `kpopit-backend/tests/test_collection.py`, using the existing 
 **Modified**
 | File | Status | Change |
 |---|---|---|
-| `kpopit-backend/services/game_service.py` | ✅ done (hook) / pending (return) | Flag-gated grant hook in `save_user_history`; **pending:** return `(is_correct, card_granted)` |
-| `kpopit-backend/seed_db.py` | ✅ done | Seed `collections` + `collection_group_eligibility` from CSVs |
+| `kpopit-backend/services/game_service.py` | ✅ done | Flag-gated, SAVEPOINT-isolated grant hook in `save_user_history`; returns `(is_correct, card_granted)` |
+| `kpopit-backend/seed_db.py` | ✅ done | Seed `collections` + `collection_group_eligibility` from CSVs; `groups.image_path` column |
+| `kpopit-backend/data/groups.csv` | ✅ done | New `image_path` column (empty until curated) |
 | `kpopit-backend/app.py` | ✅ done | Conditional `collection_bp` registration (`COLLECTION_ENABLED`) |
-| `kpopit-backend/routes/games/classic.py` | pending | Revert `idol_id = 1` debug line; later: `"card_granted"` in guess response |
-| `kpopit-backend/routes/games/blurry.py` | pending | `"card_granted"` in guess response |
-| `kpopit-backend/services/album_service.py` | pending | Unpack new return, discard `card_granted` (response unchanged) |
-| `kpopit-backend/tests/conftest.py` | pending | New tables in `TRUNCATE_SQL`; `SEED_COLLECTIONS_SQL`; collection fixtures (§7b T1–T3) |
-| `kpopit-backend/data/cards.csv` | pending | **Delete** — dead file (§4) |
+| `kpopit-backend/routes/games/classic.py` | ✅ done | Debug line reverted; `"card_granted"` in guess response |
+| `kpopit-backend/routes/games/blurry.py` | ✅ done | `"card_granted"` in guess response |
+| `kpopit-backend/services/album_service.py` | ✅ done | Unpacks new return, discards `card_granted` (response unchanged) |
+| `kpopit-backend/tests/conftest.py` | ✅ done | New tables in `TRUNCATE_SQL`; `SEED_COLLECTIONS_SQL`; collection fixtures + `make_access_jwt` |
+| `kpopit-backend/data/cards.csv` | ✅ deleted | Dead file (§4) |
 | `src/services/api.ts` | pending | Two collection API functions |
 | `src/interfaces/gameInterfaces.ts` | pending | Collection payload types + `CardGranted` |
 | `src/main.tsx` | pending | Flag-gated `/collection` + `/collection/:groupId` routes |
@@ -516,10 +529,10 @@ All tests live in `kpopit-backend/tests/test_collection.py`, using the existing 
 
 **Q6 — Pages/idols published after the backfill. ✅ RESOLVED: accepted limitation for launch.** Wins that predate an idol's card creation are not retro-granted (backfill is one-time; the live grant skips idols without card rows). Publishing the full launch set of pages *before* the backfill makes it moot, and the bonus-check self-heal (§3.1 step 4) mitigates going forward.
 
-**Q7 (open) — group_photo card art source.** Deferred schema decision: `groups.image_path` + COALESCE fallback (Option A) vs. manual per-card `UPDATE`s only (Option B). Recommendation delivered in chat (2026-07-11): **Option A**. Not implemented — separate step after the user decides.
+**Q7 — group_photo card art source. ✅ RESOLVED (user, 2026-07-11): Option A, implemented.** Migration `026_add_group_image_path.sql` adds `groups.image_path` (CSV-seeded via `groups.csv`); the group_photo query uses `COALESCE(c.image_path, g.image_path)`. Curated art still overrides via `cards.image_path`, exactly like idol cards.
 
 **Assumptions**
-- **A1 (superseded as built):** originally, a page would only be published once all its card art was curated. As built, idol cards `COALESCE` to `idols.image_path`, so pages can go `is_eligible` before curation and never render image-less idol slots. `group_photo` cards have no fallback yet (→ Q7).
+- **A1 (superseded as built):** originally, a page would only be published once all its card art was curated. As built, idol cards `COALESCE` to `idols.image_path` and group_photo cards to `groups.image_path` (Q7), so pages can go `is_eligible` before curation and never render image-less slots.
 - **A2:** Card images will live in the existing R2 bucket structure; `cards.image_path` stores a relative path like `idols.image_path` does. No upload tooling in this plan.
 - **A3:** `first_won_at` uses the same timestamp source as `won_at` (`get_current_timestamp()` from `utils/dates.py`) on the live path and historical `won_at` in the backfill.
 - **A4:** Bonus cards keep `level = 1` in `user_cards` (column unused for them; binary semantics enforced by `DO NOTHING` on re-grant) — no separate ownership table for bonus cards.
