@@ -1,5 +1,9 @@
 from datetime import datetime
 import logging
+import os
+
+COLLECTION_ENABLED = os.getenv("COLLECTION_ENABLED", "false").lower() == "true"
+COLLECTION_GAMEMODE_IDS = (1, 2)
 
 logger = logging.getLogger(__name__)
 
@@ -154,7 +158,8 @@ class CollectionService:
         """Returns the full roster for one group's page."""
         cursor.execute(
             """
-                SELECT ic.idol_id, i.artist_name,
+                SELECT DISTINCT ON (ic.idol_id)
+                    ic.idol_id, i.artist_name,
                     c.id AS card_id, COALESCE(c.image_path, i.image_path) AS image_path,
                     uc.id IS NOT NULL AS owned,
                     uc.level, uc.first_won_at
@@ -166,7 +171,7 @@ class CollectionService:
                 JOIN idols AS i ON i.id = ic.idol_id
                 LEFT JOIN user_cards AS uc ON uc.user_id = %s AND uc.card_id = c.id
                 WHERE ic.group_id = %s AND cge.is_eligible = TRUE
-                ORDER BY i.id
+                ORDER BY ic.idol_id
             """, (collection_id, user_id, group_id)
         )
         members = cursor.fetchall()

@@ -1,4 +1,5 @@
 from utils.dates import get_today_date
+from services.collection_service import CollectionService, COLLECTION_ENABLED, COLLECTION_GAMEMODE_IDS
 from datetime import timedelta, date
 import math
 import logging
@@ -95,6 +96,9 @@ class GameService:
                     # Calculate streak
                     streak = self.streak_calculation(cursor, user_id, gamemode_id)
                     self._update_user_history(cursor, user_id, gamemode_id, streak, current_attempt, one_shot_win, today)
+
+                    if COLLECTION_ENABLED and gamemode_id in COLLECTION_GAMEMODE_IDS:
+                        CollectionService(self.db).grant_card_for_win(cursor, user_id, int(answer_id), current_timestamp)
 
             connect.commit()
             return is_correct

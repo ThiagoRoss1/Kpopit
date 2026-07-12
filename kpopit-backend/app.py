@@ -19,8 +19,10 @@ from routes.session_info import session_info
 from routes.idols_page.idols_page import idols_page_bp
 from routes.auth import auth_bp
 from routes.email import email_bp
+from routes.collections.collection import collection_bp
 from utils.rate_limiter import limiter
 from flask_limiter import RateLimitExceeded
+from services.collection_service import COLLECTION_ENABLED
 load_dotenv()
 
 # Global variables
@@ -121,6 +123,10 @@ app.register_blueprint(auth_bp, url_prefix="/api")
 
 # Email blueprint - Register email verification and password reset routes
 app.register_blueprint(email_bp, url_prefix="/api")
+
+# Collection blueprint - Register collection routes
+if COLLECTION_ENABLED:
+    app.register_blueprint(collection_bp, url_prefix="/api")
 
 # Repository loading hook (optional future enhancement):
 # If needed, a before_request handler can be added here to attach
