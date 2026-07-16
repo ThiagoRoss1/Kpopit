@@ -19,6 +19,7 @@ BLURRY_IDOLS_CSV_FILE = os.path.join(DATA_FOLDER, "blurry_idols.csv")
 ALBUMS_CSV_FILE = os.path.join(DATA_FOLDER, "albums.csv")
 COLLECTIONS_CSV_FILE= os.path.join(DATA_FOLDER, "collections.csv")
 COLLECTION_GROUP_ELIGIBILITY_CSV_FILE = os.path.join(DATA_FOLDER, "collection_group_eligibility.csv")
+GROUP_FEATURES_CSV_FILE = os.path.join(DATA_FOLDER, "group_features.csv")
 
 def seed_table(cursor, csv_file, table_name, columns, conflict_column=None):
     """Read data from a CSV file and insert it into a database table."""
@@ -122,7 +123,7 @@ def run_seed():
                 # Groups Table Seeding
                 groups_columns = [
                     "id", "name", "group_debut_year",
-                    "member_count", "generation", "fandom_name", "is_published", "image_path"
+                    "member_count", "generation", "fandom_name", "is_published", "hangul_name"
                 ]
 
                 seed_table(cursor, GROUPS_CSV_FILE, 'groups', groups_columns)
@@ -178,6 +179,11 @@ def run_seed():
                     "collection_id", "group_id", "is_eligible", "has_bonus_cover"
                 ]
                 seed_table(cursor, COLLECTION_GROUP_ELIGIBILITY_CSV_FILE, 'collection_group_eligibility', collection_group_eligibility_columns, conflict_column=["collection_id", "group_id"])
+
+                group_features_columns = [
+                    "group_id", "image_path", "palette"
+                ]
+                seed_table(cursor, GROUP_FEATURES_CSV_FILE, 'group_features', group_features_columns, conflict_column=["group_id"])
 
                 # Commit changes
                 print("Seeding completed successfully.")
