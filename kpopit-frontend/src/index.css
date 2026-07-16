@@ -41,6 +41,10 @@ body {
   font-family: 'Noto Sans KR', sans-serif;
 }
 
+.font-major-mono-display {
+  font-family: 'Major Mono Display', monospace;
+}
+
 .logo {
   position: relative;
   font-weight: 800;

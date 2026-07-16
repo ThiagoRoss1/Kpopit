@@ -1,0 +1,66 @@
+// Album 1 Collection — per-group analogous palette generation.
+// The front/back cover uses the fixed brand ramp below. Every group page recolors
+// its decor with a 5-stop analogous ramp generated from the group's brand color,
+// the same way the cover ramp walks red → orange (see COLLECTION_UI_IMPLEMENTATION.md §13).
+
+import type { AlbumRamp } from './albumTypes';
+
+/** Fixed cover tonal palette — same for all groups (front/back cover, stats, pre-cover) */
+export const COVER_RAMP: AlbumRamp = ['#C62368', '#D53867', '#E34C67', '#EF5F67', '#FA7268'];
+
+function hexToHsl(hex: string): [number, number, number] {
+    const m = hex.replace('#', '');
+    const r = parseInt(m.slice(0, 2), 16) / 255;
+    const g = parseInt(m.slice(2, 4), 16) / 255;
+    const b = parseInt(m.slice(4, 6), 16) / 255;
+    const max = Math.max(r, g, b), min = Math.min(r, g, b);
+    const l = (max + min) / 2;
+    if (max === min) return [0, 0, l];
+    const d = max - min;
+    const s = l > 0.5 ? d / (2 - max - min) : d / (max + min);
+    let h: number;
+    if (max === r) h = ((g - b) / d + (g < b ? 6 : 0)) / 6;
+    else if (max === g) h = ((b - r) / d + 2) / 6;
+    else h = ((r - g) / d + 4) / 6;
+    return [h * 360, s, l];
+}
+
+function hslToHex(h: number, s: number, l: number): string {
+    const hue = ((h % 360) + 360) % 360 / 360;
+    const q = l < 0.5 ? l * (1 + s) : l + s - l * s;
+    const p = 2 * l - q;
+    const channel = (t: number) => {
+        let x = t;
+        if (x < 0) x += 1;
+        if (x > 1) x -= 1;
+        if (x < 1 / 6) return p + (q - p) * 6 * x;
+        if (x < 1 / 2) return q;
+        if (x < 2 / 3) return p + (q - p) * (2 / 3 - x) * 6;
+        return p;
+    };
+    const toHex = (v: number) => Math.round(v * 255).toString(16).padStart(2, '0');
+    return `#${toHex(channel(hue + 1 / 3))}${toHex(channel(hue))}${toHex(channel(hue - 1 / 3))}`;
+}
+
+const clamp = (v: number, lo: number, hi: number) => Math.min(hi, Math.max(lo, v));
+
+/**
+ * Generates a 5-stop analogous ramp (deepest → lightest) from a group's brand color.
+ * Matches the cover ramp's geometry: ~30° of hue travel and ~24 points of lightness
+ * between the darkest and lightest stops, anchored on the source hue. The anchor
+ * lightness is normalized into a readable band so very light brand colors
+ * (e.g. TWICE's Pantone 712 C) still produce legible accents on paper.
+ */
+export function generateAlbumRamp(sourceHex: string): AlbumRamp {
+    const [h, s, l] = hexToHsl(sourceHex);
+    const baseL = clamp(l, 0.45, 0.6);
+    const baseS = clamp(s, 0.55, 0.95);
+    const stops = [-2, -1, 0, 1, 2].map((offset) =>
+        hslToHex(
+            h + offset * 7.5,
+            clamp(baseS + offset * 0.05, 0.35, 1),
+            clamp(baseL + offset * 0.06, 0.3, 0.74),
+        ),
+    );
+    return stops as unknown as AlbumRamp;
+}
