@@ -1,13 +1,12 @@
 // Album 1 Collection — "We Are {Group}" intro page (left page of each group block).
 // Header + SET box, central 3-in-1 block: group photo (white border or locked
 // placeholder), ALBUM PROGRESS bar, GROUP FILE table (74px below the bar).
-// Group colors come from the shell's --a0…--a4 vars; the photo sits above the
+// Group colors come from the shell's --album-* vars; the photo sits above the
 // lighting pass (z-20), everything else below it so it gets illuminated.
 
 import type { CSSProperties } from 'react';
 import AlbumContentShell, { type AlbumPageSide } from './AlbumContentShell';
 import { AlbumLockedGroupPhoto } from './AlbumLocked';
-import { generateAlbumRamp } from '../albumPalette';
 import type { AlbumGroup } from '../albumTypes';
 
 interface AlbumGroupIntroPageProps {
@@ -16,13 +15,12 @@ interface AlbumGroupIntroPageProps {
 }
 
 export default function AlbumGroupIntroPage({ group, side = 'left' }: AlbumGroupIntroPageProps) {
-    const ramp = generateAlbumRamp(group.source_color);
     const total = group.members.length;
     const owned = group.members.filter((m) => m.owned).length;
     const pct = total > 0 ? Math.round((owned / total) * 100) : 0;
     const photoUnlocked = Boolean(group.group_photo?.owned && group.group_photo_src);
     const fileCells: Array<[string, string]> = [
-        ['DEBUT', String(group.debut_year)],
+        ['DEBUT', group.debut_year != null ? String(group.debut_year) : ''],
         ['LABEL', group.label],
         ['FANDOM', group.fandom_name],
         ['MEMBERS', String(total)],
@@ -30,7 +28,7 @@ export default function AlbumGroupIntroPage({ group, side = 'left' }: AlbumGroup
         ['SET', group.set],
     ];
     return (
-        <AlbumContentShell groupName={group.group_name} ramp={ramp} side={side}>
+        <AlbumContentShell groupName={group.group_name} palette={group.palette} side={side}>
             <div className="relative flex h-full flex-col px-7.5 pt-7.5">
                 {/* header row: title block + SET box */}
                 <div className="flex items-start justify-between">
@@ -42,8 +40,8 @@ export default function AlbumGroupIntroPage({ group, side = 'left' }: AlbumGroup
                         <p className="font-korean text-[22px] font-bold leading-[normal]">{group.hangul_name}</p>
                     </div>
                     <div className="font-major-mono-display flex size-15 flex-col items-center justify-center gap-0.5 rounded-br-[20px] rounded-tl-[20px] border border-white bg-[#d9d9d9] text-center drop-shadow-[2px_4px_2px_rgba(0,0,0,0.4)] [text-shadow:0.5px_0.5px_2px_rgba(0,0,0,0.35)]">
-                        <p className="text-[30px] leading-none text-(--a4)">{group.set}</p>
-                        <p className="text-[16px] leading-none text-(--a0)">SET</p>
+                        <p className="text-[30px] leading-none text-(--album-text)">{group.set}</p>
+                        <p className="text-[16px] leading-none text-(--album-deep)">SET</p>
                     </div>
                 </div>
                 {/* central 3-in-1 block */}
@@ -59,7 +57,7 @@ export default function AlbumGroupIntroPage({ group, side = 'left' }: AlbumGroup
                     {/* album progress */}
                     <div className="mt-3 w-full">
                         <div className="flex items-center justify-between uppercase">
-                            <p className="font-major-mono-display text-[22px] leading-[normal] text-(--a2) [text-shadow:1px_1px_1px_rgba(0,0,0,0.5)]">
+                            <p className="font-major-mono-display text-[22px] leading-[normal] text-(--album-main) [text-shadow:1px_1px_1px_rgba(0,0,0,0.5)]">
                                 Album Progress
                             </p>
                             <p className="font-major-mono-display font-bold text-[22px] leading-[normal] text-white [text-shadow:1px_1px_1px_rgba(0,0,0,0.5)]">
@@ -70,12 +68,12 @@ export default function AlbumGroupIntroPage({ group, side = 'left' }: AlbumGroup
                             className="mt-1.5 h-2.5 w-full overflow-hidden rounded-br-[20px] rounded-tl-[20px] border border-white bg-white/20 shadow-[2px_2px_4px_0px_rgba(0,0,0,0.3)]"
                             style={{ '--progress': `${pct}%` } as CSSProperties}
                         >
-                            <div className="h-full w-(--progress) rounded-br-[20px] rounded-tl-[20px] bg-linear-to-r from-(--a0) to-(--a4)" />
+                            <div className="h-full w-(--progress) rounded-br-[20px] rounded-tl-[20px] bg-linear-to-r from-(--album-deep) to-(--album-text)" />
                         </div>
                     </div>
                     {/* group file table — 2 columns × 3 rows, symmetric */}
                     <div className="mt-18.5 w-full overflow-clip rounded-br-[20px] rounded-tl-[20px] bg-white drop-shadow-[2px_4px_2px_rgba(0,0,0,0.4)]">
-                        <div className="flex h-8.5 items-center justify-between bg-(--a0) px-5">
+                        <div className="flex h-8.5 items-center justify-between bg-(--album-deep) px-5">
                             <p className="font-sans font-bold text-[22px] leading-[normal] text-white [text-shadow:0.5px_0.5px_2px_rgba(0,0,0,0.5)]">
                                 GROUP FILE
                             </p>

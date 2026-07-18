@@ -1,0 +1,38 @@
+/* Album 1 Collection — member card level treatments (holo drift, LV3).
+   Only the continuous keyframe animation lives here; colors/blends stay in
+   Tailwind classes on the component. */
+
+@keyframes album-holo-drift {
+    0% {
+        transform: translate(-6%, -6%) scale(1.3);
+    }
+    100% {
+        transform: translate(6%, 6%) scale(1.3);
+    }
+}
+
+@keyframes album-holo-hue {
+    to {
+        filter: hue-rotate(360deg);
+    }
+}
+
+.album-holo-drift {
+    animation: album-holo-drift 6s ease-in-out infinite alternate;
+    will-change: transform;
+}
+
+.album-holo-hue {
+    animation:
+        album-holo-drift 6s ease-in-out infinite alternate,
+        album-holo-hue 12s linear infinite;
+    will-change: transform, filter;
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .album-holo-drift,
+    .album-holo-hue {
+        animation: none;
+        transform: scale(1.3);
+    }
+}

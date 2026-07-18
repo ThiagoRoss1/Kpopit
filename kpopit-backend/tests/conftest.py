@@ -83,6 +83,7 @@ TRUNCATE_SQL = """
         idol_career,
         idol_company_affiliation,
         group_company_affiliation,
+        group_features,
         idols,
         groups,
         companies,

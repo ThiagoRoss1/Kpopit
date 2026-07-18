@@ -185,10 +185,10 @@ class CollectionService:
         cursor.execute(
             """
                 SELECT c.id AS card_id,
-                    COALESCE(c.image_path, g.image_path) AS image_path,
+                    COALESCE(c.image_path, gf.image_path) AS image_path,
                     uc.id IS NOT NULL AS owned
                 FROM cards AS c
-                JOIN groups AS g ON g.id = c.group_id
+                LEFT JOIN group_features AS gf ON gf.group_id = c.group_id
                 LEFT JOIN user_cards AS uc ON uc.user_id = %s AND uc.card_id = c.id
                 WHERE c.collection_id = %s AND c.group_id = %s AND c.card_type = 'group_photo'
             """, (user_id, collection_id, group_id)
@@ -196,3 +196,101 @@ class CollectionService:
         group_photo = cursor.fetchone()
 
         return {"group_id": group_id, "group_name": group_name, "members": members, "group_photo": group_photo}
+
+    def get_album(self, cursor, user_id: int | None, collection_id: int = 1) -> list[dict]:
+        """Returns every eligible group page with full presentation data in one payload.
+
+        Feeds the flip-book album UI, which renders all pages at once: group identity
+        (name/hangul/debut/fandom), company + label from group_company_affiliation,
+        group_features image/palette, the member roster with ownership, and the
+        group_photo card. Eligible-but-cardless pages are omitted (same vanish
+        behavior as get_overview/get_group_page)."""
+        cursor.execute(
+            """
+                SELECT cge.group_id, g.name AS group_name, g.hangul_name,
+                    g.group_debut_year AS debut_year, g.fandom_name,
+                    gf.image_path, gf.palette
+                FROM collection_group_eligibility AS cge
+                JOIN groups AS g ON g.id = cge.group_id
+                LEFT JOIN group_features AS gf ON gf.group_id = cge.group_id
+                WHERE cge.collection_id = %s AND cge.is_eligible = TRUE
+                ORDER BY cge.group_id
+            """, (collection_id,)
+        )
+        groups = cursor.fetchall()
+
+        cursor.execute(
+            """
+                SELECT gca.group_id,
+                    MAX(comp.name) FILTER (WHERE gca.role = 'Label') AS company,
+                    MAX(comp.name) FILTER (WHERE gca.role = 'Parent Company') AS label
+                FROM group_company_affiliation AS gca
+                JOIN companies AS comp ON comp.id = gca.company_id
+                JOIN collection_group_eligibility AS cge
+                    ON cge.group_id = gca.group_id
+                    AND cge.collection_id = %s AND cge.is_eligible = TRUE
+                GROUP BY gca.group_id
+            """, (collection_id,)
+        )
+        affiliations = {row["group_id"]: row for row in cursor.fetchall()}
+
+        cursor.execute(
+            """
+                SELECT DISTINCT ON (ic.group_id, ic.idol_id)
+                    ic.group_id, ic.idol_id, i.artist_name,
+                    c.id AS card_id, COALESCE(c.image_path, i.image_path) AS image_path,
+                    uc.id IS NOT NULL AS owned,
+                    uc.level, uc.first_won_at
+                FROM idol_career AS ic
+                JOIN collection_group_eligibility AS cge
+                    ON cge.group_id = ic.group_id
+                    AND cge.collection_id = %s AND cge.is_eligible = TRUE
+                JOIN cards AS c ON c.collection_id = cge.collection_id
+                    AND c.idol_id = ic.idol_id AND c.card_type = 'idol'
+                JOIN idols AS i ON i.id = ic.idol_id
+                LEFT JOIN user_cards AS uc ON uc.user_id = %s AND uc.card_id = c.id
+                ORDER BY ic.group_id, ic.idol_id
+            """, (collection_id, user_id)
+        )
+        members_by_group: dict[int, list[dict]] = {}
+        for row in cursor.fetchall():
+            member = dict(row)
+            group_id = member.pop("group_id")
+            members_by_group.setdefault(group_id, []).append(member)
+
+        cursor.execute(
+            """
+                SELECT c.group_id, c.id AS card_id,
+                    COALESCE(c.image_path, gf.image_path) AS image_path,
+                    uc.id IS NOT NULL AS owned
+                FROM cards AS c
+                JOIN collection_group_eligibility AS cge
+                    ON cge.group_id = c.group_id AND cge.collection_id = c.collection_id
+                    AND cge.is_eligible = TRUE
+                LEFT JOIN group_features AS gf ON gf.group_id = c.group_id
+                LEFT JOIN user_cards AS uc ON uc.user_id = %s AND uc.card_id = c.id
+                WHERE c.collection_id = %s AND c.card_type = 'group_photo'
+            """, (user_id, collection_id)
+        )
+        photos_by_group: dict[int, dict] = {}
+        for row in cursor.fetchall():
+            photo = dict(row)
+            photos_by_group[photo.pop("group_id")] = photo
+
+        album = []
+        for group in groups:
+            group_id = group["group_id"]
+            members = members_by_group.get(group_id)
+            if not members:
+                continue
+            affiliation = affiliations.get(group_id) or {}
+            company = affiliation.get("company")
+            album.append({
+                **group,
+                "company": company,
+                # No parent company row → the label company doubles as the label
+                "label": affiliation.get("label") or company,
+                "members": members,
+                "group_photo": photos_by_group.get(group_id),
+            })
+        return album

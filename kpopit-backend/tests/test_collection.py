@@ -252,7 +252,10 @@ def test_group_page_shape_fallbacks_and_404_paths(db_conn, make_user, make_eligi
     make_card(idol_id=idol_id)  # card art NULL → idol fallback
     make_card(group_id=group_id, card_type="group_photo")  # art NULL → group fallback
     with db_conn.cursor() as cur:
-        cur.execute("UPDATE groups SET image_path = %s WHERE id = %s", ("groups/twice.webp", group_id))
+        cur.execute(
+            "INSERT INTO group_features (group_id, image_path) VALUES (%s, %s)",
+            (group_id, "groups/twice.webp"),
+        )
     db_conn.commit()
 
     service = CollectionService(db_conn)
@@ -267,7 +270,7 @@ def test_group_page_shape_fallbacks_and_404_paths(db_conn, make_user, make_eligi
     assert member["image_path"] == "idols/sana.webp"  # COALESCE → idols.image_path
     assert member["owned"] is False
     assert member["level"] is None
-    assert result["group_photo"]["image_path"] == "groups/twice.webp"  # COALESCE → groups.image_path
+    assert result["group_photo"]["image_path"] == "groups/twice.webp"  # COALESCE → group_features.image_path
     assert result["group_photo"]["owned"] is False
 
     with db_conn.cursor() as cur:
@@ -478,3 +481,102 @@ def test_group_page_route_shape_and_404(client, db_conn, make_user, collection_p
     assert body["group_photo"]["owned"] is False
 
     assert client.get("/api/collection/groups/999999").status_code == 404
+
+
+# ---------------------------------------------------------------------------
+# Bulk album payload (GET /api/collection/album → get_album)
+# ---------------------------------------------------------------------------
+
+def _seed_group_presentation(db_conn, group_id, image_path="groups/test.webp",
+                             palette=None, label_company=None, parent_company=None):
+    """Attach group_features + company affiliations to an existing group."""
+    import json
+
+    with db_conn.cursor() as cur:
+        cur.execute(
+            "INSERT INTO group_features (group_id, image_path, palette) VALUES (%s, %s, %s)",
+            (group_id, image_path, json.dumps(palette) if palette else None),
+        )
+        for name, role in ((label_company, "Label"), (parent_company, "Parent Company")):
+            if name is None:
+                continue
+            cur.execute(
+                "INSERT INTO companies (name, is_published) VALUES (%s, TRUE) RETURNING id",
+                (name,),
+            )
+            company_id = cur.fetchone()["id"]
+            cur.execute(
+                "INSERT INTO group_company_affiliation (group_id, company_id, role) VALUES (%s, %s, %s)",
+                (group_id, company_id, role),
+            )
+    db_conn.commit()
+
+
+def test_album_shape_presentation_and_ownership(db_conn, make_user, collection_page):
+    user_id, _ = make_user()
+    palette = {"deep": "#111111", "secondary": "#222222", "main": "#333333",
+               "accent": "#444444", "text": "#555555"}
+    page_a = collection_page("AlbumGroupA", n_members=2)
+    page_b = collection_page("AlbumGroupB", n_members=1)
+    _seed_group_presentation(db_conn, page_a["group_id"], palette=palette,
+                             label_company="Source-ish Music", parent_company="HYBE-ish")
+    _seed_group_presentation(db_conn, page_b["group_id"], image_path="groups/b.webp",
+                             label_company="SM-ish")
+    grant(db_conn, user_id, page_a["idol_ids"][0])
+
+    service = CollectionService(db_conn)
+    with db_conn.cursor() as cur:
+        album = service.get_album(cur, user_id)
+
+    assert [g["group_id"] for g in album] == sorted([page_a["group_id"], page_b["group_id"]])
+    group_a = next(g for g in album if g["group_id"] == page_a["group_id"])
+    assert group_a["group_name"] == "AlbumGroupA"
+    assert group_a["debut_year"] == 2020
+    assert group_a["fandom_name"] == "TestFans"
+    assert group_a["palette"] == palette
+    assert group_a["company"] == "Source-ish Music"
+    assert group_a["label"] == "HYBE-ish"
+    assert len(group_a["members"]) == 2
+    owned = [m for m in group_a["members"] if m["owned"]]
+    assert len(owned) == 1 and owned[0]["level"] == 1
+    # group_photo card art is NULL → falls back to group_features.image_path
+    assert group_a["group_photo"]["image_path"] == "groups/test.webp"
+    assert group_a["group_photo"]["owned"] is False
+
+    # No Parent Company affiliation → the label company doubles as the label
+    group_b = next(g for g in album if g["group_id"] == page_b["group_id"])
+    assert group_b["company"] == "SM-ish"
+    assert group_b["label"] == "SM-ish"
+
+
+def test_album_omits_ineligible_and_cardless_pages(db_conn, make_user, collection_page,
+                                                   make_eligible_group, make_idol, make_career):
+    user_id, _ = make_user()
+    page = collection_page(n_members=1)
+    make_eligible_group("NotEligible", is_eligible=False)
+    cardless = make_eligible_group("EligibleButCardless")
+    idol_id = make_idol("No Card Yet")
+    make_career(idol_id, cardless)
+
+    service = CollectionService(db_conn)
+    with db_conn.cursor() as cur:
+        album = service.get_album(cur, user_id)
+    assert [g["group_id"] for g in album] == [page["group_id"]]
+
+
+def test_album_route_anonymous_uuid_sees_ownership(client, db_conn, make_user, collection_page):
+    user_id, token = make_user()
+    page = collection_page(n_members=2)
+    _seed_group_presentation(db_conn, page["group_id"])
+    grant(db_conn, user_id, page["idol_ids"][0])
+
+    resp = client.get("/api/collection/album", headers={"Authorization": token})
+    assert resp.status_code == 200
+    body = resp.get_json()
+    assert len(body) == 1
+    assert sum(m["owned"] for m in body[0]["members"]) == 1
+
+    # Anonymous catalog view still returns the full album with zero ownership
+    resp = client.get("/api/collection/album")
+    assert resp.status_code == 200
+    assert sum(m["owned"] for m in resp.get_json()[0]["members"]) == 0

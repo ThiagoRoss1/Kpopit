@@ -7,7 +7,6 @@
 import type { CSSProperties } from 'react';
 import AlbumCoverShell from './AlbumCoverShell';
 import { AlbumLockedGroupPhoto } from './AlbumLocked';
-import { generateAlbumRamp } from '../albumPalette';
 import type { AlbumGroup } from '../albumTypes';
 
 interface AlbumNextGroupPageProps {
@@ -15,8 +14,7 @@ interface AlbumNextGroupPageProps {
 }
 
 export default function AlbumNextGroupPage({ group }: AlbumNextGroupPageProps) {
-    const ramp = generateAlbumRamp(group.source_color);
-    const gradientVars = { '--g-from': ramp[4], '--g-to': ramp[0] } as CSSProperties;
+    const gradientVars = { '--g-from': group.palette.text, '--g-to': group.palette.deep } as CSSProperties;
     const unlocked = Boolean(group.group_photo?.owned && group.group_photo_src);
     return (
         <AlbumCoverShell spine="fold-left" cardAboveLighting>

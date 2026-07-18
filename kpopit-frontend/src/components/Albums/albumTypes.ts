@@ -1,13 +1,16 @@
-// Album 1 Collection — data shapes for the sticker-album UI.
-// Mirrors the backend CollectionService responses (GET /api/collection/overview and
-// GET /api/collection/groups/<id>) plus the groups.csv metadata the pages render.
-// The mock file (pages/Collection/mockAlbumData.ts) produces these shapes today;
-// the real fetch swaps in later without touching the components.
+// Album 1 Collection — view-model shapes for the sticker-album UI.
+// The API payload types (CollectionAlbumGroup et al.) live in
+// interfaces/gameInterfaces.ts; pages/Collection/collection.tsx maps them into
+// these view models (resolved photo URL, set number, guaranteed palette) so the
+// components never deal with nullable presentation data.
+
+import type { AlbumPalette } from '../../interfaces/gameInterfaces';
+
+export type { AlbumPalette };
 
 export interface AlbumMember {
     idol_id: number;
     artist_name: string;
-    real_name: string;
     card_id: number;
     image_path: string;
     owned: boolean;
@@ -18,7 +21,7 @@ export interface AlbumMember {
 
 export interface AlbumGroupPhoto {
     card_id: number;
-    image_path: string;
+    image_path: string | null;
     owned: boolean;
 }
 
@@ -26,14 +29,14 @@ export interface AlbumGroup {
     group_id: number;
     group_name: string;
     hangul_name: string;
-    debut_year: number;
+    debut_year: number | null;
     fandom_name: string;
     company: string;
     label: string;
     /** Zero-padded set number inside the album, e.g. "01" */
     set: string;
-    /** Group brand color the analogous page ramp is generated from */
-    source_color: string;
+    /** 5-stop tonal palette for the group's pages (group_features.palette or generated) */
+    palette: AlbumPalette;
     /** Resolved URL for the group photo (bundled asset or CDN) */
     group_photo_src: string | null;
     members: AlbumMember[];
@@ -46,9 +49,6 @@ export interface AlbumStats {
     groups_complete: number;
     groups_total: number;
 }
-
-/** 5-stop tonal ramp, deepest → lightest (index 0 → 4) */
-export type AlbumRamp = [string, string, string, string, string];
 
 export const ALBUM_PAGE_W = 600;
 export const ALBUM_PAGE_H = 900;

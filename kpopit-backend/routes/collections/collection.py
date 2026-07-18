@@ -40,6 +40,21 @@ def overview():
     finally:
         cursor.close()
 
+@collection_bp.route("/collection/album", methods=["GET"])
+@optional_auth
+def album():
+    db = get_db()
+    cursor = db.cursor()
+    try:
+        service = CollectionService(db)
+        result = service.get_album(cursor, resolve_user_id(cursor))
+        return jsonify(result), 200
+    except Exception:
+        logger.exception("Error fetching collection album")
+        return jsonify({"error": "An error occurred while fetching collection album."}), 500
+    finally:
+        cursor.close()
+
 @collection_bp.route("/collection/groups/<int:group_id>", methods=["GET"])
 @optional_auth
 def group_page(group_id):

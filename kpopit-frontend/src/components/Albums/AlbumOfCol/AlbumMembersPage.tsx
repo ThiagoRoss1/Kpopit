@@ -8,7 +8,6 @@ import type { ReactNode } from 'react';
 import AlbumContentShell, { type AlbumPageSide } from './AlbumContentShell';
 import AlbumMemberCard from './AlbumMemberCard';
 import { AlbumLockedSlot } from './AlbumLocked';
-import { generateAlbumRamp } from '../albumPalette';
 import { ALBUM_CARDS_PER_PAGE, type AlbumGroup } from '../albumTypes';
 
 interface MembersFrameProps {
@@ -33,7 +32,7 @@ export function AlbumMembersFrame({ group, pageLabel, children }: MembersFramePr
                     </div>
                 </div>
                 <div className="mt-2.5 flex h-10 w-15 items-center justify-center rounded-br-[20px] rounded-tl-[20px] border border-[#737373] bg-white drop-shadow-[2px_4px_2px_rgba(0,0,0,0.4)]">
-                    <p className="whitespace-nowrap font-sans text-[22px] leading-[normal] text-(--a4) [text-shadow:0.5px_0.5px_2px_rgba(0,0,0,0.35)]">
+                    <p className="whitespace-nowrap font-sans text-[22px] leading-[normal] text-(--album-text) [text-shadow:0.5px_0.5px_2px_rgba(0,0,0,0.35)]">
                         {owned}/{group.members.length}
                     </p>
                 </div>
@@ -68,11 +67,10 @@ interface AlbumMembersPageProps {
 }
 
 export default function AlbumMembersPage({ group, start, pageLabel, side }: AlbumMembersPageProps) {
-    const ramp = generateAlbumRamp(group.source_color);
     const slots = Array.from({ length: ALBUM_CARDS_PER_PAGE }, (_, i) => group.members[start + i] ?? null);
     const rows = [slots.slice(0, 2), slots.slice(2, 4), slots.slice(4, 6)];
     return (
-        <AlbumContentShell groupName={group.group_name} ramp={ramp} side={side}>
+        <AlbumContentShell groupName={group.group_name} palette={group.palette} side={side}>
             <AlbumMembersFrame group={group} pageLabel={pageLabel}>
                 <div className="z-20 flex flex-col justify-center gap-5">
                     {rows.map((row, r) => (
@@ -85,7 +83,7 @@ export default function AlbumMembersPage({ group, start, pageLabel, side }: Albu
                                     <div key={member.card_id} className="flex h-57.5 w-42.5 items-center justify-center">
                                         <div className={tilt}>
                                             {member.owned ? (
-                                                <AlbumMemberCard member={member} ramp={ramp} />
+                                                <AlbumMemberCard member={member} palette={group.palette} />
                                             ) : (
                                                 <AlbumLockedSlot slotNumber={start + i + 1} name={member.artist_name} />
                                             )}

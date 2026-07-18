@@ -5,7 +5,7 @@
 // exactly like the Figma back-cover/stats frames (including the reversed lettering).
 
 import type { ReactNode } from 'react';
-import { COVER_RAMP } from '../albumPalette';
+import { COVER_PALETTE } from '../albumPalette';
 import { HorizontalWaves, VetorCircle } from './AlbumDecorShapes';
 import { TextureLighting, GrainParticles, CoverInsetShadow } from '../AlbumOfCol/AlbumTextures';
 
@@ -34,10 +34,10 @@ function CoverDecor() {
             </div>
             {/* vetor circle, top corner */}
             <div aria-hidden className="absolute -top-53 left-54.75 h-120.75 w-120">
-                <VetorCircle color={COVER_RAMP[2]} className="size-full rotate-90" />
+                <VetorCircle color={COVER_PALETTE.main} className="size-full rotate-90" />
             </div>
             {/* coral waves at the base */}
-            <HorizontalWaves ramp={COVER_RAMP} className="absolute bottom-0 left-0 h-38.75 w-full" />
+            <HorizontalWaves palette={COVER_PALETTE} className="absolute bottom-0 left-0 h-38.75 w-full" />
             {/* giant vertical KPOPIT reading upward, tops bleeding off the outer edge — above the waves */}
             <div aria-hidden className="absolute -left-0.5 -top-1.25 flex h-226.25 w-150 items-center justify-center">
                 <div className="-rotate-90">
