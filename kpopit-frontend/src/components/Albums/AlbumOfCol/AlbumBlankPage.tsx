@@ -4,8 +4,8 @@
 
 import AlbumContentShell from './AlbumContentShell';
 import { AlbumMembersFrame } from './AlbumMembersPage';
-import { generateAlbumRamp } from './albumPalette';
-import type { AlbumGroup } from './albumTypes';
+import { generateAlbumRamp } from '../albumPalette';
+import type { AlbumGroup } from '../albumTypes';
 
 interface AlbumBlankPageProps {
     group: AlbumGroup;

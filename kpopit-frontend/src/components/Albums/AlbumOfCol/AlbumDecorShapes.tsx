@@ -4,7 +4,7 @@
 // layered-waves-haikei.svg). They are inlined as components so every group page can
 // recolor them with its own analogous ramp; the cover pages feed them COVER_RAMP.
 
-import type { AlbumRamp } from './albumTypes';
+import type { AlbumRamp } from '../albumTypes';
 
 interface RampProps {
     ramp: AlbumRamp;

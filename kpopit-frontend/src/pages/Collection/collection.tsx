@@ -5,12 +5,12 @@
 // left page. The book opens from the front cover and closes on the back cover.
 
 import { useCallback, useEffect, useMemo, useRef, useState, type ReactNode } from 'react';
-import AlbumCover from '../../components/Albums/AlbumCover';
-import AlbumStatsPage from '../../components/Albums/AlbumStatsPage';
-import AlbumNextGroupPage from '../../components/Albums/AlbumNextGroupPage';
-import AlbumGroupIntroPage from '../../components/Albums/AlbumGroupIntroPage';
-import AlbumMembersPage from '../../components/Albums/AlbumMembersPage';
-import AlbumBlankPage from '../../components/Albums/AlbumBlankPage';
+import AlbumCover from '../../components/Albums/AlbumOfCol/AlbumCover';
+import AlbumStatsPage from '../../components/Albums/AlbumOfCol/AlbumStatsPage';
+import AlbumNextGroupPage from '../../components/Albums/AlbumOfCol/AlbumNextGroupPage';
+import AlbumGroupIntroPage from '../../components/Albums/AlbumOfCol/AlbumGroupIntroPage';
+import AlbumMembersPage from '../../components/Albums/AlbumOfCol/AlbumMembersPage';
+import AlbumBlankPage from '../../components/Albums/AlbumOfCol/AlbumBlankPage';
 import { ALBUM_CARDS_PER_PAGE, ALBUM_PAGE_H, ALBUM_PAGE_W, type AlbumGroup, type AlbumStats } from '../../components/Albums/albumTypes';
 import { MOCK_ALBUM_GROUPS, buildAlbumStats } from './mockAlbumData';
 import './collection.css';
@@ -187,7 +187,8 @@ export default function Collection() {
                                     {rightOf(shownRight)}
                                 </div>
                                 {!frontClosed && !backClosed && (
-                                    <div className="pointer-events-none absolute -top-1 left-146.75 z-40 h-227 w-6.5 bg-[linear-gradient(90deg,transparent,rgba(255,255,255,0.34)_34%,rgba(20,12,22,0.5)_50%,rgba(255,255,255,0.34)_66%,transparent)]" />
+                                    <div className="pointer-events-none absolute -top-1 left-148.25 z-40 h-227 w-3.5
+                                    bg-[linear-gradient(90deg,transparent,rgba(20,12,22,0.45)_50%,transparent)]" />
                                 )}
                                 {flip && (
                                     <div
@@ -200,23 +201,9 @@ export default function Collection() {
                                     >
                                         <div className="album-leaf-face transform-gpu absolute inset-0 overflow-hidden bg-[#d9d9d9]">
                                             {leafFront}
-                                            <div
-                                                className="pointer-events-none absolute bottom-0 top-0 w-11"
-                                                style={{
-                                                    [leafSide === 'right' ? 'left' : 'right']: 0,
-                                                    background: `linear-gradient(${leafSide === 'right' ? '90deg' : '270deg'}, rgba(24,16,25,0.2), transparent)`,
-                                                }}
-                                            />
                                         </div>
                                         <div className="album-leaf-face absolute inset-0 overflow-hidden bg-[#d9d9d9] transform-[rotateY(180deg)_translateZ(0)]">
                                             {leafBack}
-                                            <div
-                                                className="pointer-events-none absolute bottom-0 top-0 w-11"
-                                                style={{
-                                                    [leafSide === 'right' ? 'right' : 'left']: 0,
-                                                    background: `linear-gradient(${leafSide === 'right' ? '270deg' : '90deg'}, rgba(24,16,25,0.2), transparent)`,
-                                                }}
-                                            />
                                         </div>
                                     </div>
                                 )}

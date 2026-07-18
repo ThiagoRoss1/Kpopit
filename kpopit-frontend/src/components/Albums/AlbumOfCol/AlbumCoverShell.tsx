@@ -5,9 +5,9 @@
 // exactly like the Figma back-cover/stats frames (including the reversed lettering).
 
 import type { ReactNode } from 'react';
-import { COVER_RAMP } from './albumPalette';
+import { COVER_RAMP } from '../albumPalette';
 import { HorizontalWaves, VetorCircle } from './AlbumDecorShapes';
-import { CesiraLighting, GrainParticles, CoverInsetShadow } from './AlbumTextures';
+import { TextureLighting, GrainParticles, CoverInsetShadow } from '../AlbumOfCol/AlbumTextures';
 
 const SPINE_GRADIENT_CLASS =
     'bg-[linear-gradient(180deg,#d9d9d9_0%,#d9d9d9_82.674%,#da685f_82.823%,#ba4a51_87.981%,#b84156_93.469%,#b23258_95.905%,#a61f58_99.377%)]';
@@ -26,9 +26,10 @@ function CoverDecor() {
     return (
         <>
             {/* tiled OFFICIAL COLLECTION watermark — wraps inside 422px to stagger like the frames */}
-            <div aria-hidden className="font-major-mono-display absolute -top-2.75 left-44 flex w-105.5 flex-col gap-5 overflow-hidden wrap-break-word text-[30px] leading-[normal] text-black/15">
+            <div aria-hidden className="font-major-mono-display absolute -top-2.75 left-44 flex w-105.5 flex-col gap-5 overflow-hidden 
+            wrap-break-word text-[30px] leading-[normal] text-black/15 uppercase">
                 {Array.from({ length: 18 }).map((_, i) => (
-                    <p key={i}>OFFICIAL COLLECTION</p>
+                    <p key={i}>Official Collection</p>
                 ))}
             </div>
             {/* vetor circle, top corner */}
@@ -41,8 +42,8 @@ function CoverDecor() {
             <div aria-hidden className="absolute -left-0.5 -top-1.25 flex h-226.25 w-150 items-center justify-center">
                 <div className="-rotate-90">
                     <div className="relative h-150 w-226.25">
-                        <p className="font-major-mono-display absolute -top-3.5 left-1.5 whitespace-nowrap text-[200px] leading-[normal] text-black/50">
-                            KPOPIT
+                        <p className="font-major-mono-display absolute -top-3.5 left-1.5 whitespace-nowrap text-[200px] leading-[normal] text-black/50 uppercase">
+                            KpopIt
                         </p>
                     </div>
                 </div>
@@ -86,7 +87,7 @@ export default function AlbumCoverShell({ mirrored = false, spine, cardAboveLigh
             </div>
             <GrainParticles />
             {!cardAboveLighting && children}
-            <CesiraLighting />
+            <TextureLighting />
             {cardAboveLighting && children}
             <Spine spine={spine} />
             <CoverInsetShadow />

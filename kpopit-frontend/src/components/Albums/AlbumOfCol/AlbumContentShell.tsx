@@ -13,9 +13,9 @@
 // so children color themselves with Tailwind var classes instead of style tags.
 
 import type { CSSProperties, ReactNode } from 'react';
-import type { AlbumRamp } from './albumTypes';
+import type { AlbumRamp } from '../albumTypes';
 import { SideWaves, VetorCircle, Vetor2Slab } from './AlbumDecorShapes';
-import { CesiraLighting, PaperGrain } from './AlbumTextures';
+import { TextureLighting, PaperGrain } from '../AlbumOfCol/AlbumTextures';
 
 export type AlbumPageSide = 'left' | 'right';
 
@@ -30,7 +30,7 @@ function GroupWatermark({ groupName }: { groupName: string }) {
     const repeats = Math.max(4, Math.ceil(70 / (groupName.length + 1)));
     const row = `${groupName.toUpperCase()} `.repeat(repeats);
     return (
-        <div aria-hidden className="font-major-mono-display absolute -left-28.5 -top-2.5 flex w-361 flex-col gap-1.5 overflow-hidden text-[30px] leading-[normal] text-black/5">
+        <div aria-hidden className="font-major-mono-display absolute -left-28.5 -top-2.5 flex w-361 flex-col gap-1.5 overflow-hidden text-[30px] leading-[normal] text-black/10 uppercase">
             {Array.from({ length: 27 }).map((_, i) => (
                 <p key={i} className="whitespace-nowrap">{row}</p>
             ))}
@@ -73,7 +73,7 @@ export default function AlbumContentShell({ groupName, ramp, side, children }: A
                 <ContentDecor ramp={ramp} />
             </div>
             {children}
-            <CesiraLighting className="z-10" />
+            <TextureLighting className="z-10" />
             <PaperGrain className="z-30" />
             <div
                 aria-hidden

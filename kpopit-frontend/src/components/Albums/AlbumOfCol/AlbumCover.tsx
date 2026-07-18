@@ -3,7 +3,7 @@
 // decor field with no card.
 
 import AlbumCoverShell from './AlbumCoverShell';
-import type { AlbumStats } from './albumTypes';
+import type { AlbumStats } from '../albumTypes';
 
 // Fixed cover ramp gradient (COVER_RAMP deepest → mid → lightest), as a static class
 const COVER_TEXT_GRADIENT_CLASS = 'bg-[linear-gradient(90deg,#C62368_0%,#E34C67_50.481%,#FA7268_100%)]';
@@ -17,7 +17,7 @@ function GradientRule({ widthClass }: { widthClass: string }) {
     return <div className={`h-0.5 ${COVER_TEXT_GRADIENT_CLASS} ${widthClass}`} />;
 }
 
-export default function AlbumCover({ variant, stats }: AlbumCoverProps) {
+export default function AlbumCover({ variant }: AlbumCoverProps) {
     if (variant === 'back') {
         return <AlbumCoverShell mirrored spine="hardcover-right" />;
     }
@@ -52,7 +52,7 @@ export default function AlbumCover({ variant, stats }: AlbumCoverProps) {
                                     <p className="font-korean whitespace-nowrap text-[22px] leading-[normal] text-[rgba(66,66,66,0.7)]">앨범.1</p>
                                 </div>
                             </div>
-                            <div className="flex items-center gap-3 drop-shadow-[0.5px_0.5px_1px_rgba(0,0,0,0.3)]">
+                            {/* <div className="flex items-center gap-3 drop-shadow-[0.5px_0.5px_1px_rgba(0,0,0,0.3)]">
                                 <p className="font-major-mono-display whitespace-nowrap text-[18px] leading-[normal] text-[rgba(227,76,103,0.7)]">
                                     {stats ? stats.groups_total : 0} GROUPS
                                 </p>
@@ -60,7 +60,7 @@ export default function AlbumCover({ variant, stats }: AlbumCoverProps) {
                                 <p className="font-major-mono-display whitespace-nowrap text-[18px] leading-[normal] text-[rgba(227,76,103,0.7)]">
                                     {stats ? stats.total : 0} STICKERS
                                 </p>
-                            </div>
+                            </div> */}
                         </div>
                     </div>
                 </div>

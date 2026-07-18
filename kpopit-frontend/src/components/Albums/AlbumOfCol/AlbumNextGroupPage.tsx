@@ -7,8 +7,8 @@
 import type { CSSProperties } from 'react';
 import AlbumCoverShell from './AlbumCoverShell';
 import { AlbumLockedGroupPhoto } from './AlbumLocked';
-import { generateAlbumRamp } from './albumPalette';
-import type { AlbumGroup } from './albumTypes';
+import { generateAlbumRamp } from '../albumPalette';
+import type { AlbumGroup } from '../albumTypes';
 
 interface AlbumNextGroupPageProps {
     group: AlbumGroup;
@@ -36,7 +36,7 @@ export default function AlbumNextGroupPage({ group }: AlbumNextGroupPageProps) {
                                     />
                                 </div>
                             ) : (
-                                <AlbumLockedGroupPhoto groupName={group.group_name} className="h-40 w-full" />
+                                <AlbumLockedGroupPhoto groupName={group.group_name} className="h-40 w-full" pageLabel='nextGroup' />
                             )}
                             <div className="flex w-full flex-col gap-1 text-center [text-shadow:2px_2px_2px_rgba(0,0,0,0.25)]">
                                 <p className={`font-major-mono-display bg-linear-to-r from-(--g-from) to-(--g-to) bg-clip-text leading-[normal] text-transparent ${group.group_name.length > 8 ? 'text-[36px]' : 'text-[52px]'}`}>

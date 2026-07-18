@@ -7,16 +7,16 @@
 // themselves — wrapping them in a z-indexed container would create a stacking
 // context and isolate the blend from the page beneath it.
 
-import lightsTextureSrc from '../../assets/albumref/materials/cesira-alvarado-br4yAXkSuvs-unsplash.jpg';
-import grainParticlesSrc from '../../assets/albumref/materials/selina-farzaei--cJjkNo8r7k-unsplash.jpg';
-import paperSrc from '../../assets/albumref/materials/image-1783996137578.jpg';
+import lightsTextureSrc from '../../../assets/materials/AlbumOfCol/lightstexture.jpg';
+import grainParticlesSrc from '../../../assets/materials/AlbumOfCol/particlestexture.jpg';
+import paperSrc from '../../../assets/materials/AlbumOfCol/papertexture.jpg';
 
 interface TextureProps {
     className?: string;
 }
 
 /** Two stacked cesira lighting passes (screen blend), full-bleed */
-export function CesiraLighting({ className = '' }: TextureProps) {
+export function TextureLighting({ className = '' }: TextureProps) {
     return (
         <>
             <img src={lightsTextureSrc} alt="" aria-hidden className={`pointer-events-none absolute inset-0 size-full object-cover mix-blend-screen ${className}`} />

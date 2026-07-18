@@ -8,8 +8,8 @@ import type { ReactNode } from 'react';
 import AlbumContentShell, { type AlbumPageSide } from './AlbumContentShell';
 import AlbumMemberCard from './AlbumMemberCard';
 import { AlbumLockedSlot } from './AlbumLocked';
-import { generateAlbumRamp } from './albumPalette';
-import { ALBUM_CARDS_PER_PAGE, type AlbumGroup } from './albumTypes';
+import { generateAlbumRamp } from '../albumPalette';
+import { ALBUM_CARDS_PER_PAGE, type AlbumGroup } from '../albumTypes';
 
 interface MembersFrameProps {
     group: AlbumGroup;
@@ -44,15 +44,15 @@ export function AlbumMembersFrame({ group, pageLabel, children }: MembersFramePr
             <div className="flex min-h-0 flex-1 flex-col justify-center">{children}</div>
             {/* hairline + footer */}
             <div className="h-0.5 w-full bg-white shadow-[2px_2px_4px_0px_rgba(0,0,0,0.25)]" />
-            <div className="mt-1 flex items-center justify-between">
+            <div className="mt-1 flex items-center justify-between uppercase">
                 <div className="flex items-center gap-1">
                     <div className="size-2.5 rounded-full bg-white" />
-                    <p className="font-major-mono-display whitespace-nowrap text-[10px] leading-[normal] text-white [text-shadow:0.5px_0.5px_2px_rgba(0,0,0,0.4)]">
-                        KPOPIT
+                    <p className="font-major-mono-display whitespace-nowrap text-[10px] leading-[normal] text-white [text-shadow:1px_1px_1px_rgba(0,0,0,0.6)]">
+                        KpopIt
                     </p>
                 </div>
-                <p className="font-major-mono-display whitespace-nowrap text-[10px] leading-[normal] text-black [text-shadow:0.5px_0.5px_2px_rgba(0,0,0,0.3)]">
-                    NEXT PAGE →
+                <p className="font-major-mono-display font-bold whitespace-nowrap text-[10px] leading-[normal] text-black [text-shadow:1px_1px_1px_rgba(0,0,0,0.6)]">
+                    Next Page →
                 </p>
             </div>
         </div>

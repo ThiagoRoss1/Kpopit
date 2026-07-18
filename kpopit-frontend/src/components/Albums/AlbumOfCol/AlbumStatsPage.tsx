@@ -3,7 +3,7 @@
 
 import type { CSSProperties } from 'react';
 import AlbumCoverShell from './AlbumCoverShell';
-import type { AlbumStats } from './albumTypes';
+import type { AlbumStats } from '../albumTypes';
 
 // Fixed cover ramp gradients as static classes (deepest → mid → lightest / mid tones)
 const TITLE_GRADIENT_CLASS = 'bg-[linear-gradient(90deg,#C62368_0%,#E34C67_50%,#FA7268_100%)]';
