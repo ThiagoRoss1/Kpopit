@@ -1,0 +1,147 @@
+.album-card-name {
+    text-shadow:
+        -1px -1px 0 rgba(0, 0, 0, 0.85),
+        1px -1px 0 rgba(0, 0, 0, 0.85),
+        -1px 1px 0 rgba(0, 0, 0, 0.85),
+        1px 1px 0 rgba(0, 0, 0, 0.85),
+        2px 2px 3px rgba(0, 0, 0, 0.6);
+    letter-spacing: 0.02em;
+}
+
+/* ---- LV2 gold — classic jewelry-gold ramp (BF953F/FCF6BA/AA771C family) tinted
+   over the gold.jpg base, plus a periodic specular sheen sweeping across */
+.album-gold-tint {
+    background: linear-gradient(
+        135deg,
+        rgba(191, 149, 63, 0.55),
+        rgba(252, 246, 186, 0.5) 28%,
+        rgba(179, 135, 40, 0.55) 52%,
+        rgba(251, 245, 183, 0.5) 76%,
+        rgba(170, 119, 28, 0.6)
+    );
+    mix-blend-mode: overlay;
+    transform: translateZ(0);
+}
+
+@keyframes album-gold-sheen {
+    0% {
+        background-position: 160% 0;
+    }
+    55%,
+    100% {
+        background-position: -60% 0;
+    }
+}
+
+.album-gold-sheen {
+    background: linear-gradient(
+        115deg,
+        transparent 38%,
+        rgba(255, 248, 214, 0.55) 47%,
+        rgba(255, 255, 255, 0.9) 50%,
+        rgba(255, 248, 214, 0.55) 53%,
+        transparent 62%
+    );
+    background-size: 240% 100%;
+    background-repeat: no-repeat;
+    animation: album-gold-sheen 3.4s ease-in-out infinite;
+    mix-blend-mode: screen;
+    transform: translateZ(0);
+    will-change: background-position;
+}
+
+/* ---- LV3 holo — pure CSS rainbow bands easing back and forth (a stuck sticker
+   catching light), no texture image so no seams/edges can ever show */
+@keyframes album-holo-bands {
+    0% {
+        background-position: 0% 50%;
+        filter: hue-rotate(0deg);
+    }
+    100% {
+        background-position: 100% 50%;
+        filter: hue-rotate(75deg);
+    }
+}
+
+.album-holo-fill {
+    background: linear-gradient(
+        125deg,
+        #ff5ba8,
+        #ffb15c 16%,
+        #f6ff8a 32%,
+        #6effc0 48%,
+        #5cc8ff 64%,
+        #b18cff 82%,
+        #ff5ba8
+    );
+    background-size: 280% 280%;
+    animation: album-holo-bands 6s ease-in-out infinite alternate;
+    transform: translateZ(0);
+    will-change: background-position, filter;
+}
+
+.album-holo-overlay {
+    background: linear-gradient(
+        125deg,
+        #ff5ba8,
+        #ffb15c 16%,
+        #f6ff8a 32%,
+        #6effc0 48%,
+        #5cc8ff 64%,
+        #b18cff 82%,
+        #ff5ba8
+    );
+    background-size: 280% 280%;
+    animation: album-holo-bands 7.5s ease-in-out infinite alternate;
+    mix-blend-mode: screen;
+    opacity: 0.5;
+    transform: translateZ(0);
+    will-change: background-position, filter;
+}
+
+/* Foil micro-lines — the fine diagonal striations of a laminated holo print.
+   Static texture; the moving bands + glare above/below sell the shimmer. */
+.album-holo-foil {
+    background:
+        repeating-linear-gradient(115deg, rgba(255, 255, 255, 0.22) 0 1px, transparent 1px 3px),
+        repeating-linear-gradient(25deg, rgba(255, 255, 255, 0.1) 0 1px, transparent 1px 7px);
+    mix-blend-mode: overlay;
+    opacity: 0.55;
+    transform: translateZ(0);
+}
+
+/* Soft specular glare easing across the whole print — plastic catching light */
+@keyframes album-holo-glare {
+    0% {
+        background-position: 140% 0;
+    }
+    100% {
+        background-position: -40% 0;
+    }
+}
+
+.album-holo-glare {
+    background: linear-gradient(
+        105deg,
+        transparent 38%,
+        rgba(255, 255, 255, 0.38) 49%,
+        rgba(255, 255, 255, 0.55) 50%,
+        rgba(255, 255, 255, 0.38) 51%,
+        transparent 62%
+    );
+    background-size: 220% 100%;
+    background-repeat: no-repeat;
+    animation: album-holo-glare 5.5s ease-in-out infinite alternate;
+    mix-blend-mode: screen;
+    transform: translateZ(0);
+    will-change: background-position;
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .album-gold-sheen,
+    .album-holo-fill,
+    .album-holo-overlay,
+    .album-holo-glare {
+        animation: none;
+    }
+}

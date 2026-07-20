@@ -1,5 +1,3 @@
-// Album 1 Collection — shared locked-state pieces, reused across the pre-cover,
-// "We Are" and members pages (single implementation per the plan's constraints).
 import { LockKeyhole } from "lucide-react";
 
 interface AlbumLockedSlotProps {
@@ -7,11 +5,17 @@ interface AlbumLockedSlotProps {
     name: string;
 }
 
-/** Dashed empty sticker slot on the members pages */
+interface AlbumLockedGroupPhotoProps {
+    groupName: string;
+    className?: string;
+    pageLabel?: string;
+}
+
 export function AlbumLockedSlot({ slotNumber, name }: AlbumLockedSlotProps) {
     return (
         <div className="relative h-56 w-40.5 rounded-sm border border-dashed border-black">
-            <div className="font-major-mono-display absolute left-0 top-px h-55 w-40 overflow-clip rounded-sm border border-white bg-[rgba(217,217,217,0.32)] text-center font-bold uppercase text-black">
+            <div className="font-major-mono-display absolute left-0 top-px h-55 w-40 overflow-clip rounded-sm border border-white 
+            bg-[rgba(217,217,217,0.32)] text-center font-bold uppercase text-black">
                 <p className="absolute top-2 -z-5 w-full font-sans text-[52px] font-bold leading-[normal]">{slotNumber}</p>
                 <div className="flex size-full flex-col items-center justify-center gap-1">
                     <p className="text-2xl leading-[normal]">{name}</p>
@@ -26,13 +30,6 @@ export function AlbumLockedSlot({ slotNumber, name }: AlbumLockedSlotProps) {
     );
 }
 
-interface AlbumLockedGroupPhotoProps {
-    groupName: string;
-    className?: string;
-    pageLabel?: string;
-}
-
-/** Dotted group-photo placeholder shown until every sticker in the group is unlocked */
 export function AlbumLockedGroupPhoto({ groupName, className = '', pageLabel }: AlbumLockedGroupPhotoProps) {
     return (
         <div className={`font-major-mono-display relative flex flex-col items-center justify-center gap-4 rounded-br-[20px] rounded-tl-[20px] border-2 border-dashed border-black/60 bg-[rgba(217,217,217,0.32)] text-center font-bold uppercase text-black ${className}`}>

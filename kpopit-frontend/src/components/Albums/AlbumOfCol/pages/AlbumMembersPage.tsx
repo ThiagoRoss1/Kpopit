@@ -1,14 +1,8 @@
-// Album 1 Collection — members page (6 sticker slots per page, slightly rotated).
-// AlbumMembersFrame owns the page chrome (header, hairlines, footer) as a flex
-// column and is reused by AlbumBlankPage; the middle area is its children.
-// Cards sit above the lighting pass (z-20); the chrome stays below it so the big
-// MEMBERS heading gets illuminated.
-
 import type { ReactNode } from 'react';
-import AlbumContentShell, { type AlbumPageSide } from './AlbumContentShell';
-import AlbumMemberCard from './AlbumMemberCard';
-import { AlbumLockedSlot } from './AlbumLocked';
-import { ALBUM_CARDS_PER_PAGE, type AlbumGroup } from '../albumTypes';
+import AlbumContentShell, { type AlbumPageSide } from '../shell/AlbumContentShell';
+import AlbumMemberCard from '../cards/AlbumMemberCard';
+import { AlbumLockedSlot } from '../cards/AlbumLocked';
+import type { AlbumGroup, AlbumMember } from '../../../../interfaces/albumInterfaces';
 
 interface MembersFrameProps {
     group: AlbumGroup;
@@ -20,28 +14,28 @@ export function AlbumMembersFrame({ group, pageLabel, children }: MembersFramePr
     const owned = group.members.filter((m) => m.owned).length;
     return (
         <div className="relative flex h-full flex-col px-7.5 pb-2.5 pt-7.5">
-            {/* header row: title block + collected count box */}
+            {/* Header row: title block + collected count box */}
             <div className="flex items-start justify-between">
                 <div className="w-54.5 text-black">
-                    <p className="font-major-mono-display text-[42px] leading-[0.85]">MEMBERS</p>
+                    <p className="font-major-mono-display text-[42px] leading-[0.85] uppercase">Members</p>
                     <div className="mt-2 flex items-end justify-between text-[14px] leading-[normal]">
-                        <p className="font-major-mono-display">
-                            PAGE <span className="font-sans">{pageLabel}</span>
+                        <p className="font-major-mono-display uppercase">
+                            Page <span className="font-sans">{pageLabel}</span>
                         </p>
-                        <p className="font-major-mono-display">{group.group_name.toUpperCase()}</p>
+                        <p className="font-major-mono-display uppercase">{group.group_name}</p>
                     </div>
                 </div>
                 <div className="mt-2.5 flex h-10 w-15 items-center justify-center rounded-br-[20px] rounded-tl-[20px] border border-[#737373] bg-white drop-shadow-[2px_4px_2px_rgba(0,0,0,0.4)]">
-                    <p className="whitespace-nowrap font-sans text-[22px] leading-[normal] text-(--album-text) [text-shadow:0.5px_0.5px_2px_rgba(0,0,0,0.35)]">
+                    <p className="whitespace-nowrap font-sans text-[22px] leading-[normal] text-(--album-light) [text-shadow:0.5px_0.5px_2px_rgba(0,0,0,0.35)]">
                         {owned}/{group.members.length}
                     </p>
                 </div>
             </div>
-            {/* hairline */}
+            {/* Top line */}
             <div className="mt-2 h-0.5 w-full bg-white shadow-[2px_2px_4px_0px_rgba(0,0,0,0.25)]" />
-            {/* middle area */}
+            {/* Middle area */}
             <div className="flex min-h-0 flex-1 flex-col justify-center">{children}</div>
-            {/* hairline + footer */}
+            {/* Bottom line + Footer */}
             <div className="h-0.5 w-full bg-white shadow-[2px_2px_4px_0px_rgba(0,0,0,0.25)]" />
             <div className="mt-1 flex items-center justify-between uppercase">
                 <div className="flex items-center gap-1">
@@ -60,14 +54,13 @@ export function AlbumMembersFrame({ group, pageLabel, children }: MembersFramePr
 
 interface AlbumMembersPageProps {
     group: AlbumGroup;
-    /** Index of the first member rendered on this page */
-    start: number;
+    slots: Array<AlbumMember | null>;
+    startSlot: number;
     pageLabel: string;
     side: AlbumPageSide;
 }
 
-export default function AlbumMembersPage({ group, start, pageLabel, side }: AlbumMembersPageProps) {
-    const slots = Array.from({ length: ALBUM_CARDS_PER_PAGE }, (_, i) => group.members[start + i] ?? null);
+export default function AlbumMembersPage({ group, slots, startSlot, pageLabel, side }: AlbumMembersPageProps) {
     const rows = [slots.slice(0, 2), slots.slice(2, 4), slots.slice(4, 6)];
     return (
         <AlbumContentShell groupName={group.group_name} palette={group.palette} side={side}>
@@ -85,7 +78,7 @@ export default function AlbumMembersPage({ group, start, pageLabel, side }: Albu
                                             {member.owned ? (
                                                 <AlbumMemberCard member={member} palette={group.palette} />
                                             ) : (
-                                                <AlbumLockedSlot slotNumber={start + i + 1} name={member.artist_name} />
+                                                <AlbumLockedSlot slotNumber={startSlot + i + 1} name={member.artist_name} />
                                             )}
                                         </div>
                                     </div>

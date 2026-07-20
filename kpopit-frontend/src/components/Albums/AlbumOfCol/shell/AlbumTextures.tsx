@@ -1,15 +1,7 @@
-// Album 1 Collection — shared texture layers (see COLLECTION_UI_IMPLEMENTATION.md §11).
-// cesira  → lighting effect, two instances (screen blend per the Figma frames)
-// selina  → particle effect, cover-style pages only (multiply)
-// paper   → paper grain (image-1783996137578), content pages (multiply)
-//
-// The optional className (e.g. a z-index) is applied to the blended <img> elements
-// themselves — wrapping them in a z-indexed container would create a stacking
-// context and isolate the blend from the page beneath it.
-
-import lightsTextureSrc from '../../../assets/materials/AlbumOfCol/lightstexture.jpg';
-import grainParticlesSrc from '../../../assets/materials/AlbumOfCol/particlestexture.jpg';
-import paperSrc from '../../../assets/materials/AlbumOfCol/papertexture.jpg';
+/** Shared texture layers for the AlbumOfCol component. */
+import lightsTextureSrc from '../../../../assets/materials/AlbumOfCol/lightstexture.jpg';
+import grainParticlesSrc from '../../../../assets/materials/AlbumOfCol/particlestexture.jpg';
+import paperSrc from '../../../../assets/materials/AlbumOfCol/papertexture.jpg';
 
 interface TextureProps {
     className?: string;

@@ -1,28 +1,23 @@
-// Album 1 Collection — next-group pre-cover (right page facing the stats page).
-// Cover shell with the central card: group photo (or the locked placeholder when the
-// group photo card isn't unlocked yet) and the group name in its own color gradient.
-// The group gradient is exposed as CSS custom properties consumed by Tailwind var
-// classes — no styling in style tags.
-
 import type { CSSProperties } from 'react';
-import AlbumCoverShell from './AlbumCoverShell';
-import { AlbumLockedGroupPhoto } from './AlbumLocked';
-import type { AlbumGroup } from '../albumTypes';
+import AlbumCoverShell from '../shell/AlbumCoverShell';
+import { AlbumLockedGroupPhoto } from '../cards/AlbumLocked';
+import type { AlbumGroup } from '../../../../interfaces/albumInterfaces';
 
 interface AlbumNextGroupPageProps {
     group: AlbumGroup;
 }
 
 export default function AlbumNextGroupPage({ group }: AlbumNextGroupPageProps) {
-    const gradientVars = { '--g-from': group.palette.text, '--g-to': group.palette.deep } as CSSProperties;
+    const gradientVars = { '--g-from': group.palette.light, '--g-to': group.palette.deep } as CSSProperties;
     const unlocked = Boolean(group.group_photo?.owned && group.group_photo_src);
     return (
         <AlbumCoverShell spine="fold-left" cardAboveLighting>
             <div className="absolute inset-0 flex items-center justify-center" style={gradientVars}>
                 <div className="h-120 w-95 rounded-br-[80px] rounded-tl-[80px] bg-[#d9d9d9] shadow-[2px_-2px_6px_1px_rgba(0,0,0,0.3)]">
                     <div className="flex size-full flex-col items-start justify-start gap-20 px-6 py-6">
-                        <p className="font-major-mono-display w-full text-center text-[14px] leading-[normal] text-[#2d2d2d] [text-shadow:2px_2px_2px_rgba(0,0,0,0.25)]">
-                            OFFICIAL COLLECTION
+                        <p className="font-major-mono-display w-full text-center text-[14px] leading-[normal] 
+                        text-[#2d2d2d] [text-shadow:2px_2px_2px_rgba(0,0,0,0.25)] uppercase">
+                            Official Collection
                         </p>
                         <div className="flex w-full flex-col items-center gap-5">
                             {unlocked ? (
@@ -37,7 +32,8 @@ export default function AlbumNextGroupPage({ group }: AlbumNextGroupPageProps) {
                                 <AlbumLockedGroupPhoto groupName={group.group_name} className="h-40 w-full" pageLabel='nextGroup' />
                             )}
                             <div className="flex w-full flex-col gap-1 text-center [text-shadow:2px_2px_2px_rgba(0,0,0,0.25)]">
-                                <p className={`font-major-mono-display bg-linear-to-r from-(--g-from) to-(--g-to) bg-clip-text leading-[normal] text-transparent ${group.group_name.length > 8 ? 'text-[36px]' : 'text-[52px]'}`}>
+                                <p className={`font-major-mono-display bg-linear-to-r from-(--g-from) to-(--g-to) 
+                                    bg-clip-text leading-[normal] text-transparent ${group.group_name.length > 8 ? 'text-[36px]' : 'text-[52px]'}`}>
                                     {group.group_name.toUpperCase()}
                                 </p>
                                 <p className="font-korean bg-linear-to-r from-(--g-from) to-(--g-to) bg-clip-text text-[28px] font-bold leading-[normal] text-transparent">
