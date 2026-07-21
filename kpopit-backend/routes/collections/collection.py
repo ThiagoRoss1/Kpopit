@@ -25,49 +25,38 @@ def resolve_user_id(cursor):
         return user_row["id"] if user_row else None
     return None
 
-@collection_bp.route("/collection/overview", methods=["GET"])
+@collection_bp.route("/collection/list", methods=["GET"])
 @optional_auth
-def overview():
+def collections_list():
     db = get_db()
     cursor = db.cursor()
     try:
         service = CollectionService(db)
-        result = service.get_overview(cursor, resolve_user_id(cursor))
+        result = service.get_collections(cursor, resolve_user_id(cursor))
         return jsonify(result), 200
     except Exception:
-        logger.exception("Error fetching collection overview")
-        return jsonify({"error": "An error occurred while fetching collection overview."}), 500
+        logger.exception("Error fetching collections list")
+        return jsonify({"error": "An error occurred while fetching collections."}), 500
     finally:
         cursor.close()
 
-@collection_bp.route("/collection/album", methods=["GET"])
-@optional_auth
-def album():
+def _album_response(collection_id):
     db = get_db()
     cursor = db.cursor()
     try:
         service = CollectionService(db)
-        result = service.get_album(cursor, resolve_user_id(cursor))
+        if not service.collection_exists(cursor, collection_id):
+            return jsonify({"error": "Collection not found."}), 404
+        result = service.get_album(cursor, resolve_user_id(cursor), collection_id)
         return jsonify(result), 200
     except Exception:
-        logger.exception("Error fetching collection album")
+        logger.exception("Error fetching collection album (collection_id=%s)", collection_id)
         return jsonify({"error": "An error occurred while fetching collection album."}), 500
     finally:
         cursor.close()
 
-@collection_bp.route("/collection/groups/<int:group_id>", methods=["GET"])
+# Collection_id is client input here — validated against `collections` (404 unknown).
+@collection_bp.route("/collection/album/<int:collection_id>", methods=["GET"])
 @optional_auth
-def group_page(group_id):
-    db = get_db()
-    cursor = db.cursor()
-    try:
-        service = CollectionService(db)
-        result = service.get_group_page(cursor, resolve_user_id(cursor), group_id)
-        if result is None:
-            return jsonify({"error": "Group page not found."}), 404
-        return jsonify(result), 200
-    except Exception:
-        logger.exception("Error fetching collection group page (group_id=%s)", group_id)
-        return jsonify({"error": "An error occurred while fetching group page."}), 500
-    finally:
-        cursor.close()
+def album(collection_id):
+    return _album_response(collection_id)

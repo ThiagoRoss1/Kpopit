@@ -181,7 +181,7 @@ def run_seed():
                 seed_table(cursor, COLLECTION_GROUP_ELIGIBILITY_CSV_FILE, 'collection_group_eligibility', collection_group_eligibility_columns, conflict_column=["collection_id", "group_id"])
 
                 group_features_columns = [
-                    "group_id", "image_path", "palette"
+                    "group_id", "image_path", "palette", "image_version"
                 ]
                 seed_table(cursor, GROUP_FEATURES_CSV_FILE, 'group_features', group_features_columns, conflict_column=["group_id"])
 
