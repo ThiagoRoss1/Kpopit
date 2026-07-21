@@ -1,4 +1,3 @@
-import type { CSSProperties } from 'react';
 import AlbumCoverShell from '../shell/AlbumCoverShell';
 import type { AlbumStats } from '../../../../interfaces/albumInterfaces';
 
@@ -34,11 +33,11 @@ export default function AlbumStatsPage({ stats }: AlbumStatsPageProps) {
                                     /{stats.total}
                                 </span>
                             </div>
-                            <div
-                                className="mt-3 h-2.5 w-full overflow-hidden rounded-br-[20px] rounded-tl-[20px] border border-white shadow-[2px_2px_2px_0px_rgba(0,0,0,0.3)]"
-                                style={{ '--progress': `${percentage}%` } as CSSProperties}
-                            >
-                                <div className={`h-full w-(--progress) rounded-br-[20px] rounded-tl-[20px] ${BAR_FILL_GRADIENT_CLASS}`} />
+                            <div className="mt-3 h-2.5 w-full overflow-hidden rounded-br-[20px] rounded-tl-[20px] border border-white shadow-[2px_2px_2px_0px_rgba(0,0,0,0.3)]">
+                                <div
+                                    className={`h-full rounded-br-[20px] rounded-tl-[20px] ${BAR_FILL_GRADIENT_CLASS}`}
+                                    style={{ width: `${percentage}%` }}
+                                />
                             </div>
                             <div className="mt-3.25 grid w-60 grid-cols-2 gap-x-2.5 gap-y-0.75">
                                 <p className="font-sans text-[22px] font-bold leading-[normal] text-white [text-shadow:1px_1px_2px_rgba(0,0,0,0.5)]">

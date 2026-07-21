@@ -1,7 +1,7 @@
-import type { CSSProperties } from 'react';
 import AlbumContentShell, { type AlbumPageSide } from '../shell/AlbumContentShell';
 import { AlbumLockedGroupPhoto } from '../cards/AlbumLocked';
 import type { AlbumGroup } from '../../../../interfaces/albumInterfaces';
+import { formatCompanyName } from '../../../../utils/formatters';
 
 interface AlbumGroupIntroPageProps {
     group: AlbumGroup;
@@ -10,17 +10,17 @@ interface AlbumGroupIntroPageProps {
 
 export default function AlbumGroupIntroPage({ group, side = 'left' }: AlbumGroupIntroPageProps) {
     const total = group.members.length;
-    const owned = group.members.filter((m) => m.owned).length;
+    const owned = group.members.filter((member) => member.owned).length;
 
-    const pct = total > 0 ? Math.round((owned / total) * 100) : 0;
-    const photoUnlocked = Boolean(group.group_photo?.owned && group.group_photo_src);
+    const progressPercentage = total > 0 ? Math.round((owned / total) * 100) : 0;
+    const photoUnlocked = Boolean(group.group_photo?.owned && group.group_photo?.src);
 
     const fileCells: Array<[string, string]> = [
         ['DEBUT', group.debut_year != null ? String(group.debut_year) : ''],
-        ['LABEL', group.label],
+        ['LABEL', formatCompanyName(group.label)],
         ['FANDOM', group.fandom_name],
         ['MEMBERS', String(total)],
-        ['COMPANY', group.company],
+        ['COMPANY', formatCompanyName(group.company)],
         ['SET', group.set],
     ];
 
@@ -47,7 +47,7 @@ export default function AlbumGroupIntroPage({ group, side = 'left' }: AlbumGroup
                 <div className="flex flex-1 flex-col justify-center items-center px-5 pb-22">
                     {photoUnlocked ? (
                         <div className="relative z-20 h-62.5 w-full overflow-clip rounded-br-[20px] rounded-tl-[20px] border-2 border-white bg-white shadow-[2px_4px_4px_0px_rgba(0,0,0,0.3)]">
-                            <img src={group.group_photo_src || undefined} alt={group.group_name} className="pointer-events-none absolute inset-0 size-full object-cover" />
+                            <img src={group.group_photo?.src || undefined} alt={group.group_name} className="pointer-events-none absolute inset-0 size-full object-cover" />
                         </div>
                     ) : (
                         <AlbumLockedGroupPhoto groupName={group.group_name} className="z-20 h-62.5 w-full" pageLabel='groupIntro' />
@@ -62,11 +62,11 @@ export default function AlbumGroupIntroPage({ group, side = 'left' }: AlbumGroup
                                 {owned}/{total}
                             </p>
                         </div>
-                        <div
-                            className="mt-1.5 h-2.5 w-full overflow-hidden rounded-br-[20px] rounded-tl-[20px] border border-white bg-white/20 shadow-[2px_2px_4px_0px_rgba(0,0,0,0.3)]"
-                            style={{ '--progress': `${pct}%` } as CSSProperties}
-                        >
-                            <div className="h-full w-(--progress) rounded-br-[20px] rounded-tl-[20px] bg-linear-to-r from-(--album-deep) to-(--album-light)" />
+                        <div className="mt-1.5 h-2.5 w-full overflow-hidden rounded-br-[20px] rounded-tl-[20px] border border-white bg-white/20 shadow-[2px_2px_4px_0px_rgba(0,0,0,0.3)]">
+                            <div
+                                className="h-full rounded-br-[20px] rounded-tl-[20px] bg-linear-to-r from-(--album-deep) to-(--album-light)"
+                                style={{ width: `${progressPercentage}%` }}
+                            />
                         </div>
                     </div>
                     {/* Group file table — 2 columns × 3 rows, symmetric */}
@@ -80,15 +80,15 @@ export default function AlbumGroupIntroPage({ group, side = 'left' }: AlbumGroup
                             </p>
                         </div>
                         <div className="grid grid-cols-2">
-                            {fileCells.map(([label, value], i) => (
+                            {fileCells.map(([label, value], cellIndex) => (
                                 <div
                                     key={label}
-                                    className={`flex items-center justify-between px-5 py-2 font-sans font-bold text-[16px] leading-[normal] 
-                                        text-black [text-shadow:0.5px_0.5px_2px_rgba(0,0,0,0.25)] 
-                                        ${i % 2 === 0 ? 'border-r border-[#cdcdcd]' : ''} ${i < 4 ? 'border-b border-[#cdcdcd]' : ''}`}
+                                    className={`flex items-center justify-between gap-3 px-5 py-2 font-sans font-bold text-[16px] leading-[normal]
+                                        text-black [text-shadow:0.5px_0.5px_2px_rgba(0,0,0,0.25)]
+                                        ${cellIndex % 2 === 0 ? 'border-r border-[#cdcdcd]' : ''} ${cellIndex < 4 ? 'border-b border-[#cdcdcd]' : ''}`}
                                 >
-                                    <span>{label}</span>
-                                    <span>{value}</span>
+                                    <span className="flex-none">{label}</span>
+                                    <span className="min-w-0 flex-1 text-right leading-[1.15]">{value}</span>
                                 </div>
                             ))}
                         </div>

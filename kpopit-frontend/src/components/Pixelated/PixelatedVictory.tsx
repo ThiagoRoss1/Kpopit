@@ -1,6 +1,6 @@
 import { useState, useEffect, useRef } from "react";
 import "./PixelatedVictory.css";
-import { albumCoverUrl } from "../../utils/imageUrl";
+import { resolveCdnUrl } from "../../utils/imageUrl";
 import type { YesterdayAlbum } from "../../interfaces/gameInterfaces";
 import { OtherGamemodes } from "../OtherGamemodes/OtherGamemodes";
 import { Copy } from "lucide-react";
@@ -37,8 +37,8 @@ const PixelatedVictory = (props: PixelatedVictoryProps) => {
     const [copied, setCopied] = useState<boolean>(false);
     const [showYesterdayName, setShowYesterdayName] = useState<boolean>(false);
     const [isYNameTruncated, setIsYNameTruncated] = useState<boolean>(false);
-    const coverUrl = albumCoverUrl(coverPath);
-    const yesterdayCoverUrl = yesterdayAlbumCover ? albumCoverUrl(yesterdayAlbumCover) : null;
+    const coverUrl = resolveCdnUrl(coverPath);
+    const yesterdayCoverUrl = yesterdayAlbumCover ? resolveCdnUrl(yesterdayAlbumCover) : null;
 
     const cardRef = useRef<HTMLDivElement>(null);
     const yNameRef = useRef<HTMLSpanElement>(null);
@@ -126,7 +126,7 @@ const PixelatedVictory = (props: PixelatedVictoryProps) => {
                     <div className="pixel-vinyl">
                         <div className="pixel-vinyl__spin">
                             <div className="pixel-vinyl__label overflow-hidden rounded-full">
-                                <img src={coverUrl} alt={`${albumName} cover`} className="w-full h-full object-cover" draggable={false} />
+                                <img src={coverUrl ?? undefined} alt={`${albumName} cover`} className="w-full h-full object-cover" draggable={false} />
                             </div>
                         </div>
                         <div className="pixel-vinyl__light" />
@@ -140,7 +140,7 @@ const PixelatedVictory = (props: PixelatedVictoryProps) => {
                     firefox:shadow-none firefox:drop-shadow-[0_8px_22px_rgba(10,10,10,0.25)] firefox:active:drop-shadow-[0_0_0_2px_0_rgba(10,10,10,0.6)]">
                     <div className="relative max-xxs:w-39 max-xxs:h-39 w-47.5 h-47.5 sm:w-57.5 sm:h-57.5 rounded-lg overflow-hidden">
                         <img
-                            src={coverUrl}
+                            src={coverUrl ?? undefined}
                             alt={`${albumName} cover`}
                             className="w-full h-full object-cover"
                             draggable={false} />
@@ -182,7 +182,7 @@ const PixelatedVictory = (props: PixelatedVictoryProps) => {
                                         <div className="pixel-vinyl__spin">
                                             <div className="pixel-vinyl__label overflow-hidden rounded-full">
                                                 <img 
-                                                    src={yesterdayAlbumCover ? albumCoverUrl(yesterdayAlbumCover) : undefined} 
+                                                    src={yesterdayAlbumCover ? resolveCdnUrl(yesterdayAlbumCover) ?? undefined : undefined} 
                                                     alt={`${yesterdayAlbum} cover`} 
                                                     className="w-full h-full object-cover" draggable={false} />
                                             </div>
@@ -196,7 +196,7 @@ const PixelatedVictory = (props: PixelatedVictoryProps) => {
                                 <div className="absolute left-0 top-1/2 -translate-y-1/2 -rotate-3 max-xxs:w-19 max-xxs:h-19 w-23 h-23 sm:w-24 sm:h-24 z-1 p-1 rounded-[9px]
                                 bg-[#1c1c1c] shadow-[0_5px_14px_rgba(10,10,10,0.25)]">
                                     <img
-                                        src={yesterdayCoverUrl || undefined}
+                                        src={yesterdayCoverUrl ?? undefined}
                                         alt={`${yesterdayAlbum} cover`}
                                         className="w-full h-full object-cover rounded-md"
                                         draggable={false}

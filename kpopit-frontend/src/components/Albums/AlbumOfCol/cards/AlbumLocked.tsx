@@ -16,12 +16,12 @@ export function AlbumLockedSlot({ slotNumber, name }: AlbumLockedSlotProps) {
         <div className="relative h-56 w-40.5 rounded-sm border border-dashed border-black">
             <div className="font-major-mono-display absolute left-0 top-px h-55 w-40 overflow-clip rounded-sm border border-white 
             bg-[rgba(217,217,217,0.32)] text-center font-bold uppercase text-black">
-                <p className="absolute top-2 -z-5 w-full font-sans text-[52px] font-bold leading-[normal]">{slotNumber}</p>
+                <p className="absolute top-2 -z-5 w-full font-sans font-bold text-[52px] leading-[normal]">{slotNumber}</p>
                 <div className="flex size-full flex-col items-center justify-center gap-1">
                     <p className="text-2xl leading-[normal]">{name}</p>
                     <p className="text-sm leading-[normal]">Locked</p>
                 </div>
-                <div className="absolute bottom-2.5 left-2.25 flex w-35.25 flex-col gap-0.5 text-[10px] leading-[normal]">
+                <div className="font-sans absolute bottom-2.5 left-2.25 flex w-35.25 flex-col gap-0.5 text-[12px] leading-[normal]">
                     <p>Keep Playing KpopIt</p>
                     <p>To Unlock</p>
                 </div>

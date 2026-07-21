@@ -8,7 +8,7 @@ import { useState, useEffect, useCallback, useRef } from "react";
 import { getPixelatedDailyAlbum, getPixelatedGuessAlbum, getAllAlbums, getYesterdaysAlbum, getUserPosition, getDailyUserCount, saveGameState}  from "../../services/api";
 import type { PixelatedGameData, AlbumSearchResult, PixelatedGuessDetail, YesterdayAlbum } from "../../interfaces/gameInterfaces";
 import { decryptToken } from "../../utils/tokenEncryption";
-import { albumCoverUrl } from "../../utils/imageUrl";
+import { resolveCdnUrl } from "../../utils/imageUrl";
 import PixelatedSearchBar from "../../components/Pixelated/PixelatedSearchBar";
 import PixelatedCanvas from "../../components/Pixelated/PixelatedCanvas";
 import PixelatedGuessGrid from "../../components/Pixelated/PixelatedGuessGrid";
@@ -279,7 +279,7 @@ function PixelatedMode() {
 
     if (!dayChecked) return null;
 
-    const coverUrl = albumCoverUrl(pixelatedGameData.cover_path);
+    const coverUrl = resolveCdnUrl(pixelatedGameData.cover_path);
 
     const statsButton = (
         <button
@@ -370,7 +370,7 @@ function PixelatedMode() {
                                             <div className="pixel-vinyl__spin">
                                                 <div className="pixel-vinyl__label overflow-hidden">
                                                     <PixelatedCanvas
-                                                        imageUrl={coverUrl}
+                                                        imageUrl={coverUrl ?? undefined}
                                                         blockSize={blockSize}
                                                         alt="Pixelated album cover"
                                                         className="w-full h-full object-cover block rounded-full"
@@ -413,7 +413,7 @@ function PixelatedMode() {
                                             {/* Cover */}
                                             <div className="relative w-full aspect-square rounded-xl overflow-hidden flex flex-col bg-transparent">
                                                 <PixelatedCanvas
-                                                    imageUrl={coverUrl}
+                                                    imageUrl={coverUrl ?? undefined}
                                                     blockSize={blockSize}
                                                     alt="Pixelated album cover"
                                                     className="w-full h-full object-cover block"

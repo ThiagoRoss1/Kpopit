@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useRef } from "react";
 import { AnimatePresence, motion } from "motion/react";
 import type { AlbumSearchResult } from "../../interfaces/gameInterfaces";
-import { albumCoverUrl } from "../../utils/imageUrl";
+import { resolveCdnUrl } from "../../utils/imageUrl";
 import SearchIcon from "../../assets/icons/magnifying-glass-fill.svg";
 
 interface PixelatedSearchBarProps {
@@ -150,7 +150,7 @@ const PixelatedSearchBar = (props: PixelatedSearchBarProps) => {
                     >
                       {album.cover_path && (
                         <img
-                          src={albumCoverUrl(album.cover_path)}
+                          src={resolveCdnUrl(album.cover_path) ?? undefined}
                           alt=""
                           className="w-12 h-12 object-cover rounded-full border-2 border-ink shrink-0"
                           loading="eager"

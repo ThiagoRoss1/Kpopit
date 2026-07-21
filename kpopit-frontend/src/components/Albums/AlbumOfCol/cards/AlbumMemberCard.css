@@ -1,3 +1,43 @@
+@property --album-shimmer {
+    syntax: '<number>';
+    inherits: true;
+    initial-value: 0;
+}
+
+@property --album-sheen {
+    syntax: '<number>';
+    inherits: true;
+    initial-value: 0;
+}
+
+@keyframes album-shimmer-clock {
+    from {
+        --album-shimmer: 0;
+    }
+    to {
+        --album-shimmer: 1;
+    }
+}
+
+/* Sheen sweeps during the first 55%, then rests off-screen until the loop ends */
+@keyframes album-sheen-clock {
+    0% {
+        --album-sheen: 0;
+    }
+    55%,
+    100% {
+        --album-sheen: 1;
+    }
+}
+
+.album-level-clock {
+    animation:
+        album-shimmer-clock 4.2s ease-in-out infinite alternate,
+        album-sheen-clock 3.4s linear infinite;
+}
+
+/* ---- Name legibility (all levels) — thin dark outline + drop shadow so the
+   Major Mono display face stays readable over photos, gold and holo fills */
 .album-card-name {
     text-shadow:
         -1px -1px 0 rgba(0, 0, 0, 0.85),
@@ -9,7 +49,7 @@
 }
 
 /* ---- LV2 gold — classic jewelry-gold ramp (BF953F/FCF6BA/AA771C family) tinted
-   over the gold.jpg base, plus a periodic specular sheen sweeping across */
+   over the gold.jpg base, plus the specular sheen driven by the shared clock */
 .album-gold-tint {
     background: linear-gradient(
         135deg,
@@ -23,16 +63,6 @@
     transform: translateZ(0);
 }
 
-@keyframes album-gold-sheen {
-    0% {
-        background-position: 160% 0;
-    }
-    55%,
-    100% {
-        background-position: -60% 0;
-    }
-}
-
 .album-gold-sheen {
     background: linear-gradient(
         115deg,
@@ -44,42 +74,15 @@
     );
     background-size: 240% 100%;
     background-repeat: no-repeat;
-    animation: album-gold-sheen 3.4s ease-in-out infinite;
+    /* 0 → off-screen right (160%), 1 → off-screen left (-60%) */
+    background-position: calc(160% - var(--album-sheen) * 220%) 0;
     mix-blend-mode: screen;
     transform: translateZ(0);
-    will-change: background-position;
 }
 
 /* ---- LV3 holo — pure CSS rainbow bands easing back and forth (a stuck sticker
    catching light), no texture image so no seams/edges can ever show */
-@keyframes album-holo-bands {
-    0% {
-        background-position: 0% 50%;
-        filter: hue-rotate(0deg);
-    }
-    100% {
-        background-position: 100% 50%;
-        filter: hue-rotate(75deg);
-    }
-}
-
-.album-holo-fill {
-    background: linear-gradient(
-        125deg,
-        #ff5ba8,
-        #ffb15c 16%,
-        #f6ff8a 32%,
-        #6effc0 48%,
-        #5cc8ff 64%,
-        #b18cff 82%,
-        #ff5ba8
-    );
-    background-size: 280% 280%;
-    animation: album-holo-bands 6s ease-in-out infinite alternate;
-    transform: translateZ(0);
-    will-change: background-position, filter;
-}
-
+.album-holo-fill,
 .album-holo-overlay {
     background: linear-gradient(
         125deg,
@@ -92,11 +95,15 @@
         #ff5ba8
     );
     background-size: 280% 280%;
-    animation: album-holo-bands 7.5s ease-in-out infinite alternate;
+    background-position: calc(var(--album-shimmer) * 100%) 50%;
+    filter: hue-rotate(calc(var(--album-shimmer) * 75deg));
+    transform: translateZ(0);
+}
+
+/* Laminate pass over the WHOLE card (frame, photo, badge and banner together) */
+.album-holo-overlay {
     mix-blend-mode: screen;
     opacity: 0.5;
-    transform: translateZ(0);
-    will-change: background-position, filter;
 }
 
 /* Foil micro-lines — the fine diagonal striations of a laminated holo print.
@@ -106,42 +113,30 @@
         repeating-linear-gradient(115deg, rgba(255, 255, 255, 0.22) 0 1px, transparent 1px 3px),
         repeating-linear-gradient(25deg, rgba(255, 255, 255, 0.1) 0 1px, transparent 1px 7px);
     mix-blend-mode: overlay;
-    opacity: 0.55;
+    opacity: 0.38;
     transform: translateZ(0);
 }
 
 /* Soft specular glare easing across the whole print — plastic catching light */
-@keyframes album-holo-glare {
-    0% {
-        background-position: 140% 0;
-    }
-    100% {
-        background-position: -40% 0;
-    }
-}
-
 .album-holo-glare {
     background: linear-gradient(
         105deg,
-        transparent 38%,
-        rgba(255, 255, 255, 0.38) 49%,
-        rgba(255, 255, 255, 0.55) 50%,
-        rgba(255, 255, 255, 0.38) 51%,
-        transparent 62%
+        transparent 26%,
+        rgba(255, 255, 255, 0.2) 40%,
+        rgba(255, 255, 255, 0.5) 50%,
+        rgba(255, 255, 255, 0.2) 60%,
+        transparent 74%
     );
     background-size: 220% 100%;
     background-repeat: no-repeat;
-    animation: album-holo-glare 5.5s ease-in-out infinite alternate;
+    /* 0 → off-screen right (140%), 1 → off-screen left (-40%) */
+    background-position: calc(140% - var(--album-shimmer) * 180%) 0;
     mix-blend-mode: screen;
     transform: translateZ(0);
-    will-change: background-position;
 }
 
 @media (prefers-reduced-motion: reduce) {
-    .album-gold-sheen,
-    .album-holo-fill,
-    .album-holo-overlay,
-    .album-holo-glare {
+    .album-level-clock {
         animation: none;
     }
 }

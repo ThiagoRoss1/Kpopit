@@ -60,25 +60,37 @@ interface AlbumMembersPageProps {
     side: AlbumPageSide;
 }
 
+const SLOTS_PER_ROW = 2;
+
 export default function AlbumMembersPage({ group, slots, startSlot, pageLabel, side }: AlbumMembersPageProps) {
-    const rows = [slots.slice(0, 2), slots.slice(2, 4), slots.slice(4, 6)];
+    const slotRows = [slots.slice(0, 2), slots.slice(2, 4), slots.slice(4, 6)];
+
     return (
         <AlbumContentShell groupName={group.group_name} palette={group.palette} side={side}>
             <AlbumMembersFrame group={group} pageLabel={pageLabel}>
-                <div className="z-20 flex flex-col justify-center gap-5">
-                    {rows.map((row, r) => (
-                        <div key={r} className="flex justify-center gap-27">
-                            {row.map((member, c) => {
-                                const i = r * 2 + c;
-                                if (!member) return <div key={`empty-${i}`} className="h-57.5 w-42.5" />;
-                                const tilt = c === 0 ? '-rotate-2' : 'rotate-2';
+                {/* No z on the container so each slot picks its own layer against the
+                    shell overlays: owned stickers sit ABOVE the paper grain (z-40 vs
+                    z-30 — laminated plastic), locked slots stay under it (printed). */}
+                <div className="flex flex-col justify-center gap-5">
+                    {slotRows.map((rowMembers, rowIndex) => (
+                        <div key={rowIndex} className="flex justify-center gap-27">
+                            {rowMembers.map((member, columnIndex) => {
+                                const slotNumber = startSlot + rowIndex * SLOTS_PER_ROW + columnIndex + 1;
+                                const tiltClass = columnIndex === 0 ? '-rotate-2' : 'rotate-2';
+
+                                if (!member) {
+                                    return <div key={`empty-slot-${slotNumber}`} className="h-57.5 w-42.5" />;
+                                }
                                 return (
-                                    <div key={member.card_id} className="flex h-57.5 w-42.5 items-center justify-center">
-                                        <div className={tilt}>
+                                    <div
+                                        key={member.card_id}
+                                        className={`relative flex h-57.5 w-42.5 items-center justify-center ${member.owned ? 'z-40' : 'z-20'}`}
+                                    >
+                                        <div className={tiltClass}>
                                             {member.owned ? (
                                                 <AlbumMemberCard member={member} palette={group.palette} />
                                             ) : (
-                                                <AlbumLockedSlot slotNumber={startSlot + i + 1} name={member.artist_name} />
+                                                <AlbumLockedSlot slotNumber={slotNumber} name={member.artist_name} />
                                             )}
                                         </div>
                                     </div>

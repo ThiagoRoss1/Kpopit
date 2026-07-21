@@ -1,3 +1,5 @@
+import type { CardGranted } from './albumInterfaces';
+
 export interface GameData {
   answer_id: number;
   categories: string[];
@@ -70,6 +72,7 @@ export interface GuessResponse<T = FeedbackData> {
   guess_correct: boolean;
   feedback: T;
   guessed_idol_data: GuessedIdolData;
+  card_granted?: CardGranted;
 }
 
 // Export guess idol api instance (entire idol career)

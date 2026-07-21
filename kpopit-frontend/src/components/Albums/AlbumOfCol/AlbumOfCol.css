@@ -34,6 +34,7 @@
 
 .album-zoom-in {
     animation: album-open-zoom 0.5s cubic-bezier(0.22, 0.9, 0.28, 1) both;
+    transform-origin: 50% 50%;
     will-change: transform, opacity;
 }
 

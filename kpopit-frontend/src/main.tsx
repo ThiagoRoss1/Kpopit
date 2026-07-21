@@ -20,7 +20,8 @@ import VerifyEmail from './pages/AuthUser/VerifyEmail'
 import ConfirmEmailChange from './pages/AuthUser/ConfirmEmailChange'
 import RevertEmailChange from './pages/AuthUser/RevertEmailChange'
 import UserProfile from './pages/User/UserProfile'
-import Collection from './pages/Collection/collection'
+import Collection from './pages/Collection/Collections'
+import CollectionAlbum from './pages/Collection/CollectionAlbum'
 import { AuthProvider } from './contexts/AuthProvider'
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
 import { BrowserRouter, Route, Navigate, Routes } from 'react-router-dom'
@@ -67,7 +68,13 @@ createRoot(document.getElementById('root')!).render(
 
                 <Route path="/pixelated" element={<PixelatedMode />} />
 
-                <Route path="/collection" element={<Collection />} />
+                {import.meta.env.VITE_COLLECTION_ENABLED === "true" && (
+                  <>
+                    <Route path="/collections" element={<Collection />} />
+
+                    <Route path="/collections/:collectionId/:slug" element={<CollectionAlbum />} />
+                  </>
+                )}
 
                 <Route path="/idols" element={<IdolsList />} />
 
