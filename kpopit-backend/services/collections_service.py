@@ -129,73 +129,28 @@ class CollectionService:
 
         return granted_group_ids
     
-    def get_overview(self, cursor, user_id: int, collection_id: int = 1) -> list[dict]:
-        """Return an overview of the user's collection, per-group page."""
+    def get_collections(self, cursor, user_id: int | None) -> list[dict]:
+        """Returns every collection with the user's distinct owned/total card counts.
+
+        Feeds the /collections list page. Counting cards (not page slots) means a
+        multi-page idol's single card counts once — no per-page inflation."""
         cursor.execute(
             """
-                SELECT cge.group_id, g.name AS group_name,
-                    COUNT(DISTINCT c.id) AS total_idol_cards,
-                    COUNT(DISTINCT uc.id) AS owned_idol_cards,
-                    cge.has_bonus_cover,
-                    BOOL_OR(buc.id IS NOT NULL) AS bonus_owned
-                FROM collection_group_eligibility AS cge
-                JOIN groups AS g ON g.id = cge.group_id
-                JOIN idol_career AS ic ON ic.group_id = cge.group_id
-                JOIN cards AS c ON c.collection_id = cge.collection_id
-                    AND c.idol_id = ic.idol_id AND c.card_type = 'idol'
+                SELECT col.id AS collection_id, col.name, col.album_label, col.description,
+                    COUNT(DISTINCT c.id) AS total_cards,
+                    COUNT(DISTINCT uc.id) AS owned_cards
+                FROM collections AS col
+                LEFT JOIN cards AS c ON c.collection_id = col.id
                 LEFT JOIN user_cards AS uc ON uc.user_id = %s AND uc.card_id = c.id
-                LEFT JOIN cards AS bc ON bc.collection_id = cge.collection_id
-                    AND bc.group_id = cge.group_id AND bc.card_type = 'group_photo'
-                LEFT JOIN user_cards AS buc ON buc.user_id = %s AND buc.card_id = bc.id
-                WHERE cge.collection_id = %s AND cge.is_eligible = TRUE
-                GROUP BY cge.group_id, g.name, cge.has_bonus_cover
-                ORDER BY cge.group_id
-            """, (user_id, user_id, collection_id)
+                GROUP BY col.id, col.name, col.album_label, col.description
+                ORDER BY col.id
+            """, (user_id,)
         )
         return cursor.fetchall()
-    
-    def get_group_page(self, cursor, user_id: int, group_id: int, collection_id: int = 1) -> dict | None:
-        """Returns the full roster for one group's page."""
-        cursor.execute(
-            """
-                SELECT DISTINCT ON (ic.idol_id)
-                    ic.idol_id, i.artist_name,
-                    c.id AS card_id, COALESCE(c.image_path, i.image_path) AS image_path,
-                    uc.id IS NOT NULL AS owned,
-                    uc.level, uc.first_won_at
-                FROM idol_career AS ic
-                JOIN collection_group_eligibility AS cge
-                    ON cge.group_id = ic.group_id AND cge.collection_id = %s
-                JOIN cards AS c ON c.collection_id = cge.collection_id
-                    AND c.idol_id = ic.idol_id AND c.card_type = 'idol'
-                JOIN idols AS i ON i.id = ic.idol_id
-                LEFT JOIN user_cards AS uc ON uc.user_id = %s AND uc.card_id = c.id
-                WHERE ic.group_id = %s AND cge.is_eligible = TRUE
-                ORDER BY ic.idol_id
-            """, (collection_id, user_id, group_id)
-        )
-        members = cursor.fetchall()
-        if not members:
-            return None
 
-        cursor.execute("SELECT name FROM groups WHERE id = %s", (group_id,))
-        group_row = cursor.fetchone()
-        group_name = group_row["name"] if group_row else None
-
-        cursor.execute(
-            """
-                SELECT c.id AS card_id,
-                    COALESCE(c.image_path, gf.image_path) AS image_path,
-                    uc.id IS NOT NULL AS owned
-                FROM cards AS c
-                LEFT JOIN group_features AS gf ON gf.group_id = c.group_id
-                LEFT JOIN user_cards AS uc ON uc.user_id = %s AND uc.card_id = c.id
-                WHERE c.collection_id = %s AND c.group_id = %s AND c.card_type = 'group_photo'
-            """, (user_id, collection_id, group_id)
-        )
-        group_photo = cursor.fetchone()
-
-        return {"group_id": group_id, "group_name": group_name, "members": members, "group_photo": group_photo}
+    def collection_exists(self, cursor, collection_id: int) -> bool:
+        cursor.execute("SELECT 1 FROM collections WHERE id = %s", (collection_id,))
+        return cursor.fetchone() is not None
 
     def get_album(self, cursor, user_id: int | None, collection_id: int = 1) -> list[dict]:
         """Returns every eligible group page with full presentation data in one payload.
@@ -209,7 +164,7 @@ class CollectionService:
             """
                 SELECT cge.group_id, g.name AS group_name, g.hangul_name,
                     g.group_debut_year AS debut_year, g.fandom_name,
-                    gf.image_path, gf.palette
+                    gf.image_path, gf.image_version, gf.palette
                 FROM collection_group_eligibility AS cge
                 JOIN groups AS g ON g.id = cge.group_id
                 LEFT JOIN group_features AS gf ON gf.group_id = cge.group_id
@@ -239,6 +194,7 @@ class CollectionService:
                 SELECT DISTINCT ON (ic.group_id, ic.idol_id)
                     ic.group_id, ic.idol_id, i.artist_name,
                     c.id AS card_id, COALESCE(c.image_path, i.image_path) AS image_path,
+                    i.image_version,
                     uc.id IS NOT NULL AS owned,
                     uc.level, uc.first_won_at
                 FROM idol_career AS ic
@@ -262,6 +218,7 @@ class CollectionService:
             """
                 SELECT c.group_id, c.id AS card_id,
                     COALESCE(c.image_path, gf.image_path) AS image_path,
+                    gf.image_version,
                     uc.id IS NOT NULL AS owned
                 FROM cards AS c
                 JOIN collection_group_eligibility AS cge

@@ -1,5 +1,5 @@
 from utils.dates import get_today_date
-from services.collection_service import CollectionService, COLLECTION_ENABLED, COLLECTION_GAMEMODE_IDS
+from services.collections_service import CollectionService, COLLECTION_ENABLED, COLLECTION_GAMEMODE_IDS
 from datetime import timedelta, date
 import math
 import logging

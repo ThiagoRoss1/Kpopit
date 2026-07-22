@@ -8,7 +8,7 @@ happens at app import) — the off-state is covered at the hook level instead.
 
 from datetime import datetime, timezone
 
-from services.collection_service import CollectionService
+from services.collections_service import CollectionService
 
 WON_AT = datetime(2026, 1, 1, 12, 0, tzinfo=timezone.utc)
 
@@ -189,107 +189,30 @@ def test_multi_group_idol_does_not_inflate_completion(db_conn, make_user, collec
 
 
 # ---------------------------------------------------------------------------
-# CollectionService — read shapes (T14–T16)
+# CollectionService — album fallbacks (migrated from the deleted get_group_page
+# tests; the fallback chain now lives in get_album)
 # ---------------------------------------------------------------------------
 
-def test_overview_counts_and_bonus_flip(db_conn, make_user, collection_page):
-    user_id, _ = make_user()
-    page = collection_page(n_members=2)
-    grant(db_conn, user_id, page["idol_ids"][0])
-
-    service = CollectionService(db_conn)
-    with db_conn.cursor() as cur:
-        rows = service.get_overview(cur, user_id)
-    assert len(rows) == 1
-    row = rows[0]
-    assert row["group_id"] == page["group_id"]
-    assert row["group_name"] == "PageGroup"
-    assert row["total_idol_cards"] == 2
-    assert row["owned_idol_cards"] == 1
-    assert row["has_bonus_cover"] is True
-    assert row["bonus_owned"] is False
-
-    grant(db_conn, user_id, page["idol_ids"][1])
-    with db_conn.cursor() as cur:
-        row = service.get_overview(cur, user_id)[0]
-    assert row["owned_idol_cards"] == 2
-    assert row["bonus_owned"] is True
-
-
-def test_overview_multi_group_idol_counts_on_each_page(db_conn, make_user, collection_page, make_career):
-    user_id, _ = make_user()
-    page_a = collection_page("GroupA", n_members=1)
-    page_b = collection_page("GroupB", n_members=1)
-    make_career(page_a["idol_ids"][0], page_b["group_id"], is_active=False)
-
-    service = CollectionService(db_conn)
-    with db_conn.cursor() as cur:
-        rows = {r["group_id"]: r for r in service.get_overview(cur, user_id)}
-    # The shared idol's single card is a slot on both pages, counted once each.
-    assert rows[page_a["group_id"]]["total_idol_cards"] == 1
-    assert rows[page_b["group_id"]]["total_idol_cards"] == 2
-
-
-def test_overview_anonymous_user_sees_catalog_with_zero_ownership(db_conn, make_user, collection_page):
-    owner_id, _ = make_user()
-    page = collection_page(n_members=2)
-    grant(db_conn, owner_id, page["idol_ids"][0])
-
-    service = CollectionService(db_conn)
-    with db_conn.cursor() as cur:
-        row = service.get_overview(cur, None)[0]
-    assert row["total_idol_cards"] == 2
-    assert row["owned_idol_cards"] == 0
-    assert row["bonus_owned"] is False
-
-
-def test_group_page_shape_fallbacks_and_404_paths(db_conn, make_user, make_eligible_group,
-                                                  make_idol, make_career, make_card):
+def test_album_member_image_and_no_bonus_fallbacks(db_conn, make_user, make_eligible_group,
+                                                   make_idol, make_career, make_card,
+                                                   collection_page):
     user_id, _ = make_user()
     group_id = make_eligible_group("TWICE-ish")
     idol_id = make_idol("Sana-ish", image_path="idols/sana.webp")
     make_career(idol_id, group_id)
     make_card(idol_id=idol_id)  # card art NULL → idol fallback
-    make_card(group_id=group_id, card_type="group_photo")  # art NULL → group fallback
-    with db_conn.cursor() as cur:
-        cur.execute(
-            "INSERT INTO group_features (group_id, image_path) VALUES (%s, %s)",
-            (group_id, "groups/twice.webp"),
-        )
-    db_conn.commit()
+    no_bonus = collection_page("Soloist-like", n_members=1, has_bonus_cover=False)
 
     service = CollectionService(db_conn)
     with db_conn.cursor() as cur:
-        result = service.get_group_page(cur, user_id, group_id)
+        album = {g["group_id"]: g for g in service.get_album(cur, user_id)}
 
-    assert result["group_id"] == group_id
-    assert result["group_name"] == "TWICE-ish"
-    member = result["members"][0]
-    assert member["idol_id"] == idol_id
-    assert member["artist_name"] == "Sana-ish"
+    member = album[group_id]["members"][0]
     assert member["image_path"] == "idols/sana.webp"  # COALESCE → idols.image_path
     assert member["owned"] is False
     assert member["level"] is None
-    assert result["group_photo"]["image_path"] == "groups/twice.webp"  # COALESCE → group_features.image_path
-    assert result["group_photo"]["owned"] is False
-
-    with db_conn.cursor() as cur:
-        assert service.get_group_page(cur, user_id, 999999) is None  # unknown
-        ineligible = make_eligible_group("Hidden", is_eligible=False)
-        hidden_idol = make_idol("Hidden Idol")
-        make_career(hidden_idol, ineligible)
-        make_card(idol_id=hidden_idol)
-        assert service.get_group_page(cur, user_id, ineligible) is None  # ineligible
-
-
-def test_group_page_no_bonus_page_has_null_group_photo(db_conn, make_user, collection_page):
-    user_id, _ = make_user()
-    page = collection_page(n_members=1, has_bonus_cover=False)
-
-    service = CollectionService(db_conn)
-    with db_conn.cursor() as cur:
-        result = service.get_group_page(cur, user_id, page["group_id"])
-    assert result["group_photo"] is None
+    assert album[group_id]["group_photo"] is None  # no group_photo card row
+    assert album[no_bonus["group_id"]]["group_photo"] is None  # no-bonus page
 
 
 # ---------------------------------------------------------------------------
@@ -425,66 +348,64 @@ def test_losing_guess_grants_nothing(client, db_conn, make_user, collection_page
 
 
 # ---------------------------------------------------------------------------
-# Routes (T21–T24)
+# Routes — /collections/list + /collections/album/<id> (auth scenarios migrated
+# from the deleted overview/groups route tests)
 # ---------------------------------------------------------------------------
 
-def test_overview_route_anonymous_uuid_sees_ownership(client, db_conn, make_user, collection_page):
-    """Regression for the fixed anonymous-ownership bug (resolve_user_id)."""
+def test_collections_list_shape_and_counts(client, db_conn, make_user, collection_page):
     user_id, token = make_user()
-    page = collection_page(n_members=2)
+    page = collection_page(n_members=2)  # 2 idol cards + 1 group_photo card
     grant(db_conn, user_id, page["idol_ids"][0])
 
-    resp = client.get("/api/collection/overview", headers={"Authorization": token})
+    resp = client.get("/api/collections/list", headers={"Authorization": token})
     assert resp.status_code == 200
-    row = resp.get_json()[0]
-    assert row["group_id"] == page["group_id"]
-    assert row["owned_idol_cards"] == 1
+    body = resp.get_json()
+    assert len(body) == 1
+    row = body[0]
+    assert row["collection_id"] == 1
+    assert row["name"] == "Album 1"
+    assert row["total_cards"] == 3
+    assert row["owned_cards"] == 1
 
 
-def test_overview_route_jwt_sees_ownership(client, db_conn, make_user, collection_page, make_access_jwt):
+def test_album_route_jwt_sees_ownership(client, db_conn, make_user, collection_page, make_access_jwt):
     user_id, token = make_user()
     page = collection_page(n_members=2)
     grant(db_conn, user_id, page["idol_ids"][0])
 
     jwt_token = make_access_jwt(user_id, token)
-    resp = client.get("/api/collection/overview", headers={"Authorization": f"Bearer {jwt_token}"})
+    resp = client.get("/api/collections/album/1", headers={"Authorization": f"Bearer {jwt_token}"})
     assert resp.status_code == 200
-    assert resp.get_json()[0]["owned_idol_cards"] == 1
+    assert sum(m["owned"] for m in resp.get_json()[0]["members"]) == 1
 
 
-def test_overview_route_without_or_garbage_auth_degrades(client, db_conn, make_user, collection_page):
+def test_list_and_album_routes_degrade_on_garbage_auth(client, db_conn, make_user, collection_page):
     owner_id, _ = make_user()
     page = collection_page(n_members=2)
     grant(db_conn, owner_id, page["idol_ids"][0])
 
     for headers in ({}, {"Authorization": "not-a-uuid-not-a-jwt"}):
-        resp = client.get("/api/collection/overview", headers=headers)
+        resp = client.get("/api/collections/list", headers=headers)
         assert resp.status_code == 200
-        row = resp.get_json()[0]
-        assert row["total_idol_cards"] == 2
-        assert row["owned_idol_cards"] == 0
+        assert resp.get_json()[0]["owned_cards"] == 0
+
+        resp = client.get("/api/collections/album/1", headers=headers)
+        assert resp.status_code == 200
+        assert sum(m["owned"] for m in resp.get_json()[0]["members"]) == 0
 
 
-def test_group_page_route_shape_and_404(client, db_conn, make_user, collection_page):
-    user_id, token = make_user()
-    page = collection_page(n_members=2)
-    grant(db_conn, user_id, page["idol_ids"][0])
+def test_album_param_route_and_404s_unknown(client, make_user, collection_page):
+    _, token = make_user()
+    collection_page(n_members=2)
 
-    resp = client.get(f"/api/collection/groups/{page['group_id']}", headers={"Authorization": token})
-    assert resp.status_code == 200
-    body = resp.get_json()
-    assert body["group_id"] == page["group_id"]
-    assert body["group_name"] == "PageGroup"
-    assert len(body["members"]) == 2
-    owned = [m for m in body["members"] if m["owned"]]
-    assert len(owned) == 1 and owned[0]["level"] == 1
-    assert body["group_photo"]["owned"] is False
+    param = client.get("/api/collections/album/1", headers={"Authorization": token})
+    assert param.status_code == 200
 
-    assert client.get("/api/collection/groups/999999").status_code == 404
+    assert client.get("/api/collections/album/999999").status_code == 404
 
 
 # ---------------------------------------------------------------------------
-# Bulk album payload (GET /api/collection/album → get_album)
+# Bulk album payload (GET /api/collections/album/<id> → get_album)
 # ---------------------------------------------------------------------------
 
 def _seed_group_presentation(db_conn, group_id, image_path="groups/test.webp",
@@ -515,7 +436,7 @@ def _seed_group_presentation(db_conn, group_id, image_path="groups/test.webp",
 def test_album_shape_presentation_and_ownership(db_conn, make_user, collection_page):
     user_id, _ = make_user()
     palette = {"deep": "#111111", "secondary": "#222222", "main": "#333333",
-               "accent": "#444444", "text": "#555555"}
+               "accent": "#444444", "light": "#555555"}
     page_a = collection_page("AlbumGroupA", n_members=2)
     page_b = collection_page("AlbumGroupB", n_members=1)
     _seed_group_presentation(db_conn, page_a["group_id"], palette=palette,
@@ -570,13 +491,13 @@ def test_album_route_anonymous_uuid_sees_ownership(client, db_conn, make_user, c
     _seed_group_presentation(db_conn, page["group_id"])
     grant(db_conn, user_id, page["idol_ids"][0])
 
-    resp = client.get("/api/collection/album", headers={"Authorization": token})
+    resp = client.get("/api/collections/album/1", headers={"Authorization": token})
     assert resp.status_code == 200
     body = resp.get_json()
     assert len(body) == 1
     assert sum(m["owned"] for m in body[0]["members"]) == 1
 
     # Anonymous catalog view still returns the full album with zero ownership
-    resp = client.get("/api/collection/album")
+    resp = client.get("/api/collections/album/1")
     assert resp.status_code == 200
     assert sum(m["owned"] for m in resp.get_json()[0]["members"]) == 0

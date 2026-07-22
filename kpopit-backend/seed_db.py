@@ -171,7 +171,7 @@ def run_seed():
                 seed_table(cursor, ALBUMS_CSV_FILE, 'albums', albums_columns)
 
                 collections_columns = [
-                    "id", "name", "description", "created_at"
+                    "id", "name", "album_label", "description", "created_at"
                 ]
                 seed_table(cursor, COLLECTIONS_CSV_FILE, 'collections', collections_columns)
 

@@ -3,6 +3,7 @@ BEGIN;
 CREATE TABLE IF NOT EXISTS collections (
     id SERIAL PRIMARY KEY,
     name TEXT NOT NULL,
+    album_label TEXT,
     description TEXT,
     created_at TIMESTAMPTZ NOT NULL DEFAULT CURRENT_TIMESTAMP
 );

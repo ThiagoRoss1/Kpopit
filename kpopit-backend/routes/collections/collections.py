@@ -1,12 +1,12 @@
 import logging
 from flask import Blueprint, jsonify, g
 from services.get_db import get_db
-from services.collection_service import CollectionService
+from services.collections_service import CollectionService
 from utils.auth_decorators import optional_auth
 
 logger = logging.getLogger(__name__)
 
-collection_bp = Blueprint('collection', __name__)
+collections_bp = Blueprint('collections', __name__)
 
 def resolve_user_id(cursor):
     """Resolve the ownership user_id for a collection read.
@@ -25,7 +25,7 @@ def resolve_user_id(cursor):
         return user_row["id"] if user_row else None
     return None
 
-@collection_bp.route("/collection/list", methods=["GET"])
+@collections_bp.route("/collections/list", methods=["GET"])
 @optional_auth
 def collections_list():
     db = get_db()
@@ -56,7 +56,7 @@ def _album_response(collection_id):
         cursor.close()
 
 # Collection_id is client input here — validated against `collections` (404 unknown).
-@collection_bp.route("/collection/album/<int:collection_id>", methods=["GET"])
+@collections_bp.route("/collections/album/<int:collection_id>", methods=["GET"])
 @optional_auth
 def album(collection_id):
     return _album_response(collection_id)
