@@ -38,7 +38,8 @@ import { useAllGameModes } from "../../hooks/useAllGameModes.tsx";
 import { useClearGameStorage } from "../../hooks/useClearGameStorage.tsx";
 import { areGuessesEqual } from "../../utils/areGuessesEqual.ts";
 import { safeReload } from "../../utils/safeReload.ts";
-// import { Input } from "@chakra-ui/react"; - Css framework import example
+import CardGrantedReveal from "../Collection/components/CardGrantedReveal.tsx";
+import type { CardGranted } from "../../interfaces/albumInterfaces.ts";
 
 function ClassicMode() {
   const gameMode = useGameMode()
@@ -49,6 +50,7 @@ function ClassicMode() {
   const [endGame, setEndGame] = useState<boolean>(false);
   const [showModal, setShowModal] = useState<null | "how-to-play" | "stats" | "streak" | "share" | "transfer-data" | "import-data" | "export-data">(null);
   const [showVictoryCard, setShowVictoryCard] = useState<boolean>(false);
+  const [cardGranted, setCardGranted] = useState<CardGranted>(null);
   const [isCorrect, setIsCorrect] = useState<boolean>(false);
   const [dayChecked, setDayChecked] = useState<boolean>(false);
   const [closeFeedbackSquares, setCloseFeedbackSquares] = useState<boolean>(false);
@@ -217,6 +219,9 @@ function ClassicMode() {
         queryClient.invalidateQueries({ queryKey: ["userStats"] });
         queryUserCount.invalidateQueries({ queryKey: ["dailyUserCount"] });
         queryClient.invalidateQueries({ queryKey: ["userPosition"] });
+
+        setCardGranted(data.card_granted ?? null);
+        queryClient.invalidateQueries({ queryKey: ["collectionAlbum"] });
       }
     },
     onError: (error) => {
@@ -455,7 +460,9 @@ function ClassicMode() {
         }}
         />
       )} 
-      {/* see later */}
+      {/* See later */}
+
+      {endGame && showVictoryCard && <CardGrantedReveal cardGranted={cardGranted} />}
 
       {endGame && guesses.length > 0 && showVictoryCard && (
         <div className="w-full flex items-center justify-center mt-10">

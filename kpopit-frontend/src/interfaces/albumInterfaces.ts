@@ -1,17 +1,17 @@
 export interface AlbumPalette {
-  /** Darkest stop — dark text, gradient dark end, GROUP FILE header */
+  /* Darkest stop — dark text, gradient dark end, GROUP FILE header */
   deep: string;
-  /** Dark-mid supporting tone (wave layers) */
+  /* Dark-mid supporting tone (wave layers) */
   secondary: string;
-  /** The group's main color — card borders, circle decor, titles */
+  /* The group's main color — card borders, circle decor, titles */
   main: string;
-  /** Bright-mid pop tone (wave layers) */
+  /* Bright-mid pop tone (wave layers) */
   accent: string;
-  /** Lightest stop — light decor tone: slab, lightest wave layer, gradient light ends */
+  /* Lightest stop — light decor tone: slab, lightest wave layer, gradient light ends */
   light: string;
 }
 
-/* ---------- API payloads ---------- */
+/* -- API Payloads -- */
 
 export interface CollectionAlbumMember {
   idol_id: number;
@@ -30,17 +30,18 @@ export interface CollectionGroupPhoto {
   src: string | null;
 }
 
-/** One collection row from GET /api/collection/list (bare array of these) */
+/* One collection row from GET /api/collections/list */
 export interface CollectionListItem {
   collection_id: number;
   name: string;
+  album_label: string | null;
   description: string | null;
   total_cards: number;
   owned_cards: number;
   created_at: string;
 }
 
-/** One group page from GET /api/collection/album (bare array of these) */
+/* One group page from GET /api/collections/album */
 export interface CollectionAlbumGroup {
   group_id: number;
   group_name: string;
@@ -56,17 +57,15 @@ export interface CollectionAlbumGroup {
   group_photo: { card_id: number; owned: boolean } | null;
 }
 
-/** card_granted field of the Classic/Blurry guess responses */
 export type CardGranted = {
   card_id: number;
   is_new: boolean;
   level: number;
   times_won: number;
-  /** Group pages whose bonus group_photo card this win completed */
   group_photo: number[];
 } | null;
 
-/* ---------- View models (AlbumOfCol) ---------- */
+/* -- (AlbumOfCol) -- */
 
 export interface AlbumMember {
   idol_id: number;

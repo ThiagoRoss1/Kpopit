@@ -66,9 +66,9 @@ export default function AlbumMemberCard({ member, palette }: AlbumMemberCardProp
                 />
                 {/* LV badge */}
                 <div className="relative mr-1.5 mt-3 rotate-6 self-end">
-                    <div className={`relative flex h-5 w-11 items-center justify-center overflow-clip rounded-sm ${isBaseLevel ? 'bg-[#d9d9d9]' : ''}`}>
+                    <div className={`relative flex h-6 w-13 items-center justify-center overflow-clip rounded-sm ${isBaseLevel ? 'bg-[#d9d9d9]' : ''}`}>
                         <TextureFill treatment={treatment} />
-                        <p className={`font-major-mono-display relative whitespace-nowrap text-[12px] font-bold leading-[normal] ${levelTextClass}`}>
+                        <p className={`font-major-mono-display relative whitespace-nowrap text-[14px] font-bold leading-[normal] ${levelTextClass}`}>
                             LV.{level}
                         </p>
                     </div>

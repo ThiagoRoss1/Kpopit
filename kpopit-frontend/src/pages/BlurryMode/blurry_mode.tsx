@@ -37,6 +37,8 @@ import { WinnerExplosion } from "../../utils/confetti";
 import { useClearGameStorage } from "../../hooks/useClearGameStorage";
 import { areGuessesEqual } from "../../utils/areGuessesEqual";
 import { safeReload } from "../../utils/safeReload";
+import CardGrantedReveal from "../Collection/components/CardGrantedReveal";
+import type { CardGranted } from "../../interfaces/albumInterfaces";
 
 function BlurryMode() {
     const gameMode = useGameMode();
@@ -48,6 +50,7 @@ function BlurryMode() {
     const [showModal, setShowModal] = useState<null | "stats" | "how-to-play-blurry" | "share" | "transfer-data" | "import-data" | "export-data">(null);
     const [dayChecked, setDayChecked] = useState<boolean>(false);
     const [showVictoryCard, setShowVictoryCard] = useState<boolean>(false);
+    const [cardGranted, setCardGranted] = useState<CardGranted>(null);
     const [confetti, setConfetti] = useState<boolean>(false);
     const [attempts, setAttempts] = useState<number>(0);
     const [sessionRestored, setSessionRestored] = useState<number>(0);
@@ -230,6 +233,11 @@ function BlurryMode() {
             queryClient.invalidateQueries({queryKey: ["userStats"]});
             queryUserCount.invalidateQueries({queryKey: ["dailyUserCount", gameMode]});
             queryClient.invalidateQueries({queryKey: ["blurryUserPosition", gameMode]});
+
+            if (data.guess_correct) {
+                setCardGranted(data.card_granted ?? null);
+                queryClient.invalidateQueries({queryKey: ["collectionAlbum"]});
+            }
 
             const currentGuesses = JSON.parse(localStorage.getItem("blurryGuessesDetails") || "[]") as GuessResponse<Partial<FeedbackData>>[];
 
@@ -543,8 +551,10 @@ function BlurryMode() {
                 />
             )}
 
+            {endGame && showVictoryCard && <CardGrantedReveal cardGranted={cardGranted} />}
+
             {endGame && guesses.length > 0 && showVictoryCard && (
-                <div className="w-full flex items-center justify-center">
+                <div className="w-full flex items-center justify-center mt-10">
                     <VictoryCardHudBlurry
                         cardInfo={guesses[guesses.length - 1].guessed_idol_data}
                         guesses={guesses}

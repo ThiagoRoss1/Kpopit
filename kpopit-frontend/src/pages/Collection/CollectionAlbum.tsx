@@ -77,8 +77,8 @@ function SideArrow({ direction, disabled, onClick, night }: { direction: -1 | 1;
             onClick={onClick}
             disabled={disabled}
             aria-label={direction < 0 ? 'Previous page' : 'Next page'}
-            className={`absolute top-1/2 z-95 hidden size-12 -translate-y-1/2 items-center justify-center rounded-full border-2 transition-colors duration-150 md:flex xl:size-14 ${
-                direction < 0 ? 'left-[clamp(8px,2vw,26px)]' : 'right-[clamp(8px,2vw,26px)]'
+            className={`absolute top-1/2 z-95 hidden size-12 -translate-y-1/2 items-center justify-center rounded-full border-2 transition-all duration-300 transform-gpu md:flex xl:size-14 ${
+            direction < 0 ? 'left-[clamp(8px,2vw,26px)]' : 'right-[clamp(8px,2vw,26px)] hover:scale-105 active:shadow-[0px_0px_0px_rgba(255,51,153,1)] active:scale-100'
             } ${disabled ? `cursor-default bg-transparent opacity-45 ${disabledStyle}` : `cursor-pointer ${enabledStyle}`}`}
         >
             <Icon className="w-6 h-6 xl:w-8 xl:h-8" strokeWidth={3} />
@@ -246,7 +246,7 @@ export default function CollectionAlbum() {
                 
                 {/* Info Button */}
                 <div className="flex items-center gap-2">
-                    <IconBtn onClick={() => setInfoOpen(true)} title="How it works" night={night}>
+                    <IconBtn onClick={() => setInfoOpen(true)} title="Info" night={night}>
                         <Info className="w-4.5 h-4.5" strokeWidth={3} />
                     </IconBtn>
                     <IconBtn
@@ -366,7 +366,7 @@ export default function CollectionAlbum() {
             )}
 
             {/* Mobile info modal */}
-            {infoOpen && <AlbumInfoModal onClose={() => setInfoOpen(false)} night={night} />}
+            {infoOpen && <AlbumInfoModal onClose={() => setInfoOpen(false)} night={night} collectionName={collectionName} />}
         </div>
     );
 }

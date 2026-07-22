@@ -2,7 +2,8 @@ import './collection.css';
 import { useQuery } from '@tanstack/react-query';
 import { getCollectionsList } from '../../services/api';
 import CollectionsBackdrop from './components/CollectionsBackdrop';
-import { CollectionCard, ThemedCard } from './components/CollectionCards';
+import { CollectionCard } from './components/CollectionCard';
+import { ThemedCard } from './components/ThemedCard';
 import { useCollectionNight } from './useCollectionNight';
 import { Moon, Sun } from 'lucide-react';
 
@@ -64,12 +65,11 @@ export default function Collection() {
                     </section>
                 )}
 
-                {collections?.map((collection, collectionIndex) => (
+                {collections?.map((collection) => (
                     <CollectionCard
                         key={collection.collection_id}
                         collection={collection}
                         night={night}
-                        flagship={collectionIndex === 0}
                     />
                 ))}
 
@@ -83,11 +83,11 @@ export default function Collection() {
 
                     <ThemedCard
                         album={{
-                            title: 'KpopIt Sazonal',
+                            title: 'KpopIt Seasonal',
                             tag: 'THEMED',
-                            description: 'Sazonal album will be a seasonal themed collection of stickers, featuring special seasonal designs and limited edition cards, that will be obtained by opening packs, combining cards and more! All of them will be obtainable by playing games and doing activities in KpopIt.',
+                            description: 'Seasonal album will be a seasonal themed collection of stickers, featuring special seasonal designs and limited edition cards. Obtain them by opening packs, combining cards, playing games and doing activities across KpopIt!',
                             hue: 0,
-                            cap: 'Sazonal',
+                            cap: 'Seasonal',
                         }}
                         night={night}
                     />

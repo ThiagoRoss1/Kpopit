@@ -239,12 +239,12 @@ const collectionAuthHeaders = async () => {
 };
 
 export const getCollectionsList = async (): Promise<CollectionListItem[]> => {
-    const response = await api.get('/collection/list', { headers: await collectionAuthHeaders() });
+    const response = await api.get('/collections/list', { headers: await collectionAuthHeaders() });
     return response.data;
 };
 
 export const getCollectionAlbum = async (collectionId: number = 1): Promise<CollectionAlbumGroup[]> => {
-    const response = await api.get(`/collection/album/${collectionId}`, { headers: await collectionAuthHeaders() });
+    const response = await api.get(`/collections/album/${collectionId}`, { headers: await collectionAuthHeaders() });
     return response.data;
 };
 
