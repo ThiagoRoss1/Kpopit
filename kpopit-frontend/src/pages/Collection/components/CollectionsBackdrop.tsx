@@ -1,5 +1,7 @@
 import paperSrc from '../../../assets/materials/AlbumOfCol/crumpled_paper.jpg';
 
+// Collection's background components
+
 // Phosphor star glyphs (viewBox 0 0 256 256): 5-point outline, 4-point outline,
 // and the solid 4-point used for the colored sparkles.
 const STAR_FIVE =
