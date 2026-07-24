@@ -1,11 +1,16 @@
-import { useEffect, useRef, type ReactNode } from 'react';
+import { useEffect, useRef } from 'react';
 import { ChevronLeft, ChevronRight } from 'lucide-react';
-import { ALBUM_PAGE_H, ALBUM_PAGE_W } from '../../../components/Albums/AlbumOfCol/albumConstants';
+import { ALBUM_CARDS_PER_PAGE, ALBUM_PAGE_H, ALBUM_PAGE_W } from '../../../components/Albums/AlbumOfCol/albumConstants';
+import { HorizontalWaves, SideWaves, VectorCircle, VectorSlab } from '../../../components/Albums/AlbumOfCol/shell/AlbumDecorShapes';
+import type { AlbumPalette } from '../../../interfaces/albumInterfaces';
 
 export interface AlbumOpening {
     pos: number;
     accent: string;
-    pages: ReactNode[];
+    /** 1 for the single-panel covers, 2 for interior spreads — drives the mock layout */
+    pageCount: number;
+    /** Group palette (COVER_PALETTE on the covers) — drives the authentic page decor */
+    palette: AlbumPalette;
 }
 
 interface AlbumPageCarouselProps {
@@ -20,10 +25,57 @@ interface AlbumPageCarouselProps {
 
 const THUMB = { w: 38, h: 28.5 };
 
+// Lightweight stand-in for a real album page in the carousel. It reuses the REAL
+// decor shapes and group palette from AlbumContentShell (same positions/rotations)
+// so a thumbnail reads as an actual album page — but skips the parts that are
+// invisible at 38px and expensive: the idol photos (dozens of full-res decodes),
+// the group watermark, and the paper/lighting texture jpgs. Rendered at full page
+// size so the parent's `scale` math stays identical.
+function MockPage({ palette, isCover, side }: { palette: AlbumPalette; isCover: boolean; side: 'left' | 'right' }) {
+    if (isCover) {
+        return (
+            <span className="relative block h-full w-full overflow-hidden bg-[#efeae2]">
+                <span className="absolute -top-53 left-54.75 block h-120.75 w-120">
+                    <VectorCircle color={palette.main} className="size-full rotate-90" />
+                </span>
+                <span className="absolute inset-x-0 bottom-0 block h-38.75">
+                    <HorizontalWaves palette={palette} className="size-full" />
+                </span>
+            </span>
+        );
+    }
+
+    return (
+        <span className="relative block h-full w-full overflow-hidden bg-white">
+            {/* Same decor composition as AlbumContentShell's ContentDecor, including
+                the left-page mirroring, so the thumbnail matches the real spread */}
+            <span className={`absolute inset-0 block ${side === 'left' ? '-scale-x-100' : ''}`}>
+                <span className="absolute -bottom-0.5 -left-10.25 -top-2 block w-40.25">
+                    <SideWaves palette={palette} className="size-full rotate-180" />
+                </span>
+                <span className="absolute -top-53 left-54.75 block h-120.75 w-120">
+                    <VectorCircle color={palette.main} className="size-full rotate-90" />
+                </span>
+                <span className="absolute left-64.75 top-185.5 block h-55.75 w-118.5">
+                    <VectorSlab color={palette.light} className="size-full -scale-x-100" />
+                </span>
+            </span>
+            {/* Card slots — palette-tinted so they read as stickers over both the
+                white paper and the colored decor regions */}
+            <span className="absolute inset-[13%] grid grid-cols-2 grid-rows-3 gap-6">
+                {Array.from({ length: ALBUM_CARDS_PER_PAGE }).map((_, slotIndex) => (
+                    <span key={slotIndex} className="rounded-xl opacity-30" style={{ background: palette.deep }} />
+                ))}
+            </span>
+        </span>
+    );
+}
+
 function MiniOpening({ opening, current, onJump, night }: { opening: AlbumOpening; current: boolean; onJump: () => void; night: boolean }) {
-    const scale = opening.pages.length === 2 ? THUMB.w / (ALBUM_PAGE_W * 2) : THUMB.h / ALBUM_PAGE_H;
-    const contentW = opening.pages.length * ALBUM_PAGE_W * scale;
-    
+    const twoPage = opening.pageCount === 2;
+    const scale = twoPage ? THUMB.w / (ALBUM_PAGE_W * 2) : THUMB.h / ALBUM_PAGE_H;
+    const contentW = opening.pageCount * ALBUM_PAGE_W * scale;
+
     return (
         <button
             type="button"
@@ -45,14 +97,18 @@ function MiniOpening({ opening, current, onJump, night }: { opening: AlbumOpenin
                 style={{ left: (THUMB.w - contentW) / 2, width: contentW, height: THUMB.h }}
             >
                 <span className="absolute left-0 top-0 flex origin-top-left" style={{ transform: `scale(${scale})` }}>
-                    {opening.pages.map((page, pageIndex) => (
+                    {Array.from({ length: opening.pageCount }).map((_, pageIndex) => (
                         <span key={pageIndex} className="relative block overflow-hidden" style={{ width: ALBUM_PAGE_W, height: ALBUM_PAGE_H }}>
-                            {page}
+                            <MockPage
+                                palette={opening.palette}
+                                isCover={!twoPage}
+                                side={pageIndex === 0 ? 'left' : 'right'}
+                            />
                         </span>
                     ))}
                 </span>
             </span>
-            {opening.pages.length === 2 && (
+            {twoPage && (
                 <span className={`absolute inset-y-0 left-1/2 w-px ${night ? 'bg-white/14' : 'bg-[#3c2f38]/16'}`} />
             )}
         </button>

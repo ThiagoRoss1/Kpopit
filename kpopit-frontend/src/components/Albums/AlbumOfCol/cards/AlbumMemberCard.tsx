@@ -1,6 +1,6 @@
 import type { AlbumMember, AlbumPalette } from '../../../../interfaces/albumInterfaces';
 import goldTextureSrc from '../../../../assets/materials/AlbumOfCol/gold.jpg';
-// import holoTextureSrc from '../../../../assets/materials/AlbumOfCol/holo (4).jpg';
+// import holoTextureSrc from '../../../../assets/materials/AlbumOfCol/holo.jpg';
 import './AlbumMemberCard.css';
 
 interface AlbumMemberCardProps {
@@ -62,6 +62,7 @@ export default function AlbumMemberCard({ member, palette }: AlbumMemberCardProp
                     src={member.src || undefined}
                     alt={member.artist_name}
                     loading="lazy"
+                    decoding="async"
                     className="pointer-events-none absolute inset-0 size-full object-cover"
                 />
                 {/* LV badge */}

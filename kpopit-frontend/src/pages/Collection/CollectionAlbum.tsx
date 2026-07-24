@@ -4,63 +4,17 @@ import { useQuery } from '@tanstack/react-query';
 import { isAxiosError } from 'axios';
 import { ChevronLeft, ChevronRight, Info, Menu, Moon, Sun } from 'lucide-react';
 import AlbumOfCol, { type AlbumBookInit, type AlbumGroupSpread, type AlbumOfColControls } from '../../components/Albums/AlbumOfCol/AlbumOfCol';
+import { COVER_PALETTE } from '../../components/Albums/AlbumOfCol/albumConstants';
 import CollectionStatus from './components/CollectionStatus';
 import AlbumPageIndex from './components/AlbumPageIndex';
 import AlbumPageCarousel, { type AlbumOpening } from './components/AlbumPageCarousel';
 import AlbumInfoModal from './components/AlbumInfoModal';
+import CollectionsBackdrop from './components/CollectionsBackdrop';
 import { toAlbumGroups } from './albumMapper';
 import { useCollectionNight } from './useCollectionNight';
 import { getCollectionAlbum, getCollectionsList } from '../../services/api';
 import type { AlbumGroup } from '../../interfaces/albumInterfaces';
 import './collection.css';
-
-function StageBackdropLayers({ night }: { night: boolean }) {
-    return (
-        <>
-            <div
-                className={`absolute inset-0 ${
-                    night
-                        ? 'bg-[radial-gradient(ellipse_120%_90%_at_50%_-10%,#14161c,#0b0c0f_70%)]'
-                        : 'bg-[radial-gradient(ellipse_120%_90%_at_50%_-10%,#f6efe2,#e8dccb_70%)]'
-                }`}
-            />
-            <div
-                className={`absolute inset-0 bg-size-[19px_19px] ${
-                    night
-                        ? 'bg-[radial-gradient(rgba(255,255,255,0.05)_1.4px,transparent_1.4px)]'
-                        : 'bg-[radial-gradient(rgba(60,47,56,0.05)_1.4px,transparent_1.4px)]'
-                }`}
-            />
-            <div
-                className={`absolute -left-[8%] -top-[14%] size-115 rounded-full blur-sm ${
-                    night
-                        ? 'bg-[radial-gradient(circle,rgba(255,51,153,0.14),transparent_70%)]'
-                        : 'bg-[radial-gradient(circle,rgba(230,76,103,0.12),transparent_70%)]'
-                }`}
-            />
-            <div
-                className={`absolute -bottom-[16%] -right-[8%] size-120 rounded-full blur-sm ${
-                    night
-                        ? 'bg-[radial-gradient(circle,rgba(168,85,247,0.16),transparent_70%)]'
-                        : 'bg-[radial-gradient(circle,rgba(255,51,153,0.1),transparent_70%)]'
-                }`}
-            />
-        </>
-    );
-}
-
-function StageBackdrop({ night }: { night: boolean }) {
-    return (
-        <div aria-hidden="true" className="pointer-events-none fixed inset-0 -z-10 overflow-hidden">
-            <div className={`absolute inset-0 transition-opacity duration-300 ${night ? 'opacity-100' : 'opacity-0'}`}>
-                <StageBackdropLayers night />
-            </div>
-            <div className={`absolute inset-0 transition-opacity duration-300 ${night ? 'opacity-0' : 'opacity-100'}`}>
-                <StageBackdropLayers night={false} />
-            </div>
-        </div>
-    );
-}
 
 function SideArrow({ direction, disabled, onClick, night }: { direction: -1 | 1; disabled: boolean; onClick: () => void; night: boolean }) {
     const Icon = direction < 0 ? ChevronLeft : ChevronRight;
@@ -87,7 +41,7 @@ function SideArrow({ direction, disabled, onClick, night }: { direction: -1 | 1;
 }
 
 const BtnClasses = (night: boolean) =>
-    `border-[1.5px] transition-all duration-150 transform-gpu hover:brightness-110 active:translate-y-0.5 ${
+    `border-2 transition-all duration-150 transform-gpu hover:brightness-110 active:translate-y-0.5 ${
         night
             ? 'border-neon-pink/60 bg-[#1c1f27] text-white shadow-[0_3px_0_rgba(255,51,153,0.6)] active:shadow-[0_1px_0_rgba(255,51,153,0.6)]'
             : 'border-ink bg-white text-ink shadow-[0_3px_0_var(--color-ink)] active:shadow-[0_1px_0_var(--color-ink)]'
@@ -164,18 +118,23 @@ export default function CollectionAlbum() {
         if (!book || !groups) return [];
         const groupsById = new Map(groups.map((group) => [group.group_id, group]));
 
-        const spreadOpenings = book.spreads.map(([leftPage, rightPage], spreadIndex) => {
+        const spreadOpenings = book.spreads.map(([, rightPage], spreadIndex) => {
             const position = spreadIndex + 1;
             const groupId = groupIdAt(position, book.spreadCount, book.groupSpreads);
             const group = groupId !== null ? groupsById.get(groupId) : undefined;
 
-            return { pos: position, accent: group?.palette.main ?? accent, pages: [leftPage, rightPage] };
+            return {
+                pos: position,
+                accent: group?.palette.main ?? accent,
+                pageCount: rightPage != null ? 2 : 1,
+                palette: group?.palette ?? COVER_PALETTE,
+            };
         });
 
         return [
-            { pos: 0, accent, pages: [book.frontCover] },
+            { pos: 0, accent, pageCount: 1, palette: COVER_PALETTE },
             ...spreadOpenings,
-            { pos: book.spreadCount + 1, accent, pages: [book.backCover] },
+            { pos: book.spreadCount + 1, accent, pageCount: 1, palette: COVER_PALETTE },
         ];
     }, [book, groups, accent]);
 
@@ -211,16 +170,16 @@ export default function CollectionAlbum() {
     const pillClasses = BtnClasses(night);
 
     return (
-        <div className={`album-level-clock -mx-2 sm:-mx-4 flex h-[calc(100dvh-48px)] sm:h-[calc(100dvh-60px)] flex-col
+        <div className={`-mx-2 sm:-mx-4 flex h-[calc(100dvh-48px)] sm:h-[calc(100dvh-60px)] flex-col
         overflow-hidden transition-colors duration-300 ${night ? 'text-white' : 'text-[#3c2f38]'}`}>
-            <StageBackdrop night={night} />
+            <CollectionsBackdrop night={night} />
 
             {/* Top bar */}
             <header className="relative z-30 flex flex-none items-center justify-between gap-3 px-4.5 py-3">
                 <div className="flex items-center gap-2">
                     <Link
                         to="/collections"
-                        className={`inline-flex flex-row w-10 h-10 justify-center items-center gap-1 rounded-full border-[1.5px] px-1 py-1 font-sans 
+                        className={`inline-flex flex-row w-10 h-10 justify-center items-center gap-1 rounded-full px-1 py-1 font-sans
                             text-[14px] font-bold ${pillClasses}`}
                     >
                         <ChevronLeft className="w-6 h-6" strokeWidth={3} />

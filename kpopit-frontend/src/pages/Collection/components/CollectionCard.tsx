@@ -28,13 +28,13 @@ function ProgressCard({ collection, night }: { collection: CollectionListItem; n
     const colPercentage = collectionPct(collection);
     return (
         <div
-            className={`min-w-50 rounded-[14px] border-2 px-4 py-3.5 transition-colors duration-300 ${
+            className={`w-full min-w-0 rounded-[14px] border-2 px-4 py-3.5 transition-colors duration-300 md:w-auto md:min-w-50 ${
                 night
                     ? 'border-white/10 bg-[#1c1f27] shadow-[0_14px_34px_-14px_rgba(0,0,0,0.7)]'
-                    : 'border-ink bg-[#fffaf3] shadow-[4px_4px_0px_#0a0a0a]'
+                    : 'border-ink bg-cream shadow-[4px_4px_0px_#0a0a0a]'
             }`}
         >
-            <div className="flex items-baseline justify-between">
+            <div className="flex items-baseline justify-center gap-3 md:justify-between md:gap-0">
                 <span className="text-[30px] font-bold leading-none text-neon-pink">{colPercentage}%</span>
                 <Cap className={night ? 'text-white/60' : 'text-[#6b5f55]'}>
                     {collection.owned_cards}/{collection.total_cards} stickers
@@ -75,7 +75,8 @@ export function CollectionCard({ collection, night }: { collection: CollectionLi
 
     return (
         <section
-            className={`mt-6 flex flex-wrap items-stretch gap-6.5 rounded-[20px] border-[2.5px] p-5.5 transition-colors duration-300 ${
+            className={`mt-6 flex flex-col items-center gap-5 text-center rounded-[20px] border-[2.5px] p-5.5 transition-colors duration-300 
+            md:flex-row md:items-stretch md:gap-6.5 md:text-left ${
                 night
                     ? 'border-white/10 bg-[#16181e] shadow-[0_14px_34px_-14px_rgba(0,0,0,0.7)]'
                     : 'border-ink bg-white shadow-[6px_6px_0px_#0a0a0a]'
@@ -85,7 +86,7 @@ export function CollectionCard({ collection, night }: { collection: CollectionLi
                 <AlbumCoverThumb />
             </Link>
 
-            <div className="flex min-w-0 flex-1 basis-70 flex-col">
+            <div className="flex w-full min-w-0 flex-col items-center md:w-auto md:flex-1 md:basis-70 md:items-start">
                 {collection.album_label && (
                     <p className={`font-sans uppercase font-black text-[12px] ${textMuted} [text-shadow:1px_1px_1px_rgba(255,255,255,0.2)]`}>
                         {collection.album_label}
@@ -98,10 +99,11 @@ export function CollectionCard({ collection, night }: { collection: CollectionLi
                 <p className={`mt-3 max-w-115 font-sans text-[14px] leading-normal ${textMuted}`}>
                     {collection.description}
                 </p>
-                <div className="mt-auto flex flex-wrap items-center gap-2.5 pt-4">
+                <div className="flex flex-wrap items-center justify-center gap-2.5 pt-4 md:mt-auto md:justify-start">
                     <Link
                         to={albumHref}
-                        className={`flex justify-center items-center gap-1 rounded-full border-2 bg-neon-pink px-5.5 py-2.75 text-[14px] font-bold text-white transition-all duration-500 transform-gpu hover:brightness-110 hover:scale-105 active:translate-y-1 ${
+                        className={`flex justify-center items-center gap-1 rounded-full border-2 bg-neon-pink px-5.5 py-2.75 text-[14px] font-bold text-white 
+                        transition-all duration-500 transform-gpu hover:brightness-110 hover:scale-105 active:translate-y-1 ${
                             night
                                 ? 'border-transparent shadow-[0_4px_0_rgba(255,255,255,0.22),0_6px_18px_-6px_rgba(255,51,153,0.7)] active:shadow-[0_1px_0_rgba(255,255,255,0.22),0_6px_18px_-6px_rgba(255,51,153,0.7)]'
                                 : 'border-ink shadow-[0_4px_0_var(--color-ink)] active:shadow-[0_1px_0_var(--color-ink)]'
@@ -110,11 +112,13 @@ export function CollectionCard({ collection, night }: { collection: CollectionLi
                         Open album <ArrowRight className="inline-block w-4 h-4" />
                     </Link>
 
-                    <Pill night={night}>{collection.total_cards} stickers</Pill>
-                    <Pill night={night}>{collectionPct(collection)}% complete</Pill>
+                    <div className="flex items-center justify-center gap-2.5 max-md:basis-full">
+                        <Pill night={night}>{collection.total_cards} stickers</Pill>
+                        <Pill night={night}>{collectionPct(collection)}% complete</Pill>
+                    </div>
                 </div>
             </div>
-            <div className="flex-none self-center">
+            <div className="w-full md:w-auto md:flex-none md:self-center">
                 <ProgressCard collection={collection} night={night} />
             </div>
         </section>

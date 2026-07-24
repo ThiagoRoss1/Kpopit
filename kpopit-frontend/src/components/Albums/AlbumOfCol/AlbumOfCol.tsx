@@ -144,8 +144,15 @@ export default function AlbumOfCol({ groups, controlRef, onPosChange, onBookInit
 
         const updateScale = () => {
             const stageRect = stageElement.getBoundingClientRect();
+            // Let the book grow past its native size on large screens so it fills
+            // more of the stage instead of floating small between the arrows. The
+            // width/height fit terms below still cap it, so it can never overflow
+            // the stage — smaller/shorter screens stay purely fit-bound.
+            const viewportWidth = window.innerWidth;
+            const maxScale =
+                viewportWidth >= 1536 ? 1.35 : viewportWidth >= 1280 ? 1.22 : viewportWidth >= 1024 ? 1.1 : 1;
             const fittedScale = Math.min(
-                1,
+                maxScale,
                 (stageRect.width - 24) / (ALBUM_PAGE_W * 2),
                 (stageRect.height - 24) / ALBUM_PAGE_H,
             );

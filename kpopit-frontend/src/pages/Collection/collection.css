@@ -32,6 +32,22 @@
     animation: collections-drift 5s ease-in-out infinite;
 }
 
+@keyframes collections-twinkle {
+    0%,
+    100% {
+        opacity: 0.6;
+        transform: scale(1);
+    }
+    50% {
+        opacity: 1;
+        transform: scale(1.14);
+    }
+}
+
+.collections-twinkle {
+    animation: collections-twinkle 4s ease-in-out infinite;
+}
+
 /* Album page — Summary rail slide in/out (collection_album.tsx unmounts the rail
    only after the -out animation finishes, via onAnimationEnd) */
 @keyframes collection-rail-in {
@@ -68,6 +84,11 @@
     .collection-rail-in,
     .collection-rail-out {
         animation-duration: 0.01ms;
+    }
+
+    .collections-drift,
+    .collections-twinkle {
+        animation: none;
     }
 }
 

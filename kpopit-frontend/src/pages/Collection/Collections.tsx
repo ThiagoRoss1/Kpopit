@@ -30,20 +30,23 @@ export default function Collection() {
                         <span>Kpopit Collections</span>
                         <span className="text-neon-pink">Vol. I · Est. 2026</span>
                     </div>
-                    <div className="mt-3 flex flex-wrap items-end justify-between gap-4">
-                        <h1 className={`font-serif text-[clamp(48px,9vw,88px)] leading-[0.82] -tracking-[0.02em] ${textMain}`}>
+                    <div className="mt-3 flex flex-col items-center gap-2 text-center md:flex-row md:flex-wrap md:items-end md:justify-between md:gap-4 md:text-left">
+                        <h1 className={`font-serif text-center text-[clamp(47.5px,8vw,88px)] leading-[0.82] -tracking-[0.02em] md:text-left ${textMain}`}>
                             Collections<span className="text-neon-pink">.</span>
                         </h1>
-                        <div className="flex flex-wrap items-center gap-2.5 pb-2">
+                        <div className="flex items-center gap-2.5 md:pb-2">
                             <span className={`font-sans font-semibold text-[16px] italic ${textMuted}`}>{totalStickers ?? '…'} stickers to collect</span>
 
                             <button
                                 type="button"
                                 onClick={() => setNight((previousNight) => !previousNight)}
                                 title="Light/night mode"
-                                className={`collections-toggle-sweep relative flex size-9 flex-none cursor-pointer items-center justify-center overflow-hidden rounded-full border-[1.5px] text-[15px] transition-colors duration-300 active:scale-95 ${
-                                    night ? 'border-white/10 bg-[#16181e] text-white' : 'border-ink bg-white text-ink'
-                                }`}
+                                className={`flex flex-none collections-toggle-sweep size-10 cursor-pointer items-center justify-center 
+                                rounded-full relative overflow-hidden border-2 transition-all duration-150 
+                                transform-gpu hover:brightness-110 active:translate-y-0.5 ${night
+                                    ? 'border-neon-pink/60 bg-[#1c1f27] text-white shadow-[0_3px_0_rgba(255,51,153,0.6)] active:shadow-[0_1px_0_rgba(255,51,153,0.6)]'
+                                    : 'border-ink bg-white text-ink shadow-[0_3px_0_var(--color-ink)] active:shadow-[0_1px_0_var(--color-ink)]'
+                                } `}
                             >
                                 {night ? <Moon className="w-5 h-5 text-white/60" /> : <Sun className="w-5 h-5 text-[#6b5f55]" />}
                             </button>
@@ -58,7 +61,7 @@ export default function Collection() {
                         className={`mt-6 rounded-[20px] border-[2.5px] p-5.5 transition-colors duration-300 ${
                             night
                                 ? 'border-white/10 bg-[#16181e] shadow-[0_14px_34px_-14px_rgba(0,0,0,0.7)]'
-                                : 'border-ink bg-white shadow-[6px_6px_0px_#0a0a0a]'
+                                : 'border-ink bg-cream shadow-[6px_6px_0px_#0a0a0a]'
                         }`}
                     >
                         <div className="collections-skeleton h-49.5 w-full rounded-[14px]" />

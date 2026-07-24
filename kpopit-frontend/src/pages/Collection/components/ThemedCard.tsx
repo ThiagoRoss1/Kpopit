@@ -19,7 +19,7 @@ function BookCover({ album }: { album: ThemedAlbumPreview }) {
     return (
         <div className="relative h-20.25 w-13.5 overflow-hidden rounded shadow-[0_10px_24px_-10px_rgba(0,0,0,0.5)]" style={{ background }}>
             <div className="absolute bottom-0 left-0 top-0 w-0.5 bg-linear-to-r from-white/28 to-transparent" />
-            <div className="absolute inset-0 flex items-center justify-center text-[12px] font-bold -tracking-[0.03em] text-white/90">
+            <div className="absolute inset-0 flex items-center justify-center text-[10px] font-bold -tracking-[0.03em] text-white/90">
                 {album.cap}
             </div>
         </div>
