@@ -1,5 +1,6 @@
 import AlbumContentShell, { type AlbumPageSide } from '../shell/AlbumContentShell';
 import { AlbumLockedGroupPhoto } from '../cards/AlbumLocked';
+import { useAlbumPreview } from '../albumPreview';
 import type { AlbumGroup } from '../../../../interfaces/albumInterfaces';
 import { formatCompanyName } from '../../../../utils/formatters';
 
@@ -14,6 +15,7 @@ export default function AlbumGroupIntroPage({ group, side = 'left' }: AlbumGroup
 
     const progressPercentage = total > 0 ? Math.round((owned / total) * 100) : 0;
     const photoUnlocked = Boolean(group.group_photo?.owned && group.group_photo?.src);
+    const preview = useAlbumPreview();
 
     const fileCells: Array<[string, string]> = [
         ['DEBUT', group.debut_year != null ? String(group.debut_year) : ''],
@@ -45,7 +47,12 @@ export default function AlbumGroupIntroPage({ group, side = 'left' }: AlbumGroup
                 </div>
                 {/* Central 3-in-1 block */}
                 <div className="flex flex-1 flex-col justify-center items-center px-5 pb-22">
-                    {photoUnlocked ? (
+                    {preview ? (
+                        <div
+                            className="z-20 h-62.5 w-full rounded-br-[20px] rounded-tl-[20px] border-2 border-white"
+                            style={{ background: group.palette.main }}
+                        />
+                    ) : photoUnlocked ? (
                         <div className="relative z-20 h-62.5 w-full overflow-clip rounded-br-[20px] rounded-tl-[20px] border-2 border-white bg-white shadow-[2px_4px_4px_0px_rgba(0,0,0,0.3)]">
                             <img src={group.group_photo?.src || undefined} alt={group.group_name} className="pointer-events-none absolute inset-0 size-full object-cover" />
                         </div>

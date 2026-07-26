@@ -1,16 +1,15 @@
-import { memo, useEffect, useRef } from 'react';
+import { memo, useEffect, useRef, type ReactNode } from 'react';
 import { ChevronLeft, ChevronRight } from 'lucide-react';
-import { ALBUM_CARDS_PER_PAGE, ALBUM_PAGE_H, ALBUM_PAGE_W } from '../../../components/Albums/AlbumOfCol/albumConstants';
-import { HorizontalWaves, SideWaves, VectorCircle, VectorSlab } from '../../../components/Albums/AlbumOfCol/shell/AlbumDecorShapes';
-import type { AlbumPalette } from '../../../interfaces/albumInterfaces';
+import { ALBUM_PAGE_H, ALBUM_PAGE_W } from '../../../components/Albums/AlbumOfCol/albumConstants';
+import { AlbumPreviewProvider } from '../../../components/Albums/AlbumOfCol/AlbumPreviewProvider';
 
 export interface AlbumOpening {
     pos: number;
     accent: string;
-    /** 1 for the single-panel covers, 2 for interior spreads — drives the mock layout */
+    /* 1 for the single-panel covers, 2 for interior spreads — drives the thumb layout */
     pageCount: number;
-    /** Group palette (COVER_PALETTE on the covers) — drives the authentic page decor */
-    palette: AlbumPalette;
+    /* The real page node(s) for this opening, rendered lightweight via AlbumPreviewProvider */
+    nodes: [ReactNode, ReactNode | null];
 }
 
 interface AlbumPageCarouselProps {
@@ -24,46 +23,6 @@ interface AlbumPageCarouselProps {
 }
 
 const THUMB = { w: 38, h: 28.5 };
-
-function MockPage({ palette, isCover, side }: { palette: AlbumPalette; isCover: boolean; side: 'left' | 'right' }) {
-    if (isCover) {
-        return (
-            <span className="relative block h-full w-full overflow-hidden bg-[#efeae2]">
-                <span className="absolute -top-53 left-54.75 block h-120.75 w-120">
-                    <VectorCircle color={palette.main} className="size-full rotate-90" />
-                </span>
-                <span className="absolute inset-x-0 bottom-0 block h-38.75">
-                    <HorizontalWaves palette={palette} className="size-full" />
-                </span>
-            </span>
-        );
-    }
-
-    return (
-        <span className="relative block h-full w-full overflow-hidden bg-white">
-            {/* Same decor composition as AlbumContentShell's ContentDecor, including
-                the left-page mirroring, so the thumbnail matches the real spread */}
-            <span className={`absolute inset-0 block ${side === 'left' ? '-scale-x-100' : ''}`}>
-                <span className="absolute -bottom-0.5 -left-10.25 -top-2 block w-40.25">
-                    <SideWaves palette={palette} className="size-full rotate-180" />
-                </span>
-                <span className="absolute -top-53 left-54.75 block h-120.75 w-120">
-                    <VectorCircle color={palette.main} className="size-full rotate-90" />
-                </span>
-                <span className="absolute left-64.75 top-185.5 block h-55.75 w-118.5">
-                    <VectorSlab color={palette.light} className="size-full -scale-x-100" />
-                </span>
-            </span>
-            {/* Card slots — palette-tinted so they read as stickers over both the
-                white paper and the colored decor regions */}
-            <span className="absolute inset-[13%] grid grid-cols-2 grid-rows-3 gap-6">
-                {Array.from({ length: ALBUM_CARDS_PER_PAGE }).map((_, slotIndex) => (
-                    <span key={slotIndex} className="rounded-xl opacity-30" style={{ background: palette.deep }} />
-                ))}
-            </span>
-        </span>
-    );
-}
 
 const MiniOpening = memo(function MiniOpening({ opening, current, onJump, night }: { opening: AlbumOpening; current: boolean; onJump: (pos: number) => void; night: boolean }) {
     const twoPage = opening.pageCount === 2;
@@ -91,15 +50,13 @@ const MiniOpening = memo(function MiniOpening({ opening, current, onJump, night 
                 style={{ left: (THUMB.w - contentW) / 2, width: contentW, height: THUMB.h }}
             >
                 <span className="absolute left-0 top-0 flex origin-top-left" style={{ transform: `scale(${scale})` }}>
-                    {Array.from({ length: opening.pageCount }).map((_, pageIndex) => (
-                        <span key={pageIndex} className="relative block overflow-hidden" style={{ width: ALBUM_PAGE_W, height: ALBUM_PAGE_H }}>
-                            <MockPage
-                                palette={opening.palette}
-                                isCover={!twoPage}
-                                side={pageIndex === 0 ? 'left' : 'right'}
-                            />
-                        </span>
-                    ))}
+                    <AlbumPreviewProvider>
+                        {Array.from({ length: opening.pageCount }).map((_, pageIndex) => (
+                            <span key={pageIndex} className="relative block overflow-hidden" style={{ width: ALBUM_PAGE_W, height: ALBUM_PAGE_H }}>
+                                {opening.nodes[pageIndex]}
+                            </span>
+                        ))}
+                    </AlbumPreviewProvider>
                 </span>
             </span>
             {twoPage && (
@@ -132,8 +89,35 @@ function StepArrow({ direction, disabled, onClick, night }: { direction: -1 | 1;
     );
 }
 
+function useDragScroll(ref: React.RefObject<HTMLDivElement | null>) {
+    const drag = useRef({ down: false, startX: 0, startLeft: 0, moved: false });
+
+    return {
+        onPointerDown: (event: React.PointerEvent) => {
+            if (event.pointerType !== 'mouse' || event.button !== 0 || !ref.current) return;
+            drag.current = { down: true, startX: event.clientX, startLeft: ref.current.scrollLeft, moved: false };
+        },
+        onPointerMove: (event: React.PointerEvent) => {
+            if (!drag.current.down || !ref.current) return;
+            const dx = event.clientX - drag.current.startX;
+            if (!drag.current.moved && Math.abs(dx) < 4) return;
+            drag.current.moved = true;
+            ref.current.scrollLeft = drag.current.startLeft - dx;
+        },
+        onPointerUp: () => { drag.current.down = false; },
+        onPointerLeave: () => { drag.current.down = false; },
+        onClickCapture: (event: React.MouseEvent) => {
+            if (!drag.current.moved) return;
+            event.preventDefault();
+            event.stopPropagation();
+            drag.current.moved = false;
+        },
+    };
+}
+
 export default function AlbumPageCarousel({ openings, shown, onJump, onStep, canPrev, canNext, night }: AlbumPageCarouselProps) {
     const railRef = useRef<HTMLDivElement>(null);
+    const dragHandlers = useDragScroll(railRef);
     
     useEffect(() => {
         const rail = railRef.current;
@@ -144,25 +128,33 @@ export default function AlbumPageCarousel({ openings, shown, onJump, onStep, can
 
     return (
         <div
-            className={`flex max-w-[min(560px,92vw)] items-center gap-2 rounded-2xl border-2 px-2.5 py-2 backdrop-blur-md transition-colors duration-300 ${
+            className={`collections-chrome-blur flex max-w-[min(560px,92vw)] items-center gap-2 rounded-2xl border-2 px-2.5 py-2 
+            backdrop-blur-md transition-colors duration-300 ${
                 night
                     ? 'border-white/12 bg-[#16181e]/72 shadow-[0_12px_30px_-12px_rgba(0,0,0,0.7)]'
                     : 'border-ink bg-[#fffcf6]/88 shadow-[0_8px_20px_-10px_rgba(60,40,50,0.35)]'
             }`}
         >
             <StepArrow direction={-1} disabled={!canPrev} onClick={() => onStep(-1)} night={night} />
-            <div
-                ref={railRef}
-                // overflow-x auto for the rail, but hide the scrollbar, maybe with a click and drag gesture for desktop and mobile.
-                className="flex items-center gap-2.5 overflow-x-auto px-1.5 py-2 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden"
-            >
+
+            <div className="min-w-0 flex-1 overflow-hidden">
+                <div
+                    ref={railRef}
+                    {...dragHandlers}
+                    className="cursor-pointer overflow-x-auto px-1.5 pt-2 pb-6.5 -mb-4.5 select-none 
+                    active:cursor-pointer [scrollbar-width:none] [&::-webkit-scrollbar]:hidden"
+                >
+
+                    <div className="flex items-center gap-2.5">
                 {openings.map((opening) => (
                     <span key={opening.pos} data-cur={opening.pos === shown ? '1' : '0'} className="inline-flex">
                         {/* onJump is passed through, not wrapped — a closure created
                             here would defeat MiniOpening's memo on every render. */}
-                        <MiniOpening opening={opening} current={opening.pos === shown} onJump={onJump} night={night} />
-                    </span>
-                ))}
+                                <MiniOpening opening={opening} current={opening.pos === shown} onJump={onJump} night={night} />
+                            </span>
+                        ))}
+                    </div>
+                </div>
             </div>
             <StepArrow direction={1} disabled={!canNext} onClick={() => onStep(1)} night={night} />
         </div>

@@ -1,6 +1,7 @@
 import type { AlbumMember, AlbumPalette } from '../../../../interfaces/albumInterfaces';
 import goldTextureSrc from '../../../../assets/materials/AlbumOfCol/gold.jpg';
 // import holoTextureSrc from '../../../../assets/materials/AlbumOfCol/holo.jpg';
+import { useAlbumPreview } from '../albumPreview';
 import './AlbumMemberCard.css';
 
 interface AlbumMemberCardProps {
@@ -28,7 +29,7 @@ function TextureFill({ treatment }: { treatment: CardTreatment }) {
     return <span aria-hidden className="album-holo-fill pointer-events-none absolute inset-0" />;
 }
 
-/** Full-card holo laminate — rainbow bands, foil micro-lines and a drifting
+/* Full-card holo laminate — rainbow bands, foil micro-lines and a drifting
     glare stacked over everything, so the sticker reads as laminated plastic */
 function HoloLaminate() {
     return (
@@ -41,7 +42,15 @@ function HoloLaminate() {
     );
 }
 
+/* Thumbnail stand-in: same footprint as the real card, no photo/gold/holo — just the owned fill. */
+function AlbumMemberCardPreview({ palette }: { palette: AlbumPalette }) {
+    return <div className="h-55 w-40 rounded-sm" style={{ background: palette.main }} />;
+}
+
 export default function AlbumMemberCard({ member, palette }: AlbumMemberCardProps) {
+    const preview = useAlbumPreview();
+    if (preview) return <AlbumMemberCardPreview palette={palette} />;
+
     const level = member.level ?? 1;
     const treatment = treatmentForLevel(level);
     const isBaseLevel = treatment === 'base';

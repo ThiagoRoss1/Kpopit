@@ -1,5 +1,6 @@
 import AlbumCoverShell from '../shell/AlbumCoverShell';
 import { AlbumLockedGroupPhoto } from '../cards/AlbumLocked';
+import { useAlbumPreview } from '../albumPreview';
 import type { AlbumGroup } from '../../../../interfaces/albumInterfaces';
 
 interface AlbumNextGroupPageProps {
@@ -13,6 +14,7 @@ export default function AlbumNextGroupPage({ group }: AlbumNextGroupPageProps) {
         backgroundImage: `linear-gradient(to right, ${group.palette.light}, ${group.palette.deep})`,
     };
     const unlocked = Boolean(group.group_photo?.owned && group.group_photo?.src);
+    const preview = useAlbumPreview();
     return (
         <AlbumCoverShell spine="fold-left" cardAboveLighting>
             <div className="absolute inset-0 flex items-center justify-center">
@@ -23,7 +25,12 @@ export default function AlbumNextGroupPage({ group }: AlbumNextGroupPageProps) {
                             Official Collection
                         </p>
                         <div className="flex w-full flex-col items-center gap-5">
-                            {unlocked ? (
+                            {preview ? (
+                                <div
+                                    className="h-40 w-full rounded-br-[20px] rounded-tl-[20px] border border-white"
+                                    style={{ background: group.palette.main }}
+                                />
+                            ) : unlocked ? (
                                 <div className="relative h-40 w-full overflow-clip rounded-br-[20px] rounded-tl-[20px] border border-white">
                                     <img
                                         src={group.group_photo?.src || undefined}
