@@ -21,7 +21,7 @@ export default function Collection() {
     const rule = night ? 'border-white/22' : 'border-ink';
 
     return (
-        <div className={`relative min-h-full w-full transition-colors duration-300 ${textMain}`}>
+        <div className={`collections-root relative min-h-full w-full transition-colors duration-300 ${textMain}`}>
             <CollectionsBackdrop night={night} />
             <div className="relative mx-auto max-w-300 px-6 pb-18">
                 {/* Header */}

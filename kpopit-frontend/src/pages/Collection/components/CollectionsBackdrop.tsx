@@ -1,4 +1,4 @@
-import paperSrc from '../../../assets/materials/AlbumOfCol/crumpled_paper.jpg';
+import paperSrc from '../../../assets/materials/AlbumOfCol/crumpled_paper-baked.jpg';
 
 // Collection's background components
 
@@ -75,7 +75,6 @@ function SheetTexture({ night }: { night: boolean }) {
             alt=""
             aria-hidden
             decoding="async"
-            style={{ filter: 'saturate(0.2) brightness(1.07)' }}
             className="absolute inset-0 size-full object-cover opacity-[0.15] mix-blend-multiply"
         />
     );
@@ -133,7 +132,7 @@ function BackdropLayers({ night }: { night: boolean }) {
 
 export default function CollectionsBackdrop({ night }: { night: boolean }) {
     return (
-        <div aria-hidden className="pointer-events-none fixed inset-0 -z-10 overflow-hidden">
+        <div aria-hidden className="collections__bg pointer-events-none fixed inset-0 -z-10 overflow-hidden">
             <div className={`absolute inset-0 transition-opacity duration-300 ${night ? 'opacity-100' : 'opacity-0'}`}>
                 <BackdropLayers night />
             </div>

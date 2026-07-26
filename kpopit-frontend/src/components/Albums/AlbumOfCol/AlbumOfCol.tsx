@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState, type ReactNode } from 'react';
+import { memo, useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState, type ReactNode } from 'react';
 import AlbumCover from './pages/AlbumCover';
 import AlbumStatsPage from './pages/AlbumStatsPage';
 import AlbumNextGroupPage from './pages/AlbumNextGroupPage';
@@ -106,7 +106,7 @@ interface AlbumOfColProps {
     keysDisabled?: boolean;
 }
 
-export default function AlbumOfCol({ groups, controlRef, onPosChange, onBookInit, keysDisabled = false }: AlbumOfColProps) {
+function AlbumOfCol({ groups, controlRef, onPosChange, onBookInit, keysDisabled = false }: AlbumOfColProps) {
     const stats = useMemo(() => buildAlbumStats(groups), [groups]);
     const { interiorPages, groupSpreads } = useMemo(() => buildInteriorPages(groups, stats), [groups, stats]);
 
@@ -275,8 +275,17 @@ export default function AlbumOfCol({ groups, controlRef, onPosChange, onBookInit
 
     const flippingForward = flip !== null && flip.direction > 0;
     const leafSide: 'left' | 'right' = flippingForward ? 'right' : 'left';
-    const leafFront = flip ? (flippingForward ? rightPageAt(position) : leftPageAt(position)) : null;
-    const leafBack = flip ? (flippingForward ? leftPageAt(position + 1) : rightPageAt(position - 1)) : null;
+
+    const lastLeafContent = useRef<{ front: ReactNode; back: ReactNode }>({ front: null, back: null });
+    if (flip) {
+        lastLeafContent.current = {
+            front: flippingForward ? rightPageAt(position) : leftPageAt(position),
+            back: flippingForward ? leftPageAt(position + 1) : rightPageAt(position - 1),
+        };
+    }
+
+    const leafFront = lastLeafContent.current.front;
+    const leafBack = lastLeafContent.current.back;
 
     // Closed covers sit centered: shift the (empty-page-less) book by half a page
     const bookShiftPx = Math.round(
@@ -322,6 +331,8 @@ export default function AlbumOfCol({ groups, controlRef, onPosChange, onBookInit
                                             left: leafSide === 'right' ? ALBUM_PAGE_W : 0,
                                             transformOrigin: leafSide === 'right' ? 'left center' : 'right center',
                                             transform: 'rotateY(0deg)',
+                                            visibility: flip ? 'visible' : 'hidden',
+                                            pointerEvents: flip ? 'auto' : 'none',
                                         }}
                                     >
                                         <div className="album-leaf-face transform-gpu absolute inset-0 overflow-hidden bg-[#d9d9d9]">
@@ -357,3 +368,5 @@ export default function AlbumOfCol({ groups, controlRef, onPosChange, onBookInit
         </div>
     );
 }
+
+export default memo(AlbumOfCol);

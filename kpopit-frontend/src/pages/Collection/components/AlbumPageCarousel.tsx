@@ -1,4 +1,4 @@
-import { useEffect, useRef } from 'react';
+import { memo, useEffect, useRef } from 'react';
 import { ChevronLeft, ChevronRight } from 'lucide-react';
 import { ALBUM_CARDS_PER_PAGE, ALBUM_PAGE_H, ALBUM_PAGE_W } from '../../../components/Albums/AlbumOfCol/albumConstants';
 import { HorizontalWaves, SideWaves, VectorCircle, VectorSlab } from '../../../components/Albums/AlbumOfCol/shell/AlbumDecorShapes';
@@ -25,12 +25,6 @@ interface AlbumPageCarouselProps {
 
 const THUMB = { w: 38, h: 28.5 };
 
-// Lightweight stand-in for a real album page in the carousel. It reuses the REAL
-// decor shapes and group palette from AlbumContentShell (same positions/rotations)
-// so a thumbnail reads as an actual album page — but skips the parts that are
-// invisible at 38px and expensive: the idol photos (dozens of full-res decodes),
-// the group watermark, and the paper/lighting texture jpgs. Rendered at full page
-// size so the parent's `scale` math stays identical.
 function MockPage({ palette, isCover, side }: { palette: AlbumPalette; isCover: boolean; side: 'left' | 'right' }) {
     if (isCover) {
         return (
@@ -71,7 +65,7 @@ function MockPage({ palette, isCover, side }: { palette: AlbumPalette; isCover: 
     );
 }
 
-function MiniOpening({ opening, current, onJump, night }: { opening: AlbumOpening; current: boolean; onJump: () => void; night: boolean }) {
+const MiniOpening = memo(function MiniOpening({ opening, current, onJump, night }: { opening: AlbumOpening; current: boolean; onJump: (pos: number) => void; night: boolean }) {
     const twoPage = opening.pageCount === 2;
     const scale = twoPage ? THUMB.w / (ALBUM_PAGE_W * 2) : THUMB.h / ALBUM_PAGE_H;
     const contentW = opening.pageCount * ALBUM_PAGE_W * scale;
@@ -79,7 +73,7 @@ function MiniOpening({ opening, current, onJump, night }: { opening: AlbumOpenin
     return (
         <button
             type="button"
-            onClick={onJump}
+            onClick={() => onJump(opening.pos)}
             aria-label={`Go to page ${opening.pos}`}
             className={`relative flex-none cursor-pointer overflow-hidden rounded-sm border transform-gpu transition-transform duration-200 ease-out ${
                 current
@@ -113,7 +107,7 @@ function MiniOpening({ opening, current, onJump, night }: { opening: AlbumOpenin
             )}
         </button>
     );
-}
+});
 
 function StepArrow({ direction, disabled, onClick, night }: { direction: -1 | 1; disabled: boolean; onClick: () => void; night: boolean }) {
     const Icon = direction < 0 ? ChevronLeft : ChevronRight;
@@ -159,11 +153,14 @@ export default function AlbumPageCarousel({ openings, shown, onJump, onStep, can
             <StepArrow direction={-1} disabled={!canPrev} onClick={() => onStep(-1)} night={night} />
             <div
                 ref={railRef}
+                // overflow-x auto for the rail, but hide the scrollbar, maybe with a click and drag gesture for desktop and mobile.
                 className="flex items-center gap-2.5 overflow-x-auto px-1.5 py-2 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden"
             >
                 {openings.map((opening) => (
                     <span key={opening.pos} data-cur={opening.pos === shown ? '1' : '0'} className="inline-flex">
-                        <MiniOpening opening={opening} current={opening.pos === shown} onJump={() => onJump(opening.pos)} night={night} />
+                        {/* onJump is passed through, not wrapped — a closure created
+                            here would defeat MiniOpening's memo on every render. */}
+                        <MiniOpening opening={opening} current={opening.pos === shown} onJump={onJump} night={night} />
                     </span>
                 ))}
             </div>

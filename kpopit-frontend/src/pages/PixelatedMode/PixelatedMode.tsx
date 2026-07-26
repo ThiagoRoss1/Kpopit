@@ -4,7 +4,7 @@ import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { Helmet } from "react-helmet-async";
 import { useSharedGameData } from "../../hooks/useSharedGameData";
 import { useGameMode } from "../../hooks/useGameMode";
-import { useState, useEffect, useCallback, useRef } from "react";
+import { useState, useEffect, useCallback, useMemo, useRef } from "react";
 import { getPixelatedDailyAlbum, getPixelatedGuessAlbum, getAllAlbums, getYesterdaysAlbum, getUserPosition, getDailyUserCount, saveGameState}  from "../../services/api";
 import type { PixelatedGameData, AlbumSearchResult, PixelatedGuessDetail, YesterdayAlbum } from "../../interfaces/gameInterfaces";
 import { decryptToken } from "../../utils/tokenEncryption";
@@ -253,7 +253,9 @@ function PixelatedMode() {
         }
     }, [isCorrect]);
 
-    const excludedIds = guesses.map((g) => g.album_id);
+    // Memoised for PixelatedSearchBar's React.memo: a fresh array every render
+    // fails the shallow prop compare and re-renders the whole suggestion list.
+    const excludedIds = useMemo(() => guesses.map((g) => g.album_id), [guesses]);
     const blockSize = endGame ? REVEAL_LEVEL : GetPixelLevel(guesses.length);
     const userCount = dailyUserCount?.data?.user_count ?? 0;
     const winningGuess = guesses.find((g) => g.guess_correct);

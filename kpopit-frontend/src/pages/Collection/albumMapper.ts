@@ -2,7 +2,7 @@ import { COVER_PALETTE } from '../../components/Albums/AlbumOfCol/albumConstants
 import { resolveCdnUrl } from '../../utils/imageUrl';
 import type { AlbumGroup, CollectionAlbumGroup } from '../../interfaces/albumInterfaces';
 
-export function toAlbumGroups(data: CollectionAlbumGroup[]): AlbumGroup[] {
+export function getAlbumMapping(data: CollectionAlbumGroup[]): AlbumGroup[] {
     return data.map((group, index) => ({
         group_id: group.group_id,
         group_name: group.group_name,

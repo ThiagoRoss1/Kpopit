@@ -1,25 +1,43 @@
 /** Shared texture layers for the AlbumOfCol component. */
 import lightsTextureSrc from '../../../../assets/materials/AlbumOfCol/lightstexture.jpg';
+import lightsTextureSmallSrc from '../../../../assets/materials/AlbumOfCol/lightstexture-600w.jpg';
 import grainParticlesSrc from '../../../../assets/materials/AlbumOfCol/particlestexture.jpg';
+import grainParticlesSmallSrc from '../../../../assets/materials/AlbumOfCol/particlestexture-600w.jpg';
 import paperSrc from '../../../../assets/materials/AlbumOfCol/papertexture.jpg';
 
 interface TextureProps {
     className?: string;
 }
 
+const TEXTURE_SIZES = '(max-width: 1023px) 170px, 810px';
+
 /** Two stacked cesira lighting passes (screen blend), full-bleed */
 export function TextureLighting({ className = '' }: TextureProps) {
     return (
-        <>
-            <img src={lightsTextureSrc} alt="" aria-hidden decoding="async" className={`pointer-events-none absolute inset-0 size-full object-cover mix-blend-screen ${className}`} />
-        </>
+        <img
+            src={lightsTextureSrc}
+            srcSet={`${lightsTextureSmallSrc} 600w, ${lightsTextureSrc} 1200w`}
+            sizes={TEXTURE_SIZES}
+            alt=""
+            aria-hidden
+            decoding="async"
+            className={`pointer-events-none absolute inset-0 size-full object-cover mix-blend-screen ${className}`}
+        />
     );
 }
 
 /** Particle texture for cover-style pages (multiply) */
 export function GrainParticles({ className = '' }: TextureProps) {
     return (
-        <img src={grainParticlesSrc} alt="" aria-hidden decoding="async" className={`pointer-events-none absolute inset-0 size-full object-cover mix-blend-multiply ${className}`} />
+        <img
+            src={grainParticlesSrc}
+            srcSet={`${grainParticlesSmallSrc} 600w, ${grainParticlesSrc} 1200w`}
+            sizes={TEXTURE_SIZES}
+            alt=""
+            aria-hidden
+            decoding="async"
+            className={`pointer-events-none absolute inset-0 size-full object-cover mix-blend-multiply ${className}`}
+        />
     );
 }
 

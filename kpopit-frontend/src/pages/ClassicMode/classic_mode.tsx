@@ -3,7 +3,7 @@ import "./style.css";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { Helmet } from "react-helmet-async";
 import { useSharedGameData } from "../../hooks/useSharedGameData.tsx";
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback, useMemo, useRef } from "react";
 import { getDailyIdol, getGuessIdol, getYesterdaysIdol, getDailyUserCount, getUserPosition, saveGameState } from "../../services/api.ts";
 import type {
   GameData,
@@ -40,6 +40,8 @@ import { areGuessesEqual } from "../../utils/areGuessesEqual.ts";
 import { safeReload } from "../../utils/safeReload.ts";
 import CardGrantedReveal from "../Collection/components/CardGrantedReveal.tsx";
 import type { CardGranted } from "../../interfaces/albumInterfaces.ts";
+
+const NO_IDOLS: IdolListItem[] = [];
 
 function ClassicMode() {
   const gameMode = useGameMode()
@@ -325,6 +327,23 @@ function ClassicMode() {
     setSelectedIdol(null);
   };
 
+  const handleIdolSelect = useCallback((idolName: string) => setCurrentGuess(idolName), []);
+  const handleIdolSelectId = useCallback((idolId: IdolListItem) => setSelectedIdol(idolId), []);
+
+  const excludedIdols = useMemo(
+    () => guesses.map(guess => guess.guessed_idol_data?.idol_id),
+    [guesses],
+  );
+
+  const submitRef = useRef<() => void>(() => {});
+  useEffect(() => {
+    submitRef.current = () => {
+      handleGuessSubmit();
+      handleGuessAttempts();
+    };
+  });
+  const handleSubmit = useCallback(() => submitRef.current(), []);
+
   // All gameModes for victory card
   const { otherModes } = useAllGameModes(gameMode);
   
@@ -411,15 +430,12 @@ function ClassicMode() {
       <div className="w-full flex flex-col">
         <div className="relative w-full max-w-4xl px-4 mx-auto flex justify-center z-40 mb-4">
           <SearchBar
-            allIdols={allIdolsData || []}
+            allIdols={allIdolsData || NO_IDOLS}
             value={currentGuess}
-            onIdolSelect={(idolName) => setCurrentGuess(idolName)}
-            onIdolSelectId={(idolId) => setSelectedIdol(idolId)}
-            onSubmit={() => {
-              handleGuessSubmit();
-              handleGuessAttempts();
-            }}
-            excludedIdols={guesses.map(guess => guess.guessed_idol_data?.idol_id)}
+            onIdolSelect={handleIdolSelect}
+            onIdolSelectId={handleIdolSelectId}
+            onSubmit={handleSubmit}
+            excludedIdols={excludedIdols}
             disabled={endGame || guessMutation.isPending || isCorrect}
             gameMode={"classic"}
           />
@@ -501,8 +517,6 @@ function ClassicMode() {
         </span>
       </div>
       )}
-      
-      {/* <p>ID: {gameData?.answer_id}</p> */}
     </div>
     </>
   );

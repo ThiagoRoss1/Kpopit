@@ -10,7 +10,7 @@ import AlbumPageIndex from './components/AlbumPageIndex';
 import AlbumPageCarousel, { type AlbumOpening } from './components/AlbumPageCarousel';
 import AlbumInfoModal from './components/AlbumInfoModal';
 import CollectionsBackdrop from './components/CollectionsBackdrop';
-import { toAlbumGroups } from './albumMapper';
+import { getAlbumMapping } from './albumMapper';
 import { useCollectionNight } from './useCollectionNight';
 import { getCollectionAlbum, getCollectionsList } from '../../services/api';
 import type { AlbumGroup } from '../../interfaces/albumInterfaces';
@@ -85,7 +85,7 @@ export default function CollectionAlbum() {
         queryFn: getCollectionsList,
         enabled: validId,
     });
-    const groups = useMemo(() => (data ? toAlbumGroups(data) : null), [data]);
+    const groups = useMemo(() => (data ? getAlbumMapping(data) : null), [data]);
     const collectionName =
         collections?.find((collection) => collection.collection_id === parsedId)?.name ??
         `Album ${validId ? parsedId : ''}`.trim();
@@ -138,6 +138,11 @@ export default function CollectionAlbum() {
         ];
     }, [book, groups, accent]);
 
+    // Stable identities: the carousel's thumbnails are memoised, and an inline
+    // arrow here would hand them a new function on every render and defeat it.
+    const jumpToPos = useCallback((position: number) => controls.current?.jumpTo(position), []);
+    const stepBy = useCallback((direction: 1 | -1) => controls.current?.go(direction), []);
+
     const jumpToGroup = useCallback(
         (groupId: number) => {
             const groupSpread = book?.groupSpreads.find((spread) => spread.group_id === groupId);
@@ -170,162 +175,166 @@ export default function CollectionAlbum() {
     const pillClasses = BtnClasses(night);
 
     return (
-        <div className={`-mx-2 sm:-mx-4 flex h-[calc(100dvh-48px)] sm:h-[calc(100dvh-60px)] flex-col
-        overflow-hidden transition-colors duration-300 ${night ? 'text-white' : 'text-[#3c2f38]'}`}>
-            <CollectionsBackdrop night={night} />
+        <div className="collections min-h-full w-full">
+            <div className="collections__bg" aria-hidden="true" />
+        
+            <div className={`collections__behavior collections-root -mx-2 sm:-mx-4 flex h-[calc(100dvh-48px)] sm:h-[calc(100dvh-60px)] flex-col
+            overflow-hidden transition-colors duration-300 ${night ? 'text-white' : 'text-[#3c2f38]'}`}>
+                <CollectionsBackdrop night={night} />
 
-            {/* Top bar */}
-            <header className="relative z-30 flex flex-none items-center justify-between gap-3 px-4.5 py-3">
-                <div className="flex items-center gap-2">
-                    <Link
-                        to="/collections"
-                        className={`inline-flex flex-row w-10 h-10 justify-center items-center gap-1 rounded-full px-1 py-1 font-sans
-                            text-[14px] font-bold ${pillClasses}`}
-                    >
-                        <ChevronLeft className="w-6 h-6" strokeWidth={3} />
-                    </Link>
+                {/* Top bar */}
+                <header className="relative z-30 flex flex-none items-center justify-between gap-3 px-4.5 py-3">
+                    <div className="flex items-center gap-2">
+                        <Link
+                            to="/collections"
+                            className={`inline-flex flex-row w-10 h-10 justify-center items-center gap-1 rounded-full px-1 py-1 font-sans
+                                text-[14px] font-bold ${pillClasses}`}
+                        >
+                            <ChevronLeft className="w-6 h-6" strokeWidth={3} />
+                        </Link>
 
-                    <button
-                        type="button"
-                        onClick={toggleSummary}
-                        title={summaryActive ? 'Hide summary' : 'Show summary'}
-                        className={`inline-flex h-10 cursor-pointer items-center gap-1.5 rounded-full border-[1.5px] px-3.25 py-2 font-sans text-[14px] font-bold ${pillClasses} ${
-                            summaryActive 
-                            ? night 
-                                ? 'lg:border-neon-pink lg:bg-ink' 
-                                : 'lg:border-ink lg:bg-neon-pink' 
-                            : night
-                                ? 'lg:text-white'
-                                : 'lg:text-ink'
-                        }`}
-                    >
-                        <Menu className="w-4 h-4" strokeWidth={3} /> Summary
-                    </button>
-                </div>
-                
-                {/* Info Button */}
-                <div className="flex items-center gap-2">
-                    <IconBtn onClick={() => setInfoOpen(true)} title="Info" night={night}>
-                        <Info className="w-4.5 h-4.5" strokeWidth={3} />
-                    </IconBtn>
-                    <IconBtn
-                        onClick={() => setNight((previousNight) => !previousNight)}
-                        title="Light/night mode"
-                        night={night}
-                        className="collections-toggle-sweep relative overflow-hidden"
-                    >
-                        {night ? <Moon className="size-4.5" strokeWidth={2.25} /> : <Sun className="size-4.5" strokeWidth={2.25} />}
-                    </IconBtn>
-                </div>
-            </header>
-
-            {/* Body */}
-            <div className="flex min-h-0 flex-1">
-                {railOpen && (
-                    <aside
-                        onAnimationEnd={() => {
-                            if (railClosing) {
-                                setRailOpen(false);
-                                setRailClosing(false);
-                            }
-                        }}
-                        className={`z-10 mb-3 ml-3 mt-1 hidden w-64.5 flex-none flex-col rounded-2xl border-2 px-4.5 py-4.5 transform-gpu transition-colors duration-300 lg:flex ${
-                            railClosing ? 'collection-rail-out' : 'collection-rail-in'
-                        } ${
-                            night
-                                ? 'border-neon-pink/40 bg-[#14161c]/85 shadow-[4px_4px_0px_rgba(255,51,153,0.8)]'
-                                : 'border-ink bg-cream shadow-[4px_4px_0px_#0a0a0a]'
-                        }`}
-                    >
-                        <AlbumPageIndex
-                            collectionName={collectionName}
-                            groups={groups}
-                            currentGroupId={currentGroupId}
-                            onJump={jumpToGroup}
-                            query={query}
-                            onQueryChange={setQuery}
-                            night={night}
-                        />
-                    </aside>
-                )}
-
-                {/* Stage */}
-                <div className="relative flex min-h-0 min-w-0 flex-1 flex-col">
-                    <SideArrow direction={-1} disabled={frontClosed || shown.flipping} onClick={() => controls.current?.go(-1)} night={night} />
-                    <SideArrow direction={1} disabled={backClosed || shown.flipping} onClick={() => controls.current?.go(1)} night={night} />
-
-                    {/* Side padding keeps the arrows outside the scaled book */}
-                    <div className="relative z-2 min-h-0 flex-1 md:px-16 xl:px-20">
-                        <AlbumOfCol
-                            groups={groups}
-                            controlRef={controls}
-                            onPosChange={onPosChange}
-                            onBookInit={onBookInit}
-                            keysDisabled={infoOpen || indexOpen}
-                        />
+                        <button
+                            type="button"
+                            onClick={toggleSummary}
+                            title={summaryActive ? 'Hide summary' : 'Show summary'}
+                            className={`inline-flex h-10 cursor-pointer items-center gap-1.5 rounded-full border-[1.5px] px-3.25 py-2 font-sans text-[14px] font-bold ${pillClasses} ${
+                                summaryActive 
+                                ? night 
+                                    ? 'lg:border-neon-pink lg:bg-ink' 
+                                    : 'lg:border-ink lg:bg-neon-pink' 
+                                : night
+                                    ? 'lg:text-white'
+                                    : 'lg:text-ink'
+                            }`}
+                        >
+                            <Menu className="w-4 h-4" strokeWidth={3} /> Summary
+                        </button>
                     </div>
+                    
+                    {/* Info Button */}
+                    <div className="flex items-center gap-2">
+                        <IconBtn onClick={() => setInfoOpen(true)} title="Info" night={night}>
+                            <Info className="w-4.5 h-4.5" strokeWidth={3} />
+                        </IconBtn>
+                        <IconBtn
+                            onClick={() => setNight((previousNight) => !previousNight)}
+                            title="Light/night mode"
+                            night={night}
+                            className="collections-toggle-sweep relative overflow-hidden"
+                        >
+                            {night ? <Moon className="size-4.5" strokeWidth={2.25} /> : <Sun className="size-4.5" strokeWidth={2.25} />}
+                        </IconBtn>
+                    </div>
+                </header>
 
-                    {/* Status + carousel */}
-                    <div className="absolute inset-x-0 bottom-3 z-10 flex flex-col items-center gap-2 px-3">
-                        <p className={`font-major-mono-display whitespace-nowrap text-[12px] ${night ? '' : '[text-shadow:0_1px_0_rgba(255,255,255,0.5)]'}  uppercase`}>
-                            {frontClosed
-                                ? 'Cover — Tap to open'
-                                : backClosed
-                                  ? 'Back Cover'
-                                  : `${currentGroup ? `${currentGroup.group_name.toUpperCase()} · ` : ''} Page ${Math.min(shown.pos, spreadCount)}/${spreadCount}`}
-                        </p>
-
-                        {openings.length > 0 && (
-                            <AlbumPageCarousel
-                                openings={openings}
-                                shown={shown.pos}
-                                onJump={(position) => controls.current?.jumpTo(position)}
-                                onStep={(direction) => controls.current?.go(direction)}
-                                canPrev={!frontClosed && !shown.flipping}
-                                canNext={!backClosed && !shown.flipping}
+                {/* Body */}
+                <div className="flex min-h-0 flex-1">
+                    {railOpen && (
+                        <aside
+                            onAnimationEnd={() => {
+                                if (railClosing) {
+                                    setRailOpen(false);
+                                    setRailClosing(false);
+                                }
+                            }}
+                            className={`z-10 mb-3 ml-3 mt-1 hidden w-64.5 flex-none flex-col rounded-2xl border-2 px-4.5 py-4.5 transform-gpu transition-colors duration-300 lg:flex ${
+                                railClosing ? 'collection-rail-out' : 'collection-rail-in'
+                            } ${
+                                night
+                                    ? 'border-neon-pink/40 bg-[#14161c]/85 shadow-[4px_4px_0px_rgba(255,51,153,0.8)]'
+                                    : 'border-ink bg-cream shadow-[4px_4px_0px_#0a0a0a]'
+                            }`}
+                        >
+                            <AlbumPageIndex
+                                collectionName={collectionName}
+                                groups={groups}
+                                currentGroupId={currentGroupId}
+                                onJump={jumpToGroup}
+                                query={query}
+                                onQueryChange={setQuery}
                                 night={night}
                             />
-                        )}
-                    </div>
+                        </aside>
+                    )}
 
-                    {/* Mobile: rotate-phone hint */}
-                    <div
-                        className={`absolute left-1/2 top-3.5 z-12 hidden -translate-x-1/2 items-center gap-1.75 whitespace-nowrap rounded-full border-[1.5px] px-3.25 py-1.75 font-sans text-[11px] font-bold backdrop-blur-md transition-colors duration-300 max-md:portrait:flex ${
-                            night ? 'border-white/12 bg-[#16181e]/72 text-white' : 'border-[#3c2f38]/20 bg-[#fffcf6]/88 text-[#3c2f38]'
-                        }`}
-                    >
-                        <span className="text-[14px]">📱↻</span> Rotate your phone to see the whole album
+                    {/* Stage */}
+                    <div className="relative flex min-h-0 min-w-0 flex-1 flex-col">
+                        <SideArrow direction={-1} disabled={frontClosed || shown.flipping} onClick={() => controls.current?.go(-1)} night={night} />
+                        <SideArrow direction={1} disabled={backClosed || shown.flipping} onClick={() => controls.current?.go(1)} night={night} />
+
+                        {/* Side padding keeps the arrows outside the scaled book */}
+                        <div className="relative z-2 min-h-0 flex-1 md:px-16 xl:px-20">
+                            <AlbumOfCol
+                                groups={groups}
+                                controlRef={controls}
+                                onPosChange={onPosChange}
+                                onBookInit={onBookInit}
+                                keysDisabled={infoOpen || indexOpen}
+                            />
+                        </div>
+
+                        {/* Status + carousel */}
+                        <div className="absolute inset-x-0 bottom-3 z-10 flex flex-col items-center gap-2 px-3">
+                            <p className={`font-major-mono-display whitespace-nowrap text-[12px] ${night ? '' : '[text-shadow:0_1px_0_rgba(255,255,255,0.5)]'}  uppercase`}>
+                                {frontClosed
+                                    ? 'Cover — Tap to open'
+                                    : backClosed
+                                    ? 'Back Cover'
+                                    : `${currentGroup ? `${currentGroup.group_name.toUpperCase()} · ` : ''} Page ${Math.min(shown.pos, spreadCount)}/${spreadCount}`}
+                            </p>
+
+                            {openings.length > 0 && (
+                                <AlbumPageCarousel
+                                    openings={openings}
+                                    shown={shown.pos}
+                                    onJump={jumpToPos}
+                                    onStep={stepBy}
+                                    canPrev={!frontClosed && !shown.flipping}
+                                    canNext={!backClosed && !shown.flipping}
+                                    night={night}
+                                />
+                            )}
+                        </div>
+
+                        {/* Mobile: rotate-phone hint */}
+                        <div
+                            className={`absolute left-1/2 top-3.5 z-12 hidden -translate-x-1/2 items-center gap-1.75 whitespace-nowrap rounded-full border-[1.5px] px-3.25 py-1.75 font-sans text-[11px] font-bold backdrop-blur-md transition-colors duration-300 max-md:portrait:flex ${
+                                night ? 'border-white/12 bg-[#16181e]/72 text-white' : 'border-[#3c2f38]/20 bg-[#fffcf6]/88 text-[#3c2f38]'
+                            }`}
+                        >
+                            <span className="text-[14px]">📱↻</span> Rotate your phone to see the whole album
+                        </div>
                     </div>
                 </div>
+
+                {/* Mobile index modal */}
+                {indexOpen && (
+                    <div
+                        onClick={() => setIndexOpen(false)}
+                        className="fixed inset-0 z-200 flex items-center justify-center bg-[#1e141c]/50 px-4 py-8"
+                    >
+                        <div
+                            onClick={(event) => event.stopPropagation()}
+                            className={`flex max-h-[85dvh] min-h-0 w-[min(420px,100%)] flex-col rounded-[18px] border-2 p-5 transition-colors duration-300 ${
+                                night ? 'border-white/12 bg-[#16181e] shadow-[0_30px_80px_rgba(0,0,0,0.4)]' : 'border-ink bg-[#fffaf3] shadow-[6px_6px_0px_#0a0a0a]'
+                            }`}
+                        >
+                            <AlbumPageIndex
+                                collectionName={collectionName}
+                                groups={groups}
+                                currentGroupId={currentGroupId}
+                                onJump={jumpToGroup}
+                                query={query}
+                                onQueryChange={setQuery}
+                                night={night}
+                            />
+                        </div>
+                    </div>
+                )}
+
+                {/* Mobile info modal */}
+                {infoOpen && <AlbumInfoModal onClose={() => setInfoOpen(false)} night={night} collectionName={collectionName} />}
             </div>
-
-            {/* Mobile index modal */}
-            {indexOpen && (
-                <div
-                    onClick={() => setIndexOpen(false)}
-                    className="fixed inset-0 z-200 flex items-center justify-center bg-[#1e141c]/50 px-4 py-8"
-                >
-                    <div
-                        onClick={(event) => event.stopPropagation()}
-                        className={`flex max-h-[85dvh] min-h-0 w-[min(420px,100%)] flex-col rounded-[18px] border-2 p-5 transition-colors duration-300 ${
-                            night ? 'border-white/12 bg-[#16181e] shadow-[0_30px_80px_rgba(0,0,0,0.4)]' : 'border-ink bg-[#fffaf3] shadow-[6px_6px_0px_#0a0a0a]'
-                        }`}
-                    >
-                        <AlbumPageIndex
-                            collectionName={collectionName}
-                            groups={groups}
-                            currentGroupId={currentGroupId}
-                            onJump={jumpToGroup}
-                            query={query}
-                            onQueryChange={setQuery}
-                            night={night}
-                        />
-                    </div>
-                </div>
-            )}
-
-            {/* Mobile info modal */}
-            {infoOpen && <AlbumInfoModal onClose={() => setInfoOpen(false)} night={night} collectionName={collectionName} />}
         </div>
     );
 }

@@ -19,6 +19,15 @@
 .album-leaf-face {
     backface-visibility: hidden;
     -webkit-backface-visibility: hidden;
+
+    will-change: transform;
+}
+
+.album-book img {
+    backface-visibility: visible;
+    -webkit-backface-visibility: visible;
+    transform: none;
+    -webkit-transform: none;
 }
 
 @keyframes album-open-zoom {
