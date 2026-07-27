@@ -70,8 +70,10 @@
     animation: collections-twinkle 4s ease-in-out infinite;
 }
 
-/* Album page — Summary rail slide in/out (collection_album.tsx unmounts the rail
-   only after the -out animation finishes, via onAnimationEnd) */
+/* Album page — Summary rail slide in/out. Every -in/-out pair below is driven by
+   useDisclosure: it keeps the element mounted through the -out animation and
+   unmounts it on that element's own animationend. */
+   
 @keyframes collection-rail-in {
     from {
         transform: translateX(-115%) translateZ(0);
@@ -102,9 +104,197 @@
     animation: collection-rail-out 0.22s cubic-bezier(0.55, 0, 0.55, 0.2) both;
 }
 
+/* Status + carousel chrome — same mount/unmount pattern as the Summary rail. */
+
+@keyframes collection-chrome-in {
+    from {
+        transform: translateY(20px) translateZ(0);
+        opacity: 0;
+    }
+    to {
+        transform: translateY(0) translateZ(0);
+        opacity: 1;
+    }
+}
+
+@keyframes collection-chrome-out {
+    from {
+        transform: translateY(0) translateZ(0);
+        opacity: 1;
+    }
+    to {
+        transform: translateY(20px) translateZ(0);
+        opacity: 0;
+    }
+}
+
+.collection-chrome-in {
+    animation: collection-chrome-in 0.3s ease both;
+}
+
+.collection-chrome-out {
+    animation: collection-chrome-out 0.3s ease both;
+}
+
+/* FxPanel desktop popover (lg:) — house motion from droplist.css /
+   IdolsSearchBar.css: translateY(-10px) -> 0, opacity, 0.3s ease. Exit is
+   the reverse, born-under/return-to-trigger. */
+
+@keyframes collection-pop-in {
+    from {
+        transform: translateY(-10px);
+        opacity: 0;
+    }
+    to {
+        transform: translateY(0);
+        opacity: 1;
+    }
+}
+
+@keyframes collection-pop-out {
+    from {
+        transform: translateY(0);
+        opacity: 1;
+    }
+    to {
+        transform: translateY(-10px);
+        opacity: 0;
+    }
+}
+
+.collection-pop-in {
+    animation: collection-pop-in 0.3s ease both;
+}
+
+.collection-pop-out {
+    animation: collection-pop-out 0.3s ease both;
+}
+
+/* Mobile drawer (FxPanel below lg:) + AlbumInfoModal — these read as
+   pop-ups rather than anchored popovers, so they scale in instead. */
+
+@keyframes collection-modal-in {
+    from {
+        transform: scale(0.85);
+        opacity: 0;
+    }
+    to {
+        transform: scale(1);
+        opacity: 1;
+    }
+}
+
+@keyframes collection-modal-out {
+    from {
+        transform: scale(1);
+        opacity: 1;
+    }
+    to {
+        transform: scale(0.85);
+        opacity: 0;
+    }
+}
+
+.collection-modal-in {
+    animation: collection-modal-in 0.3s ease both;
+}
+
+.collection-modal-out {
+    animation: collection-modal-out 0.3s ease both;
+}
+
+/* Mobile FxPanel sheet (below lg:) — docked to the bottom edge, so it slides
+   up/down rather than scaling like a centred pop-up. */
+
+@keyframes collection-sheet-in {
+    from {
+        transform: translateY(20px);
+        opacity: 0;
+    }
+    to {
+        transform: translateY(0);
+        opacity: 1;
+    }
+}
+
+@keyframes collection-sheet-out {
+    from {
+        transform: translateY(0);
+        opacity: 1;
+    }
+    to {
+        transform: translateY(20px);
+        opacity: 0;
+    }
+}
+
+.collection-sheet-in {
+    animation: collection-sheet-in 0.3s ease both;
+}
+
+.collection-sheet-out {
+    animation: collection-sheet-out 0.3s ease both;
+}
+
+/* FxPanel's root switches shape at lg: (drawer -> anchored popover), so its
+   motion class switches with it via Tailwind's lg: variant on a literal
+   class name — same two keyframes above, just gated to the popover width. */
+
+@media (min-width: 1024px) {
+    .lg\:collection-pop-in {
+        animation: collection-pop-in 0.3s ease both;
+    }
+
+    .lg\:collection-pop-out {
+        animation: collection-pop-out 0.3s ease both;
+    }
+}
+
+/* Backdrop dim layers (FxPanel's phone scrim, AlbumInfoModal's full-screen
+   wrapper) fade only — scaling a full-bleed overlay would reveal gaps at
+   the viewport edges instead of a clean dim. */
+
+@keyframes collection-backdrop-in {
+    from {
+        opacity: 0;
+    }
+    to {
+        opacity: 1;
+    }
+}
+
+@keyframes collection-backdrop-out {
+    from {
+        opacity: 1;
+    }
+    to {
+        opacity: 0;
+    }
+}
+
+.collection-backdrop-in {
+    animation: collection-backdrop-in 0.3s ease both;
+}
+
+.collection-backdrop-out {
+    animation: collection-backdrop-out 0.3s ease both;
+}
+
 @media (prefers-reduced-motion: reduce) {
     .collection-rail-in,
-    .collection-rail-out {
+    .collection-rail-out,
+    .collection-chrome-in,
+    .collection-chrome-out,
+    .collection-pop-in,
+    .collection-pop-out,
+    .collection-modal-in,
+    .collection-modal-out,
+    .collection-sheet-in,
+    .collection-sheet-out,
+    .lg\:collection-pop-in,
+    .lg\:collection-pop-out,
+    .collection-backdrop-in,
+    .collection-backdrop-out {
         animation-duration: 0.01ms;
     }
 
@@ -125,6 +315,7 @@
 
 /* Light/night toggle — a diagonal shine sweeps across on hover. The button must
    be `relative overflow-hidden` so the streak is clipped to the pill. */
+   
 .collections-toggle-sweep::after {
     content: '';
     position: absolute;
@@ -208,7 +399,7 @@
    its room with static bottom padding. Hiding the carousel has to give that
    padding back or the book never grows — only the status line still needs
    clearance. */
-   
+
 [data-pages='off'] .album-stage {
     padding-bottom: 3rem;
 }

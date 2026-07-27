@@ -1,4 +1,4 @@
-import './collection.css';
+import './collections.css';
 import { useQuery } from '@tanstack/react-query';
 import { getCollectionsList } from '../../services/api';
 import CollectionsBackdrop from './components/CollectionsBackdrop';
@@ -8,10 +8,10 @@ import { useCollectionFx } from './useCollectionFx';
 import { useCollectionNight } from './useCollectionNight';
 import FxPanel from './components/FxPanel';
 import { Moon, SlidersHorizontal, Sun } from 'lucide-react';
-import { useState } from 'react';
+import { useDisclosure } from '../../hooks/useDisclosure';
 
 export default function Collection() {
-    const [fxOpen, setFxOpen] = useState(false);
+    const fxPanel = useDisclosure();
     const { fx } = useCollectionFx();
     const fxAttrs = {
         'data-fx-backdrop': fx.backdrop ? 'on' : 'off',
@@ -52,10 +52,11 @@ export default function Collection() {
                             <span className={`font-sans font-semibold text-[16px] italic ${textMuted}`}>{totalStickers ?? '…'} stickers to collect</span>
 
                             <button
+                                id="fx-panel-toggle"
                                 type="button"
-                                onClick={() => setFxOpen((previousOpen) => !previousOpen)}
+                                onClick={fxPanel.toggle}
                                 title="Visual effects"
-                                aria-expanded={fxOpen}
+                                aria-expanded={fxPanel.active}
                                 className={`flex flex-none size-10 cursor-pointer items-center justify-center rounded-full border-2
                                 transition-all duration-150 transform-gpu hover:brightness-110 active:translate-y-0.5 ${night
                                     ? 'border-neon-pink/60 bg-[#1c1f27] text-white shadow-[0_3px_0_rgba(255,51,153,0.6)] active:shadow-[0_1px_0_rgba(255,51,153,0.6)]'
@@ -63,7 +64,15 @@ export default function Collection() {
                             >
                                 <SlidersHorizontal className="w-4.5 h-4.5" strokeWidth={3} />
                             </button>
-                            {fxOpen && <FxPanel night={night} onClose={() => setFxOpen(false)} albumName='Collections' />}
+                            {fxPanel.mounted && (
+                                <FxPanel
+                                    night={night}
+                                    onClose={fxPanel.close}
+                                    albumName='Collections'
+                                    closing={fxPanel.closing}
+                                    {...fxPanel.animationProps}
+                                />
+                            )}
 
                             <button
                                 type="button"

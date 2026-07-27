@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from 'react';
+import { useEffect, useRef, useState, type AnimationEvent } from 'react';
 import { ChevronDown, X } from 'lucide-react';
 import { useCollectionFx } from '../useCollectionFx';
 import type { FxKey } from '../collectionFx';
@@ -7,6 +7,9 @@ interface FxPanelProps {
     night: boolean;
     onClose: () => void;
     albumName?: string;
+    closing: boolean;
+    /** From useDisclosure's animationProps — it owns the unmount and the bubbling guard. */
+    onAnimationEnd: (event: AnimationEvent<Element>) => void;
 }
 
 interface RowSpec {
@@ -16,11 +19,10 @@ interface RowSpec {
 }
 
 const TEXTURE_ROWS: RowSpec[] = [
-    { key: 'backdrop', label: 'Page background' },
-    { key: 'paper', label: 'Album paper' },
+    { key: 'backdrop', label: 'Background paper' },
+    { key: 'textures', label: 'Album textures' },
     { key: 'shadows', label: 'Shadows' },
     { key: 'blur', label: 'Toolbar blur' },
-    { key: 'hq', label: 'High resolution', hint: 'Sharper textures' },
 ];
 
 const MOTION_ROWS: RowSpec[] = [
@@ -163,7 +165,7 @@ function FxGroup({
     );
 }
 
-export default function FxPanel({ night, onClose, albumName }: FxPanelProps) {
+export default function FxPanel({ night, onClose, albumName, closing, onAnimationEnd }: FxPanelProps) {
     const { fx, setFx, setFxGroup, groupOn } = useCollectionFx();
     const panelRef = useRef<HTMLDivElement>(null);
 
@@ -195,21 +197,28 @@ export default function FxPanel({ night, onClose, albumName }: FxPanelProps) {
         ? 'border-neon-pink bg-[#16181e] shadow-[6px_6px_0px_rgba(255,51,153,1)]'
         : 'border-ink bg-[#fffaf3] shadow-[6px_6px_0px_#0a0a0a]';
 
+    const motionClass = closing
+        ? 'collection-sheet-out lg:collection-pop-out'
+        : 'collection-sheet-in lg:collection-pop-in';
+
+    const backdropMotion = closing ? 'collection-backdrop-out' : 'collection-backdrop-in';
+
     return (
         <>
             {/* Phone */}
-            <div className="fixed inset-0 z-250 bg-[#1e141c]/55 lg:hidden" aria-hidden />
+            <div className={`fixed inset-0 z-250 bg-[#1e141c]/55 lg:hidden ${backdropMotion}`} aria-hidden />
 
             <div
                 ref={panelRef}
                 role="dialog"
                 aria-label="Visual effects"
-                className={`fixed inset-x-0 bottom-0 z-260 max-h-[80dvh] overflow-y-auto rounded-t-[20px] border-2 p-4 transition-colors duration-300
-                    lg:absolute lg:inset-x-auto lg:bottom-auto lg:right-3 lg:top-full lg:mt-4 lg:w-64 lg:rounded-[20px] lg:p-3 ${shell}`}
+                onAnimationEnd={onAnimationEnd}
+                className={`fixed inset-x-0 bottom-0 z-260 max-h-[80dvh] overflow-y-auto rounded-t-[20px] border-2 p-4 text-left transition-colors duration-300
+                    lg:absolute lg:inset-x-auto lg:bottom-auto lg:right-3 lg:top-full lg:mt-4 lg:w-64 lg:rounded-[20px] lg:p-3 ${motionClass} ${shell}`}
             >
                 <div className="flex items-start justify-between gap-2.5">
                     <div className="min-w-0">
-                        <p className="text-[10px] uppercase font-bold tracking-[0.20em] text-neon-pink [text-shadow:1px_1px_0px_rgba(0,0,0,1)]">
+                        <p className={`text-[10px] uppercase font-bold tracking-[0.20em] ${night ? 'text-neon-pink' : 'text-[#C62368]'}`}>
                             Visual effects
                         </p>
                         

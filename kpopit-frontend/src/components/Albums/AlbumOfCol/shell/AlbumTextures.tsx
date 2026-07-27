@@ -15,14 +15,9 @@ interface TextureProps {
 const TEXTURE_SIZES = '(max-width: 1023px) 170px, 810px';
 const PAPER_SIZES = '(max-width: 640px) 260px, (max-width: 1023px) 75vw, 1283px';
 
-/** High quality: states the full painted width so the 1200w source wins everywhere. */
-const HQ_TEXTURE_SIZES = '810px';
-const HQ_PAPER_SIZES = '1283px';
-
 /** Two stacked cesira lighting passes (screen blend), full-bleed */
 export function TextureLighting({ className = '' }: TextureProps) {
-    const on = useFx('paper');
-    const hq = useFx('hq');
+    const on = useFx('textures');
 
     const preview = useAlbumPreview();
     if (!on || preview) return null;
@@ -31,7 +26,7 @@ export function TextureLighting({ className = '' }: TextureProps) {
         <img
             src={lightsTextureSrc}
             srcSet={`${lightsTextureSmallSrc} 600w, ${lightsTextureSrc} 1200w`}
-            sizes={hq ? HQ_TEXTURE_SIZES : TEXTURE_SIZES}
+            sizes={TEXTURE_SIZES}
             alt=""
             aria-hidden
             decoding="async"
@@ -42,8 +37,7 @@ export function TextureLighting({ className = '' }: TextureProps) {
 
 /** Particle texture for cover-style pages (multiply) */
 export function GrainParticles({ className = '' }: TextureProps) {
-    const on = useFx('paper');
-    const hq = useFx('hq');
+    const on = useFx('textures');
     const preview = useAlbumPreview();
     if (!on || preview) return null;
 
@@ -51,7 +45,7 @@ export function GrainParticles({ className = '' }: TextureProps) {
         <img
             src={grainParticlesSrc}
             srcSet={`${grainParticlesSmallSrc} 600w, ${grainParticlesSrc} 1200w`}
-            sizes={hq ? HQ_TEXTURE_SIZES : TEXTURE_SIZES}
+            sizes={TEXTURE_SIZES}
             alt=""
             aria-hidden
             decoding="async"
@@ -62,17 +56,16 @@ export function GrainParticles({ className = '' }: TextureProps) {
 
 /** Paper grain for content pages */
 export function PaperGrain({ className = '' }: TextureProps) {
-    const on = useFx('paper');
-    const hq = useFx('hq');
+    const on = useFx('textures');
 
     const preview = useAlbumPreview();
     if (!on || preview) return null;
-    
+
     return (
         <img
             src={paperSrc}
             srcSet={`${paperSmallSrc} 800w, ${paperSrc} 1086w`}
-            sizes={hq ? HQ_PAPER_SIZES : PAPER_SIZES}
+            sizes={PAPER_SIZES}
             alt=""
             aria-hidden
             decoding="async"

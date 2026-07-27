@@ -13,10 +13,11 @@ import CollectionsBackdrop from './components/CollectionsBackdrop';
 import { getAlbumMapping } from './albumMapper';
 import { useCollectionFx } from './useCollectionFx';
 import { useCollectionNight } from './useCollectionNight';
+import { useDisclosure } from '../../hooks/useDisclosure';
 import { getCollectionAlbum, getCollectionsList } from '../../services/api';
 import { useIsLg } from '../../hooks/useIsDevice';
 import type { AlbumGroup } from '../../interfaces/albumInterfaces';
-import './collection.css';
+import './collections.css';
 
 function SideArrow({ direction, disabled, onClick, night }: { direction: -1 | 1; disabled: boolean; onClick: () => void; night: boolean }) {
     const Icon = direction < 0 ? ChevronLeft : ChevronRight;
@@ -108,13 +109,12 @@ export default function CollectionAlbum() {
     } as const;
 
     const [night, setNight] = useCollectionNight();
-    const [railOpen, setRailOpen] = useState(true);
-    const [railClosing, setRailClosing] = useState(false);
-    const [indexOpen, setIndexOpen] = useState(false);
-    const [infoOpen, setInfoOpen] = useState(false);
-    const [fxOpen, setFxOpen] = useState(false);
-    const [carouselOpen, setCarouselOpen] = useState(true);
-    const pagesAttr = { 'data-pages': carouselOpen ? 'on' : 'off' } as const;
+    const rail = useDisclosure(true);
+    const carousel = useDisclosure(true);
+    const index = useDisclosure();
+    const info = useDisclosure();
+    const fxPanel = useDisclosure();
+    const pagesAttr = { 'data-pages': carousel.mounted ? 'on' : 'off' } as const;
     const [query, setQuery] = useState('');
     const [book, setBook] = useState<AlbumBookInit | null>(null);
     const [shown, setShown] = useState({ pos: 0, flipping: false });
@@ -166,10 +166,11 @@ export default function CollectionAlbum() {
     const jumpToGroup = useCallback(
         (groupId: number) => {
             const groupSpread = book?.groupSpreads.find((spread) => spread.group_id === groupId);
+
             if (groupSpread) controls.current?.jumpTo(groupSpread.pos);
-            setIndexOpen(false);
+            index.close();
         },
-        [book],
+        [book, index],
     );
 
     if (!validId || (isError && isAxiosError(error) && error.response?.status === 404)) {
@@ -178,19 +179,10 @@ export default function CollectionAlbum() {
     if (isLoading) return <CollectionStatus message="Opening the album…" />;
     if (isError || !groups) return <CollectionStatus message="Couldn't load the album. Please try again later." />;
 
-    const toggleSummary = () => {
-        if (!isLg) {
-            setIndexOpen(true);
-            return;
-        }
-        if (railOpen && !railClosing) {
-            setRailClosing(true);
-        } else {
-            setRailClosing(false);
-            setRailOpen(true);
-        }
-    };
-    const summaryActive = railOpen && !railClosing;
+    // Below lg: the summary is a modal instead of a rail, so the button opens that.
+    const toggleSummary = () => (isLg ? rail.toggle() : index.open());
+    const summaryActive = rail.active;
+    const carouselActive = carousel.active;
     const pillClasses = BtnClasses(night);
 
     return (
@@ -237,12 +229,12 @@ export default function CollectionAlbum() {
 
                         <button
                             type="button"
-                            onClick={() => setCarouselOpen((previousOpen) => !previousOpen)}
-                            title={carouselOpen ? 'Hide pages' : 'Show pages'}
-                            aria-expanded={carouselOpen}
-                            className={`inline-flex flex-row justify-center items-center max-zm:w-10 h-10 cursor-pointer gap-1.5 rounded-full 
+                            onClick={carousel.toggle}
+                            title={carouselActive ? 'Hide pages' : 'Show pages'}
+                            aria-expanded={carouselActive}
+                            className={`inline-flex flex-row justify-center items-center max-zm:w-10 h-10 cursor-pointer gap-1.5 rounded-full
                             border-2 zm:px-3.25 zm:py-2 font-sans text-[14px] font-bold ${pillClasses} ${
-                                carouselOpen
+                                carouselActive
                                     ? night
                                         ? 'lg:border-neon-pink lg:bg-ink'
                                         : 'lg:border-ink lg:bg-neon-pink'
@@ -260,18 +252,24 @@ export default function CollectionAlbum() {
                     <div className="relative flex items-center gap-2">
                         <IconBtn
                             id="fx-panel-toggle"
-                            onClick={() => setFxOpen((previousOpen) => !previousOpen)}
+                            onClick={fxPanel.toggle}
                             title="Visual effects"
                             night={night}
                         >
                             <SlidersHorizontal className="w-4.5 h-4.5" strokeWidth={3} />
                         </IconBtn>
-                        
-                        {fxOpen && (
-                            <FxPanel night={night} onClose={() => setFxOpen(false)} albumName={collectionName} />
+
+                        {fxPanel.mounted && (
+                            <FxPanel
+                                night={night}
+                                onClose={fxPanel.close}
+                                albumName={collectionName}
+                                closing={fxPanel.closing}
+                                {...fxPanel.animationProps}
+                            />
                         )}
 
-                        <IconBtn onClick={() => setInfoOpen(true)} title="Info" night={night}>
+                        <IconBtn onClick={info.open} title="Info" night={night}>
                             <Info className="w-4.5 h-4.5" strokeWidth={3} />
                         </IconBtn>
 
@@ -289,16 +287,11 @@ export default function CollectionAlbum() {
 
                 {/* Body */}
                 <div className="flex min-h-0 flex-1">
-                    {isLg && railOpen && (
+                    {isLg && rail.mounted && (
                         <aside
-                            onAnimationEnd={() => {
-                                if (railClosing) {
-                                    setRailOpen(false);
-                                    setRailClosing(false);
-                                }
-                            }}
+                            {...rail.animationProps}
                             className={`flex z-10 mb-3 ml-4.5 mt-1 w-64.5 flex-none flex-col rounded-2xl border-2 px-4.5 py-4.5 transform-gpu transition-colors duration-300 ${
-                            railClosing ? 'collection-rail-out' : 'collection-rail-in'
+                            rail.closing ? 'collection-rail-out' : 'collection-rail-in'
                             } ${
                                 night
                                     ? 'border-neon-pink/40 bg-[#14161c]/85 shadow-[4px_4px_0px_rgba(255,51,153,0.8)]'
@@ -329,7 +322,7 @@ export default function CollectionAlbum() {
                                 controlRef={controls}
                                 onPosChange={onPosChange}
                                 onBookInit={onBookInit}
-                                keysDisabled={infoOpen || indexOpen || fxOpen}
+                                keysDisabled={info.mounted || index.mounted || fxPanel.mounted}
                             />
                         </div>
 
@@ -343,16 +336,21 @@ export default function CollectionAlbum() {
                                     : `${currentGroup ? `${currentGroup.group_name.toUpperCase()} · ` : ''} Page ${Math.min(shown.pos, spreadCount)}/${spreadCount}`}
                             </p>
 
-                            {carouselOpen && openings.length > 0 && (
-                                <AlbumPageCarousel
-                                    openings={openings}
-                                    shown={shown.pos}
-                                    onJump={jumpToPos}
-                                    onStep={stepBy}
-                                    canPrev={!frontClosed && !shown.flipping}
-                                    canNext={!backClosed && !shown.flipping}
-                                    night={night}
-                                />
+                            {carousel.mounted && openings.length > 0 && (
+                                <div
+                                    {...carousel.animationProps}
+                                    className={carousel.closing ? 'collection-chrome-out' : 'collection-chrome-in'}
+                                >
+                                    <AlbumPageCarousel
+                                        openings={openings}
+                                        shown={shown.pos}
+                                        onJump={jumpToPos}
+                                        onStep={stepBy}
+                                        canPrev={!frontClosed && !shown.flipping}
+                                        canNext={!backClosed && !shown.flipping}
+                                        night={night}
+                                    />
+                                </div>
                             )}
                         </div>
 
@@ -368,14 +366,19 @@ export default function CollectionAlbum() {
                 </div>
 
                 {/* Mobile index modal */}
-                {indexOpen && (
+                {index.mounted && (
                     <div
-                        onClick={() => setIndexOpen(false)}
-                        className="fixed inset-0 z-200 flex items-center justify-center bg-[#1e141c]/50 px-4 py-8"
+                        onClick={index.close}
+                        className={`fixed inset-0 z-200 flex items-center justify-center bg-[#1e141c]/50 px-4 py-8 ${
+                            index.closing ? 'collection-backdrop-out' : 'collection-backdrop-in'
+                        }`}
                     >
                         <div
                             onClick={(event) => event.stopPropagation()}
+                            {...index.animationProps}
                             className={`flex max-h-[85dvh] min-h-0 w-[min(420px,100%)] flex-col rounded-[18px] border-2 p-5 transition-colors duration-300 ${
+                                index.closing ? 'collection-modal-out' : 'collection-modal-in'
+                            } ${
                                 night ? 'border-white/12 bg-[#16181e] shadow-[0_30px_80px_rgba(0,0,0,0.4)]' : 'border-ink bg-[#fffaf3] shadow-[6px_6px_0px_#0a0a0a]'
                             }`}
                         >
@@ -393,7 +396,15 @@ export default function CollectionAlbum() {
                 )}
 
                 {/* Mobile info modal */}
-                {infoOpen && <AlbumInfoModal onClose={() => setInfoOpen(false)} night={night} collectionName={collectionName} />}
+                {info.mounted && (
+                    <AlbumInfoModal
+                        onClose={info.close}
+                        night={night}
+                        collectionName={collectionName}
+                        closing={info.closing}
+                        {...info.animationProps}
+                    />
+                )}
             </div>
         </div>
     );

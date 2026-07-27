@@ -1,9 +1,13 @@
+import type { AnimationEvent } from 'react';
 import { X, BookOpenText, Layers, Sticker, Smartphone } from 'lucide-react';
 
 interface AlbumInfoModalProps {
     collectionName?: string;
     onClose: () => void;
     night: boolean;
+    closing: boolean;
+    /** From useDisclosure's animationProps — it owns the unmount and the bubbling guard. */
+    onAnimationEnd: (event: AnimationEvent<Element>) => void;
 }
 
 const INFO_ROWS = [
@@ -30,15 +34,19 @@ const INFO_ROWS = [
 ];
 
 export default function AlbumInfoModal(props: AlbumInfoModalProps) {
-    const { onClose, night, collectionName } = props;
+    const { onClose, night, collectionName, closing, onAnimationEnd } = props;
+    const backdropMotion = closing ? 'collection-backdrop-out' : 'collection-backdrop-in';
+    const modalMotion = closing ? 'collection-modal-out' : 'collection-modal-in';
+    
     return (
         <div
             onClick={onClose}
-            className="fixed inset-0 z-260 flex items-center justify-center bg-[#1e141c]/55 p-4.5 backdrop-blur-xs"
+            className={`fixed inset-0 z-260 flex items-center justify-center bg-[#1e141c]/55 p-4.5 backdrop-blur-xs ${backdropMotion}`}
         >
             <div
                 onClick={(event) => event.stopPropagation()}
-                className={`max-h-[84vh] w-[min(440px,100%)] overflow-y-auto rounded-[20px] border-2 p-6 transition-colors duration-300 ${
+                onAnimationEnd={onAnimationEnd}
+                className={`max-h-[84vh] w-[min(440px,100%)] overflow-y-auto rounded-[20px] border-2 p-6 transition-colors duration-300 ${modalMotion} ${
                     night ? 'border-neon-pink bg-[#16181e] shadow-[6px_6px_0px_rgba(255,51,153,1)]' : 'border-ink bg-[#fffaf3] shadow-[6px_6px_0px_#0a0a0a]'
                 }`}
             >

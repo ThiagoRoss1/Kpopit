@@ -9,7 +9,7 @@ export function useCollectionFx() {
     const fx = useSyncExternalStore(subscribeFx, getFxSnapshot, getFxSnapshot);
 
     const groupOn = useCallback((group: 'texture' | 'motion') => {
-        return FX_GROUPS[group].some((key) => (key === 'hq' ? false : fx[key]));
+        return FX_GROUPS[group].some((key) => fx[key]);
     }, [fx]);
 
     return { fx, setFx, setFxGroup, groupOn };
