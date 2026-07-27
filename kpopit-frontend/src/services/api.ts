@@ -7,7 +7,7 @@ import { setAccessToken, getAccessToken, clearAccessToken } from './tokenStore';
 import { safeReload } from '../utils/safeReload';
 // Api instance with base URL
 const api = axios.create({
-    baseURL: `${import.meta.env.VITE_API_URL}/api`,
+    baseURL: import.meta.env.DEV ? '/api' : `${import.meta.env.VITE_API_URL}/api`,
     withCredentials: true,
     timeout: 15000,
 });
