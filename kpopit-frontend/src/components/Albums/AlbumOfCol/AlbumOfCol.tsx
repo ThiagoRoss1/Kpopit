@@ -74,7 +74,8 @@ function buildInteriorPages(groups: AlbumGroup[], stats: AlbumStats) {
     const groupSpreads: AlbumGroupSpread[] = [];
     for (const group of groups) {
         groupSpreads.push({ group_id: group.group_id, pos: interiorPages.length / 2 + 1 });
-        interiorPages.push(...buildGroupPages(group, stats, interiorPages.length));
+        const pages = buildGroupPages(group, stats, interiorPages.length);
+        interiorPages.push(...pages);
     }
     return { interiorPages, groupSpreads };
 }
@@ -294,7 +295,7 @@ function AlbumOfCol({ groups, controlRef, onPosChange, onBookInit, keysDisabled 
 
     return (
         <div
-            className="album-level-clock flex h-full min-h-0 w-full flex-col items-center px-3 pb-28 pt-3"
+            className="album-level-clock album-stage flex h-full min-h-0 w-full flex-col items-center px-3 pb-28 pt-3"
         >
             <div ref={stageRef} className="flex min-h-0 w-full flex-1 items-center justify-center">
                 <div className="album-perspective album-zoom-in transform-gpu">
@@ -309,18 +310,18 @@ function AlbumOfCol({ groups, controlRef, onPosChange, onBookInit, keysDisabled 
                         <div className="absolute left-0 top-0 origin-top-left" style={{ transform: `scale(${scale})` }}>
                             <div className="relative" style={{ width: ALBUM_PAGE_W * 2, height: ALBUM_PAGE_H }}>
                                 {leftPage != null && (
-                                    <div className="absolute left-0 top-0 h-225 w-150 overflow-hidden shadow-[inset_-14px_0_26px_-12px_rgba(24,16,25,0.32)]">
+                                    <div className="album-page-shadow absolute left-0 top-0 h-225 w-150 overflow-hidden shadow-[inset_-14px_0_26px_-12px_rgba(24,16,25,0.32)]">
                                         {leftPage}
                                     </div>
                                 )}
                                 {rightPage != null && (
-                                    <div className="absolute left-150 top-0 h-225 w-150 overflow-hidden shadow-[inset_14px_0_26px_-12px_rgba(24,16,25,0.32)]">
+                                    <div className="album-page-shadow absolute left-150 top-0 h-225 w-150 overflow-hidden shadow-[inset_14px_0_26px_-12px_rgba(24,16,25,0.32)]">
                                         {rightPage}
                                     </div>
                                 )}
                                 {/* Spine shading over the page seam */}
                                 {!frontClosed && !backClosed && (
-                                    <div className="pointer-events-none absolute top-0 left-148.25 z-40 h-225 w-3.5
+                                    <div className="album-spine-shade pointer-events-none absolute top-0 left-148.25 z-40 h-225 w-3.5
                                     bg-[linear-gradient(90deg,transparent,rgba(20,12,22,0.45)_50%,transparent)]" />
                                 )}
                                 {flip && (

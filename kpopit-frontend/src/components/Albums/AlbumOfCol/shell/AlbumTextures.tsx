@@ -1,23 +1,37 @@
 /** Shared texture layers for the AlbumOfCol component. */
+import { useFx } from '../../../../pages/Collection/useCollectionFx';
+import { useAlbumPreview } from '../albumPreview';
 import lightsTextureSrc from '../../../../assets/materials/AlbumOfCol/lightstexture.jpg';
 import lightsTextureSmallSrc from '../../../../assets/materials/AlbumOfCol/lightstexture-600w.jpg';
 import grainParticlesSrc from '../../../../assets/materials/AlbumOfCol/particlestexture.jpg';
 import grainParticlesSmallSrc from '../../../../assets/materials/AlbumOfCol/particlestexture-600w.jpg';
 import paperSrc from '../../../../assets/materials/AlbumOfCol/papertexture.jpg';
+import paperSmallSrc from '../../../../assets/materials/AlbumOfCol/papertexture-800w.jpg';
 
 interface TextureProps {
     className?: string;
 }
 
 const TEXTURE_SIZES = '(max-width: 1023px) 170px, 810px';
+const PAPER_SIZES = '(max-width: 640px) 260px, (max-width: 1023px) 75vw, 1283px';
+
+/** High quality: states the full painted width so the 1200w source wins everywhere. */
+const HQ_TEXTURE_SIZES = '810px';
+const HQ_PAPER_SIZES = '1283px';
 
 /** Two stacked cesira lighting passes (screen blend), full-bleed */
 export function TextureLighting({ className = '' }: TextureProps) {
+    const on = useFx('paper');
+    const hq = useFx('hq');
+
+    const preview = useAlbumPreview();
+    if (!on || preview) return null;
+
     return (
         <img
             src={lightsTextureSrc}
             srcSet={`${lightsTextureSmallSrc} 600w, ${lightsTextureSrc} 1200w`}
-            sizes={TEXTURE_SIZES}
+            sizes={hq ? HQ_TEXTURE_SIZES : TEXTURE_SIZES}
             alt=""
             aria-hidden
             decoding="async"
@@ -28,11 +42,16 @@ export function TextureLighting({ className = '' }: TextureProps) {
 
 /** Particle texture for cover-style pages (multiply) */
 export function GrainParticles({ className = '' }: TextureProps) {
+    const on = useFx('paper');
+    const hq = useFx('hq');
+    const preview = useAlbumPreview();
+    if (!on || preview) return null;
+
     return (
         <img
             src={grainParticlesSrc}
             srcSet={`${grainParticlesSmallSrc} 600w, ${grainParticlesSrc} 1200w`}
-            sizes={TEXTURE_SIZES}
+            sizes={hq ? HQ_TEXTURE_SIZES : TEXTURE_SIZES}
             alt=""
             aria-hidden
             decoding="async"
@@ -41,11 +60,19 @@ export function GrainParticles({ className = '' }: TextureProps) {
     );
 }
 
-/** Paper grain for content pages (multiply, rotated like the Figma frames) */
+/** Paper grain for content pages */
 export function PaperGrain({ className = '' }: TextureProps) {
+    const on = useFx('paper');
+    const hq = useFx('hq');
+
+    const preview = useAlbumPreview();
+    if (!on || preview) return null;
+    
     return (
         <img
             src={paperSrc}
+            srcSet={`${paperSmallSrc} 800w, ${paperSrc} 1086w`}
+            sizes={hq ? HQ_PAPER_SIZES : PAPER_SIZES}
             alt=""
             aria-hidden
             decoding="async"
@@ -57,6 +84,6 @@ export function PaperGrain({ className = '' }: TextureProps) {
 /** Hardcover inset frame shadow, painted last on cover-style pages */
 export function CoverInsetShadow() {
     return (
-        <div aria-hidden className="pointer-events-none absolute inset-0 shadow-[inset_0px_4px_6px_0px_rgba(0,0,0,0.6),inset_-4px_-4px_6px_0px_rgba(0,0,0,0.6)]" />
+        <div aria-hidden className="album-cover-inset pointer-events-none absolute inset-0 shadow-[inset_0px_4px_6px_0px_rgba(0,0,0,0.6),inset_-4px_-4px_6px_0px_rgba(0,0,0,0.6)]" />
     );
 }

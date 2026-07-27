@@ -29,7 +29,7 @@ function BookCover({ album }: { album: ThemedAlbumPreview }) {
 export function ThemedCard({ album, night }: { album: ThemedAlbumPreview; night: boolean }) {
     return (
         <div
-            className={`relative rounded-2xl border-2 p-3 opacity-80 transition-colors duration-300 ${
+            className={`relative rounded-2xl border-2 p-3 transition-colors duration-300 ${
                 night
                     ? 'border-white/10 bg-[#16181e] shadow-[0_14px_34px_-14px_rgba(0,0,0,0.7)]'
                     : 'border-ink bg-white shadow-[4px_4px_0px_#0a0a0a]'

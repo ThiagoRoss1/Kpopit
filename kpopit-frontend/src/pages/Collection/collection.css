@@ -20,12 +20,6 @@
     backface-visibility: hidden;
 }
 
-.collections__behavior {
-    height: 100%;
-    min-height: 100vh;
-    max-height: 100lvh;
-}
-
 @keyframes collections-shimmer {
     0% {
         background-position: -200% 0;
@@ -155,4 +149,66 @@
         transition: none;
         transform: translateX(-140%);
     }
+}
+
+/* - Visual-effects panel -
+   Attribute rules rather than props on purpose: flipping one of these
+   re-renders exactly nothing in React, which is what lets the book and the
+   carousel keep their memo. The <img> textures are the deliberate exception,
+   they unmount from the leaf (see AlbumTextures.tsx), because there the point
+   is bitmap memory and `display:none` frees none of it. */
+
+[data-fx-sparkles='off'] .collections-drift,
+[data-fx-sparkles='off'] .collections-twinkle {
+    animation: none;
+}
+
+[data-fx-lv2='off'] .album-gold-sheen {
+    animation: none;
+    opacity: 0;
+}
+
+[data-fx-lv3='off'] .album-holo-foil,
+[data-fx-lv3='off'] .album-holo-glare,
+[data-fx-lv3='off'] .album-holo-overlay {
+    animation: none;
+}
+
+/* The clock drives --album-shimmer and --album-sheen, which feed BOTH LV2 and
+   LV3, and it is the clock — not the effects — that forces an inherited style
+   recalc across the whole book every frame. So it can only stop when neither
+   level is using it; killing it for one switch alone would freeze the other
+   level at a random value. Turning one switch off is a visual choice; turning
+   both off is the one that buys frame time. */
+
+[data-fx-lv2='off'][data-fx-lv3='off'] .album-level-clock {
+    animation: none;
+}
+
+/* Two of these hooks sit on elements that also carry page content (the page
+   slots wrap {leftPage}/{rightPage}), so the effect has to be removed by the
+   property that draws it — `display: none` there would hide the page itself.
+   The spine shade is a standalone gradient element with no children, so it
+   goes away entirely. */
+
+[data-fx-shadows='off'] .album-page-shadow,
+[data-fx-shadows='off'] .album-cover-inset {
+    box-shadow: none;
+}
+
+[data-fx-shadows='off'] .album-spine-shade {
+    display: none;
+}
+
+[data-fx-blur='off'] .collections-chrome-blur {
+    backdrop-filter: none;
+}
+
+/* The status + carousel block is absolutely positioned, so the stage reserves
+   its room with static bottom padding. Hiding the carousel has to give that
+   padding back or the book never grows — only the status line still needs
+   clearance. */
+   
+[data-pages='off'] .album-stage {
+    padding-bottom: 3rem;
 }

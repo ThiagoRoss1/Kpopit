@@ -1,3 +1,4 @@
+import { useFx } from '../useCollectionFx';
 import paperSrc from '../../../assets/materials/AlbumOfCol/crumpled_paper-baked.jpg';
 
 // Collection's background components
@@ -64,11 +65,17 @@ function BaseSheet({ night }: { night: boolean }) {
 /** The sheet's texture: subtle paper creases by day, a halftone dot grid by
  *  night (which reads cleaner under the neon). */
 function SheetTexture({ night }: { night: boolean }) {
+    const on = useFx('backdrop');
+
     if (night) {
         return (
             <div className="absolute inset-0 bg-size-[19px_19px] bg-[radial-gradient(rgba(255,255,255,0.05)_1.4px,transparent_1.4px)]" />
         );
     }
+
+    // Only remove the paper texture, avoiding to remove the night halftone, when the backdrop effect is off.
+    if (!on) return null;
+
     return (
         <img
             src={paperSrc}

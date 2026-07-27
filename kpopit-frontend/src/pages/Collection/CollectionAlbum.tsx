@@ -2,17 +2,19 @@ import { useCallback, useMemo, useRef, useState } from 'react';
 import { Link, useParams } from 'react-router-dom';
 import { useQuery } from '@tanstack/react-query';
 import { isAxiosError } from 'axios';
-import { ChevronLeft, ChevronRight, Info, Menu, Moon, Sun } from 'lucide-react';
+import { ChevronLeft, ChevronRight, GalleryVerticalEnd, Info, Menu, Moon, SlidersHorizontal, Sun } from 'lucide-react';
 import AlbumOfCol, { type AlbumBookInit, type AlbumGroupSpread, type AlbumOfColControls } from '../../components/Albums/AlbumOfCol/AlbumOfCol';
-import { COVER_PALETTE } from '../../components/Albums/AlbumOfCol/albumConstants';
 import CollectionStatus from './components/CollectionStatus';
 import AlbumPageIndex from './components/AlbumPageIndex';
 import AlbumPageCarousel, { type AlbumOpening } from './components/AlbumPageCarousel';
 import AlbumInfoModal from './components/AlbumInfoModal';
+import FxPanel from './components/FxPanel';
 import CollectionsBackdrop from './components/CollectionsBackdrop';
 import { getAlbumMapping } from './albumMapper';
+import { useCollectionFx } from './useCollectionFx';
 import { useCollectionNight } from './useCollectionNight';
 import { getCollectionAlbum, getCollectionsList } from '../../services/api';
+import { useIsLg } from '../../hooks/useIsDevice';
 import type { AlbumGroup } from '../../interfaces/albumInterfaces';
 import './collection.css';
 
@@ -31,7 +33,8 @@ function SideArrow({ direction, disabled, onClick, night }: { direction: -1 | 1;
             onClick={onClick}
             disabled={disabled}
             aria-label={direction < 0 ? 'Previous page' : 'Next page'}
-            className={`absolute top-1/2 z-95 hidden size-12 -translate-y-1/2 items-center justify-center rounded-full border-2 transition-all duration-300 transform-gpu md:flex xl:size-14 ${
+            className={`absolute top-1/2 z-20 hidden size-12 -translate-y-1/2 items-center justify-center rounded-full border-2 transition-all duration-300 
+            transform-gpu md:flex xl:size-14 ${
             direction < 0 ? 'left-[clamp(8px,2vw,26px)]' : 'right-[clamp(8px,2vw,26px)] hover:scale-105 active:shadow-[0px_0px_0px_rgba(255,51,153,1)] active:scale-100'
             } ${disabled ? `cursor-default bg-transparent opacity-45 ${disabledStyle}` : `cursor-pointer ${enabledStyle}`}`}
         >
@@ -47,9 +50,10 @@ const BtnClasses = (night: boolean) =>
             : 'border-ink bg-white text-ink shadow-[0_3px_0_var(--color-ink)] active:shadow-[0_1px_0_var(--color-ink)]'
     }`;
 
-function IconBtn({ children, onClick, title, night, className = '' }: { children: React.ReactNode; onClick: () => void; title: string; night: boolean; className?: string }) {
+function IconBtn({ children, id, onClick, title, night, className = '' }: { children: React.ReactNode; onClick: () => void; id?: string; title: string; night: boolean; className?: string }) {
     return (
         <button
+            id={id}
             type="button"
             onClick={onClick}
             title={title}
@@ -72,6 +76,8 @@ function groupIdAt(pos: number, spreadCount: number, groupSpreads: AlbumGroupSpr
 export default function CollectionAlbum() {
     const { collectionId } = useParams();
 
+    const isLg = useIsLg();
+
     const parsedId = Number(collectionId);
     const validId = Number.isInteger(parsedId) && parsedId > 0;
 
@@ -90,11 +96,25 @@ export default function CollectionAlbum() {
         collections?.find((collection) => collection.collection_id === parsedId)?.name ??
         `Album ${validId ? parsedId : ''}`.trim();
 
+    const { fx } = useCollectionFx();
+
+    const fxAttrs = {
+        'data-fx-backdrop': fx.backdrop ? 'on' : 'off',
+        'data-fx-sparkles': fx.sparkles ? 'on' : 'off',
+        'data-fx-shadows': fx.shadows ? 'on' : 'off',
+        'data-fx-blur': fx.blur ? 'on' : 'off',
+        'data-fx-lv2': fx.lv2 ? 'on' : 'off',
+        'data-fx-lv3': fx.lv3 ? 'on' : 'off',
+    } as const;
+
     const [night, setNight] = useCollectionNight();
     const [railOpen, setRailOpen] = useState(true);
     const [railClosing, setRailClosing] = useState(false);
     const [indexOpen, setIndexOpen] = useState(false);
     const [infoOpen, setInfoOpen] = useState(false);
+    const [fxOpen, setFxOpen] = useState(false);
+    const [carouselOpen, setCarouselOpen] = useState(true);
+    const pagesAttr = { 'data-pages': carouselOpen ? 'on' : 'off' } as const;
     const [query, setQuery] = useState('');
     const [book, setBook] = useState<AlbumBookInit | null>(null);
     const [shown, setShown] = useState({ pos: 0, flipping: false });
@@ -127,14 +147,14 @@ export default function CollectionAlbum() {
                 pos: position,
                 accent: group?.palette.main ?? accent,
                 pageCount: rightPage != null ? 2 : 1,
-                palette: group?.palette ?? COVER_PALETTE,
+                nodes: book.spreads[spreadIndex],
             };
         });
 
         return [
-            { pos: 0, accent, pageCount: 1, palette: COVER_PALETTE },
+            { pos: 0, accent, pageCount: 1, nodes: [book.frontCover, null] },
             ...spreadOpenings,
-            { pos: book.spreadCount + 1, accent, pageCount: 1, palette: COVER_PALETTE },
+            { pos: book.spreadCount + 1, accent, pageCount: 1, nodes: [book.backCover, null] },
         ];
     }, [book, groups, accent]);
 
@@ -159,8 +179,7 @@ export default function CollectionAlbum() {
     if (isError || !groups) return <CollectionStatus message="Couldn't load the album. Please try again later." />;
 
     const toggleSummary = () => {
-        const isDesktop = window.matchMedia('(min-width: 1024px)').matches;
-        if (!isDesktop) {
+        if (!isLg) {
             setIndexOpen(true);
             return;
         }
@@ -178,8 +197,12 @@ export default function CollectionAlbum() {
         <div className="collections min-h-full w-full">
             <div className="collections__bg" aria-hidden="true" />
         
-            <div className={`collections__behavior collections-root -mx-2 sm:-mx-4 flex h-[calc(100dvh-48px)] sm:h-[calc(100dvh-60px)] flex-col
-            overflow-hidden transition-colors duration-300 ${night ? 'text-white' : 'text-[#3c2f38]'}`}>
+            <div
+                className={`collections-root -mx-2 sm:-mx-4 flex h-[calc(100svh-48px)] sm:h-[calc(100svh-60px)] flex-col
+            overflow-hidden transition-colors duration-300 ${night ? 'text-white' : 'text-[#3c2f38]'}`}
+                {...fxAttrs}
+                {...pagesAttr}
+            >
                 <CollectionsBackdrop night={night} />
 
                 {/* Top bar */}
@@ -197,7 +220,8 @@ export default function CollectionAlbum() {
                             type="button"
                             onClick={toggleSummary}
                             title={summaryActive ? 'Hide summary' : 'Show summary'}
-                            className={`inline-flex h-10 cursor-pointer items-center gap-1.5 rounded-full border-[1.5px] px-3.25 py-2 font-sans text-[14px] font-bold ${pillClasses} ${
+                            className={`inline-flex flex-row justify-center items-center max-zm:w-10 h-10 cursor-pointer gap-1.5 rounded-full 
+                            border-2 zm:px-3.25 zm:py-2 font-sans text-[14px] font-bold ${pillClasses} ${
                                 summaryActive 
                                 ? night 
                                     ? 'lg:border-neon-pink lg:bg-ink' 
@@ -207,29 +231,65 @@ export default function CollectionAlbum() {
                                     : 'lg:text-ink'
                             }`}
                         >
-                            <Menu className="w-4 h-4" strokeWidth={3} /> Summary
+                            <Menu className="max-zm:w-4.5 max-zm:h-4.5 zm:w-4 zm:h-4" strokeWidth={3} /> 
+                            <span className="max-zm:hidden">Summary</span>
+                        </button>
+
+                        <button
+                            type="button"
+                            onClick={() => setCarouselOpen((previousOpen) => !previousOpen)}
+                            title={carouselOpen ? 'Hide pages' : 'Show pages'}
+                            aria-expanded={carouselOpen}
+                            className={`inline-flex flex-row justify-center items-center max-zm:w-10 h-10 cursor-pointer gap-1.5 rounded-full 
+                            border-2 zm:px-3.25 zm:py-2 font-sans text-[14px] font-bold ${pillClasses} ${
+                                carouselOpen
+                                    ? night
+                                        ? 'lg:border-neon-pink lg:bg-ink'
+                                        : 'lg:border-ink lg:bg-neon-pink'
+                                    : night
+                                        ? 'lg:text-white'
+                                        : 'lg:text-ink'
+                            }`}
+                        >
+                            <GalleryVerticalEnd className="max-zm:w-4.5 max-zm:h-4.5 zm:w-4 zm:h-4" strokeWidth={3} />
+                            <span className="max-zm:hidden">Pages</span>
                         </button>
                     </div>
                     
-                    {/* Info Button */}
-                    <div className="flex items-center gap-2">
+                    {/* Effects / Info / Night */}
+                    <div className="relative flex items-center gap-2">
+                        <IconBtn
+                            id="fx-panel-toggle"
+                            onClick={() => setFxOpen((previousOpen) => !previousOpen)}
+                            title="Visual effects"
+                            night={night}
+                        >
+                            <SlidersHorizontal className="w-4.5 h-4.5" strokeWidth={3} />
+                        </IconBtn>
+                        
+                        {fxOpen && (
+                            <FxPanel night={night} onClose={() => setFxOpen(false)} albumName={collectionName} />
+                        )}
+
                         <IconBtn onClick={() => setInfoOpen(true)} title="Info" night={night}>
                             <Info className="w-4.5 h-4.5" strokeWidth={3} />
                         </IconBtn>
+
                         <IconBtn
                             onClick={() => setNight((previousNight) => !previousNight)}
                             title="Light/night mode"
                             night={night}
                             className="collections-toggle-sweep relative overflow-hidden"
                         >
-                            {night ? <Moon className="size-4.5" strokeWidth={2.25} /> : <Sun className="size-4.5" strokeWidth={2.25} />}
+                            {night ? <Moon className="w-4.5 h-4.5" strokeWidth={2.25} /> : <Sun className="w-4.5 h-4.5" strokeWidth={2.25} />}
                         </IconBtn>
                     </div>
+                    
                 </header>
 
                 {/* Body */}
                 <div className="flex min-h-0 flex-1">
-                    {railOpen && (
+                    {isLg && railOpen && (
                         <aside
                             onAnimationEnd={() => {
                                 if (railClosing) {
@@ -237,8 +297,8 @@ export default function CollectionAlbum() {
                                     setRailClosing(false);
                                 }
                             }}
-                            className={`z-10 mb-3 ml-3 mt-1 hidden w-64.5 flex-none flex-col rounded-2xl border-2 px-4.5 py-4.5 transform-gpu transition-colors duration-300 lg:flex ${
-                                railClosing ? 'collection-rail-out' : 'collection-rail-in'
+                            className={`flex z-10 mb-3 ml-4.5 mt-1 w-64.5 flex-none flex-col rounded-2xl border-2 px-4.5 py-4.5 transform-gpu transition-colors duration-300 ${
+                            railClosing ? 'collection-rail-out' : 'collection-rail-in'
                             } ${
                                 night
                                     ? 'border-neon-pink/40 bg-[#14161c]/85 shadow-[4px_4px_0px_rgba(255,51,153,0.8)]'
@@ -269,7 +329,7 @@ export default function CollectionAlbum() {
                                 controlRef={controls}
                                 onPosChange={onPosChange}
                                 onBookInit={onBookInit}
-                                keysDisabled={infoOpen || indexOpen}
+                                keysDisabled={infoOpen || indexOpen || fxOpen}
                             />
                         </div>
 
@@ -283,7 +343,7 @@ export default function CollectionAlbum() {
                                     : `${currentGroup ? `${currentGroup.group_name.toUpperCase()} · ` : ''} Page ${Math.min(shown.pos, spreadCount)}/${spreadCount}`}
                             </p>
 
-                            {openings.length > 0 && (
+                            {carouselOpen && openings.length > 0 && (
                                 <AlbumPageCarousel
                                     openings={openings}
                                     shown={shown.pos}
@@ -298,7 +358,7 @@ export default function CollectionAlbum() {
 
                         {/* Mobile: rotate-phone hint */}
                         <div
-                            className={`absolute left-1/2 top-3.5 z-12 hidden -translate-x-1/2 items-center gap-1.75 whitespace-nowrap rounded-full border-[1.5px] px-3.25 py-1.75 font-sans text-[11px] font-bold backdrop-blur-md transition-colors duration-300 max-md:portrait:flex ${
+                            className={`collections-chrome-blur absolute left-1/2 top-3.5 z-12 hidden -translate-x-1/2 items-center gap-1.75 whitespace-nowrap rounded-full border-[1.5px] px-3.25 py-1.75 font-sans text-[11px] font-bold backdrop-blur-md transition-colors duration-300 max-md:portrait:flex ${
                                 night ? 'border-white/12 bg-[#16181e]/72 text-white' : 'border-[#3c2f38]/20 bg-[#fffcf6]/88 text-[#3c2f38]'
                             }`}
                         >
