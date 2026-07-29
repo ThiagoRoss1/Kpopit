@@ -118,7 +118,7 @@ function useDragScroll(ref: React.RefObject<HTMLDivElement | null>) {
 export default function AlbumPageCarousel({ openings, shown, onJump, onStep, canPrev, canNext, night }: AlbumPageCarouselProps) {
     const railRef = useRef<HTMLDivElement>(null);
     const dragHandlers = useDragScroll(railRef);
-    
+
     useEffect(() => {
         const rail = railRef.current;
         if (!rail) return;
@@ -128,7 +128,7 @@ export default function AlbumPageCarousel({ openings, shown, onJump, onStep, can
 
     return (
         <div
-            className={`collections-chrome-blur flex max-w-[min(560px,92vw)] items-center gap-2 rounded-2xl border-2 px-2.5 py-2 
+            className={`collections-chrome-blur flex max-w-[min(560px,92vw)] items-center gap-2 rounded-2xl border-2 px-2.5 py-2
             backdrop-blur-md transition-colors duration-300 ${
                 night
                     ? 'border-white/12 bg-[#16181e]/72 shadow-[0_12px_30px_-12px_rgba(0,0,0,0.7)]'
@@ -141,7 +141,7 @@ export default function AlbumPageCarousel({ openings, shown, onJump, onStep, can
                 <div
                     ref={railRef}
                     {...dragHandlers}
-                    className="cursor-pointer overflow-x-auto px-1.5 pt-2 pb-6.5 -mb-4.5 select-none 
+                    className="cursor-pointer overflow-x-auto px-1.5 pt-2 pb-6.5 -mb-4.5 select-none
                     active:cursor-pointer [scrollbar-width:none] [&::-webkit-scrollbar]:hidden"
                 >
 

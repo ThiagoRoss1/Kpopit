@@ -188,10 +188,10 @@ export default function CollectionAlbum() {
     return (
         <div className="collections min-h-full w-full">
             <div className="collections__bg" aria-hidden="true" />
-        
+
             <div
-                className={`collections-root -mx-2 sm:-mx-4 flex h-[calc(100svh-48px)] sm:h-[calc(100svh-60px)] flex-col
-            overflow-hidden transition-colors duration-300 ${night ? 'text-white' : 'text-[#3c2f38]'}`}
+                className={`collections-root -mx-2 sm:-mx-4 flex flex-col lg:h-[calc(100svh-60px)]
+            lg:overflow-hidden transition-colors duration-300 ${night ? 'text-white' : 'text-[#3c2f38]'}`}
                 {...fxAttrs}
                 {...pagesAttr}
             >
@@ -212,8 +212,8 @@ export default function CollectionAlbum() {
                             type="button"
                             onClick={toggleSummary}
                             title={summaryActive ? 'Hide summary' : 'Show summary'}
-                            className={`inline-flex flex-row justify-center items-center max-zm:w-10 h-10 cursor-pointer gap-1.5 rounded-full 
-                            border-2 zm:px-3.25 zm:py-2 font-sans text-[14px] font-bold ${pillClasses} ${
+                            className={`inline-flex flex-row justify-center items-center max-lg:w-10 h-10 cursor-pointer gap-1.5 rounded-full 
+                            border-2 lg:px-3.25 lg:py-2 font-sans text-[14px] font-bold ${pillClasses} ${
                                 summaryActive 
                                 ? night 
                                     ? 'lg:border-neon-pink lg:bg-ink' 
@@ -223,8 +223,8 @@ export default function CollectionAlbum() {
                                     : 'lg:text-ink'
                             }`}
                         >
-                            <Menu className="max-zm:w-4.5 max-zm:h-4.5 zm:w-4 zm:h-4" strokeWidth={3} /> 
-                            <span className="max-zm:hidden">Summary</span>
+                            <Menu className="max-lg:w-4.5 max-lg:h-4.5 lg:w-4 lg:h-4" strokeWidth={3} /> 
+                            <span className="max-lg:hidden">Summary</span>
                         </button>
 
                         <button
@@ -232,8 +232,8 @@ export default function CollectionAlbum() {
                             onClick={carousel.toggle}
                             title={carouselActive ? 'Hide pages' : 'Show pages'}
                             aria-expanded={carouselActive}
-                            className={`inline-flex flex-row justify-center items-center max-zm:w-10 h-10 cursor-pointer gap-1.5 rounded-full
-                            border-2 zm:px-3.25 zm:py-2 font-sans text-[14px] font-bold ${pillClasses} ${
+                            className={`inline-flex flex-row justify-center items-center max-lg:w-10 h-10 cursor-pointer gap-1.5 rounded-full
+                            border-2 lg:px-3.25 lg:py-2 font-sans text-[14px] font-bold ${pillClasses} ${
                                 carouselActive
                                     ? night
                                         ? 'lg:border-neon-pink lg:bg-ink'
@@ -243,8 +243,8 @@ export default function CollectionAlbum() {
                                         : 'lg:text-ink'
                             }`}
                         >
-                            <GalleryVerticalEnd className="max-zm:w-4.5 max-zm:h-4.5 zm:w-4 zm:h-4" strokeWidth={3} />
-                            <span className="max-zm:hidden">Pages</span>
+                            <GalleryVerticalEnd className="max-lg:w-4.5 max-lg:h-4.5 lg:w-4 lg:h-4" strokeWidth={3} />
+                            <span className="max-lg:hidden">Pages</span>
                         </button>
                     </div>
                     
@@ -312,11 +312,10 @@ export default function CollectionAlbum() {
 
                     {/* Stage */}
                     <div className="relative flex min-h-0 min-w-0 flex-1 flex-col">
-                        <SideArrow direction={-1} disabled={frontClosed || shown.flipping} onClick={() => controls.current?.go(-1)} night={night} />
-                        <SideArrow direction={1} disabled={backClosed || shown.flipping} onClick={() => controls.current?.go(1)} night={night} />
+                        <div className="relative z-2 h-[clamp(300px,calc(100svh-260px),700px)] md:px-16 lg:h-auto lg:min-h-0 lg:flex-1 xl:px-20">
+                            <SideArrow direction={-1} disabled={frontClosed || shown.flipping} onClick={() => controls.current?.go(-1)} night={night} />
+                            <SideArrow direction={1} disabled={backClosed || shown.flipping} onClick={() => controls.current?.go(1)} night={night} />
 
-                        {/* Side padding keeps the arrows outside the scaled book */}
-                        <div className="relative z-2 min-h-0 flex-1 md:px-16 xl:px-20">
                             <AlbumOfCol
                                 groups={groups}
                                 controlRef={controls}
@@ -325,9 +324,8 @@ export default function CollectionAlbum() {
                                 keysDisabled={info.mounted || index.mounted || fxPanel.mounted}
                             />
                         </div>
-
-                        {/* Status + carousel */}
-                        <div className="absolute inset-x-0 bottom-3 z-10 flex flex-col items-center gap-2 px-3">
+                        
+                        <div className="mt-5 mb-10 flex flex-col items-center gap-2 px-3 lg:absolute lg:inset-x-0 lg:bottom-3 lg:z-10 lg:mt-0 lg:mb-0">
                             <p className={`font-major-mono-display whitespace-nowrap text-[12px] ${night ? '' : '[text-shadow:0_1px_0_rgba(255,255,255,0.5)]'}  uppercase`}>
                                 {frontClosed
                                     ? 'Cover — Tap to open'
@@ -352,15 +350,6 @@ export default function CollectionAlbum() {
                                     />
                                 </div>
                             )}
-                        </div>
-
-                        {/* Mobile: rotate-phone hint */}
-                        <div
-                            className={`collections-chrome-blur absolute left-1/2 top-3.5 z-12 hidden -translate-x-1/2 items-center gap-1.75 whitespace-nowrap rounded-full border-[1.5px] px-3.25 py-1.75 font-sans text-[11px] font-bold backdrop-blur-md transition-colors duration-300 max-md:portrait:flex ${
-                                night ? 'border-white/12 bg-[#16181e]/72 text-white' : 'border-[#3c2f38]/20 bg-[#fffcf6]/88 text-[#3c2f38]'
-                            }`}
-                        >
-                            <span className="text-[14px]">📱↻</span> Rotate your phone to see the whole album
                         </div>
                     </div>
                 </div>
