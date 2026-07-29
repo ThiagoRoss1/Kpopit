@@ -161,7 +161,7 @@ const VictoryCardBigBlurry = (props: BlurryVictoryCardBigProps) => {
                 hover:scale-102 hover:brightness-110 hover:bg-linear-to-r transition-all duration-500 transform-gpu">
                     <div className="relative w-full h-full flex flex-col items-center justify-between gap-1">
                         <span className="max-xxs:text-lg xxs:text-lg xs:text-xl sm:text-2xl font-bold select-none">
-                            Yesterday idol was
+                            Yesterday's idol was
                         </span>
 
                         <div className="flex flex-row w-full h-full items-center justify-start max-xxs:pr-0 pl-8 sm:pl-12 max-xxs:gap-2 xxs:gap-4 sm:gap-8">

@@ -2,9 +2,9 @@ from PIL import Image
 from pathlib import Path
 import io
 
-SOURCE_FOLDER = '../../../Kpopit-images/kpopit-albums-raw'
-DESTINATION_FOLDER = '../../../Kpopit-images/kpopit-albums-webp'
-WEBP_QUALITY = 85
+SOURCE_FOLDER = '../../../Kpopit-images/kpopit-groups-png'
+DESTINATION_FOLDER = '../../../Kpopit-images/kpopit-groups-webp'
+WEBP_QUALITY = 90
 WEBP_QUALITY_AVATARS = 80
 SUPPORTED_EXTENSIONS = ('.png', '.jpg', '.jpeg', '.webp', '.bmp', '.tiff', '.gif')
 
