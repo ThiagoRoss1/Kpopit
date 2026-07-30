@@ -40,10 +40,11 @@ function GroupRow({
         >
             <span className="h-8.5 w-2 flex-none rounded-[3px]" style={{ background: group.palette.main }} />
             
-            <span className="min-w-0 flex-1">
+            <span className="min-w-0 flex-1 w-full">
                 <span className="flex flex-col items-baseline gap-1.5">
                     <span
-                        className={`font-major-mono-display overflow-hidden text-ellipsis whitespace-nowrap text-[14px] transition-colors duration-300
+                        className={`flex font-major-mono-display overflow-hidden text-ellipsis text-[15px] transition-colors duration-300 
+                        bg-amber-300/0
                         ${night ? 'text-white' : 'text-[#3c2f38]'} uppercase`}
                     >
                         {group.group_name}
@@ -124,7 +125,11 @@ export default function AlbumPageIndex({ collectionName, groups, currentGroupId,
                 />
             </div>
             
-            <div className="mt-2 -mx-1 flex min-h-0 flex-col gap-0.5 overflow-y-auto px-1 py-1 contain-[paint]">
+            <div
+                className={`album-index-scroll mt-2 -mx-1 flex min-h-0 flex-col gap-0.5 overflow-y-auto px-1 py-1 contain-[paint] ${
+                    night ? 'album-index-scroll--night' : ''
+                }`}
+            >
                 {filteredGroups.map((group) => (
                     <GroupRow
                         key={group.group_id}

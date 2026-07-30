@@ -91,7 +91,11 @@ export default function AlbumMemberCard({ member, palette }: AlbumMemberCardProp
                     <TextureFill treatment={treatment} />
                     <p
                         className={`album-card-name font-major-mono-display relative font-bold whitespace-nowrap uppercase leading-[normal] text-white ${
-                            member.artist_name.length > 10 ? 'text-[14px]' : 'text-[18px]'
+                            member.artist_name.length > 14
+                            ? 'text-[11px]'
+                            : member.artist_name.length > 10
+                                ? 'text-[14px]' 
+                            : 'text-[18px]'
                         }`}
                     >
                         {member.artist_name}

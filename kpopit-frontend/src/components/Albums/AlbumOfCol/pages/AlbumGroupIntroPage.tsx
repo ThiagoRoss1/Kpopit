@@ -33,7 +33,12 @@ export default function AlbumGroupIntroPage({ group, side = 'left' }: AlbumGroup
                 <div className="flex items-start justify-between">
                     <div className="flex flex-col whitespace-nowrap text-black [text-shadow:0.5px_0.5px_2px_rgba(0,0,0,0.35)] uppercase">
                         <p className="font-major-mono-display text-[22px] leading-[normal]">We are</p>
-                        <p className={`font-major-mono-display leading-[normal] ${group.group_name.length > 8 ? 'text-[44px]' : 'text-[52px]'}`}>
+                        <p className={`font-major-mono-display leading-[normal] 
+                        ${group.group_name.length > 14 
+                            ? 'text-[37px]' 
+                            : group.group_name.length > 8
+                                ? 'text-[44px]'
+                            : 'text-[52px]'}`}>
                             {group.group_name.toUpperCase()}
                         </p>
                         <p className="font-korean text-[22px] font-bold leading-[normal]">{group.hangul_name}</p>
@@ -90,12 +95,20 @@ export default function AlbumGroupIntroPage({ group, side = 'left' }: AlbumGroup
                             {fileCells.map(([label, value], cellIndex) => (
                                 <div
                                     key={label}
-                                    className={`flex items-center justify-between gap-3 px-5 py-2 font-sans font-bold text-[16px] leading-[normal]
+                                    className={`flex items-center justify-between text-center gap-3 px-5 py-2 font-sans font-bold text-[16px] leading-[normal]
                                         text-black [text-shadow:0.5px_0.5px_2px_rgba(0,0,0,0.25)]
                                         ${cellIndex % 2 === 0 ? 'border-r border-[#cdcdcd]' : ''} ${cellIndex < 4 ? 'border-b border-[#cdcdcd]' : ''}`}
                                 >
                                     <span className="flex-none">{label}</span>
-                                    <span className="min-w-0 flex-1 text-right leading-[1.15]">{value}</span>
+                                    <span className={`${value.split(' ').some(word => word.length >= 10) 
+                                        ? 'text-sm' 
+                                        : value.length >= 13
+                                            ? 'text-sm'
+                                                : value.length >= 10
+                                                ? 'text-base'
+                                        : 'text-xl'} min-w-0 flex-1 text-right leading-[1.15] truncate`}>
+                                        {value}
+                                    </span>
                                 </div>
                             ))}
                         </div>

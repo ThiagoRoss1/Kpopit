@@ -35,8 +35,8 @@ function SideArrow({ direction, disabled, onClick, night }: { direction: -1 | 1;
             disabled={disabled}
             aria-label={direction < 0 ? 'Previous page' : 'Next page'}
             className={`absolute top-1/2 z-20 hidden size-12 -translate-y-1/2 items-center justify-center rounded-full border-2 transition-all duration-300 
-            transform-gpu md:flex xl:size-14 ${
-            direction < 0 ? 'left-[clamp(8px,2vw,26px)]' : 'right-[clamp(8px,2vw,26px)] hover:scale-105 active:shadow-[0px_0px_0px_rgba(255,51,153,1)] active:scale-100'
+            transform-gpu md:flex xl:size-14 hover:scale-105 active:shadow-[0px_0px_0px_rgba(255,51,153,1)] active:scale-100 ${
+            direction < 0 ? 'left-[clamp(8px,2vw,26px)]' : 'right-[clamp(8px,2vw,26px)]'
             } ${disabled ? `cursor-default bg-transparent opacity-45 ${disabledStyle}` : `cursor-pointer ${enabledStyle}`}`}
         >
             <Icon className="w-6 h-6 xl:w-8 xl:h-8" strokeWidth={3} />

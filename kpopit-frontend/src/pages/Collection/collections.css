@@ -104,6 +104,49 @@
     animation: collection-rail-out 0.22s cubic-bezier(0.55, 0, 0.55, 0.2) both;
 }
 
+.album-index-scroll::-webkit-scrollbar {
+    width: 7px;
+    background: transparent;
+}
+
+.album-index-scroll::-webkit-scrollbar-track {
+    background: rgba(60, 47, 56, 0.12);
+    border-radius: 999px;
+    margin-block: 2px;
+    box-shadow: none;
+}
+
+.album-index-scroll::-webkit-scrollbar-thumb {
+    background: linear-gradient(180deg, #ff3399, #fa7268);
+    border-radius: 999px;
+    background-clip: padding-box;
+    box-shadow: none;
+}
+
+.album-index-scroll::-webkit-scrollbar-thumb:hover,
+.album-index-scroll::-webkit-scrollbar-thumb:active {
+    background: linear-gradient(180deg, #ff4fa8, #ff8574);
+}
+
+.album-index-scroll--night::-webkit-scrollbar-track {
+    background: rgba(255, 255, 255, 0.13);
+}
+
+/* Firefox gets the standard properties instead, same @supports gate index.css
+   uses, so Chromium keeps rendering the ::-webkit- rules above rather than
+   falling back to the (gradient-less) two-colour form. */
+
+@supports (-moz-appearance: none) {
+    .album-index-scroll {
+        scrollbar-width: thin;
+        scrollbar-color: #ff3399 rgba(60, 47, 56, 0.12);
+    }
+
+    .album-index-scroll--night {
+        scrollbar-color: #ff3399 rgba(255, 255, 255, 0.13);
+    }
+}
+
 /* Status + carousel chrome — same mount/unmount pattern as the Summary rail. */
 
 @keyframes collection-chrome-in {

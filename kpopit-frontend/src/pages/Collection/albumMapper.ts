@@ -5,7 +5,7 @@ import type { AlbumGroup, CollectionAlbumGroup } from '../../interfaces/albumInt
 export function getAlbumMapping(data: CollectionAlbumGroup[]): AlbumGroup[] {
     return data.map((group, index) => ({
         group_id: group.group_id,
-        group_name: group.group_name,
+        group_name: group.group_name === 'Soloist' ? 'Soloists' : group.group_name,
         hangul_name: group.hangul_name ?? '',
         debut_year: group.debut_year,
         fandom_name: group.fandom_name ?? '',

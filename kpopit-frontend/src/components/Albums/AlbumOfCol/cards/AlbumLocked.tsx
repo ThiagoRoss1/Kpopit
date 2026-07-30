@@ -18,7 +18,9 @@ export function AlbumLockedSlot({ slotNumber, name }: AlbumLockedSlotProps) {
             bg-[rgba(217,217,217,0.32)] text-center font-bold uppercase text-black">
                 <p className="absolute top-2 -z-5 w-full font-sans font-bold text-[52px] leading-[normal]">{slotNumber}</p>
                 <div className="flex size-full flex-col items-center justify-center gap-1">
-                    <p className="text-2xl leading-[normal]">{name}</p>
+                    <p className={`${name.split(' ').some(word => word.length >= 10) ? 'text-xl' : 'text-2xl'} leading-[normal]`}>
+                        {name}
+                    </p>
                     <p className="text-sm leading-[normal]">Locked</p>
                 </div>
                 <div className="font-sans absolute bottom-2.5 left-2.25 flex w-35.25 flex-col gap-0.5 text-[12px] leading-[normal]">
