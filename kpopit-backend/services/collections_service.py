@@ -4,6 +4,7 @@ import os
 
 COLLECTION_ENABLED = os.getenv("COLLECTION_ENABLED", "false").lower() == "true"
 COLLECTION_GAMEMODE_IDS = (1, 2)
+SOLOIST_GROUP_ID = 20  # Soloists' page closes the album
 
 logger = logging.getLogger(__name__)
 
@@ -169,8 +170,8 @@ class CollectionService:
                 JOIN groups AS g ON g.id = cge.group_id
                 LEFT JOIN group_features AS gf ON gf.group_id = cge.group_id
                 WHERE cge.collection_id = %s AND cge.is_eligible = TRUE
-                ORDER BY cge.group_id
-            """, (collection_id,)
+                ORDER BY (cge.group_id = %s), cge.group_id
+            """, (collection_id, SOLOIST_GROUP_ID)
         )
         groups = cursor.fetchall()
 

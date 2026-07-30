@@ -18,11 +18,11 @@ collection_id,group_id,is_eligible,has_bonus_cover
 1,17,true,true
 1,18,true,true
 1,19,true,true
-1,20,true,false
+1,20,true,true
 1,21,true,true
 1,22,true,true
 1,23,true,true
-1,24,false,false
+1,24,true,true
 1,25,true,true
 1,26,true,true
 1,27,true,true
