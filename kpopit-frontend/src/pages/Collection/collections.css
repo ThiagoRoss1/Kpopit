@@ -419,13 +419,11 @@
     animation: none;
 }
 
-/* Two of these hooks sit on elements that also carry page content (the page
-   slots wrap {leftPage}/{rightPage}), so the effect has to be removed by the
-   property that draws it — `display: none` there would hide the page itself.
-   The spine shade is a standalone gradient element with no children, so it
-   goes away entirely. */
+/* The cover inset hook sits on an element that also carries page content, so
+   the effect has to be removed by the property that draws it — `display: none`
+   there would hide the page itself. The spine shade is a standalone gradient
+   element with no children, so it goes away entirely. */
 
-[data-fx-shadows='off'] .album-page-shadow,
 [data-fx-shadows='off'] .album-cover-inset {
     box-shadow: none;
 }
