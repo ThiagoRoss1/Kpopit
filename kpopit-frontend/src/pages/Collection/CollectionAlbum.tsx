@@ -1,9 +1,12 @@
-import { useCallback, useMemo, useRef, useState } from 'react';
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { Link, useParams } from 'react-router-dom';
 import { useQuery } from '@tanstack/react-query';
 import { isAxiosError } from 'axios';
-import { ChevronLeft, ChevronRight, GalleryVerticalEnd, Info, Menu, Moon, SlidersHorizontal, Sun } from 'lucide-react';
+import { ChevronLeft, ChevronRight, Columns2, GalleryVerticalEnd, Info, Menu, Moon, SlidersHorizontal, Square, Sun } from 'lucide-react';
 import AlbumOfCol, { type AlbumBookInit, type AlbumGroupSpread, type AlbumOfColControls } from '../../components/Albums/AlbumOfCol/AlbumOfCol';
+import type { AlbumFocus } from '../../components/Albums/AlbumOfCol/AlbumOfCol';
+import type { CardZoomTarget } from '../../components/Albums/AlbumOfCol/albumCardZoom';
+import CardZoomModal from './components/CardZoomModal';
 import CollectionStatus from './components/CollectionStatus';
 import AlbumPageIndex from './components/AlbumPageIndex';
 import AlbumPageCarousel, { type AlbumOpening } from './components/AlbumPageCarousel';
@@ -123,11 +126,89 @@ export default function CollectionAlbum() {
     const onBookInit = useCallback((next: AlbumBookInit) => setBook(next), []);
     const onPosChange = useCallback((pos: number, flipping: boolean) => setShown({ pos, flipping }), []);
 
+    const [zoomTarget, setZoomTarget] = useState<CardZoomTarget | null>(null);
+    const zoom = useDisclosure();
+    const zoomHistoryEntry = useRef(false);
+
+    const openCardZoom = useCallback(
+        (target: CardZoomTarget) => {
+            setZoomTarget(target);
+            zoom.open();
+            if (zoomHistoryEntry.current) return;
+            zoomHistoryEntry.current = true;
+            history.pushState({ kpopitCardZoom: true }, '');
+        },
+        [zoom],
+    );
+
+    const flyingCardId =
+        zoom.mounted && zoomTarget
+            ? zoomTarget.kind === 'member'
+                ? zoomTarget.member.card_id
+                : (zoomTarget.group.group_photo?.card_id ?? null)
+            : null;
+
+    const closeCardZoom = useCallback(() => {
+        zoom.close();
+        if (!zoomHistoryEntry.current) return;
+        zoomHistoryEntry.current = false;
+        history.back();
+    }, [zoom]);
+
+    useEffect(() => {
+        if (!zoom.mounted) return;
+        const onKeyDown = (event: KeyboardEvent) => {
+            if (event.key === 'Escape') closeCardZoom();
+        };
+        const onPopState = () => {
+            zoomHistoryEntry.current = false;
+            zoom.close();
+        };
+        window.addEventListener('keydown', onKeyDown);
+        window.addEventListener('popstate', onPopState);
+        return () => {
+            window.removeEventListener('keydown', onKeyDown);
+            window.removeEventListener('popstate', onPopState);
+        };
+    }, [zoom, closeCardZoom]);
+
     const spreadCount = book?.spreadCount ?? 0;
     const maxPos = spreadCount + 1;
 
     const frontClosed = shown.pos === 0;
     const backClosed = shown.pos >= maxPos;
+
+    // Focus mode does not persist between visits: it changes what every tap on the
+    // screen means, and restoring it silently on a fresh load reads as a broken app.
+    const [focus, setFocus] = useState<AlbumFocus>('off');
+    const focusActive = focus !== 'off';
+    const focusAttr = { 'data-focus': focusActive ? 'on' : 'off' } as const;
+    const focusHistoryEntry = useRef(false);
+
+    const toggleFocus = useCallback(() => {
+        if (focusActive) {
+            setFocus('off');
+            if (!focusHistoryEntry.current) return;
+            focusHistoryEntry.current = false;
+            history.back();
+            return;
+        }
+        // Only the right page exists on the cover, only the left on the back cover.
+        setFocus(frontClosed ? 'right' : 'left');
+        focusHistoryEntry.current = true;
+        history.pushState({ kpopitFocus: true }, '');
+    }, [focusActive, frontClosed]);
+
+    useEffect(() => {
+        if (!focusActive) return;
+        const onPopState = () => {
+            if (zoom.mounted) return;
+            focusHistoryEntry.current = false;
+            setFocus('off');
+        };
+        window.addEventListener('popstate', onPopState);
+        return () => window.removeEventListener('popstate', onPopState);
+    }, [focusActive, zoom.mounted]);
     
     const currentGroupId = book ? groupIdAt(shown.pos, spreadCount, book.groupSpreads) : null;
     const currentGroup: AlbumGroup | null = groups?.find((group) => group.group_id === currentGroupId) ?? null;
@@ -194,6 +275,7 @@ export default function CollectionAlbum() {
             lg:overflow-hidden transition-colors duration-300 ${night ? 'text-white' : 'text-[#3c2f38]'}`}
                 {...fxAttrs}
                 {...pagesAttr}
+                {...focusAttr}
             >
                 <CollectionsBackdrop night={night} />
 
@@ -245,6 +327,27 @@ export default function CollectionAlbum() {
                         >
                             <GalleryVerticalEnd className="max-lg:w-4.5 max-lg:h-4.5 lg:w-4 lg:h-4" strokeWidth={3} />
                             <span className="max-lg:hidden">Pages</span>
+                        </button>
+                        
+                        <button
+                            type="button"
+                            onClick={toggleFocus}
+                            title={focusActive ? 'Show both pages' : 'Focus one page'}
+                            aria-pressed={focusActive}
+                            className={`inline-flex flex-row justify-center items-center w-10 h-10 cursor-pointer gap-1.5 rounded-full
+                            border-2 font-sans text-[14px] font-bold lg:hidden ${pillClasses} ${
+                                focusActive
+                                    ? night
+                                        ? 'border-neon-pink bg-ink'
+                                        : 'border-ink bg-neon-pink'
+                                    : night
+                                        ? 'lg:text-white'
+                                        : 'lg:text-ink'
+                            }`}
+                        >
+                            {focusActive
+                                ? <Columns2 className="w-4.5 h-4.5" strokeWidth={3} />
+                                : <Square className="w-4.5 h-4.5" strokeWidth={3} />}
                         </button>
                     </div>
                     
@@ -312,7 +415,7 @@ export default function CollectionAlbum() {
 
                     {/* Stage */}
                     <div className="relative flex min-h-0 min-w-0 flex-1 flex-col">
-                        <div className="relative z-2 h-[clamp(300px,calc(100svh-260px),700px)] md:px-16 lg:h-auto lg:min-h-0 lg:flex-1 xl:px-20">
+                        <div className="collections-album-stage relative z-2 h-[clamp(300px,calc(100svh-260px),700px)] md:px-16 lg:h-auto lg:min-h-0 lg:flex-1 xl:px-20">
                             <SideArrow direction={-1} disabled={frontClosed || shown.flipping} onClick={() => controls.current?.go(-1)} night={night} />
                             <SideArrow direction={1} disabled={backClosed || shown.flipping} onClick={() => controls.current?.go(1)} night={night} />
 
@@ -321,11 +424,18 @@ export default function CollectionAlbum() {
                                 controlRef={controls}
                                 onPosChange={onPosChange}
                                 onBookInit={onBookInit}
-                                keysDisabled={info.mounted || index.mounted || fxPanel.mounted}
+                                keysDisabled={info.mounted || index.mounted || fxPanel.mounted || zoom.mounted}
+                                onCardZoom={fx.tapZoom ? openCardZoom : undefined}
+                                flyingCardId={flyingCardId}
+                                focus={focus}
+                                onFocusChange={setFocus}
                             />
                         </div>
                         
-                        <div className="mt-5 mb-10 flex flex-col items-center gap-2 px-3 lg:absolute lg:inset-x-0 lg:bottom-3 lg:z-10 lg:mt-0 lg:mb-0">
+                        <div
+                            hidden={focus !== 'off'}
+                            className="mt-5 mb-10 flex flex-col items-center gap-2 px-3 lg:absolute lg:inset-x-0 lg:bottom-3 lg:z-10 lg:mt-0 lg:mb-0"
+                        >
                             <p className={`font-major-mono-display whitespace-nowrap text-[12px] ${night ? '' : '[text-shadow:0_1px_0_rgba(255,255,255,0.5)]'}  uppercase`}>
                                 {frontClosed
                                     ? 'Cover — Tap to open'
@@ -392,6 +502,17 @@ export default function CollectionAlbum() {
                         collectionName={collectionName}
                         closing={info.closing}
                         {...info.animationProps}
+                    />
+                )}
+
+                {zoom.mounted && zoomTarget && (
+                    <CardZoomModal
+                        target={zoomTarget}
+                        collectionName={collectionName}
+                        night={night}
+                        onClose={closeCardZoom}
+                        closing={zoom.closing}
+                        {...zoom.animationProps}
                     />
                 )}
             </div>

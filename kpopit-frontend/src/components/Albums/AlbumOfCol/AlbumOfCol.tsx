@@ -7,6 +7,8 @@ import AlbumMembersPage from './pages/AlbumMembersPage';
 import AlbumBlankPage from './pages/AlbumBlankPage';
 import type { AlbumGroup, AlbumStats } from '../../../interfaces/albumInterfaces';
 import { ALBUM_CARDS_PER_PAGE, ALBUM_PAGE_H, ALBUM_PAGE_W } from './albumConstants';
+import { AlbumCardZoomContext, type AlbumCardZoomApi, type CardZoomTarget } from './albumCardZoom';
+import { isSafari } from '../../../hooks/useIsDevice';
 import './AlbumOfCol.css';
 
 const FLIP_DURATION_MS = 800;
@@ -82,7 +84,11 @@ function buildInteriorPages(groups: AlbumGroup[], stats: AlbumStats) {
 
 interface FlipState {
     direction: 1 | -1;
+    landed: boolean;
 }
+
+/** `off` shows the spread; `left`/`right` show one page, painted twice as large. */
+export type AlbumFocus = 'off' | 'left' | 'right';
 
 /** Imperative controls handed to the album-page chrome via `controlRef` */
 export interface AlbumOfColControls {
@@ -99,15 +105,34 @@ export interface AlbumBookInit {
     backCover: ReactNode;
 }
 
+/** Absent (or withheld) means stickers are not zoom targets and every click
+        on the book turns the page — see the tap-to-zoom switch in the FX panel. */
+
+/** Focus mode shows one page at a time so it can be painted twice as large. */
+
 interface AlbumOfColProps {
     groups: AlbumGroup[];
     controlRef?: React.RefObject<AlbumOfColControls | null>;
     onPosChange?: (position: number, flipping: boolean) => void;
     onBookInit?: (book: AlbumBookInit) => void;
     keysDisabled?: boolean;
+    onCardZoom?: (target: CardZoomTarget) => void;
+    flyingCardId?: number | null;
+    focus?: AlbumFocus;
+    onFocusChange?: (focus: AlbumFocus) => void;
 }
 
-function AlbumOfCol({ groups, controlRef, onPosChange, onBookInit, keysDisabled = false }: AlbumOfColProps) {
+function AlbumOfCol({
+    groups,
+    controlRef,
+    onPosChange,
+    onBookInit,
+    keysDisabled = false,
+    onCardZoom,
+    flyingCardId = null,
+    focus = 'off',
+    onFocusChange,
+}: AlbumOfColProps) {
     const stats = useMemo(() => buildAlbumStats(groups), [groups]);
     const { interiorPages, groupSpreads } = useMemo(() => buildInteriorPages(groups, stats), [groups, stats]);
 
@@ -137,29 +162,59 @@ function AlbumOfCol({ groups, controlRef, onPosChange, onBookInit, keysDisabled 
     const frontClosed = position === 0;
     const backClosed = position === backCoverPosition;
 
+    const albumStageRef = useRef<HTMLDivElement>(null);
     const stageRef = useRef<HTMLDivElement>(null);
     const [scale, setScale] = useState(0.5);
+
+    // Safari ignores `touch-action` for page zoom, so the CSS rule on .album-stage
+    // does nothing there. `gesturestart`/`gesturechange` are non-standard and
+    // Safari-only — hence the gate and the casts; they are not in the DOM lib.
+    // Delete this whole effect the day WebKit honours touch-action: nothing else
+    // depends on it.
+    useEffect(() => {
+        const stageElement = albumStageRef.current;
+        if (!isSafari || !stageElement) return;
+        const blockGesture = (event: Event) => event.preventDefault();
+        stageElement.addEventListener('gesturestart', blockGesture as EventListener);
+        stageElement.addEventListener('gesturechange', blockGesture as EventListener);
+        return () => {
+            stageElement.removeEventListener('gesturestart', blockGesture as EventListener);
+            stageElement.removeEventListener('gesturechange', blockGesture as EventListener);
+        };
+    }, []);
+
     useLayoutEffect(() => {
         const stageElement = stageRef.current;
         if (!stageElement) return;
 
         const updateScale = () => {
             const stageRect = stageElement.getBoundingClientRect();
+
             // Let the book grow past its native size on large screens so it fills
             // more of the stage instead of floating small between the arrows. The
             // width/height fit terms below still cap it, so it can never overflow
             // the stage — smaller/shorter screens stay purely fit-bound.
+
             const viewportWidth = window.innerWidth;
             const maxScale =
                 viewportWidth >= 1536 ? 1.35 : viewportWidth >= 1280 ? 1.22 : viewportWidth >= 1024 ? 1.1 : 1;
+
+            // Focus mode shows one page, so the width term divides by a single page
+            // instead of the spread. Nothing else moves: maxScale, the height term
+            // and the whole-pixel snap below stay exactly as they are — that snap is
+            // what stops the spine seam rasterising differently between frames.
+
+            const widthDivisor = focus === 'off' ? ALBUM_PAGE_W * 2 : ALBUM_PAGE_W;
             const fittedScale = Math.min(
                 maxScale,
-                (stageRect.width - 24) / (ALBUM_PAGE_W * 2),
+                (stageRect.width - 24) / widthDivisor,
                 (stageRect.height - 24) / ALBUM_PAGE_H,
             );
+
             // Snap so each page maps to a whole pixel count — a fractional page
             // width rasterizes the spine seam differently per scroll frame
             // (white line / shadow flicker between the two pages).
+
             const clampedScale = Math.max(0.2, fittedScale);
             setScale(Math.floor(clampedScale * ALBUM_PAGE_W) / ALBUM_PAGE_W);
         };
@@ -168,7 +223,9 @@ function AlbumOfCol({ groups, controlRef, onPosChange, onBookInit, keysDisabled 
         const resizeObserver = new ResizeObserver(updateScale);
         resizeObserver.observe(stageElement);
         return () => resizeObserver.disconnect();
-    }, []);
+        // `focus` is a dependency on purpose: without it the fit would only catch up
+        // on the next stage resize, which makes entering the mode look broken.
+    }, [focus]);
 
     const frontCover = useMemo(() => <AlbumCover variant="front" stats={stats} />, [stats]);
     const backCover = useMemo(() => <AlbumCover variant="back" />, []);
@@ -198,28 +255,105 @@ function AlbumOfCol({ groups, controlRef, onPosChange, onBookInit, keysDisabled 
             const canGoForward = direction > 0 && position < backCoverPosition;
             const canGoBackward = direction < 0 && position > 0;
             if (!canGoForward && !canGoBackward) return;
-            setFlip({ direction });
+            setFlip({ direction, landed: false });
         },
         [flip, position, backCoverPosition],
     );
 
+    // Focus mode moves a viewport across the spread before it turns a leaf.
+    // Cover, back cover and blank pages need no special case: one of their sides is
+    // null, so they fall through the "otherwise" rows on their own.
+    // This is the single entry point for navigation — tap, keyboard and the chrome's
+    // controlRef all go through it, so they can never disagree.
+
+    const step = useCallback(
+        (direction: 1 | -1) => {
+            if (focus === 'off') {
+                go(direction);
+                return;
+            }
+            if (flip) return;
+
+            if (direction > 0 && focus === 'left' && rightPageAt(position) != null) {
+                onFocusChange?.('right');
+                return;
+            }
+            if (direction < 0 && focus === 'right' && leftPageAt(position) != null) {
+                onFocusChange?.('left');
+                return;
+            }
+
+            const landing = position + direction;
+            if (landing < 0 || landing > backCoverPosition) return;
+            go(direction);
+            // Set the landing spread's focus now, not when the leaf lands: the camera
+            // has to cross the gutter in step with the leaf, not jump after it.
+            onFocusChange?.(
+                direction > 0
+                    ? leftPageAt(landing) != null
+                        ? 'left'
+                        : 'right'
+                    : rightPageAt(landing) != null
+                      ? 'right'
+                      : 'left',
+            );
+        },
+        [focus, flip, position, backCoverPosition, leftPageAt, rightPageAt, go, onFocusChange],
+    );
+
+    /** Rotating right now — `flip` alone stays true through the landing frames. */
+    const turning = flip !== null && !flip.landed;
+
     const leafRef = useRef<HTMLDivElement>(null);
     useLayoutEffect(() => {
-        if (!flip) return;
+        if (!turning) return;
         const leafElement = leafRef.current;
         if (!leafElement) return;
         void leafElement.offsetWidth;
         leafElement.style.transform = `rotateY(${flip.direction > 0 ? -180 : 180}deg)`;
-    }, [flip]);
+    }, [turning, flip]);
 
-    // The leaf lands: advance the position and unmount the leaf together.
     useEffect(() => {
-        if (!flip) return;
+        if (!turning) return;
         const flipTimeout = setTimeout(() => {
             setPosition((previousPosition) => previousPosition + flip.direction);
-            setFlip(null);
+            setFlip((previousFlip) => (previousFlip ? { ...previousFlip, landed: true } : null));
         }, FLIP_DURATION_MS);
         return () => clearTimeout(flipTimeout);
+    }, [turning, flip]);
+
+    // Step two, two frames later: retire the leaf. Tearing down a rotated 3D
+    // layer and repainting both slots in the same commit is what leaves a stale
+    // row of the outgoing page on the spread underneath — visible on Firefox as
+    // soon as the backdrop sparkles stop animating and it goes back to
+    // repainting only the damaged rectangle. Split in two, the pixels under the
+    // leaf are already the final ones by the time its layer goes away, so a
+    // damage rectangle that comes up a row short costs nothing.
+    //
+    // ⚠ KNOWN TRADE-OFF (measured 2026-07-31, deliberately left alone).
+    // Nothing else clears `flip`, so while these two frames do not arrive the
+    // guard in `go`/`step` blocks EVERY page turn — the album simply stops
+    // navigating. requestAnimationFrame is starved in a background tab, under
+    // load, or in an unfocused window (measured: 0 frames in 500ms in the agent's
+    // browser pane, 3 with focus). Not a hypothetical.
+    //
+    // Left as is because these two frames are what holds the Firefox seam fix
+    // above. The fix is NOT to drop them: keep the two-frame path for the visual
+    // guarantee and add a parallel setTimeout as a floor, so `flip` clears even
+    // when frames never come. Touching this area is how the regressions in
+    // performancefixes.md §4/§6 started — do it with a device in hand.
+    // Written up in possiblefuture.md §8.
+
+    useEffect(() => {
+        if (!flip?.landed) return;
+        let innerFrame = 0;
+        const outerFrame = requestAnimationFrame(() => {
+            innerFrame = requestAnimationFrame(() => setFlip(null));
+        });
+        return () => {
+            cancelAnimationFrame(outerFrame);
+            cancelAnimationFrame(innerFrame);
+        };
     }, [flip]);
 
     // The album page (collection_album.tsx) drives the book through
@@ -233,11 +367,12 @@ function AlbumOfCol({ groups, controlRef, onPosChange, onBookInit, keysDisabled 
     );
     useEffect(() => {
         if (!controlRef) return;
-        controlRef.current = { go, jumpTo };
+        // `step`, not `go`: the side arrows inherit the focus rule for free.
+        controlRef.current = { go: step, jumpTo };
         return () => {
             controlRef.current = null;
         };
-    }, [controlRef, go, jumpTo]);
+    }, [controlRef, step, jumpTo]);
 
     const bookInit = useMemo<AlbumBookInit>(
         () => ({ spreadCount, groupSpreads, spreads, frontCover, backCover }),
@@ -247,10 +382,10 @@ function AlbumOfCol({ groups, controlRef, onPosChange, onBookInit, keysDisabled 
         onBookInit?.(bookInit);
     }, [onBookInit, bookInit]);
 
-    const shownPosition = flip ? position + flip.direction : position;
+    const shownPosition = turning ? position + flip.direction : position;
     useEffect(() => {
-        onPosChange?.(shownPosition, !!flip);
-    }, [onPosChange, shownPosition, flip]);
+        onPosChange?.(shownPosition, turning);
+    }, [onPosChange, shownPosition, turning]);
 
     useEffect(() => {
         if (keysDisabled) return;
@@ -262,23 +397,27 @@ function AlbumOfCol({ groups, controlRef, onPosChange, onBookInit, keysDisabled 
                 active instanceof HTMLElement &&
                 (active.tagName === 'INPUT' || active.tagName === 'TEXTAREA' || active.isContentEditable);
             if (isEditingText) return;
-            if (event.key === 'ArrowRight') go(1);
-            if (event.key === 'ArrowLeft') go(-1);
+            if (event.key === 'ArrowRight') step(1);
+            if (event.key === 'ArrowLeft') step(-1);
         };
         window.addEventListener('keydown', onKeyDown);
         return () => window.removeEventListener('keydown', onKeyDown);
-    }, [go, keysDisabled]);
+    }, [step, keysDisabled]);
 
-    const leftPagePosition = flip ? (flip.direction > 0 ? position : position - 1) : position;
-    const rightPagePosition = flip ? (flip.direction > 0 ? position + 1 : position) : position;
+    const leftPagePosition = turning ? (flip.direction > 0 ? position : position - 1) : position;
+    const rightPagePosition = turning ? (flip.direction > 0 ? position + 1 : position) : position;
     const leftPage = leftPageAt(leftPagePosition);
     const rightPage = rightPageAt(rightPagePosition);
 
+    // Which half the leaf hinges on is fixed for the whole turn, landing frames
+    // included — it must not move out from under its own pixels.
     const flippingForward = flip !== null && flip.direction > 0;
     const leafSide: 'left' | 'right' = flippingForward ? 'right' : 'left';
 
+    // Only while the rotation is live: once the spread has advanced, `position`
+    // no longer describes the pages the leaf is carrying.
     const lastLeafContent = useRef<{ front: ReactNode; back: ReactNode }>({ front: null, back: null });
-    if (flip) {
+    if (turning) {
         lastLeafContent.current = {
             front: flippingForward ? rightPageAt(position) : leftPageAt(position),
             back: flippingForward ? leftPageAt(position + 1) : rightPageAt(position - 1),
@@ -287,14 +426,53 @@ function AlbumOfCol({ groups, controlRef, onPosChange, onBookInit, keysDisabled 
 
     const leafFront = lastLeafContent.current.front;
     const leafBack = lastLeafContent.current.back;
-
-    // Closed covers sit centered: shift the (empty-page-less) book by half a page
+    
     const bookShiftPx = Math.round(
-        frontClosed && !flip ? (-ALBUM_PAGE_W * scale) / 2 : backClosed && !flip ? (ALBUM_PAGE_W * scale) / 2 : 0,
+        focus === 'left'
+            ? (ALBUM_PAGE_W * scale) / 2
+            : focus === 'right'
+              ? (-ALBUM_PAGE_W * scale) / 2
+              : frontClosed && !turning
+                ? (-ALBUM_PAGE_W * scale) / 2
+                : backClosed && !turning
+                  ? (ALBUM_PAGE_W * scale) / 2
+                  : 0,
+    );
+
+    const canTurn = useCallback(
+        (direction: 1 | -1) => !flip && (direction > 0 ? position < backCoverPosition : position > 0),
+        [flip, position, backCoverPosition],
+    );
+
+    const cardZoom = useMemo<AlbumCardZoomApi | null>(
+        () => (flip !== null || !onCardZoom ? null : { open: onCardZoom, flyingCardId }),
+        [flip, onCardZoom, flyingCardId],
+    );
+
+    const onBookClick = useCallback(
+        (event: React.MouseEvent<HTMLDivElement>) => {
+            const box = (focus === 'off' ? event.currentTarget : stageRef.current)?.getBoundingClientRect();
+            if (!box) return;
+            step(event.clientX < box.left + box.width / 2 ? -1 : 1);
+        },
+        [focus, step],
+    );
+
+    // The two buttons used to carry a per-half cursor; keep that affordance without
+    // paying a React render per mouse move — write the property only when it flips.
+    const onBookMouseMove = useCallback(
+        (event: React.MouseEvent<HTMLDivElement>) => {
+            const box = event.currentTarget.getBoundingClientRect();
+            const wanted = canTurn(event.clientX < box.left + box.width / 2 ? -1 : 1) ? 'pointer' : 'default';
+            if (event.currentTarget.style.cursor !== wanted) event.currentTarget.style.cursor = wanted;
+        },
+        [canTurn],
     );
 
     return (
+        <AlbumCardZoomContext.Provider value={cardZoom}>
         <div
+            ref={albumStageRef}
             className="album-level-clock album-stage flex h-full min-h-0 w-full flex-col items-center px-3 pt-3 pb-3 lg:pb-28"
         >
             <div ref={stageRef} className="flex min-h-0 w-full flex-1 items-center justify-center">
@@ -308,22 +486,29 @@ function AlbumOfCol({ groups, controlRef, onPosChange, onBookInit, keysDisabled 
                         }}
                     >
                         <div className="absolute left-0 top-0 origin-top-left" style={{ transform: `scale(${scale})` }}>
-                            <div className="relative" style={{ width: ALBUM_PAGE_W * 2, height: ALBUM_PAGE_H }}>
+                            <div
+                                className="relative"
+                                style={{ width: ALBUM_PAGE_W * 2, height: ALBUM_PAGE_H }}
+                                onClick={onBookClick}
+                                onMouseMove={onBookMouseMove}
+                                onMouseDown={(event) => event.preventDefault()}
+                            >
                                 {leftPage != null && (
-                                    <div className="album-page-shadow absolute left-0 top-0 h-225 w-150 overflow-hidden shadow-[inset_-14px_0_26px_-12px_rgba(24,16,25,0.32)]">
+                                    <div className="absolute left-0 top-0 h-225 w-150 overflow-hidden">
                                         {leftPage}
                                     </div>
                                 )}
                                 {rightPage != null && (
-                                    <div className="album-page-shadow absolute left-150 top-0 h-225 w-150 overflow-hidden shadow-[inset_14px_0_26px_-12px_rgba(24,16,25,0.32)]">
+                                    <div className="absolute left-150 top-0 h-225 w-150 overflow-hidden">
                                         {rightPage}
                                     </div>
                                 )}
-                                {/* Spine shading over the page seam */}
-                                {!frontClosed && !backClosed && (
-                                    <div className="album-spine-shade pointer-events-none absolute top-0 left-148.25 z-40 h-225 w-3.5
-                                    bg-[linear-gradient(90deg,transparent,rgba(20,12,22,0.45)_50%,transparent)]" />
-                                )}
+
+                                <div
+                                    className="album-spine-shade pointer-events-none absolute top-0 left-148.25 z-70 h-225 w-3.5
+                                    bg-[linear-gradient(90deg,transparent,rgba(20,12,22,0.45)_50%,transparent)] transform-gpu"
+                                    style={{ opacity: leftPage != null && rightPage != null ? 1 : 0 }}
+                                />
                                 {flip && (
                                     <div
                                         ref={leafRef}
@@ -345,28 +530,13 @@ function AlbumOfCol({ groups, controlRef, onPosChange, onBookInit, keysDisabled 
                                     </div>
                                 )}
 
-                                <button
-                                    type="button"
-                                    aria-label="Previous page"
-                                    tabIndex={-1}
-                                    onMouseDown={(event) => event.preventDefault()}
-                                    onClick={() => go(-1)}
-                                    className={`absolute left-0 top-0 z-80 h-225 w-150 focus:outline-none ${position > 0 && !flip ? 'cursor-pointer' : 'cursor-default'}`}
-                                />
-                                <button
-                                    type="button"
-                                    aria-label="Next page"
-                                    tabIndex={-1}
-                                    onMouseDown={(event) => event.preventDefault()}
-                                    onClick={() => go(1)}
-                                    className={`absolute left-150 top-0 z-80 h-225 w-150 focus:outline-none ${position < backCoverPosition && !flip ? 'cursor-pointer' : 'cursor-default'}`}
-                                />
                             </div>
                         </div>
                     </div>
                 </div>
             </div>
         </div>
+        </AlbumCardZoomContext.Provider>
     );
 }
 

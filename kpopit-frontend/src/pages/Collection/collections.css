@@ -246,6 +246,84 @@
     animation: collection-modal-out 0.3s ease both;
 }
 
+/* Card zoom panel — fade only, deliberately NOT the scaling pair above.
+   The sticker itself does the moving here: it flies from its slot in the album
+   (a FLIP) to its place in the panel. A scaling ancestor would drag it off the
+   path measured at click time, so the panel holds still and only fades. */
+
+@keyframes collection-card-zoom-in {
+    from {
+        opacity: 0;
+    }
+    to {
+        opacity: 1;
+    }
+}
+
+@keyframes collection-card-zoom-out {
+    from {
+        opacity: 1;
+    }
+    to {
+        opacity: 0;
+    }
+}
+
+.collection-card-zoom-in {
+    animation: collection-card-zoom-in 0.22s ease both;
+}
+
+.collection-card-zoom-out {
+    animation: collection-card-zoom-out 0.3s ease both;
+}
+
+/* The sticker is authored at the album's own 160x220 grid, so the zoom scales it
+   rather than reimplementing it. The factor is the only thing JS provides (it
+   depends on the measured box); the rule itself lives here. Origin is top-left so
+   the scaled box starts flush with the slot the FLIP measured. */
+/* The box itself is what flies (the FLIP), and a FLIP's translate+scale only makes
+   the corners line up when the scale happens about the top-left corner. With the
+   default centre origin the card launches from the middle of nowhere. */
+.card-zoom-art {
+    transform-origin: top left;
+}
+
+/* `zoom`, deliberately not `transform: scale()`. The sticker's gold and holo
+   layers carry `transform: translateZ(0)`, so each is its own compositor layer —
+   and a promoted layer under a scaled ancestor is rastered at its own size and
+   then stretched, which turns the LV badge (also rotated, so its subtree flattens
+   into one raster) into a blurry bitmap. `zoom` scales the layout instead, so
+   every glyph is laid out at its final size and drawn at native resolution. */
+.card-zoom-art > * {
+    zoom: var(--card-zoom-scale, 1);
+}
+
+/* Desktop: the text column unfolds from behind the card once it has landed, so
+   the panel reads as coming OUT of the sticker rather than as a second,
+   unrelated entrance. Below lg the column sits under the card and needs none. */
+@media (min-width: 1024px) {
+    .card-zoom-meta {
+        animation: card-zoom-meta-in 0.26s cubic-bezier(0.22, 1, 0.36, 1) 0.18s both;
+    }
+}
+
+@keyframes card-zoom-meta-in {
+    from {
+        opacity: 0;
+        transform: translateX(-20px);
+    }
+    to {
+        opacity: 1;
+        transform: translateX(0);
+    }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .card-zoom-meta {
+        animation: none;
+    }
+}
+
 /* Mobile FxPanel sheet (below lg:) — docked to the bottom edge, so it slides
    up/down rather than scaling like a centred pop-up. */
 
@@ -434,6 +512,26 @@
 
 [data-fx-blur='off'] .collections-chrome-blur {
     backdrop-filter: none;
+}
+
+/* Focus mode — one page at a time.
+   Below lg the stage reclaims the height the status line and the carousel were
+   using (112px = navbar 48 + topbar 64, the chrome that stays). That reclaimed
+   height is what takes the page from 328x492 to 376x564, i.e. exactly 2x the
+   188x282 a spread paints today. Driven by an attribute so the ResizeObserver
+   remeasures without React remounting the book. */
+@media (max-width: 1023px) {
+    [data-focus='on'] .collections-album-stage {
+        height: calc(100svh - 112px);
+    }
+}
+
+/* The camera crosses the gutter in step with the leaf, so the reader follows the
+   page instead of watching it leave the screen. `.album-book` already transitions
+   transform (0.6s, for the closed-cover shift) — in focus it has to match the
+   leaf's 0.8s and easing, or the camera arrives before the page does. */
+[data-focus='on'] .album-book {
+    transition: transform 0.8s cubic-bezier(0.42, 0.04, 0.3, 1);
 }
 
 /* When the pages are turned off, the stage needs to adjust its padding (lg +), data-pages = carousel */
