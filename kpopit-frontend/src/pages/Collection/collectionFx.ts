@@ -1,16 +1,21 @@
 const FX_KEY = 'kpopit-collections-fx';
 
-export type FxKey = 'backdrop' | 'textures' | 'shadows' | 'blur' | 'sparkles' | 'lv2' | 'lv3';
+export type FxKey = 'backdrop' | 'textures' | 'shadows' | 'blur' | 'sparkles' | 'lv2' | 'lv3' | 'tapZoom';
 export type FxState = Record<FxKey, boolean>;
+export type FxGroup = keyof typeof FX_GROUPS;
 
 export const FX_GROUPS = {
     texture: ['backdrop', 'textures', 'shadows', 'blur'] as FxKey[],
     motion: ['sparkles', 'lv2', 'lv3'] as FxKey[],
+    // Not an effect: turning stickers into tap targets punches holes in the area
+    // that turns the page, and on a phone spread that area is already tight.
+    controls: ['tapZoom'] as FxKey[],
 };
 
 const DEFAULTS: FxState = {
     backdrop: true, textures: true, shadows: true, blur: true,
     sparkles: true, lv2: true, lv3: true,
+    tapZoom: true,
 };
 
 function readStored(): FxState {
@@ -45,12 +50,14 @@ function withMotionPreference(base: FxState): FxState {
     return { ...base, sparkles: false, lv2: false, lv3: false };
 }
 
-const FX_ORDER: FxKey[] = [...FX_GROUPS.texture, ...FX_GROUPS.motion];
+// Every group must appear here: `commit` only diffs these keys, so a key left out
+// would silently never persist.
+const FX_ORDER: FxKey[] = [...FX_GROUPS.texture, ...FX_GROUPS.motion, ...FX_GROUPS.controls];
 
 let state: FxState = readStored();
 const listeners = new Set<() => void>();
 
-const lastByGroup: Partial<Record<'texture' | 'motion', FxState>> = {};
+const lastByGroup: Partial<Record<FxGroup, FxState>> = {};
 
 export function getFxSnapshot(): FxState {
     return state;
@@ -81,7 +88,7 @@ export function setFx(key: FxKey, value: boolean) {
     commit({ ...state, [key]: value });
 }
 
-export function setFxGroup(group: 'texture' | 'motion', value: boolean) {
+export function setFxGroup(group: FxGroup, value: boolean) {
     const next = { ...state };
 
     if (value) {

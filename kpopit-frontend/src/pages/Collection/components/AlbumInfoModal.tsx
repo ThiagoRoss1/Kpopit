@@ -19,7 +19,7 @@ const INFO_ROWS = [
     {
         icon: <Layers className="w-8 h-8" />,
         title: "Flip and navigate",
-        body: "Tap the page sides (or use the arrows / ← → keys) to turn pages. The carousel below jumps straight to any opening, and the Summary jumps to a group.",
+        body: "Tap the page sides (or use the arrows / ← → keys) to turn pages. In Focus mode the same taps move across the spread first, then turn. The carousel below jumps straight to any opening, and the Summary jumps to a group.",
     },
     {
         icon: <Sticker className="w-8 h-8" />,
@@ -29,7 +29,7 @@ const INFO_ROWS = [
     {
         icon: <Smartphone className="w-8 h-8" />,
         title: "On your phone",
-        body: "Rotate your phone to landscape to see the whole album bigger.",
+        body: "Tap Focus to read one page at a time — it paints the page twice as large. Tap any sticker to enlarge it.",
     }
 ];
 

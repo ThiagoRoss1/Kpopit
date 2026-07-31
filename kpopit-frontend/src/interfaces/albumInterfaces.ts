@@ -22,6 +22,7 @@ export interface CollectionAlbumMember {
   owned: boolean;
   level: number | null;
   first_won_at: string | null;
+  times_won: number | null;
 }
 
 export interface CollectionGroupPhoto {
@@ -74,6 +75,8 @@ export interface AlbumMember {
   src: string | null;
   owned: boolean;
   level: number | null;
+  first_won_at: string | null;
+  times_won: number | null;
   is_new?: boolean;
 }
 

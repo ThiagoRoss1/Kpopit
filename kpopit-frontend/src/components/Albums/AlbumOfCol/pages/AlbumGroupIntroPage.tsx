@@ -1,6 +1,7 @@
 import AlbumContentShell, { type AlbumPageSide } from '../shell/AlbumContentShell';
 import { AlbumLockedGroupPhoto } from '../cards/AlbumLocked';
 import { useAlbumPreview } from '../albumPreview';
+import { useCardZoom } from '../albumCardZoom';
 import type { AlbumGroup } from '../../../../interfaces/albumInterfaces';
 import { formatCompanyName } from '../../../../utils/formatters';
 
@@ -16,6 +17,7 @@ export default function AlbumGroupIntroPage({ group, side = 'left' }: AlbumGroup
     const progressPercentage = total > 0 ? Math.round((owned / total) * 100) : 0;
     const photoUnlocked = Boolean(group.group_photo?.owned && group.group_photo?.src);
     const preview = useAlbumPreview();
+    const zoom = useCardZoom();
 
     const fileCells: Array<[string, string]> = [
         ['DEBUT', group.debut_year != null ? String(group.debut_year) : ''],
@@ -58,7 +60,17 @@ export default function AlbumGroupIntroPage({ group, side = 'left' }: AlbumGroup
                             style={{ background: group.palette.main }}
                         />
                     ) : photoUnlocked ? (
-                        <div className="relative z-20 h-62.5 w-full overflow-clip rounded-br-[20px] rounded-tl-[20px] border-2 border-white bg-white shadow-[2px_4px_4px_0px_rgba(0,0,0,0.3)]">
+                        <div
+                            className={`relative z-20 h-62.5 w-full overflow-clip rounded-br-[20px] rounded-tl-[20px] border-2 border-white bg-white shadow-[2px_4px_4px_0px_rgba(0,0,0,0.3)] ${
+                                zoom ? 'cursor-pointer transition-transform duration-200 hover:scale-[1.02]' : ''
+                            }`}
+                            style={{ visibility: zoom?.flyingCardId === group.group_photo?.card_id ? 'hidden' : undefined }}
+                            onClick={(event) => {
+                                if (!zoom) return;
+                                event.stopPropagation();
+                                zoom.open({ kind: 'groupPhoto', group, rect: event.currentTarget.getBoundingClientRect() });
+                            }}
+                        >
                             <img src={group.group_photo?.src || undefined} alt={group.group_name} className="pointer-events-none absolute inset-0 size-full object-cover" />
                         </div>
                     ) : (
@@ -81,8 +93,8 @@ export default function AlbumGroupIntroPage({ group, side = 'left' }: AlbumGroup
                             />
                         </div>
                     </div>
-                    {/* Group file table — 2 columns × 3 rows, symmetric */}
-                    <div className="mt-18.5 w-full overflow-clip rounded-br-[20px] rounded-tl-[20px] bg-white drop-shadow-[2px_4px_2px_rgba(0,0,0,0.4)] uppercase">
+                    
+                    <div className="mt-18.5 w-full overflow-clip rounded-br-[20px] rounded-tl-[20px] bg-white shadow-[2px_4px_2px_rgba(0,0,0,0.4)] uppercase">
                         <div className="flex h-8.5 items-center justify-between bg-(--album-deep) px-5">
                             <p className="font-sans font-bold text-[22px] leading-[normal] text-white [text-shadow:0.5px_0.5px_2px_rgba(0,0,0,0.5)]">
                                 Group File

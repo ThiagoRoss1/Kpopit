@@ -1,14 +1,14 @@
 import { useSyncExternalStore, useCallback } from 'react';
 import {
     FX_GROUPS, getFxSnapshot, setFx, setFxGroup, subscribeFx,
-    type FxKey, type FxState,
+    type FxGroup, type FxKey, type FxState,
 } from './collectionFx';
 
 /** Full state + setters. For the panel. */
 export function useCollectionFx() {
     const fx = useSyncExternalStore(subscribeFx, getFxSnapshot, getFxSnapshot);
 
-    const groupOn = useCallback((group: 'texture' | 'motion') => {
+    const groupOn = useCallback((group: FxGroup) => {
         return FX_GROUPS[group].some((key) => fx[key]);
     }, [fx]);
 
@@ -24,4 +24,4 @@ export function useFx(key: FxKey): boolean {
     );
 }
 
-export type { FxKey, FxState };
+export type { FxGroup, FxKey, FxState };

@@ -197,7 +197,7 @@ class CollectionService:
                     c.id AS card_id, COALESCE(c.image_path, i.image_path) AS image_path,
                     i.image_version,
                     uc.id IS NOT NULL AS owned,
-                    uc.level, uc.first_won_at
+                    uc.level, uc.first_won_at, uc.times_won
                 FROM idol_career AS ic
                 JOIN collection_group_eligibility AS cge
                     ON cge.group_id = ic.group_id

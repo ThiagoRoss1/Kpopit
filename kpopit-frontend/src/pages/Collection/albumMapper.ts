@@ -27,6 +27,8 @@ export function getAlbumMapping(data: CollectionAlbumGroup[]): AlbumGroup[] {
             src: resolveCdnUrl(member.image_path, member.image_version),
             owned: member.owned,
             level: member.level,
+            first_won_at: member.first_won_at,
+            times_won: member.times_won,
         })),
     }));
 }

@@ -31,6 +31,14 @@ const MOTION_ROWS: RowSpec[] = [
     { key: 'lv3', label: 'Holographic (LV3)' },
 ];
 
+const CONTROL_ROWS: RowSpec[] = [
+    {
+        key: 'tapZoom',
+        label: 'Tap to zoom stickers',
+        hint: 'Turn this off to use the whole page for turning.',
+    },
+];
+
 function FxSwitch({
     checked, onChange, night, label, hint, strong = false,
 }: {
@@ -170,7 +178,7 @@ export default function FxPanel({ night, onClose, albumName, closing, onAnimatio
     const panelRef = useRef<HTMLDivElement>(null);
 
     const wide = typeof matchMedia === 'function' && matchMedia('(min-width: 1024px)').matches;
-    const [openGroups, setOpenGroups] = useState({ texture: wide, motion: wide });
+    const [openGroups, setOpenGroups] = useState({ texture: wide, motion: wide, controls: wide });
 
     useEffect(() => {
         const onKey = (event: KeyboardEvent) => {
@@ -262,6 +270,17 @@ export default function FxPanel({ night, onClose, albumName, closing, onAnimatio
                         onToggleOpen={() => setOpenGroups((previous) => ({ ...previous, motion: !previous.motion }))}
                         masterOn={groupOn('motion')}
                         onMaster={(next) => setFxGroup('motion', next)}
+                        fx={fx}
+                        setFx={setFx}
+                        night={night}
+                    />
+                    <FxGroup
+                        title="Controls"
+                        rows={CONTROL_ROWS}
+                        open={openGroups.controls}
+                        onToggleOpen={() => setOpenGroups((previous) => ({ ...previous, controls: !previous.controls }))}
+                        masterOn={groupOn('controls')}
+                        onMaster={(next) => setFxGroup('controls', next)}
                         fx={fx}
                         setFx={setFx}
                         night={night}

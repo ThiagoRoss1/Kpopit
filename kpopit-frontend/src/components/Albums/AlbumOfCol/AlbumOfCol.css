@@ -1,5 +1,9 @@
 /* AlbumOfCol — page-turn / book 3D setup. */
 
+.album-stage {
+    touch-action: pan-x pan-y;
+}
+
 .album-perspective {
     perspective: 2600px;
 }

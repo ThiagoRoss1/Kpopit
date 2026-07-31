@@ -2,6 +2,7 @@ import type { ReactNode } from 'react';
 import AlbumContentShell, { type AlbumPageSide } from '../shell/AlbumContentShell';
 import AlbumMemberCard from '../cards/AlbumMemberCard';
 import { AlbumLockedSlot } from '../cards/AlbumLocked';
+import { useCardZoom } from '../albumCardZoom';
 import type { AlbumGroup, AlbumMember } from '../../../../interfaces/albumInterfaces';
 
 interface MembersFrameProps {
@@ -64,6 +65,7 @@ const SLOTS_PER_ROW = 2;
 
 export default function AlbumMembersPage({ group, slots, startSlot, pageLabel, side }: AlbumMembersPageProps) {
     const slotRows = [slots.slice(0, 2), slots.slice(2, 4), slots.slice(4, 6)];
+    const zoom = useCardZoom();
 
     return (
         <AlbumContentShell groupName={group.group_name} palette={group.palette} side={side}>
@@ -86,13 +88,31 @@ export default function AlbumMembersPage({ group, slots, startSlot, pageLabel, s
                                         key={member.card_id}
                                         className={`relative flex h-57.5 w-42.5 items-center justify-center ${member.owned ? 'z-40' : 'z-20'}`}
                                     >
-                                        <div className={tiltClass}>
-                                            {member.owned ? (
+                                        {member.owned ? (
+                                            // Only the sticker is a zoom target — the ~5px of slot around
+                                            // it still turns the page. A locked slot gets no handler at
+                                            // all, so its click simply bubbles to the book and turns.
+                                            <div
+                                                className={`${tiltClass} ${zoom ? 'cursor-pointer transition-transform duration-200 hover:scale-[1.04]' : ''}`}
+                                                style={{ visibility: zoom?.flyingCardId === member.card_id ? 'hidden' : undefined }}
+                                                onClick={(event) => {
+                                                    if (!zoom) return;
+                                                    event.stopPropagation();
+                                                    zoom.open({
+                                                        kind: 'member',
+                                                        member,
+                                                        group,
+                                                        rect: event.currentTarget.getBoundingClientRect(),
+                                                    });
+                                                }}
+                                            >
                                                 <AlbumMemberCard member={member} palette={group.palette} />
-                                            ) : (
+                                            </div>
+                                        ) : (
+                                            <div className={tiltClass}>
                                                 <AlbumLockedSlot slotNumber={slotNumber} name={member.artist_name} />
-                                            )}
-                                        </div>
+                                            </div>
+                                        )}
                                     </div>
                                 );
                             })}
