@@ -475,25 +475,20 @@
     animation: none;
 }
 
+/* Each effect layer owns its own keyframes now (see AlbumMemberCard.css), so
+   `animation: none` stops the real work and parks the layer on its `from` frame:
+   both sweeps start off-screen, so a switched-off card reads as plain laminate
+   with no band frozen across it. There is no shared clock left to switch off —
+   an album with no LV2/LV3 cards runs no animation at all. */
+
 [data-fx-lv2='off'] .album-gold-sheen {
     animation: none;
     opacity: 0;
 }
 
-[data-fx-lv3='off'] .album-holo-foil,
-[data-fx-lv3='off'] .album-holo-glare,
-[data-fx-lv3='off'] .album-holo-overlay {
-    animation: none;
-}
-
-/* The clock drives --album-shimmer and --album-sheen, which feed BOTH LV2 and
-   LV3, and it is the clock — not the effects — that forces an inherited style
-   recalc across the whole book every frame. So it can only stop when neither
-   level is using it; killing it for one switch alone would freeze the other
-   level at a random value. Turning one switch off is a visual choice; turning
-   both off is the one that buys frame time. */
-
-[data-fx-lv2='off'][data-fx-lv3='off'] .album-level-clock {
+[data-fx-lv3='off'] .album-holo-fill,
+[data-fx-lv3='off'] .album-holo-overlay,
+[data-fx-lv3='off'] .album-holo-glare {
     animation: none;
 }
 

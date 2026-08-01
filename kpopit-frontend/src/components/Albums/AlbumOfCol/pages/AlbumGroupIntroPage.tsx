@@ -1,5 +1,7 @@
 import AlbumContentShell, { type AlbumPageSide } from '../shell/AlbumContentShell';
 import { AlbumLockedGroupPhoto } from '../cards/AlbumLocked';
+import { TextureFill } from '../cards/AlbumMemberCard';
+import { treatmentForGroup } from '../cards/albumCardLevel';
 import { useAlbumPreview } from '../albumPreview';
 import { useCardZoom } from '../albumCardZoom';
 import type { AlbumGroup } from '../../../../interfaces/albumInterfaces';
@@ -16,6 +18,7 @@ export default function AlbumGroupIntroPage({ group, side = 'left' }: AlbumGroup
 
     const progressPercentage = total > 0 ? Math.round((owned / total) * 100) : 0;
     const photoUnlocked = Boolean(group.group_photo?.owned && group.group_photo?.src);
+    const photoFrame = treatmentForGroup(group.members);
     const preview = useAlbumPreview();
     const zoom = useCardZoom();
 
@@ -61,9 +64,9 @@ export default function AlbumGroupIntroPage({ group, side = 'left' }: AlbumGroup
                         />
                     ) : photoUnlocked ? (
                         <div
-                            className={`relative z-20 h-62.5 w-full overflow-clip rounded-br-[20px] rounded-tl-[20px] border-2 border-white bg-white shadow-[2px_4px_4px_0px_rgba(0,0,0,0.3)] ${
-                                zoom ? 'cursor-pointer transition-transform duration-200 hover:scale-[1.02]' : ''
-                            }`}
+                            className={`relative z-20 h-62.5 w-full overflow-clip rounded-br-[20px] rounded-tl-[20px] bg-white shadow-[2px_4px_4px_0px_rgba(0,0,0,0.3)] ${
+                                photoFrame === 'base' ? 'border-2 border-white' : 'album-level-static p-1.5'
+                            } ${zoom ? 'cursor-pointer transition-transform duration-200 hover:scale-[1.02]' : ''}`}
                             style={{ visibility: zoom?.flyingCardId === group.group_photo?.card_id ? 'hidden' : undefined }}
                             onClick={(event) => {
                                 if (!zoom) return;
@@ -71,7 +74,11 @@ export default function AlbumGroupIntroPage({ group, side = 'left' }: AlbumGroup
                                 zoom.open({ kind: 'groupPhoto', group, rect: event.currentTarget.getBoundingClientRect() });
                             }}
                         >
-                            <img src={group.group_photo?.src || undefined} alt={group.group_name} className="pointer-events-none absolute inset-0 size-full object-cover" />
+                            <TextureFill treatment={photoFrame} />
+                            
+                            <div className="relative size-full overflow-clip rounded-br-[14px] rounded-tl-[14px]">
+                                <img src={group.group_photo?.src || undefined} alt={group.group_name} className="pointer-events-none absolute inset-0 size-full object-cover" />
+                            </div>
                         </div>
                     ) : (
                         <AlbumLockedGroupPhoto groupName={group.group_name} className="z-20 h-62.5 w-full" pageLabel='groupIntro' />

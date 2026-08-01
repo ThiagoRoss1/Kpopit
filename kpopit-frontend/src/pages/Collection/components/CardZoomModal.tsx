@@ -170,13 +170,9 @@ export default function CardZoomModal(props: CardZoomModalProps) {
           ];
 
     return (
-        // `album-level-clock` is load-bearing: the gold and holo layers read two
-        // `inherits: true` custom properties animated by this class on the album
-        // stage. The modal lives outside that tree, so without it here the LV3 holo
-        // freezes at frame 0 — dead exactly where it is looked at most closely.
         <div
             onClick={onClose}
-            className={`album-level-clock fixed inset-0 z-260 flex items-center justify-center bg-[#1e141c]/55 px-7 py-10 backdrop-blur-xs ${backdropMotion}`}
+            className={`fixed inset-0 z-260 flex items-center justify-center bg-[#1e141c]/55 px-7 py-10 backdrop-blur-xs ${backdropMotion}`}
         >
             <div
                 onClick={(event) => event.stopPropagation()}

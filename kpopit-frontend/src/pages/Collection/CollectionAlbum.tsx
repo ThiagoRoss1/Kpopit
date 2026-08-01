@@ -89,12 +89,18 @@ export default function CollectionAlbum() {
         queryKey: ['collectionAlbum', parsedId],
         queryFn: () => getCollectionAlbum(parsedId),
         enabled: validId,
+        staleTime: 1000 * 60 * 5,
+        refetchOnWindowFocus: false,
     });
+    
     const { data: collections } = useQuery({
         queryKey: ['collectionsList'],
         queryFn: getCollectionsList,
         enabled: validId,
+        staleTime: 1000 * 60 * 5,
+        refetchOnWindowFocus: false,
     });
+
     const groups = useMemo(() => (data ? getAlbumMapping(data) : null), [data]);
     const collectionName =
         collections?.find((collection) => collection.collection_id === parsedId)?.name ??

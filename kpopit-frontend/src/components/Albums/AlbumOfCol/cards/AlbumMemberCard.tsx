@@ -1,7 +1,9 @@
+import { useLayoutEffect, useRef } from 'react';
 import type { AlbumMember, AlbumPalette } from '../../../../interfaces/albumInterfaces';
 import goldTextureSrc from '../../../../assets/materials/AlbumOfCol/gold.jpg';
 // import holoTextureSrc from '../../../../assets/materials/AlbumOfCol/holo.jpg';
 import { useAlbumPreview } from '../albumPreview';
+import { treatmentForLevel, type CardTreatment } from './albumCardLevel';
 import './AlbumMemberCard.css';
 
 interface AlbumMemberCardProps {
@@ -9,13 +11,8 @@ interface AlbumMemberCardProps {
     palette: AlbumPalette;
 }
 
-type CardTreatment = 'base' | 'gold' | 'holo';
-
-const treatmentForLevel = (level: number): CardTreatment =>
-    level >= 3 ? 'holo' : level === 2 ? 'gold' : 'base';
-
 /** Textured fill behind the frame ring / badge / banner on gold and holo cards */
-function TextureFill({ treatment }: { treatment: CardTreatment }) {
+export function TextureFill({ treatment }: { treatment: CardTreatment }) {
     if (treatment === 'base') return null;
     if (treatment === 'gold') {
         return (
@@ -49,10 +46,22 @@ function AlbumMemberCardPreview({ palette }: { palette: AlbumPalette }) {
 
 export default function AlbumMemberCard({ member, palette }: AlbumMemberCardProps) {
     const preview = useAlbumPreview();
-    if (preview) return <AlbumMemberCardPreview palette={palette} />;
-
+    const cardRef = useRef<HTMLDivElement>(null);
     const level = member.level ?? 1;
     const treatment = treatmentForLevel(level);
+    
+    useLayoutEffect(() => {
+        const host = cardRef.current;
+        if (!host) return;
+        for (const animation of host.getAnimations({ subtree: true })) {
+            if (animation instanceof CSSAnimation && animation.animationName.startsWith('album-')) {
+                animation.startTime = 0;
+            }
+        }
+    }, [treatment]);
+
+    if (preview) return <AlbumMemberCardPreview palette={palette} />;
+
     const isBaseLevel = treatment === 'base';
     const groupColorFill = { background: palette.main };
     const levelTextClass = isBaseLevel
@@ -61,6 +70,7 @@ export default function AlbumMemberCard({ member, palette }: AlbumMemberCardProp
 
     return (
         <div
+            ref={cardRef}
             className={`relative h-55 w-40 overflow-clip rounded-sm ${isBaseLevel ? 'p-0.75' : 'p-1.25'}`}
             style={isBaseLevel ? groupColorFill : undefined}
         >

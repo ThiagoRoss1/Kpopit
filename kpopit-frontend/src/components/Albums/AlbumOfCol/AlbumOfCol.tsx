@@ -171,6 +171,7 @@ function AlbumOfCol({
     // Safari-only — hence the gate and the casts; they are not in the DOM lib.
     // Delete this whole effect the day WebKit honours touch-action: nothing else
     // depends on it.
+
     useEffect(() => {
         const stageElement = albumStageRef.current;
         if (!isSafari || !stageElement) return;
@@ -190,19 +191,9 @@ function AlbumOfCol({
         const updateScale = () => {
             const stageRect = stageElement.getBoundingClientRect();
 
-            // Let the book grow past its native size on large screens so it fills
-            // more of the stage instead of floating small between the arrows. The
-            // width/height fit terms below still cap it, so it can never overflow
-            // the stage — smaller/shorter screens stay purely fit-bound.
-
             const viewportWidth = window.innerWidth;
             const maxScale =
                 viewportWidth >= 1536 ? 1.35 : viewportWidth >= 1280 ? 1.22 : viewportWidth >= 1024 ? 1.1 : 1;
-
-            // Focus mode shows one page, so the width term divides by a single page
-            // instead of the spread. Nothing else moves: maxScale, the height term
-            // and the whole-pixel snap below stay exactly as they are — that snap is
-            // what stops the spine seam rasterising differently between frames.
 
             const widthDivisor = focus === 'off' ? ALBUM_PAGE_W * 2 : ALBUM_PAGE_W;
             const fittedScale = Math.min(
@@ -210,10 +201,6 @@ function AlbumOfCol({
                 (stageRect.width - 24) / widthDivisor,
                 (stageRect.height - 24) / ALBUM_PAGE_H,
             );
-
-            // Snap so each page maps to a whole pixel count — a fractional page
-            // width rasterizes the spine seam differently per scroll frame
-            // (white line / shadow flicker between the two pages).
 
             const clampedScale = Math.max(0.2, fittedScale);
             setScale(Math.floor(clampedScale * ALBUM_PAGE_W) / ALBUM_PAGE_W);
@@ -249,6 +236,7 @@ function AlbumOfCol({
 
     // Starts a page turn — just mounts the leaf; the layout effect below kicks
     // off the rotation on the very next paint.
+
     const go = useCallback(
         (direction: 1 | -1) => {
             if (flip) return;
@@ -460,6 +448,7 @@ function AlbumOfCol({
 
     // The two buttons used to carry a per-half cursor; keep that affordance without
     // paying a React render per mouse move — write the property only when it flips.
+    
     const onBookMouseMove = useCallback(
         (event: React.MouseEvent<HTMLDivElement>) => {
             const box = event.currentTarget.getBoundingClientRect();
@@ -473,7 +462,7 @@ function AlbumOfCol({
         <AlbumCardZoomContext.Provider value={cardZoom}>
         <div
             ref={albumStageRef}
-            className="album-level-clock album-stage flex h-full min-h-0 w-full flex-col items-center px-3 pt-3 pb-3 lg:pb-28"
+            className="album-stage flex h-full min-h-0 w-full flex-col items-center px-3 pt-3 pb-3 lg:pb-28"
         >
             <div ref={stageRef} className="flex min-h-0 w-full flex-1 items-center justify-center">
                 <div className="album-perspective album-zoom-in transform-gpu">

@@ -36,9 +36,9 @@ function readStored(): FxState {
 
 /**
  * First visit only. `prefers-reduced-motion` is a preference the person set in
- * their OS, not a hardware guess and the CSS already silences .album-level-clock
- * and the sparkles under it, so leaving these switches "on" would show controls
- * for animation that provably is not running.
+ * their OS, not a hardware guess and the CSS already silences the LV2/LV3 card
+ * animations and the sparkles under it, so leaving these switches "on" would show
+ * controls for animation that provably is not running.
  */
 
 function withMotionPreference(base: FxState): FxState {

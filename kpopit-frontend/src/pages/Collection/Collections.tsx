@@ -27,6 +27,8 @@ export default function Collection() {
     const { data: collections, isLoading } = useQuery({
         queryKey: ['collectionsList'],
         queryFn: getCollectionsList,
+        staleTime: 1000 * 60 * 5,
+        refetchOnWindowFocus: false,
     });
     const totalStickers = collections?.reduce((sum, collection) => sum + collection.total_cards, 0);
 
