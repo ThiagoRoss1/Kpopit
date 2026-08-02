@@ -36,7 +36,8 @@ export default function AlbumGroupIntroPage({ group, side = 'left' }: AlbumGroup
             <div className="relative flex h-full flex-col px-7.5 pt-7.5">
                 {/* Header row: title block + SET box */}
                 <div className="flex items-start justify-between">
-                    <div className="flex flex-col whitespace-nowrap text-black [text-shadow:0.5px_0.5px_2px_rgba(0,0,0,0.35)] uppercase">
+                    <div className={`flex flex-col whitespace-nowrap uppercase [text-shadow:1px_1px_0px_rgba(0,0,0,1)]
+                    ${group.palette.main.toUpperCase() === '#000000' ? 'text-white' : 'text-black'}`}>
                         <p className="font-major-mono-display text-[22px] leading-[normal]">We are</p>
                         <p className={`font-major-mono-display leading-[normal] 
                         ${group.group_name.length > 14 
