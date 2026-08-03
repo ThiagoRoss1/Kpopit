@@ -333,27 +333,29 @@ function PixelatedMode() {
                     <div className={`flex flex-col lg:flex-row gap-4 lg:gap-10 ${isLg ? "items-start" : "items-center"}`}>
 
                         {!isLg && (
-                        <Link 
-                            to="/"
-                            className="flex flex-row items-center justify-center gap-5 mb-0">
-                            <h1 className="text-5xl font-bold text-neon-pink leading-tight">
-                                <span
-                                    className="kpop-part"
-                                    style={{ '--kpop-color': 'var(--color-neon-pink)' } as React.CSSProperties}
-                                >
-                                    Pixel
-                                </span>
+                        <div className="flex flex-row items-center justify-center gap-5 mb-0">
+                            <Link 
+                                to="/"
+                                className="inline-block bg-transparent border-0 p-0 cursor-pointer hover:scale-105
+                                transition-all duration-500 transform-gpu">
+                                <h1 className="text-5xl font-bold text-neon-pink leading-tight">
+                                    <span
+                                        className="kpop-part"
+                                        style={{ '--kpop-color': 'var(--color-neon-pink)' } as React.CSSProperties}
+                                    >
+                                        Pixel
+                                    </span>
 
-                                <span
-                                    className="it-part"
-                                    style={{ '--it-color': 'var(--color-cream)' } as React.CSSProperties}
-                                >
-                                    It
-                                </span>
-                            </h1>
-
+                                    <span
+                                        className="it-part"
+                                        style={{ '--it-color': 'var(--color-cream)' } as React.CSSProperties}
+                                    >
+                                        It
+                                    </span>
+                                </h1>
+                            </Link>
                             {statsButton}
-                        </Link>
+                        </div>  
                         )}
                         
                         {/* ── LEFT: album sleeve + vinyl + hints ── */}

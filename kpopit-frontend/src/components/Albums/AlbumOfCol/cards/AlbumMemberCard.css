@@ -61,7 +61,10 @@
 
 /* Old form: `background-position: calc(var(--album-shimmer) * 100%) 50%` plus
    `filter: hue-rotate(calc(var(--album-shimmer) * 75deg))` — shimmer running
-   0 → 1. Both endpoints are reproduced exactly here. */
+   0 → 1. Both endpoints are reproduced exactly here. The hue-rotate is not a
+   pure hue shift — the CSS filter matrix does not preserve luminance — so it is
+   what gives the holo its brighter, higher-contrast swing, and dropping it
+   visibly flattens the card. It stays. */
 
 @keyframes album-holo-shimmer {
     from {
@@ -72,6 +75,11 @@
         background-position: 100% 50%;
         filter: hue-rotate(75deg);
     }
+}
+
+.album-lv-badge .album-holo-fill {
+    rotate: -6deg;
+    inset: -25%;
 }
 
 /* ---- LV3 holo — pure CSS rainbow bands easing back and forth (a stuck sticker
@@ -144,18 +152,6 @@
     animation: album-holo-glare-sweep 4.2s ease-in-out infinite alternate;
     mix-blend-mode: screen;
     transform: translateZ(0);
-}
-
-/* Static variant — the group photo frame borrows the same fills so it reads as
-   the same family as the stickers, but never animates. A large rectangle
-   sweeping behind the reward photo would compete with the stickers, which are
-   the thing that should catch the light, and a frozen gradient costs nothing
-   per frame. */
-   
-.album-level-static .album-gold-sheen,
-.album-level-static .album-gold-tint,
-.album-level-static .album-holo-fill {
-    animation: none;
 }
 
 @media (prefers-reduced-motion: reduce) {

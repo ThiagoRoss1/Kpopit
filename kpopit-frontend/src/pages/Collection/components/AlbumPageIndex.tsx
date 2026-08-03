@@ -126,7 +126,7 @@ export default function AlbumPageIndex({ collectionName, groups, currentGroupId,
             </div>
             
             <div
-                className={`album-index-scroll mt-2 -mx-1 flex min-h-0 flex-col gap-0.5 overflow-y-auto px-1 py-1 contain-[paint] ${
+                className={`album-index-scroll mt-2 -mx-2 flex min-h-0 flex-col gap-1 overflow-y-auto px-2 py-1 contain-[paint] ${
                     night ? 'album-index-scroll--night' : ''
                 }`}
             >

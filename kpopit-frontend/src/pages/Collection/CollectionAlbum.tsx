@@ -48,7 +48,7 @@ function SideArrow({ direction, disabled, onClick, night }: { direction: -1 | 1;
 }
 
 const BtnClasses = (night: boolean) =>
-    `border-2 transition-all duration-150 transform-gpu hover:brightness-110 active:translate-y-0.5 ${
+    `collections-press border-2 transition-all duration-150 transform-gpu hover:brightness-110 active:translate-y-0.5 ${
         night
             ? 'border-neon-pink/60 bg-[#1c1f27] text-white shadow-[0_3px_0_rgba(255,51,153,0.6)] active:shadow-[0_1px_0_rgba(255,51,153,0.6)]'
             : 'border-ink bg-white text-ink shadow-[0_3px_0_var(--color-ink)] active:shadow-[0_1px_0_var(--color-ink)]'
@@ -285,8 +285,9 @@ export default function CollectionAlbum() {
             >
                 <CollectionsBackdrop night={night} />
 
-                {/* Top bar */}
-                <header className="relative z-30 flex flex-none items-center justify-between gap-3 px-4.5 py-3">
+                {/* Top bar */}\
+                
+                <header className="relative z-30 flex flex-none items-center justify-between gap-3 px-2 xxs:px-4.5 lg:px-8 py-3">
                     <div className="flex items-center gap-2">
                         <Link
                             to="/collections"
@@ -399,7 +400,7 @@ export default function CollectionAlbum() {
                     {isLg && rail.mounted && (
                         <aside
                             {...rail.animationProps}
-                            className={`flex z-10 mb-3 ml-4.5 mt-1 w-64.5 flex-none flex-col rounded-2xl border-2 px-4.5 py-4.5 transform-gpu transition-colors duration-300 ${
+                            className={`flex z-10 mb-3 ml-4.5 lg:ml-8 mt-1 w-64.5 flex-none flex-col rounded-2xl border-2 px-4.5 py-4.5 transform-gpu transition-colors duration-300 ${
                             rail.closing ? 'collection-rail-out' : 'collection-rail-in'
                             } ${
                                 night

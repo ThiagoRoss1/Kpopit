@@ -26,8 +26,8 @@ export function AlbumMembersFrame({ group, pageLabel, children }: MembersFramePr
                         <p className="font-major-mono-display uppercase">{group.group_name}</p>
                     </div>
                 </div>
-                <div className="mt-2.5 flex h-10 w-15 items-center justify-center rounded-br-[20px] rounded-tl-[20px] border border-[#737373] bg-white drop-shadow-[2px_4px_2px_rgba(0,0,0,0.4)]">
-                    <p className="whitespace-nowrap font-sans text-[22px] leading-[normal] text-(--album-light) [text-shadow:0.5px_0.5px_2px_rgba(0,0,0,0.35)]">
+                <div className="mt-2.5 flex h-10 w-15 items-center justify-center rounded-br-[20px] rounded-tl-[20px] border border-(--album-main) bg-white drop-shadow-[2px_4px_2px_rgba(0,0,0,0.6)]">
+                    <p className="whitespace-nowrap font-sans text-[22px] leading-[normal] text-black [text-shadow:0.5px_0.5px_2px_rgba(0,0,0,0.35)]">
                         {owned}/{group.members.length}
                     </p>
                 </div>

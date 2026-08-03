@@ -84,8 +84,7 @@ export default function AlbumMemberCard({ member, palette }: AlbumMemberCardProp
                     decoding="async"
                     className="pointer-events-none absolute inset-0 size-full object-cover"
                 />
-                {/* LV badge */}
-                <div className="relative mr-1.5 mt-3 rotate-6 self-end">
+                <div className="album-lv-badge relative mr-1.5 mt-3 rotate-6 self-end">
                     <div className={`relative flex h-6 w-13 items-center justify-center overflow-clip rounded-sm ${isBaseLevel ? 'bg-[#d9d9d9]' : ''}`}>
                         <TextureFill treatment={treatment} />
                         <p className={`font-major-mono-display relative whitespace-nowrap text-[14px] font-bold leading-[normal] ${levelTextClass}`}>
@@ -93,6 +92,7 @@ export default function AlbumMemberCard({ member, palette }: AlbumMemberCardProp
                         </p>
                     </div>
                 </div>
+                
                 {/* Name banner — carries the level fill on gold and holo */}
                 <div
                     className="relative mb-2 flex h-6.5 w-35 items-center justify-center self-center overflow-clip rounded-br-xl rounded-tl-xl"

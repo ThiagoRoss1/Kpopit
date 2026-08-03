@@ -270,30 +270,17 @@
 }
 
 .collection-card-zoom-in {
-    animation: collection-card-zoom-in 0.22s ease both;
+    animation: collection-card-zoom-in 1.2s ease both;
 }
 
 .collection-card-zoom-out {
     animation: collection-card-zoom-out 0.3s ease both;
 }
 
-/* The sticker is authored at the album's own 160x220 grid, so the zoom scales it
-   rather than reimplementing it. The factor is the only thing JS provides (it
-   depends on the measured box); the rule itself lives here. Origin is top-left so
-   the scaled box starts flush with the slot the FLIP measured. */
-/* The box itself is what flies (the FLIP), and a FLIP's translate+scale only makes
-   the corners line up when the scale happens about the top-left corner. With the
-   default centre origin the card launches from the middle of nowhere. */
 .card-zoom-art {
     transform-origin: top left;
 }
 
-/* `zoom`, deliberately not `transform: scale()`. The sticker's gold and holo
-   layers carry `transform: translateZ(0)`, so each is its own compositor layer —
-   and a promoted layer under a scaled ancestor is rastered at its own size and
-   then stretched, which turns the LV badge (also rotated, so its subtree flattens
-   into one raster) into a blurry bitmap. `zoom` scales the layout instead, so
-   every glyph is laid out at its final size and drawn at native resolution. */
 .card-zoom-art > * {
     zoom: var(--card-zoom-scale, 1);
 }
@@ -301,9 +288,10 @@
 /* Desktop: the text column unfolds from behind the card once it has landed, so
    the panel reads as coming OUT of the sticker rather than as a second,
    unrelated entrance. Below lg the column sits under the card and needs none. */
+
 @media (min-width: 1024px) {
     .card-zoom-meta {
-        animation: card-zoom-meta-in 0.26s cubic-bezier(0.22, 1, 0.36, 1) 0.18s both;
+        animation: card-zoom-meta-in 1s cubic-bezier(0.22, 1, 0.36, 1) 0.18s both;
     }
 }
 
@@ -432,6 +420,15 @@
     .collections-root *::after {
         transition-property: transform, translate, scale, rotate;
     }
+
+    /* Opts back into box-shadow/filter transitions — the wildcard rule above
+    restricts Collections to cheap transform-only transitions on mobile,
+    which silently breaks a button's pressed-shadow animation unless it
+    carries this class. */
+    
+    .collections-root .collections-press {
+        transition-property: transform, translate, scale, rotate, box-shadow, filter;
+    }
 }
 
 /* Light/night toggle — a diagonal shine sweeps across on hover. The button must
@@ -515,6 +512,7 @@
    height is what takes the page from 328x492 to 376x564, i.e. exactly 2x the
    188x282 a spread paints today. Driven by an attribute so the ResizeObserver
    remeasures without React remounting the book. */
+
 @media (max-width: 1023px) {
     [data-focus='on'] .collections-album-stage {
         height: calc(100svh - 112px);
@@ -525,6 +523,7 @@
    page instead of watching it leave the screen. `.album-book` already transitions
    transform (0.6s, for the closed-cover shift) — in focus it has to match the
    leaf's 0.8s and easing, or the camera arrives before the page does. */
+   
 [data-focus='on'] .album-book {
     transition: transform 0.8s cubic-bezier(0.42, 0.04, 0.3, 1);
 }

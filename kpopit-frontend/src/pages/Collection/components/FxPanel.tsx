@@ -226,7 +226,7 @@ export default function FxPanel({ night, onClose, albumName, closing, onAnimatio
             >
                 <div className="flex items-start justify-between gap-2.5">
                     <div className="min-w-0">
-                        <p className={`text-[10px] uppercase font-bold tracking-[0.20em] ${night ? 'text-neon-pink' : 'text-[#C62368]'}`}>
+                        <p className={`text-[10px] uppercase font-bold tracking-widest ${night ? 'text-neon-pink' : 'text-[#C62368]'}`}>
                             Visual effects
                         </p>
                         

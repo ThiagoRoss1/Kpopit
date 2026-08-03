@@ -50,12 +50,13 @@ export default function AlbumGroupIntroPage({ group, side = 'left' }: AlbumGroup
                         <p className="font-korean text-[22px] font-bold leading-[normal]">{group.hangul_name}</p>
                     </div>
                     <div className="font-major-mono-display flex size-15 flex-col items-center justify-center gap-0.5 rounded-br-[20px] rounded-tl-[20px] 
-                    border border-white bg-[#d9d9d9] text-center drop-shadow-[2px_4px_2px_rgba(0,0,0,0.4)] 
+                    border border-(--album-main) bg-white text-center drop-shadow-[2px_4px_2px_rgba(0,0,0,0.6)] 
                     [text-shadow:0.5px_0.5px_2px_rgba(0,0,0,0.35)] uppercase">
-                        <p className="text-[30px] leading-none text-(--album-light)">{group.set}</p>
-                        <p className="text-[16px] leading-none text-(--album-deep)">Set</p>
+                        <p className="text-[30px] leading-none text-black">{group.set}</p>
+                        <p className="text-[16px] leading-none text-black">Set</p>
                     </div>
                 </div>
+
                 {/* Central 3-in-1 block */}
                 <div className="flex flex-1 flex-col justify-center items-center px-5 pb-22">
                     {preview ? (
@@ -66,7 +67,7 @@ export default function AlbumGroupIntroPage({ group, side = 'left' }: AlbumGroup
                     ) : photoUnlocked ? (
                         <div
                             className={`relative z-20 h-62.5 w-full overflow-clip rounded-br-[20px] rounded-tl-[20px] bg-white shadow-[2px_4px_4px_0px_rgba(0,0,0,0.3)] ${
-                                photoFrame === 'base' ? 'border-2 border-white' : 'album-level-static p-1.5'
+                            photoFrame === 'base' ? 'border-2 border-white' : 'p-1.5'
                             } ${zoom ? 'cursor-pointer transition-transform duration-200 hover:scale-[1.02]' : ''}`}
                             style={{ visibility: zoom?.flyingCardId === group.group_photo?.card_id ? 'hidden' : undefined }}
                             onClick={(event) => {
@@ -84,7 +85,8 @@ export default function AlbumGroupIntroPage({ group, side = 'left' }: AlbumGroup
                     ) : (
                         <AlbumLockedGroupPhoto groupName={group.group_name} className="z-20 h-62.5 w-full" pageLabel='groupIntro' />
                     )}
-                    {/* album progress */}
+
+                    {/* Album progress */}
                     <div className="mt-3 w-full">
                         <div className="flex items-center justify-between uppercase">
                             <p className="font-major-mono-display text-[22px] leading-[normal] text-(--album-main) [text-shadow:1px_1px_1px_rgba(0,0,0,0.5)]">
