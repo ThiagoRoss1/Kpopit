@@ -485,6 +485,59 @@ def test_album_omits_ineligible_and_cardless_pages(db_conn, make_user, collectio
     assert [g["group_id"] for g in album] == [page["group_id"]]
 
 
+def test_album_member_has_contiguous_card_number(db_conn, make_user, collection_page):
+    """Every member carries a contiguous per-collection card_number 1..N, independent
+    of the raw cards.id serial (which has gaps from re-seeds + group_photo rows)."""
+    user_id, _ = make_user()
+    collection_page("NumberA", n_members=2)
+    collection_page("NumberB", n_members=3)
+
+    service = CollectionService(db_conn)
+    with db_conn.cursor() as cur:
+        album = service.get_album(cur, user_id, collection_id=1)
+
+    numbers = sorted({m["card_number"] for g in album for m in g["members"]})
+    assert numbers == list(range(1, len(numbers) + 1))
+
+
+def test_card_number_follows_idol_id_order(db_conn, make_user, collection_page):
+    """card_number ranks by idol_id (not the arbitrary cards.id serial): sorting the
+    idols by idol_id yields card_numbers 1..N in that exact order."""
+    user_id, _ = make_user()
+    collection_page("OrderA", n_members=3)
+    collection_page("OrderB", n_members=2)
+
+    service = CollectionService(db_conn)
+    with db_conn.cursor() as cur:
+        album = service.get_album(cur, user_id, collection_id=1)
+
+    pairs = sorted({(m["idol_id"], m["card_number"]) for g in album for m in g["members"]})
+    numbers_in_idol_order = [card_number for _, card_number in pairs]
+    assert numbers_in_idol_order == list(range(1, len(numbers_in_idol_order) + 1))
+
+
+def test_multi_group_idol_shares_one_card_number(db_conn, make_user, collection_page, make_career):
+    """A shared idol keeps her single card number on every page she appears on."""
+    user_id, _ = make_user()
+    page_a = collection_page("SharedA", n_members=2)
+    page_b = collection_page("SharedB", n_members=2)
+    shared_idol = page_a["idol_ids"][1]
+    make_career(shared_idol, page_b["group_id"], is_active=False)
+    shared_card_id = page_a["card_ids"][1]
+
+    service = CollectionService(db_conn)
+    with db_conn.cursor() as cur:
+        album = service.get_album(cur, user_id, collection_id=1)
+
+    numbers_for_card = {
+        m["card_number"]
+        for g in album
+        for m in g["members"]
+        if m["card_id"] == shared_card_id
+    }
+    assert len(numbers_for_card) == 1
+
+
 def test_album_route_anonymous_uuid_sees_ownership(client, db_conn, make_user, collection_page):
     user_id, token = make_user()
     page = collection_page(n_members=2)

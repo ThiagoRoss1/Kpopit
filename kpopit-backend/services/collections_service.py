@@ -189,7 +189,7 @@ class CollectionService:
             """, (collection_id,)
         )
         affiliations = {row["group_id"]: row for row in cursor.fetchall()}
-
+        
         cursor.execute(
             """
                 SELECT DISTINCT ON (ic.group_id, ic.idol_id)
@@ -197,7 +197,8 @@ class CollectionService:
                     c.id AS card_id, COALESCE(c.image_path, i.image_path) AS image_path,
                     i.image_version,
                     uc.id IS NOT NULL AS owned,
-                    uc.level, uc.first_won_at, uc.times_won
+                    uc.level, uc.first_won_at, uc.times_won,
+                    DENSE_RANK() OVER (ORDER BY ic.idol_id) AS card_number
                 FROM idol_career AS ic
                 JOIN collection_group_eligibility AS cge
                     ON cge.group_id = ic.group_id
