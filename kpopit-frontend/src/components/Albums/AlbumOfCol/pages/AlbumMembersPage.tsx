@@ -56,14 +56,11 @@ export function AlbumMembersFrame({ group, pageLabel, children }: MembersFramePr
 interface AlbumMembersPageProps {
     group: AlbumGroup;
     slots: Array<AlbumMember | null>;
-    startSlot: number;
     pageLabel: string;
     side: AlbumPageSide;
 }
 
-const SLOTS_PER_ROW = 2;
-
-export default function AlbumMembersPage({ group, slots, startSlot, pageLabel, side }: AlbumMembersPageProps) {
+export default function AlbumMembersPage({ group, slots, pageLabel, side }: AlbumMembersPageProps) {
     const slotRows = [slots.slice(0, 2), slots.slice(2, 4), slots.slice(4, 6)];
     const zoom = useCardZoom();
 
@@ -77,11 +74,10 @@ export default function AlbumMembersPage({ group, slots, startSlot, pageLabel, s
                     {slotRows.map((rowMembers, rowIndex) => (
                         <div key={rowIndex} className="flex justify-center gap-27">
                             {rowMembers.map((member, columnIndex) => {
-                                const slotNumber = startSlot + rowIndex * SLOTS_PER_ROW + columnIndex + 1;
                                 const tiltClass = columnIndex === 0 ? '-rotate-2' : 'rotate-2';
 
                                 if (!member) {
-                                    return <div key={`empty-slot-${slotNumber}`} className="h-57.5 w-42.5" />;
+                                    return <div key={`empty-slot-${rowIndex}-${columnIndex}`} className="h-57.5 w-42.5" />;
                                 }
                                 return (
                                     <div
@@ -110,7 +106,7 @@ export default function AlbumMembersPage({ group, slots, startSlot, pageLabel, s
                                             </div>
                                         ) : (
                                             <div className={tiltClass}>
-                                                <AlbumLockedSlot slotNumber={slotNumber} name={member.artist_name} />
+                                                <AlbumLockedSlot slotNumber={member.card_number} name={member.artist_name} />
                                             </div>
                                         )}
                                     </div>

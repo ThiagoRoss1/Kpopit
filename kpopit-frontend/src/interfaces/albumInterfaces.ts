@@ -1,13 +1,8 @@
 export interface AlbumPalette {
-  /* Darkest stop — dark text, gradient dark end, GROUP FILE header */
   deep: string;
-  /* Dark-mid supporting tone (wave layers) */
   secondary: string;
-  /* The group's main color — card borders, circle decor, titles */
   main: string;
-  /* Bright-mid pop tone (wave layers) */
   accent: string;
-  /* Lightest stop — light decor tone: slab, lightest wave layer, gradient light ends */
   light: string;
 }
 
@@ -17,6 +12,7 @@ export interface CollectionAlbumMember {
   idol_id: number;
   artist_name: string;
   card_id: number;
+  card_number: number;
   image_path: string;
   image_version: string | null;
   owned: boolean;
@@ -72,6 +68,7 @@ export interface AlbumMember {
   idol_id: number;
   artist_name: string;
   card_id: number;
+  card_number: number;
   src: string | null;
   owned: boolean;
   level: number | null;

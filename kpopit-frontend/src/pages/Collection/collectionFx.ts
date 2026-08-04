@@ -1,21 +1,19 @@
 const FX_KEY = 'kpopit-collections-fx';
 
-export type FxKey = 'backdrop' | 'textures' | 'shadows' | 'blur' | 'sparkles' | 'lv2' | 'lv3' | 'tapZoom';
+export type FxKey = 'backdrop' | 'textures' | 'shadows' | 'blur' | 'sparkles' | 'lv2' | 'lv3' | 'tapZoom' | 'arrows';
 export type FxState = Record<FxKey, boolean>;
 export type FxGroup = keyof typeof FX_GROUPS;
 
 export const FX_GROUPS = {
     texture: ['backdrop', 'textures', 'shadows', 'blur'] as FxKey[],
     motion: ['sparkles', 'lv2', 'lv3'] as FxKey[],
-    // Not an effect: turning stickers into tap targets punches holes in the area
-    // that turns the page, and on a phone spread that area is already tight.
-    controls: ['tapZoom'] as FxKey[],
+    controls: ['tapZoom', 'arrows'] as FxKey[],
 };
 
 const DEFAULTS: FxState = {
     backdrop: true, textures: true, shadows: true, blur: true,
     sparkles: true, lv2: true, lv3: true,
-    tapZoom: true,
+    tapZoom: true, arrows: true,
 };
 
 function readStored(): FxState {

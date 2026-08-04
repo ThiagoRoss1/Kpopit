@@ -279,6 +279,9 @@
 
 .card-zoom-art {
     transform-origin: top left;
+    /* Cap a single stale (pre-recompute) frame so the zoomed child can't paint
+    past the box during a breakpoint swap. */
+    overflow: hidden;
 }
 
 .card-zoom-art > * {

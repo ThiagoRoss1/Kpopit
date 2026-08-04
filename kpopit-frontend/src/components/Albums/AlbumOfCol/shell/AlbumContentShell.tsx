@@ -2,6 +2,7 @@ import type { CSSProperties, ReactNode } from 'react';
 import type { AlbumPalette } from '../../../../interfaces/albumInterfaces';
 import { SideWaves, VectorCircle, VectorSlab } from './AlbumDecorShapes';
 import { TextureLighting, PaperGrain } from './AlbumTextures';
+import { useAlbumPreview } from '../albumPreview';
 
 export type AlbumPageSide = 'left' | 'right';
 
@@ -45,6 +46,8 @@ function ContentDecor({ palette }: { palette: AlbumPalette }) {
 }
 
 export default function AlbumContentShell({ groupName, palette, side, children }: AlbumContentShellProps) {
+    const preview = useAlbumPreview();
+
     const paletteVars = {
         '--album-deep': palette.deep,
         '--album-secondary': palette.secondary,
@@ -55,10 +58,12 @@ export default function AlbumContentShell({ groupName, palette, side, children }
 
     return (
         <div className="relative h-225 w-150 overflow-hidden bg-white" style={paletteVars}>
-            <GroupWatermark groupName={groupName} />
-            <div className={`absolute inset-0 ${side === 'left' ? '-scale-x-100' : ''}`}>
-                <ContentDecor palette={palette} />
-            </div>
+            {!preview && <GroupWatermark groupName={groupName} />}
+            {!preview && (
+                <div className={`absolute inset-0 ${side === 'left' ? '-scale-x-100' : ''}`}>
+                    <ContentDecor palette={palette} />
+                </div>
+            )}
             {children}
             <TextureLighting className="z-10" />
             <PaperGrain className="z-30" />

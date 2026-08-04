@@ -5,6 +5,7 @@ import type { CardZoomTarget } from '../../../components/Albums/AlbumOfCol/album
 import { formatCardDate } from '../../../utils/formatCardDate';
 import { treatmentForGroup } from '../../../components/Albums/AlbumOfCol/cards/albumCardLevel';
 import { TextureFill } from '../../../components/Albums/AlbumOfCol/cards/AlbumMemberCard';
+import { useSyncAlbumAnimations } from '../../../components/Albums/AlbumOfCol/cards/useSyncAlbumAnimations';
 
 interface CardZoomModalProps {
     target: CardZoomTarget;
@@ -18,6 +19,7 @@ interface CardZoomModalProps {
 interface MetaCell {
     label: string;
     value: ReactNode;
+    align: string;
 }
 
 const LEVEL_NAME: Record<number, string> = { 1: 'BASE', 2: 'GOLD', 3: 'HOLO' };
@@ -71,8 +73,6 @@ function MetaRow({ cell, align, night }: { cell: MetaCell; align: string; night:
     );
 }
 
-const MOBILE_ALIGN = ['text-left', 'text-center', 'text-right'];
-
 export default function CardZoomModal(props: CardZoomModalProps) {
     const { target, collectionName, night, onClose, closing, onAnimationEnd } = props;
 
@@ -85,6 +85,8 @@ export default function CardZoomModal(props: CardZoomModalProps) {
     const [artSettled, setArtSettled] = useState(!isMember);
 
     const artRef = useRef<HTMLDivElement>(null);
+    
+    useSyncAlbumAnimations(artRef, isMember ? null : groupPhotoFrame);
 
     const backdropMotion = closing ? 'collection-backdrop-out' : 'collection-backdrop-in';
     const panelMotion = closing ? 'collection-card-zoom-out' : 'collection-card-zoom-in';
@@ -94,9 +96,16 @@ export default function CardZoomModal(props: CardZoomModalProps) {
 
         if (!artElement || !isMember) return;
 
+        let raf = 0;
         const measure = () => {
-            const { clientWidth } = artElement;
-            if (clientWidth === 0) return;
+            const el = artRef.current;
+            if (!el) return;
+            const { clientWidth } = el;
+            
+            if (clientWidth === 0) {
+                raf = requestAnimationFrame(measure);
+                return;
+            }
             setStickerScale(clientWidth / STICKER_GRID_W);
             setArtSettled(true);
         };
@@ -106,7 +115,10 @@ export default function CardZoomModal(props: CardZoomModalProps) {
         const resizeObserver = new ResizeObserver(measure);
         resizeObserver.observe(artElement);
 
-        return () => resizeObserver.disconnect();
+        return () => {
+            cancelAnimationFrame(raf);
+            resizeObserver.disconnect();
+        };
     }, [isMember]);
 
     const didFly = useRef(false);
@@ -157,6 +169,7 @@ export default function CardZoomModal(props: CardZoomModalProps) {
         ? [
               {
                   label: 'Level',
+                  align: 'text-left',
                   value: (
                       <span className="inline-flex items-center gap-1.75">
                           <LevelPips level={level} night={night} />
@@ -164,13 +177,13 @@ export default function CardZoomModal(props: CardZoomModalProps) {
                       </span>
                   ),
               },
-              { label: 'Copies', value: `${target.member.times_won ?? 1}x` },
-              { label: 'Obtained at', value: formatCardDate(target.member.first_won_at) },
+              { label: 'Copies', align: 'text-center', value: `${target.member.times_won ?? 1}x` },
+              { label: 'Obtained at', align: 'text-right', value: formatCardDate(target.member.first_won_at) },
           ]
         : [
-              { label: 'Collection', value: collectionName.toUpperCase() },
-              { label: 'Page', value: group.set },
-              { label: 'Stickers', value: `${ownedCount}/${group.members.length}` },
+              { label: 'Collection', align: 'text-left', value: collectionName.toUpperCase() },
+              { label: 'Page', align: 'text-left', value: group.set },
+              { label: 'Stickers', align: 'text-right', value: `${ownedCount}/${group.members.length}` },
           ];
 
     return (
@@ -228,6 +241,7 @@ export default function CardZoomModal(props: CardZoomModalProps) {
                                 src={group.group_photo?.src || undefined}
                                 alt={group.group_name}
                                 className="h-full w-full object-contain lg:object-cover"
+                                draggable={false}
                             />
                         </div>
                     </div>
@@ -235,9 +249,10 @@ export default function CardZoomModal(props: CardZoomModalProps) {
 
                 <div className="card-zoom-meta mt-4 flex w-full min-w-0 flex-1 flex-col lg:mt-0">
                     <p
-                        className="font-major-mono-display text-[10px] lg:text-[12px] text-neon-pink [text-shadow:1px_1px_0px_rgba(0,0,0,0.6)] font-bold uppercase tracking-[0.04em]"
+                        className="font-major-mono-display text-[12px] lg:text-[12px] text-neon-pink [text-shadow:1px_1px_0px_rgba(0,0,0,0.6)] 
+                        font-bold uppercase tracking-[0.04em]"
                     >
-                        {isMember ? `${collectionName} · Card #${target.member.card_id}` : 'Group Page · Reward'}
+                        {isMember ? `${collectionName} · Card #${target.member.card_number}` : 'Group Page · Reward'}
                     </p>
 
                     {/* Flex row kept for a future hangul name — idols have no Korean
@@ -253,14 +268,14 @@ export default function CardZoomModal(props: CardZoomModalProps) {
                     </div>
 
                     <p className={`mt-1 text-[12px] font-bold ${night ? 'text-white/62' : 'text-[#7a6b74]'}`}>
-                        {isMember ? identity : 'Unlocked by obtaining every sticker on this page.'}
+                        {isMember ? identity : `Unlocked by obtaining all ${group.group_name.charAt(0).toUpperCase() + group.group_name.slice(1).toLowerCase()} stickers`}
                     </p>
 
                     <div className={`my-3.5 h-px lg:my-5 ${night ? 'bg-white/16' : 'bg-[#3c2f38]/20'}`} />
 
                     <div className="flex justify-between gap-4 lg:flex-col lg:gap-6">
-                        {cells.map((cell, index) => (
-                            <MetaRow key={cell.label} cell={cell} align={MOBILE_ALIGN[index]} night={night} />
+                        {cells.map((cell) => (
+                            <MetaRow key={cell.label} cell={cell} align={cell.align} night={night} />
                         ))}
                     </div>
                 </div>

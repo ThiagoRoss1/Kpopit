@@ -1,9 +1,10 @@
-import { useLayoutEffect, useRef } from 'react';
+import { useRef } from 'react';
 import type { AlbumMember, AlbumPalette } from '../../../../interfaces/albumInterfaces';
 import goldTextureSrc from '../../../../assets/materials/AlbumOfCol/gold.jpg';
 // import holoTextureSrc from '../../../../assets/materials/AlbumOfCol/holo.jpg';
 import { useAlbumPreview } from '../albumPreview';
 import { treatmentForLevel, type CardTreatment } from './albumCardLevel';
+import { useSyncAlbumAnimations } from './useSyncAlbumAnimations';
 import './AlbumMemberCard.css';
 
 interface AlbumMemberCardProps {
@@ -50,15 +51,7 @@ export default function AlbumMemberCard({ member, palette }: AlbumMemberCardProp
     const level = member.level ?? 1;
     const treatment = treatmentForLevel(level);
     
-    useLayoutEffect(() => {
-        const host = cardRef.current;
-        if (!host) return;
-        for (const animation of host.getAnimations({ subtree: true })) {
-            if (animation instanceof CSSAnimation && animation.animationName.startsWith('album-')) {
-                animation.startTime = 0;
-            }
-        }
-    }, [treatment]);
+    useSyncAlbumAnimations(cardRef, treatment);
 
     if (preview) return <AlbumMemberCardPreview palette={palette} />;
 

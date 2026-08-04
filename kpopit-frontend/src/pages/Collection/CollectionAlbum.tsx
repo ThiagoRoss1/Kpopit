@@ -433,8 +433,12 @@ export default function CollectionAlbum() {
                         {/* Stage */}
                         <div className="relative flex min-h-0 min-w-0 flex-1 flex-col">
                             <div className="collections-album-stage relative z-2 h-[clamp(300px,calc(100svh-260px),700px)] md:px-16 lg:h-auto lg:min-h-0 lg:flex-1 xl:px-20">
-                                <SideArrow direction={-1} disabled={frontClosed || shown.flipping} onClick={() => controls.current?.go(-1)} night={night} />
-                                <SideArrow direction={1} disabled={backClosed || shown.flipping} onClick={() => controls.current?.go(1)} night={night} />
+                                {fx.arrows && (
+                                    <>
+                                        <SideArrow direction={-1} disabled={frontClosed || shown.flipping} onClick={() => controls.current?.go(-1)} night={night} />
+                                        <SideArrow direction={1} disabled={backClosed || shown.flipping} onClick={() => controls.current?.go(1)} night={night} />
+                                    </>
+                                )}
 
                                 <AlbumOfCol
                                     groups={groups}

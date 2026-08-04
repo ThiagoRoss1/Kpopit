@@ -1,7 +1,9 @@
+import { useRef } from 'react';
 import AlbumContentShell, { type AlbumPageSide } from '../shell/AlbumContentShell';
 import { AlbumLockedGroupPhoto } from '../cards/AlbumLocked';
 import { TextureFill } from '../cards/AlbumMemberCard';
 import { treatmentForGroup } from '../cards/albumCardLevel';
+import { useSyncAlbumAnimations } from '../cards/useSyncAlbumAnimations';
 import { useAlbumPreview } from '../albumPreview';
 import { useCardZoom } from '../albumCardZoom';
 import type { AlbumGroup } from '../../../../interfaces/albumInterfaces';
@@ -21,6 +23,9 @@ export default function AlbumGroupIntroPage({ group, side = 'left' }: AlbumGroup
     const photoFrame = treatmentForGroup(group.members);
     const preview = useAlbumPreview();
     const zoom = useCardZoom();
+    const photoRef = useRef<HTMLDivElement>(null);
+    
+    useSyncAlbumAnimations(photoRef, photoFrame);
 
     const fileCells: Array<[string, string]> = [
         ['DEBUT', group.debut_year != null ? String(group.debut_year) : ''],
@@ -66,6 +71,7 @@ export default function AlbumGroupIntroPage({ group, side = 'left' }: AlbumGroup
                         />
                     ) : photoUnlocked ? (
                         <div
+                            ref={photoRef}
                             className={`relative z-20 h-62.5 w-full overflow-clip rounded-br-[20px] rounded-tl-[20px] bg-white shadow-[2px_4px_4px_0px_rgba(0,0,0,0.3)] ${
                             photoFrame === 'base' ? 'border-2 border-white' : 'p-1.5'
                             } ${zoom ? 'cursor-pointer transition-transform duration-200 hover:scale-[1.02]' : ''}`}
@@ -79,7 +85,13 @@ export default function AlbumGroupIntroPage({ group, side = 'left' }: AlbumGroup
                             <TextureFill treatment={photoFrame} />
                             
                             <div className="relative size-full overflow-clip rounded-br-[14px] rounded-tl-[14px]">
-                                <img src={group.group_photo?.src || undefined} alt={group.group_name} className="pointer-events-none absolute inset-0 size-full object-cover" />
+                                <img 
+                                    src={group.group_photo?.src || undefined} 
+                                    alt={group.group_name} 
+                                    className="pointer-events-none absolute inset-0 size-full object-cover" 
+                                    draggable={false}
+                                    loading='lazy'
+                                />
                             </div>
                         </div>
                     ) : (

@@ -24,6 +24,7 @@ export function getAlbumMapping(data: CollectionAlbumGroup[]): AlbumGroup[] {
             idol_id: member.idol_id,
             artist_name: member.artist_name,
             card_id: member.card_id,
+            card_number: member.card_number,
             src: resolveCdnUrl(member.image_path, member.image_version),
             owned: member.owned,
             level: member.level,

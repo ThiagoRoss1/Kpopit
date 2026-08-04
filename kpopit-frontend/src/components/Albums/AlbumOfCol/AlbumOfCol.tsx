@@ -12,6 +12,7 @@ import { isSafari } from '../../../hooks/useIsDevice';
 import './AlbumOfCol.css';
 
 const FLIP_DURATION_MS = 800;
+const RAF_FLOOR_DELAY_MS = 200;
 
 function buildAlbumStats(groups: AlbumGroup[]): AlbumStats {
     const totalStickers = groups.reduce((sum, group) => sum + group.members.length, 0);
@@ -44,7 +45,6 @@ function buildGroupPages(group: AlbumGroup, stats: AlbumStats, firstPageIndex: n
                 key={`members-${group.group_id}-${memberPageIndex}`}
                 group={group}
                 slots={pageSlots}
-                startSlot={startSlot}
                 pageLabel={`${memberPageIndex + 1}/${memberPageCount}`}
                 side={pageIndexInBook % 2 === 0 ? 'left' : 'right'}
             />
@@ -309,38 +309,19 @@ function AlbumOfCol({
         }, FLIP_DURATION_MS);
         return () => clearTimeout(flipTimeout);
     }, [turning, flip]);
-
-    // Step two, two frames later: retire the leaf. Tearing down a rotated 3D
-    // layer and repainting both slots in the same commit is what leaves a stale
-    // row of the outgoing page on the spread underneath — visible on Firefox as
-    // soon as the backdrop sparkles stop animating and it goes back to
-    // repainting only the damaged rectangle. Split in two, the pixels under the
-    // leaf are already the final ones by the time its layer goes away, so a
-    // damage rectangle that comes up a row short costs nothing.
-    //
-    // ⚠ KNOWN TRADE-OFF (measured 2026-07-31, deliberately left alone).
-    // Nothing else clears `flip`, so while these two frames do not arrive the
-    // guard in `go`/`step` blocks EVERY page turn — the album simply stops
-    // navigating. requestAnimationFrame is starved in a background tab, under
-    // load, or in an unfocused window (measured: 0 frames in 500ms in the agent's
-    // browser pane, 3 with focus). Not a hypothetical.
-    //
-    // Left as is because these two frames are what holds the Firefox seam fix
-    // above. The fix is NOT to drop them: keep the two-frame path for the visual
-    // guarantee and add a parallel setTimeout as a floor, so `flip` clears even
-    // when frames never come. Touching this area is how the regressions in
-    // performancefixes.md §4/§6 started — do it with a device in hand.
-    // Written up in possiblefuture.md §8.
-
+    
     useEffect(() => {
         if (!flip?.landed) return;
         let innerFrame = 0;
         const outerFrame = requestAnimationFrame(() => {
             innerFrame = requestAnimationFrame(() => setFlip(null));
         });
+
+        const floor = setTimeout(() => setFlip(null), FLIP_DURATION_MS + RAF_FLOOR_DELAY_MS);
         return () => {
             cancelAnimationFrame(outerFrame);
             cancelAnimationFrame(innerFrame);
+            clearTimeout(floor);
         };
     }, [flip]);
 
@@ -448,7 +429,7 @@ function AlbumOfCol({
 
     // The two buttons used to carry a per-half cursor; keep that affordance without
     // paying a React render per mouse move — write the property only when it flips.
-    
+
     const onBookMouseMove = useCallback(
         (event: React.MouseEvent<HTMLDivElement>) => {
             const box = event.currentTarget.getBoundingClientRect();

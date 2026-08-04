@@ -37,6 +37,11 @@ const CONTROL_ROWS: RowSpec[] = [
         label: 'Tap to zoom stickers',
         hint: 'Turn this off to use the whole page for turning.',
     },
+    {
+        key: 'arrows',
+        label: 'Side page arrows',
+        hint: 'Hide them for a cleaner screen — turn pages by tapping, the arrow keys, or the carousel.',
+    },
 ];
 
 function FxSwitch({
