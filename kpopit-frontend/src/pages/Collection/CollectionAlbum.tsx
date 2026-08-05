@@ -127,11 +127,11 @@ export default function CollectionAlbum() {
     const pagesAttr = { 'data-pages': carousel.mounted ? 'on' : 'off' } as const;
     const [query, setQuery] = useState('');
     const [book, setBook] = useState<AlbumBookInit | null>(null);
-    const [shown, setShown] = useState({ pos: 0, flipping: false });
+    const [shown, setShown] = useState({ pos: 0, busy: false });
     const controls = useRef<AlbumOfColControls | null>(null);
 
     const onBookInit = useCallback((next: AlbumBookInit) => setBook(next), []);
-    const onPosChange = useCallback((pos: number, flipping: boolean) => setShown({ pos, flipping }), []);
+    const onPosChange = useCallback((pos: number, busy: boolean) => setShown({ pos, busy }), []);
 
     const [zoomTarget, setZoomTarget] = useState<CardZoomTarget | null>(null);
     const zoom = useDisclosure();
@@ -295,7 +295,7 @@ export default function CollectionAlbum() {
                 >
                     <CollectionsBackdrop night={night} />
 
-                    {/* Top bar */}\
+                    {/* Top bar */}
                     
                     <header className="relative z-30 flex flex-none items-center justify-between gap-3 px-2 xxs:px-4.5 lg:px-8 py-3">
                         <div className="flex items-center gap-2">
@@ -349,10 +349,11 @@ export default function CollectionAlbum() {
                             <button
                                 type="button"
                                 onClick={toggleFocus}
+                                disabled={shown.busy}
                                 title={focusActive ? 'Show both pages' : 'Focus one page'}
                                 aria-pressed={focusActive}
                                 className={`inline-flex flex-row justify-center items-center w-10 h-10 cursor-pointer gap-1.5 rounded-full
-                                border-2 font-sans text-[14px] font-bold lg:hidden ${pillClasses} ${
+                                border-2 font-sans text-[14px] font-bold lg:hidden ${shown.busy ? 'cursor-default opacity-45' : 'cursor-pointer'} ${pillClasses} ${
                                     focusActive
                                         ? night
                                             ? 'border-neon-pink bg-ink'
@@ -364,7 +365,8 @@ export default function CollectionAlbum() {
                             >
                                 {focusActive
                                     ? <Columns2 className="w-4.5 h-4.5" strokeWidth={3} />
-                                    : <Square className="w-4.5 h-4.5" strokeWidth={3} />}
+                                    : <Square className="w-4.5 h-4.5" strokeWidth={3} />
+                                }
                             </button>
                         </div>
                         
@@ -435,8 +437,8 @@ export default function CollectionAlbum() {
                             <div className="collections-album-stage relative z-2 h-[clamp(300px,calc(100svh-260px),700px)] md:px-16 lg:h-auto lg:min-h-0 lg:flex-1 xl:px-20">
                                 {fx.arrows && (
                                     <>
-                                        <SideArrow direction={-1} disabled={frontClosed || shown.flipping} onClick={() => controls.current?.go(-1)} night={night} />
-                                        <SideArrow direction={1} disabled={backClosed || shown.flipping} onClick={() => controls.current?.go(1)} night={night} />
+                                        <SideArrow direction={-1} disabled={frontClosed || shown.busy} onClick={() => controls.current?.go(-1)} night={night} />
+                                        <SideArrow direction={1} disabled={backClosed || shown.busy} onClick={() => controls.current?.go(1)} night={night} />
                                     </>
                                 )}
 
@@ -475,8 +477,8 @@ export default function CollectionAlbum() {
                                             shown={shown.pos}
                                             onJump={jumpToPos}
                                             onStep={stepBy}
-                                            canPrev={!frontClosed && !shown.flipping}
-                                            canNext={!backClosed && !shown.flipping}
+                                            canPrev={!frontClosed && !shown.busy}
+                                            canNext={!backClosed && !shown.busy}
                                             night={night}
                                         />
                                     </div>

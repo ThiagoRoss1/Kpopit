@@ -236,7 +236,10 @@ function BlurryMode() {
 
             if (data.guess_correct) {
                 setCardGranted(data.card_granted ?? null);
-                queryClient.invalidateQueries({queryKey: ["collectionAlbum"]});
+                if (data.card_granted) {
+                    queryClient.invalidateQueries({ queryKey: ["collectionAlbum"] });
+                    queryClient.invalidateQueries({ queryKey: ["collectionsList"] });
+                }
             }
 
             const currentGuesses = JSON.parse(localStorage.getItem("blurryGuessesDetails") || "[]") as GuessResponse<Partial<FeedbackData>>[];

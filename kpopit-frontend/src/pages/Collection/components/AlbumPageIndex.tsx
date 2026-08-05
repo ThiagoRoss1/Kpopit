@@ -1,4 +1,5 @@
 import type { AlbumGroup } from '../../../interfaces/albumInterfaces';
+import { memo } from 'react';
 import { Search, Check } from 'lucide-react';
 
 interface AlbumPageIndexProps {
@@ -30,12 +31,13 @@ function GroupRow({
         <button
             type="button"
             onClick={onJump}
-            className={`flex w-full cursor-pointer items-center gap-2.75 rounded-[11px] border-[1.5px] px-2.75 py-2.25 text-left transition-all duration-300 ${
+            className={`flex w-full cursor-pointer items-center gap-2.75 rounded-[11px] border-[1.5px] px-2.75 py-2.25 text-left 
+            transition-[background-color,border-color,box-shadow] duration-300 ${
                 active
                     ? night
                         ? 'border-neon-pink bg-ink/60 shadow-[2px_2px_0px_#FF3399]'
                         : 'border-ink bg-neon-pink/10 shadow-[2px_2px_0px_#0a0a0a]'
-                    : `border-transparent ${night ? 'hover:bg-white/5' : 'hover:bg-[#e64c67]/6'}`
+                    : `border-transparent ${night ? 'hover:bg-white/5' : 'hover:bg-neon-pink/6'}`
             }`}
         >
             <span className="h-8.5 w-2 flex-none rounded-[3px]" style={{ background: group.palette.main }} />
@@ -75,7 +77,7 @@ function GroupRow({
     );
 }
 
-export default function AlbumPageIndex({ collectionName, groups, currentGroupId, onJump, query, onQueryChange, night }: AlbumPageIndexProps) {
+function AlbumPageIndex({ collectionName, groups, currentGroupId, onJump, query, onQueryChange, night }: AlbumPageIndexProps) {
     const searchTerm = query.trim().toLowerCase();
 
     const filteredGroups = groups.filter((group) =>
@@ -148,3 +150,5 @@ export default function AlbumPageIndex({ collectionName, groups, currentGroupId,
         </>
     );
 }
+
+export default memo(AlbumPageIndex);

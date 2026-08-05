@@ -223,7 +223,10 @@ function ClassicMode() {
         queryClient.invalidateQueries({ queryKey: ["userPosition"] });
 
         setCardGranted(data.card_granted ?? null);
-        queryClient.invalidateQueries({ queryKey: ["collectionAlbum"] });
+        if (data.card_granted) {
+          queryClient.invalidateQueries({ queryKey: ["collectionAlbum"] });
+          queryClient.invalidateQueries({ queryKey: ["collectionsList"] });
+        }
       }
     },
     onError: (error) => {

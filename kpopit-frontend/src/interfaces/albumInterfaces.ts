@@ -13,7 +13,7 @@ export interface CollectionAlbumMember {
   artist_name: string;
   card_id: number;
   card_number: number;
-  image_path: string;
+  image_path: string | null;
   image_version: string | null;
   owned: boolean;
   level: number | null;
@@ -35,7 +35,6 @@ export interface CollectionListItem {
   description: string | null;
   total_cards: number;
   owned_cards: number;
-  created_at: string;
 }
 
 /* One group page from GET /api/collections/album */
@@ -51,7 +50,12 @@ export interface CollectionAlbumGroup {
   image_version: string | null;
   palette: AlbumPalette | null;
   members: CollectionAlbumMember[];
-  group_photo: { card_id: number; owned: boolean } | null;
+  group_photo: {
+    card_id: number;
+    image_path: string | null;
+    image_version: string | null;
+    owned: boolean;
+  } | null;
 }
 
 export type CardGranted = {

@@ -17,7 +17,7 @@ export function getAlbumMapping(data: CollectionAlbumGroup[]): AlbumGroup[] {
         ? {
             card_id: group.group_photo.card_id,
             owned: group.group_photo.owned,
-            src: resolveCdnUrl(group.image_path, group.image_version)
+            src: resolveCdnUrl(group.group_photo.image_path, group.group_photo.image_version)
           }
         : null,
         members: group.members.map((member) => ({
