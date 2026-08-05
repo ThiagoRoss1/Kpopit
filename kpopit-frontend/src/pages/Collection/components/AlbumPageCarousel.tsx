@@ -1,4 +1,4 @@
-import { memo, useEffect, useRef, type ReactNode } from 'react';
+import { memo, useEffect, useRef, useState, type ReactNode } from 'react';
 import { ChevronLeft, ChevronRight } from 'lucide-react';
 import { ALBUM_PAGE_H, ALBUM_PAGE_W } from '../../../components/Albums/AlbumOfCol/albumConstants';
 import { AlbumPreviewProvider } from '../../../components/Albums/AlbumOfCol/AlbumPreviewProvider';
@@ -22,21 +22,48 @@ interface AlbumPageCarouselProps {
     night: boolean;
 }
 
+interface MiniOpeningProps {
+    opening: AlbumOpening;
+    current: boolean;
+    onJump: (pos: number) => void;
+    night: boolean;
+}
+
 const THUMB = { w: 38, h: 28.5 };
 
-const MiniOpening = memo(function MiniOpening({ opening, current, onJump, night }: { opening: AlbumOpening; current: boolean; onJump: (pos: number) => void; night: boolean }) {
+const MiniOpening = memo(function MiniOpening({ opening, current, onJump, night }: MiniOpeningProps) {
     const twoPage = opening.pageCount === 2;
     const scale = twoPage ? THUMB.w / (ALBUM_PAGE_W * 2) : THUMB.h / ALBUM_PAGE_H;
     const contentW = opening.pageCount * ALBUM_PAGE_W * scale;
 
+    // Windowing: mount the real (heavy) page tree only for near-viewport thumbs. The
+    // current thumb is always real; off-screen thumbs render just the button chrome
+    // (same fixed footprint, so the centering offsetLeft math is unaffected) until they scroll close.
+    const buttonRef = useRef<HTMLButtonElement>(null);
+    const [nearViewport, setNearViewport] = useState(false);
+    
+    useEffect(() => {
+        const element = buttonRef.current;
+        if (!element) return;
+        const observer = new IntersectionObserver(
+            ([entry]) => setNearViewport(Boolean(entry?.isIntersecting)),
+            { root: element.closest('[data-carousel-rail]'), rootMargin: '200px' },
+        );
+        observer.observe(element);
+        return () => observer.disconnect();
+    }, []);
+
+    const showReal = current || nearViewport;
+
     return (
         <button
+            ref={buttonRef}
             type="button"
             onClick={() => onJump(opening.pos)}
             aria-label={`Go to page ${opening.pos}`}
-            className={`relative flex-none cursor-pointer overflow-hidden rounded-sm border transform-gpu transition-transform duration-200 ease-out ${
+            className={`relative flex-none cursor-pointer overflow-hidden rounded-sm border transition-transform duration-200 ease-out ${
                 current
-                    ? 'z-10 -translate-y-0.5 scale-[1.32]'
+                    ? 'z-10 -translate-y-0.5 scale-[1.32] transform-gpu'
                     : `${night ? 'border-white/12' : 'border-ink/30'} hover:scale-105`
             } ${night ? 'bg-linear-to-br from-[#20232c] to-[#171a21]' : 'bg-linear-to-br from-[#f2e8dd] to-[#eaddd0]'}`}
             style={{
@@ -45,20 +72,22 @@ const MiniOpening = memo(function MiniOpening({ opening, current, onJump, night 
                 ...(current ? { borderColor: opening.accent, boxShadow: `0 4px 10px -3px ${opening.accent}88` } : undefined),
             }}
         >
-            <span
-                className="pointer-events-none absolute top-0 select-none"
-                style={{ left: (THUMB.w - contentW) / 2, width: contentW, height: THUMB.h }}
-            >
-                <span className="absolute left-0 top-0 flex origin-top-left" style={{ transform: `scale(${scale})` }}>
-                    <AlbumPreviewProvider>
-                        {Array.from({ length: opening.pageCount }).map((_, pageIndex) => (
-                            <span key={pageIndex} className="relative block overflow-hidden" style={{ width: ALBUM_PAGE_W, height: ALBUM_PAGE_H }}>
-                                {opening.nodes[pageIndex]}
-                            </span>
-                        ))}
-                    </AlbumPreviewProvider>
+            {showReal && (
+                <span
+                    className="pointer-events-none absolute top-0 select-none"
+                    style={{ left: (THUMB.w - contentW) / 2, width: contentW, height: THUMB.h }}
+                >
+                    <span className="absolute left-0 top-0 flex origin-top-left" style={{ transform: `scale(${scale})` }}>
+                        <AlbumPreviewProvider>
+                            {Array.from({ length: opening.pageCount }).map((_, pageIndex) => (
+                                <span key={pageIndex} className="relative block overflow-hidden" style={{ width: ALBUM_PAGE_W, height: ALBUM_PAGE_H }}>
+                                    {opening.nodes[pageIndex]}
+                                </span>
+                            ))}
+                        </AlbumPreviewProvider>
+                    </span>
                 </span>
-            </span>
+            )}
             {twoPage && (
                 <span className={`absolute inset-y-0 left-1/2 w-px ${night ? 'bg-white/14' : 'bg-[#3c2f38]/16'}`} />
             )}
@@ -91,6 +120,9 @@ function StepArrow({ direction, disabled, onClick, night }: { direction: -1 | 1;
 
 function useDragScroll(ref: React.RefObject<HTMLDivElement | null>) {
     const drag = useRef({ down: false, startX: 0, startLeft: 0, moved: false });
+    const stopDragging = () => {
+        drag.current.down = false;
+    };
 
     return {
         onPointerDown: (event: React.PointerEvent) => {
@@ -104,8 +136,8 @@ function useDragScroll(ref: React.RefObject<HTMLDivElement | null>) {
             drag.current.moved = true;
             ref.current.scrollLeft = drag.current.startLeft - dx;
         },
-        onPointerUp: () => { drag.current.down = false; },
-        onPointerLeave: () => { drag.current.down = false; },
+        onPointerUp: stopDragging,
+        onPointerLeave: stopDragging,
         onClickCapture: (event: React.MouseEvent) => {
             if (!drag.current.moved) return;
             event.preventDefault();
@@ -140,16 +172,16 @@ export default function AlbumPageCarousel({ openings, shown, onJump, onStep, can
             <div className="min-w-0 flex-1 overflow-hidden">
                 <div
                     ref={railRef}
+                    data-carousel-rail
                     {...dragHandlers}
                     className="cursor-pointer overflow-x-auto px-1.5 pt-2 pb-6.5 -mb-4.5 select-none
                     active:cursor-pointer [scrollbar-width:none] [&::-webkit-scrollbar]:hidden"
                 >
-
                     <div className="flex items-center gap-2.5">
-                {openings.map((opening) => (
-                    <span key={opening.pos} data-cur={opening.pos === shown ? '1' : '0'} className="inline-flex">
-                        {/* onJump is passed through, not wrapped — a closure created
-                            here would defeat MiniOpening's memo on every render. */}
+                        {openings.map((opening) => (
+                            <span key={opening.pos} data-cur={opening.pos === shown ? '1' : '0'} className="inline-flex">
+                                {/* onJump is passed through, not wrapped — a closure created
+                                    here would defeat MiniOpening's memo on every render. */}
                                 <MiniOpening opening={opening} current={opening.pos === shown} onJump={onJump} night={night} />
                             </span>
                         ))}

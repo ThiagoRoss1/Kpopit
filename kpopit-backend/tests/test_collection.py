@@ -443,6 +443,16 @@ def test_album_shape_presentation_and_ownership(db_conn, make_user, collection_p
                              label_company="Source-ish Music", parent_company="HYBE-ish")
     _seed_group_presentation(db_conn, page_b["group_id"], image_path="groups/b.webp",
                              label_company="SM-ish")
+    with db_conn.cursor() as cur:
+        cur.execute(
+            "UPDATE cards SET image_path = %s WHERE id = %s",
+            ("cards/album-group-b.webp", page_b["group_photo_card_id"]),
+        )
+        cur.execute(
+            "UPDATE group_features SET image_version = %s WHERE group_id = %s",
+            ("group-v2", page_b["group_id"]),
+        )
+    db_conn.commit()
     grant(db_conn, user_id, page_a["idol_ids"][0])
 
     service = CollectionService(db_conn)
@@ -468,6 +478,8 @@ def test_album_shape_presentation_and_ownership(db_conn, make_user, collection_p
     group_b = next(g for g in album if g["group_id"] == page_b["group_id"])
     assert group_b["company"] == "SM-ish"
     assert group_b["label"] == "SM-ish"
+    assert group_b["group_photo"]["image_path"] == "cards/album-group-b.webp"
+    assert group_b["group_photo"]["image_version"] == "group-v2"
 
 
 def test_album_omits_ineligible_and_cardless_pages(db_conn, make_user, collection_page,
@@ -500,20 +512,29 @@ def test_album_member_has_contiguous_card_number(db_conn, make_user, collection_
     assert numbers == list(range(1, len(numbers) + 1))
 
 
-def test_card_number_follows_idol_id_order(db_conn, make_user, collection_page):
-    """card_number ranks by idol_id (not the arbitrary cards.id serial): sorting the
-    idols by idol_id yields card_numbers 1..N in that exact order."""
+def test_card_number_follows_idol_id_order_for_album_one(
+    db_conn, make_user, make_eligible_group, make_idol, make_career, make_card,
+):
+    """Album 1 numbers follow idol order even when card rows are inserted in reverse."""
     user_id, _ = make_user()
-    collection_page("OrderA", n_members=3)
-    collection_page("OrderB", n_members=2)
+    group_id = make_eligible_group("IdolOrderGroup", has_bonus_cover=False)
+    idol_ids = [make_idol(f"Idol Order {index}") for index in range(1, 4)]
+    for idol_id in idol_ids:
+        make_career(idol_id, group_id)
+    for idol_id in reversed(idol_ids):
+        make_card(idol_id=idol_id)
 
     service = CollectionService(db_conn)
     with db_conn.cursor() as cur:
         album = service.get_album(cur, user_id, collection_id=1)
 
-    pairs = sorted({(m["idol_id"], m["card_number"]) for g in album for m in g["members"]})
-    numbers_in_idol_order = [card_number for _, card_number in pairs]
-    assert numbers_in_idol_order == list(range(1, len(numbers_in_idol_order) + 1))
+    pairs = sorted(
+        (member["idol_id"], member["card_number"])
+        for group in album
+        for member in group["members"]
+    )
+    assert [idol_id for idol_id, _ in pairs] == idol_ids
+    assert [card_number for _, card_number in pairs] == [1, 2, 3]
 
 
 def test_multi_group_idol_shares_one_card_number(db_conn, make_user, collection_page, make_career):

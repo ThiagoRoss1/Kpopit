@@ -13,6 +13,7 @@ import './AlbumOfCol.css';
 
 const FLIP_DURATION_MS = 800;
 const RAF_FLOOR_DELAY_MS = 200;
+const FOCUS_MOVE_TIMEOUT_MS = FLIP_DURATION_MS + 50;
 
 function buildAlbumStats(groups: AlbumGroup[]): AlbumStats {
     const totalStickers = groups.reduce((sum, group) => sum + group.members.length, 0);
@@ -113,7 +114,7 @@ export interface AlbumBookInit {
 interface AlbumOfColProps {
     groups: AlbumGroup[];
     controlRef?: React.RefObject<AlbumOfColControls | null>;
-    onPosChange?: (position: number, flipping: boolean) => void;
+    onPosChange?: (position: number, busy: boolean) => void;
     onBookInit?: (book: AlbumBookInit) => void;
     keysDisabled?: boolean;
     onCardZoom?: (target: CardZoomTarget) => void;
@@ -158,6 +159,41 @@ function AlbumOfCol({
         return Math.min(Math.max(requested, 0), backCoverPosition);
     });
     const [flip, setFlip] = useState<FlipState | null>(null);
+    const focusMovingRef = useRef(false);
+    const focusMoveTimeoutRef = useRef<number | undefined>(undefined);
+    const focusMoveFrameRef = useRef(0);
+    const [focusMoving, setFocusMoving] = useState(false);
+
+    const finishFocusMove = useCallback(() => {
+        window.clearTimeout(focusMoveTimeoutRef.current);
+        cancelAnimationFrame(focusMoveFrameRef.current);
+        focusMoveTimeoutRef.current = undefined;
+        focusMoveFrameRef.current = 0;
+        focusMovingRef.current = false;
+        setFocusMoving(false);
+    }, []);
+
+    const scheduleFocusMoveFallbacks = useCallback(() => {
+        window.clearTimeout(focusMoveTimeoutRef.current);
+        cancelAnimationFrame(focusMoveFrameRef.current);
+        focusMoveTimeoutRef.current = window.setTimeout(finishFocusMove, FOCUS_MOVE_TIMEOUT_MS);
+        if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
+            focusMoveFrameRef.current = requestAnimationFrame(finishFocusMove);
+        }
+    }, [finishFocusMove]);
+
+    const previousFocusRef = useRef(focus);
+    useLayoutEffect(() => {
+        if (previousFocusRef.current === focus) return;
+        previousFocusRef.current = focus;
+        if (flip || focusMovingRef.current) return;
+
+        focusMovingRef.current = true;
+        setFocusMoving(true);
+        scheduleFocusMoveFallbacks();
+    }, [focus, flip, scheduleFocusMoveFallbacks]);
+
+    useEffect(() => () => finishFocusMove(), [finishFocusMove]);
 
     const frontClosed = position === 0;
     const backClosed = position === backCoverPosition;
@@ -256,11 +292,12 @@ function AlbumOfCol({
 
     const step = useCallback(
         (direction: 1 | -1) => {
+            if (flip || focusMovingRef.current) return;
+            
             if (focus === 'off') {
                 go(direction);
                 return;
             }
-            if (flip) return;
 
             if (direction > 0 && focus === 'left' && rightPageAt(position) != null) {
                 onFocusChange?.('right');
@@ -291,6 +328,7 @@ function AlbumOfCol({
 
     /** Rotating right now — `flip` alone stays true through the landing frames. */
     const turning = flip !== null && !flip.landed;
+    const navigationBusy = flip !== null || focusMoving;
 
     const leafRef = useRef<HTMLDivElement>(null);
     useLayoutEffect(() => {
@@ -329,10 +367,10 @@ function AlbumOfCol({
     // controlRef and mirrors its state via the two callbacks.
     const jumpTo = useCallback(
         (targetPosition: number) => {
-            setFlip(null);
+            if (flip || focusMovingRef.current) return;
             setPosition(Math.min(Math.max(targetPosition, 0), backCoverPosition));
         },
-        [backCoverPosition],
+        [flip, backCoverPosition],
     );
     useEffect(() => {
         if (!controlRef) return;
@@ -353,8 +391,8 @@ function AlbumOfCol({
 
     const shownPosition = turning ? position + flip.direction : position;
     useEffect(() => {
-        onPosChange?.(shownPosition, turning);
-    }, [onPosChange, shownPosition, turning]);
+        onPosChange?.(shownPosition, navigationBusy);
+    }, [onPosChange, shownPosition, navigationBusy]);
 
     useEffect(() => {
         if (keysDisabled) return;
@@ -409,13 +447,13 @@ function AlbumOfCol({
     );
 
     const canTurn = useCallback(
-        (direction: 1 | -1) => !flip && (direction > 0 ? position < backCoverPosition : position > 0),
-        [flip, position, backCoverPosition],
+        (direction: 1 | -1) => !navigationBusy && (direction > 0 ? position < backCoverPosition : position > 0),
+        [navigationBusy, position, backCoverPosition],
     );
 
     const cardZoom = useMemo<AlbumCardZoomApi | null>(
-        () => (flip !== null || !onCardZoom ? null : { open: onCardZoom, flyingCardId }),
-        [flip, onCardZoom, flyingCardId],
+        () => (navigationBusy || !onCardZoom ? null : { open: onCardZoom, flyingCardId }),
+        [navigationBusy, onCardZoom, flyingCardId],
     );
 
     const onBookClick = useCallback(
@@ -439,6 +477,12 @@ function AlbumOfCol({
         [canTurn],
     );
 
+    const onBookTransitionEnd = useCallback((event: React.TransitionEvent<HTMLDivElement>) => {
+        if (event.target === event.currentTarget && event.propertyName === 'transform') {
+            finishFocusMove();
+        }
+    }, [finishFocusMove]);
+
     return (
         <AlbumCardZoomContext.Provider value={cardZoom}>
         <div
@@ -449,6 +493,7 @@ function AlbumOfCol({
                 <div className="album-perspective album-zoom-in transform-gpu">
                     <div
                         className="album-book relative"
+                        onTransitionEnd={onBookTransitionEnd}
                         style={{
                             width: ALBUM_PAGE_W * 2 * scale,
                             height: ALBUM_PAGE_H * scale,
