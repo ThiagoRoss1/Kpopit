@@ -14,6 +14,7 @@ import './AlbumOfCol.css';
 const FLIP_DURATION_MS = 800;
 const RAF_FLOOR_DELAY_MS = 200;
 const FOCUS_MOVE_TIMEOUT_MS = FLIP_DURATION_MS + 50;
+const ALBUM_SCALE_PIXEL_GRID = 300;
 
 function buildAlbumStats(groups: AlbumGroup[]): AlbumStats {
     const totalStickers = groups.reduce((sum, group) => sum + group.members.length, 0);
@@ -239,7 +240,9 @@ function AlbumOfCol({
             );
 
             const clampedScale = Math.max(0.2, fittedScale);
-            setScale(Math.floor(clampedScale * ALBUM_PAGE_W) / ALBUM_PAGE_W);
+            const devicePixelRatio = window.devicePixelRatio || 1;
+            const devicePixelGrid = ALBUM_SCALE_PIXEL_GRID * devicePixelRatio;
+            setScale(Math.floor(clampedScale * devicePixelGrid) / devicePixelGrid);
         };
 
         updateScale();
@@ -347,7 +350,7 @@ function AlbumOfCol({
         }, FLIP_DURATION_MS);
         return () => clearTimeout(flipTimeout);
     }, [turning, flip]);
-    
+
     useEffect(() => {
         if (!flip?.landed) return;
         let innerFrame = 0;

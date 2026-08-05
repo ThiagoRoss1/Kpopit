@@ -29,8 +29,11 @@ import ProtectedRoute from './components/ProtectedRoute/ProtectedRoute'
 import { SpeedInsights } from "@vercel/speed-insights/react"
 import { Analytics } from "@vercel/analytics/react"
 import { HelmetProvider } from 'react-helmet-async'
+import { printEasterEgg } from './utils/consoleEasterEgg'
 
 const queryClient = new QueryClient();
+
+printEasterEgg();
 
 createRoot(document.getElementById('root')!).render(
   <StrictMode>
