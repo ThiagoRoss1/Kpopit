@@ -44,7 +44,7 @@ createRoot(document.getElementById('root')!).render(
           <AuthProvider>
             {import.meta.env.VITE_MAINTENANCE_MODE === "true" ? (
               <Routes>
-                <Route path="*" element={<MaintenancePage type="database" />} />
+                <Route path="*" element={<MaintenancePage type="collection" />} />
               </Routes>
             ) : (
             <Routes>
