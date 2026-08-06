@@ -1,21 +1,3 @@
-# Upsert data/group_features.csv from the GROUPS list below.
-#
-# Each entry is (group_id, image_path, colors, image_version). `colors` holds 1 to
-# 5 hex colors separated by commas and ORDER MATTERS: the first one is the group's
-# main color and reaches the palette untouched, as do all the others - see
-# generate_group_palette.py for how the remaining stops are derived. A group with
-# no color yet is skipped, and the frontend falls back to COVER_PALETTE.
-#
-# The CSV is edited in place, never rebuilt: a row this run does not touch comes
-# out byte for byte as it went in, so hand-tuned colors survive. That is why the
-# default only fills in the groups that have no row yet.
-#
-#   python generate_group_features_csv.py               # add the missing groups
-#   python generate_group_features_csv.py --groups 24   # redo group 24 from GROUPS
-#   python generate_group_features_csv.py --all         # redo every group (first run)
-#   python generate_group_features_csv.py --groups 24 --dry-run
-#
-# Afterwards seed it with:  python seed_db.py
 import argparse
 import csv
 import json
@@ -137,10 +119,14 @@ def upsert_group_features_csv(selected: set[int] | None, dry_run: bool) -> bool:
 
     else:
         if not dry_run:
-            with open(OUTPUT_FILE, "w", encoding="utf-8", newline="") as file:
+            # Write a sibling temp file and swap it in atomically, so an interrupted
+            # run can never leave a half-written group_features.csv behind.
+            tmp_path = OUTPUT_FILE + ".tmp"
+            with open(tmp_path, "w", encoding="utf-8", newline="") as file:
                 writer = csv.writer(file)
                 writer.writerow(CSV_COLUMNS)
                 writer.writerows(rows[group_id] for group_id in sorted(rows))
+            os.replace(tmp_path, OUTPUT_FILE)
 
         print(f"{'Would write' if dry_run else 'Wrote'} {OUTPUT_FILE}")
 

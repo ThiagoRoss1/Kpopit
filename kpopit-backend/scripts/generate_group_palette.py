@@ -1,41 +1,3 @@
-# Derive the 5-stop Album 1 group palette from a group's declared brand colors.
-#
-# Contract: every declared color reaches the output UNCHANGED. The first one is
-# always `main` (card frames, the corner circle, page titles); the rest of the
-# declared colors and the generated tones fill the other four stops so the five
-# read as a single value ramp, darkest to lightest:
-#
-#     deep <= secondary <= main <= accent <= light
-#
-# That order is not cosmetic: SideWaves (AlbumDecorShapes.tsx) paints the five
-# stops onto five nested bands in exactly that sequence, so a non-monotone
-# palette turns the gradation into stripes.
-#
-# Slot layout
-#   main            <- the first declared color, verbatim
-#   deep, secondary <- declared colors darker than main, darkest outermost
-#   light, accent   <- declared colors lighter than main, lightest outermost
-#   every slot left over is generated
-#
-# Generated tones fill the GAPS of the ramp: each empty slot takes a target
-# lightness interpolated between its declared neighbours (or stepped past the
-# ramp ends), rendered as a tint or a shade of one owner color. Ownership is
-# divmod(5, n) with the remainder handed to the earliest colors, so the first
-# color owns the largest share and its tones sit closest to `main`:
-#
-#   1 color -> 5     2 -> 3+2     3 -> 2+2+1     4 -> 2+1+1+1     5 -> 1 each
-#
-# Lightness is measured in OKLab, not HLS. HLS calls #CCFF00 and #0000FF equally
-# light, which makes ramps built on it step unevenly; OKLab also drops the need
-# to special-case greys, since a declared neutral simply carries ~zero chroma
-# and its tones inherit that.
-#
-# Colors are never altered to fix contrast: a declared color that reads pale on
-# the page is a call for the page, not for this script.
-#
-# CLI:  python generate_group_palette.py "#81A5F9"
-#       python generate_group_palette.py "#C8002E, #F9F6F7, #16080B"
-#       python generate_group_palette.py "#C8002E" "#F9F6F7"
 import json
 import math
 import re
@@ -46,31 +8,15 @@ PALETTE_STOPS = ("deep", "secondary", "main", "accent", "light")
 MAIN_SLOT = PALETTE_STOPS.index("main")
 MAX_SOURCE_COLORS = len(PALETTE_STOPS)
 
-# --- Tunable derivation factors ----------------------------------------------
-# Lightness step for tones generated past the declared extremes, so one declared
-# color spans four steps. A run compresses evenly when the room left between its
-# anchor and black/white is smaller than this.
 TONE_STEP = 0.14
-
-# Under this OKLCh chroma a declared color is a deliberate grey: its tones stay
-# neutral instead of picking up whatever hue the conversion happens to report.
 NEUTRAL_CHROMA = 0.02
-
-# Chroma cannot survive near black or white, so it follows an envelope peaking at
-# mid lightness. Tones only ever lose chroma to the envelope, never gain from it.
 CHROMA_ENVELOPE_EXPONENT = 1.4
-
-# DESIGN.md section 10: highlights desaturate toward the light source, shadows
-# hold their chroma and cool toward the ambient. Both drifts scale with how far
-# the tone travels away from its owner.
 SHADE_CHROMA_GAIN = 0.35
 TINT_CHROMA_LOSS = 0.25
-SHADE_HUE_TARGET = 264.0  # blue
-TINT_HUE_TARGET = 90.0  # yellow
+SHADE_HUE_TARGET = 264.0
+TINT_HUE_TARGET = 90.0 
 MAX_HUE_DRIFT = 12.0
 
-# An out-of-gamut OKLCh triple is pulled back by shrinking chroma at fixed
-# lightness, so the tone keeps the ramp step it was assigned.
 GAMUT_DECAY = 0.94
 GAMUT_ATTEMPTS = 32
 

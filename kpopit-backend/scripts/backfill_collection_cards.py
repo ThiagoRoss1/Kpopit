@@ -1,7 +1,5 @@
-# Backfill Album 1 collection cards from historical wins.
-#
-# One-time, manual, run BEFORE public launch. NOT a migration.
-#
+# Backfill Album 1 collection cards from historical wins (One time run).
+
 # Launch runbook:
 #   1. python migrations/migrations.py        (schema)
 #   2. python seed_db.py                      (collections + eligibility CSVs)
@@ -10,12 +8,6 @@
 #   5. python -m scripts.backfill_collection_cards --dry-run   (check the report)
 #   6. python -m scripts.backfill_collection_cards            (real run)
 #   7. Enable COLLECTION_ENABLED / VITE_COLLECTION_ENABLED
-#
-# Replays every historical Classic/Blurry win chronologically per user through
-# the SAME CollectionService.grant_card_for_win used by the live path, so
-# first_won_at, level evolution, times_won and bonus unlocks come out
-# historically correct. Level/times_won increments are NOT idempotent, hence
-# the non-empty user_cards guard (--force to override, e.g. after a restore).
 
 import argparse
 from datetime import datetime, time
@@ -23,7 +15,7 @@ from zoneinfo import ZoneInfo
 
 from dotenv import load_dotenv
 from services.collections_service import CollectionService, COLLECTION_GAMEMODE_IDS
-from services.get_db import get_manual_db
+from services.get_db import get_manual_db, pool
 
 load_dotenv()
 
@@ -88,7 +80,7 @@ def run_backfill(dry_run: bool = False, force: bool = False):
             except Exception as e:
                 connect.rollback()
                 print(f"Error during backfill (rolled back): {e}")
-                raise e
+                raise
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(description="Replay historical wins into Album 1 collection cards.")
@@ -99,5 +91,4 @@ if __name__ == "__main__":
     try:
         run_backfill(dry_run=args.dry_run, force=args.force)
     finally:
-        from services.get_db import pool
         pool.close()
