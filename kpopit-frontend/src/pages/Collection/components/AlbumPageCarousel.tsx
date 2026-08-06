@@ -38,7 +38,8 @@ const MiniOpening = memo(function MiniOpening({ opening, current, onJump, night 
 
     // Windowing: mount the real (heavy) page tree only for near-viewport thumbs. The
     // current thumb is always real; off-screen thumbs render just the button chrome
-    // (same fixed footprint, so the centering offsetLeft math is unaffected) until they scroll close.
+    // (same fixed footprint, so the centering measurements stay stable) until they scroll close.
+    
     const buttonRef = useRef<HTMLButtonElement>(null);
     const [nearViewport, setNearViewport] = useState(false);
     
@@ -61,9 +62,9 @@ const MiniOpening = memo(function MiniOpening({ opening, current, onJump, night 
             type="button"
             onClick={() => onJump(opening.pos)}
             aria-label={`Go to page ${opening.pos}`}
-            className={`relative flex-none cursor-pointer overflow-hidden rounded-sm border transition-transform duration-200 ease-out ${
+            className={`relative flex-none cursor-pointer overflow-hidden rounded-sm border transition-transform duration-200 ease-out transform-gpu ${
                 current
-                    ? 'z-10 -translate-y-0.5 scale-[1.32] transform-gpu'
+                    ? 'z-10 -translate-y-0.5 scale-[1.32]'
                     : `${night ? 'border-white/12' : 'border-ink/30'} hover:scale-105`
             } ${night ? 'bg-linear-to-br from-[#20232c] to-[#171a21]' : 'bg-linear-to-br from-[#f2e8dd] to-[#eaddd0]'}`}
             style={{
@@ -155,7 +156,12 @@ export default function AlbumPageCarousel({ openings, shown, onJump, onStep, can
         const rail = railRef.current;
         if (!rail) return;
         const current = rail.querySelector<HTMLElement>('[data-cur="1"]');
-        if (current) rail.scrollTo({ left: current.offsetLeft - rail.clientWidth / 2 + current.clientWidth / 2, behavior: 'smooth' });
+        if (!current) return;
+        
+        const railRect = rail.getBoundingClientRect();
+        const currentRect = current.getBoundingClientRect();
+        const delta = currentRect.left - railRect.left - (rail.clientWidth - currentRect.width) / 2;
+        rail.scrollTo({ left: rail.scrollLeft + delta, behavior: 'smooth' });
     }, [shown]);
 
     return (
@@ -177,7 +183,7 @@ export default function AlbumPageCarousel({ openings, shown, onJump, onStep, can
                     className="cursor-pointer overflow-x-auto px-1.5 pt-2 pb-6.5 -mb-4.5 select-none
                     active:cursor-pointer [scrollbar-width:none] [&::-webkit-scrollbar]:hidden"
                 >
-                    <div className="flex items-center gap-2.5">
+                    <div className="flex min-w-full items-center justify-center-safe gap-2.5">
                         {openings.map((opening) => (
                             <span key={opening.pos} data-cur={opening.pos === shown ? '1' : '0'} className="inline-flex">
                                 {/* onJump is passed through, not wrapped — a closure created
