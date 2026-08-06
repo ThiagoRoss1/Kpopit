@@ -10,6 +10,8 @@ interface AlbumPageIndexProps {
     query: string;
     onQueryChange: (query: string) => void;
     night: boolean;
+    totalCards?: number;
+    ownedCards?: number;
 }
 
 function GroupRow({
@@ -77,17 +79,15 @@ function GroupRow({
     );
 }
 
-function AlbumPageIndex({ collectionName, groups, currentGroupId, onJump, query, onQueryChange, night }: AlbumPageIndexProps) {
+function AlbumPageIndex({ collectionName, groups, currentGroupId, onJump, query, onQueryChange, night, totalCards, ownedCards }: AlbumPageIndexProps) {
     const searchTerm = query.trim().toLowerCase();
 
     const filteredGroups = groups.filter((group) =>
         `${group.group_name} ${group.hangul_name}`.toLowerCase().includes(searchTerm),
     );
-
-    const total = groups.reduce((sum, group) => sum + group.members.length, 0);
-    const owned = groups.reduce((sum, group) => sum + group.members.filter((member) => member.owned).length, 0);
-
-    const progressPercentage = total > 0 ? Math.round((owned / total) * 100) : 0;
+    
+    const countsReady = totalCards !== undefined && ownedCards !== undefined;
+    const progressPercentage = countsReady && totalCards > 0 ? Math.round((ownedCards / totalCards) * 100) : 0;
     
     const accentText = night ? 'text-neon-pink' : 'text-[#C62368]';
 
@@ -98,7 +98,7 @@ function AlbumPageIndex({ collectionName, groups, currentGroupId, onJump, query,
                 {collectionName}
             </p>
             <p className={`mt-1 font-sans text-[11px] font-semibold transition-colors duration-300 ${night ? 'text-white/62' : 'text-[#7a6b74]'}`}>
-                {groups.length} groups · {total} stickers
+                {groups.length} groups · {countsReady ? totalCards : '…'} stickers
             </p>
             {/* Full-bleed: bar + % align flush-left with the album name / header text above. */}
             <div className="mt-3 flex items-center gap-2">
@@ -108,7 +108,7 @@ function AlbumPageIndex({ collectionName, groups, currentGroupId, onJump, query,
                         style={{ width: `${progressPercentage}%` }}
                     />
                 </div>
-                <span className={`font-major-mono-display text-[14px] transition-colors duration-300 ${accentText}`}>{progressPercentage}%</span>
+                <span className={`font-major-mono-display text-[14px] transition-colors duration-300 ${accentText}`}>{countsReady ? `${progressPercentage}%` : '…'}</span>
             </div>
             <div
                 className={`mt-3.5 flex items-center gap-2 rounded-full border-[1.5px] px-3.25 py-2 transition-colors duration-300 ${

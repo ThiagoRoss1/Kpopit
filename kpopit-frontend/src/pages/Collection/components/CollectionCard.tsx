@@ -34,7 +34,7 @@ function ProgressCard({ collection, night }: { collection: CollectionListItem; n
                     : 'border-ink bg-cream shadow-[4px_4px_0px_#0a0a0a]'
             }`}
         >
-            <div className="flex items-baseline justify-center gap-3 md:justify-between md:gap-0">
+            <div className="flex items-baseline justify-center gap-3 md:justify-between md:gap-1">
                 <span className="text-[30px] font-bold leading-none text-neon-pink">{colPercentage}%</span>
                 <Cap className={night ? 'text-white/60' : 'text-[#6b5f55]'}>
                     {collection.owned_cards}/{collection.total_cards} stickers

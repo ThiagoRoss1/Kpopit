@@ -103,9 +103,8 @@ export default function CollectionAlbum() {
     });
 
     const groups = useMemo(() => (data ? getAlbumMapping(data) : null), [data]);
-    const collectionName =
-        collections?.find((collection) => collection.collection_id === parsedId)?.name ??
-        `Album ${validId ? parsedId : ''}`.trim();
+    const currentCollection = collections?.find((collection) => collection.collection_id === parsedId);
+    const collectionName = currentCollection?.name ?? `Album ${validId ? parsedId : ''}`.trim();
 
     const { fx } = useCollectionFx();
 
@@ -446,6 +445,8 @@ export default function CollectionAlbum() {
                                     query={query}
                                     onQueryChange={setQuery}
                                     night={night}
+                                    totalCards={currentCollection?.total_cards}
+                                    ownedCards={currentCollection?.owned_cards}
                                 />
                             </aside>
                         )}
@@ -530,6 +531,8 @@ export default function CollectionAlbum() {
                                     query={query}
                                     onQueryChange={setQuery}
                                     night={night}
+                                    totalCards={currentCollection?.total_cards}
+                                    ownedCards={currentCollection?.owned_cards}
                                 />
                             </div>
                         </div>
