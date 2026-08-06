@@ -30,7 +30,7 @@ const MaintenanceCollection = () => {
                     KpopIt · <span className="font-korean">케이팝잇</span> Collections
                 </span>
 
-                <h1 className="text-3xl sm:text-5xl font-bold text-white [text-shadow:1.2px_1.2px_4px_rgba(0,0,0,0.8),0_0_18px_rgba(180,55,119,0.45)]">
+                <h1 className="text-3xl sm:text-5xl font-bold text-white [text-shadow:1.2px_1.2px_4px_rgba(0,0,0,0.8),0_0_4px_rgba(180,55,119,0.45)]">
                     Building your album 📸
                 </h1>
 
