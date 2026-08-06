@@ -97,11 +97,13 @@ Our idol selection algorithm is designed for maximum variety. It is designed to 
 
 - **User Accounts & Profiles**: An account system with **Login / Register**, so users can track their **streaks** and **wins** accurately across devices (previously **Local Storage** only).
 
+- **Album Collection**: A sticker-album collection layered on the daily games. Winning **Classic** or **Blurry** grants the idol's card; repeat wins level it up (base frame → gold → animated holo). Cards live in an interactive, page-turning **flip-book album** grouped by K-pop group, with per-idol collection numbers, a mobile-friendly **Focus mode**, tap-to-zoom cards, and a light/dark reading theme.
+
 ### 🚧 Upcoming
 
 - **Global / Local Leaderboards**: Introducing a competitive layer for the most dedicated fans.
 
-- **Album Collection**: A personal gallery where players collect and revisit the albums they've guessed, building their own K-pop discography over time.
+- **More Collections**: Additional albums beyond the first, expanding the cards fans can collect over time.
 
 - **Design**: Creating a better and unique K-pop vibe, I plan to re-design [KpopIt](https://www.kpopit.net/) for better visuals and experience.
 
