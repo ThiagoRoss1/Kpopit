@@ -28,19 +28,19 @@ const TEXTURE_ROWS: RowSpec[] = [
 const MOTION_ROWS: RowSpec[] = [
     { key: 'sparkles', label: 'Background sparkles' },
     { key: 'lv2', label: 'Gold shine (LV2)' },
-    { key: 'lv3', label: 'Holographic (LV3)' },
+    { key: 'lv3', label: 'Holo shine (LV3)' },
 ];
 
 const CONTROL_ROWS: RowSpec[] = [
     {
         key: 'tapZoom',
         label: 'Tap to zoom stickers',
-        hint: 'Turn this off to use the whole page for turning.',
+        hint: 'Off uses the whole page for turning instead.',
     },
     {
         key: 'arrows',
         label: 'Side page arrows',
-        hint: 'Hide them for a cleaner screen — turn pages by tapping, the arrow keys, or the carousel.',
+        hint: 'Off for a cleaner view — turn by tap, ← →, or the carousel.',
     },
 ];
 
@@ -293,7 +293,7 @@ export default function FxPanel({ night, onClose, albumName, closing, onAnimatio
                 </div>
 
                 <p className={`mt-3 font-sans text-[11.5px] leading-[1.45] ${night ? 'text-white/55' : 'text-[#7a6b74]'}`}>
-                    Turning effects off makes the album lighter on slower devices.
+                    Turn effects and textures off to make the album lighter on slower devices.
                 </p>
             </div>
         </>

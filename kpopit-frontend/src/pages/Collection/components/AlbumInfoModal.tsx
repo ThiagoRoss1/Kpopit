@@ -1,5 +1,5 @@
 import type { AnimationEvent } from 'react';
-import { X, BookOpenText, Layers, Sticker, Smartphone } from 'lucide-react';
+import { X, BookOpenText, Layers, Sticker, Smartphone, Settings } from 'lucide-react';
 
 interface AlbumInfoModalProps {
     collectionName?: string;
@@ -10,11 +10,16 @@ interface AlbumInfoModalProps {
     onAnimationEnd: (event: AnimationEvent<Element>) => void;
 }
 
-const INFO_ROWS = [
+const INFO_ROWS = (props: AlbumInfoModalProps) =>[
     {
         icon: <BookOpenText className="w-8 h-8" />,
-        title: "One continuous album",
-        body: "The collection gathers every idol from the featured groups in a single sticker album. Flip through it like a real book.",
+        title: `${props.collectionName} Album`,
+        body: `${props.collectionName} features every idol and group from KpopIt. Flip through it like a real book.`,
+    },
+    {
+    icon: <Settings className="w-8 h-8" />,
+    title: "Settings",
+    body: "Adjust visual effects and controls from the settings button.",
     },
     {
         icon: <Layers className="w-8 h-8" />,
@@ -23,13 +28,13 @@ const INFO_ROWS = [
     },
     {
         icon: <Sticker className="w-8 h-8" />,
-        title: "Sticker levels",
-        body: "Win Classic or Blurry to collect that idol's sticker; winning the same idol again levels it up — LV2 gold, LV3 holo. Complete a group (full bar ✓) to unlock its group photo.",
+        title: "Stickers",
+        body: "Win Classic or Blurry to collect that idol's sticker, win the same idol again to level it up: Base → Gold → Holo. Tap any sticker to see its level, copies and more. Complete a group (full bar ✓) to unlock its group photo.",
     },
     {
         icon: <Smartphone className="w-8 h-8" />,
         title: "On your phone",
-        body: "Tap Focus to read one page at a time — it paints the page twice as large. Tap any sticker to enlarge it.",
+        body: "Tap the focus button to zoom in and read one page at a time, easier to see on a small screen.",
     }
 ];
 
@@ -74,7 +79,7 @@ export default function AlbumInfoModal(props: AlbumInfoModalProps) {
                     </button>
                 </div>
                 <div className="mt-4.5 flex flex-col gap-3.5">
-                    {INFO_ROWS.map((row) => (
+                    {INFO_ROWS(props).map((row) => (
                         <div key={row.title} className="flex gap-3">
                             <div
                                 className={`flex w-10 h-10 flex-none items-center justify-center rounded-xl text-[18px] transition-colors duration-300 ${

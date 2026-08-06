@@ -3,7 +3,7 @@ import { Link, useParams } from 'react-router-dom';
 import { Helmet } from 'react-helmet-async';
 import { useQuery } from '@tanstack/react-query';
 import { isAxiosError } from 'axios';
-import { ChevronLeft, ChevronRight, Columns2, GalleryVerticalEnd, Info, Menu, Moon, SlidersHorizontal, Square, Sun } from 'lucide-react';
+import { ChevronLeft, ChevronRight, Fullscreen, BookOpen, GalleryVerticalEnd, Info, Menu, Moon, SlidersHorizontal, Sun } from 'lucide-react';
 import AlbumOfCol, { type AlbumBookInit, type AlbumGroupSpread, type AlbumOfColControls } from '../../components/Albums/AlbumOfCol/AlbumOfCol';
 import type { AlbumFocus } from '../../components/Albums/AlbumOfCol/AlbumOfCol';
 import type { CardZoomTarget } from '../../components/Albums/AlbumOfCol/albumCardZoom';
@@ -134,7 +134,7 @@ export default function CollectionAlbum() {
     // Safari ignores `touch-action` for pinch-zoom, so the .collections-root CSS rule
     // does nothing there (same story as AlbumOfCol's stage). Block its non-standard
     // gesture events across the whole album page; Chromium/Firefox are covered by CSS.
-    
+
     useEffect(() => {
         const root = rootRef.current;
         if (!isSafari || !root) return;
@@ -382,8 +382,8 @@ export default function CollectionAlbum() {
                                 }`}
                             >
                                 {focusActive
-                                    ? <Columns2 className="w-4.5 h-4.5" strokeWidth={3} />
-                                    : <Square className="w-4.5 h-4.5" strokeWidth={3} />
+                                    ? <BookOpen className="w-4.5 h-4.5" strokeWidth={3} />
+                                    : <Fullscreen className="w-4.5 h-4.5" strokeWidth={3} />
                                 }
                             </button>
                         </div>
@@ -393,7 +393,7 @@ export default function CollectionAlbum() {
                             <IconBtn
                                 id="fx-panel-toggle"
                                 onClick={fxPanel.toggle}
-                                title="Visual effects"
+                                title="Settings"
                                 night={night}
                             >
                                 <SlidersHorizontal className="w-4.5 h-4.5" strokeWidth={3} />
