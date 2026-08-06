@@ -19,7 +19,7 @@ import { useCollectionFx } from './useCollectionFx';
 import { useCollectionNight } from './useCollectionNight';
 import { useDisclosure } from '../../hooks/useDisclosure';
 import { getCollectionAlbum, getCollectionsList } from '../../services/api';
-import { useIsLg } from '../../hooks/useIsDevice';
+import { useIsLg, isSafari } from '../../hooks/useIsDevice';
 import type { AlbumGroup } from '../../interfaces/albumInterfaces';
 import './collections.css';
 
@@ -129,6 +129,23 @@ export default function CollectionAlbum() {
     const [book, setBook] = useState<AlbumBookInit | null>(null);
     const [shown, setShown] = useState({ pos: 0, busy: false });
     const controls = useRef<AlbumOfColControls | null>(null);
+    const rootRef = useRef<HTMLDivElement>(null);
+
+    // Safari ignores `touch-action` for pinch-zoom, so the .collections-root CSS rule
+    // does nothing there (same story as AlbumOfCol's stage). Block its non-standard
+    // gesture events across the whole album page; Chromium/Firefox are covered by CSS.
+    
+    useEffect(() => {
+        const root = rootRef.current;
+        if (!isSafari || !root) return;
+        const blockGesture = (event: Event) => event.preventDefault();
+        root.addEventListener('gesturestart', blockGesture as EventListener);
+        root.addEventListener('gesturechange', blockGesture as EventListener);
+        return () => {
+            root.removeEventListener('gesturestart', blockGesture as EventListener);
+            root.removeEventListener('gesturechange', blockGesture as EventListener);
+        };
+    }, []);
 
     const onBookInit = useCallback((next: AlbumBookInit) => setBook(next), []);
     const onPosChange = useCallback((pos: number, busy: boolean) => setShown({ pos, busy }), []);
@@ -287,6 +304,7 @@ export default function CollectionAlbum() {
                 <div className="collections__bg" aria-hidden="true" />
 
                 <div
+                    ref={rootRef}
                     className={`collections-root -mx-2 sm:-mx-4 flex flex-col lg:h-[calc(100svh-60px)]
                 lg:overflow-hidden transition-colors duration-300 ${night ? 'text-white' : 'text-[#3c2f38]'}`}
                     {...fxAttrs}

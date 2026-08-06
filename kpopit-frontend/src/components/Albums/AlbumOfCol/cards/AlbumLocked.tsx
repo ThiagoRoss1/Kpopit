@@ -18,7 +18,10 @@ export function AlbumLockedSlot({ slotNumber, name }: AlbumLockedSlotProps) {
             bg-[rgba(217,217,217,0.32)] text-center font-bold uppercase text-black">
                 <p className="absolute top-2 -z-5 w-full font-sans font-bold text-[52px] leading-[normal]">{slotNumber}</p>
                 <div className="flex size-full flex-col items-center justify-center gap-1">
-                    <p className={`${name.split(' ').some(word => word.length >= 10) ? 'text-xl' : 'text-2xl'} leading-[normal]`}>
+                    <p className={`${name.split(' ').some(word => word.length >= 10) 
+                        ? 'text-xl' : name.split(' ').some(word => word.length >= 9) 
+                        ? 'text-[22px]' 
+                        : 'text-2xl'} leading-[normal]`}>
                         {name}
                     </p>
                     <p className="text-sm leading-[normal]">Locked</p>
@@ -34,9 +37,12 @@ export function AlbumLockedSlot({ slotNumber, name }: AlbumLockedSlotProps) {
 
 export function AlbumLockedGroupPhoto({ groupName, className = '', pageLabel }: AlbumLockedGroupPhotoProps) {
     return (
-        <div className={`font-major-mono-display relative flex flex-col items-center justify-center gap-4 rounded-br-[20px] rounded-tl-[20px] border-2 border-dashed border-black/60 bg-[rgba(217,217,217,0.32)] text-center font-bold uppercase text-black ${className}`}>
+        <div className={`font-major-mono-display relative flex flex-col items-center justify-center gap-4 rounded-br-[20px] rounded-tl-[20px] 
+        border-2 border-dashed border-black/60 bg-[rgba(217,217,217,0.32)] text-center font-bold uppercase text-black ${className}`}>
             <span className="flex flex-col items-center justify-center w-full gap-4 z-50">
-                <p className={`leading-[normal] ${groupName.length > 8 ? `${pageLabel == 'groupIntro' ? 'text-3xl' : 'text-[20px]'}` : `${pageLabel == 'groupIntro' ? 'text-4xl' : 'text-[26px]'}`}`}>{groupName}</p>
+                <p className={`leading-[normal] ${groupName.length > 8 ? `${pageLabel == 'groupIntro' ? 'text-3xl' : 'text-[20px]'}` : `${
+                pageLabel == 'groupIntro' ? 'text-4xl' : 'text-[26px]'}`}`}>{groupName}</p>
+                
                 <p className={`flex ${pageLabel == 'groupIntro' ? 'text-2xl' : 'text-lg'} leading-[normal] tracking-[0.2em]`}>Locked</p>
             </span>
 
