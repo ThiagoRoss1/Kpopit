@@ -20,12 +20,17 @@ export const isGeckoEngine = typeof window !== "undefined" &&
   (window.CSS && CSS.supports('-moz-appearance', 'none'));
 
 export function useIsLg(breakpoint = 1024) {
-    const [isLg, setIsLg] = useState(window.innerWidth >= breakpoint);
+    const [isLg, setIsLg] = useState(() => window.matchMedia(`(min-width: ${breakpoint}px)`).matches);
 
     useEffect(() => {
-        const onResize = () => setIsLg(window.innerWidth >= breakpoint);
-        window.addEventListener("resize", onResize);
-        return () => window.removeEventListener("resize", onResize);
+        const mediaQuery = window.matchMedia(`(min-width: ${breakpoint}px)`);
+        const handleChange = (event: MediaQueryListEvent) => {
+            setIsLg(event.matches);
+        }
+
+        mediaQuery.addEventListener("change", handleChange);
+
+        return () => mediaQuery.removeEventListener("change", handleChange);
     }, [breakpoint]);
 
     return isLg;

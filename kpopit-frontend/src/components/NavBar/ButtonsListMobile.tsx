@@ -205,6 +205,23 @@ const ButtonsListMobile = (props: ButtonsListMobileProps) => {
                     </ul>
                 </li>
 
+                {/* Collection */}
+                {import.meta.env.VITE_COLLECTION_ENABLED === "true" && (
+                    <li className="w-full flex items-center justify-center list-none">
+                        <Link
+                            to="/collections"
+                            onClick={onClose}
+                            className={`flex w-full max-xxs:h-12 xxs:h-14 xs:h-16 bg-black rounded-2xl items-center justify-center text-center ${text}`}>
+                                <span className={text}>
+                                    {location.pathname.includes("/collections") && (
+                                        <span className="text-neon-pink [text-shadow:1px_1px_10px_#FF3399,1px_1px_10px_#FF3399] pr-1">• </span>
+                                    )}
+                                    Collections
+                                </span>
+                        </Link>
+                    </li>
+                )}
+
                 {/* Contact */}
                 <li className="w-full flex items-center justify-center list-none">
                     <Link

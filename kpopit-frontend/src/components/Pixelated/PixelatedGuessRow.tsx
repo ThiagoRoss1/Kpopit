@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useCallback } from "react";
 import "./PixelatedGuess.css";
 import type { PixelatedGuessDetail } from "../../interfaces/gameInterfaces";
-import { albumCoverUrl } from "../../utils/imageUrl";
+import { resolveCdnUrl } from "../../utils/imageUrl";
 
 interface PixelatedGuessRowProps {
     guess: PixelatedGuessDetail;
@@ -20,7 +20,7 @@ const PixelatedGuessRow = ({
     onAlbumAnimated,
     onAnimationComplete,
 }: PixelatedGuessRowProps) => {
-    const coverUrl = albumCoverUrl(guess.cover_path);
+    const coverUrl = resolveCdnUrl(guess.cover_path);
 
     const [hasAnimated, setHasAnimated] = useState(isAnimated);
     const shouldAnimate = isLatest && !hasAnimated;
@@ -59,7 +59,7 @@ const PixelatedGuessRow = ({
                         overflow-hidden hover:scale-110 transition-transform duration-300 transform-gpu"
                     >
                         <img
-                            src={coverUrl}
+                            src={coverUrl ?? undefined}
                             alt={`${guess.album_name} cover`}
                             className="w-full h-full object-cover"
                             draggable={false}

@@ -1,0 +1,164 @@
+/* ---- Name legibility (all levels) — thin dark outline + drop shadow so the
+   Major Mono display face stays readable over photos, gold and holo fills */
+
+.album-card-name {
+    text-shadow:
+        -1px -1px 0 rgba(0, 0, 0, 0.85),
+        1px -1px 0 rgba(0, 0, 0, 0.85),
+        -1px 1px 0 rgba(0, 0, 0, 0.85),
+        1px 1px 0 rgba(0, 0, 0, 0.85),
+        2px 2px 3px rgba(0, 0, 0, 0.6);
+    letter-spacing: 0.02em;
+}
+
+/* ---- LV2 gold — classic jewelry-gold ramp (BF953F/FCF6BA/AA771C family) tinted
+   over the gold.jpg base, plus the specular sheen */
+
+.album-gold-tint {
+    background: linear-gradient(
+        135deg,
+        rgba(191, 149, 63, 0.55),
+        rgba(252, 246, 186, 0.5) 28%,
+        rgba(179, 135, 40, 0.55) 52%,
+        rgba(251, 245, 183, 0.5) 76%,
+        rgba(170, 119, 28, 0.6)
+    );
+    mix-blend-mode: overlay;
+    transform: translateZ(0);
+}
+
+/* Sheen sweeps during the first 55%, then rests off-screen until the loop ends.
+   Old form: `background-position: calc(160% - var(--album-sheen) * 220%) 0`,
+   with the sheen clock holding 1 from 55% on — so 160% at the start of the
+   sweep, -60% (fully off the left edge) from 55% to the end. */
+
+@keyframes album-gold-sheen-sweep {
+    0% {
+        background-position: 160% 0;
+    }
+    55%,
+    100% {
+        background-position: -60% 0;
+    }
+}
+
+.album-gold-sheen {
+    background: linear-gradient(
+        115deg,
+        transparent 38%,
+        rgba(255, 248, 214, 0.55) 47%,
+        rgba(255, 255, 255, 0.9) 50%,
+        rgba(255, 248, 214, 0.55) 53%,
+        transparent 62%
+    );
+    background-size: 240% 100%;
+    background-repeat: no-repeat;
+    background-position: 160% 0;
+    animation: album-gold-sheen-sweep 3.4s linear infinite;
+    mix-blend-mode: screen;
+    transform: translateZ(0);
+}
+
+/* Old form: `background-position: calc(var(--album-shimmer) * 100%) 50%` plus
+   `filter: hue-rotate(calc(var(--album-shimmer) * 75deg))` — shimmer running
+   0 → 1. Both endpoints are reproduced exactly here. The hue-rotate is not a
+   pure hue shift — the CSS filter matrix does not preserve luminance — so it is
+   what gives the holo its brighter, higher-contrast swing, and dropping it
+   visibly flattens the card. It stays. */
+
+@keyframes album-holo-shimmer {
+    from {
+        background-position: 0% 50%;
+        filter: hue-rotate(0deg);
+    }
+    to {
+        background-position: 100% 50%;
+        filter: hue-rotate(75deg);
+    }
+}
+
+.album-lv-badge .album-holo-fill {
+    rotate: -6deg;
+    inset: -25%;
+}
+
+/* ---- LV3 holo — pure CSS rainbow bands easing back and forth (a stuck sticker
+   catching light), no texture image so no seams/edges can ever show */
+
+.album-holo-fill,
+.album-holo-overlay {
+    background: linear-gradient(
+        125deg,
+        #ff5ba8,
+        #ffb15c 16%,
+        #f6ff8a 32%,
+        #6effc0 48%,
+        #5cc8ff 64%,
+        #b18cff 82%,
+        #ff5ba8
+    );
+    background-size: 280% 280%;
+    background-position: 0% 50%;
+    animation: album-holo-shimmer 4.2s ease-in-out infinite alternate;
+    transform: translateZ(0);
+}
+
+/* Laminate pass over the WHOLE card (frame, photo, badge and banner together) */
+
+.album-holo-overlay {
+    mix-blend-mode: screen;
+    opacity: 0.5;
+}
+
+/* Foil micro-lines — the fine diagonal striations of a laminated holo print.
+   Static texture; the moving bands + glare above/below sell the shimmer. */
+
+.album-holo-foil {
+    background:
+        repeating-linear-gradient(115deg, rgba(255, 255, 255, 0.22) 0 1px, transparent 1px 3px),
+        repeating-linear-gradient(25deg, rgba(255, 255, 255, 0.1) 0 1px, transparent 1px 7px);
+    mix-blend-mode: overlay;
+    opacity: 0.38;
+    transform: translateZ(0);
+}
+
+/* Old form: `background-position: calc(140% - var(--album-shimmer) * 180%) 0`,
+   i.e. off-screen right at 140% travelling to off-screen left at -40%, on the
+   same 4.2s alternating shimmer curve as the bands above. */
+
+@keyframes album-holo-glare-sweep {
+    from {
+        background-position: 140% 0;
+    }
+    to {
+        background-position: -40% 0;
+    }
+}
+
+/* Soft specular glare easing across the whole print — plastic catching light */
+
+.album-holo-glare {
+    background: linear-gradient(
+        105deg,
+        transparent 26%,
+        rgba(255, 255, 255, 0.2) 40%,
+        rgba(255, 255, 255, 0.5) 50%,
+        rgba(255, 255, 255, 0.2) 60%,
+        transparent 74%
+    );
+    background-size: 220% 100%;
+    background-repeat: no-repeat;
+    background-position: 140% 0;
+    animation: album-holo-glare-sweep 4.2s ease-in-out infinite alternate;
+    mix-blend-mode: screen;
+    transform: translateZ(0);
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .album-gold-sheen,
+    .album-holo-fill,
+    .album-holo-overlay,
+    .album-holo-glare {
+        animation: none;
+    }
+}

@@ -1,0 +1,152 @@
+import './collections.css';
+import { useQuery } from '@tanstack/react-query';
+import { Helmet } from 'react-helmet-async';
+import { getCollectionsList } from '../../services/api';
+import CollectionsBackdrop from './components/CollectionsBackdrop';
+import { CollectionCard } from './components/CollectionCard';
+import { ThemedCard } from './components/ThemedCard';
+import { useCollectionFx } from './useCollectionFx';
+import { useCollectionNight } from './useCollectionNight';
+import FxPanel from './components/FxPanel';
+import { Moon, SlidersHorizontal, Sun } from 'lucide-react';
+import { useDisclosure } from '../../hooks/useDisclosure';
+
+export default function Collection() {
+    const fxPanel = useDisclosure();
+    const { fx } = useCollectionFx();
+    const fxAttrs = {
+        'data-fx-backdrop': fx.backdrop ? 'on' : 'off',
+        'data-fx-sparkles': fx.sparkles ? 'on' : 'off',
+        'data-fx-shadows': fx.shadows ? 'on' : 'off',
+        'data-fx-blur': fx.blur ? 'on' : 'off',
+        'data-fx-lv2': fx.lv2 ? 'on' : 'off',
+        'data-fx-lv3': fx.lv3 ? 'on' : 'off',
+    } as const;
+
+    const [night, setNight] = useCollectionNight();
+
+    const { data: collections, isLoading } = useQuery({
+        queryKey: ['collectionsList'],
+        queryFn: getCollectionsList,
+        staleTime: 1000 * 60 * 5,
+        refetchOnWindowFocus: false,
+    });
+    const totalStickers = collections?.reduce((sum, collection) => sum + collection.total_cards, 0);
+
+    const textMain = night ? 'text-white' : 'text-ink';
+    const textMuted = night ? 'text-white/62' : 'text-[#6b5f55]';
+    const rule = night ? 'border-white/22' : 'border-ink';
+
+    return (
+        <>
+            <Helmet>
+                <title>KpopIt - Collections</title>
+                <meta name="description" content="Explore KpopIt Collections, collect stickers, and complete your albums!" />
+                <link rel="canonical" href={`https://kpopit.net/collections`} />
+                <meta property="og:title" content="KpopIt Collections - Explore, collect and complete KpopIt Albums." />
+                <meta property="og:description" content="Explore KpopIt Collections, collect stickers, and complete your albums!" />
+            </Helmet>
+
+            <div className={`collections-root relative min-h-full w-full transition-colors duration-300 ${textMain}`} {...fxAttrs}>
+                <CollectionsBackdrop night={night} />
+                
+                <div className="relative mx-auto max-w-300 px-6 pb-18">
+                    {/* Header */}
+                    <header className="pt-6.5">
+                        <div className={`flex flex-wrap items-baseline justify-between gap-2 border-b-[1.5px] pb-2 font-mono text-[9.5px] uppercase tracking-[0.2em] transition-colors duration-300 ${rule} ${textMuted}`}>
+                            <span>Kpopit Collections</span>
+                            <span className="text-neon-pink">Vol. I · Est. 2026</span>
+                        </div>
+                        <div className="mt-3 flex flex-col items-center gap-2 text-center md:flex-row md:flex-wrap md:items-end md:justify-between md:gap-4 md:text-left">
+                            <h1 className={`font-serif text-center text-[clamp(47.5px,8vw,88px)] leading-[0.82] -tracking-[0.02em] md:text-left ${textMain}`}>
+                                Collections<span className="text-neon-pink">.</span>
+                            </h1>
+                            <div className="relative flex items-center gap-2.5 md:pb-2">
+                                <span className={`font-sans font-semibold text-[16px] italic ${textMuted}`}>{totalStickers ?? '…'} stickers to collect</span>
+
+                                <button
+                                    id="fx-panel-toggle"
+                                    type="button"
+                                    onClick={fxPanel.toggle}
+                                    title="Visual effects"
+                                    aria-expanded={fxPanel.active}
+                                    className={`flex flex-none size-10 cursor-pointer items-center justify-center rounded-full border-2
+                                    transition-all duration-150 transform-gpu hover:brightness-110 active:translate-y-0.5 ${night
+                                        ? 'border-neon-pink/60 bg-[#1c1f27] text-white shadow-[0_3px_0_rgba(255,51,153,0.6)] active:shadow-[0_1px_0_rgba(255,51,153,0.6)]'
+                                        : 'border-ink bg-white text-ink shadow-[0_3px_0_var(--color-ink)] active:shadow-[0_1px_0_var(--color-ink)]'}`}
+                                >
+                                    <SlidersHorizontal className="w-4.5 h-4.5" strokeWidth={3} />
+                                </button>
+                                {fxPanel.mounted && (
+                                    <FxPanel
+                                        night={night}
+                                        onClose={fxPanel.close}
+                                        albumName='Collections'
+                                        closing={fxPanel.closing}
+                                        {...fxPanel.animationProps}
+                                    />
+                                )}
+
+                                <button
+                                    type="button"
+                                    onClick={() => setNight((previousNight) => !previousNight)}
+                                    title="Light/night mode"
+                                    className={`flex flex-none collections-toggle-sweep size-10 cursor-pointer items-center justify-center 
+                                    rounded-full relative overflow-hidden border-2 transition-all duration-150 
+                                    transform-gpu hover:brightness-110 active:translate-y-0.5 ${night
+                                        ? 'border-neon-pink/60 bg-[#1c1f27] text-white shadow-[0_3px_0_rgba(255,51,153,0.6)] active:shadow-[0_1px_0_rgba(255,51,153,0.6)]'
+                                        : 'border-ink bg-white text-ink shadow-[0_3px_0_var(--color-ink)] active:shadow-[0_1px_0_var(--color-ink)]'
+                                    } `}
+                                >
+                                    {night ? <Moon className="w-5 h-5 text-white/60" /> : <Sun className="w-5 h-5 text-[#6b5f55]" />}
+                                </button>
+                            </div>
+                        </div>
+                        <div className={`mt-2.5 border-b-4 border-double transition-colors duration-300 ${rule}`} />
+                    </header>
+
+                    {/* Albums — one card per collection row */}
+                    {isLoading && (
+                        <section
+                            className={`mt-6 rounded-[20px] border-[2.5px] p-5.5 transition-colors duration-300 ${
+                                night
+                                    ? 'border-white/10 bg-[#16181e] shadow-[0_14px_34px_-14px_rgba(0,0,0,0.7)]'
+                                    : 'border-ink bg-cream shadow-[6px_6px_0px_#0a0a0a]'
+                            }`}
+                        >
+                            <div className="collections-skeleton h-49.5 w-full rounded-[14px]" />
+                        </section>
+                    )}
+
+                    {collections?.map((collection) => (
+                        <CollectionCard
+                            key={collection.collection_id}
+                            collection={collection}
+                            night={night}
+                        />
+                    ))}
+
+                    {/* Future albums */}
+                    <div className="flex flex-col gap-2 w-full h-fit mt-6 rounded-[20px] bg-transparent py-4 px-0">
+                        <div className="flex flex-row justify-start items-start">
+                            <span className={`font-bold text-3xl opacity-80 ${textMain} [text-shadow:1px_1px_1px_rgba(0,0,0,0.4)]`}>
+                                Coming Soon!
+                            </span>
+                        </div>
+
+                        <ThemedCard
+                            album={{
+                                title: 'KpopIt Seasonal',
+                                tag: 'THEMED',
+                                description: 'Seasonal album will be a seasonal themed collection of stickers, featuring special seasonal designs and limited edition cards. Obtain them by opening packs, combining cards, playing games and doing activities across KpopIt!',
+                                hue: 0,
+                                cap: 'Seasonal',
+                            }}
+                            night={night}
+                        />
+                    </div>
+                </div>
+            </div>
+        </>
+    );
+}

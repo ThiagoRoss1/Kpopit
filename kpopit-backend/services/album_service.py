@@ -190,7 +190,8 @@ class AlbumService:
             guessed = cursor.fetchone()
 
             game_service = GameService(connect, None)
-            is_correct = game_service.save_user_history(
+            # Pixelated never grants collection cards (for Album 1) (gamemode 3); discard card_granted.
+            is_correct, _ = game_service.save_user_history(
                 connect, cursor, user_id, gamemode_id, guess_album_id, answer_data,
                 correct_id, current_attempt, today, current_timestamp, analytics_data,
             )

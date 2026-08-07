@@ -1,0 +1,546 @@
+.collections {
+    position: relative;
+    min-height: 100%;
+    width: 100%;
+}
+
+.collections { overflow-x: clip; }
+
+.collections__bg {
+    position: fixed;
+    inset: 0;
+    z-index: -10;
+    overflow: hidden;
+    pointer-events: none;
+    height: 100%;
+    min-height: 100vh;
+    max-height: 100lvh;
+    transform: translateZ(0);
+    -webkit-transform: translateZ(0);
+    backface-visibility: hidden;
+}
+
+.collections-root {
+    touch-action: pan-x pan-y;
+}
+
+@keyframes collections-shimmer {
+    0% {
+        background-position: -200% 0;
+    }
+    100% {
+        background-position: 200% 0;
+    }
+}
+
+.collections-skeleton {
+    background: linear-gradient(
+        100deg,
+        rgba(60, 47, 56, 0.06) 30%,
+        rgba(60, 47, 56, 0.13) 50%,
+        rgba(60, 47, 56, 0.06) 70%
+    );
+    background-size: 200% 100%;
+    animation: collections-shimmer 1.3s linear infinite;
+}
+
+@keyframes collections-drift {
+    0%,
+    100% {
+        transform: translateY(0);
+    }
+    50% {
+        transform: translateY(-7px);
+    }
+}
+
+.collections-drift {
+    animation: collections-drift 5s ease-in-out infinite;
+}
+
+@keyframes collections-twinkle {
+    0%,
+    100% {
+        opacity: 0.6;
+        transform: scale(1);
+    }
+    50% {
+        opacity: 1;
+        transform: scale(1.14);
+    }
+}
+
+.collections-twinkle {
+    animation: collections-twinkle 4s ease-in-out infinite;
+}
+
+/* Album page — Summary rail slide in/out. Every -in/-out pair below is driven by
+   useDisclosure: it keeps the element mounted through the -out animation and
+   unmounts it on that element's own animationend. */
+   
+@keyframes collection-rail-in {
+    from {
+        transform: translateX(-115%) translateZ(0);
+        opacity: 0.4;
+    }
+    to {
+        transform: translateX(0) translateZ(0);
+        opacity: 1;
+    }
+}
+
+@keyframes collection-rail-out {
+    from {
+        transform: translateX(0) translateZ(0);
+        opacity: 1;
+    }
+    to {
+        transform: translateX(-115%) translateZ(0);
+        opacity: 0.4;
+    }
+}
+
+.collection-rail-in {
+    animation: collection-rail-in 0.26s cubic-bezier(0.22, 0.9, 0.28, 1) both;
+}
+
+.collection-rail-out {
+    animation: collection-rail-out 0.22s cubic-bezier(0.55, 0, 0.55, 0.2) both;
+}
+
+.album-index-scroll::-webkit-scrollbar {
+    width: 7px;
+    background: transparent;
+}
+
+.album-index-scroll::-webkit-scrollbar-track {
+    background: rgba(60, 47, 56, 0.12);
+    border-radius: 999px;
+    margin-block: 2px;
+    box-shadow: none;
+}
+
+.album-index-scroll::-webkit-scrollbar-thumb {
+    background: linear-gradient(180deg, #ff3399, #fa7268);
+    border-radius: 999px;
+    background-clip: padding-box;
+    box-shadow: none;
+}
+
+.album-index-scroll::-webkit-scrollbar-thumb:hover,
+.album-index-scroll::-webkit-scrollbar-thumb:active {
+    background: linear-gradient(180deg, #ff4fa8, #ff8574);
+}
+
+.album-index-scroll--night::-webkit-scrollbar-track {
+    background: rgba(255, 255, 255, 0.13);
+}
+
+/* Firefox gets the standard properties instead, same @supports gate index.css
+   uses, so Chromium keeps rendering the ::-webkit- rules above rather than
+   falling back to the (gradient-less) two-colour form. */
+
+@supports (-moz-appearance: none) {
+    .album-index-scroll {
+        scrollbar-width: thin;
+        scrollbar-color: #ff3399 rgba(60, 47, 56, 0.12);
+    }
+
+    .album-index-scroll--night {
+        scrollbar-color: #ff3399 rgba(255, 255, 255, 0.13);
+    }
+}
+
+/* Status + carousel chrome — same mount/unmount pattern as the Summary rail. */
+
+@keyframes collection-chrome-in {
+    from {
+        transform: translateY(20px) translateZ(0);
+        opacity: 0;
+    }
+    to {
+        transform: translateY(0) translateZ(0);
+        opacity: 1;
+    }
+}
+
+@keyframes collection-chrome-out {
+    from {
+        transform: translateY(0) translateZ(0);
+        opacity: 1;
+    }
+    to {
+        transform: translateY(20px) translateZ(0);
+        opacity: 0;
+    }
+}
+
+.collection-chrome-in {
+    animation: collection-chrome-in 0.3s ease both;
+}
+
+.collection-chrome-out {
+    animation: collection-chrome-out 0.3s ease both;
+}
+
+/* FxPanel desktop popover (lg:) — house motion from droplist.css /
+   IdolsSearchBar.css: translateY(-10px) -> 0, opacity, 0.3s ease. Exit is
+   the reverse, born-under/return-to-trigger. */
+
+@keyframes collection-pop-in {
+    from {
+        transform: translateY(-10px);
+        opacity: 0;
+    }
+    to {
+        transform: translateY(0);
+        opacity: 1;
+    }
+}
+
+@keyframes collection-pop-out {
+    from {
+        transform: translateY(0);
+        opacity: 1;
+    }
+    to {
+        transform: translateY(-10px);
+        opacity: 0;
+    }
+}
+
+.collection-pop-in {
+    animation: collection-pop-in 0.3s ease both;
+}
+
+.collection-pop-out {
+    animation: collection-pop-out 0.3s ease both;
+}
+
+/* Mobile drawer (FxPanel below lg:) + AlbumInfoModal — these read as
+   pop-ups rather than anchored popovers, so they scale in instead. */
+
+@keyframes collection-modal-in {
+    from {
+        transform: scale(0.85);
+        opacity: 0;
+    }
+    to {
+        transform: scale(1);
+        opacity: 1;
+    }
+}
+
+@keyframes collection-modal-out {
+    from {
+        transform: scale(1);
+        opacity: 1;
+    }
+    to {
+        transform: scale(0.85);
+        opacity: 0;
+    }
+}
+
+.collection-modal-in {
+    animation: collection-modal-in 0.3s ease both;
+}
+
+.collection-modal-out {
+    animation: collection-modal-out 0.3s ease both;
+}
+
+/* Card zoom panel — fade only, deliberately NOT the scaling pair above.
+   The sticker itself does the moving here: it flies from its slot in the album
+   (a FLIP) to its place in the panel. A scaling ancestor would drag it off the
+   path measured at click time, so the panel holds still and only fades. */
+
+@keyframes collection-card-zoom-in {
+    from {
+        opacity: 0;
+    }
+    to {
+        opacity: 1;
+    }
+}
+
+@keyframes collection-card-zoom-out {
+    from {
+        opacity: 1;
+    }
+    to {
+        opacity: 0;
+    }
+}
+
+.collection-card-zoom-in {
+    animation: collection-card-zoom-in 1.2s ease both;
+}
+
+.collection-card-zoom-out {
+    animation: collection-card-zoom-out 0.3s ease both;
+}
+
+.card-zoom-art {
+    transform-origin: top left;
+    /* Cap a single stale (pre-recompute) frame so the zoomed child can't paint
+    past the box during a breakpoint swap. */
+    overflow: hidden;
+}
+
+.card-zoom-art > * {
+    zoom: var(--card-zoom-scale, 1);
+}
+
+/* Desktop: the text column unfolds from behind the card once it has landed, so
+   the panel reads as coming OUT of the sticker rather than as a second,
+   unrelated entrance. Below lg the column sits under the card and needs none. */
+
+@media (min-width: 1024px) {
+    .card-zoom-meta {
+        animation: card-zoom-meta-in 1s cubic-bezier(0.22, 1, 0.36, 1) 0.18s both;
+    }
+}
+
+@keyframes card-zoom-meta-in {
+    from {
+        opacity: 0;
+        transform: translateX(-20px);
+    }
+    to {
+        opacity: 1;
+        transform: translateX(0);
+    }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .card-zoom-meta {
+        animation: none;
+    }
+}
+
+/* Mobile FxPanel sheet (below lg:) — docked to the bottom edge, so it slides
+   up/down rather than scaling like a centred pop-up. */
+
+@keyframes collection-sheet-in {
+    from {
+        transform: translateY(20px);
+        opacity: 0;
+    }
+    to {
+        transform: translateY(0);
+        opacity: 1;
+    }
+}
+
+@keyframes collection-sheet-out {
+    from {
+        transform: translateY(0);
+        opacity: 1;
+    }
+    to {
+        transform: translateY(20px);
+        opacity: 0;
+    }
+}
+
+.collection-sheet-in {
+    animation: collection-sheet-in 0.3s ease both;
+}
+
+.collection-sheet-out {
+    animation: collection-sheet-out 0.3s ease both;
+}
+
+/* FxPanel's root switches shape at lg: (drawer -> anchored popover), so its
+   motion class switches with it via Tailwind's lg: variant on a literal
+   class name — same two keyframes above, just gated to the popover width. */
+
+@media (min-width: 1024px) {
+    .lg\:collection-pop-in {
+        animation: collection-pop-in 0.3s ease both;
+    }
+
+    .lg\:collection-pop-out {
+        animation: collection-pop-out 0.3s ease both;
+    }
+}
+
+/* Backdrop dim layers (FxPanel's phone scrim, AlbumInfoModal's full-screen
+   wrapper) fade only — scaling a full-bleed overlay would reveal gaps at
+   the viewport edges instead of a clean dim. */
+
+@keyframes collection-backdrop-in {
+    from {
+        opacity: 0;
+    }
+    to {
+        opacity: 1;
+    }
+}
+
+@keyframes collection-backdrop-out {
+    from {
+        opacity: 1;
+    }
+    to {
+        opacity: 0;
+    }
+}
+
+.collection-backdrop-in {
+    animation: collection-backdrop-in 0.3s ease both;
+}
+
+.collection-backdrop-out {
+    animation: collection-backdrop-out 0.3s ease both;
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .collection-rail-in,
+    .collection-rail-out,
+    .collection-chrome-in,
+    .collection-chrome-out,
+    .collection-pop-in,
+    .collection-pop-out,
+    .collection-modal-in,
+    .collection-modal-out,
+    .collection-sheet-in,
+    .collection-sheet-out,
+    .lg\:collection-pop-in,
+    .lg\:collection-pop-out,
+    .collection-backdrop-in,
+    .collection-backdrop-out {
+        animation-duration: 0.01ms;
+    }
+
+    .collections-drift,
+    .collections-twinkle {
+        animation: none;
+    }
+}
+
+@media (max-width: 1023px) {
+    .collections-root,
+    .collections-root *,
+    .collections-root *::before,
+    .collections-root *::after {
+        transition-property: transform, translate, scale, rotate;
+    }
+
+    /* Opts back into box-shadow/filter transitions — the wildcard rule above
+    restricts Collections to cheap transform-only transitions on mobile,
+    which silently breaks a button's pressed-shadow animation unless it
+    carries this class. */
+    
+    .collections-root .collections-press {
+        transition-property: transform, translate, scale, rotate, box-shadow, filter;
+    }
+}
+
+/* Light/night toggle — a diagonal shine sweeps across on hover. The button must
+   be `relative overflow-hidden` so the streak is clipped to the pill. */
+   
+.collections-toggle-sweep::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(
+        115deg,
+        transparent 35%,
+        rgba(255, 255, 255, 0.55) 50%,
+        transparent 65%
+    );
+    transform: translateX(-140%);
+    pointer-events: none;
+}
+
+.collections-toggle-sweep:hover::after {
+    transform: translateX(140%);
+    transition: transform 1s ease;
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .collections-toggle-sweep:hover::after {
+        transition: none;
+        transform: translateX(-140%);
+    }
+}
+
+/* - Visual-effects panel -
+   Attribute rules rather than props on purpose: flipping one of these
+   re-renders exactly nothing in React, which is what lets the book and the
+   carousel keep their memo. The <img> textures are the deliberate exception,
+   they unmount from the leaf (see AlbumTextures.tsx), because there the point
+   is bitmap memory and `display:none` frees none of it. */
+
+[data-fx-sparkles='off'] .collections-drift,
+[data-fx-sparkles='off'] .collections-twinkle {
+    animation: none;
+}
+
+/* Each effect layer owns its own keyframes now (see AlbumMemberCard.css), so
+   `animation: none` stops the real work and parks the layer on its `from` frame:
+   both sweeps start off-screen, so a switched-off card reads as plain laminate
+   with no band frozen across it. There is no shared clock left to switch off —
+   an album with no LV2/LV3 cards runs no animation at all. */
+
+[data-fx-lv2='off'] .album-gold-sheen {
+    animation: none;
+    opacity: 0;
+}
+
+[data-fx-lv3='off'] .album-holo-fill,
+[data-fx-lv3='off'] .album-holo-overlay,
+[data-fx-lv3='off'] .album-holo-glare {
+    animation: none;
+}
+
+/* The cover inset hook sits on an element that also carries page content, so
+   the effect has to be removed by the property that draws it — `display: none`
+   there would hide the page itself. The spine shade is a standalone gradient
+   element with no children, so it goes away entirely. */
+
+[data-fx-shadows='off'] .album-cover-inset {
+    box-shadow: none;
+}
+
+[data-fx-shadows='off'] .album-spine-shade {
+    display: none;
+}
+
+[data-fx-blur='off'] .collections-chrome-blur {
+    backdrop-filter: none;
+}
+
+/* Focus mode — one page at a time.
+   Below lg the stage reclaims the height the status line and the carousel were
+   using (112px = navbar 48 + topbar 64, the chrome that stays). That reclaimed
+   height is what takes the page from 328x492 to 376x564, i.e. exactly 2x the
+   188x282 a spread paints today. Driven by an attribute so the ResizeObserver
+   remeasures without React remounting the book. */
+
+@media (max-width: 1023px) {
+    [data-focus='on'] .collections-album-stage {
+        height: calc(100svh - 112px);
+    }
+}
+
+/* The camera crosses the gutter in step with the leaf, so the reader follows the
+   page instead of watching it leave the screen. `.album-book` already transitions
+   transform (0.6s, for the closed-cover shift) — in focus it has to match the
+   leaf's 0.8s and easing, or the camera arrives before the page does. */
+   
+@media (prefers-reduced-motion: no-preference) {
+    [data-focus='on'] .album-book {
+        transition: transform 0.8s cubic-bezier(0.42, 0.04, 0.3, 1);
+    }
+}
+
+/* When the pages are turned off, the stage needs to adjust its padding (lg +), data-pages = carousel */
+
+@media (min-width: 1024px) {
+    [data-pages='off'] .album-stage {
+        padding-bottom: 3rem;
+    }
+}

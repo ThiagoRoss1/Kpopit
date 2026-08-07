@@ -1,12 +1,13 @@
 import axios from 'axios';
 import type { AddIdolRequest, CompleteGuessTrafficRequest, RestoreSessionResponse, PixelatedGameData, PixelatedGuessPayload, AlbumSearchResult } from '../interfaces/gameInterfaces';
+import type { CollectionAlbumGroup, CollectionListItem } from '../interfaces/albumInterfaces';
 import type { MeResponse, UpdateProfilePayload } from '../interfaces/authInterfaces';
 import { decryptToken } from '../utils/tokenEncryption';
 import { setAccessToken, getAccessToken, clearAccessToken } from './tokenStore';
 import { safeReload } from '../utils/safeReload';
 // Api instance with base URL
 const api = axios.create({
-    baseURL: `${import.meta.env.VITE_API_URL}/api`,
+    baseURL: import.meta.env.DEV ? '/api' : `${import.meta.env.VITE_API_URL}/api`,
     withCredentials: true,
     timeout: 15000,
 });
@@ -231,8 +232,22 @@ export const getPixelatedGuessAlbum = async (payload: PixelatedGuessPayload) => 
     return response.data;
 }
 
-// All published albums — fetched once and filtered client-side (mirrors getAllIdols
-// → ["allIdols"]). Replaces the old per-keystroke /albums/search endpoint.
+const collectionAuthHeaders = async () => {
+    const encrypted = localStorage.getItem('userToken');
+    const token = encrypted ? await decryptToken(encrypted) : null;
+    return token && !getAccessToken() ? { 'Authorization': token } : {};
+};
+
+export const getCollectionsList = async (): Promise<CollectionListItem[]> => {
+    const response = await api.get('/collections/list', { headers: await collectionAuthHeaders() });
+    return response.data;
+};
+
+export const getCollectionAlbum = async (collectionId: number = 1): Promise<CollectionAlbumGroup[]> => {
+    const response = await api.get(`/collections/album/${collectionId}`, { headers: await collectionAuthHeaders() });
+    return response.data;
+};
+
 export const getAllAlbums = async (): Promise<AlbumSearchResult[]> => {
     const response = await api.get('/game/pixelated/albums-list');
     return response.data;

@@ -4,11 +4,11 @@ import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { Helmet } from "react-helmet-async";
 import { useSharedGameData } from "../../hooks/useSharedGameData";
 import { useGameMode } from "../../hooks/useGameMode";
-import { useState, useEffect, useCallback, useRef } from "react";
+import { useState, useEffect, useCallback, useMemo, useRef } from "react";
 import { getPixelatedDailyAlbum, getPixelatedGuessAlbum, getAllAlbums, getYesterdaysAlbum, getUserPosition, getDailyUserCount, saveGameState}  from "../../services/api";
 import type { PixelatedGameData, AlbumSearchResult, PixelatedGuessDetail, YesterdayAlbum } from "../../interfaces/gameInterfaces";
 import { decryptToken } from "../../utils/tokenEncryption";
-import { albumCoverUrl } from "../../utils/imageUrl";
+import { resolveCdnUrl } from "../../utils/imageUrl";
 import PixelatedSearchBar from "../../components/Pixelated/PixelatedSearchBar";
 import PixelatedCanvas from "../../components/Pixelated/PixelatedCanvas";
 import PixelatedGuessGrid from "../../components/Pixelated/PixelatedGuessGrid";
@@ -253,7 +253,9 @@ function PixelatedMode() {
         }
     }, [isCorrect]);
 
-    const excludedIds = guesses.map((g) => g.album_id);
+    // Memoised for PixelatedSearchBar's React.memo: a fresh array every render
+    // fails the shallow prop compare and re-renders the whole suggestion list.
+    const excludedIds = useMemo(() => guesses.map((g) => g.album_id), [guesses]);
     const blockSize = endGame ? REVEAL_LEVEL : GetPixelLevel(guesses.length);
     const userCount = dailyUserCount?.data?.user_count ?? 0;
     const winningGuess = guesses.find((g) => g.guess_correct);
@@ -279,7 +281,7 @@ function PixelatedMode() {
 
     if (!dayChecked) return null;
 
-    const coverUrl = albumCoverUrl(pixelatedGameData.cover_path);
+    const coverUrl = resolveCdnUrl(pixelatedGameData.cover_path);
 
     const statsButton = (
         <button
@@ -331,27 +333,29 @@ function PixelatedMode() {
                     <div className={`flex flex-col lg:flex-row gap-4 lg:gap-10 ${isLg ? "items-start" : "items-center"}`}>
 
                         {!isLg && (
-                        <Link 
-                            to="/"
-                            className="flex flex-row items-center justify-center gap-5 mb-0">
-                            <h1 className="text-5xl font-bold text-neon-pink leading-tight">
-                                <span
-                                    className="kpop-part"
-                                    style={{ '--kpop-color': 'var(--color-neon-pink)' } as React.CSSProperties}
-                                >
-                                    Pixel
-                                </span>
+                        <div className="flex flex-row items-center justify-center gap-5 mb-0">
+                            <Link 
+                                to="/"
+                                className="inline-block bg-transparent border-0 p-0 cursor-pointer hover:scale-105
+                                transition-all duration-500 transform-gpu">
+                                <h1 className="text-5xl font-bold text-neon-pink leading-tight">
+                                    <span
+                                        className="kpop-part"
+                                        style={{ '--kpop-color': 'var(--color-neon-pink)' } as React.CSSProperties}
+                                    >
+                                        Pixel
+                                    </span>
 
-                                <span
-                                    className="it-part"
-                                    style={{ '--it-color': 'var(--color-cream)' } as React.CSSProperties}
-                                >
-                                    It
-                                </span>
-                            </h1>
-
+                                    <span
+                                        className="it-part"
+                                        style={{ '--it-color': 'var(--color-cream)' } as React.CSSProperties}
+                                    >
+                                        It
+                                    </span>
+                                </h1>
+                            </Link>
                             {statsButton}
-                        </Link>
+                        </div>  
                         )}
                         
                         {/* ── LEFT: album sleeve + vinyl + hints ── */}
@@ -370,7 +374,7 @@ function PixelatedMode() {
                                             <div className="pixel-vinyl__spin">
                                                 <div className="pixel-vinyl__label overflow-hidden">
                                                     <PixelatedCanvas
-                                                        imageUrl={coverUrl}
+                                                        imageUrl={coverUrl ?? undefined}
                                                         blockSize={blockSize}
                                                         alt="Pixelated album cover"
                                                         className="w-full h-full object-cover block rounded-full"
@@ -413,7 +417,7 @@ function PixelatedMode() {
                                             {/* Cover */}
                                             <div className="relative w-full aspect-square rounded-xl overflow-hidden flex flex-col bg-transparent">
                                                 <PixelatedCanvas
-                                                    imageUrl={coverUrl}
+                                                    imageUrl={coverUrl ?? undefined}
                                                     blockSize={blockSize}
                                                     alt="Pixelated album cover"
                                                     className="w-full h-full object-cover block"

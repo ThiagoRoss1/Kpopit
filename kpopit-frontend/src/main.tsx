@@ -20,6 +20,8 @@ import VerifyEmail from './pages/AuthUser/VerifyEmail'
 import ConfirmEmailChange from './pages/AuthUser/ConfirmEmailChange'
 import RevertEmailChange from './pages/AuthUser/RevertEmailChange'
 import UserProfile from './pages/User/UserProfile'
+import Collection from './pages/Collection/Collections'
+import CollectionAlbum from './pages/Collection/CollectionAlbum'
 import { AuthProvider } from './contexts/AuthProvider'
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
 import { BrowserRouter, Route, Navigate, Routes } from 'react-router-dom'
@@ -27,8 +29,11 @@ import ProtectedRoute from './components/ProtectedRoute/ProtectedRoute'
 import { SpeedInsights } from "@vercel/speed-insights/react"
 import { Analytics } from "@vercel/analytics/react"
 import { HelmetProvider } from 'react-helmet-async'
+import { printEasterEgg } from './utils/consoleEasterEgg'
 
 const queryClient = new QueryClient();
+
+printEasterEgg();
 
 createRoot(document.getElementById('root')!).render(
   <StrictMode>
@@ -39,7 +44,7 @@ createRoot(document.getElementById('root')!).render(
           <AuthProvider>
             {import.meta.env.VITE_MAINTENANCE_MODE === "true" ? (
               <Routes>
-                <Route path="*" element={<MaintenancePage type="database" />} />
+                <Route path="*" element={<MaintenancePage type="collection" />} />
               </Routes>
             ) : (
             <Routes>
@@ -65,7 +70,15 @@ createRoot(document.getElementById('root')!).render(
                 <Route path="/blurry" element={<BlurryMode />} />
 
                 <Route path="/pixelated" element={<PixelatedMode />} />
-                
+
+                {import.meta.env.VITE_COLLECTION_ENABLED === "true" && (
+                  <>
+                    <Route path="/collections" element={<Collection />} />
+
+                    <Route path="/collections/:collectionId/:slug" element={<CollectionAlbum />} />
+                  </>
+                )}
+
                 <Route path="/idols" element={<IdolsList />} />
 
                 <Route path="/idols/:id/:slug" element={<IdolProfile />} />

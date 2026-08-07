@@ -29,11 +29,11 @@ const MaintenanceDatabase = () => {
                 </div>
                 
                 <div className="flex flex-col gap-2 justify-center items-center">
-                    <span className="text-base sm:text-2xl font-semibold text-[#FF3399] [text-shadow:2px_2px_8px_rgba(0,0,0,0.5)]">
+                    <span className="text-base sm:text-2xl font-semibold text-neon-pink [text-shadow:2px_2px_8px_rgba(0,0,0,0.5)]">
                         What I'm doing: I'm changing Kpopit's database from SQLite to PostgreSQL.
                     </span>
                     
-                    <span className="text-base sm:text-2xl font-semibold text-[#FF3399] [text-shadow:2px_2px_8px_rgba(0,0,0,0.5)]">
+                    <span className="text-base sm:text-2xl font-semibold text-neon-pink [text-shadow:2px_2px_8px_rgba(0,0,0,0.5)]">
                         Why: SQLite is faster than PostgreSQL Buuuut there are some features in PostgreSQL that makes it more suitable for Kpopit's future.
                     </span>
                 </div>
@@ -63,11 +63,11 @@ const MaintenanceDatabase = () => {
                 </div>
 
                 <div className="flex flex-col gap-2 justify-center items-center">
-                    <span className="text-[14px] sm:text-xl font-semibold text-[#FF3399] [text-shadow:2px_2px_8px_rgba(0,0,0,0.5)]">
+                    <span className="text-[14px] sm:text-xl font-semibold text-neon-pink [text-shadow:2px_2px_8px_rgba(0,0,0,0.5)]">
                         There are many other reasons but I'll not enter into technical details, just know that this will benefit Kpopit in the long run.
                     </span>
 
-                    <span className="text-lg sm:text-3xl font-semibold text-[#FF3399] [text-shadow:2px_2px_8px_rgba(0,0,0,0.5)]">
+                    <span className="text-lg sm:text-3xl font-semibold text-neon-pink [text-shadow:2px_2px_8px_rgba(0,0,0,0.5)]">
                         We will be back soon!
                     </span>
                 </div>

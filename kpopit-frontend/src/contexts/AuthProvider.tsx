@@ -1,4 +1,5 @@
 import { useCallback, useEffect, useRef, useState, type ReactNode } from "react";
+import { useQueryClient } from "@tanstack/react-query";
 import { AuthContext, type AuthState } from "./auth_context";
 import { getMe, refreshToken, restoreSession as restoreGameSession, isTimeoutError } from "../services/api";
 import { setAccessToken, clearAccessToken } from "../services/tokenStore";
@@ -16,10 +17,12 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
         user: null,
     });
 
-    const { clearAll } = useClearGameStorage(); 
+    const { clearAll } = useClearGameStorage();
     const clearAllRef = useRef(clearAll);
     clearAllRef.current = clearAll;
-    
+
+    const queryClient = useQueryClient();
+
     const cancelledRef = useRef(false);
     const isRefreshingRef = useRef(false);
 
@@ -114,6 +117,21 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
             cancelledRef.current = true;
         };
     }, [restoreSession]);
+
+    // Collection queries (`collectionsList`/`collectionAlbum`) are keyed without the user,
+    // so a login/logout doesn't refetch them on its own, to fix it we watch for auth state 
+    // changes and invalidate them when it flips.
+
+    const prevAuthRef = useRef<boolean | null>(null);
+    
+    useEffect(() => {
+        if (state.isLoading) return;
+        if (prevAuthRef.current !== null && prevAuthRef.current !== state.isAuthenticated) {
+            queryClient.invalidateQueries({ queryKey: ['collectionsList'] });
+            queryClient.invalidateQueries({ queryKey: ['collectionAlbum'] });
+        }
+        prevAuthRef.current = state.isAuthenticated;
+    }, [state.isAuthenticated, state.isLoading, queryClient]);
 
     return (
         <AuthContext.Provider value={{ ...state, refreshAuth: restoreSession, refetchUser }}>

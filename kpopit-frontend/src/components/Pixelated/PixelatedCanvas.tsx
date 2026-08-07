@@ -2,7 +2,7 @@ import { useCallback, useEffect, useRef, useState } from "react";
 import { blockSizeToGrid } from "../../utils/pixelLevels";
 
 interface PixelatedCanvasProps {
-    imageUrl: string;
+    imageUrl?: string;
     blockSize: number;
     alt?: string;
     className?: string;
@@ -103,7 +103,7 @@ const PixelatedCanvas = ({ imageUrl, blockSize, alt, className }: PixelatedCanva
 
         img.addEventListener("load", handleLoad);
         img.addEventListener("error", handleError);
-        img.src = imageUrl;
+        img.src = imageUrl ?? "";
         if (img.complete && img.naturalWidth > 0) handleLoad();
 
         return () => {

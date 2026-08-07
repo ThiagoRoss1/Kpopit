@@ -149,8 +149,8 @@ def guess_blurry_idol():
 
         # Calculate score / if is correct and update user history
         try:
-            is_correct = game_service.save_user_history(
-                connect, cursor, user_id, 2, guessed_idol_id, answer_data, 
+            is_correct, card_granted = game_service.save_user_history(
+                connect, cursor, user_id, 2, guessed_idol_id, answer_data,
                 answer_id, current_attempt, today, current_timestamp, analytics_data
             )
         
@@ -169,7 +169,8 @@ def guess_blurry_idol():
         response_data = {
             "guess_correct": is_correct,
             "feedback": feedback,
-            "guessed_idol_data": data_for_display
+            "guessed_idol_data": data_for_display,
+            "card_granted": card_granted
         }
 
         return jsonify(response_data), 200

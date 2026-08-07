@@ -132,7 +132,7 @@ return (
             hover:scale-102 hover:brightness-110 hover:bg-linear-to-r transition-all duration-500 transform-gpu">
                 <div className="relative w-full h-full flex flex-col items-center justify-between gap-1">
                     <span className="max-xxs:text-lg xxs:text-lg xs:text-xl sm:text-2xl font-bold select-none">
-                        Yesterday idol was
+                        Yesterday's idol was
                     </span>
 
                     <div className="flex flex-row w-full h-full items-center justify-start max-xxs:pr-0 xxs:pr-2 xs:pr-4 xm:pr-2 sm:pr-4 ml-10 sm:ml-20 gap-2 sm:gap-6">

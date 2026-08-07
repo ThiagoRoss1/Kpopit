@@ -1,4 +1,5 @@
 from utils.dates import get_today_date
+from services.collections_service import CollectionService, COLLECTION_ENABLED, COLLECTION_GAMEMODE_IDS
 from datetime import timedelta, date
 import math
 import logging
@@ -42,6 +43,7 @@ class GameService:
         answer_data = answer_data or {}
         is_correct = int(guessed_id) == int(answer_id)
         one_shot_win = is_correct and current_attempt == 1
+        card_granted = None
     
         # Update user history in the database 
         try:
@@ -96,8 +98,26 @@ class GameService:
                     streak = self.streak_calculation(cursor, user_id, gamemode_id)
                     self._update_user_history(cursor, user_id, gamemode_id, streak, current_attempt, one_shot_win, today)
 
+                    if COLLECTION_ENABLED and gamemode_id in COLLECTION_GAMEMODE_IDS:
+                        # A collection failure must never cost the user their win:
+                        # the savepoint confines the grant, because psycopg poisons
+                        # the whole transaction after any errored statement.
+                        cursor.execute("SAVEPOINT collection_grant")
+                        try:
+                            card_granted = CollectionService(self.db).grant_card_for_win(
+                                cursor, user_id, int(answer_id), current_timestamp
+                            )
+                            cursor.execute("RELEASE SAVEPOINT collection_grant")
+                        except Exception:
+                            cursor.execute("ROLLBACK TO SAVEPOINT collection_grant")
+                            card_granted = None
+                            logger.exception(
+                                "Collection card grant failed for user_id=%s idol_id=%s gamemode_id=%s date=%s "
+                                "— win was saved, card was NOT granted. Manual backfill needed.", user_id, answer_id, gamemode_id, today
+                            )
+
             connect.commit()
-            return is_correct
+            return is_correct, card_granted
 
         except Exception as e:
             connect.rollback()

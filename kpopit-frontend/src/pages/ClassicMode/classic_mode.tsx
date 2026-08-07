@@ -3,7 +3,7 @@ import "./style.css";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { Helmet } from "react-helmet-async";
 import { useSharedGameData } from "../../hooks/useSharedGameData.tsx";
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback, useMemo, useRef } from "react";
 import { getDailyIdol, getGuessIdol, getYesterdaysIdol, getDailyUserCount, getUserPosition, saveGameState } from "../../services/api.ts";
 import type {
   GameData,
@@ -38,7 +38,10 @@ import { useAllGameModes } from "../../hooks/useAllGameModes.tsx";
 import { useClearGameStorage } from "../../hooks/useClearGameStorage.tsx";
 import { areGuessesEqual } from "../../utils/areGuessesEqual.ts";
 import { safeReload } from "../../utils/safeReload.ts";
-// import { Input } from "@chakra-ui/react"; - Css framework import example
+import CardGrantedReveal from "../Collection/components/CardGrantedReveal.tsx";
+import type { CardGranted } from "../../interfaces/albumInterfaces.ts";
+
+const NO_IDOLS: IdolListItem[] = [];
 
 function ClassicMode() {
   const gameMode = useGameMode()
@@ -49,6 +52,7 @@ function ClassicMode() {
   const [endGame, setEndGame] = useState<boolean>(false);
   const [showModal, setShowModal] = useState<null | "how-to-play" | "stats" | "streak" | "share" | "transfer-data" | "import-data" | "export-data">(null);
   const [showVictoryCard, setShowVictoryCard] = useState<boolean>(false);
+  const [cardGranted, setCardGranted] = useState<CardGranted>(null);
   const [isCorrect, setIsCorrect] = useState<boolean>(false);
   const [dayChecked, setDayChecked] = useState<boolean>(false);
   const [closeFeedbackSquares, setCloseFeedbackSquares] = useState<boolean>(false);
@@ -217,6 +221,12 @@ function ClassicMode() {
         queryClient.invalidateQueries({ queryKey: ["userStats"] });
         queryUserCount.invalidateQueries({ queryKey: ["dailyUserCount"] });
         queryClient.invalidateQueries({ queryKey: ["userPosition"] });
+
+        setCardGranted(data.card_granted ?? null);
+        if (data.card_granted) {
+          queryClient.invalidateQueries({ queryKey: ["collectionAlbum"] });
+          queryClient.invalidateQueries({ queryKey: ["collectionsList"] });
+        }
       }
     },
     onError: (error) => {
@@ -320,6 +330,23 @@ function ClassicMode() {
     setSelectedIdol(null);
   };
 
+  const handleIdolSelect = useCallback((idolName: string) => setCurrentGuess(idolName), []);
+  const handleIdolSelectId = useCallback((idolId: IdolListItem) => setSelectedIdol(idolId), []);
+
+  const excludedIdols = useMemo(
+    () => guesses.map(guess => guess.guessed_idol_data?.idol_id),
+    [guesses],
+  );
+
+  const submitRef = useRef<() => void>(() => {});
+  useEffect(() => {
+    submitRef.current = () => {
+      handleGuessSubmit();
+      handleGuessAttempts();
+    };
+  });
+  const handleSubmit = useCallback(() => submitRef.current(), []);
+
   // All gameModes for victory card
   const { otherModes } = useAllGameModes(gameMode);
   
@@ -406,15 +433,12 @@ function ClassicMode() {
       <div className="w-full flex flex-col">
         <div className="relative w-full max-w-4xl px-4 mx-auto flex justify-center z-40 mb-4">
           <SearchBar
-            allIdols={allIdolsData || []}
+            allIdols={allIdolsData || NO_IDOLS}
             value={currentGuess}
-            onIdolSelect={(idolName) => setCurrentGuess(idolName)}
-            onIdolSelectId={(idolId) => setSelectedIdol(idolId)}
-            onSubmit={() => {
-              handleGuessSubmit();
-              handleGuessAttempts();
-            }}
-            excludedIdols={guesses.map(guess => guess.guessed_idol_data?.idol_id)}
+            onIdolSelect={handleIdolSelect}
+            onIdolSelectId={handleIdolSelectId}
+            onSubmit={handleSubmit}
+            excludedIdols={excludedIdols}
             disabled={endGame || guessMutation.isPending || isCorrect}
             gameMode={"classic"}
           />
@@ -455,7 +479,9 @@ function ClassicMode() {
         }}
         />
       )} 
-      {/* see later */}
+      {/* See later */}
+
+      {endGame && showVictoryCard && <CardGrantedReveal cardGranted={cardGranted} />}
 
       {endGame && guesses.length > 0 && showVictoryCard && (
         <div className="w-full flex items-center justify-center mt-10">
@@ -494,8 +520,6 @@ function ClassicMode() {
         </span>
       </div>
       )}
-      
-      {/* <p>ID: {gameData?.answer_id}</p> */}
     </div>
     </>
   );

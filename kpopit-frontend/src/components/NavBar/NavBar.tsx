@@ -8,8 +8,8 @@ import { GAMES_LINKS, IDOLS_LINKS } from "./navigation";
 import { Menu, X } from "lucide-react";
 import { useAuth } from "../../hooks/useAuth";
 
-export type PageName = "classic" | "blurry" | "contact" | "idols" | "login" | "register" | "profile" | "pixelated";
-const MODES: PageName[] = ["classic", "blurry", "contact", "idols", "login", "register", "profile", "pixelated"];
+export type PageName = "classic" | "blurry" | "contact" | "idols" | "login" | "register" | "profile" | "pixelated" | "collections";
+const MODES: PageName[] = ["classic", "blurry", "contact", "idols", "login", "register", "profile", "pixelated", "collections"];
 
 
 const NavBar = () => {
@@ -95,6 +95,15 @@ const NavBar = () => {
                         className="bg-white/0 max-xxs:w-16 max-xxs:h-10 xxs:w-18 xxs:h-10 sm:w-23 sm:h-12"
                         dropdownClassName=""
                     />
+                    {/* Collections */}
+                    {import.meta.env.VITE_COLLECTION_ENABLED === "true" && (
+                    <Link
+                        to="/collections"
+                        className="flex items-center justify-center rounded-3xl hover:cursor-pointer hover:scale-105 hover:bg-[#b43777] transition-all
+                        duration-300 transform-gpu bg-transparent max-xxs:w-18 max-xxs:h-10 xxs:w-22 xxs:h-10 xs:w-24 xs:h-10 sm:w-30 sm:h-12">
+                            <span className="flex flex-row text-white max-xxs:text-[14px] xxs:text-[14px] sm:text-base gap-1">Collections</span>
+                    </Link>
+                    )}
                     {/* Contact */}
                     <Link
                         to="/contact"

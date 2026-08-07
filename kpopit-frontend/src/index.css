@@ -41,6 +41,10 @@ body {
   font-family: 'Noto Sans KR', sans-serif;
 }
 
+.font-major-mono-display {
+  font-family: 'Major Mono Display', monospace;
+}
+
 .logo {
   position: relative;
   font-weight: 800;
@@ -267,7 +271,11 @@ html {
     }
 }
 
-/* Avoid blur on images when hovering/scaling */
+/* Avoid blur on images when hovering/scaling.
+   These two properties together break any <img> rendered inside a
+   3D-rotated face. 
+   Firefox culls it as back-facing. AlbumOfCol.css opts the
+   flip-book out via `.album-book img`. */
 img {
   -webkit-backface-visibility: hidden;
   backface-visibility: hidden;
