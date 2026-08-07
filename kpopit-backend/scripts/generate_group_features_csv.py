@@ -35,7 +35,7 @@ GROUPS: list[tuple[int, str, str, int]] = [
     (17, "/images/groups/illit.webp", "#C2A3FF, #A7C7E7", 1),
     (18, "/images/groups/meovv.webp", "#D1D5DB, #CCFF00", 1),
     (19, "/images/groups/loona.webp", "#F8FAFC, #0B0F19, #FDE047", 1),
-    (20, "", "#000000, #FFFFFF", 1),
+    (20, "/images/groups/soloists.webp", "#000000, #FFFFFF", 1),
     (21, "/images/groups/artms.webp", "#5CCCFF, #8887BA", 1),
     (22, "/images/groups/loossemble.webp", "#A5857E", 1),
     (23, "/images/groups/red_velvet.webp", "#FEA38B", 1),

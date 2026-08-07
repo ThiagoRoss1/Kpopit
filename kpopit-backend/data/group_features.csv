@@ -18,7 +18,7 @@ group_id,image_path,palette,image_version
 17,/images/groups/illit.webp,"{""deep"": ""#6B4DAA"", ""secondary"": ""#9577D4"", ""main"": ""#C2A3FF"", ""accent"": ""#A7C7E7"", ""light"": ""#EAF2FA""}",1
 18,/images/groups/meovv.webp,"{""deep"": ""#7E7E7E"", ""secondary"": ""#A8A8A8"", ""main"": ""#D1D5DB"", ""accent"": ""#CCFF00"", ""light"": ""#FFFFFF""}",1
 19,/images/groups/loona.webp,"{""deep"": ""#0B0F19"", ""secondary"": ""#FDE047"", ""main"": ""#F8FAFC"", ""accent"": ""#FCFCFC"", ""light"": ""#FFFFFF""}",1
-20,,"{""deep"": ""#000000"", ""secondary"": ""#000000"", ""main"": ""#000000"", ""accent"": ""#636363"", ""light"": ""#FFFFFF""}",
+20,/images/groups/soloists.webp,"{""deep"": ""#000000"", ""secondary"": ""#000000"", ""main"": ""#000000"", ""accent"": ""#636363"", ""light"": ""#FFFFFF""}",1
 21,/images/groups/artms.webp,"{""deep"": ""#5E5E90"", ""secondary"": ""#8887BA"", ""main"": ""#5CCCFF"", ""accent"": ""#B6E6FE"", ""light"": ""#FFFFFF""}",1
 22,/images/groups/loossemble.webp,"{""deep"": ""#543531"", ""secondary"": ""#7B5C56"", ""main"": ""#A5857E"", ""accent"": ""#C9B3AE"", ""light"": ""#ECE4E2""}",1
 23,/images/groups/red_velvet.webp,"{""deep"": ""#A54938"", ""secondary"": ""#D17561"", ""main"": ""#FEA38B"", ""accent"": ""#FED3C7"", ""light"": ""#FFFFFF""}",1
