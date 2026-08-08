@@ -490,6 +490,7 @@ function AlbumOfCol({
         <AlbumCardZoomContext.Provider value={cardZoom}>
         <div
             ref={albumStageRef}
+            data-turning={turning ? 'on' : 'off'}
             className="album-stage flex h-full min-h-0 w-full flex-col items-center px-3 pt-3 pb-3 lg:pb-28"
         >
             <div ref={stageRef} className="flex min-h-0 w-full flex-1 items-center justify-center">

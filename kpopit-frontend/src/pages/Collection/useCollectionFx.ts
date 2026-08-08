@@ -1,27 +1,43 @@
-import { useSyncExternalStore, useCallback } from 'react';
+import { useSyncExternalStore } from 'react';
 import {
-    FX_GROUPS, getFxSnapshot, setFx, setFxGroup, subscribeFx,
-    type FxGroup, type FxKey, type FxState,
+    getDeviceTierSnapshot,
+    getPresetSnapshot,
+    getSettingsSnapshot,
+    setGfx,
+    setPreset,
+    subscribeGfx,
+    type GfxKey,
+    type GfxSettings,
 } from './collectionFx';
 
-/** Full state + setters. For the panel. */
+/** Full settings view for roots and the settings panel. */
 export function useCollectionFx() {
-    const fx = useSyncExternalStore(subscribeFx, getFxSnapshot, getFxSnapshot);
+    const settings = useSyncExternalStore(subscribeGfx, getSettingsSnapshot, getSettingsSnapshot);
+    const preset = useSyncExternalStore(subscribeGfx, getPresetSnapshot, getPresetSnapshot);
 
-    const groupOn = useCallback((group: FxGroup) => {
-        return FX_GROUPS[group].some((key) => fx[key]);
-    }, [fx]);
-
-    return { fx, setFx, setFxGroup, groupOn };
+    return {
+        settings,
+        preset,
+        deviceTier: getDeviceTierSnapshot(),
+        setGfx,
+        setPreset,
+    };
 }
 
-/** One flag. For leaves that must not re-render on unrelated changes. */
-export function useFx(key: FxKey): boolean {
+/** One setting for leaves that should ignore unrelated graphics changes. */
+export function useGfx<K extends GfxKey>(key: K): GfxSettings[K] {
     return useSyncExternalStore(
-        subscribeFx,
-        () => getFxSnapshot()[key],
-        () => getFxSnapshot()[key],
+        subscribeGfx,
+        () => getSettingsSnapshot()[key],
+        () => getSettingsSnapshot()[key],
     );
 }
 
-export type { FxGroup, FxKey, FxState };
+export type {
+    AlbumTextureGraphics,
+    CardGraphics,
+    GfxKey,
+    GfxPreset,
+    GfxSettings,
+    SelectableGfxPreset,
+} from './collectionFx';

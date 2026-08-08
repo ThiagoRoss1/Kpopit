@@ -1,3 +1,13 @@
+/* Each treated card is its own isolated, paint-contained group so mix-blend
+   flattens WITHIN the card and composites into the 3D book as a single layer,
+   instead of forcing a whole-page re-blend every frame. This is the load-bearing
+   fix for the mobile compositing nuke, it is independent of HOW the gradients
+   animate, so the High animation below is the original, pixel-for-pixel. */
+.album-card-isolate {
+    isolation: isolate;
+    contain: paint;
+}
+
 /* ---- Name legibility (all levels) — thin dark outline + drop shadow so the
    Major Mono display face stays readable over photos, gold and holo fills */
 
