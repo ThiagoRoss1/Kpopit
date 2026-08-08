@@ -485,6 +485,14 @@
    with no band frozen across it. There is no shared clock left to switch off —
    an album with no LV2/LV3 cards runs no animation at all. */
 
+/* Off = FREEZE the shimmer only; the holo/gold texture itself stays so the card
+   keeps its LV2/LV3 identity (that is the whole point of levelling a card). Both
+   sweeps rest off-screen on their `from` frame, so a frozen card reads as plain
+   laminate with no band stuck across it. The per-card `isolation`/`contain`
+   (AlbumMemberCard.css) means a parked mix-blend layer no longer forces a
+   whole-page recomposite, so freezing is cheap and safe now. Removing the
+   texture entirely is a job for the Graphics "off/potato" tier, never this tab. */
+
 [data-fx-lv2='off'] .album-gold-sheen {
     animation: none;
     opacity: 0;
@@ -494,6 +502,117 @@
 [data-fx-lv3='off'] .album-holo-overlay,
 [data-fx-lv3='off'] .album-holo-glare {
     animation: none;
+}
+
+/* While a leaf is turning, freeze the card shimmer/sheen so the flip is a single
+   clean 3D recomposite instead of blend + animation fighting the rotation. This
+   is what removes the page-flip "death glitch". */
+
+[data-turning='on'] .album-holo-fill,
+[data-turning='on'] .album-holo-overlay,
+[data-turning='on'] .album-holo-glare,
+[data-turning='on'] .album-gold-sheen {
+    animation-play-state: paused;
+}
+
+/* ---- LOW TIER — cheap, flat layers per treated card. No mix-blend, no
+   filter, no per-frame repaint. The Low preset also unmounts album textures;
+   here the card treatments collapse to flat, normal-blend paint. */
+
+/* Holo: drop the laminate/foil/glare passes, keep one static rainbow fill. */
+/* Medium keeps the moving fill/overlay pair, but removes two full-card passes. */
+
+[data-cards='medium'] .album-holo-foil,
+[data-cards='medium'] .album-holo-glare {
+    display: none;
+}
+
+[data-cards='low'] .album-holo-overlay,
+[data-cards='low'] .album-holo-foil,
+[data-cards='low'] .album-holo-glare {
+    display: none;
+}
+
+[data-cards='low'] .album-holo-fill {
+    mix-blend-mode: normal;
+    opacity: 0.9;
+    animation: none;
+}
+
+/* Gold: KEEP the bright jewelry-gold tint (so it reads gold, not raw bronze from
+   the gold.jpg base) but swap the overlay/screen blends for plain normal blend —
+   flat and cheap, colour preserved. */
+
+[data-cards='low'] .album-gold-tint {
+    mix-blend-mode: normal;
+    opacity: 0.62;
+}
+
+[data-cards='low'] .album-gold-sheen {
+    mix-blend-mode: normal;
+    opacity: 0.5;
+    animation: none;
+}
+
+/* Border-only keeps the card box and internal spacing unchanged. Treatment art
+   is removed, then an inset/pseudo-element border carries the level identity
+   without border-image squaring the rounded corners. */
+
+[data-cards='border'] .album-gold-base,
+[data-cards='border'] .album-gold-tint,
+[data-cards='border'] .album-gold-sheen,
+[data-cards='border'] .album-holo-fill,
+[data-cards='border'] .album-holo-overlay,
+[data-cards='border'] .album-holo-foil,
+[data-cards='border'] .album-holo-glare {
+    display: none;
+}
+
+[data-cards='border'] [data-treatment='base']::before,
+[data-cards='border'] [data-treatment='gold']::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    z-index: 50;
+    border-radius: inherit;
+    pointer-events: none;
+}
+
+[data-cards='border'] [data-treatment='base']::before {
+    box-shadow: inset 0 0 0 2px var(--album-main);
+}
+
+[data-cards='border'] [data-treatment='gold']::before {
+    box-shadow: inset 0 0 0 2px #e8b923;
+}
+
+[data-cards='border'] [data-treatment='holo']::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    z-index: 50;
+    border-radius: inherit;
+    padding: 2px;
+    background: linear-gradient(125deg, #b07bff, #4bc6ff, #ff5ba8);
+    pointer-events: none;
+    /* Border-only gradient ring: paint the padding box and punch out the content
+       box so only the 2px frame shows. Standard `mask` first, -webkit- for Safari. */
+    mask:
+        linear-gradient(#fff 0 0) content-box,
+        linear-gradient(#fff 0 0);
+    mask-composite: exclude;
+    -webkit-mask:
+        linear-gradient(#fff 0 0) content-box,
+        linear-gradient(#fff 0 0);
+    -webkit-mask-composite: xor;
+}
+
+/* The Low tier's static sheen override is later than the general switch rule,
+   so repeat Off here: toggling Gold shine off always freezes and hides the band. */
+   
+[data-fx-lv2='off'] .album-gold-sheen {
+    animation: none;
+    opacity: 0;
 }
 
 /* The cover inset hook sits on an element that also carries page content, so

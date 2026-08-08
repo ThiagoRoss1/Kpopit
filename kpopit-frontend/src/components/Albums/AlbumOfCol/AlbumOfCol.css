@@ -11,20 +11,24 @@
 .album-book {
     transform-style: preserve-3d;
     transition: transform 0.6s cubic-bezier(0.2, 0.7, 0.2, 1);
-    will-change: transform;
 }
 
 .album-leaf {
     transform-style: preserve-3d;
     transition: transform 0.8s cubic-bezier(0.42, 0.04, 0.3, 1);
+}
+
+/* `will-change` promotes an element to its own compositor layer for the whole
+   time it is set. Left on permanently it holds GPU memory for every book/leaf on
+   the page — real pressure on mobile. Scope it to the turn only. */
+.album-stage[data-turning='on'] .album-book,
+.album-stage[data-turning='on'] .album-leaf {
     will-change: transform;
 }
 
 .album-leaf-face {
     backface-visibility: hidden;
     -webkit-backface-visibility: hidden;
-
-    will-change: transform;
 }
 
 .album-book img {
@@ -48,7 +52,6 @@
 .album-zoom-in {
     animation: album-open-zoom 0.5s cubic-bezier(0.22, 0.9, 0.28, 1) both;
     transform-origin: 50% 50%;
-    will-change: transform, opacity;
 }
 
 @media (prefers-reduced-motion: reduce) {

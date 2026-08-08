@@ -6,6 +6,7 @@ import CollectionsBackdrop from './components/CollectionsBackdrop';
 import { CollectionCard } from './components/CollectionCard';
 import { ThemedCard } from './components/ThemedCard';
 import { useCollectionFx } from './useCollectionFx';
+import { getCollectionFxAttrs } from './collectionFxAttrs';
 import { useCollectionNight } from './useCollectionNight';
 import FxPanel from './components/FxPanel';
 import { Moon, SlidersHorizontal, Sun } from 'lucide-react';
@@ -13,15 +14,8 @@ import { useDisclosure } from '../../hooks/useDisclosure';
 
 export default function Collection() {
     const fxPanel = useDisclosure();
-    const { fx } = useCollectionFx();
-    const fxAttrs = {
-        'data-fx-backdrop': fx.backdrop ? 'on' : 'off',
-        'data-fx-sparkles': fx.sparkles ? 'on' : 'off',
-        'data-fx-shadows': fx.shadows ? 'on' : 'off',
-        'data-fx-blur': fx.blur ? 'on' : 'off',
-        'data-fx-lv2': fx.lv2 ? 'on' : 'off',
-        'data-fx-lv3': fx.lv3 ? 'on' : 'off',
-    } as const;
+    const { settings } = useCollectionFx();
+    const fxAttrs = getCollectionFxAttrs(settings);
 
     const [night, setNight] = useCollectionNight();
 

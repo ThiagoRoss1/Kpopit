@@ -5,6 +5,7 @@ import { useQuery } from '@tanstack/react-query';
 import { isAxiosError } from 'axios';
 import { ChevronLeft, ChevronRight, Fullscreen, BookOpen, GalleryVerticalEnd, Info, Menu, Moon, SlidersHorizontal, Sun } from 'lucide-react';
 import AlbumOfCol, { type AlbumBookInit, type AlbumGroupSpread, type AlbumOfColControls } from '../../components/Albums/AlbumOfCol/AlbumOfCol';
+import { ALBUM_CARDS_PER_PAGE } from '../../components/Albums/AlbumOfCol/albumConstants';
 import type { AlbumFocus } from '../../components/Albums/AlbumOfCol/AlbumOfCol';
 import type { CardZoomTarget } from '../../components/Albums/AlbumOfCol/albumCardZoom';
 import CardZoomModal from './components/CardZoomModal';
@@ -13,8 +14,11 @@ import AlbumPageIndex from './components/AlbumPageIndex';
 import AlbumPageCarousel, { type AlbumOpening } from './components/AlbumPageCarousel';
 import AlbumInfoModal from './components/AlbumInfoModal';
 import FxPanel from './components/FxPanel';
+import OnboardingTour from './components/OnboardingTour';
 import CollectionsBackdrop from './components/CollectionsBackdrop';
+import { hasSeenCollectionGuide } from './onboarding';
 import { getAlbumMapping } from './albumMapper';
+import { getCollectionFxAttrs } from './collectionFxAttrs';
 import { useCollectionFx } from './useCollectionFx';
 import { useCollectionNight } from './useCollectionNight';
 import { useDisclosure } from '../../hooks/useDisclosure';
@@ -55,13 +59,14 @@ const BtnClasses = (night: boolean) =>
             : 'border-ink bg-white text-ink shadow-[0_3px_0_var(--color-ink)] active:shadow-[0_1px_0_var(--color-ink)]'
     }`;
 
-function IconBtn({ children, id, onClick, title, night, className = '' }: { children: React.ReactNode; onClick: () => void; id?: string; title: string; night: boolean; className?: string }) {
+function IconBtn({ children, id, onClick, title, night, className = '', dataTour }: { children: React.ReactNode; onClick: () => void; id?: string; title: string; night: boolean; className?: string; dataTour?: string }) {
     return (
         <button
             id={id}
             type="button"
             onClick={onClick}
             title={title}
+            data-tour={dataTour}
             className={`flex size-10 flex-none cursor-pointer items-center justify-center rounded-full ${BtnClasses(night)} ${className}`}
         >
             {children}
@@ -106,16 +111,9 @@ export default function CollectionAlbum() {
     const currentCollection = collections?.find((collection) => collection.collection_id === parsedId);
     const collectionName = currentCollection?.name ?? `Album ${validId ? parsedId : ''}`.trim();
 
-    const { fx } = useCollectionFx();
+    const { settings } = useCollectionFx();
 
-    const fxAttrs = {
-        'data-fx-backdrop': fx.backdrop ? 'on' : 'off',
-        'data-fx-sparkles': fx.sparkles ? 'on' : 'off',
-        'data-fx-shadows': fx.shadows ? 'on' : 'off',
-        'data-fx-blur': fx.blur ? 'on' : 'off',
-        'data-fx-lv2': fx.lv2 ? 'on' : 'off',
-        'data-fx-lv3': fx.lv3 ? 'on' : 'off',
-    } as const;
+    const fxAttrs = getCollectionFxAttrs(settings);
 
     const [night, setNight] = useCollectionNight();
     const rail = useDisclosure(true);
@@ -233,6 +231,29 @@ export default function CollectionAlbum() {
         return () => window.removeEventListener('popstate', onPopState);
     }, [focusActive, zoom.mounted]);
     
+    // First-run onboarding tour: auto-start once the album has loaded, unless the
+    // user has already seen it. `markCollectionGuideSeen` is written by the tour on
+    // finish/skip; replay from the info modal just re-arms the state.
+
+    const [tourActive, setTourActive] = useState(false);
+    useEffect(() => {
+        if (groups && !hasSeenCollectionGuide()) setTourActive(true);
+    }, [groups]);
+
+    const firstStickerSpread = useMemo(() => {
+        if (!book || !groups) return null;
+        for (const spread of book.groupSpreads) {
+            const group = groups.find((candidate) => candidate.group_id === spread.group_id);
+            const memberIndex = group?.members.findIndex((member) => member.owned) ?? -1;
+            if (memberIndex >= 0) return spread.pos + 1 + Math.floor(memberIndex / ALBUM_CARDS_PER_PAGE);
+        }
+        return null;
+    }, [book, groups]);
+
+    const showFirstSticker = useCallback(() => {
+        if (firstStickerSpread != null) controls.current?.jumpTo(firstStickerSpread);
+    }, [firstStickerSpread]);
+
     const currentGroupId = book ? groupIdAt(shown.pos, spreadCount, book.groupSpreads) : null;
     const currentGroup: AlbumGroup | null = groups?.find((group) => group.group_id === currentGroupId) ?? null;
 
@@ -327,6 +348,7 @@ export default function CollectionAlbum() {
                             <button
                                 type="button"
                                 onClick={toggleSummary}
+                                data-tour="summary"
                                 title={summaryActive ? 'Hide summary' : 'Show summary'}
                                 className={`inline-flex flex-row justify-center items-center max-lg:w-10 h-10 cursor-pointer gap-1.5 rounded-full 
                                 border-2 lg:px-3.25 lg:py-2 font-sans text-[14px] font-bold ${pillClasses} ${
@@ -346,6 +368,7 @@ export default function CollectionAlbum() {
                             <button
                                 type="button"
                                 onClick={carousel.toggle}
+                                data-tour="pages"
                                 title={carouselActive ? 'Hide pages' : 'Show pages'}
                                 aria-expanded={carouselActive}
                                 className={`inline-flex flex-row justify-center items-center max-lg:w-10 h-10 cursor-pointer gap-1.5 rounded-full
@@ -367,6 +390,7 @@ export default function CollectionAlbum() {
                                 type="button"
                                 onClick={toggleFocus}
                                 disabled={shown.busy}
+                                data-tour="focus"
                                 title={focusActive ? 'Show both pages' : 'Focus one page'}
                                 aria-pressed={focusActive}
                                 className={`inline-flex flex-row justify-center items-center w-10 h-10 cursor-pointer gap-1.5 rounded-full
@@ -408,7 +432,7 @@ export default function CollectionAlbum() {
                                 />
                             )}
 
-                            <IconBtn onClick={info.open} title="Info" night={night}>
+                            <IconBtn onClick={info.open} title="Info" night={night} dataTour="info">
                                 <Info className="w-4.5 h-4.5" strokeWidth={3} />
                             </IconBtn>
 
@@ -416,6 +440,7 @@ export default function CollectionAlbum() {
                                 onClick={() => setNight((previousNight) => !previousNight)}
                                 title="Light/night mode"
                                 night={night}
+                                dataTour="night"
                                 className="collections-toggle-sweep relative overflow-hidden"
                             >
                                 {night ? <Moon className="w-4.5 h-4.5" strokeWidth={2.25} /> : <Sun className="w-4.5 h-4.5" strokeWidth={2.25} />}
@@ -453,8 +478,11 @@ export default function CollectionAlbum() {
 
                         {/* Stage */}
                         <div className="relative flex min-h-0 min-w-0 flex-1 flex-col">
-                            <div className="collections-album-stage relative z-2 h-[clamp(300px,calc(100svh-260px),700px)] md:px-16 lg:h-auto lg:min-h-0 lg:flex-1 xl:px-20">
-                                {fx.arrows && (
+                            <div 
+                                data-tour="book" 
+                                className="collections-album-stage relative z-2 h-[clamp(300px,calc(100svh-260px),700px)] md:px-16 lg:h-auto lg:min-h-0 lg:flex-1 xl:px-20"
+                            >
+                                {settings.arrows && (
                                     <>
                                         <SideArrow direction={-1} disabled={frontClosed || shown.busy} onClick={() => controls.current?.go(-1)} night={night} />
                                         <SideArrow direction={1} disabled={backClosed || shown.busy} onClick={() => controls.current?.go(1)} night={night} />
@@ -466,8 +494,8 @@ export default function CollectionAlbum() {
                                     controlRef={controls}
                                     onPosChange={onPosChange}
                                     onBookInit={onBookInit}
-                                    keysDisabled={info.mounted || index.mounted || fxPanel.mounted || zoom.mounted}
-                                    onCardZoom={fx.tapZoom ? openCardZoom : undefined}
+                                    keysDisabled={info.mounted || index.mounted || fxPanel.mounted || zoom.mounted || tourActive}
+                                    onCardZoom={settings.tapZoom ? openCardZoom : undefined}
                                     flyingCardId={flyingCardId}
                                     focus={focus}
                                     onFocusChange={setFocus}
@@ -545,7 +573,19 @@ export default function CollectionAlbum() {
                             night={night}
                             collectionName={collectionName}
                             closing={info.closing}
+                            onReplayTour={() => {
+                                info.close();
+                                setTourActive(true);
+                            }}
                             {...info.animationProps}
+                        />
+                    )}
+
+                    {tourActive && (
+                        <OnboardingTour
+                            night={night}
+                            onClose={() => setTourActive(false)}
+                            onShowSticker={showFirstSticker}
                         />
                     )}
 

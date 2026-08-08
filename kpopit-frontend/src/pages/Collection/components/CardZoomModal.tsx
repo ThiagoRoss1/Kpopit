@@ -6,6 +6,7 @@ import { formatCardDate } from '../../../utils/formatCardDate';
 import { treatmentForGroup } from '../../../components/Albums/AlbumOfCol/cards/albumCardLevel';
 import { TextureFill } from '../../../components/Albums/AlbumOfCol/cards/AlbumMemberCard';
 import { useSyncAlbumAnimations } from '../../../components/Albums/AlbumOfCol/cards/useSyncAlbumAnimations';
+import { useGfx } from '../useCollectionFx';
 
 interface CardZoomModalProps {
     target: CardZoomTarget;
@@ -90,6 +91,7 @@ export default function CardZoomModal(props: CardZoomModalProps) {
 
     const backdropMotion = closing ? 'collection-backdrop-out' : 'collection-backdrop-in';
     const panelMotion = closing ? 'collection-card-zoom-out' : 'collection-card-zoom-in';
+    const blur = useGfx('blur');
 
     useLayoutEffect(() => {
         const artElement = artRef.current;
@@ -189,7 +191,9 @@ export default function CardZoomModal(props: CardZoomModalProps) {
     return (
         <div
             onClick={onClose}
-            className={`fixed inset-0 z-260 flex items-center justify-center bg-[#1e141c]/55 px-7 py-10 backdrop-blur-xs ${backdropMotion}`}
+            className={`fixed inset-0 z-260 flex items-center justify-center bg-[#1e141c]/55 px-7 py-10 ${backdropMotion} ${
+                blur ? 'backdrop-blur-xs' : ''
+            }`}
         >
             <div
                 onClick={(event) => event.stopPropagation()}
@@ -228,6 +232,7 @@ export default function CardZoomModal(props: CardZoomModalProps) {
                 ) : (
                     <div 
                         ref={artRef} 
+                        data-treatment={groupPhotoFrame}
                         style={{ '--album-main': group.palette.main } as CSSProperties}
                         className={`relative flex aspect-160/72 w-full flex-none origin-top-left self-start items-center justify-center rounded-br-[20px] rounded-tl-[20px]
                         overflow-clip lg:w-[clamp(35rem,42vw,40rem)] ${

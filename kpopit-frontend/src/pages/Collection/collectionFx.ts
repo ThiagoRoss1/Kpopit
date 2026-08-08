@@ -1,105 +1,278 @@
+import { probeDeviceTier, resolveDeviceTier, type DeviceTier } from './deviceTier.ts';
+
 const FX_KEY = 'kpopit-collections-fx';
+const STORAGE_VERSION = 3;
 
-export type FxKey = 'backdrop' | 'textures' | 'shadows' | 'blur' | 'sparkles' | 'lv2' | 'lv3' | 'tapZoom' | 'arrows';
-export type FxState = Record<FxKey, boolean>;
-export type FxGroup = keyof typeof FX_GROUPS;
+export type CardGraphics = 'high' | 'medium' | 'low' | 'border';
+export type AlbumTextureGraphics = 'high' | 'low' | 'off';
+export type GfxPreset = 'auto' | DeviceTier | 'custom';
+export type SelectableGfxPreset = Exclude<GfxPreset, 'custom'>;
 
-export const FX_GROUPS = {
-    texture: ['backdrop', 'textures', 'shadows', 'blur'] as FxKey[],
-    motion: ['sparkles', 'lv2', 'lv3'] as FxKey[],
-    controls: ['tapZoom', 'arrows'] as FxKey[],
+export interface GfxSettings {
+    cards: CardGraphics;
+    albumTextures: AlbumTextureGraphics;
+    paper: boolean;
+    shadows: boolean;
+    blur: boolean;
+    sparkles: boolean;
+    goldShine: boolean;
+    holoShine: boolean;
+    tapZoom: boolean;
+    arrows: boolean;
+}
+
+export type GfxKey = keyof GfxSettings;
+
+export const DEFAULT_SETTINGS: GfxSettings = {
+    cards: 'high',
+    albumTextures: 'high',
+    paper: true,
+    shadows: true,
+    blur: true,
+    sparkles: true,
+    goldShine: true,
+    holoShine: true,
+    tapZoom: true,
+    arrows: true,
 };
 
-const DEFAULTS: FxState = {
-    backdrop: true, textures: true, shadows: true, blur: true,
-    sparkles: true, lv2: true, lv3: true,
-    tapZoom: true, arrows: true,
+const PRESETS: Record<DeviceTier, Omit<GfxSettings, 'tapZoom' | 'arrows'>> = {
+    high: {
+        cards: 'high',
+        albumTextures: 'high',
+        paper: true,
+        shadows: true,
+        blur: true,
+        sparkles: true,
+        goldShine: true,
+        holoShine: true,
+    },
+    medium: {
+        cards: 'medium',
+        albumTextures: 'low',
+        paper: true,
+        shadows: true,
+        blur: false,
+        sparkles: false,
+        goldShine: true,
+        holoShine: true,
+    },
+    low: {
+        cards: 'low',
+        albumTextures: 'off',
+        paper: false,
+        shadows: true,
+        blur: false,
+        sparkles: false,
+        goldShine: true,
+        holoShine: true,
+    },
 };
 
-function readStored(): FxState {
-    if (typeof window === 'undefined' || typeof localStorage === 'undefined') return withMotionPreference(DEFAULTS);
-    try {
-        const raw = localStorage.getItem(FX_KEY);
+const PRESET_KEYS = [
+    'cards',
+    'albumTextures',
+    'paper',
+    'shadows',
+    'blur',
+    'sparkles',
+    'goldShine',
+    'holoShine',
+] as const satisfies readonly GfxKey[];
 
-        if (!raw) return withMotionPreference(DEFAULTS);
+const CONTROL_KEYS = ['tapZoom', 'arrows'] as const satisfies readonly GfxKey[];
+const BOOLEAN_KEYS = [
+    'paper',
+    'shadows',
+    'blur',
+    'sparkles',
+    'goldShine',
+    'holoShine',
+    'tapZoom',
+    'arrows',
+] as const satisfies readonly GfxKey[];
 
-        const parsed = JSON.parse(raw) as Partial<FxState>;
+interface PersistedState {
+    version: typeof STORAGE_VERSION;
+    preset: GfxPreset;
+    settings: GfxSettings;
+}
 
-        // Spread over DEFAULTS so a key added in a later release is simply on.
-        return { ...DEFAULTS, ...parsed };
-    } catch {
-        return withMotionPreference(DEFAULTS);
+export interface MigratedSettings {
+    preset: GfxPreset;
+    settings: GfxSettings;
+}
+
+function isRecord(value: unknown): value is Record<string, unknown> {
+    return typeof value === 'object' && value !== null && !Array.isArray(value);
+}
+
+function isDeviceTier(value: unknown): value is DeviceTier {
+    return value === 'high' || value === 'medium' || value === 'low';
+}
+
+function isPreset(value: unknown): value is GfxPreset {
+    return value === 'auto' || value === 'custom' || isDeviceTier(value);
+}
+
+function isCardGraphics(value: unknown): value is CardGraphics {
+    return value === 'high' || value === 'medium' || value === 'low' || value === 'border';
+}
+
+function isAlbumTextureGraphics(value: unknown): value is AlbumTextureGraphics {
+    return value === 'high' || value === 'low' || value === 'off';
+}
+
+function readSettings(value: unknown): GfxSettings {
+    if (!isRecord(value)) return { ...DEFAULT_SETTINGS };
+
+    const next = { ...DEFAULT_SETTINGS };
+    if (isCardGraphics(value.cards)) next.cards = value.cards;
+    if (isAlbumTextureGraphics(value.albumTextures)) next.albumTextures = value.albumTextures;
+
+    for (const key of BOOLEAN_KEYS) {
+        const stored = value[key];
+        if (typeof stored === 'boolean') next[key] = stored;
     }
+
+    return next;
+}
+
+/** Apply graphics and animation values while leaving Controls untouched. */
+export function applyPreset(base: GfxSettings, tier: DeviceTier): GfxSettings {
+    return { ...base, ...PRESETS[tier] };
+}
+
+/** Direct Controls changes keep the selected preset; every other change is Custom. */
+export function presetAfterDirectChange(current: GfxPreset, key: GfxKey): GfxPreset {
+    return (CONTROL_KEYS as readonly GfxKey[]).includes(key) ? current : 'custom';
+}
+
+function matchesPreset(settings: GfxSettings, tier: DeviceTier): boolean {
+    return PRESET_KEYS.every((key) => settings[key] === PRESETS[tier][key]);
+}
+
+function fallbackForDevice(deviceTier: DeviceTier): MigratedSettings {
+    return { preset: 'auto', settings: applyPreset(DEFAULT_SETTINGS, deviceTier) };
 }
 
 /**
- * First visit only. `prefers-reduced-motion` is a preference the person set in
- * their OS, not a hardware guess and the CSS already silences the LV2/LV3 card
- * animations and the sparkles under it, so leaving these switches "on" would show
- * controls for animation that provably is not running.
+ * Pure persisted-state reader. It accepts the Round 2 flat blob as well as the
+ * settings-first shape and ignores malformed values rather than trusting them.
  */
+export function migrateStoredSettings(value: unknown, deviceTier: DeviceTier): MigratedSettings {
+    if (!isRecord(value)) return fallbackForDevice(deviceTier);
 
-function withMotionPreference(base: FxState): FxState {
-    const reduced = typeof matchMedia === 'function'
-        && matchMedia('(prefers-reduced-motion: reduce)').matches;
+    if ('settings' in value) {
+        if (!isPreset(value.preset) || !isRecord(value.settings)) return fallbackForDevice(deviceTier);
 
-    if (!reduced) return base;
+        const stored = readSettings(value.settings);
+        if (value.preset === 'auto') {
+            return { preset: 'auto', settings: applyPreset(stored, deviceTier) };
+        }
+        if (isDeviceTier(value.preset)) {
+            return { preset: value.preset, settings: applyPreset(stored, value.preset) };
+        }
+        return { preset: 'custom', settings: stored };
+    }
 
-    return { ...base, sparkles: false, lv2: false, lv3: false };
+    const legacyKeys = [
+        'textures', 'renderTier', 'lv2', 'lv3', 'backdrop', 'blur', 'shadows',
+        'sparkles', 'tapZoom', 'arrows', 'auto', 'quality',
+    ];
+    if (!legacyKeys.some((key) => key in value)) return fallbackForDevice(deviceTier);
+
+    const settings = { ...DEFAULT_SETTINGS };
+    const legacyTier = value.renderTier === 'light'
+        ? 'low'
+        : value.renderTier === 'high'
+            ? 'high'
+            : value.quality === 'light'
+                ? 'low'
+                : value.quality === 'high'
+                    ? 'high'
+                    : null;
+
+    if (legacyTier) settings.cards = legacyTier;
+    if (typeof value.textures === 'boolean') settings.albumTextures = value.textures ? 'high' : 'off';
+    if (typeof value.backdrop === 'boolean') settings.paper = value.backdrop;
+    if (typeof value.shadows === 'boolean') settings.shadows = value.shadows;
+    if (typeof value.blur === 'boolean') settings.blur = value.blur;
+    if (typeof value.sparkles === 'boolean') settings.sparkles = value.sparkles;
+    if (typeof value.lv2 === 'boolean') settings.goldShine = value.lv2;
+    if (typeof value.lv3 === 'boolean') settings.holoShine = value.lv3;
+    if (typeof value.tapZoom === 'boolean') settings.tapZoom = value.tapZoom;
+    if (typeof value.arrows === 'boolean') settings.arrows = value.arrows;
+
+    const auto = typeof value.auto === 'boolean' ? value.auto : value.quality === 'auto';
+    if (auto) return { preset: 'auto', settings: applyPreset(settings, deviceTier) };
+
+    if (legacyTier && matchesPreset(settings, legacyTier)) {
+        return { preset: legacyTier, settings };
+    }
+    return { preset: 'custom', settings };
 }
 
-// Every group must appear here: `commit` only diffs these keys, so a key left out
-// would silently never persist.
-const FX_ORDER: FxKey[] = [...FX_GROUPS.texture, ...FX_GROUPS.motion, ...FX_GROUPS.controls];
+function readStored(): unknown {
+    if (typeof localStorage === 'undefined') return null;
+    try {
+        const raw = localStorage.getItem(FX_KEY);
+        return raw ? JSON.parse(raw) : null;
+    } catch {
+        return null;
+    }
+}
 
-let state: FxState = readStored();
+const deviceTier = resolveDeviceTier(probeDeviceTier());
+const initial = migrateStoredSettings(readStored(), deviceTier);
+let settings = initial.settings;
+let preset = initial.preset;
+
 const listeners = new Set<() => void>();
 
-const lastByGroup: Partial<Record<FxGroup, FxState>> = {};
-
-export function getFxSnapshot(): FxState {
-    return state;
+export function getSettingsSnapshot(): GfxSettings {
+    return settings;
 }
 
-export function subscribeFx(listener: () => void): () => void {
-    listeners.add(listener);
+export function getPresetSnapshot(): GfxPreset {
+    return preset;
+}
 
+export function getDeviceTierSnapshot(): DeviceTier {
+    return deviceTier;
+}
+
+export function subscribeGfx(listener: () => void): () => void {
+    listeners.add(listener);
     return () => listeners.delete(listener);
 }
 
-function commit(next: FxState) {
-    // Same object identity when nothing changed keeps useSyncExternalStore quiet.
-    if (FX_ORDER.every((k) => next[k] === state[k])) return;
-
-    state = next;
-
+function persist() {
+    if (typeof localStorage === 'undefined') return;
+    const stored: PersistedState = { version: STORAGE_VERSION, preset, settings };
     try {
-        localStorage.setItem(FX_KEY, JSON.stringify(state));
-    } catch {
-        // Private mode / quota: the session still works, it just won't persist.
+        localStorage.setItem(FX_KEY, JSON.stringify(stored));
+    } catch (err) {
+        // Private mode or quota errors only make this session non-persistent.
+        if (import.meta.env.DEV) console.warn(`[gfx] Failed to persist collection FX settings: ${FX_KEY}`, stored, err);
     }
+}
 
+function notify() {
     listeners.forEach((listener) => listener());
 }
 
-export function setFx(key: FxKey, value: boolean) {
-    commit({ ...state, [key]: value });
+export function setPreset(next: SelectableGfxPreset) {
+    preset = next;
+    settings = applyPreset(settings, next === 'auto' ? deviceTier : next);
+    persist();
+    notify();
 }
 
-export function setFxGroup(group: FxGroup, value: boolean) {
-    const next = { ...state };
-
-    if (value) {
-        const remembered = lastByGroup[group];
-
-        for (const key of FX_GROUPS[group]) {
-            next[key] = remembered ? remembered[key] : true;
-        }
-    } else {
-        lastByGroup[group] = { ...state };
-
-        for (const key of FX_GROUPS[group]) next[key] = false;
-    }
-    
-    commit(next);
+export function setGfx<K extends GfxKey>(key: K, value: GfxSettings[K]) {
+    if (settings[key] === value) return;
+    settings = { ...settings, [key]: value };
+    preset = presetAfterDirectChange(preset, key);
+    persist();
+    notify();
 }

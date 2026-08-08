@@ -72,7 +72,8 @@ export default function AlbumGroupIntroPage({ group, side = 'left' }: AlbumGroup
                     ) : photoUnlocked ? (
                         <div
                             ref={photoRef}
-                            className={`relative z-20 h-62.5 w-full overflow-clip rounded-br-[20px] rounded-tl-[20px] bg-white shadow-[2px_4px_4px_0px_rgba(0,0,0,0.3)] ${
+                            data-treatment={photoFrame}
+                            className={`isolate relative z-20 h-62.5 w-full overflow-clip rounded-br-[20px] rounded-tl-[20px] bg-white shadow-[2px_4px_4px_0px_rgba(0,0,0,0.3)] ${
                             photoFrame === 'base' ? 'border-2 border-white' : 'p-1.5'
                             } ${zoom ? 'cursor-pointer transition-transform duration-200 hover:scale-[1.02]' : ''}`}
                             style={{ visibility: zoom?.flyingCardId === group.group_photo?.card_id ? 'hidden' : undefined }}

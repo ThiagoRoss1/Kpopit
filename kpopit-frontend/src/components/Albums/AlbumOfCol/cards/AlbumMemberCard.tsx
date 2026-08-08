@@ -1,4 +1,4 @@
-import { useRef } from 'react';
+import { useRef, type CSSProperties } from 'react';
 import type { AlbumMember, AlbumPalette } from '../../../../interfaces/albumInterfaces';
 import goldTextureSrc from '../../../../assets/materials/AlbumOfCol/gold.jpg';
 // import holoTextureSrc from '../../../../assets/materials/AlbumOfCol/holo.jpg';
@@ -18,7 +18,7 @@ export function TextureFill({ treatment }: { treatment: CardTreatment }) {
     if (treatment === 'gold') {
         return (
             <>
-                <img src={goldTextureSrc} alt="" aria-hidden className="pointer-events-none absolute inset-0 size-full object-cover" />
+                <img src={goldTextureSrc} alt="" aria-hidden className="album-gold-base pointer-events-none absolute inset-0 size-full object-cover" />
                 <span aria-hidden className="album-gold-tint pointer-events-none absolute inset-0" />
                 <span aria-hidden className="album-gold-sheen pointer-events-none absolute inset-0" />
             </>
@@ -57,6 +57,10 @@ export default function AlbumMemberCard({ member, palette }: AlbumMemberCardProp
 
     const isBaseLevel = treatment === 'base';
     const groupColorFill = { background: palette.main };
+    const cardStyle = {
+        '--album-main': palette.main,
+        ...(isBaseLevel ? groupColorFill : {}),
+    } as CSSProperties;
     const levelTextClass = isBaseLevel
         ? 'text-black [text-shadow:1px_1px_1px_rgba(0,0,0,0.2)]'
         : 'album-card-name text-[#FFF6D8]';
@@ -64,8 +68,9 @@ export default function AlbumMemberCard({ member, palette }: AlbumMemberCardProp
     return (
         <div
             ref={cardRef}
-            className={`relative h-55 w-40 overflow-clip rounded-sm ${isBaseLevel ? 'p-0.75' : 'p-1.25'}`}
-            style={isBaseLevel ? groupColorFill : undefined}
+            data-treatment={treatment}
+            className={`album-card-isolate relative h-55 w-40 overflow-clip rounded-sm ${isBaseLevel ? 'p-0.75' : 'p-1.25'}`}
+            style={cardStyle}
         >
             {/* frame ring */}
             <TextureFill treatment={treatment} />

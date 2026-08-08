@@ -1,11 +1,13 @@
 import type { AnimationEvent } from 'react';
-import { X, BookOpenText, Layers, Sticker, Smartphone, Settings } from 'lucide-react';
+import { X, BookOpenText, Layers, Sticker, Smartphone, Settings, PlayCircle } from 'lucide-react';
 
 interface AlbumInfoModalProps {
     collectionName?: string;
     onClose: () => void;
     night: boolean;
     closing: boolean;
+    /** Restart the first-run onboarding tour. */
+    onReplayTour?: () => void;
     /** From useDisclosure's animationProps — it owns the unmount and the bubbling guard. */
     onAnimationEnd: (event: AnimationEvent<Element>) => void;
 }
@@ -39,7 +41,7 @@ const INFO_ROWS = (props: AlbumInfoModalProps) =>[
 ];
 
 export default function AlbumInfoModal(props: AlbumInfoModalProps) {
-    const { onClose, night, collectionName, closing, onAnimationEnd } = props;
+    const { onClose, night, collectionName, closing, onAnimationEnd, onReplayTour } = props;
     const backdropMotion = closing ? 'collection-backdrop-out' : 'collection-backdrop-in';
     const modalMotion = closing ? 'collection-modal-out' : 'collection-modal-in';
     
@@ -51,11 +53,11 @@ export default function AlbumInfoModal(props: AlbumInfoModalProps) {
             <div
                 onClick={(event) => event.stopPropagation()}
                 onAnimationEnd={onAnimationEnd}
-                className={`max-h-[84vh] w-[min(440px,100%)] overflow-y-auto rounded-[20px] border-2 p-6 transition-colors duration-300 ${modalMotion} ${
+                className={`flex max-h-[84vh] w-[min(440px,100%)] flex-col overflow-hidden rounded-[20px] border-2 p-6 transition-colors duration-300 ${modalMotion} ${
                     night ? 'border-neon-pink bg-[#16181e] shadow-[6px_6px_0px_rgba(255,51,153,1)]' : 'border-ink bg-[#fffaf3] shadow-[6px_6px_0px_#0a0a0a]'
                 }`}
             >
-                <div className="flex items-start justify-between gap-2.5">
+                <div className="flex flex-none items-start justify-between gap-2.5">
                     <div>
                         <p className={`font-mono text-[9px] uppercase tracking-[0.22em] transition-colors duration-300 ${night ? 'text-neon-pink' : 'text-[#C62368]'}`}>
                             How it works
@@ -69,7 +71,7 @@ export default function AlbumInfoModal(props: AlbumInfoModalProps) {
                         type="button"
                         onClick={onClose}
                         aria-label="Close"
-                        className={`flex w-9 h-9 flex-none cursor-pointer items-center justify-center rounded-full border-2 bg-transparent
+                        className={`flex w-9 h-9 collections-press flex-none cursor-pointer items-center justify-center rounded-full border-2 bg-transparent
                             transition-all duration-300 hover:scale-105 transform-gpu active:translate-y-0.5 active:translate-x-0.5 ${
                             night ? 'border-neon-pink text-white shadow-[2px_2px_0px_rgba(255,51,153,1)] active:shadow-[0px_1px_0px_rgba(255,51,153,0)]' 
                             : 'border-ink text-ink shadow-[2px_2px_0px_rgba(0,0,0,1)] active:shadow-[0px_1px_0px_rgba(0,0,0,0)]'
@@ -78,7 +80,7 @@ export default function AlbumInfoModal(props: AlbumInfoModalProps) {
                         <X className="w-5 h-5" strokeWidth={3} />
                     </button>
                 </div>
-                <div className="mt-4.5 flex flex-col gap-3.5">
+                <div className={`album-index-scroll ${night ? 'album-index-scroll--night' : ''} -mx-2 mt-4.5 flex min-h-0 flex-1 flex-col gap-3.5 overflow-y-auto px-2 contain-[paint]`}>
                     {INFO_ROWS(props).map((row) => (
                         <div key={row.title} className="flex gap-3">
                             <div
@@ -97,6 +99,22 @@ export default function AlbumInfoModal(props: AlbumInfoModalProps) {
                         </div>
                     ))}
                 </div>
+
+                {onReplayTour && (
+                    <button
+                        type="button"
+                        onClick={onReplayTour}
+                        className={`collections-press mt-4.5 flex flex-row h-10 w-full flex-none cursor-pointer items-center justify-center gap-2 rounded-xl border-2 
+                        text-[12.5px] font-bold uppercase tracking-[0.04em] transition-all duration-150 active:translate-x-0.5 active:translate-y-0.5 ${
+                            night
+                                ? 'border-neon-pink text-white shadow-[3px_3px_0px_rgba(255,51,153,0.5)] active:shadow-none'
+                                : 'border-ink text-ink shadow-[3px_3px_0px_#0a0a0a] active:shadow-none'
+                        }`}
+                    >
+                        <PlayCircle className="w-5 h-5" strokeWidth={3} />
+                        <span className="font-major-mono-display">Replay tour</span>
+                    </button>
+                )}
             </div>
         </div>
     );
