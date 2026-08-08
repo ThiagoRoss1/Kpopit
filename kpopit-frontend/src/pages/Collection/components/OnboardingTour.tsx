@@ -259,8 +259,8 @@ export default function OnboardingTour({ night, onClose, onShowSticker }: Onboar
         // Neither side fits (tall target, e.g. the book): float truly centered.
         return centered;
     }, [hole, viewport, glide, cardH]);
-
-    const spotlightShadow = night ? 'shadow-[3px_3px_0px_rgba(255,51,153,0.9)]' : 'shadow-[3px_3px_0px_#0a0a0a]';
+    
+    const spotlightOffset = night ? '3px 3px 0 0 rgba(255,51,153,0.9)' : '3px 3px 0 0 #0a0a0a';
 
     const shell = night
         ? 'border-neon-pink bg-[#16181e] text-white shadow-[6px_6px_0px_rgba(255,51,153,1)]'
@@ -278,16 +278,19 @@ export default function OnboardingTour({ night, onClose, onShowSticker }: Onboar
             className="fixed inset-0 z-270 touch-none outline-none"
         >
             {hole ? (
-                <>
-                    <div style={{ position: 'fixed', top: 0, left: 0, width: '100%', height: hole.top, background: dim, transition: panelTransition }} />
-                    <div style={{ position: 'fixed', top: hole.top + hole.height, left: 0, width: '100%', bottom: 0, background: dim, transition: panelTransition }} />
-                    <div style={{ position: 'fixed', top: hole.top, left: 0, width: hole.left, height: hole.height, background: dim, transition: panelTransition }} />
-                    <div style={{ position: 'fixed', top: hole.top, left: hole.left + hole.width, right: 0, height: hole.height, background: dim, transition: panelTransition }} />
-                    <div
-                        style={{ position: 'fixed', top: hole.top, left: hole.left, width: hole.width, height: hole.height, transition: panelTransition }}
-                        className={`rounded-xl border-2 border-neon-pink ${spotlightShadow}`}
-                    />
-                </>
+                <div
+                    style={{
+                        position: 'fixed',
+                        top: hole.top,
+                        left: hole.left,
+                        width: hole.width,
+                        height: hole.height,
+                        boxShadow: `${spotlightOffset}, 0 0 0 9999px ${dim}`,
+                        transition: panelTransition,
+                        pointerEvents: 'none',
+                    }}
+                    className="rounded-xl border-2 border-neon-pink"
+                />
             ) : (
                 <div style={{ position: 'fixed', inset: 0, background: dim }} />
             )}
