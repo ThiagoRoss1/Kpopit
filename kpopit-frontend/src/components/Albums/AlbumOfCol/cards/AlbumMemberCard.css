@@ -65,6 +65,7 @@
     background-repeat: no-repeat;
     background-position: 160% 0;
     animation: album-gold-sheen-sweep 3.4s linear infinite;
+    animation-delay: var(--album-animation-delay, 0ms);
     mix-blend-mode: screen;
     transform: translateZ(0);
 }
@@ -110,6 +111,7 @@
     background-size: 280% 280%;
     background-position: 0% 50%;
     animation: album-holo-shimmer 4.2s ease-in-out infinite alternate;
+    animation-delay: var(--album-animation-delay, 0ms);
     transform: translateZ(0);
 }
 
@@ -160,8 +162,23 @@
     background-repeat: no-repeat;
     background-position: 140% 0;
     animation: album-holo-glare-sweep 4.2s ease-in-out infinite alternate;
+    animation-delay: var(--album-animation-delay, 0ms);
     mix-blend-mode: screen;
     transform: translateZ(0);
+}
+
+/* Safari-only compositor correction for the rotating album leaf. Keep the
+   normal-browser promotion unchanged: WebKit's separate treatment surfaces
+   can otherwise race the isolated card/photo surface during rotateY(). Do
+   not add a transform to .album-card-isolate here; changing both stacking
+   contexts was the rejected experiment that broke card-flight geometry. */
+[data-browser='safari'] .album-leaf .album-gold-tint,
+[data-browser='safari'] .album-leaf .album-gold-sheen,
+[data-browser='safari'] .album-leaf .album-holo-fill,
+[data-browser='safari'] .album-leaf .album-holo-overlay,
+[data-browser='safari'] .album-leaf .album-holo-foil,
+[data-browser='safari'] .album-leaf .album-holo-glare {
+    transform: none;
 }
 
 @media (prefers-reduced-motion: reduce) {

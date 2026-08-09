@@ -4,6 +4,7 @@ import goldTextureSrc from '../../../../assets/materials/AlbumOfCol/gold.jpg';
 // import holoTextureSrc from '../../../../assets/materials/AlbumOfCol/holo.jpg';
 import { useAlbumPreview } from '../albumPreview';
 import { treatmentForLevel, type CardTreatment } from './albumCardLevel';
+import { useAlbumAnimationPhase } from './useAlbumAnimationPhase';
 import { useSyncAlbumAnimations } from './useSyncAlbumAnimations';
 import './AlbumMemberCard.css';
 
@@ -50,7 +51,8 @@ export default function AlbumMemberCard({ member, palette }: AlbumMemberCardProp
     const cardRef = useRef<HTMLDivElement>(null);
     const level = member.level ?? 1;
     const treatment = treatmentForLevel(level);
-    
+    const animationPhase = useAlbumAnimationPhase();
+
     useSyncAlbumAnimations(cardRef, treatment);
 
     if (preview) return <AlbumMemberCardPreview palette={palette} />;
@@ -58,6 +60,7 @@ export default function AlbumMemberCard({ member, palette }: AlbumMemberCardProp
     const isBaseLevel = treatment === 'base';
     const groupColorFill = { background: palette.main };
     const cardStyle = {
+        ...animationPhase,
         '--album-main': palette.main,
         ...(isBaseLevel ? groupColorFill : {}),
     } as CSSProperties;

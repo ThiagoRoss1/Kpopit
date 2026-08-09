@@ -5,6 +5,7 @@ import type { CardZoomTarget } from '../../../components/Albums/AlbumOfCol/album
 import { formatCardDate } from '../../../utils/formatCardDate';
 import { treatmentForGroup } from '../../../components/Albums/AlbumOfCol/cards/albumCardLevel';
 import { TextureFill } from '../../../components/Albums/AlbumOfCol/cards/AlbumMemberCard';
+import { useAlbumAnimationPhase } from '../../../components/Albums/AlbumOfCol/cards/useAlbumAnimationPhase';
 import { useSyncAlbumAnimations } from '../../../components/Albums/AlbumOfCol/cards/useSyncAlbumAnimations';
 import { useGfx } from '../useCollectionFx';
 
@@ -86,7 +87,8 @@ export default function CardZoomModal(props: CardZoomModalProps) {
     const [artSettled, setArtSettled] = useState(!isMember);
 
     const artRef = useRef<HTMLDivElement>(null);
-    
+    const animationPhase = useAlbumAnimationPhase();
+
     useSyncAlbumAnimations(artRef, isMember ? null : groupPhotoFrame);
 
     const backdropMotion = closing ? 'collection-backdrop-out' : 'collection-backdrop-in';
@@ -230,10 +232,13 @@ export default function CardZoomModal(props: CardZoomModalProps) {
                         <AlbumMemberCard member={target.member} palette={group.palette} />
                     </div>
                 ) : (
-                    <div 
-                        ref={artRef} 
+                    <div
+                        ref={artRef}
                         data-treatment={groupPhotoFrame}
-                        style={{ '--album-main': group.palette.main } as CSSProperties}
+                        style={{
+                            ...animationPhase,
+                            '--album-main': group.palette.main,
+                        } as CSSProperties}
                         className={`relative flex aspect-160/72 w-full flex-none origin-top-left self-start items-center justify-center rounded-br-[20px] rounded-tl-[20px]
                         overflow-clip lg:w-[clamp(35rem,42vw,40rem)] ${
                             groupPhotoFrame === 'base' ? `border-2 border-(--album-main)` : 'p-1.5 transform-gpu'

@@ -1,4 +1,5 @@
 import { useState, useEffect } from "react";
+import { isSafariUserAgent } from './safariDetection';
 
 export function useIsMobile(breakpoint = 768) {
     const [isMobile, setIsMobile] = useState(window.innerWidth <= breakpoint);
@@ -12,9 +13,18 @@ export function useIsMobile(breakpoint = 768) {
     return isMobile;
 }
 
+// Keep the broad historical flag for existing site-wide consumers. In
+// particular, iOS Chrome/Firefox are WebKit shells and previously matched this
+// value; changing it would alter unrelated victory-card and album-page logic.
 export const isSafari = typeof window !== "undefined" && (
     /^((?!chrome|android).)*safari/i.test(navigator.userAgent) ||
-    (navigator.maxTouchPoints > 1 && /Macintosh/.test(navigator.userAgent)));
+    (navigator.maxTouchPoints > 1 && /Macintosh/.test(navigator.userAgent))
+);
+
+// Exact gate for the Safari-only album compositor experiment. This deliberately
+// excludes CriOS/FxiOS/other iOS browser shells so the workaround cannot leak
+// into unrelated non-Safari paths.
+export const isSafariAlbumEngine = typeof window !== "undefined" && isSafariUserAgent(navigator.userAgent, navigator.maxTouchPoints);
 
 export const isGeckoEngine = typeof window !== "undefined" && 
   (window.CSS && CSS.supports('-moz-appearance', 'none'));

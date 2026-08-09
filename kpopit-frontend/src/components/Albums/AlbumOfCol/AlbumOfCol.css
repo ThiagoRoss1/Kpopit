@@ -16,13 +16,8 @@
 .album-leaf {
     transform-style: preserve-3d;
     transition: transform 0.8s cubic-bezier(0.42, 0.04, 0.3, 1);
-}
-
-/* `will-change` promotes an element to its own compositor layer for the whole
-   time it is set. Left on permanently it holds GPU memory for every book/leaf on
-   the page — real pressure on mobile. Scope it to the turn only. */
-.album-stage[data-turning='on'] .album-book,
-.album-stage[data-turning='on'] .album-leaf {
+    /* The leaf only exists during a turn. Keep its compositor layer for that
+       entire lifetime so Safari never de-promotes it during landing cleanup. */
     will-change: transform;
 }
 

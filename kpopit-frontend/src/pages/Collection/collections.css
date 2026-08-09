@@ -504,17 +504,6 @@
     animation: none;
 }
 
-/* While a leaf is turning, freeze the card shimmer/sheen so the flip is a single
-   clean 3D recomposite instead of blend + animation fighting the rotation. This
-   is what removes the page-flip "death glitch". */
-
-[data-turning='on'] .album-holo-fill,
-[data-turning='on'] .album-holo-overlay,
-[data-turning='on'] .album-holo-glare,
-[data-turning='on'] .album-gold-sheen {
-    animation-play-state: paused;
-}
-
 /* ---- LOW TIER — cheap, flat layers per treated card. No mix-blend, no
    filter, no per-frame repaint. The Low preset also unmounts album textures;
    here the card treatments collapse to flat, normal-blend paint. */
@@ -605,6 +594,19 @@
         linear-gradient(#fff 0 0) content-box,
         linear-gradient(#fff 0 0);
     -webkit-mask-composite: xor;
+}
+
+/* Fill the frame padding with the level color so it reads as a solid colored
+   frame instead of an empty gap. Base already does this via its inline
+   `background: palette.main`; gold/holo carry no card-root background, so their
+   `p-1.25` padding showed a transparent gap with the level border stranded at
+   the card edge. Border tier only — textured tiers keep their texture frame. */
+[data-cards='border'] [data-treatment='gold'] {
+    background: #e8b923;
+}
+
+[data-cards='border'] [data-treatment='holo'] {
+    background: linear-gradient(125deg, #b07bff, #4bc6ff, #ff5ba8);
 }
 
 /* The Low tier's static sheen override is later than the general switch rule,

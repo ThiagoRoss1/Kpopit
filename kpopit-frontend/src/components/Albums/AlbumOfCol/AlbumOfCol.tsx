@@ -8,7 +8,7 @@ import AlbumBlankPage from './pages/AlbumBlankPage';
 import type { AlbumGroup, AlbumStats } from '../../../interfaces/albumInterfaces';
 import { ALBUM_CARDS_PER_PAGE, ALBUM_PAGE_H, ALBUM_PAGE_W } from './albumConstants';
 import { AlbumCardZoomContext, type AlbumCardZoomApi, type CardZoomTarget } from './albumCardZoom';
-import { isSafari } from '../../../hooks/useIsDevice';
+import { isSafariAlbumEngine } from '../../../hooks/useIsDevice';
 import './AlbumOfCol.css';
 
 const FLIP_DURATION_MS = 800;
@@ -211,7 +211,7 @@ function AlbumOfCol({
 
     useEffect(() => {
         const stageElement = albumStageRef.current;
-        if (!isSafari || !stageElement) return;
+        if (!isSafariAlbumEngine || !stageElement) return;
         const blockGesture = (event: Event) => event.preventDefault();
         stageElement.addEventListener('gesturestart', blockGesture as EventListener);
         stageElement.addEventListener('gesturechange', blockGesture as EventListener);
@@ -296,7 +296,6 @@ function AlbumOfCol({
     const step = useCallback(
         (direction: 1 | -1) => {
             if (flip || focusMovingRef.current) return;
-            
             if (focus === 'off') {
                 go(direction);
                 return;
@@ -436,7 +435,6 @@ function AlbumOfCol({
 
     const leafFront = lastLeafContent.current.front;
     const leafBack = lastLeafContent.current.back;
-    
     const bookShiftPx = Math.round(
         focus === 'left'
             ? (ALBUM_PAGE_W * scale) / 2
@@ -490,7 +488,7 @@ function AlbumOfCol({
         <AlbumCardZoomContext.Provider value={cardZoom}>
         <div
             ref={albumStageRef}
-            data-turning={turning ? 'on' : 'off'}
+            data-browser={isSafariAlbumEngine ? 'safari' : undefined}
             className="album-stage flex h-full min-h-0 w-full flex-col items-center px-3 pt-3 pb-3 lg:pb-28"
         >
             <div ref={stageRef} className="flex min-h-0 w-full flex-1 items-center justify-center">
