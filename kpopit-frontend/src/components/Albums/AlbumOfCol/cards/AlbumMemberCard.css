@@ -88,6 +88,18 @@
     }
 }
 
+/* The leaf copy gets a compositor-safe variant on Safari. Keep the rainbow
+   background motion, but do not animate a filter while WebKit is also
+   allocating the rotating face and its photo backing store. */
+@keyframes album-holo-shimmer-leaf-safari {
+    from {
+        background-position: 0% 50%;
+    }
+    to {
+        background-position: 100% 50%;
+    }
+}
+
 .album-lv-badge .album-holo-fill {
     rotate: -6deg;
     inset: -25%;
@@ -179,6 +191,15 @@
 [data-browser='safari'] .album-leaf .album-holo-foil,
 [data-browser='safari'] .album-leaf .album-holo-glare {
     transform: none;
+}
+
+/* LV3 is the only treatment whose moving surface also animates a filter.
+   Removing that filter only for the transient Safari leaf keeps the photo and
+   holo paint in one turn without changing settled cards or other engines. */
+[data-browser='safari'] .album-leaf .album-holo-fill,
+[data-browser='safari'] .album-leaf .album-holo-overlay {
+    animation-name: album-holo-shimmer-leaf-safari;
+    filter: none;
 }
 
 @media (prefers-reduced-motion: reduce) {

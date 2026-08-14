@@ -9,6 +9,7 @@ import { useAlbumPreview } from '../albumPreview';
 import { useCardZoom } from '../albumCardZoom';
 import type { AlbumGroup } from '../../../../interfaces/albumInterfaces';
 import { formatCompanyName } from '../../../../utils/formatters';
+import { EAGER_ARTWORK_PROPS } from '../albumArtworkLoading';
 
 interface AlbumGroupIntroPageProps {
     group: AlbumGroup;
@@ -96,7 +97,7 @@ export default function AlbumGroupIntroPage({ group, side = 'left' }: AlbumGroup
                                     alt={group.group_name}
                                     className="pointer-events-none absolute inset-0 size-full object-cover"
                                     draggable={false}
-                                    loading="lazy"
+                                    {...EAGER_ARTWORK_PROPS}
                                 />
                             </div>
                         </div>

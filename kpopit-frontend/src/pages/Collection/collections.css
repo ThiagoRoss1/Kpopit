@@ -75,8 +75,9 @@
 }
 
 /* Album page — Summary rail slide in/out. Every -in/-out pair below is driven by
-   useDisclosure: it keeps the element mounted through the -out animation and
-   unmounts it on that element's own animationend. */
+   useDisclosure: it keeps the element mounted through the -out animation,
+   completes on the owner's animationend when available, and has a bounded
+   watchdog fallback when motion is reduced or CSS cannot emit the event. */
    
 @keyframes collection-rail-in {
     from {
@@ -278,7 +279,9 @@
 }
 
 .collection-card-zoom-out {
-    animation: collection-card-zoom-out 0.3s ease both;
+    /* The panel receives this CSS variable from CardZoomModal, using the same
+       contract as the return FLIP and disclosure watchdog. */
+    animation: collection-card-zoom-out var(--collection-card-zoom-exit-duration, 0.3s) ease both;
 }
 
 .card-zoom-art {
@@ -292,9 +295,44 @@
     zoom: var(--card-zoom-scale, 1);
 }
 
+/* The group-photo frame owns the visible treatment edge. Its image viewport
+   clips the artwork below; the FLIP geometry shell must remain paint-visible
+   so a fractional transform cannot cut off the outer ring. */
+.card-zoom-group-art {
+    overflow: visible;
+}
+
+/* The group-photo treatment is the visible frame, so it cannot also be the
+   clipping boundary. Only the nested image viewport clips the photo. Rounding
+   the direct treatment layers keeps gold/holo pixels inside the intended
+   top-left and bottom-right corners without clipping the frame itself. */
+.card-zoom-group-frame > .album-gold-base,
+.card-zoom-group-frame > .album-gold-tint,
+.card-zoom-group-frame > .album-gold-sheen,
+.card-zoom-group-frame > .album-holo-fill {
+    border-radius: 20px 0 20px 0;
+}
+
+/* On tablet-sized desktop layouts, derive member-card width from both axes.
+   This avoids the old fixed 22.5rem result on iPad while preserving 8:11 and
+   leaving enough room for metadata. Phones keep the stacked height rule. */
+@media (min-width: 768px) {
+    .card-zoom-panel--member {
+        max-width: min(68rem, calc(100vw - 3.5rem));
+    }
+
+    .card-zoom-member-art {
+        /* Keep the 8:11 art and reserve modal chrome at every tablet width,
+           including the short landscape case below the desktop breakpoint. */
+        width: min(31rem, 42vw, 56.72svh, calc((100svh - 8.5rem) * 0.7273));
+        height: auto;
+    }
+}
+
 /* Desktop: the text column unfolds from behind the card once it has landed, so
    the panel reads as coming OUT of the sticker rather than as a second,
-   unrelated entrance. Below lg the column sits under the card and needs none. */
+   unrelated entrance. Member zoom switches to a row at md; group-photo zoom
+   keeps its wider row layout at lg. */
 
 @media (min-width: 1024px) {
     .card-zoom-meta {
@@ -405,6 +443,8 @@
     .collection-pop-out,
     .collection-modal-in,
     .collection-modal-out,
+    .collection-card-zoom-in,
+    .collection-card-zoom-out,
     .collection-sheet-in,
     .collection-sheet-out,
     .lg\:collection-pop-in,

@@ -1,33 +1,40 @@
-# Safari Album Texture Glitch — Implementation Report (2026-08-09)
+# Safari Album Texture Glitch — Implementation Report (2026-08-10)
 
-> **Codex revision (2026-08-09):** The historical A+B block described below was not shipped as the
-> current implementation because adding a host transform alongside child transform removal broke the
-> card-flight path. The current patch removes the image-readiness axis, keeps the host and all visual
-> treatment declarations unchanged, and applies only an A-only child-transform experiment under
-> `[data-browser='safari']` on the rotating album stage. Real Safari device QA is still required before
-> calling this visual GREEN. The historical sections remain below as diagnosis and rejected alternatives.
+> **Codex revision (2026-08-10):** The historical A+B and A-only compositor experiments are not the
+> current implementation. A-only made native Safari captures worse and was rolled back. A separate
+> `loading="eager"` control also remained gradient-only before the photo appeared and was reverted.
+> The current tree preserves the original treatment transforms and leaf geometry. Native Mac Safari
+> reproduces a group-intro gradient→photo delay, but the exact hidden-image status at the bad frame was
+> not captured; this remains unresolved and is not visual GREEN. Historical sections below are retained
+> as rejected experiments and hypotheses.
 
-## Current patch state
+## Current baseline state
 
 - Deleted the decode/warmup modules, tests, Safari preparation phase, background warming, and global
-  eager/synchronous image attributes. The briefing confirms the defect is treatment compositing, not image delivery.
+  eager/synchronous image attributes. Those historical paths remain removed, but the native Mac evidence
+  means image readiness/paint cannot be categorically excluded for the hidden destination image.
 - Restored the simple `{ direction, landed }` flip lifecycle and the original CardZoom FLIP host DOM.
-- Kept the negative animation phase only when `isSafari` is true; Chromium/Firefox retain their previous
+- Kept the negative animation phase only when the exact `isSafariAlbumEngine` gate is true; Chromium/Firefox retain their previous
   `useSyncAlbumAnimations` clock path, while Safari skips the Web Animations `startTime` mutation.
-- Added `data-browser="safari"` to the album stage only when the exact `isSafariAlbumEngine` detector
-  matches. The broad legacy `isSafari` export remains unchanged for unrelated site-wide consumers.
-- Added a stage-scoped Safari rule that sets `transform: none` on the six treatment spans. No host transform,
-  backface override, keyframe, filter, blend mode, opacity, or quality-tier change was added.
+- The A-only `data-browser="safari"` marker and six treatment `transform:none` rules were removed after
+  native Safari showed broader gradient/late-photo regressions. No host transform, backface override,
+  keyframe, filter, blend mode, opacity, or quality-tier change is present.
 - Extracted the Safari user-agent gate into a pure helper and covered macOS Safari, iPadOS desktop-mode
   Safari, iOS Chrome, and iOS Firefox with focused tests so the compositor rule cannot leak into those shells.
 - Removed the dead `[data-turning='on']` animation pause rule after the producer was removed; treatment motion remains continuous.
-- Chromium runtime smoke on the local album confirmed that a real turn mounts `.album-leaf` while
-  `.album-stage[data-browser]` remains absent; the Safari compositor selector therefore does not match.
-- The temporary Windows-only focused test files were removed for the MacBook handoff after their 6/6
-  result was recorded; no test package or dependency was added.
+- Focused pure tests are 49/49, lint/build pass, and `git diff --check` passes; these are engineering checks
+  only and do not establish Safari visual correctness.
+- V1 remains the default renderer and its treatment/FLIP structure is unchanged. V2 is still available
+  only through the development-only `?albumEngine=v2` switch; it now keeps both target faces ready,
+  preserves the source window through settling, delays face z-priority until the eased 90° midpoint,
+  and separates the V2 group-photo zoom's FLIP geometry shell from its clipped treatment shell.
+- Collection queries now wait for `AuthProvider` session restoration before their first request. This
+  closes the saved-session race where an anonymous in-flight response could be cached before the JWT;
+  login/logout invalidation keys and anonymous UUID behavior remain unchanged.
 
-This is intentionally the smallest A-only compositor experiment. If it fails real Safari QA, revert this
-stage-scoped rule and investigate a filter-wrapper design separately; do not combine it with host promotion.
+The V1 baseline remains intentionally unchanged. The V2 lifecycle candidate is the only implementation
+under review; its transition-frame, zoom, cross-browser, and RAM gates remain open until the owner
+captures visible Safari/Firefox/Chrome results.
 
 ## WebKit research continuation
 
@@ -35,9 +42,9 @@ WebKit's own 3D-transform documentation describes `preserve-3d` as a shared 3D s
 blending implementation history notes that blend/filter effects interact with flattening in that
 space. The long-running [WebKit preserve-3d nesting bug](https://bugs.webkit.org/show_bug.cgi?id=71624)
 and [blend-mode/preserve-3d discussion](https://bugs.webkit.org/show_bug.cgi?id=99200) support treating
-the child-transform removal as a device-tested compositor experiment, not as a guaranteed mathematical
-no-op. The current patch therefore keeps the host geometry unchanged and scopes the rule to the
-rotating leaf only. [WebKit 3D transforms](https://webkit.org/blog/386/3d-transforms/)
+the rejected child-transform removal as a device-tested compositor hypothesis, not as a guaranteed
+mathematical no-op. The current baseline keeps host geometry and treatment declarations unchanged.
+[WebKit 3D transforms](https://webkit.org/blog/386/3d-transforms/)
 
 Records the reconciled experiment from `safari-texture-glitch-diagnosis.md`, informed by WebKit
 primary sources in `safari-texture-glitch-research.md`. **No git commit was made — the tree is left dirty.**
@@ -47,7 +54,7 @@ On the Collection flip-book, flipping a page glitches **treated** cards (gold = 
 group photos: group-photo cards show only the holo texture then the photo appears ~1s later (100%),
 idol stickers the same ~70–80%, gold cards flash a white sheet above the image, and there is a blink
 right before the leaf turns. The **base** tier (no gold/holo overlay layers) is always flawless —
-proof the cause is treatment compositing, not image delivery.
+ proof that treatment and hidden-image paint paths both need testing; it is not proof that image delivery is irrelevant.
 
 ## Historical compositor hypothesis (not independently confirmed)
 Every gold/holo treatment span carries its own `transform: translateZ(0)`, which asks WebKit for a
@@ -117,8 +124,10 @@ the top of this report.
 
 ### What I deleted / reverted from the WIP (wrong axis — image decode/warmup)
 
-The owner confirmed images are NOT the cause (base tier loads identical photos instantly). The entire
-decode/warmup axis was symptom-chasing and added real Safari latency, so it was removed:
+The earlier Windows observation was recorded as “images are NOT the cause” because base-tier photos
+loaded instantly. Native Safari later showed the destination intro image is first mounted inside the
+hidden flip leaf, so that observation was insufficient to rule out readiness/paint timing. The entire
+decode/warmup axis remains removed because it was not proven and added real Safari latency:
 
 - **`AlbumOfCol.tsx`** — restored to HEAD behavior. Reverted `FlipState` to `{ direction; landed }`,
   removed the `preparing | turning | landed` phase machine, `preparingRef`/`preparing` state, the
@@ -196,3 +205,61 @@ render and navigate byte-identically to HEAD — spot-check one browser to confi
 If any residual holo/group-photo flash remains after this, the next (unshipped) lever is research Fix C:
 move `filter: hue-rotate` onto a non-blended wrapper (Safari-only, pixel-verified identical) — not needed
 unless device QA shows a leftover.
+
+## Historical V2 execution update (2026-08-11 — superseded by rollback)
+
+The report above preserves the rejected A-only/A+B history. The active `?albumEngine=v2` candidate is now
+the V1-shaped renderer, not the rejected persistent-sheet checkpoint:
+
+- two flat underlays at rest;
+- one complete front/back leaf during a turn;
+- V2 descriptors, reducer, readiness registry, motion clock, zoom identity, and chrome retained;
+- V1 image paint rules copied into V2;
+- Stats panel stacking scoped to V2;
+- name/LV compositor ownership limited to the active leaf;
+- camera, scale, leaf, zoom, and active text animation owners use GPU-backed transforms;
+- no blanket promotion of every static paragraph/card/texture.
+
+The current candidate passes **59/59** focused tests, lint, build, and diff-check. Local Chromium smoke shows
+idle, forward, and backward hybrid states with ready target surfaces and no missing page subtree. Native
+Safari/iOS visual frames, Firefox final-frame pacing, group-photo zoom border parity, and measured RAM remain
+open; this report must not be read as a claim that Safari is already 100% fixed.
+
+### Post-audit correction (2026-08-11)
+
+The active candidate now freezes the V1 leaf payload through both settling frames, removes the hybrid
+leaf/underlays from persistent-sheet 3-D and z-index selectors, aborts replaced readiness waits, and
+keeps registry/motion-clock fallbacks lazy. The focused suite is now **59/59** green. Local browser
+smoke confirms the intended 2-underlay idle / 2-underlay+1-leaf turn topology and the Yena multi-page
+tuple at rest and after a backward return. Native Safari/iOS and RAM remain the release gates.
+
+## Final owner-requested rollback (2026-08-11)
+
+The owner reported that the V1-shaped hybrid candidate made the album materially worse when treatments
+were enabled and that the sticker regression returned. It is not a deliverable and is not the active
+V2 renderer. `AlbumOfColV2` was restored to the persistent V2 `AlbumBookStage` path; hybrid renderer,
+layout, CSS, tests, and hybrid-only debug selectors were removed from the active tree. Recent experimental
+text promotion, Stats marker/stacking, and hover-promotion edits were also rolled back. V1 remains the
+default control and was not changed.
+
+The persistent V2 baseline retains the descriptor document, reducer, bounded physical-sheet window,
+passive artwork registry, abortable readiness cleanup, shared animation clock, descriptor-driven chrome,
+and exact source-sheet zoom identity. These are engineering improvements, not proof of Safari visual parity.
+
+### Experiment ledger
+
+- Safari-only treatment `transform:none` / A-only selectors: rejected; native captures became broader/worse.
+- `loading="eager"` for group photos: rejected; the late gradient-to-photo reveal remained.
+- Global/host containment, `translateZ(0)`, blanket `transform-gpu`, and texture downgrades: rejected
+  because they changed layers/geometry or risked the RAM budget without proving the target frame.
+- Radius-one windows and per-face subtree culling: rejected because backward destinations disappeared or
+  page subtrees remounted.
+- Persistent face z-index timing: deterministic but never accepted by native Safari evidence.
+- V1-shaped hybrid renderer: Chromium topology smoke and 59/59 tests passed, but the owner-visible
+  recording showed treatment/sticker/page composition regressions, so it was removed rather than layered
+  with more CSS.
+
+After rollback, the persistent V2 baseline passes **50/50** focused Node tests, lint, build, and diff-check
+(the six hybrid-only tests were removed with the rejected candidate). Native Safari/iOS frame capture,
+Firefox/Chrome parity, zoom-border checks, and measured RAM remain open for a separate investigation.
+No production cutover or V1/V2 folder merge is authorized.

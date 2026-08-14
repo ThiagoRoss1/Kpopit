@@ -1,7 +1,7 @@
 # Safari texture/flip glitch — MacBook handoff
 
-**Date:** 2026-08-09  
-**Status:** Windows attempt stopped. Owner reports the latest patch is worse: textured cards glitch again during the flip and textured artwork still appears late; base cards remain the control. Do not call the current experiment fixed.
+**Date:** 2026-08-10
+**Status:** Native Mac Safari reproduced the late group-photo reveal, but no production fix is proven. The A-only compositor experiment was worse and has been rolled back. A browser-neutral `loading="eager"` control also remained gradient-only before the photo appeared and was reverted. The V2 candidate now contains lifecycle, z-order, and zoom fixes behind `?albumEngine=v2`; V1 remains the default and is not merged.
 
 > **Mac Codex entry point:** read `safari-mac-codex-master-context.md` first. It reconciles the full
 > conversation, experiment history, conflicting/superseded documents, required project/design reading,
@@ -16,23 +16,27 @@
 - The current Safari-only child-transform experiment did not solve the symptom and may have made the flip regression visible again.
 - The next investigation must run on the real MacBook Safari, not infer success from Chrome, TypeScript, or a production build.
 
-## Current working-tree experiment
+## Current working-tree state
 
-The current dirty tree contains an A-only experiment that should be treated as **untrusted** until Mac Safari inspection:
+The A-only stage marker and six `transform:none` rules are removed. The current album code preserves the
+original treatment transforms, leaf geometry, and negative Safari animation phase. The exact Safari gate
+is still used for gesture/animation behavior, but no temporary browser selector remains. The image path
+is still an open hypothesis: the destination intro image is first mounted as a hidden `leafBack` under a
+rotated/backface-hidden face, beneath an animated holo fill. Do not add eager/decode/warm-up behavior or a
+host transform without a decisive Web Inspector capture.
 
-1. `AlbumOfCol.tsx` stamps `data-browser="safari"` only when `isSafariAlbumEngine` is true.
-2. `AlbumMemberCard.css` applies `transform: none` to six treatment layers only below `[data-browser='safari'] .album-leaf`:
-   - `.album-gold-tint`
-   - `.album-gold-sheen`
-   - `.album-holo-fill`
-   - `.album-holo-overlay`
-   - `.album-holo-foil`
-   - `.album-holo-glare`
-3. No host `.album-card-isolate` transform or backface override is present. The rejected A+B host-promotion experiment must not be reintroduced without a measured Safari test.
-4. `useAlbumAnimationPhase` supplies the negative CSS delay only to `isSafariAlbumEngine`.
-5. `useSyncAlbumAnimations` is retained for the original non-Safari clock behavior and exits only for the exact album Safari gate.
-6. The old broad `isSafari` export was restored for unrelated site-wide consumers (`VictoryCardSmall` and `CollectionAlbum`); do not replace it globally with the strict detector again.
-7. The decode/warmup/preparing path was removed because the owner confirmed that images are not causal. Do not bring back eager/synchronous decode or background warm-up as a texture fix.
+The isolated V2 engine now contains a separate lifecycle candidate behind `?albumEngine=v2`; it does not
+replace the legacy/default engine. The candidate keeps complete physical sheet faces mounted, waits on both
+visible faces of a target opening, preserves the pre-turn sheet window through settling, and keeps the
+geometrically departing face on top until the 3D midpoint. These changes directly target the Stats/grain,
+backward-underlay, and late-card-field failures in the owner recording, but they are not declared Safari
+visual-green until a visible high-rate Safari capture confirms the transition frames.
+
+The V2 group-photo zoom also uses an unclipped outer FLIP geometry shell and an inner clipped treatment
+shell, preventing the transformed flight from clipping the top treatment edge. The legacy/V1 zoom branch
+is intentionally unchanged. Collection list/album queries wait for auth restoration before their first
+request, preventing an anonymous response from winning the saved-session race; existing login/logout
+invalidations remain in place.
 
 Relevant code:
 
@@ -47,22 +51,25 @@ Relevant code:
 
 ## What was verified on Windows
 
-- Focused phase + Safari-gate tests: **6/6 pass**.
+- Focused V2/model/machine/integration/phase/detector tests: **49/49 pass**.
 - `npm run lint`: pass.
 - `npm run build`: pass; only the pre-existing Vite chunk-size warning remains.
 - `git diff --check`: pass; only CRLF conversion warnings.
-- Chrome runtime smoke: a real turn mounted `.album-leaf` while the stage had no `data-browser` attribute, so the Safari selector did not match.
-- No Safari/WebKit runtime, `safaridriver`, or Playwright WebKit was available on Windows.
+- Historical Chrome runtime smoke: the old A-only experiment mounted `.album-leaf` while the stage had no `data-browser` attribute, so that Safari-only selector did not match. The selector and experiment are no longer present.
+- Native Mac Safari static evidence exists, but visible high-rate transition automation remains unavailable;
+  WebDriver's document was hidden and Apple Events JavaScript was disabled.
 - No package was installed and no dependency lockfile was changed.
 - Temporary `vite-runtime.log` and `vite-runtime.err.log` files created for the smoke test were removed.
-- The two temporary focused test files created by this Windows attempt were removed after recording their 6/6 result in this handoff; no test dependency was installed.
+- The focused tests remain dependency-free; no test dependency was installed.
 - No commit was made. Preserve the dirty tree and unrelated user/Claude changes.
 
 ## Prior investigation decisions
 
-- The symptom is strongly correlated with treatment compositing: base is safe; gold is intermittent; holo/group-photo is worst; animations-off still flashes.
-- The previous image-readiness plan (`albumRevealReadiness`, `albumImageWarmup`, `preparing → turning → landed`) was symptom-chasing and has been removed from source. Its old plan/spec sections are retained as historical context only.
-- `translateZ(0)` is not guaranteed to be a visual no-op in WebKit: removing a transform can change stacking/compositing. Therefore the current A-only selector is an experiment, not a proven fix.
+- The symptom is correlated with treated surfaces, but the native Mac capture narrowed the clearest case to a
+  group-intro photo: Safari showed the holo gradient first and the photo about a second later. This does not
+  yet distinguish image readiness from hidden-face paint/compositor ordering.
+- The previous image-readiness plan (`albumRevealReadiness`, `albumImageWarmup`, `preparing → turning → landed`) remains removed. A single `loading="eager"` control did not fix the observed frame, but that does not fully rule out first-mount timing because the destination DOM is created at turn time.
+- `translateZ(0)` is not guaranteed to be a visual no-op in WebKit: removing a transform can change stacking/compositing. The A-only selector was therefore only an experiment; it is now rolled back after native Safari showed worse gradients/late-photo behavior.
 - The host-promotion B half broke the card-flight/FLIP geometry and must remain rejected.
 - Do not pause holo/gold animations during the turn; the requested behavior is continuous motion.
 
@@ -73,15 +80,14 @@ Run this handoff from the current tree on the MacBook:
 1. Read this file, `docs/superpowers/safari-texture-glitch-fix-report.md`, the design/spec, and the plan before changing code.
 2. Capture a baseline in Safari with Web Inspector open: base, gold, holo idol, holo group-photo; animations on and off; forward and backward turns; static page and zoom.
 3. In Safari's Elements/Computed panels, record for the failing leaf:
-   - `data-browser` value;
+   - all duplicate destination `<img>` elements and their `complete`, `naturalWidth`, and `currentSrc`;
    - computed `transform` for each six treatment span;
    - computed `animation-delay`, `animation-play-state`, and `filter`;
    - whether the photo `<img>` is already painted before the leaf starts rotating;
    - whether the failure occurs with the treatment spans temporarily disabled one at a time.
-4. Compare three controlled variants, one at a time:
-   - current A-only rule;
-   - current rule removed (true baseline);
-   - a narrowly scoped alternative that preserves stacking semantics. Do not combine child removal with host promotion.
+4. Compare only one narrowly scoped alternative at a time against this baseline: first the intro image
+   wrapper `z-index`, then (only if needed) the intro holo fill's transform. Do not combine child removal
+   with host promotion, eager loading, or decode/warm-up.
 5. Use Safari Layers/Rendering tools to identify whether the photo and treatment are separate backing surfaces during `rotateY()`. A screenshot/video of the exact failing frame is required.
 6. Verify the stationary card before/after each variant. Any pixel-visible gold/holo change rejects the variant under the no-design-change constraint.
 7. Recheck iOS Safari separately if available. Recheck iOS Chrome/Firefox and desktop Chrome/Firefox to ensure the exact gate remains absent.
@@ -89,7 +95,7 @@ Run this handoff from the current tree on the MacBook:
 
 ## Safe rollback guidance for the next Codex
 
-If the current experiment is the cause of the worse behavior, remove only the A-only experiment first:
+If a future experiment is worse, remove only that experiment and restore this baseline:
 
 - remove the six `[data-browser='safari'] .album-leaf ... { transform: none; }` declarations;
 - remove `data-browser` from the stage;
@@ -103,4 +109,7 @@ Five delegated roles were completed: two senior frontend audits, a WebKit/Safari
 
 ## Handoff outcome
 
-The Windows session is intentionally ended without claiming a fix. The next MacBook Codex should use Safari evidence to either validate or roll back the A-only compositor experiment, then update this file with the measured result and final patch.
+The Mac session is intentionally ended without claiming a fix. Native Safari automation became unavailable
+(`kLSNoExecutableErr`/Apple Events restrictions), and no iOS device or simulator is connected. The next
+bounded test must sample duplicate destination images during the 800ms turn; if that cannot be done, leave
+this baseline documented and move on rather than starting another speculative cycle.

@@ -3,6 +3,7 @@ import type { AlbumMember, AlbumPalette } from '../../../../interfaces/albumInte
 import goldTextureSrc from '../../../../assets/materials/AlbumOfCol/gold.jpg';
 // import holoTextureSrc from '../../../../assets/materials/AlbumOfCol/holo.jpg';
 import { useAlbumPreview } from '../albumPreview';
+import { EAGER_ARTWORK_PROPS } from '../albumArtworkLoading';
 import { treatmentForLevel, type CardTreatment } from './albumCardLevel';
 import { useAlbumAnimationPhase } from './useAlbumAnimationPhase';
 import { useSyncAlbumAnimations } from './useSyncAlbumAnimations';
@@ -81,8 +82,7 @@ export default function AlbumMemberCard({ member, palette }: AlbumMemberCardProp
                 <img
                     src={member.src || undefined}
                     alt={member.artist_name}
-                    loading="lazy"
-                    decoding="async"
+                    {...EAGER_ARTWORK_PROPS}
                     className="pointer-events-none absolute inset-0 size-full object-cover"
                 />
                 <div className="album-lv-badge relative mr-1.5 mt-3 rotate-6 self-end">
