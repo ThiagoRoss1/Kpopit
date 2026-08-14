@@ -3,13 +3,16 @@ import type { AlbumMember, AlbumPalette } from '../../../../interfaces/albumInte
 import goldTextureSrc from '../../../../assets/materials/AlbumOfCol/gold.jpg';
 // import holoTextureSrc from '../../../../assets/materials/AlbumOfCol/holo.jpg';
 import { useAlbumPreview } from '../albumPreview';
+import { EAGER_ARTWORK_PROPS } from '../albumArtworkLoading';
 import { treatmentForLevel, type CardTreatment } from './albumCardLevel';
+import { useAlbumAnimationPhase } from './useAlbumAnimationPhase';
 import { useSyncAlbumAnimations } from './useSyncAlbumAnimations';
 import './AlbumMemberCard.css';
 
 interface AlbumMemberCardProps {
     member: AlbumMember;
     palette: AlbumPalette;
+    zoomed?: boolean;
 }
 
 /** Textured fill behind the frame ring / badge / banner on gold and holo cards */
@@ -45,12 +48,13 @@ function AlbumMemberCardPreview({ palette }: { palette: AlbumPalette }) {
     return <div className="h-55 w-40 rounded-sm" style={{ background: palette.main }} />;
 }
 
-export default function AlbumMemberCard({ member, palette }: AlbumMemberCardProps) {
+export default function AlbumMemberCard({ member, palette, zoomed = false }: AlbumMemberCardProps) {
     const preview = useAlbumPreview();
     const cardRef = useRef<HTMLDivElement>(null);
     const level = member.level ?? 1;
     const treatment = treatmentForLevel(level);
-    
+    const animationPhase = useAlbumAnimationPhase();
+
     useSyncAlbumAnimations(cardRef, treatment);
 
     if (preview) return <AlbumMemberCardPreview palette={palette} />;
@@ -58,6 +62,7 @@ export default function AlbumMemberCard({ member, palette }: AlbumMemberCardProp
     const isBaseLevel = treatment === 'base';
     const groupColorFill = { background: palette.main };
     const cardStyle = {
+        ...animationPhase,
         '--album-main': palette.main,
         ...(isBaseLevel ? groupColorFill : {}),
     } as CSSProperties;
@@ -69,7 +74,7 @@ export default function AlbumMemberCard({ member, palette }: AlbumMemberCardProp
         <div
             ref={cardRef}
             data-treatment={treatment}
-            className={`album-card-isolate relative h-55 w-40 overflow-clip rounded-sm ${isBaseLevel ? 'p-0.75' : 'p-1.25'}`}
+            className={`album-card-isolate relative h-55 w-40 overflow-clip rounded-sm ${zoomed ? 'album-card-zoomed' : ''} ${isBaseLevel ? 'p-0.75' : 'p-1.25'}`}
             style={cardStyle}
         >
             {/* frame ring */}
@@ -78,8 +83,7 @@ export default function AlbumMemberCard({ member, palette }: AlbumMemberCardProp
                 <img
                     src={member.src || undefined}
                     alt={member.artist_name}
-                    loading="lazy"
-                    decoding="async"
+                    {...EAGER_ARTWORK_PROPS}
                     className="pointer-events-none absolute inset-0 size-full object-cover"
                 />
                 <div className="album-lv-badge relative mr-1.5 mt-3 rotate-6 self-end">

@@ -17,7 +17,7 @@ function GroupWatermark({ groupName }: { groupName: string }) {
     const repeats = Math.max(4, Math.ceil(70 / (groupName.length + 1)));
     const row = `${groupName.toUpperCase()} `.repeat(repeats);
     return (
-        <div aria-hidden className="font-major-mono-display absolute -left-28.5 -top-2.5 flex w-361 flex-col gap-1.5 overflow-hidden 
+        <div aria-hidden className="font-major-mono-display absolute -left-28.5 -top-2.5 flex w-361 flex-col gap-1.5 overflow-hidden
         text-[30px] leading-[normal] text-black/10 uppercase">
             {Array.from({ length: 27 }).map((_, i) => (
                 <p key={i} className="whitespace-nowrap">{row}</p>

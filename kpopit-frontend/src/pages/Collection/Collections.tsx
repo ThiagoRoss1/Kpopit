@@ -11,17 +11,21 @@ import { useCollectionNight } from './useCollectionNight';
 import FxPanel from './components/FxPanel';
 import { Moon, SlidersHorizontal, Sun } from 'lucide-react';
 import { useDisclosure } from '../../hooks/useDisclosure';
+import { useAuth } from '../../hooks/useAuth';
+import { COLLECTION_EXIT_ANIMATIONS, COLLECTION_STANDARD_EXIT_MS } from './collectionMotion';
 
 export default function Collection() {
-    const fxPanel = useDisclosure();
+    const fxPanel = useDisclosure({ exitDurationMs: COLLECTION_STANDARD_EXIT_MS, exitAnimationNames: COLLECTION_EXIT_ANIMATIONS.sheet });
     const { settings } = useCollectionFx();
     const fxAttrs = getCollectionFxAttrs(settings);
+    const { isLoading: isAuthLoading } = useAuth();
 
     const [night, setNight] = useCollectionNight();
 
     const { data: collections, isLoading } = useQuery({
         queryKey: ['collectionsList'],
         queryFn: getCollectionsList,
+        enabled: !isAuthLoading,
         staleTime: 1000 * 60 * 5,
         refetchOnWindowFocus: false,
     });
@@ -100,7 +104,7 @@ export default function Collection() {
                     </header>
 
                     {/* Albums — one card per collection row */}
-                    {isLoading && (
+                    {(isAuthLoading || isLoading) && (
                         <section
                             className={`mt-6 rounded-[20px] border-[2.5px] p-5.5 transition-colors duration-300 ${
                                 night

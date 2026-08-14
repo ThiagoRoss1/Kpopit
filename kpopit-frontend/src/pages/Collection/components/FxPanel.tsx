@@ -393,7 +393,8 @@ export default function FxPanel({ night, onClose, albumName, closing, onAnimatio
         const onPointerDown = (event: PointerEvent) => {
             if (pendingRef.current) return;
 
-            const target = event.target as Element;
+            if (!(event.target instanceof Element)) return;
+            const target = event.target;
 
             if (target.closest('#fx-panel-toggle')) return;
             if (!panelRef.current?.contains(target)) onClose();

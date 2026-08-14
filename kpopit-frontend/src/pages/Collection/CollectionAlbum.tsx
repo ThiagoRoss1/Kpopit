@@ -25,6 +25,12 @@ import { useDisclosure } from '../../hooks/useDisclosure';
 import { getCollectionAlbum, getCollectionsList } from '../../services/api';
 import { useIsLg, isSafari } from '../../hooks/useIsDevice';
 import type { AlbumGroup } from '../../interfaces/albumInterfaces';
+import {
+    COLLECTION_CARD_ZOOM_EXIT_MS,
+    COLLECTION_EXIT_ANIMATIONS,
+    COLLECTION_STANDARD_EXIT_MS,
+    COLLECTION_SUMMARY_RAIL_EXIT_MS,
+} from './collectionMotion';
 import './collections.css';
 
 function SideArrow({ direction, disabled, onClick, night }: { direction: -1 | 1; disabled: boolean; onClick: () => void; night: boolean }) {
@@ -116,11 +122,12 @@ export default function CollectionAlbum() {
     const fxAttrs = getCollectionFxAttrs(settings);
 
     const [night, setNight] = useCollectionNight();
-    const rail = useDisclosure(true);
-    const carousel = useDisclosure(true);
-    const index = useDisclosure();
-    const info = useDisclosure();
-    const fxPanel = useDisclosure();
+    const rail = useDisclosure({ initialOpen: true, exitDurationMs: COLLECTION_SUMMARY_RAIL_EXIT_MS, exitAnimationNames: COLLECTION_EXIT_ANIMATIONS.rail });
+    const carousel = useDisclosure({ initialOpen: true, exitDurationMs: COLLECTION_STANDARD_EXIT_MS, exitAnimationNames: COLLECTION_EXIT_ANIMATIONS.chrome });
+    const index = useDisclosure({ exitDurationMs: COLLECTION_STANDARD_EXIT_MS, exitAnimationNames: COLLECTION_EXIT_ANIMATIONS.modal });
+    const { close: closeIndex } = index;
+    const info = useDisclosure({ exitDurationMs: COLLECTION_STANDARD_EXIT_MS, exitAnimationNames: COLLECTION_EXIT_ANIMATIONS.modal });
+    const fxPanel = useDisclosure({ exitDurationMs: COLLECTION_STANDARD_EXIT_MS, exitAnimationNames: COLLECTION_EXIT_ANIMATIONS.sheet });
     const pagesAttr = { 'data-pages': carousel.mounted ? 'on' : 'off' } as const;
     const [query, setQuery] = useState('');
     const [book, setBook] = useState<AlbumBookInit | null>(null);
@@ -148,42 +155,47 @@ export default function CollectionAlbum() {
     const onPosChange = useCallback((pos: number, busy: boolean) => setShown({ pos, busy }), []);
 
     const [zoomTarget, setZoomTarget] = useState<CardZoomTarget | null>(null);
-    const zoom = useDisclosure();
+    const zoom = useDisclosure({ exitDurationMs: COLLECTION_CARD_ZOOM_EXIT_MS, exitAnimationNames: COLLECTION_EXIT_ANIMATIONS.cardZoom });
+    const { open: openZoom, close: closeZoom, mounted: zoomMounted } = zoom;
     const zoomHistoryEntry = useRef(false);
+
+    useEffect(() => {
+        if (!zoomMounted) setZoomTarget(null);
+    }, [zoomMounted]);
 
     const openCardZoom = useCallback(
         (target: CardZoomTarget) => {
             setZoomTarget(target);
-            zoom.open();
+            openZoom();
             if (zoomHistoryEntry.current) return;
             zoomHistoryEntry.current = true;
             history.pushState({ kpopitCardZoom: true }, '');
         },
-        [zoom],
+        [openZoom],
     );
 
     const flyingCardId =
-        zoom.mounted && zoomTarget
+        zoomMounted && zoomTarget
             ? zoomTarget.kind === 'member'
                 ? zoomTarget.member.card_id
                 : (zoomTarget.group.group_photo?.card_id ?? null)
             : null;
 
     const closeCardZoom = useCallback(() => {
-        zoom.close();
+        closeZoom();
         if (!zoomHistoryEntry.current) return;
         zoomHistoryEntry.current = false;
         history.back();
-    }, [zoom]);
+    }, [closeZoom]);
 
     useEffect(() => {
-        if (!zoom.mounted) return;
+        if (!zoomMounted) return;
         const onKeyDown = (event: KeyboardEvent) => {
             if (event.key === 'Escape') closeCardZoom();
         };
         const onPopState = () => {
             zoomHistoryEntry.current = false;
-            zoom.close();
+            closeZoom();
         };
         window.addEventListener('keydown', onKeyDown);
         window.addEventListener('popstate', onPopState);
@@ -191,7 +203,7 @@ export default function CollectionAlbum() {
             window.removeEventListener('keydown', onKeyDown);
             window.removeEventListener('popstate', onPopState);
         };
-    }, [zoom, closeCardZoom]);
+    }, [zoomMounted, closeCardZoom, closeZoom]);
 
     const spreadCount = book?.spreadCount ?? 0;
     const maxPos = spreadCount + 1;
@@ -223,13 +235,13 @@ export default function CollectionAlbum() {
     useEffect(() => {
         if (!focusActive) return;
         const onPopState = () => {
-            if (zoom.mounted) return;
+            if (zoomMounted) return;
             focusHistoryEntry.current = false;
             setFocus('off');
         };
         window.addEventListener('popstate', onPopState);
         return () => window.removeEventListener('popstate', onPopState);
-    }, [focusActive, zoom.mounted]);
+    }, [focusActive, zoomMounted]);
     
     // First-run onboarding tour: auto-start once the album has loaded, unless the
     // user has already seen it. `markCollectionGuideSeen` is written by the tour on
@@ -293,9 +305,9 @@ export default function CollectionAlbum() {
             const groupSpread = book?.groupSpreads.find((spread) => spread.group_id === groupId);
 
             if (groupSpread) controls.current?.jumpTo(groupSpread.pos);
-            index.close();
+            closeIndex();
         },
-        [book, index],
+        [book, closeIndex],
     );
 
     if (!validId || (isError && isAxiosError(error) && error.response?.status === 404)) {
@@ -494,7 +506,7 @@ export default function CollectionAlbum() {
                                     controlRef={controls}
                                     onPosChange={onPosChange}
                                     onBookInit={onBookInit}
-                                    keysDisabled={info.mounted || index.mounted || fxPanel.mounted || zoom.mounted || tourActive}
+                                    keysDisabled={info.mounted || index.mounted || fxPanel.mounted || zoomMounted || tourActive}
                                     onCardZoom={settings.tapZoom ? openCardZoom : undefined}
                                     flyingCardId={flyingCardId}
                                     focus={focus}
@@ -502,35 +514,34 @@ export default function CollectionAlbum() {
                                 />
                             </div>
                             
-                            <div
-                                hidden={focus !== 'off'}
-                                className="mt-5 mb-10 flex flex-col items-center gap-2 px-3 lg:absolute lg:inset-x-0 lg:bottom-3 lg:z-10 lg:mt-0 lg:mb-0"
-                            >
-                                <p className={`font-major-mono-display whitespace-nowrap text-[12px] ${night ? '' : '[text-shadow:0_1px_0_rgba(255,255,255,0.5)]'}  uppercase`}>
-                                    {frontClosed
-                                        ? 'Cover — Tap to open'
-                                        : backClosed
-                                        ? 'Back Cover'
-                                        : `${currentGroup ? `${currentGroup.group_name.toUpperCase()} · ` : ''} Page ${Math.min(shown.pos, spreadCount)}/${spreadCount}`}
-                                </p>
+                            {focus === 'off' && (
+                                <div className="mt-5 mb-10 flex flex-col items-center gap-2 px-3 lg:absolute lg:inset-x-0 lg:bottom-3 lg:z-10 lg:mt-0 lg:mb-0">
+                                    <p className={`font-major-mono-display whitespace-nowrap text-[12px] ${night ? '' : '[text-shadow:0_1px_0_rgba(255,255,255,0.5)]'}  uppercase`}>
+                                        {frontClosed
+                                            ? 'Cover — Tap to open'
+                                            : backClosed
+                                            ? 'Back Cover'
+                                            : `${currentGroup ? `${currentGroup.group_name.toUpperCase()} · ` : ''} Page ${Math.min(shown.pos, spreadCount)}/${spreadCount}`}
+                                    </p>
 
-                                {carousel.mounted && openings.length > 0 && (
-                                    <div
-                                        {...carousel.animationProps}
-                                        className={carousel.closing ? 'collection-chrome-out' : 'collection-chrome-in'}
-                                    >
-                                        <AlbumPageCarousel
-                                            openings={openings}
-                                            shown={shown.pos}
-                                            onJump={jumpToPos}
-                                            onStep={stepBy}
-                                            canPrev={!frontClosed && !shown.busy}
-                                            canNext={!backClosed && !shown.busy}
-                                            night={night}
-                                        />
-                                    </div>
-                                )}
-                            </div>
+                                    {carousel.mounted && openings.length > 0 && (
+                                        <div
+                                            {...carousel.animationProps}
+                                            className={carousel.closing ? 'collection-chrome-out' : 'collection-chrome-in'}
+                                        >
+                                            <AlbumPageCarousel
+                                                openings={openings}
+                                                shown={shown.pos}
+                                                onJump={jumpToPos}
+                                                onStep={stepBy}
+                                                canPrev={!frontClosed && !shown.busy}
+                                                canNext={!backClosed && !shown.busy}
+                                                night={night}
+                                            />
+                                        </div>
+                                    )}
+                                </div>
+                            )}
                         </div>
                     </div>
 
@@ -589,7 +600,7 @@ export default function CollectionAlbum() {
                         />
                     )}
 
-                    {zoom.mounted && zoomTarget && (
+                    {zoomMounted && zoomTarget && (
                         <CardZoomModal
                             target={zoomTarget}
                             collectionName={collectionName}

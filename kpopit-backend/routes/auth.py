@@ -21,11 +21,12 @@ COOKIE_DOMAIN = os.getenv("COOKIE_DOMAIN") if IS_PRODUCTION else None
 
 auth_bp = Blueprint("auth", __name__)
 
-samesite = "None" if FLASK_ENV == "development" else "Lax"
-secure = True
-# Past used values
-# samesite = "Lax" if FLASK_ENV == "development" else "Lax"
-# secure = IS_PRODUCTION
+# Local development is served over plain HTTP through Vite's same-origin proxy.
+# Safari rejects Secure cookies received over HTTP (and SameSite=None also
+# requires Secure), so use a normal first-party cookie locally. Production stays
+# Secure and keeps the existing SameSite policy.
+samesite = "Lax"
+secure = IS_PRODUCTION
 
 def _set_refresh_cookie(response, raw_refresh_token: str, remember_me: bool) -> None:
     response.set_cookie(

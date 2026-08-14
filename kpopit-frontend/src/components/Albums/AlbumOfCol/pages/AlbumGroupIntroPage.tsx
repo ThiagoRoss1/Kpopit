@@ -3,11 +3,13 @@ import AlbumContentShell, { type AlbumPageSide } from '../shell/AlbumContentShel
 import { AlbumLockedGroupPhoto } from '../cards/AlbumLocked';
 import { TextureFill } from '../cards/AlbumMemberCard';
 import { treatmentForGroup } from '../cards/albumCardLevel';
+import { useAlbumAnimationPhase } from '../cards/useAlbumAnimationPhase';
 import { useSyncAlbumAnimations } from '../cards/useSyncAlbumAnimations';
 import { useAlbumPreview } from '../albumPreview';
 import { useCardZoom } from '../albumCardZoom';
 import type { AlbumGroup } from '../../../../interfaces/albumInterfaces';
 import { formatCompanyName } from '../../../../utils/formatters';
+import { EAGER_ARTWORK_PROPS } from '../albumArtworkLoading';
 
 interface AlbumGroupIntroPageProps {
     group: AlbumGroup;
@@ -24,7 +26,8 @@ export default function AlbumGroupIntroPage({ group, side = 'left' }: AlbumGroup
     const preview = useAlbumPreview();
     const zoom = useCardZoom();
     const photoRef = useRef<HTMLDivElement>(null);
-    
+    const animationPhase = useAlbumAnimationPhase();
+
     useSyncAlbumAnimations(photoRef, photoFrame);
 
     const fileCells: Array<[string, string]> = [
@@ -76,7 +79,10 @@ export default function AlbumGroupIntroPage({ group, side = 'left' }: AlbumGroup
                             className={`isolate relative z-20 h-62.5 w-full overflow-clip rounded-br-[20px] rounded-tl-[20px] bg-white shadow-[2px_4px_4px_0px_rgba(0,0,0,0.3)] ${
                             photoFrame === 'base' ? 'border-2 border-white' : 'p-1.5'
                             } ${zoom ? 'cursor-pointer transition-transform duration-200 hover:scale-[1.02]' : ''}`}
-                            style={{ visibility: zoom?.flyingCardId === group.group_photo?.card_id ? 'hidden' : undefined }}
+                            style={{
+                                ...animationPhase,
+                                visibility: zoom?.flyingCardId === group.group_photo?.card_id ? 'hidden' : undefined,
+                            }}
                             onClick={(event) => {
                                 if (!zoom) return;
                                 event.stopPropagation();
@@ -88,10 +94,10 @@ export default function AlbumGroupIntroPage({ group, side = 'left' }: AlbumGroup
                             <div className="relative size-full overflow-clip rounded-br-[14px] rounded-tl-[14px]">
                                 <img 
                                     src={group.group_photo?.src || undefined} 
-                                    alt={group.group_name} 
-                                    className="pointer-events-none absolute inset-0 size-full object-cover" 
+                                    alt={group.group_name}
+                                    className="pointer-events-none absolute inset-0 size-full object-cover"
                                     draggable={false}
-                                    loading='lazy'
+                                    {...EAGER_ARTWORK_PROPS}
                                 />
                             </div>
                         </div>
