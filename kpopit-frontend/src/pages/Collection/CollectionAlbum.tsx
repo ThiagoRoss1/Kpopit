@@ -123,7 +123,7 @@ export default function CollectionAlbum() {
 
     const [night, setNight] = useCollectionNight();
     const rail = useDisclosure({ initialOpen: true, exitDurationMs: COLLECTION_SUMMARY_RAIL_EXIT_MS, exitAnimationNames: COLLECTION_EXIT_ANIMATIONS.rail });
-    const carousel = useDisclosure({ exitDurationMs: COLLECTION_STANDARD_EXIT_MS, exitAnimationNames: COLLECTION_EXIT_ANIMATIONS.chrome });
+    const carousel = useDisclosure({ initialOpen: true, exitDurationMs: COLLECTION_STANDARD_EXIT_MS, exitAnimationNames: COLLECTION_EXIT_ANIMATIONS.chrome });
     const index = useDisclosure({ exitDurationMs: COLLECTION_STANDARD_EXIT_MS, exitAnimationNames: COLLECTION_EXIT_ANIMATIONS.modal });
     const { close: closeIndex } = index;
     const info = useDisclosure({ exitDurationMs: COLLECTION_STANDARD_EXIT_MS, exitAnimationNames: COLLECTION_EXIT_ANIMATIONS.modal });
