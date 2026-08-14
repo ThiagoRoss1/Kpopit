@@ -3,7 +3,7 @@
 **Review date:** 2026-08-14  
 **Reviewer:** Codex (solo review; no subagents)  
 **Renderer:** V1 only  
-**Status:** core Safari/iPad defects are implemented, statically verified, and reported fixed by the owner on native hardware. The final solo review correction has been applied; no blocking code finding remains.
+**Status:** core Safari/iPad defects are implemented, statically verified, and reported fixed by the owner on native hardware. The final solo review correction has been applied. The one cross-browser behavior change this branch makes outside Safari — removal of the turn-time animation pause — was identified in a later review pass and has since been cleared on Firefox and Chromium by owner device testing. No blocking code finding remains.
 
 ## Review scope
 
@@ -115,6 +115,33 @@ const carousel = useDisclosure({
 
 No other blocking code defect was found in the reviewed album changes.
 
+## Turn-time animation policy change
+
+Recorded separately because it changes behavior on the two engines the Safari work was not targeting.
+
+Before this branch the album root carried `data-turning={turning ? 'on' : 'off'}`, and `collections.css` used it to freeze every animated card treatment for the duration of a turn:
+
+```css
+[data-turning='on'] .album-holo-fill,
+[data-turning='on'] .album-holo-overlay,
+[data-turning='on'] .album-holo-glare,
+[data-turning='on'] .album-gold-sheen {
+    animation-play-state: paused;
+}
+```
+
+That rule's own comment attributed the removal of the page-flip "death glitch" to it.
+
+`2cbf7d2` removed both the attribute and the rule. The attribute slot now carries `data-browser={isSafariAlbumEngine ? 'safari' : undefined}`, and the replacement compositor rules are scoped to `[data-browser='safari'] .album-leaf`. The consequence is that on Chromium and Firefox the gold sheen, holo shimmer, and holo glare — including LV3's animated `hue-rotate` — continue running through the 800 ms leaf rotation instead of pausing. Safari did not lose the protection; it exchanged it for the narrower filter-free leaf keyframe. The other two engines lost it outright.
+
+The earlier Chromium smoke run could not have covered this. An anonymous session owns no cards, and `AlbumMembersPage` renders `AlbumLockedSlot` rather than `AlbumMemberCard` for unowned members, so no `.album-gold-*` or `.album-holo-*` layer mounts at all in that session. The change was verified separately on device (see below).
+
+Related and intentional in the same commit: `.album-book` lost its turn-scoped `will-change: transform`, which now lives on `.album-leaf` for that element's turn-only lifetime. The net effect is less compositor memory held during a turn.
+
+## Changes outside the album scope
+
+`kpopit-backend/routes/auth.py` changes the refresh-cookie policy in this branch: `samesite` becomes a constant `"Lax"` and `secure` becomes `IS_PRODUCTION`. Because `IS_PRODUCTION` is `FLASK_ENV != "development"`, production resolves to `Lax` / `True` both before and after the change, so production behavior is unchanged; only local development over plain HTTP is affected. Unrelated to the album work, but present in the same branch and therefore part of the merge decision.
+
 ## Non-blocking improvements
 
 - The current tests exercise the pure disclosure reducer, event-clock filtering, animation-name policy, watchdog timing, zoom duration contract, and eager-artwork constant. They do not mount the React hook in a DOM. A future lightweight React integration test could prove actual mount → close → animation end/watchdog → DOM removal behavior, but the present implementation is coherent by inspection.
@@ -131,6 +158,9 @@ No other blocking code defect was found in the reviewed album changes.
 - Diagnostic residue search — clean under `kpopit-frontend/src` and `kpopit-frontend/tests` except for the intentional production `data-browser="safari"` gate.
 - Earlier rebuilt Chromium smoke completed repeated page turns and disclosure open/close checks without console errors. Its anonymous session could not exercise owned-card zoom.
 - Owner/device result: the reported Safari sticker flash, LV3/Holo render delay, zoomed group-photo border clipping, iPad zoom sizing, and iPad sticker typography are reported fixed in the latest native checks.
+- Owner cross-browser check of the turn-time animation change: Firefox and Brave (Chromium) at High graphics showed no page-flip artifact after the pause removal. The `[data-turning='on']` freeze is therefore not required on those engines, and no non-Safari regression follows from removing it.
+- Independent re-verification of the three build claims on Windows: `npm test` 14/14, `npm run lint` clean, `npm run build` successful with only the pre-existing chunk-size advisory. All seven `useDisclosure` call sites were confirmed migrated to the options object, and all six `exitAnimationNames` entries were confirmed to match real keyframes with matching durations (rail 220 ms / `0.22s`; chrome, modal, sheet, and card zoom 300 ms / `0.3s`).
+- Mobile behavior during page turns is tracked separately and is out of scope for this report.
 
 ## Conclusion
 
@@ -138,4 +168,4 @@ The final implementation is substantially cleaner than the experimental versions
 
 The hooks are not running continuously, closed overlays unmount, observers/listeners/timers clean up, and the mounted artwork scope is bounded. No React-side RAM leak or unnecessary render loop was found. The remaining performance uncertainty is browser-level decoded-image/GPU memory behavior under a long native session, not an obvious ownership failure in this code.
 
-The Pages-carousel regression found during the solo review is resolved. No blocking code issue remains; the candidate is ready for the planned final cross-browser/device review and merge decision.
+The Pages-carousel regression found during the solo review is resolved, and the turn-time animation removal found in the later pass has been cleared on Firefox and Chromium by device testing. No blocking code issue remains; the desktop cross-browser review is complete and the candidate is ready for the merge decision. Mobile page-turn behavior remains open and is tracked separately.
