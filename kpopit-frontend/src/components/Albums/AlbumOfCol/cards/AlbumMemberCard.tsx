@@ -12,6 +12,7 @@ import './AlbumMemberCard.css';
 interface AlbumMemberCardProps {
     member: AlbumMember;
     palette: AlbumPalette;
+    zoomed?: boolean;
 }
 
 /** Textured fill behind the frame ring / badge / banner on gold and holo cards */
@@ -47,7 +48,7 @@ function AlbumMemberCardPreview({ palette }: { palette: AlbumPalette }) {
     return <div className="h-55 w-40 rounded-sm" style={{ background: palette.main }} />;
 }
 
-export default function AlbumMemberCard({ member, palette }: AlbumMemberCardProps) {
+export default function AlbumMemberCard({ member, palette, zoomed = false }: AlbumMemberCardProps) {
     const preview = useAlbumPreview();
     const cardRef = useRef<HTMLDivElement>(null);
     const level = member.level ?? 1;
@@ -73,7 +74,7 @@ export default function AlbumMemberCard({ member, palette }: AlbumMemberCardProp
         <div
             ref={cardRef}
             data-treatment={treatment}
-            className={`album-card-isolate relative h-55 w-40 overflow-clip rounded-sm ${isBaseLevel ? 'p-0.75' : 'p-1.25'}`}
+            className={`album-card-isolate relative h-55 w-40 overflow-clip rounded-sm ${zoomed ? 'album-card-zoomed' : ''} ${isBaseLevel ? 'p-0.75' : 'p-1.25'}`}
             style={cardStyle}
         >
             {/* frame ring */}

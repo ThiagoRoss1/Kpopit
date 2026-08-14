@@ -56,9 +56,9 @@ function LevelPips({ level, night }: { level: number; night: boolean }) {
 
 function MetaRow({ cell, align, night, wide }: { cell: MetaCell; align: string; night: boolean; wide: boolean }) {
     const rowLayout = wide ? 'md:flex-row md:items-baseline md:gap-2 md:text-left' : 'lg:flex-row lg:items-baseline lg:gap-2 lg:text-left';
-    const labelSize = wide ? 'md:text-sm md:tracking-[0.02em]' : 'lg:text-sm lg:tracking-[0.02em]';
+    const labelSize = wide ? 'sm:text-[12px] md:text-sm md:tracking-[0.02em]' : 'lg:text-sm lg:tracking-[0.02em]';
     const divider = wide ? 'md:block' : 'lg:block';
-    const valueSize = wide ? 'md:text-base' : 'lg:text-base';
+    const valueSize = wide ? 'sm:text-[15px] md:text-base' : 'lg:text-base';
 
     return (
         <div className={`flex min-w-0 flex-col gap-1 ${align} ${rowLayout}`}>
@@ -245,7 +245,7 @@ export default function CardZoomModal(props: CardZoomModalProps) {
                         style={{ '--card-zoom-scale': stickerScale } as CSSProperties}
                         className="card-zoom-art card-zoom-member-art aspect-8/11 h-[min(44svh,calc((100vw-6.5rem)*1.375),29.125rem)] flex-none"
                     >
-                        <AlbumMemberCard member={target.member} palette={group.palette} />
+                        <AlbumMemberCard member={target.member} palette={group.palette} zoomed />
                     </div>
                 ) : (
                     <div
@@ -276,7 +276,7 @@ export default function CardZoomModal(props: CardZoomModalProps) {
 
                 <div className={`card-zoom-meta mt-4 flex w-full min-w-0 flex-1 flex-col ${isMember ? 'md:mt-0' : 'lg:mt-0'}`}>
                     <p
-                        className="font-major-mono-display text-[12px] lg:text-[12px] text-neon-pink [text-shadow:1px_1px_0px_rgba(0,0,0,0.6)] 
+                        className="font-major-mono-display text-[12px] sm:text-[14px] text-neon-pink [text-shadow:1px_1px_0px_rgba(0,0,0,0.6)]
                         font-bold uppercase tracking-[0.04em]"
                     >
                         {isMember ? `${collectionName} · Card #${target.member.card_number}` : 'Group Page · Reward'}
@@ -286,7 +286,7 @@ export default function CardZoomModal(props: CardZoomModalProps) {
                         name in the schema yet, only groups do. */}
                     <div className="mt-1 flex flex-wrap items-baseline gap-2">
                         <p
-                            className={`font-major-mono-display text-[22px] leading-tight uppercase lg:text-[32px] ${
+                            className={`font-major-mono-display text-[22px] leading-tight uppercase sm:text-[30px] lg:text-[32px] ${
                                 night ? 'text-white' : 'text-ink'
                             }`}
                         >
@@ -294,7 +294,7 @@ export default function CardZoomModal(props: CardZoomModalProps) {
                         </p>
                     </div>
 
-                    <p className={`mt-1 text-[12px] font-bold ${night ? 'text-white/62' : 'text-[#7a6b74]'}`}>
+                    <p className={`mt-1 text-[12px] sm:text-[14px] font-bold ${night ? 'text-white/62' : 'text-[#7a6b74]'}`}>
                         {isMember ? identity : `Unlocked by obtaining all ${group.group_name.charAt(0).toUpperCase() + group.group_name.slice(1).toLowerCase()} stickers`}
                     </p>
 

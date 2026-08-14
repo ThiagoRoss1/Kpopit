@@ -295,6 +295,12 @@
     zoom: var(--card-zoom-scale, 1);
 }
 
+.card-zoom-member-art > .album-card-zoomed {
+    zoom: 1;
+    transform: scale(var(--card-zoom-scale, 1));
+    transform-origin: top left;
+}
+
 /* The group-photo frame owns the visible treatment edge. Its image viewport
    clips the artwork below; the FLIP geometry shell must remain paint-visible
    so a fractional transform cannot cut off the outer ring. */
