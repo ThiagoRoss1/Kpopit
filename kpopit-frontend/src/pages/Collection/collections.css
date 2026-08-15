@@ -552,7 +552,7 @@
 
 /* ---- LOW TIER — cheap, flat layers per treated card. No mix-blend, no
    filter, no per-frame repaint. The Low preset also unmounts album textures;
-   here the card treatments collapse to flat, normal-blend paint. */
+   here the card graphics collapse to flat, normal-blend paint. */
 
 /* Holo: drop the laminate/foil/glare passes, keep one static rainbow fill. */
 /* Medium keeps the moving fill/overlay pair, but removes two full-card passes. */

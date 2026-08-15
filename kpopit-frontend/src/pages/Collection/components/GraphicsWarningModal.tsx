@@ -50,9 +50,13 @@ export default function GraphicsWarningModal({ night, onConfirm, onCancel }: Gra
                     id="gfx-warn-body"
                     className={`mt-4 font-sans text-[13px] leading-normal ${night ? 'text-white/70' : 'text-[#5a4b54]'}`}
                 >
-                    Some devices can struggle with the heaviest graphics. Full textures and
-                    holographic effects can stutter or flicker here. You can lower graphics again any time
-                    in this panel.
+                    Higher graphics enable full textures and holographic effects, which use additional
+                    graphics memory and may stutter on some devices.
+                    <span className={`mt-2 block text-[11px] leading-[1.45] ${night ? 'text-white/55' : 'text-[#7a6b74]'}`}>
+                        On some mobile browsers, higher graphics may cause flickering or incomplete page rendering.
+                        If this happens, set <strong>Album textures</strong> to <strong>Off</strong> and lower
+                        <strong> Card graphics</strong> for a more stable experience.
+                    </span>
                 </p>
 
                 <div className="mt-5 flex flex-col gap-2.5">
