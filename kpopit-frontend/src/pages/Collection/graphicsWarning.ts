@@ -32,7 +32,7 @@ export function isHeavyPreset(next: SelectableGfxPreset): boolean {
     return next === 'high';
 }
 
-/** The individual heavy graphics changes: max card treatment, full-res album
+/** The individual heavy graphics changes: max card graphics, full-res album
     textures, and turning the holo shimmer on. */
 export function isHeavyGfx<K extends GfxKey>(key: K, value: GfxSettings[K]): boolean {
     return (
