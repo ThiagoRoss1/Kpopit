@@ -58,12 +58,21 @@ function SideArrow({ direction, disabled, onClick, night }: { direction: -1 | 1;
     );
 }
 
-const BtnClasses = (night: boolean) =>
-    `collections-press border-2 transition-all duration-150 transform-gpu hover:brightness-110 active:translate-y-0.5 ${
-        night
-            ? 'border-neon-pink/60 bg-[#1c1f27] text-white shadow-[0_3px_0_rgba(255,51,153,0.6)] active:shadow-[0_1px_0_rgba(255,51,153,0.6)]'
-            : 'border-ink bg-white text-ink shadow-[0_3px_0_var(--color-ink)] active:shadow-[0_1px_0_var(--color-ink)]'
-    }`;
+const PILL_STRUCTURE = 'collections-press border-2 transition-all duration-150 transform-gpu hover:brightness-110 active:translate-y-0.5';
+
+const PILL_TONE = {
+    night: 'border-neon-pink/60 bg-[#1c1f27] text-white shadow-[0_3px_0_rgba(255,51,153,0.6)] active:shadow-[0_1px_0_rgba(255,51,153,0.6)]',
+    day: 'border-ink bg-white text-ink shadow-[0_3px_0_var(--color-ink)] active:shadow-[0_1px_0_var(--color-ink)]',
+    nightActive: 'border-neon-pink bg-ink text-white shadow-[0_3px_0_rgba(255,51,153,0.6)] active:shadow-[0_1px_0_rgba(255,51,153,0.6)]',
+    dayActive: 'border-ink bg-neon-pink text-ink shadow-[0_3px_0_var(--color-ink)] active:shadow-[0_1px_0_var(--color-ink)]',
+} as const;
+
+const BtnClasses = (night: boolean) => `${PILL_STRUCTURE} ${night ? PILL_TONE.night : PILL_TONE.day}`;
+
+const TogglePillClasses = (night: boolean, active: boolean) => {
+    if (active) return `${PILL_STRUCTURE} ${night ? PILL_TONE.nightActive : PILL_TONE.dayActive}`;
+    return `${PILL_STRUCTURE} ${night ? PILL_TONE.night : PILL_TONE.day}`;
+};
 
 function IconBtn({ children, id, onClick, title, night, className = '', dataTour }: { children: React.ReactNode; onClick: () => void; id?: string; title: string; night: boolean; className?: string; dataTour?: string }) {
     return (
@@ -318,7 +327,7 @@ export default function CollectionAlbum() {
 
     // Below lg: the summary is a modal instead of a rail, so the button opens that.
     const toggleSummary = () => (isLg ? rail.toggle() : index.open());
-    const summaryActive = rail.active;
+    const summaryActive = isLg ? rail.active : index.active;
     const carouselActive = carousel.active;
     const pillClasses = BtnClasses(night);
 
@@ -362,16 +371,9 @@ export default function CollectionAlbum() {
                                 onClick={toggleSummary}
                                 data-tour="summary"
                                 title={summaryActive ? 'Hide summary' : 'Show summary'}
-                                className={`inline-flex flex-row justify-center items-center max-lg:w-10 h-10 cursor-pointer gap-1.5 rounded-full 
-                                border-2 lg:px-3.25 lg:py-2 font-sans text-[14px] font-bold ${pillClasses} ${
-                                    summaryActive 
-                                    ? night 
-                                        ? 'lg:border-neon-pink lg:bg-ink' 
-                                        : 'lg:border-ink lg:bg-neon-pink' 
-                                    : night
-                                        ? 'lg:text-white'
-                                        : 'lg:text-ink'
-                                }`}
+                                aria-expanded={summaryActive}
+                                className={`inline-flex flex-row justify-center items-center max-lg:w-10 h-10 cursor-pointer gap-1.5 rounded-full
+                                border-2 lg:px-3.25 lg:py-2 font-sans text-[14px] font-bold ${TogglePillClasses(night, summaryActive)}`}
                             >
                                 <Menu className="max-lg:w-4.5 max-lg:h-4.5 lg:w-4 lg:h-4" strokeWidth={3} /> 
                                 <span className="max-lg:hidden">Summary</span>
@@ -384,15 +386,7 @@ export default function CollectionAlbum() {
                                 title={carouselActive ? 'Hide pages' : 'Show pages'}
                                 aria-expanded={carouselActive}
                                 className={`inline-flex flex-row justify-center items-center max-lg:w-10 h-10 cursor-pointer gap-1.5 rounded-full
-                                border-2 lg:px-3.25 lg:py-2 font-sans text-[14px] font-bold ${pillClasses} ${
-                                    carouselActive
-                                        ? night
-                                            ? 'lg:border-neon-pink lg:bg-ink'
-                                            : 'lg:border-ink lg:bg-neon-pink'
-                                        : night
-                                            ? 'lg:text-white'
-                                            : 'lg:text-ink'
-                                }`}
+                                border-2 lg:px-3.25 lg:py-2 font-sans text-[14px] font-bold ${TogglePillClasses(night, carouselActive)}`}
                             >
                                 <GalleryVerticalEnd className="max-lg:w-4.5 max-lg:h-4.5 lg:w-4 lg:h-4" strokeWidth={3} />
                                 <span className="max-lg:hidden">Pages</span>
