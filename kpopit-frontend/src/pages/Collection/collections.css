@@ -75,8 +75,9 @@
 }
 
 /* Album page — Summary rail slide in/out. Every -in/-out pair below is driven by
-   useDisclosure: it keeps the element mounted through the -out animation and
-   unmounts it on that element's own animationend. */
+   useDisclosure: it keeps the element mounted through the -out animation,
+   completes on the owner's animationend when available, and has a bounded
+   watchdog fallback when motion is reduced or CSS cannot emit the event. */
    
 @keyframes collection-rail-in {
     from {
@@ -278,7 +279,9 @@
 }
 
 .collection-card-zoom-out {
-    animation: collection-card-zoom-out 0.3s ease both;
+    /* The panel receives this CSS variable from CardZoomModal, using the same
+       contract as the return FLIP and disclosure watchdog. */
+    animation: collection-card-zoom-out var(--collection-card-zoom-exit-duration, 0.3s) ease both;
 }
 
 .card-zoom-art {
@@ -292,9 +295,50 @@
     zoom: var(--card-zoom-scale, 1);
 }
 
+.card-zoom-member-art > .album-card-zoomed {
+    zoom: 1;
+    transform: scale(var(--card-zoom-scale, 1));
+    transform-origin: top left;
+}
+
+/* The group-photo frame owns the visible treatment edge. Its image viewport
+   clips the artwork below; the FLIP geometry shell must remain paint-visible
+   so a fractional transform cannot cut off the outer ring. */
+.card-zoom-group-art {
+    overflow: visible;
+}
+
+/* The group-photo treatment is the visible frame, so it cannot also be the
+   clipping boundary. Only the nested image viewport clips the photo. Rounding
+   the direct treatment layers keeps gold/holo pixels inside the intended
+   top-left and bottom-right corners without clipping the frame itself. */
+.card-zoom-group-frame > .album-gold-base,
+.card-zoom-group-frame > .album-gold-tint,
+.card-zoom-group-frame > .album-gold-sheen,
+.card-zoom-group-frame > .album-holo-fill {
+    border-radius: 20px 0 20px 0;
+}
+
+/* On tablet-sized desktop layouts, derive member-card width from both axes.
+   This avoids the old fixed 22.5rem result on iPad while preserving 8:11 and
+   leaving enough room for metadata. Phones keep the stacked height rule. */
+@media (min-width: 768px) {
+    .card-zoom-panel--member {
+        max-width: min(68rem, calc(100vw - 3.5rem));
+    }
+
+    .card-zoom-member-art {
+        /* Keep the 8:11 art and reserve modal chrome at every tablet width,
+           including the short landscape case below the desktop breakpoint. */
+        width: min(31rem, 42vw, 56.72svh, calc((100svh - 8.5rem) * 0.7273));
+        height: auto;
+    }
+}
+
 /* Desktop: the text column unfolds from behind the card once it has landed, so
    the panel reads as coming OUT of the sticker rather than as a second,
-   unrelated entrance. Below lg the column sits under the card and needs none. */
+   unrelated entrance. Member zoom switches to a row at md; group-photo zoom
+   keeps its wider row layout at lg. */
 
 @media (min-width: 1024px) {
     .card-zoom-meta {
@@ -405,6 +449,8 @@
     .collection-pop-out,
     .collection-modal-in,
     .collection-modal-out,
+    .collection-card-zoom-in,
+    .collection-card-zoom-out,
     .collection-sheet-in,
     .collection-sheet-out,
     .lg\:collection-pop-in,
@@ -504,20 +550,9 @@
     animation: none;
 }
 
-/* While a leaf is turning, freeze the card shimmer/sheen so the flip is a single
-   clean 3D recomposite instead of blend + animation fighting the rotation. This
-   is what removes the page-flip "death glitch". */
-
-[data-turning='on'] .album-holo-fill,
-[data-turning='on'] .album-holo-overlay,
-[data-turning='on'] .album-holo-glare,
-[data-turning='on'] .album-gold-sheen {
-    animation-play-state: paused;
-}
-
 /* ---- LOW TIER — cheap, flat layers per treated card. No mix-blend, no
    filter, no per-frame repaint. The Low preset also unmounts album textures;
-   here the card treatments collapse to flat, normal-blend paint. */
+   here the card graphics collapse to flat, normal-blend paint. */
 
 /* Holo: drop the laminate/foil/glare passes, keep one static rainbow fill. */
 /* Medium keeps the moving fill/overlay pair, but removes two full-card passes. */
@@ -605,6 +640,19 @@
         linear-gradient(#fff 0 0) content-box,
         linear-gradient(#fff 0 0);
     -webkit-mask-composite: xor;
+}
+
+/* Fill the frame padding with the level color so it reads as a solid colored
+   frame instead of an empty gap. Base already does this via its inline
+   `background: palette.main`; gold/holo carry no card-root background, so their
+   `p-1.25` padding showed a transparent gap with the level border stranded at
+   the card edge. Border tier only — textured tiers keep their texture frame. */
+[data-cards='border'] [data-treatment='gold'] {
+    background: #e8b923;
+}
+
+[data-cards='border'] [data-treatment='holo'] {
+    background: linear-gradient(125deg, #b07bff, #4bc6ff, #ff5ba8);
 }
 
 /* The Low tier's static sheen override is later than the general switch rule,

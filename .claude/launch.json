@@ -1,0 +1,21 @@
+{
+  "version": "0.0.1",
+  "configurations": [
+    {
+      "name": "kpopit-frontend",
+      "runtimeExecutable": "npm",
+      "runtimeArgs": ["run", "dev:host"],
+      "cwd": "kpopit-frontend",
+      "port": 5173,
+      "autoPort": false
+    },
+    {
+      "name": "kpopit-backend",
+      "runtimeExecutable": ".venv/Scripts/python.exe",
+      "runtimeArgs": ["app.py"],
+      "cwd": "kpopit-backend",
+      "port": 5000,
+      "autoPort": false
+    }
+  ]
+}

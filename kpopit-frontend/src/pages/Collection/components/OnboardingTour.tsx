@@ -278,7 +278,13 @@ export default function OnboardingTour({ night, onClose, onShowSticker }: Onboar
             className="fixed inset-0 z-270 touch-none outline-none"
         >
             {hole ? (
+                // Distinct key from the full-screen dim below so React mounts this
+                // fresh instead of reusing that node — otherwise the first spotlight
+                // animates in from the 0,0 corner (the reused node's transition
+                // runs from `inset:0`). Fresh mount = appears in place; subsequent
+                // steps reuse this same node and glide between targets.
                 <div
+                    key="spotlight"
                     style={{
                         position: 'fixed',
                         top: hole.top,
@@ -292,7 +298,7 @@ export default function OnboardingTour({ night, onClose, onShowSticker }: Onboar
                     className="rounded-xl border-2 border-neon-pink"
                 />
             ) : (
-                <div style={{ position: 'fixed', inset: 0, background: dim }} />
+                <div key="dim" style={{ position: 'fixed', inset: 0, background: dim }} />
             )}
 
             <div ref={cardRef} style={cardStyle} className={`fixed rounded-[18px] border-2 p-4 ${shell}`}>

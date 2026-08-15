@@ -5,8 +5,11 @@ import type { CardZoomTarget } from '../../../components/Albums/AlbumOfCol/album
 import { formatCardDate } from '../../../utils/formatCardDate';
 import { treatmentForGroup } from '../../../components/Albums/AlbumOfCol/cards/albumCardLevel';
 import { TextureFill } from '../../../components/Albums/AlbumOfCol/cards/AlbumMemberCard';
+import { useAlbumAnimationPhase } from '../../../components/Albums/AlbumOfCol/cards/useAlbumAnimationPhase';
 import { useSyncAlbumAnimations } from '../../../components/Albums/AlbumOfCol/cards/useSyncAlbumAnimations';
 import { useGfx } from '../useCollectionFx';
+import { EAGER_ARTWORK_PROPS } from '../../../components/Albums/AlbumOfCol/albumArtworkLoading';
+import { COLLECTION_CARD_ZOOM_EXIT_MS } from '../collectionMotion';
 
 interface CardZoomModalProps {
     target: CardZoomTarget;
@@ -25,7 +28,8 @@ interface MetaCell {
 
 const LEVEL_NAME: Record<number, string> = { 1: 'BASE', 2: 'GOLD', 3: 'HOLO' };
 const STICKER_GRID_W = 160;
-const FLIGHT_MS = 800;
+const OPEN_FLIGHT_MS = 800;
+const CLOSE_FLIGHT_MS = COLLECTION_CARD_ZOOM_EXIT_MS;
 const FLIGHT_EASING = 'cubic-bezier(0.22, 1, 0.36, 1)';
 
 const prefersReducedMotion = () =>
@@ -50,11 +54,16 @@ function LevelPips({ level, night }: { level: number; night: boolean }) {
     );
 }
 
-function MetaRow({ cell, align, night }: { cell: MetaCell; align: string; night: boolean }) {
+function MetaRow({ cell, align, night, wide }: { cell: MetaCell; align: string; night: boolean; wide: boolean }) {
+    const rowLayout = wide ? 'md:flex-row md:items-baseline md:gap-2 md:text-left' : 'lg:flex-row lg:items-baseline lg:gap-2 lg:text-left';
+    const labelSize = wide ? 'sm:text-[12px] md:text-sm md:tracking-[0.02em]' : 'lg:text-sm lg:tracking-[0.02em]';
+    const divider = wide ? 'md:block' : 'lg:block';
+    const valueSize = wide ? 'sm:text-[15px] md:text-base' : 'lg:text-base';
+
     return (
-        <div className={`flex min-w-0 flex-col gap-1 ${align} lg:flex-row lg:items-baseline lg:gap-2 lg:text-left`}>
+        <div className={`flex min-w-0 flex-col gap-1 ${align} ${rowLayout}`}>
             <span
-                className={`text-[8.5px] lg:text-sm font-black uppercase tracking-[0.08em] lg:tracking-[0.02em] ${
+                className={`text-[8.5px] font-black uppercase tracking-[0.08em] ${labelSize} ${
                     night ? 'text-white/62' : 'text-[#7a6b74]'
                 }`}
             >
@@ -63,11 +72,11 @@ function MetaRow({ cell, align, night }: { cell: MetaCell; align: string; night:
             
             <span
                 aria-hidden
-                className={`hidden flex-1 -translate-y-0.75 border-b border-dotted lg:block ${
+                className={`hidden flex-1 -translate-y-0.75 border-b border-dotted ${divider} ${
                     night ? 'border-white/20' : 'border-ink/25'
                 }`}
             />
-            <span className={`whitespace-nowrap text-[13.5px] lg:text-base font-bold ${night ? 'text-white' : 'text-[#3c2f38]'}`}>
+            <span className={`whitespace-nowrap text-[13.5px] font-bold ${valueSize} ${night ? 'text-white' : 'text-[#3c2f38]'}`}>
                 {cell.value}
             </span>
         </div>
@@ -86,7 +95,8 @@ export default function CardZoomModal(props: CardZoomModalProps) {
     const [artSettled, setArtSettled] = useState(!isMember);
 
     const artRef = useRef<HTMLDivElement>(null);
-    
+    const animationPhase = useAlbumAnimationPhase();
+
     useSyncAlbumAnimations(artRef, isMember ? null : groupPhotoFrame);
 
     const backdropMotion = closing ? 'collection-backdrop-out' : 'collection-backdrop-in';
@@ -105,7 +115,11 @@ export default function CardZoomModal(props: CardZoomModalProps) {
             const { clientWidth } = el;
             
             if (clientWidth === 0) {
-                raf = requestAnimationFrame(measure);
+                if (raf !== 0) return;
+                raf = requestAnimationFrame(() => {
+                    raf = 0;
+                    measure();
+                });
                 return;
             }
             setStickerScale(clientWidth / STICKER_GRID_W);
@@ -119,6 +133,7 @@ export default function CardZoomModal(props: CardZoomModalProps) {
 
         return () => {
             cancelAnimationFrame(raf);
+            raf = 0;
             resizeObserver.disconnect();
         };
     }, [isMember]);
@@ -142,7 +157,7 @@ export default function CardZoomModal(props: CardZoomModalProps) {
         void flying.offsetWidth;
 
         flying.style.willChange = 'transform';
-        flying.style.transition = `transform ${FLIGHT_MS}ms ${FLIGHT_EASING}`;
+        flying.style.transition = `transform ${OPEN_FLIGHT_MS}ms ${FLIGHT_EASING}`;
         flying.style.transform = '';
 
         return () => {
@@ -159,7 +174,7 @@ export default function CardZoomModal(props: CardZoomModalProps) {
 
         if (landed.width === 0) return;
 
-        flying.style.transition = `transform ${FLIGHT_MS}ms ${FLIGHT_EASING}`;
+        flying.style.transition = `transform ${CLOSE_FLIGHT_MS}ms ${FLIGHT_EASING}`;
         flying.style.transform = invertTo(target.rect, landed);
     }, [closing, target]);
 
@@ -198,8 +213,11 @@ export default function CardZoomModal(props: CardZoomModalProps) {
             <div
                 onClick={(event) => event.stopPropagation()}
                 onAnimationEnd={onAnimationEnd}
-                className={`relative flex w-full max-w-95 flex-col items-center rounded-[20px] border-2 p-4.5 transition-colors duration-300 
-                ${isMember ? 'lg:max-w-200' : 'lg:max-w-300'} lg:flex-row lg:items-stretch lg:gap-7.5 lg:p-6.5 ${panelMotion} ${
+                style={{ '--collection-card-zoom-exit-duration': `${COLLECTION_CARD_ZOOM_EXIT_MS}ms` } as CSSProperties}
+                className={`card-zoom-panel relative flex w-full max-w-95 flex-col items-center rounded-[20px] border-2 p-4.5 transition-colors duration-300
+                ${isMember
+                    ? 'card-zoom-panel--member md:flex-row md:items-stretch md:gap-7.5 md:p-6.5'
+                    : 'lg:max-w-300 lg:flex-row lg:items-stretch lg:gap-7.5 lg:p-6.5'} ${panelMotion} ${
                     night
                         ? 'border-neon-pink bg-[#16181e] shadow-[6px_6px_0px_rgba(255,51,153,1)]'
                         : 'border-ink bg-[#fffaf3] shadow-[6px_6px_0px_rgba(0,0,0,1)]'
@@ -225,17 +243,20 @@ export default function CardZoomModal(props: CardZoomModalProps) {
                     <div
                         ref={artRef}
                         style={{ '--card-zoom-scale': stickerScale } as CSSProperties}
-                        className="card-zoom-art aspect-8/11 h-[min(44svh,calc((100vw-6.5rem)*1.375),29.125rem)] flex-none lg:h-auto lg:w-90"
+                        className="card-zoom-art card-zoom-member-art aspect-8/11 h-[min(44svh,calc((100vw-6.5rem)*1.375),29.125rem)] flex-none"
                     >
-                        <AlbumMemberCard member={target.member} palette={group.palette} />
+                        <AlbumMemberCard member={target.member} palette={group.palette} zoomed />
                     </div>
                 ) : (
-                    <div 
-                        ref={artRef} 
+                    <div
+                        ref={artRef}
                         data-treatment={groupPhotoFrame}
-                        style={{ '--album-main': group.palette.main } as CSSProperties}
-                        className={`relative flex aspect-160/72 w-full flex-none origin-top-left self-start items-center justify-center rounded-br-[20px] rounded-tl-[20px]
-                        overflow-clip lg:w-[clamp(35rem,42vw,40rem)] ${
+                        style={{
+                            ...animationPhase,
+                            '--album-main': group.palette.main,
+                        } as CSSProperties}
+                        className={`card-zoom-art card-zoom-group-art card-zoom-group-frame relative flex aspect-160/72 w-full flex-none origin-top-left self-start items-center justify-center rounded-br-[20px] rounded-tl-[20px]
+                        lg:w-[clamp(35rem,42vw,40rem)] ${
                             groupPhotoFrame === 'base' ? `border-2 border-(--album-main)` : 'p-1.5 transform-gpu'
                         }`}
                     >
@@ -247,14 +268,15 @@ export default function CardZoomModal(props: CardZoomModalProps) {
                                 alt={group.group_name}
                                 className="h-full w-full object-contain lg:object-cover"
                                 draggable={false}
+                                {...EAGER_ARTWORK_PROPS}
                             />
                         </div>
                     </div>
                 )}
 
-                <div className="card-zoom-meta mt-4 flex w-full min-w-0 flex-1 flex-col lg:mt-0">
+                <div className={`card-zoom-meta mt-4 flex w-full min-w-0 flex-1 flex-col ${isMember ? 'md:mt-0' : 'lg:mt-0'}`}>
                     <p
-                        className="font-major-mono-display text-[12px] lg:text-[12px] text-neon-pink [text-shadow:1px_1px_0px_rgba(0,0,0,0.6)] 
+                        className="font-major-mono-display text-[12px] sm:text-[14px] text-neon-pink [text-shadow:1px_1px_0px_rgba(0,0,0,0.6)]
                         font-bold uppercase tracking-[0.04em]"
                     >
                         {isMember ? `${collectionName} · Card #${target.member.card_number}` : 'Group Page · Reward'}
@@ -264,7 +286,7 @@ export default function CardZoomModal(props: CardZoomModalProps) {
                         name in the schema yet, only groups do. */}
                     <div className="mt-1 flex flex-wrap items-baseline gap-2">
                         <p
-                            className={`font-major-mono-display text-[22px] leading-tight uppercase lg:text-[32px] ${
+                            className={`font-major-mono-display text-[22px] leading-tight uppercase sm:text-[30px] lg:text-[32px] ${
                                 night ? 'text-white' : 'text-ink'
                             }`}
                         >
@@ -272,15 +294,15 @@ export default function CardZoomModal(props: CardZoomModalProps) {
                         </p>
                     </div>
 
-                    <p className={`mt-1 text-[12px] font-bold ${night ? 'text-white/62' : 'text-[#7a6b74]'}`}>
+                    <p className={`mt-1 text-[12px] sm:text-[14px] font-bold ${night ? 'text-white/62' : 'text-[#7a6b74]'}`}>
                         {isMember ? identity : `Unlocked by obtaining all ${group.group_name.charAt(0).toUpperCase() + group.group_name.slice(1).toLowerCase()} stickers`}
                     </p>
 
-                    <div className={`my-3.5 h-px lg:my-5 ${night ? 'bg-white/16' : 'bg-[#3c2f38]/20'}`} />
+                    <div className={`my-3.5 h-px ${isMember ? 'md:my-5' : 'lg:my-5'} ${night ? 'bg-white/16' : 'bg-[#3c2f38]/20'}`} />
 
-                    <div className="flex justify-between gap-4 lg:flex-col lg:gap-6">
+                    <div className={`flex justify-between gap-4 ${isMember ? 'md:flex-col md:gap-6' : 'lg:flex-col lg:gap-6'}`}>
                         {cells.map((cell) => (
-                            <MetaRow key={cell.label} cell={cell} align={cell.align} night={night} />
+                            <MetaRow key={cell.label} cell={cell} align={cell.align} night={night} wide={isMember} />
                         ))}
                     </div>
                 </div>

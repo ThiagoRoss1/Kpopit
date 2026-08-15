@@ -393,7 +393,8 @@ export default function FxPanel({ night, onClose, albumName, closing, onAnimatio
         const onPointerDown = (event: PointerEvent) => {
             if (pendingRef.current) return;
 
-            const target = event.target as Element;
+            if (!(event.target instanceof Element)) return;
+            const target = event.target;
 
             if (target.closest('#fx-panel-toggle')) return;
             if (!panelRef.current?.contains(target)) onClose();
@@ -462,7 +463,7 @@ export default function FxPanel({ night, onClose, albumName, closing, onAnimatio
                     <PresetGrid preset={preset} deviceTier={deviceTier} setPreset={guardedSetPreset} night={night} />
 
                     <FxGroup title="Graphics" open={openGroups.graphics} onToggle={() => toggleGroup('graphics')} night={night}>
-                        <SegmentedSlider label="Card treatment" value={settings.cards} options={CARD_OPTIONS} onChange={(value) => guardedSetGfx('cards', value)} night={night} />
+                        <SegmentedSlider label="Card graphics" value={settings.cards} options={CARD_OPTIONS} onChange={(value) => guardedSetGfx('cards', value)} night={night} />
                         <SegmentedSlider label="Album textures" value={settings.albumTextures} options={TEXTURE_OPTIONS} onChange={(value) => guardedSetGfx('albumTextures', value)} night={night} />
                         <SegmentedSlider label="Background paper" value={settings.paper} options={BOOLEAN_OPTIONS} onChange={(value) => guardedSetGfx('paper', value)} night={night} />
                         <SegmentedSlider label="Shadows" value={settings.shadows} options={BOOLEAN_OPTIONS} onChange={(value) => guardedSetGfx('shadows', value)} night={night} />
