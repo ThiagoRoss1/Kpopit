@@ -1,60 +1,63 @@
-// DevTools easter egg — once per browser session. The module-level guard blocks a
-// double-fire within one load; sessionStorage blocks reprints across reloads in the
-// same session. SPA navigation never re-imports, so no per-route reprint either.
+// DevTools easter egg
 const SESSION_KEY = 'kpopit_egg_shown';
 let printed = false;
 
 const ART = String.raw`
-'..''...'..;oxdlc,......,;;,..;l;..                         .,cxl.............';
-K0O00OOO00kolddlc,......;;;;,,;;,'..                         .cx;...............
-Kxdx0KKKKKXOoddl:,.....';;;;,;;;,.                            ';..........  .   
-Odccdkoollolcodl:;'....';;'..cl'....''''''....                .;' ...''         
-xKk:lOkddxxlclo:....  ..;;,.',,:lok0OO0000OOk:.               .lxl,.;o;   ...   
-,lolccccllllcco:.    ...;::;'.;O0O000000000X0;                 ,dl'.',....','''.
-..',;;,,;::;;coc........,;:c..l000000KKKKKKXx.                 .'.........,,....
-;;cllodddxxxxxxxdooolllccclc..cxOOOkkOOOkocd:                  .................
-:::ccccllllllooooooooooddddc.':::;;;::cllccl'                 .,ccc:,'..........
-;;;;;:::::::ccllloooooddxkk:.            ...                  .cdooolc:c:::::;;;
-,,;;::::clllodxxxkkkkOOOOOx'  ..'',,,''......                 .,c::::;;;;;;;;,,;
-ccllodooodddxxxxkkkkkkkkkkx,.;odxkOOOOOOOkkxol:,..            .;:::;;;;;,,,,,,,'
-dddooooooooddxxkkkkkxxxxxxxl:ododkO000OOOkkOOOOkdl:,..       .,::;;;;;;,,,,,,,,'
-oodddddxxxxxxxxkxxxxdddxxl;,:c;;ldk0K0OkxkkO0KK0OOkxl'..    ..;:::;;;;;;,,,,,,''
-ccccccclooddxxkkkkkkkxocc:,:oc:l:,:oddolcll:cloddoolcclc,.  .';;;;;;;;;;;,,,,,,,
-odxxddxxxxxxdddddllloolccc::odx00o,cc;lddxdodxo;,:cokO0kxl. ..........''',,,,,,,
-:::;:cllodxkkOkkdlcccllclllcldk0XxcOO;,xKK0KKXXdo00xk0000k;....          ..,,,,,
-000OkkxxdlcccccccccccllllllloxxkOxONNOcok0XXXXKdkXKkxO000k;.......      ....,;;,
-dxkOKK0kdocccccccllllllllllldOKO0KXXXX0xdxOOOOkkKXKkkkO0KO:.........    ....,;;;
-;;::ccc:ccccccllllllllllllolo0KOkO0000KKKKOOO0KXXKOO0O00K0l....'......   ...;:;;
-;:::::ccccccccllllllloooooolo0X0kxxk000000000KK0Oxk0KKKKK0x;.....''...     .;;;;
-::::cccccccllllllllooooooooodOXKOxddk0KKXXXXKOkdooOKKKKKK0kc.....'''....    .'..
-::cccccccclllllooooooooooooodOXKOkxxdxkkkOOdccoddx0XKKK0KOdl,....'''....    .'..
-cccccccllllllooooooooooooooodOXK0Okxdol;'co:;;lkk0XXXK0KKkdl;....''''....   .'..
-ccccclllloooooooooooooooodddd0XK0OOkxdx:.:ol;;cx0KXXXKKKOxdo;...''''''...  .,;,'
-ccclllloooooooooooodddddddddd0XXK0OOkkkl;:ddc;;d0XXXKKKKkdol,..''''''.... .,;::;
-xxdddddooooooooodddddddddddddOXXK00OOkko;cxxl::xKKKKKKK0xol:,''''.........,::;;;
-kkOOOOOOkkxxxddddddddddddddddkXXKK00Okko;ckko:cOKKKKKKKkl:;,'...........,:c:::;;
-kkkkOOOO000000OOkkkkxxddddddx0XXKK00Oxxd:d0kolxKKKKKKKOl;;'''.....''',:cllc::::;
-dxxxkkkOOO00000000KK00OOOOOxxKXKK00KOddxdk0xod0XKKK0KKxc:;,,,,,,,;::cloolc::::::
-lllloddxxkkkOOOO00000000K0xdx0XK0K00OddOK0OdlxKXKKK0KOdllllccccccccloodoc:::::::
-ooooollloddxxxkkkOOOO000Ol;cok0KKKK0Oxx0K0x::OXKKK000xoolllcccllooooddoc::::::::
-xxkxxxddddoooooddxxxxkkkd;'coxO0O0K0Oxk000o:xKXKK000kl::::cccloddooodoc::::::::;
-kkkxxxxxkkkkxxxddoooodddo:,codkOkkO0kxO0Oklo0KKK0O0Oo;;:c:cccllllllolc::::::::;;
-KKK0OOOkkkkkkkkOOOkkxxdooc',lodxxxkOxk0OkdlxKKKKOkOxlccccccccccloolllcc:::::::;;
-XXXXKKXKKK00OOOOOOO00OOkxdl;:oolloxOkkOkxdx0K0K0xdxoc:::cccloooddool:::ccc:::::;
-KKK00KNNNNNXXKKK0OOOkkkkkkxdooollldddxkxdxO00Okdodolccloolccoxdolloc;;:::;,,;:::
-llcccloxk0XXNNNNXXXXKOOkxxxxxdoolllloolodxOOkdooolccccoxddkdlc;:llllccccc:,',,,,
-xdxxdooc:coOKNNNNXNNNNNXK0Okxxddol::cc:ldoddololc::ccclxxdocclc,:lllooolcc:;;,,,
-oxkkkOOkxl;;o0XNXXXNNNNNNNXKK0Okdocccccclccc::c::cooddooocclclc;;cc:;::::clllc:;
-ddddxxkOOOdc;l0XXXKXXXXXXNNNXXX0xolccc:::::cllllclxxdxdlccccccc:;cc:;;;;,,;,,,;;
-dxkkooxkkkOkc,oKXKKKXXXNNXXXXXXKxlolcccccccldkOkxdolcccc:::ccccc::;,'',,,;,,'...
-xxxxkkodOkkk:':OXXKKXXXXXXXXKKXKxlllccc::c:ccoddolccccccc:::::cc::;,,,'''',,'''.
-lokkxxdoxxOOl';kXXK0KXXXXXKKKKKKkoccc:cccc:cc::;:cccc:cc::::::cc::;;;;,''......'
-oloddxddkkkkc',xKKK00KKKXXKKKK0Okl:::::::::::;;,,:ccccccc:::c::cc:;;;,,,'''..   
-xodOkkdoddxx:.;kKKKOOKKKKKK00Okkd'...;:;;;:::;;:;';:::::::cccccllc:;;,,,,,,,,,'.
-lclodooxOOOd,.cO0000O0000OOOOOOOo.   .;;,,;:;...,,,;::::::cldkOOOxdoc:;;;;,,,:c:
-:ldxkdoxxxxc.'o0000OkkOkkOOOOOOOo.    .',,;;.   .,,::::::ok0KKK00Okxdlcclc:::::;
-ldxxdooxxxo'.:k0OOOkxxkOOOOOOOOOk;       ...      'xOxxxOKXXXKK00Okddlcloddddo:'
-,;:lcoxxkx:.'oOkkkOOxxkkkOOkkkOOOl.              .lOOO000KKKKKK00Okdolc:codxkl..
+,;;,,;,,,,,,,,,,;,,,,,;;;;;;:cc:clllllldxOXNXKXNXx;''';:;,'':dddxxc'',;,,;;;cx0O
+,,,,,,,,,,,,,,,,;;;;;;;;;;;;;;;;;::cllloodkOKXXKKk:'''','''',:oddxd:'';:;;cdkOko
+,,,,,,,,,,,,,'',,,,,;;;;;;;;,,,,;;;;;::cloddxOOOOkc'''::,''''';lddxxl;,;loolccc:
+'',,,,,,,,,,,,,,,,,'''',,,,,,,,,,,,,,;;;;;:lddoodko,,::,''''''',coddxxdol:;,,;;;
+,,'',,'',,,,,,,,,,',,'''''''',,,,,,,,,,,,,,;:looccl:,;;,''''''''';:cclooooollc:c
+,,,,,'',,,,,,,,,,,,,'''','''''''''',,,,,,,;,,;cc:,,:ll:,''''''''''''',,,,;::cllo
+,,,,,,,,,,,,,,,,,''',,,''''''''''''''',,,,,,;,,;;,,,cdl,'''''''''''''''''''',;:;
+''',,,,,,,,,,,,,,,''''''''''''''''''''''',,,,,,,,;,,:lc,'''''''''''''''''''''',,
+,,,,,,,,,,,,,,,,''',,''''''''''''''''''''''',,,,,,,,,,,,''''.';c;'''''''''''''''
+,,,,,,,,,,,,,,,,,,,''''''''''''''''''''''''''',,,,,,,,:lolccclkOxc,'''''''''''''
+,,,,,,,,,,'',,,,,,,,,,,,,,,,,,,,,,,,''''''''''',,,,,'';:lodoooodddc,''''''''''''
+,,,,,,,,,,,,,''''''''''''',,,,,,,,,'''''''''''''',,,,'',;:lodoc:::::;,''''''''''
+,,,,,,,,,,,,,''',''''''''''''''''''''''''''''''''',,,''',,;lodoc::::c:;,''''''''
+,,,,,,,,,,,''''',,,'',,,','''''''''''''''''''''''',,,,'''',;cllc::cccc::;,''''''
+;,,,,,,,''''',,,,,,,,,,,,,,,,,,'''''''''''''''''''',,''''',,,;lolllcccc::;,'''''
+;:::;;,,'''''',,,,;,,,''',,;;;;;;;;,,''''''''''''''',,'',,,;;;;:cllcccc::;''''''
+,,,;::;,,,,;,,,'''',,,,,,,;cllooooolc;,''''''''''''',,''''',,;;::::ccccc;,''''''
+;;;;,,,,,,;:::;,,'';clc;;cloddxxxxxxdoc;,''''''''''',,'''''',,,;;;;:ccc:,,,'''''
+c:::;,,,,;;;;;;''''';cc;coodxxxxkkxxxddlc:,''''''''',,'''''',,,,,,,,;:;,,,'';cod
+cc::;;;;;:::::,''''',;:coodxxxxxkkxxxxxddoc,'''''''',,'''''',,,,,,,',;;;:cloxKXX
+;;;;;;::ccccc:,,::;,;:lodddxxxxxxxxxxxxxxxoc,''''''',,''''''',,,;;:lloxkkkkkOKXX
+:;;;;::::cclol:,;::clooddxxxxxxkkkxxxxxxxxxdc,''''''','''''''',;:cloooxkkkkkk0XX
+:::::::::clooddollodddxxxkkkkkkkkkkkkkxkkkxxd:'''''''''''''''','''',;:coxxkkkOKX
+ccclllooooooodxxxxxxxkkkkkkkkkkkkkkkkkkkkkkxxl,'''''''''''''''',''''',;coxkkkk0X
+llllloodxdddoodddxxxxkkkkkkkkkkkkkkkkkkkkkkkxdc;,'''''''''''''',,,,,;;,;lxkkxdx0
+cccllodxxxxxdddxxxxxxxxxkkkkkkkkkkkkkkkkkkkkkdlc;;,''''''''''',,,,;;;;;;cdkxxddx
+cllloodddxxkkxxxxxxxxxxxxxxxxxkkkOOkkkkkkOOkkdollc:;,,,''''''',,,,',,,;::oxxdddo
+cllooodddddxxkkxxxxxxxxdddddoddxkkkkkkkkkkkkxdoooolc:;;,,,,,,',,,,,,,;:cccdxxxxx
+;;;::cdxxddxxxxxkkxxxxdddddxkxdxkkkkkkkkkkkkxdddddolccc:;;,,,,,,,,,;;::cccoxxkkk
+,'',;coxxxxxxxxxxxxxxxxxxxxkkxdxkkkkkkxxxxxxxdddxxddolllcc:;,,,,;;;::::clllodkOO
+::;;lodxkkkkkxxxxxxxxkxxxxxdodxkkkkkkxooddxxxxdxxxxddoolllc:;;;:cclllllloodddxkk
+cccodddxkkkkkkkxxxxkOOOkxxxddkkkxxxxdllodxxkxxxkkkxxdoolllccccclodddddooddddxkkk
+loddxxxkkkkkkkkkxxxkkkkkxxddxxdddddlclldxxkkxxkkkkkxxdllllclolclddxxxxdddxxxxxkx
+ldxxxkkkkkkkkkkkkkkkkxxxxxkxddddolcclloxkkkkxkkkkkkxddolollooolloxxxxxxxxxxxxxxx
+';codxkkkkkkkkkkkkkkkkkOOOOkxdolccllooxkkkxxxkkkkkkxxdddddddddoloxxxxxxxxxxkkxxk
+'''',;cloddxkkkkkOOOOOOOOOkdollllloddkkkxxdoddxkkkkkkxxxxxxxxxxooxkkkkkkkkkkkkkk
+,''',''',,,;::cclodddxxxxxdoddddddooolloollloodxxxkkkkxxxxxkkkkxodkkkkkkkkkkkkkO
+,,''',,'',,,''''',;;;;;;;;;oOOxdooc;,,;loooooodddxxxxkxxkxxkkkkxooxkkkkkOOOOOOOO
+,''''',,,'',,,,,,;::::;,,,;cokxxxxoccloooooxxxdddxxxxxxxkxxxkkkxooxkkkkkOOOOOOOO
+'''''''',,''',,,,,clcc;;cl::looxOOxloxkkkxdodxxddxxxkkxkkkxxkkkkdoxkkkkkkOOOOOOO
+''''''''',,'',,';coo:,,ckOkolxdoxOkookkkkkkxxddoodxxkkkkkxxxxkkkdoxkkkkkkOOOOOOO
+''''''''''''',coOOkd;;coxkkkddkxoxxdxkOOOkkkkkxdolldxxdxkxxxxxkkdoxkkkkkOOOOOOOO
+''''''''''',:dO0KKKk:;lxxdddxxxkkkddkOOOOOOkkkkkkdolloddxkkxxkkxookkkkkOOOOOOOOO
+''''''''';ldxO0000OkdcokOOkxxxxxk0OdxOOOOOOOkkkkkkxxdddoddxxxkkxoxkOOOOOOOOOOOOO
+;:looll;;ldkOOkoldxxxxkkOOOOOkkxxKXOdkOOOOOOOOOkkkkkkkkxxdddddoloxkOOOOOOOOOOOOO
+coxkkkkc;:odkkooc;,:oxxOOOOOOOOkk0XKOkkOOOOOOOOOOOkkkkkkkkkkkkxxoclokkkkkOOOOOOk
+;::looolcclloccoc,';oxOXK0OkkkkkkO0KK0kkOOOOOOOOOOOOOOOOOOkkkkOkxoclxkkxkkkkkkkO
+lloddc;oxc;,,,,,,,',lkKXXK0xdxxkkkkO0K0xxxkOOOOOOOOOOOOOOOOOOOkkkxxddooooodxk0KX
+xxdo:,cddc,',,,,,,,:kXXK0kddolodxkkkO0KOkxxkOOOOOOOOOOOOOOOOOkkkxdollc::ldkKXXXX
+oc;,',oxl;'''',''';kXXX0xdxdlllloddxOkO0K0xdxOOOOOOOOOOOOOOkkkxdoodkdlox0XXXXXXX
+,''''';;,',,,,,,'';xKX0xoxOklclcc:;l0kodxkOkxxkOOOOOOOOOOkkkxxxxkOKKK0XXXXXXXXXX
+'''''''''',,,''',,';oxdoclll;,;::,',:;',,;coxOOOOOOkkkkkOOOO00KKXKKKKXXXXXXXXKKX
+'''''''''''''''''''',,;::;,,,,'''''''''''''';coxO0K00KKKKXXXXXXXXXXKKXXXXXKKKKXX
+'''''''''''''''''',''',cooc::;'''''''''''''',,,;lkKXXXXXXXXXXXXXXXXKKXXXXXKXXXKK
+
 `;
 
 export function printEasterEgg(): void {
@@ -68,5 +71,13 @@ export function printEasterEgg(): void {
     }
     // One styled call keeps the console clean.
     console.log(`%c${ART}`, 'color:#FF3399; font-family:monospace; font-weight:bold;');
-    console.log('%cKpopIt — made with 💗 for K-pop stans. Think you found a bug? ping us.', 'color:#C62368;');
+    // Consoles don't render HTML — a full https: URL is what DevTools auto-linkifies,
+    // so relative paths like "/contact" have to be spelled out with the domain.
+    console.log(
+        '%cKpopIt — made with 💗 for K-pop fans. Think you found a bug? Contact me -> \n%chttps://kpopit.net/contact %c· %chttps://x.com/TgoRoss1',
+        'color:#C62368;',
+        'color:#FF3399; font-weight:bold;',
+        'color:#C62368;',
+        'color:#FF3399; font-weight:bold;'
+    );
 }
