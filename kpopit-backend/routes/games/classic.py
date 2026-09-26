@@ -49,7 +49,7 @@ def get_daily_idol():
         # Fetch group companies
         group_id = idol_data_dict["group_id"]
         is_former_group = idol_data_dict.get("is_former_group", False)
-        if group_id and not is_former_group:
+        if group_id:
             group_companies = repository.fetch_group_companies(group_id)
             idol_data_dict["group_companies"] = group_companies
         else:
@@ -179,7 +179,7 @@ def guess_idol():
             idol["career"] = repository.fetch_full_idol_career(idol_id)
             idol["companies"] = repository.fetch_idol_companies(idol_id)
 
-            if group_id and not idol.get("is_former_group"):
+            if group_id:
                 idol["group_companies"] = repository.fetch_group_companies(group_id)
             else:
                 idol["group_companies"] = []
@@ -279,6 +279,9 @@ def guess_idol():
             group["group_name"] for group in guessed_idol["career"]
                 if group.get("is_active")
         ]
+        # No active group: her most recent past group (see CURRENT_CAREER_CTE in idol_repository.py)
+        if not active_groups and guessed_idol.get("is_former_group"):
+            active_groups = [guessed_idol["group_name"]]
         active_group_name = active_groups[0] if active_groups else None
 
         data_for_display["groups"] = [group["group_name"] for group in guessed_idol["career"]]

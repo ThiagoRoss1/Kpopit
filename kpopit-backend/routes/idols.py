@@ -1,5 +1,6 @@
 from flask import Blueprint, jsonify
 from services.get_db import get_db
+from repositories.idol_repository import CURRENT_CAREER_CTE
 
 idol_bp = Blueprint('idols', __name__)
 
@@ -35,31 +36,30 @@ def get_idols_list():
     cursor.execute(idol_query)
     idols_list = cursor.fetchall()
 
-    member_count_query = """
-            SELECT ic.idol_id, g.member_count
-            FROM idol_career AS ic
-            JOIN groups AS g ON ic.group_id = g.id
+    member_count_query = f"""
+            WITH {CURRENT_CAREER_CTE}
+            SELECT cc.idol_id, g.member_count
+            FROM current_career AS cc
+            JOIN groups AS g ON cc.group_id = g.id
             JOIN (
                 -- Subquery to get the first / main group for each idol
                 SELECT idol_id, MIN(start_year) as first_start_year
-                FROM idol_career
-                WHERE is_active = TRUE
+                FROM current_career
                 GROUP BY idol_id
             ) AS main_group
-            ON ic.idol_id = main_group.idol_id
-            AND ic.start_year = main_group.first_start_year
-            WHERE ic.is_active = TRUE
+            ON cc.idol_id = main_group.idol_id
+            AND cc.start_year = main_group.first_start_year
     """
     cursor.execute(member_count_query)
     member_count_results = cursor.fetchall()
 
     idol_member_counts = {row["idol_id"]: row["member_count"] for row in member_count_results}
 
-    groups_query = """
-        SELECT ic.idol_id, g.name AS group_name
-        FROM idol_career AS ic
-        JOIN groups AS g ON ic.group_id = g.id
-        WHERE ic.is_active = TRUE
+    groups_query = f"""
+        WITH {CURRENT_CAREER_CTE}
+        SELECT cc.idol_id, g.name AS group_name
+        FROM current_career AS cc
+        JOIN groups AS g ON cc.group_id = g.id
     """
     cursor.execute(groups_query)
     results = cursor.fetchall()
@@ -81,7 +81,8 @@ def get_idols_list():
     for row in results:
         idol_groups_all.setdefault(row["idol_id"], []).append(row["group_name"])
 
-    companies_query = """
+    companies_query = f"""
+        WITH {CURRENT_CAREER_CTE}
         SELECT
             ic.idol_id,
             c.name AS company_name
@@ -93,10 +94,9 @@ def get_idols_list():
         SELECT
             icar.idol_id,
             c.name AS company_name
-            FROM idol_career AS icar
+            FROM current_career AS icar
             JOIN group_company_affiliation AS gca ON icar.group_id = gca.group_id
             JOIN companies AS c ON gca.company_id = c.id
-            WHERE icar.is_active = TRUE
         """
     cursor.execute(companies_query)
     results = cursor.fetchall()

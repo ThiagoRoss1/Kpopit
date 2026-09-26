@@ -1,6 +1,7 @@
 from flask import Blueprint, jsonify
 from services.get_db import get_db
 from repositories.idol_repository import IdolRepository
+from repositories.idol_repository import CURRENT_CAREER_CTE
 
 idols_page_bp = Blueprint('idols_page', __name__)
 
@@ -12,7 +13,8 @@ def get_idols_page():
         with connect.cursor() as cursor:
             try:
                 # Not using IdolRepository here because we just need a simple list for the general page
-                idol_page_query = """
+                idol_page_query = f"""
+                    WITH {CURRENT_CAREER_CTE}
                     SELECT DISTINCT ON (i.id)
                         i.id,
                         i.artist_name,
@@ -23,26 +25,19 @@ def get_idols_page():
                         g.name AS group_name,
                         c.id AS company_id,
                         c.name AS company_name,
-                        COALESCE(NOT ic.is_active, FALSE) AS is_former_group,
+                        COALESCE(cc.is_former_group, FALSE) AS is_former_group,
                         (SELECT STRING_AGG(DISTINCT g2.name, ', ')
                             FROM idol_career AS ic2
                             JOIN groups AS g2 ON ic2.group_id = g2.id
                             WHERE ic2.idol_id = i.id) AS all_groups
                     FROM idols AS i
-                    -- Current group, falling back to the most recent past group (see grouplessidols.md)
-                    LEFT JOIN idol_career AS ic ON i.id = ic.idol_id
-                    LEFT JOIN groups AS g ON g.id = ic.group_id
+                    -- Current group (falls back to the most recent past group, see CURRENT_CAREER_CTE)
+                    LEFT JOIN current_career AS cc ON i.id = cc.idol_id
+                    LEFT JOIN groups AS g ON g.id = cc.group_id
                     LEFT JOIN group_company_affiliation AS gca ON gca.group_id = g.id
                     LEFT JOIN companies AS c ON c.id = gca.company_id
                     WHERE i.is_published = TRUE
-                    ORDER BY
-                        i.id ASC,
-                        ic.is_active DESC NULLS LAST,
-                        CASE WHEN ic.is_active THEN g.id END ASC,
-                        ic.end_year DESC NULLS LAST,
-                        ic.start_year DESC NULLS LAST,
-                        g.id ASC,
-                        gca.role DESC
+                    ORDER BY i.id ASC, g.id ASC, gca.role DESC
                 """
                 cursor.execute(idol_page_query)
                 return jsonify(cursor.fetchall())

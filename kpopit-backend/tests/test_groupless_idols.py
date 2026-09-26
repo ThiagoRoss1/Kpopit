@@ -143,3 +143,24 @@ def test_classic_guess_compares_former_group_label(client, db_conn, today, make_
 
     assert resp.status_code == 200, resp.get_json()
     assert resp.get_json()["feedback"]["companies"]["status"] == "correct"
+
+
+def test_idols_list_uses_former_group(client, ex_member, make_idol, make_group, make_career):
+    # Search / guess-row data (["allIdols"]): an ex-member shows her last group like a member.
+    active_group = make_group("Loossemble", member_count=5)
+    hyunjin = make_idol("HyunJin")
+    make_career(hyunjin, ex_member["latest_group"], is_active=False, start_year=2024, end_year=2026)
+    make_career(hyunjin, active_group, is_active=True, start_year=2023)
+
+    resp = client.get("/api/idols-list")
+
+    assert resp.status_code == 200
+    by_id = {idol["id"]: idol for idol in resp.get_json()}
+    semi = by_id[ex_member["idol_id"]]
+    assert semi["active_group"] == "LATENCY"
+    assert semi["member_count"] == 5
+    assert semi["companies"] == ["LATENCY Label"]
+    assert sorted(semi["groups"]) == ["LATENCY", "cignature"]
+    # An idol with an active group is unaffected by her past one.
+    assert by_id[hyunjin]["active_group"] == "Loossemble"
+    assert by_id[hyunjin]["companies"] == []
