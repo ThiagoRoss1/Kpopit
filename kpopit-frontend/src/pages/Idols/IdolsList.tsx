@@ -7,7 +7,7 @@ import { getIdolsPage } from "../../services/api";
 import type { IdolsPageData } from "../../interfaces/gameInterfaces";
 import IdolsSearchBar from "../../components/IdolsSearchBar/IdolsSearchBar";
 import IdolsCards from "../../components/IdolsPageCards/IdolsCards";
-import { formatCompanyName, buildIdolSlug } from "../../utils/formatters";
+import { formatCompanyName, formatGroupName, buildIdolSlug } from "../../utils/formatters";
 
 function IdolsList() {
     const [searchTerm, setSearchTerm] = useState("");
@@ -123,7 +123,7 @@ function IdolsList() {
                         <IdolsCards
                             idolImage={`${import.meta.env.VITE_IMAGE_BUCKET_URL}${idol.image_path}?v=${idol.image_version}`}
                             artistName={idol.artist_name}
-                            groupName={idol.group_name}
+                            groupName={idol.group_name && formatGroupName(idol.group_name, idol.is_former_group)}
                             companyName={idol.company_name ? formatCompanyName(idol.company_name) : idol.company_name}
                         />
                         </Link>

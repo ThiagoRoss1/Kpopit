@@ -1,5 +1,6 @@
 from flask import Blueprint, jsonify, g
 from services.get_db import get_db
+from repositories.idol_repository import CURRENT_CAREER_CTE
 from utils.dates import get_today_date
 from datetime import timedelta
 
@@ -46,10 +47,12 @@ def store_yesterdays_idol():
         artist_name = cursor.fetchone()["artist_name"]
 
         # --- Fetch idol group ---
-        group_sql = """
+        group_sql = f"""
+            WITH {CURRENT_CAREER_CTE}
             SELECT g.name FROM groups AS g
-            LEFT JOIN idol_career AS ic ON g.id = ic.group_id
-            WHERE ic.idol_id = %s AND ic.is_active = TRUE
+            JOIN current_career AS cc ON g.id = cc.group_id
+            WHERE cc.idol_id = %s
+            ORDER BY g.id ASC
         """
 
         # Remove left join after testing (not all idols have a career entry)

@@ -2,21 +2,25 @@ import { AnimatePresence, motion } from "motion/react";
 import { useEffect, useState } from "react";
 import React from "react";
 import Mic from "../../assets/icons/mic-vocal.svg";
+import { formatGroupName } from "../../utils/formatters";
 // import LockedIcon from "../../assets/icons/lock-key-fill.svg";
 // import UnlockedIcon from "../../assets/icons/lock-key-open-fill.svg";
 
 interface AnswerHintsBoxProps {
     memberCount: number | null;
     groups?: string[] | null;
+    isFormerGroup?: boolean;
     attempts: number;
     gameEnded: boolean;
 }
 
 const AnswerHintsBox = (props: AnswerHintsBoxProps) => {
-    const {memberCount, groups, attempts, gameEnded} = props;
+    const {memberCount, groups, isFormerGroup, attempts, gameEnded} = props;
 
     const memberCountDisplay = memberCount ?? "Soloist"; // == memberCount !== null ? memberCount : "Soloist"; As i'm returning Null
-    const groupsDisplay = groups && groups.length > 0 ? groups : ["Soloist"];
+    const groupsDisplay = groups && groups.length > 0
+        ? groups.map(group => formatGroupName(group, isFormerGroup))
+        : ["Soloist"];
 
     // canReveal states
     const CARD1 = 6;

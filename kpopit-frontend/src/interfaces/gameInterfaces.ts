@@ -8,6 +8,8 @@ export interface GameData {
   /* Hints */
   member_count?: number;
   groups?: string[];
+  /** Idol has no active group; `groups` holds her most recent past one */
+  is_former_group?: boolean;
 }
 
 export interface IdolListItem {
@@ -175,6 +177,7 @@ export interface IdolsPageData extends Pick<IdolListItem,
     "company_name": string;
     "group_id": number | null;
     "group_name": string | null;
+    "is_former_group": boolean;
     "is_published": boolean;
     "all_groups": string;
   }
@@ -218,6 +221,7 @@ export interface IdolProfileData {
   idol_career: {
     fandom_name: string | null;
     group_name: string | null;
+    is_former_group: boolean;
     idol_debut_year: number;
     group_companies: Company[];
     idol_companies: Company[];
