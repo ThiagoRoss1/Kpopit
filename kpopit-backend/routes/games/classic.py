@@ -48,7 +48,8 @@ def get_daily_idol():
 
         # Fetch group companies
         group_id = idol_data_dict["group_id"]
-        if group_id:
+        is_former_group = idol_data_dict.get("is_former_group", False)
+        if group_id and not is_former_group:
             group_companies = repository.fetch_group_companies(group_id)
             idol_data_dict["group_companies"] = group_companies
         else:
@@ -63,6 +64,9 @@ def get_daily_idol():
         # Add career data 
         idol_career_for_groups = repository.fetch_full_idol_career(idol_id)
         groups = [career["group_name"] for career in idol_career_for_groups if career.get("is_active")]
+        # No active group: hint with the most recent past group instead of "Soloist"
+        if not groups and is_former_group:
+            groups = [idol_data_dict["group_name"]]
 
         # User service - Streak reset
         user_service = UserService(connect)
@@ -84,6 +88,7 @@ def get_daily_idol():
             "member_count": idol_data_dict.get("member_count"),
             # TODO groups - same as Group but organizing better for frontend
             "groups": groups,
+            "is_former_group": is_former_group,
             # Image path for frontend to display
             "image_path": idol_data_dict.get("image_path"),
             "image_version": idol_data_dict.get("image_version"),
@@ -174,7 +179,7 @@ def guess_idol():
             idol["career"] = repository.fetch_full_idol_career(idol_id)
             idol["companies"] = repository.fetch_idol_companies(idol_id)
 
-            if group_id:
+            if group_id and not idol.get("is_former_group"):
                 idol["group_companies"] = repository.fetch_group_companies(group_id)
             else:
                 idol["group_companies"] = []

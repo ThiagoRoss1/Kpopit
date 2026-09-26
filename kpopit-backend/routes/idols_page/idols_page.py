@@ -23,17 +23,26 @@ def get_idols_page():
                         g.name AS group_name,
                         c.id AS company_id,
                         c.name AS company_name,
+                        COALESCE(NOT ic.is_active, FALSE) AS is_former_group,
                         (SELECT STRING_AGG(DISTINCT g2.name, ', ')
                             FROM idol_career AS ic2
                             JOIN groups AS g2 ON ic2.group_id = g2.id
                             WHERE ic2.idol_id = i.id) AS all_groups
                     FROM idols AS i
-                    LEFT JOIN idol_career AS ic ON i.id = ic.idol_id AND ic.is_active = TRUE
+                    -- Current group, falling back to the most recent past group (see grouplessidols.md)
+                    LEFT JOIN idol_career AS ic ON i.id = ic.idol_id
                     LEFT JOIN groups AS g ON g.id = ic.group_id
                     LEFT JOIN group_company_affiliation AS gca ON gca.group_id = g.id
                     LEFT JOIN companies AS c ON c.id = gca.company_id
                     WHERE i.is_published = TRUE
-                    ORDER BY i.id ASC, g.id ASC, gca.role DESC
+                    ORDER BY
+                        i.id ASC,
+                        ic.is_active DESC NULLS LAST,
+                        CASE WHEN ic.is_active THEN g.id END ASC,
+                        ic.end_year DESC NULLS LAST,
+                        ic.start_year DESC NULLS LAST,
+                        g.id ASC,
+                        gca.role DESC
                 """
                 cursor.execute(idol_page_query)
                 return jsonify(cursor.fetchall())
@@ -62,6 +71,7 @@ def get_idols_page_idol(idol_id):
                 group_id = idol_data.get("group_id") if idol_data else None
 
                 idol_companies = idol_repo.fetch_idol_companies(idol_id)
+                is_former_group = idol_data.get("is_former_group", False)
                 group_companies = idol_repo.fetch_group_companies(group_id) if idol_career else []
 
                 # Check which modes idol is in and add that to the response
@@ -97,6 +107,7 @@ def get_idols_page_idol(idol_id):
                     idol_career = {
                         "group_name": idol_data.get("group_name"),
                         "idol_debut_year": idol_data.get("idol_debut_year"),
+                        "is_former_group": is_former_group,
                         "fandom_name": idol_data.get("fandom_name"),
                         "idol_companies": idol_companies,
                         "group_companies": group_companies,

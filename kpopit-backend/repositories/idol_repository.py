@@ -23,13 +23,22 @@ class IdolRepository:
                 g.group_debut_year,
                 g.member_count,
                 g.generation,
-                g.fandom_name
+                g.fandom_name,
+                -- TRUE when the idol has no active group and this is her most recent past one
+                COALESCE(NOT ic.is_active, FALSE) AS is_former_group
             FROM idols AS i
-            -- Join with idol career to get current group
-            LEFT JOIN idol_career AS ic ON i.id = ic.idol_id AND ic.is_active = TRUE
+            -- Current group, falling back to the most recent past group (see grouplessidols.md)
+            LEFT JOIN idol_career AS ic ON i.id = ic.idol_id
             -- Join with groups table to get actual group data
             LEFT JOIN groups AS g ON ic.group_id = g.id
             WHERE i.id = %s AND i.is_published = TRUE
+            ORDER BY
+                ic.is_active DESC NULLS LAST,
+                CASE WHEN ic.is_active THEN g.id END ASC,
+                ic.end_year DESC NULLS LAST,
+                ic.start_year DESC NULLS LAST,
+                g.id ASC
+            LIMIT 1
         """
         self.cursor.execute(sql_query, (idol_id,))
         return self.cursor.fetchone()

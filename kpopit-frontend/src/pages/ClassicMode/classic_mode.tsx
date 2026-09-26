@@ -20,6 +20,7 @@ import SearchBar from "../../components/GuessSearchBar/SearchBar.tsx";
 import GuessesGrid from "../../components/GuessesGrid/GuessGrid.tsx";
 import VictoryCardHud from "../../components/VictoryCard/VictoryCardHud.tsx";
 import AnswerHintsBox from "../../components/AnswerHints/AnswerHintsBox.tsx";
+import { formatGroupName } from "../../utils/formatters";
 import TopButtons from "../../components/buttons/TopButtons.tsx";
 import Modal from "../../components/buttons/modals/Modal.tsx";
 import HowToPlayText from "../../components/buttons/modals/HowToPlayContent.tsx";
@@ -416,6 +417,7 @@ function ClassicMode() {
         <AnswerHintsBox 
         memberCount={gameData?.member_count ?? null} 
         groups={gameData?.groups ?? null} 
+        isFormerGroup={gameData?.is_former_group ?? false}
         attempts={attempts}
         gameEnded={endGame}
         />
@@ -499,7 +501,7 @@ function ClassicMode() {
             userRank={userRankData}
             userScore={userScoreData}
             stats={userStatsData}
-            idolActiveGroup={gameData?.groups ?? null}
+            idolActiveGroup={gameData?.groups?.map(group => formatGroupName(group, gameData.is_former_group)) ?? null}
             otherGameModes={otherModes}
           />
         </div>

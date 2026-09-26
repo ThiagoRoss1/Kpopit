@@ -17,7 +17,7 @@ import { useDateLocale } from "../../hooks/useDateLocale";
 import IdolsProfileSearch from "../../components/IdolsSearchBar/IdolsProfileSearch";
 import { useIsMobile } from "../../hooks/useIsDevice";
 import { Helmet } from "react-helmet-async";
-import { buildIdolSlug } from "../../utils/formatters";
+import { buildIdolSlug, formatGroupName } from "../../utils/formatters";
 
 function IdolProfile() {
 
@@ -212,7 +212,7 @@ function IdolProfile() {
                                     className="names-enter px-2 bg-neon-pink rounded-2xl"
                                     style={{ animationDelay: "0.8s" }}>
                                     <span className="font-bold text-white text-base md:text-lg">
-                                        {idolCareer.group_name}
+                                        {formatGroupName(idolCareer.group_name, idolCareer.is_former_group)}
                                     </span>
                                 </div>
                                 )}
