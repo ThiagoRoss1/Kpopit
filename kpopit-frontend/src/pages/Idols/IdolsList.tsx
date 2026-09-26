@@ -7,7 +7,7 @@ import { getIdolsPage } from "../../services/api";
 import type { IdolsPageData } from "../../interfaces/gameInterfaces";
 import IdolsSearchBar from "../../components/IdolsSearchBar/IdolsSearchBar";
 import IdolsCards from "../../components/IdolsPageCards/IdolsCards";
-import { formatCompanyName } from "../../utils/formatters";
+import { formatCompanyName, formatGroupName, buildIdolSlug } from "../../utils/formatters";
 
 function IdolsList() {
     const [searchTerm, setSearchTerm] = useState("");
@@ -38,9 +38,9 @@ function IdolsList() {
 
         return idolsData?.filter(idol =>
             idol.artist_name.toLowerCase().includes(term) || 
-            idol.group_name.toLowerCase().includes(term) ||
+            idol.group_name?.toLowerCase().includes(term) ||
             idol.company_name?.toLowerCase().includes(term) || 
-            idol.all_groups.toLowerCase().includes(term)
+            idol.all_groups?.toLowerCase().includes(term)
         ).sort((a, b) => {
             const aName = a.artist_name.toLowerCase();
             const bName = b.artist_name.toLowerCase();
@@ -118,12 +118,12 @@ function IdolsList() {
                     {filteredIdols?.map((idol, i) => (
                         <Link
                             key={idol.id}
-                            to={`/idols/${idol.id}/${idol.artist_name.toLowerCase()}-${idol.group_name.toLowerCase()}`.trim().replace(/\s+/g, '-')}
+                            to={`/idols/${idol.id}/${buildIdolSlug(idol.artist_name, idol.group_name)}`}
                             className="idol-card-enter" style={{ animationDelay: `${i * 0.02}s` }}>
                         <IdolsCards
                             idolImage={`${import.meta.env.VITE_IMAGE_BUCKET_URL}${idol.image_path}?v=${idol.image_version}`}
                             artistName={idol.artist_name}
-                            groupName={idol.group_name}
+                            groupName={idol.group_name && formatGroupName(idol.group_name, idol.is_former_group)}
                             companyName={idol.company_name ? formatCompanyName(idol.company_name) : idol.company_name}
                         />
                         </Link>

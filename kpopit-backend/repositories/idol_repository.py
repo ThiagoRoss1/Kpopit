@@ -1,10 +1,38 @@
+# An idol's current career rows are her active `idol_career` rows. An idol with no
+# active row (left her group, hasn't joined a new one or debuted solo) falls back to
+# her most recent past group, so she keeps showing it.
+
+CURRENT_CAREER_CTE = """
+    current_career AS (
+        SELECT ic.*, FALSE AS is_former_group
+        FROM idol_career AS ic
+        WHERE ic.is_active = TRUE
+
+        UNION ALL
+
+        SELECT past.*, TRUE AS is_former_group
+        FROM (
+            SELECT DISTINCT ON (ic.idol_id) ic.*
+            FROM idol_career AS ic
+            WHERE NOT EXISTS (
+                SELECT 1 FROM idol_career AS active
+                WHERE active.idol_id = ic.idol_id AND active.is_active = TRUE
+            )
+            ORDER BY ic.idol_id, ic.end_year DESC NULLS LAST,
+                     ic.start_year DESC NULLS LAST, ic.group_id ASC
+        ) AS past
+    )
+"""
+
+
 class IdolRepository:
     def __init__(self, cursor):
         self.cursor = cursor
 
     def fetch_full_idol_data(self, idol_id):
         """Fetch full idol data from the database"""  
-        sql_query = """
+        sql_query = f"""
+            WITH {CURRENT_CAREER_CTE}
             SELECT
                 i.id AS idol_id,
                 i.artist_name,
@@ -23,13 +51,17 @@ class IdolRepository:
                 g.group_debut_year,
                 g.member_count,
                 g.generation,
-                g.fandom_name
+                g.fandom_name,
+                COALESCE(cc.is_former_group, FALSE) AS is_former_group
             FROM idols AS i
-            -- Join with idol career to get current group
-            LEFT JOIN idol_career AS ic ON i.id = ic.idol_id AND ic.is_active = TRUE
+            -- Current group (falls back to the most recent past group, see CURRENT_CAREER_CTE)
+            LEFT JOIN current_career AS cc ON i.id = cc.idol_id
             -- Join with groups table to get actual group data
-            LEFT JOIN groups AS g ON ic.group_id = g.id
+            LEFT JOIN groups AS g ON cc.group_id = g.id
             WHERE i.id = %s AND i.is_published = TRUE
+            -- Multi-group idols: lowest group id is the main one
+            ORDER BY g.id ASC
+            LIMIT 1
         """
         self.cursor.execute(sql_query, (idol_id,))
         return self.cursor.fetchone()

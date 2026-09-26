@@ -11,6 +11,14 @@ import au from "../assets/flags/au.svg";
 import nz from "../assets/flags/nz.svg";
 import de from "../assets/flags/de.svg";
 import nl from "../assets/flags/nl.svg";
+import ph from "../assets/flags/ph.svg";
+import id from "../assets/flags/id.svg";
+import gb from "../assets/flags/gb.svg";
+
+const flagAliases = (nationalities: string[], flag: string) =>
+    Object.fromEntries(
+        nationalities.map((nationality) => [nationality, flag])
+    );
 
 const flags: Record<string, string> = {
     "South Korean": kr,
@@ -26,6 +34,10 @@ const flags: Record<string, string> = {
     "New Zealand": nz,
     "German": de,
     "Dutch": nl,
+    "Indonesian": id,
+    "British": gb,
+
+    ...flagAliases(["Filipina", "Filipino"], ph),
 }
 
 export const getNationalityFlag = (nationality: string): string | null => {

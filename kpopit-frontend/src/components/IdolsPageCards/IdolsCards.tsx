@@ -1,8 +1,8 @@
 interface IdolsCardsProps {
     idolImage?: string;
     artistName?: string;
-    groupName?: string;
-    companyName?: string;
+    groupName?: string | null;
+    companyName?: string | null;
 }
 
 const IdolsCards = (props: IdolsCardsProps) => {
