@@ -23,9 +23,9 @@ export const useIdolSearch = (props: UseIdolSearchProps): UseIdolSearchResult =>
         return idols.filter((idol: IdolsPageData) => {
             const matchesName = idol.artist_name.toLowerCase().includes(normalizedQuery);
 
-            const matchesGroup = idol.group_name.toLowerCase().includes(normalizedQuery)
+            const matchesGroup = idol.group_name?.toLowerCase().includes(normalizedQuery);
 
-            const matchesAllGroups = idol.all_groups.toLowerCase().includes(normalizedQuery);
+            const matchesAllGroups = idol.all_groups?.toLowerCase().includes(normalizedQuery);
 
             const matchesCompany = idol.company_name?.toLowerCase().includes(normalizedQuery);
 

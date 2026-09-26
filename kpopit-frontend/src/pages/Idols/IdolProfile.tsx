@@ -17,6 +17,7 @@ import { useDateLocale } from "../../hooks/useDateLocale";
 import IdolsProfileSearch from "../../components/IdolsSearchBar/IdolsProfileSearch";
 import { useIsMobile } from "../../hooks/useIsDevice";
 import { Helmet } from "react-helmet-async";
+import { buildIdolSlug } from "../../utils/formatters";
 
 function IdolProfile() {
 
@@ -65,7 +66,7 @@ function IdolProfile() {
 
     useEffect(() => {
         if (idolProfile) {
-            const correctSlug = `${idolProfile.artist_name.toLowerCase()}-${idolCareer?.group_name.toLowerCase()}`.trim().replace(/\s+/g, '-');
+            const correctSlug = buildIdolSlug(idolProfile.artist_name, idolCareer?.group_name);
 
             if (slug !== correctSlug) {
                 navigate(`/idols/${id}/${correctSlug}`, { replace: true });
@@ -139,11 +140,14 @@ function IdolProfile() {
     // Helmet SEO
     const artistName = idolProfileData.idol_profile.artist_name;
     const groupName = idolProfileData.idol_career.group_name;
-    const canonicalUrl = `https://kpopit.net/idols/${idolProfileData.idol_profile.idol_id}/${artistName.toLowerCase()}-${groupName.toLowerCase()}`.trim().replace(/\s+/g, '-');
-    const idolTitle = `${artistName} (${groupName}) · Stats & Profile - KpopIt`;
-    const idolDescription = `Stats and profile for ${artistName} of ${groupName} on KpopIt.`;
-    const ogTitle = `${artistName} (${groupName}) · KpopIt`;
-    const ogDescription = `Stats, profile and career info for ${artistName} of ${groupName}.`;
+    // `groupName` is null when the idol has no active career row - keep the copy readable instead of printing "null".
+    const nameWithGroup = groupName ? `${artistName} (${groupName})` : artistName;
+    const ofGroup = groupName ? `${artistName} of ${groupName}` : artistName;
+    const canonicalUrl = `https://kpopit.net/idols/${idolProfileData.idol_profile.idol_id}/${buildIdolSlug(artistName, groupName)}`;
+    const idolTitle = `${nameWithGroup} · Stats & Profile - KpopIt`;
+    const idolDescription = `Stats and profile for ${ofGroup} on KpopIt.`;
+    const ogTitle = `${nameWithGroup} · KpopIt`;
+    const ogDescription = `Stats, profile and career info for ${ofGroup}.`;
 
     return (
         <div className="w-full min-h-full bg-ink">
@@ -203,13 +207,15 @@ function IdolProfile() {
                         {/* Idol name and group */}
                         <div className="absolute lg:top-115 bottom-0 left-0 bg-linear-to-t from-ink via-ink/60 to-transparent w-full">
                             <div className="names-enter flex flex-col justify-center items-start w-full h-full px-4 py-5 xl:px-8 sm:py-5 gap-1.5 whitespace-nowrap">
+                                {idolCareer?.group_name && (
                                 <div 
                                     className="names-enter px-2 bg-neon-pink rounded-2xl"
                                     style={{ animationDelay: "0.8s" }}>
                                     <span className="font-bold text-white text-base md:text-lg">
-                                        {idolCareer?.group_name}
+                                        {idolCareer.group_name}
                                     </span>
                                 </div>
+                                )}
 
                                 <span 
                                     className={`main-name-enter font-sans font-black text-white ${(idolProfile?.artist_name.length ?? 0) >= 10 

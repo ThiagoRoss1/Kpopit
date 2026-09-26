@@ -12,3 +12,15 @@ export const formatCompanyName = (company: string): string => {
 
     return result;
 };
+
+/**
+ * Builds the `/idols/:id/:slug` slug. `group_name` comes from the "current group"
+ * join and is NULL for an idol with no active career row, so it is optional here.
+ */
+export const buildIdolSlug = (artistName: string, groupName?: string | null): string =>
+    [artistName, groupName]
+        .filter(Boolean)
+        .join("-")
+        .trim()
+        .replace(/\s+/g, "-")
+        .toLowerCase();

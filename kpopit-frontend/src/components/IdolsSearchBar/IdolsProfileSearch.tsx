@@ -3,6 +3,7 @@ import { useEffect, useRef, useState } from "react";
 import { useIdolSearch } from "../../hooks/useIdolSearch";
 import type { IdolsPageData } from "../../interfaces/gameInterfaces";
 import { Link, useNavigate } from "react-router-dom";
+import { buildIdolSlug } from "../../utils/formatters";
 
 interface IdolsProfileSearchProps {
     idolsData: IdolsPageData[];
@@ -60,8 +61,7 @@ const IdolsProfileSearch = (props: IdolsProfileSearchProps) => {
 
                             onChoose(firstResult);
 
-                            const slug = `${firstResult.id}/${firstResult.artist_name}-${firstResult.group_name}`.trim().replace(/\s+/g, '-').toLowerCase();
-                            navigate(`/idols/${slug}`);
+                            navigate(`/idols/${firstResult.id}/${buildIdolSlug(firstResult.artist_name, firstResult.group_name)}`);
 
                             onChange?.("");
                             setShowList(false);
@@ -87,7 +87,7 @@ const IdolsProfileSearch = (props: IdolsProfileSearchProps) => {
                         {searchResults.map((idol) => {
                             return (
                                 <Link 
-                                    to={`/idols/${idol.id}/${idol.artist_name}-${idol.group_name}`.trim().replace(/\s+/g, '-').toLowerCase()}
+                                    to={`/idols/${idol.id}/${buildIdolSlug(idol.artist_name, idol.group_name)}`}
                                     key={idol.id}
                                     onClick={() => {
                                         onChoose(idol)
@@ -110,7 +110,7 @@ const IdolsProfileSearch = (props: IdolsProfileSearchProps) => {
                                                 <div className="relative flex flex-col">
                                                     <span className="font-sans font-bold text-base sm:text-lg text-white [text:shadow:1px_1px_0px_rgba(0,0,0,0.6)] 
                                                     group-hover:translate-x-1 transition-transform duration-500 transform-gpu">
-                                                        {`${idol.artist_name} (${idol.group_name})`}
+                                                        {idol.group_name ? `${idol.artist_name} (${idol.group_name})` : idol.artist_name}
                                                     </span>
 
                                                     <span className="font-sans font-bold text-xs sm:text-sm text-white/60 

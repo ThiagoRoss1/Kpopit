@@ -33,3 +33,12 @@ group_id,image_path,palette,image_version
 33,/images/groups/sistar.webp,"{""deep"": ""#7D0985"", ""secondary"": ""#B918BF"", ""main"": ""#FF00FF"", ""accent"": ""#FEA9F6"", ""light"": ""#FFF6FD""}",1
 34,/images/groups/gfriend.webp,"{""deep"": ""#5F488B"", ""secondary"": ""#00B2CA"", ""main"": ""#F0F1F0"", ""accent"": ""#F8F8F8"", ""light"": ""#FFFFFF""}",1
 35,/images/groups/viviz.webp,"{""deep"": ""#45067F"", ""secondary"": ""#712BBC"", ""main"": ""#9B5DE5"", ""accent"": ""#BABABA"", ""light"": ""#F3F4F6""}",1
+36,/images/groups/h1-key.webp,"{""deep"": ""#850B32"", ""secondary"": ""#CA0D4A"", ""main"": ""#FF4D6D"", ""accent"": ""#BEBEBE"", ""light"": ""#E5E7EB""}",1
+38,/images/groups/unis.webp,"{""deep"": ""#880152"", ""secondary"": ""#CA0F78"", ""main"": ""#FF4D9E"", ""accent"": ""#C1C1C1"", ""light"": ""#E2E8F0""}",1
+39,/images/groups/unchild.webp,"{""deep"": ""#76A00F"", ""secondary"": ""#A0CE27"", ""main"": ""#CCFF00"", ""accent"": ""#F5FF3D"", ""light"": ""#FFFFFF""}",1
+40,/images/groups/latency.webp,"{""deep"": ""#0B0B0B"", ""secondary"": ""#2B2B2E"", ""main"": ""#D62828"", ""accent"": ""#F07869"", ""light"": ""#FEB9AD""}",1
+41,/images/groups/hearts2hearts.webp,"{""deep"": ""#4982A6"", ""secondary"": ""#75AED0"", ""main"": ""#A2DBFC"", ""accent"": ""#D1EDFE"", ""light"": ""#FFFFFF""}",1
+42,/images/groups/kiiikiii.webp,"{""deep"": ""#9C8318"", ""secondary"": ""#D0AC24"", ""main"": ""#FFD966"", ""accent"": ""#FFEDBC"", ""light"": ""#FFFFFF""}",1
+43,/images/groups/billlie.webp,"{""deep"": ""#435E90"", ""secondary"": ""#6A88BA"", ""main"": ""#94B4E5"", ""accent"": ""#C5B4E1"", ""light"": ""#EEE8F6""}",1
+44,/images/groups/fromis_9.webp,"{""deep"": ""#3A844C"", ""secondary"": ""#6BAE75"", ""main"": ""#F2B9C6"", ""accent"": ""#FADCE2"", ""light"": ""#FFFFFF""}",1
+45,/images/groups/tuide.webp,"{""deep"": ""#92410D"", ""secondary"": ""#CE600C"", ""main"": ""#FF8C42"", ""accent"": ""#F7C6D9"", ""light"": ""#FFFFFF""}",1

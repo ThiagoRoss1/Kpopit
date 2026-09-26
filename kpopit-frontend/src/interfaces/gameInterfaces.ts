@@ -173,8 +173,8 @@ export interface IdolsPageData extends Pick<IdolListItem,
     // New fields specifically for the idols page
     "company_id": number;
     "company_name": string;
-    "group_id": number;
-    "group_name": string;
+    "group_id": number | null;
+    "group_name": string | null;
     "is_published": boolean;
     "all_groups": string;
   }
@@ -217,7 +217,7 @@ export interface IdolProfileData {
   };
   idol_career: {
     fandom_name: string | null;
-    group_name: string;
+    group_name: string | null;
     idol_debut_year: number;
     group_companies: Company[];
     idol_companies: Company[];
