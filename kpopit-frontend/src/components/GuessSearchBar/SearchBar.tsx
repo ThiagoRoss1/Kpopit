@@ -19,6 +19,8 @@ interface SearchBarProps {
   gameMode: 'classic' | 'blurry' | null;
 }
 
+const LIST_SPRING = { type: "spring", stiffness: 500, damping: 50 } as const;
+
 const SearchBar = (props: SearchBarProps) => {
   const { allIdols, value, onIdolSelect, onIdolSelectId, gameMode, onSubmit, disabled, excludedIdols, onClose } =
     props;
@@ -201,27 +203,38 @@ const SearchBar = (props: SearchBarProps) => {
             </motion.button>
           <AnimatePresence>
           {showList && suggestions.length > 0 && (
+            <motion.div
+              key="suggestions"
+              initial="closed"
+              animate="open"
+              exit="closed"
+              variants={{ closed: { y: -10 }, open: { y: 0 } }}
+              transition={LIST_SPRING}
+              className="absolute left-0 top-full w-full mt-2 z-50"
+            >
+            {/* The blur sits on a sibling of the fading list, not on the list itself: opacity < 1
+                makes an element its own backdrop root, so a blurred list under an opacity fade
+                showed the page sharp while animating and the blur popped in/out at the ends
+                (the open/close flicker). Here the blur radius animates alongside the fade. */}
+            <motion.div
+              aria-hidden
+              variants={{
+                closed: { "--suggestions-blur": "0px" },
+                open: { "--suggestions-blur": "12px" },
+              }}
+              style={{
+                backdropFilter: "blur(var(--suggestions-blur))",
+                WebkitBackdropFilter: "blur(var(--suggestions-blur))",
+              }}
+              transition={LIST_SPRING}
+              className="absolute inset-0 rounded-3xl pointer-events-none"
+            />
             <motion.ul
-              initial={{
-                y: -10,
-                opacity: 0,
-              }}
-              animate={{
-                y: 0,
-                opacity: 1,
-              }}
-              transition={{
-                type: "spring",
-                stiffness: 500,
-                damping: 50,
-              }}
-              exit={{
-                y: -10,
-                opacity: 0,
-              }}
-              className={`absolute left-0 top-full w-full mt-2 rounded-3xl
+              variants={{ closed: { opacity: 0 }, open: { opacity: 1 } }}
+              transition={LIST_SPRING}
+              className={`relative w-full rounded-3xl
               ${suggestions.length === 1 ? "overflow-hidden" : "overflow-y-auto overflow-x-hidden"} searchbar-scroll border border-white bg-linear-to-r from-black/5 via-[#b43777]/0 to-black/5
-              backdrop-blur-md shadow-lg z-50 drop-shadow-md max-h-50 sm:max-h-60 transform-gpu will-change-transform`}
+              shadow-lg drop-shadow-md max-h-50 sm:max-h-60 transform-gpu will-change-transform`}
               // liquid glass if possible but using gradient for now (bg-linear-to-r from-[#000]/65 via-[#b43777]/80 to-[#000]/65)
             >
               {suggestions.map((suggestion) => {
@@ -297,6 +310,7 @@ const SearchBar = (props: SearchBarProps) => {
               );
               })}
             </motion.ul>
+            </motion.div>
           )}
           </AnimatePresence>
         </div>
