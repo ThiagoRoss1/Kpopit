@@ -18,3 +18,5 @@ seed_db_old.py
 # sqlite temp files
 *.db-shm
 *.db-wal
+# Email outbox (EMAIL_DELIVERY=outbox, development only)
+.email-outbox/

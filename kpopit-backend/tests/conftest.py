@@ -61,6 +61,10 @@ os.environ.setdefault("FLASK_ENV", "development")
 os.environ["COLLECTION_ENABLED"] = "true"
 # Register the admin blueprint regardless of the local .env, so its auth rules are always tested.
 os.environ["ADMIN_ENABLED"] = "true"
+# No test may reach Resend: emails go to a per-test outbox (see the email_outbox fixture),
+# and the real key from .env is replaced before email_service reads it at import.
+os.environ["EMAIL_DELIVERY"] = "outbox"
+os.environ["RESEND_API_KEY"] = "re_disabled_for_tests"
 
 import psycopg  # noqa: E402
 import pytest  # noqa: E402
@@ -128,6 +132,37 @@ def db_conn():
         yield conn
     finally:
         conn.close()
+
+
+class Outbox:
+    """Emails written by EmailService._send in outbox mode, oldest first."""
+
+    def __init__(self, path):
+        self.path = path
+
+    def all(self) -> list[dict]:
+        import json
+
+        return [json.loads(p.read_text(encoding="utf-8")) for p in sorted(self.path.glob("*.json"))]
+
+    def latest_to(self, address: str) -> dict | None:
+        sent = [m for m in self.all() if m["to"] == address]
+        return sent[-1] if sent else None
+
+
+@pytest.fixture(autouse=True)
+def email_outbox(monkeypatch, tmp_path):
+    """Fresh outbox per test; a direct Resend call fails the test."""
+    import resend
+
+    def _no_resend(*_args, **_kwargs):
+        raise AssertionError("tests must never call Resend")
+
+    outbox_dir = tmp_path / "outbox"
+    monkeypatch.setenv("EMAIL_DELIVERY", "outbox")
+    monkeypatch.setenv("EMAIL_OUTBOX_DIR", str(outbox_dir))
+    monkeypatch.setattr(resend.Emails, "send", _no_resend)
+    return Outbox(outbox_dir)
 
 
 @pytest.fixture(autouse=True)
