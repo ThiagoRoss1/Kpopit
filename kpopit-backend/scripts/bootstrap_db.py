@@ -10,6 +10,7 @@ Refuses any host other than localhost, and exits non-zero if a migration fails
 (the migration runner raises immediately on its first failure).
 """
 
+import logging
 import os
 import sys
 from pathlib import Path
@@ -23,6 +24,8 @@ LOCAL_HOSTS = {"localhost", "127.0.0.1", "::1"}
 
 
 def main() -> int:
+    # The migration runner reports through logging; without this its INFO/ERROR lines are lost in CI.
+    logging.basicConfig(level=logging.INFO, format="%(levelname)s %(name)s: %(message)s")
     db_url = os.getenv("DB_URL") or ""
     if urlparse(db_url).hostname not in LOCAL_HOSTS:
         print("bootstrap_db: DB_URL must point at a local database (localhost/127.0.0.1).")
@@ -35,7 +38,10 @@ def main() -> int:
     from migrations.migrations import apply_migrations
 
     init_db()
-    apply_migrations()
+    try:
+        apply_migrations()
+    except Exception:
+        return 1  # the runner already logged the file and the server's message
 
     expected = sorted(p.name for p in (BACKEND_ROOT / "migrations").glob("*.sql"))
     with psycopg.connect(db_url) as conn:

@@ -61,3 +61,34 @@ def test_cli_connection_failure_is_nonzero(tmp_path):
     env = {**os.environ, "DB_URL": "postgresql://test@127.0.0.1:9/missing?connect_timeout=1", "PYTHON_DOTENV_DISABLED": "1"}
     result = subprocess.run([sys.executable, str(runner)], env=env, capture_output=True, text=True, timeout=10)
     assert result.returncode != 0
+
+
+def test_cli_logs_the_failed_file_and_the_server_message(migration_cli):
+    directory, _, run = migration_cli
+    (directory / "001_bad.sql").write_text("SELECT missing_column;", encoding="utf-8")
+    result = run()
+    assert result.returncode != 0
+    # Server text is localized (lc_messages); check the parts that aren't.
+    assert "Migration 001_bad.sql failed (UndefinedColumn):" in result.stderr
+    assert '"missing_column"' in result.stderr
+
+
+def test_cli_logs_the_server_context_when_present(migration_cli):
+    directory, _, run = migration_cli
+    (directory / "001_raise.sql").write_text(
+        "DO $$ BEGIN RAISE EXCEPTION 'stop here'; END $$;", encoding="utf-8")
+    result = run()
+    assert result.returncode != 0
+    assert "Migration 001_raise.sql failed (RaiseException): stop here" in result.stderr
+    assert "001_raise.sql context: " in result.stderr
+
+
+def test_cli_connection_failure_never_shows_the_dsn(tmp_path):
+    runner = Path(__file__).parents[1] / "migrations/migrations.py"
+    dsn = "postgresql://someone:s3cret-pw@127.0.0.1:9/missing?connect_timeout=1"
+    env = {**os.environ, "DB_URL": dsn, "PYTHON_DOTENV_DISABLED": "1"}
+    result = subprocess.run([sys.executable, str(runner)], env=env, capture_output=True, text=True, timeout=10)
+    assert result.returncode != 0
+    output = result.stdout + result.stderr
+    assert "s3cret-pw" not in output and "someone" not in output
+    assert "Migration runner failed (" in output

@@ -12,6 +12,22 @@ DB_URL = os.getenv("DB_URL")
 logger = logging.getLogger(__name__)
 
 
+def _log_failure(filename: str, error: Exception) -> None:
+    """Log what the server said about a failed migration file.
+
+    Only SQL errors raised while running a file reach here (the connection is already open),
+    so the server's primary message and context are safe to show; they name the bad statement,
+    never the DSN. Anything without diagnostics is logged by type only."""
+    diag = getattr(error, "diag", None) if isinstance(error, psycopg.Error) else None
+    primary = getattr(diag, "message_primary", None)
+    if not primary:
+        logger.error("Migration %s failed (%s); stopping", filename, type(error).__name__)
+        return
+    logger.error("Migration %s failed (%s): %s; stopping", filename, type(error).__name__, primary)
+    if diag.context:
+        logger.error("Migration %s context: %s", filename, diag.context.strip())
+
+
 def apply_migrations():
     with psycopg.connect(DB_URL) as conn, conn.cursor() as cursor:
         cursor.execute("""
@@ -40,7 +56,7 @@ def apply_migrations():
                 conn.commit()
             except Exception as error:
                 conn.rollback()
-                logger.error("Migration %s failed (%s); stopping", migration_file.name, type(error).__name__)
+                _log_failure(migration_file.name, error)
                 raise
             logger.info("Migration applied: %s", migration_file.name)
 
