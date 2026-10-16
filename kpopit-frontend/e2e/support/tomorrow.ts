@@ -1,4 +1,4 @@
-import { spawn, type ChildProcess } from 'node:child_process';
+import { spawn, spawnSync, type ChildProcess } from 'node:child_process';
 import type { Page } from '@playwright/test';
 import { BACKEND_DIR, BACKEND_PYTHON, testBackendEnv } from './env';
 import { ipHeader } from './fixtures';
@@ -43,15 +43,28 @@ export class OffsetBackend {
     throw new Error(`offset backend on :${this.port} did not start`);
   }
 
+  // Waits until the process tree is gone and the port is closed: a fire-and-forget kill lost the
+  // race with the test runner's exit and left backends listening on 5101-5104.
   async stop(): Promise<void> {
     if (!this.proc?.pid) return;
     if (process.platform === 'win32') {
-      spawn('taskkill', ['/pid', String(this.proc.pid), '/T', '/F'], { stdio: 'ignore' });
+      spawnSync('taskkill', ['/pid', String(this.proc.pid), '/T', '/F'], { stdio: 'ignore' });
     } else {
       this.proc.kill('SIGTERM');
     }
     this.proc = null;
+    const deadline = Date.now() + 15_000;
+    while (Date.now() < deadline) {
+      try {
+        await fetch(`${this.origin}/api/gamemodes-count`);
+      } catch {
+        return; // connection refused: stopped
+      }
+      await new Promise((r) => setTimeout(r, 250));
+    }
+    throw new Error(`offset backend on :${this.port} is still answering after stop()`);
   }
+
 
   // Page-level only: the context route that tags the client IP stays in place.
   static async detach(page: Page): Promise<void> {
