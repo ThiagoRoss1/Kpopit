@@ -49,6 +49,7 @@ def detect_user(req) -> dict:
        "is_admin": False, "is_authenticated": False}
       {"source": "none",      "user_id": None, "token": None,
        "is_admin": False, "is_authenticated": False}
+      {"source": "invalid", ...same as "none"}  — a Bearer token that failed to decode
 
     Does NOT touch the database. Callers needing user_id for anonymous users
     must resolve it from the DB using the returned token.
@@ -64,7 +65,9 @@ def detect_user(req) -> dict:
         payload = decode_jwt(raw_token, expected_type="access")
 
         if payload is None:
-            return _no_auth()
+            # A token was sent but is expired/forged: not the same as no auth. Callers answer 401
+            # so the client refreshes instead of being served (and caching) anonymous data.
+            return {**_no_auth(), "source": "invalid"}
         
         return {
             "source": "jwt",

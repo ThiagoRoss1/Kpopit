@@ -4,7 +4,9 @@ from utils.auth_helpers import detect_user
 
 def optional_auth(f):
     """
-    Populates g.auth with the result of detect_user(). Never blocks the request.
+    Populates g.auth with the result of detect_user(). No header and an anonymous UUID pass;
+    a Bearer token that is expired or invalid gets 401, so the client refreshes and retries
+    instead of being treated as anonymous (e.g. an empty Collections album cached until F5).
     Use on game routes to enrich context without requiring login.
 
     Access via: g.auth["source"], g.auth["user_id"], g.auth["is_authenticated"],
@@ -12,7 +14,10 @@ def optional_auth(f):
     """
     @wraps(f)
     def wrapper(*args, **kwargs):
-        g.auth = detect_user(request)
+        auth = detect_user(request)
+        if auth["source"] == "invalid":
+            return jsonify({"error": "Invalid or expired token"}), 401
+        g.auth = auth
         return f(*args, **kwargs)
     return wrapper
 

@@ -1,6 +1,7 @@
 import { test, expect, type Page } from './support/fixtures';
 import { answerIdol, guessIdol, openGame, userToken, victoryMarker, type IdolEntry } from './support/game';
-import { idolHasCard, seedIdolCard, userIdByToken, userIdolCard } from './support/db';
+import { anyIdolWithCard, idolHasCard, seedIdolCard, userIdByToken, userIdByUsername, userIdolCard } from './support/db';
+import { expectLoggedIn, newUser, registerViaApi } from './support/accounts';
 
 type Mode = 'classic' | 'blurry';
 
@@ -75,4 +76,30 @@ test.describe('Collections', () => {
     await page.locator('a[href^="/collections/1/"]').first().click();
     await expect(page).toHaveURL(/\/collections\/1\//);
   });
+});
+
+// T33: an expired access token used to be served as anonymous (200, nothing owned), so the album
+// showed 0% until F5. Now the backend answers 401, the client refreshes, and the replay is owned.
+test('an expired access token on the collections list is refreshed, not cached as empty', async ({ page }) => {
+  const user = newUser();
+  await page.goto('/');
+  await registerViaApi(page, user);
+  await page.reload();
+  await expectLoggedIn(page);
+  await seedIdolCard(await userIdByUsername(user.username), await anyIdolWithCard());
+  await skipOverlays(page);
+
+  let forged = false;
+  await page.route('**/api/collections/list**', async (route) => {
+    if (forged) return route.fallback();
+    forged = true;
+    await route.fallback({ headers: { ...route.request().headers(), authorization: 'Bearer expired.or.forged' } });
+  });
+  const rejected = page.waitForResponse((r) => r.url().includes('/api/collections/list') && r.status() === 401);
+  const replayed = page.waitForResponse((r) => r.url().includes('/api/collections/list') && r.status() === 200);
+  await page.locator('nav').getByRole('link', { name: 'Collections' }).click();
+  await rejected;
+  const rows = await (await replayed).json();
+  expect(rows[0].owned_cards).toBe(1);
+  await expect(page.getByText(/^1\/\d+ stickers$/).first()).toBeVisible();
 });

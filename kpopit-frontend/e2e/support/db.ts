@@ -102,6 +102,14 @@ export async function seedIdolCard(userId: number, idolId: number, level = 1, ti
   );
 }
 
+export async function anyIdolWithCard(): Promise<number> {
+  const { rows } = await db().query(
+    `SELECT idol_id FROM cards WHERE card_type = 'idol' AND collection_id = 1 ORDER BY idol_id LIMIT 1`,
+  );
+  if (!rows[0]) throw new Error('no Album 1 idol card in this database');
+  return rows[0].idol_id as number;
+}
+
 export async function idolHasCard(idolId: number): Promise<boolean> {
   const { rows } = await db().query(
     `SELECT 1 FROM cards WHERE idol_id = $1 AND card_type = 'idol' LIMIT 1`,
