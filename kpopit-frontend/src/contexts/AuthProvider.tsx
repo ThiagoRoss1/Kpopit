@@ -97,9 +97,8 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
             localStorage.removeItem('kpopit_session');
             sessionStorage.removeItem('kpopit_session');
             if (wasAuthenticated) {
-                // Only wipe the anonymous UUID + game state if the user actually
-                // had a real session. A pure anonymous user whose refresh just
-                // happened to fail should keep their UUID and local progress.
+                // Wipe the UUID and game state only after a real session; a purely anonymous
+                // user whose refresh failed keeps both.
                 localStorage.removeItem('userToken');
                 localStorage.removeItem('kpopit_was_authenticated');
                 clearAll();
@@ -141,11 +140,8 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
             if (cancelledRef.current) return;
             setState(s => ({ ...s, user: me }));
         } catch (err) {
-            // 401 is already handled by the api interceptor (single refresh + retry,
-            // or page reload on refresh failure) — by the time we see it here, the
-            // recovery path has already run. For everything else (network, 5xx) the
-            // existing user state is still valid: the mutation that called us already
-            // succeeded server-side, we just couldn't refetch the latest snapshot.
+            // A 401 was already handled by the api interceptor; on network/5xx the current user
+            // state stays valid (the calling mutation succeeded, only the refetch failed).
             if (import.meta.env.DEV) {
                 console.warn("[AuthProvider] refetchUser failed:", err);
             }
@@ -172,9 +168,7 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
         };
     }, [restoreFromServer, forgetLostSession, applyOutcome]);
 
-    // Collection queries (`collectionsList`/`collectionAlbum`) are keyed without the user,
-    // so a login/logout doesn't refetch them on its own, to fix it we watch for auth state 
-    // changes and invalidate them when it flips.
+    // Collection queries aren't keyed by user, so refetch them when the auth state flips.
 
     const prevAuthRef = useRef<boolean | null>(null);
     

@@ -377,14 +377,12 @@ function ClassicMode() {
         <TopButtons
           onSubmitHowToPlay={() => { setShowModal("how-to-play") }}
           onSubmitStats={() => { setShowModal("stats") }}
-          // onSubmitStreak={() => { setShowModal("streak") }}
           onSubmitShare={() => { setShowModal("share") }}
         />
         {showModal === "how-to-play" && <Modal isOpen onClose={() => setShowModal(null)} title="How to Play..."><HowToPlayText /></Modal>}
 
         {showModal === "stats" && <Modal isOpen onClose={() => setShowModal(null)} title="Stats..."><StatsText stats={userStatsData} onSubmitTransferData={() => {setShowModal("transfer-data")}} /></Modal>}
         {showModal === "share" && <Modal isOpen onClose={() => setShowModal(null)} title="Share..."><ShareText guesses={guesses} hasWon={isCorrect} attempts={attempts} gameMode={"classic"} /></Modal>}
-        {/* {showModal === "streak" && <Modal onClose={() => setShowModal(null)} title="Streak..."><p>Working in progress...</p></Modal>} */}
 
         {/* Sub-Stats Modals */}
         {showModal === "transfer-data" && <Modal isOpen onClose={() => setShowModal(null)} title="Transfer Data..." isTransferDataSubPages={true} returnPage={() => {setShowModal("stats")}}><TransferDataText onSubmitImportData={() => {setShowModal("import-data")}} onSubmitExportData={() => {setShowModal("export-data")}} /></Modal>}
@@ -461,7 +459,6 @@ function ClassicMode() {
         }}
         />
       )} 
-      {/* See later */}
 
       {endGame && showVictoryCard && <CardGrantedReveal cardGranted={cardGranted} />}
 
