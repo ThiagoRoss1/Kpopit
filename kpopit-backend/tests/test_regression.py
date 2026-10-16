@@ -456,3 +456,15 @@ def _rows(payload):
         if isinstance(value, list):
             return value
     return []
+
+
+def test_win_log_names_the_internal_user_id_only(client, make_user, idol_with, pin_idol, caplog):
+    import logging
+
+    user_id, token = make_user()
+    idol = idol_with("Logged")
+    pin_idol(idol)
+    with caplog.at_level(logging.INFO, logger="services.game_service"):
+        guess(client, "classic", token, idol, idol, 2)
+    assert f"Victory! User {user_id} won gamemode 1 in 2 attempts at date {dates.get_today_date_str()}." in caplog.text
+    assert token not in caplog.text
