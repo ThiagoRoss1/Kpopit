@@ -13,9 +13,9 @@ export default defineConfig({
             cookieDomainRewrite: 'localhost'
         }
     },
-    // Test and Lighthouse runs write reports here; watching them would reload the dev server mid-run.
+    // Test and Lighthouse runs write reports (and the E2E email outbox) here; watching them would reload the dev server mid-run.
     watch: {
-        ignored: ['**/playwright-report/**', '**/test-results/**', '**/blob-report/**', '**/.lighthouseci/**', '**/lighthouse/**']
+        ignored: ['**/playwright-report/**', '**/test-results/**', '**/blob-report/**', '**/.lighthouseci/**', '**/lighthouse/**', '**/.email-outbox/**']
     }
 }
 })

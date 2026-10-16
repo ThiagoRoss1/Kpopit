@@ -41,6 +41,8 @@ test-results/
 playwright-report/
 blob-report/
 playwright/.cache/
+# E2E email outbox (backend EMAIL_DELIVERY=outbox), cleared per run
+.email-outbox/
 .lighthouseci/
 # Raw Lighthouse reports; only the baseline-*.md summaries are tracked
 lighthouse/baseline/*/

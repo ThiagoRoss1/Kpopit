@@ -4,7 +4,7 @@ import {
 } from './support/accounts';
 import { answerIdol, guessIdol, openGame, userToken, victoryMarker } from './support/game';
 import {
-  dailyHistory, issuePasswordResetToken, setUsernameChangedAt, userIdByToken, userIdByUsername,
+  dailyHistory, setUsernameChangedAt, userIdByToken, userIdByUsername,
 } from './support/db';
 
 const editUsernameButton = (page: import('@playwright/test').Page) =>
@@ -156,31 +156,6 @@ test.describe('Accounts', () => {
     expect(await dailyHistory(anonId, 'classic')).toEqual([expect.objectContaining({ won: true, guesses_count: 1 })]);
     await openGame(page, 'classic');
     await expect(victoryMarker(page, 'classic')).toBeVisible();
-  });
-
-  test('forgot + reset password (email stubbed)', async ({ page }) => {
-    const user = newUser();
-    await page.goto('/');
-    await registerViaApi(page, user, true);
-    await page.context().clearCookies();
-    await page.evaluate(() => { localStorage.clear(); sessionStorage.clear(); });
-
-    await page.goto('/forgot-password');
-    await page.getByPlaceholder('bias@example.com').fill(user.email);
-    await page.getByRole('button', { name: 'Send Reset Link' }).click();
-    await expect(page.getByText('If an account with that email exists, a reset link has been sent.')).toBeVisible();
-
-    // The email is never sent in tests: issue the token the email would carry.
-    const token = await issuePasswordResetToken(await userIdByUsername(user.username));
-    await page.goto(`/reset-password?token=${token}`);
-    const pw = page.getByPlaceholder('••••••••••••');
-    const newPassword = 'N3w-Passw0rd!';
-    await pw.nth(0).fill(newPassword);
-    await pw.nth(1).fill(newPassword);
-    await page.getByRole('button', { name: 'Reset Password' }).click();
-    await expect(page.getByText('Password reset successfully.')).toBeVisible();
-
-    await loginViaUi(page, { ...user, password: newPassword }, false);
   });
 
   test('profile page and username change cooldown', async ({ page }) => {

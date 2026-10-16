@@ -1,4 +1,3 @@
-import crypto from 'node:crypto';
 import fs from 'node:fs';
 import path from 'node:path';
 import dotenv from 'dotenv';
@@ -112,23 +111,6 @@ export async function dailyHistory(userId: number, mode: ModeName) {
     [userId, GAMEMODE[mode]],
   );
   return rows;
-}
-
-// Stands in for the reset email, which tests never send: same raw token → SHA-256 scheme
-// as routes/email.py. Returns the raw token for the /reset-password link.
-export async function issuePasswordResetToken(userId: number): Promise<string> {
-  const raw = crypto.randomBytes(32).toString('base64url');
-  const hash = crypto.createHash('sha256').update(raw).digest('hex');
-  await db().query(
-    `DELETE FROM email_tokens WHERE user_id = $1 AND token_type = 'password_reset' AND used_at IS NULL`,
-    [userId],
-  );
-  await db().query(
-    `INSERT INTO email_tokens (user_id, token_hash, token_type, expires_at)
-     VALUES ($1, $2, 'password_reset', NOW() + INTERVAL '1 hour')`,
-    [userId, hash],
-  );
-  return raw;
 }
 
 // Only ever called on users the test just created; the JWT picks it up on the next refresh.

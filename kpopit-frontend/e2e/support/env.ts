@@ -9,6 +9,13 @@ export const BACKEND_DIR = path.resolve(HERE, '../../../kpopit-backend');
 export const BACKEND_PYTHON =
   process.platform === 'win32' ? '.venv\\Scripts\\python.exe' : '.venv/bin/python';
 
+// Backend EMAIL_DELIVERY=outbox writes every email here as JSON instead of calling Resend.
+// Gitignored, cleared at the start of each run (playwright.config.ts).
+export const EMAIL_OUTBOX_DIR = path.resolve(HERE, '../../.email-outbox');
+
+// Email links point at the local dev server, never at the production site.
+export const EMAIL_FRONTEND_URL = 'http://localhost:5173';
+
 // Admin page route for the test env only (production keeps VITE_ADMIN_ROUTE unset).
 export const ADMIN_ROUTE = '/e2e-admin';
 
@@ -31,7 +38,7 @@ export const DISABLED_R2 = 'disabled-for-tests';
 export const DISABLED_R2_ENDPOINT = 'http://127.0.0.1:9'; // discard port: uploads fail fast
 
 // load_dotenv() never overrides a variable that is already set, so these beat
-// kpopit-backend/.env: Resend rejects the dummy key, so no real email can go out.
+// kpopit-backend/.env: emails go to the outbox, and the dummy Resend key is a second guard.
 export function testBackendEnv(extra: Record<string, string> = {}): Record<string, string> {
   const env: Record<string, string> = {
     FLASK_ENV: 'development',
@@ -39,6 +46,9 @@ export function testBackendEnv(extra: Record<string, string> = {}): Record<strin
     ADMIN_ENABLED: 'true',
     MAINTENANCE_MODE: 'false',
     RESEND_API_KEY: DISABLED_RESEND_KEY,
+    EMAIL_DELIVERY: 'outbox',
+    EMAIL_OUTBOX_DIR,
+    RESEND_EMAIL_FRONTEND_URL: EMAIL_FRONTEND_URL,
     TEST_DATE_OFFSET: '0',
     PYTHONUNBUFFERED: '1',
     PYTHONIOENCODING: 'utf-8',

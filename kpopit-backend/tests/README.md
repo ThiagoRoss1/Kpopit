@@ -38,16 +38,17 @@ values (on Windows an empty variable can vanish, and then `.env` fills in the re
 
 ```
 FLASK_ENV=development  COLLECTION_ENABLED=true  RESEND_API_KEY=re_disabled_for_tests
+EMAIL_DELIVERY=outbox  EMAIL_OUTBOX_DIR=<a gitignored folder>  RESEND_EMAIL_FRONTEND_URL=http://localhost:5173
 R2_ENDPOINT_URL=http://127.0.0.1:9   and every other R2_* name = disabled-for-tests
 (R2_ACCESS_KEY_ID R2_SECRET_ACCESS_KEY R2_BUCKET_NAME R2_AVATARS_ACCESS_KEY_ID
  R2_AVATARS_SECRET_ACCESS_KEY R2_AVATARS_BUCKET_NAME R2_AVATARS_PREFIX)
 ```
 
-Resend rejects the dummy key, so every send fails safely (`EmailService` logs and
-returns `False`) and no email is delivered; the forgot-password route still answers
-its generic success message. No code stub is needed. The E2E reset-password test
-issues the token itself (same SHA-256 scheme as `routes/email.py`) instead of
-reading an email. Avatar uploads fail (R2 endpoint is a closed local port).
+With `EMAIL_DELIVERY=outbox` (honored only when `FLASK_ENV=development`), `EmailService._send`
+writes each email as JSON (`to`, `subject`, `html`, `link`) into `EMAIL_OUTBOX_DIR` instead of
+calling Resend; the dummy key is a second guard. E2E reads the links with
+`e2e/support/outbox.ts` (`latestLink`); pytest gets a per-test `email_outbox` fixture and fails
+any direct Resend call. Avatar uploads fail (R2 endpoint is a closed local port).
 
 Playwright does this for you: `npm run test:e2e` starts both servers from
 `playwright.config.ts` (`webServer`, env from `e2e/support/env.ts`). It refuses to

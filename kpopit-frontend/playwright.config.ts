@@ -1,5 +1,9 @@
+import fs from 'node:fs';
 import { defineConfig, devices } from '@playwright/test';
-import { ADMIN_ROUTE, BACKEND_DIR, BACKEND_PYTHON, testBackendEnv } from './e2e/support/env';
+import { ADMIN_ROUTE, BACKEND_DIR, BACKEND_PYTHON, EMAIL_OUTBOX_DIR, testBackendEnv } from './e2e/support/env';
+
+// Fresh email outbox per run. Workers load this file too (TEST_WORKER_INDEX set): they must not wipe it.
+if (!process.env.TEST_WORKER_INDEX) fs.rmSync(EMAIL_OUTBOX_DIR, { recursive: true, force: true });
 
 // Vite dev server by default; override with PLAYWRIGHT_BASE_URL to test another target.
 const baseURL = process.env.PLAYWRIGHT_BASE_URL ?? 'http://localhost:5173';
