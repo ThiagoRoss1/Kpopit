@@ -12,8 +12,12 @@ load_dotenv()
 
 logger = logging.getLogger(__name__)
 
-BUCKET_NAME = os.getenv("R2_BUCKET_NAME")
+# Backups go only to the private bucket in R2_BACKUP_BUCKET_NAME. There is deliberately no fallback
+# to R2_BUCKET_NAME (the public image bucket): without the backup bucket nothing is dumped or uploaded.
+BUCKET_NAME = os.getenv("R2_BACKUP_BUCKET_NAME")
+# A read-only role (kpopit_backup) when set; otherwise the app's own connection.
 DB_URL = os.getenv("BACKUP_DB_URL") or os.getenv("DB_URL")
+OBJECT_PREFIX = "backups_db/"
 
 
 def _pg_dump_version(pg_dump: str) -> str:
@@ -25,7 +29,7 @@ def _pg_dump_version(pg_dump: str) -> str:
 
 
 def postgresql_backup_to_s3():
-    """Dump the database with pg_dump and upload it to R2 under backups/.
+    """Dump the database with pg_dump and upload it to R2_BACKUP_BUCKET_NAME under OBJECT_PREFIX.
 
     Returns (success, filename). Only controlled diagnostics go to logs: neither the
     database URL nor pg_dump stderr, whose parse errors can echo credential fragments."""
@@ -33,9 +37,9 @@ def postgresql_backup_to_s3():
 
     missing = []
     if not DB_URL:
-        missing.append("DB_URL")
+        missing.append("BACKUP_DB_URL or DB_URL")
     if not BUCKET_NAME:
-        missing.append("R2_BUCKET_NAME")
+        missing.append("R2_BACKUP_BUCKET_NAME")
     if missing:
         logger.error("Backup misconfigured, missing environment variables: %s", ", ".join(missing))
         return False, None
@@ -82,7 +86,7 @@ def postgresql_backup_to_s3():
         )
 
         logger.info("Uploading backup %s to R2...", filename)
-        s3.upload_file(local_path, BUCKET_NAME, f"backups/{filename}")
+        s3.upload_file(local_path, BUCKET_NAME, f"{OBJECT_PREFIX}{filename}")
         logger.info("Backup %s uploaded successfully.", filename)
         return True, filename
 
@@ -104,5 +108,9 @@ def postgresql_backup_to_s3():
 if __name__ == "__main__":
     logging.basicConfig(level=logging.INFO)
     success, filename = postgresql_backup_to_s3()
-    logger.info("Backup successful: %s", filename) if success else logger.error("Backup failed (see log above)")
+    if success:
+        logger.info("Backup successful: %s%s", OBJECT_PREFIX, filename)
+    else:
+        logger.error("Backup failed (see log above)")
+    raise SystemExit(0 if success else 1)
 

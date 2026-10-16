@@ -1,6 +1,7 @@
 """/api/tasks/backup auth + rate limit, and backup_service failure handling. Nothing reaches pg_dump or R2."""
 
 import logging
+import os
 import subprocess
 from concurrent.futures import ThreadPoolExecutor
 from pathlib import Path
@@ -216,3 +217,116 @@ def test_backup_can_use_a_separate_read_only_database_login(monkeypatch):
     monkeypatch.setenv("BACKUP_DB_URL", "postgresql://backup@127.0.0.1/example")
     namespace = runpy.run_path(backup_service.__file__)
     assert namespace["DB_URL"] == "postgresql://backup@127.0.0.1/example"
+
+
+# --- Bucket and database variables (read at import, so each case reloads the module) ------
+
+@pytest.fixture
+def configured(monkeypatch, tmp_path):
+    """Reload backup_service with exactly the given variables; restore it afterwards."""
+    import importlib
+
+    names = ("R2_BACKUP_BUCKET_NAME", "R2_BUCKET_NAME", "BACKUP_DB_URL", "DB_URL")
+    original = {name: os.environ.get(name) for name in names}
+
+    def _configure(**env):
+        for name in names:
+            monkeypatch.delenv(name, raising=False)
+        for name, value in env.items():
+            monkeypatch.setenv(name, value)
+        module = importlib.reload(backup_service)
+        monkeypatch.setattr(module.tempfile, "gettempdir", lambda: str(tmp_path))
+        return module
+
+    yield _configure
+    for name, value in original.items():
+        if value is None:
+            os.environ.pop(name, None)
+        else:
+            os.environ[name] = value
+    importlib.reload(backup_service)
+
+
+class RecordingStorage:
+    def __init__(self):
+        self.calls = []
+
+    def upload_file(self, local_path, bucket, key):
+        self.calls.append((bucket, key))
+
+
+def _fake_tools(monkeypatch, module):
+    """Fake pg_dump and boto3; returns (dumped DSNs, storage, created clients)."""
+    dsns, clients, storage = [], [], RecordingStorage()
+    monkeypatch.setattr(module.shutil, "which", lambda _: "/usr/bin/pg_dump")
+
+    def fake_run(args, **kwargs):
+        if "--version" in args:
+            return subprocess.CompletedProcess(args, 0, stdout="pg_dump (PostgreSQL) 18.3\n", stderr="")
+        dsns.append(args[args.index("--dbname") + 1])
+        Path(args[args.index("--file") + 1]).write_text("-- dump", encoding="utf-8")
+        return subprocess.CompletedProcess(args, 0, stdout="", stderr="")
+
+    def fake_client(*args, **kwargs):
+        clients.append(kwargs)
+        return storage
+
+    monkeypatch.setattr(module.subprocess, "run", fake_run)
+    monkeypatch.setattr(module.boto3, "client", fake_client)
+    return dsns, storage, clients
+
+
+@pytest.mark.parametrize("bucket_env", [{}, {"R2_BACKUP_BUCKET_NAME": ""}])
+def test_missing_backup_bucket_uploads_nothing(configured, monkeypatch, caplog, bucket_env):
+    module = configured(DB_URL="postgresql://app@127.0.0.1/app", **bucket_env)
+    dsns, storage, clients = _fake_tools(monkeypatch, module)
+    with caplog.at_level(logging.ERROR):
+        assert module.postgresql_backup_to_s3() == (False, None)
+    assert (dsns, storage.calls, clients) == ([], [], [])
+    assert "missing environment variables: R2_BACKUP_BUCKET_NAME" in caplog.text
+
+
+def test_public_image_bucket_is_never_a_fallback(configured, monkeypatch, caplog):
+    module = configured(DB_URL="postgresql://app@127.0.0.1/app", R2_BUCKET_NAME="public-images")
+    dsns, storage, clients = _fake_tools(monkeypatch, module)
+    with caplog.at_level(logging.ERROR):
+        assert module.postgresql_backup_to_s3() == (False, None)
+    assert (dsns, storage.calls, clients) == ([], [], [])
+    assert "R2_BACKUP_BUCKET_NAME" in caplog.text
+    assert "public-images" not in caplog.text
+
+
+def test_happy_path_uploads_to_the_backup_bucket_under_backups_db(configured, monkeypatch, caplog):
+    module = configured(DB_URL="postgresql://app@127.0.0.1/app", R2_BUCKET_NAME="public-images",
+                        R2_BACKUP_BUCKET_NAME="private-backups")
+    dsns, storage, _ = _fake_tools(monkeypatch, module)
+    with caplog.at_level(logging.INFO):
+        success, filename = module.postgresql_backup_to_s3()
+    assert success
+    [(bucket, key)] = storage.calls
+    assert bucket == "private-backups"
+    assert key == f"backups_db/{filename}"
+    assert filename.startswith("backup_") and filename.endswith(".sql")
+    assert "postgresql://" not in caplog.text
+
+
+def test_backup_db_url_wins_and_db_url_is_the_fallback(configured, monkeypatch):
+    module = configured(BACKUP_DB_URL="postgresql://reader@127.0.0.1/source", DB_URL="postgresql://app@127.0.0.1/app",
+                        R2_BACKUP_BUCKET_NAME="private-backups")
+    dsns, _, _ = _fake_tools(monkeypatch, module)
+    assert module.postgresql_backup_to_s3()[0]
+    assert dsns == ["postgresql://reader@127.0.0.1/source"]
+
+    module = configured(DB_URL="postgresql://app@127.0.0.1/app", R2_BACKUP_BUCKET_NAME="private-backups")
+    dsns, _, _ = _fake_tools(monkeypatch, module)
+    assert module.postgresql_backup_to_s3()[0]
+    assert dsns == ["postgresql://app@127.0.0.1/app"]
+
+
+def test_missing_database_names_both_variables_and_no_url(configured, monkeypatch, caplog):
+    module = configured(R2_BACKUP_BUCKET_NAME="private-backups")
+    dsns, storage, _ = _fake_tools(monkeypatch, module)
+    with caplog.at_level(logging.ERROR):
+        assert module.postgresql_backup_to_s3() == (False, None)
+    assert (dsns, storage.calls) == ([], [])
+    assert "missing environment variables: BACKUP_DB_URL or DB_URL" in caplog.text

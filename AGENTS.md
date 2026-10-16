@@ -130,7 +130,10 @@ Use these for any user-facing auth/profile input. They return `None` if valid, a
 | `ADMIN_ENABLED` | Enables admin blueprint |
 | `MAINTENANCE_MODE` | Disables all `/api` routes |
 | `COLLECTION_ENABLED` | Registers `collection_bp` and enables the win→card grant hook (Album 1 collection) |
-| `R2_*` | Cloudflare R2 credentials/bucket names for idol photos, user avatars (`R2_AVATARS_BUCKET_NAME`), and DB backups |
+| `R2_*` | Cloudflare R2 credentials/bucket names for idol photos (`R2_BUCKET_NAME`, the public image bucket — backups never use it) and user avatars (`R2_AVATARS_BUCKET_NAME`) |
+| `R2_BACKUP_BUCKET_NAME` | Private bucket for DB backups (`services/backup_service.py`, objects under `backups_db/`). Required: when missing or empty the backup fails closed and uploads nothing — there is no fallback to `R2_BUCKET_NAME`. Uses `R2_ACCESS_KEY_ID` / `R2_SECRET_ACCESS_KEY` / `R2_ENDPOINT_URL` |
+| `BACKUP_DB_URL` | Optional database URL for `pg_dump` (e.g. the read-only `kpopit_backup` role); falls back to `DB_URL` |
+| `BACKUP_AUTH_KEY` | Bearer key for `POST /api/tasks/backup`; when unset the route rejects every request |
 | `JWT_*` | JWT signing + expiry (`JWT_SECRET_KEY` ≥32 chars, `JWT_ACCESS_TOKEN_EXPIRES`, `JWT_REFRESH_TOKEN_EXPIRES`) |
 | `RESEND_*` | Resend email delivery (`RESEND_API_KEY`, `RESEND_EMAIL_FROM`, `RESEND_EMAIL_FRONTEND_URL` — base URL used to build all email links) |
 
