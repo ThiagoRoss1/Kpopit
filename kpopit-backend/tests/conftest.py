@@ -149,6 +149,18 @@ class Outbox:
         sent = [m for m in self.all() if m["to"] == address]
         return sent[-1] if sent else None
 
+    def wait_for(self, address: str, timeout: float = 5.0) -> dict | None:
+        """latest_to, polling: some emails (forgot-password) are sent off the request thread."""
+        import time
+
+        deadline = time.monotonic() + timeout
+        while time.monotonic() < deadline:
+            mail = self.latest_to(address)
+            if mail:
+                return mail
+            time.sleep(0.05)
+        return None
+
 
 @pytest.fixture(autouse=True)
 def email_outbox(monkeypatch, tmp_path):

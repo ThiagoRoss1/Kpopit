@@ -71,6 +71,9 @@ class AuthService:
 
     # Register
     def register(self, cursor, username: str, password: str, email: str | None) -> dict:
+        # Hash first: every outcome pays the bcrypt cost, so a duplicate email isn't faster.
+        password_hash = self.hash_password(password)
+
         if self.user_repo.find_by_username(cursor, username):
             raise ValueError("username_taken")
         
@@ -78,7 +81,6 @@ class AuthService:
             raise ValueError("email_taken")
 
         token = str(uuid.uuid4())
-        password_hash = self.hash_password(password)
         user = self.user_repo.create_with_credentials(cursor, token, username, password_hash, email)
 
         # Create an initial profile record for the new user
@@ -144,6 +146,9 @@ class AuthService:
         if user.get("is_authenticated"):
             raise ValueError("already_claimed")
 
+        # Hash first: every outcome pays the bcrypt cost, so a duplicate email isn't faster.
+        password_hash = self.hash_password(password)
+
         conflict = self.user_repo.find_by_username(cursor, username)
         if conflict and conflict["id"] != user["id"]:
             raise ValueError("username_taken")
@@ -153,8 +158,6 @@ class AuthService:
 
             if conflict and conflict["id"] != user["id"]:
                 raise ValueError("email_taken")
-
-        password_hash = self.hash_password(password)
         updated_user = self.user_repo.upgrade_to_authenticated(cursor, anon_token, username, password_hash, email)
 
         # Create an initial profile record for the new user

@@ -360,7 +360,7 @@ def test_password_reset_via_outbox(client, email_outbox):
 
     res = client.post("/api/auth/email/forgot-password", json={"email": "resetter@example.com"})
     assert res.status_code == 200
-    mail = email_outbox.latest_to("resetter@example.com")
+    mail = email_outbox.wait_for("resetter@example.com")
     assert mail is not None and "/reset-password?token=" in mail["link"]
     token = parse_qs(urlparse(mail["link"]).query)["token"][0]
 

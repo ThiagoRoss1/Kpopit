@@ -4,10 +4,11 @@ from flask import Blueprint, request, jsonify, g, json
 from utils.auth_decorators import require_auth
 from utils.auth_helpers import validate_password, validate_and_normalize_email
 from services.email_service import EmailService
-from services.get_db import get_db
+from services.get_db import get_db, get_manual_db
 from repositories.user_repository import UserRepository
 import secrets
 import hashlib
+from concurrent.futures import ThreadPoolExecutor
 from datetime import timedelta
 from utils.dates import utc_now
 from services.auth_service import AuthService
@@ -145,65 +146,63 @@ def verify_email():
     finally:
         cursor.close()
 
+FORGOT_PASSWORD_MESSAGE = "If an account with that email exists, a password reset link has been sent"
+
+# Forgot-password work (lookup, token write, Resend call) runs off the request thread, so the
+# response time is the same whether or not the email has an account (no enumeration by timing).
+_background = ThreadPoolExecutor(max_workers=2, thread_name_prefix="forgot-password")
+
+
+def _issue_password_reset(email: str) -> None:
+    try:
+        with get_manual_db() as connect:
+            with connect.cursor() as cursor:
+                user = UserRepository(connect).find_by_email(cursor, email)
+                if not user:
+                    return
+
+                raw_token = secrets.token_urlsafe(32)
+                token_hash = hashlib.sha256(raw_token.encode()).hexdigest()
+                expires_at = utc_now() + timedelta(hours=1)
+
+                cursor.execute(
+                    """
+                        DELETE FROM email_tokens
+                        WHERE user_id = %s
+                        AND token_type = 'password_reset'
+                        AND used_at IS NULL
+                    """, (user["id"],)
+                )
+                cursor.execute(
+                    """
+                        INSERT INTO email_tokens (user_id, token_hash, token_type, expires_at)
+                        VALUES (%s, %s, 'password_reset', %s)
+                    """, (user["id"], token_hash, expires_at)
+                )
+                connect.commit()
+
+            reset_url = f"{RESEND_EMAIL_FRONTEND_URL}/reset-password?token={raw_token}"
+            EmailService.send_password_reset(
+                to_email=user["email"],
+                username=user["username"],
+                reset_link=reset_url
+            )
+    except Exception:
+        logger.exception("Failed to issue a password reset")
+
+
 @email_bp.route("/auth/email/forgot-password", methods=["POST"])
 @limiter.limit("3 per hour; 5 per day")
 def forgot_password():
-    """Endpoint to trigger sending a password reset link to the user's email address."""
-    data = request.get_json()
+    """Queue a password reset link for the email; always the same answer, at the same speed."""
+    data = request.get_json(silent=True) or {}
     email = data.get("email")
 
     if not email:
         return jsonify({"error": "Missing email"}), 400
 
-    connect = get_db()
-    cursor = connect.cursor()
-
-    try:
-        repo = UserRepository(connect)
-        user = repo.find_by_email(cursor, email)
-
-        if not user:
-            return jsonify({"message": "If an account with that email exists, a password reset link has been sent"}), 200
-        
-        raw_token = secrets.token_urlsafe(32)
-        token_hash = hashlib.sha256(raw_token.encode()).hexdigest()
-        expires_at = utc_now() + timedelta(hours=1)
-
-        cursor.execute(
-            """
-                DELETE FROM email_tokens
-                WHERE user_id = %s
-                AND token_type = 'password_reset'
-                AND used_at IS NULL
-            """, (user["id"],)
-        )
-
-        cursor.execute(
-            """
-                INSERT INTO email_tokens (user_id, token_hash, token_type, expires_at)
-                VALUES (%s, %s, 'password_reset', %s)
-            """, (user["id"], token_hash, expires_at)
-        )
-
-        connect.commit()
-
-        # Send password reset email
-        reset_url = f"{RESEND_EMAIL_FRONTEND_URL}/reset-password?token={raw_token}"
-        EmailService.send_password_reset(
-            to_email=user["email"],
-            username=user["username"],
-            reset_link=reset_url
-        )
-
-        return jsonify({"message": "If an account with that email exists, a password reset link has been sent"}), 200
-        
-    except Exception:
-        connect.rollback()
-        logger.exception("Failed to send password reset email")
-        return jsonify({"error": "Failed to send password reset email"}), 500
-    
-    finally:
-        cursor.close()
+    _background.submit(_issue_password_reset, email)
+    return jsonify({"message": FORGOT_PASSWORD_MESSAGE}), 200
 
 @email_bp.route("/auth/email/reset-password", methods=["POST"])
 @limiter.limit("5 per hour; 10 per day")
