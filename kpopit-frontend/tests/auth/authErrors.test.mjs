@@ -2,9 +2,9 @@ import test from 'node:test';
 import assert from 'node:assert/strict';
 import { isSessionRejected } from '../../src/utils/authErrors.ts';
 
-test('401 and 404 from the server end the session', () => {
+test('only a rejected session (401) ends the session', () => {
     assert.equal(isSessionRejected({ response: { status: 401 } }), true);
-    assert.equal(isSessionRejected({ response: { status: 404 } }), true);
+    assert.equal(isSessionRejected({ response: { status: 404 } }), false);
 });
 
 test('network errors, timeouts and 5xx are transient', () => {

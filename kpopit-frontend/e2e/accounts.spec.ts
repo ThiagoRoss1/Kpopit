@@ -129,6 +129,27 @@ test.describe('Accounts', () => {
     await expect.poll(() => page.evaluate(() => localStorage.getItem('kpopit_session'))).toBeNull();
   });
 
+  test('a session recovers on reconnect after all timed refresh retries fail', async ({ page }) => {
+    const user = newUser();
+    await page.goto('/');
+    await registerViaApi(page, user);
+    await page.clock.install();
+    let attempts = 0;
+    await page.route('**/api/auth/refresh', (route) => {
+      attempts += 1;
+      return route.fulfill({ status: 503, contentType: 'application/json', body: '{}' });
+    });
+    await page.reload();
+    await expect.poll(() => attempts).toBe(1);
+    for (const [i, delay] of [2_000, 5_000, 15_000].entries()) {
+      await page.clock.fastForward(delay);
+      await expect.poll(() => attempts).toBe(i + 2);
+    }
+    await page.unroute('**/api/auth/refresh');
+    await page.evaluate(() => window.dispatchEvent(new Event('online')));
+    await expect(page.locator('nav').getByRole('button', { name: 'User menu' }).first()).toBeVisible();
+  });
+
   test('login rejects a wrong password', async ({ page }) => {
     const user = newUser();
     await page.goto('/');

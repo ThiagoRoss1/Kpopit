@@ -184,8 +184,8 @@ def refresh():
     """
     Issues a new access token from the httpOnly refresh cookie.
     Cookie path is /api/auth (prod) or / (dev); SameSite/Secure are set
-    in _set_refresh_cookie. In production the refresh token is also rotated
-    on every successful call (see AuthService.refresh_access_token).
+    in _set_refresh_cookie. In production refresh tokens rotate after half
+    their lifetime has elapsed (see AuthService.refresh_access_token).
     """
     raw_refresh = request.cookies.get("refresh_token")
 

@@ -28,15 +28,21 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
     const isRefreshingRef = useRef(false);
     const retryCountRef = useRef(0);
     const retryTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+    const transientFailureRef = useRef(false);
     const restoreSessionRef = useRef<() => Promise<void>>(async () => {});
 
     const restoreSession = useCallback(async () => {
         if (isRefreshingRef.current) return;
+        if (retryTimerRef.current) {
+            clearTimeout(retryTimerRef.current);
+            retryTimerRef.current = null;
+        }
 
         const hadSession =
             localStorage.getItem('kpopit_session') ??
             sessionStorage.getItem('kpopit_session');
         if (!hadSession) {
+            transientFailureRef.current = false;
             const wasAuthenticated = localStorage.getItem('kpopit_was_authenticated') === 'true';
             if (wasAuthenticated) {
                 localStorage.removeItem('userToken');
@@ -68,14 +74,15 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
             }
 
             retryCountRef.current = 0;
+            transientFailureRef.current = false;
             setState({ isAuthenticated: true, isLoading: false, user: me });
         } catch (err) {
             if (!isSessionRejected(err)) {
-                // Transient (network, timeout, 5xx): keep the session markers, the UUID and the
-                // local game state, show logged-out for now and retry in the background.
-                clearAccessToken();
+                // A failed refresh cannot invalidate an already authenticated user/token.
+                // On first load we still need the server to confirm the session.
                 if (cancelledRef.current) return;
-                setState({ isAuthenticated: false, isLoading: false, user: null });
+                transientFailureRef.current = true;
+                setState(s => ({ ...s, isLoading: false }));
                 const delay = RESTORE_RETRY_DELAYS_MS[retryCountRef.current];
                 if (delay !== undefined) {
                     retryCountRef.current += 1;
@@ -85,6 +92,7 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
             }
 
             const wasAuthenticated = localStorage.getItem('kpopit_was_authenticated') === 'true';
+            transientFailureRef.current = false;
             clearAccessToken();
             localStorage.removeItem('kpopit_session');
             sessionStorage.removeItem('kpopit_session');
@@ -128,10 +136,19 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
     useEffect(() => {
         cancelledRef.current = false;
         restoreSession();
+        const retryOnReconnect = () => {
+            if (!transientFailureRef.current) return;
+            retryCountRef.current = 0;
+            void restoreSessionRef.current();
+        };
+        window.addEventListener('online', retryOnReconnect);
+        window.addEventListener('focus', retryOnReconnect);
 
         return () => {
             cancelledRef.current = true;
             if (retryTimerRef.current) clearTimeout(retryTimerRef.current);
+            window.removeEventListener('online', retryOnReconnect);
+            window.removeEventListener('focus', retryOnReconnect);
         };
     }, [restoreSession]);
 
