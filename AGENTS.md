@@ -93,9 +93,9 @@ Use these for any user-facing auth/profile input. They return `None` if valid, a
 - `validate_password` — 8–128 chars (upper bound prevents bcrypt-cost-12 DoS via huge payloads).
 
 ## Date/Time Conventions (`utils/dates.py`)
-- **EST helpers** for daily-game logic: `get_today_now()`, `get_today_date()`, `get_today_date_str()` (ISO `YYYY-MM-DD`), `get_current_timestamp()`. Anchored to `America/New_York`.
-- **UTC helper** for token/session timestamps: `get_datetime_now_utc()` — use this for all `email_tokens.expires_at` / `refresh_tokens.expires_at` comparisons.
-- **`TEST_MODE`** — When `FLASK_ENV=development`, can be flipped on to offset "today" by `TEST_DATE_OFFSET` days; production always returns real time.
+- **Game-day helpers** (which puzzle, history day and streak day it is): `get_today_now()`, `get_today_date()`, `get_today_date_str()` (ISO `YYYY-MM-DD`). Anchored to `America/New_York`; the daily reset is midnight there.
+- **Real-time helpers** (never offset): `utc_now()` for token/session timestamps and every `email_tokens` / `refresh_tokens` expiry; `est_now()` / `get_current_timestamp()` for real New York moments (`created_at`, `won_at`, transfer-code expiry).
+- **`TEST_MODE`** — With `FLASK_ENV=development`, `TEST_DATE_OFFSET` shifts only the game-day helpers by that many days; tokens and expiries keep the real clock. Production ignores it.
 
 ## Frontend Auth Layer (`kpopit-frontend/src/`)
 - **`contexts/AuthProvider.tsx` + `contexts/auth_context.ts`** — `AuthProvider` is mounted at the app root and exposes `{ isAuthenticated, isLoading, user, refreshAuth }` via `AuthContext`. On mount it attempts a silent refresh via `/auth/refresh` → `/auth/me` if a session marker exists.
