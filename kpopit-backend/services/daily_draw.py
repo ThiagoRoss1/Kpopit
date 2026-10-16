@@ -204,8 +204,9 @@ def ensure_daily_picks(cursor, gamemode_id: int, rng: random.Random | None = Non
     try:
         ensure_pick(cursor, gamemode_id, today + timedelta(days=1), rng)
         cursor.execute("RELEASE SAVEPOINT draw_tomorrow")
-    except Exception:
+    except Exception as error:
         cursor.execute("ROLLBACK TO SAVEPOINT draw_tomorrow")
-        logger.exception("Could not draw tomorrow's pick for gamemode %s", gamemode_id)
+        # Database diagnostics can contain tomorrow's failed row/answer ID.
+        logger.error("Could not draw tomorrow's pick for gamemode %s (%s)", gamemode_id, type(error).__name__)
 
     return today_id

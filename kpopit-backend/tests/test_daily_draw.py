@@ -275,14 +275,14 @@ def test_tomorrow_pick_exists_but_no_route_returns_it(client, db_conn, make_idol
         assert _pick(db_conn, tomorrow, gamemode_id)[column] == tomorrow_pick[column]
 
 
-def test_tomorrow_draw_failure_keeps_today(db_conn, make_idol, monkeypatch):
+def test_tomorrow_draw_failure_keeps_today(db_conn, make_idol, monkeypatch, caplog):
     make_idol("Solo")
     today = get_today_date()
     real = daily_draw.ensure_pick
 
     def flaky(cursor, gamemode_id, pick_date, rng=None):
         if pick_date > today:
-            raise RuntimeError("boom")
+            raise RuntimeError("Failing row contains future-answer-secret-8675309")
         return real(cursor, gamemode_id, pick_date, rng)
 
     monkeypatch.setattr(daily_draw, "ensure_pick", flaky)
@@ -291,3 +291,5 @@ def test_tomorrow_draw_failure_keeps_today(db_conn, make_idol, monkeypatch):
     db_conn.commit()
     assert _pick(db_conn, today, 1) is not None
     assert _pick(db_conn, today + timedelta(days=1), 1) is None
+    assert "future-answer-secret-8675309" not in caplog.text
+    assert "Could not draw tomorrow" in caplog.text
