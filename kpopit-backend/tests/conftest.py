@@ -1,20 +1,15 @@
 """
-Integration-test scaffolding for kpopit-backend.
-
-Requirements
-------------
-- A local PostgreSQL database with the full schema already applied.
-- `TEST_DB_URL` env var pointing to that DB.
-  If unset, we fall back to `DB_URL` with the database name swapped to
-  `kpopit_test` so accidental runs never touch the dev/prod DB.
-
-The fixture suite TRUNCATEs every transactional table before each test and
-re-seeds the three gamemodes (FK targets), giving each test a clean slate.
+Integration-test scaffolding: a local, disposable `kpopit_test` database (TEST_DB_URL).
+Every test starts from TRUNCATEd tables with the gamemodes and Album 1 re-seeded.
 """
 
 import os
 import sys
 from pathlib import Path
+
+import psycopg
+import pytest
+from psycopg.rows import dict_row
 
 BACKEND_ROOT = Path(__file__).resolve().parent.parent
 sys.path.insert(0, str(BACKEND_ROOT))
@@ -55,9 +50,7 @@ os.environ.setdefault(
     "test_jwt_secret_key_at_least_32_chars_long_for_pytest_runs",
 )
 os.environ.setdefault("FLASK_ENV", "development")
-# Force the collection feature on for the suite: collection_bp registration and
-# the grant hook both read this at import time. Hook on/off behaviour is still
-# exercised per-test via monkeypatch on services.game_service.COLLECTION_ENABLED.
+# Read at import by collection_bp and the grant hook; tests flip the hook via monkeypatch.
 os.environ["COLLECTION_ENABLED"] = "true"
 # Register the admin blueprint regardless of the local .env, so its auth rules are always tested.
 os.environ["ADMIN_ENABLED"] = "true"
@@ -66,12 +59,8 @@ os.environ["ADMIN_ENABLED"] = "true"
 os.environ["EMAIL_DELIVERY"] = "outbox"
 os.environ["RESEND_API_KEY"] = "re_disabled_for_tests"
 
-import psycopg  # noqa: E402
-import pytest  # noqa: E402
-from psycopg.rows import dict_row  # noqa: E402
-
-from app import app as flask_app  # noqa: E402
-from utils.dates import get_today_date_str  # noqa: E402
+# The app and every module that reads env vars at import are imported lazily, inside the
+# fixtures, so the environment above is always in place first.
 
 
 TRUNCATE_SQL = """
@@ -116,6 +105,8 @@ SEED_COLLECTIONS_SQL = """
 
 @pytest.fixture(scope="session")
 def app():
+    from app import app as flask_app
+
     flask_app.config["TESTING"] = True
     yield flask_app
 
@@ -178,8 +169,9 @@ def email_outbox(monkeypatch, tmp_path):
 
 
 @pytest.fixture(autouse=True)
-def reset_rate_limits():
-    """In-memory limiter counters are process-wide; start every test from zero."""
+def reset_rate_limits(app):
+    """In-memory limiter counters are process-wide; start every test from zero.
+    Depends on `app`: the limiter only has storage once the app has called init_app."""
     from utils.rate_limiter import limiter
 
     limiter.reset()
@@ -198,6 +190,8 @@ def reset_db(db_conn):
 
 @pytest.fixture
 def today():
+    from utils.dates import get_today_date_str
+
     return get_today_date_str()
 
 

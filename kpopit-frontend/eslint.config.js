@@ -29,4 +29,9 @@ export default tseslint.config([
       'react-hooks/preserve-manual-memoization': 'warn',
     },
   },
+  {
+    // Playwright reads a fixture's dependencies from its first parameter, so `({}, use)` is required.
+    files: ['e2e/**/*.ts'],
+    rules: { 'no-empty-pattern': ['error', { allowObjectPatternsAsParameters: true }] },
+  },
 ])

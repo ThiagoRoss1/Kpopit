@@ -53,7 +53,6 @@ export type ConsoleErrors = { list: string[] };
 
 export const test = base.extend<{ consoleErrors: ConsoleErrors }, { backend: OffsetBackend }>({
   backend: [
-    // eslint-disable-next-line no-empty-pattern
     async ({}, provide) => {
       const backend = new OffsetBackend(0, 5000);
       const frontendDir = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '../..');

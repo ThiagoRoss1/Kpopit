@@ -226,7 +226,7 @@ def test_concurrent_draws_produce_one_pick(make_idol):
                 barrier.wait()
                 results.append(ensure_pick(cur, 1, today, random.Random(seed)))
                 conn.commit()
-        except Exception as e:  # pragma: no cover - surfaced below
+        except Exception as e:
             errors.append(e)
 
     threads = [threading.Thread(target=worker, args=(seed,)) for seed in range(4)]

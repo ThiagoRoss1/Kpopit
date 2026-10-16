@@ -1,26 +1,18 @@
 """
-Simulate the daily draw (services/daily_draw.py) in memory for every mode.
+Simulate services/daily_draw.py in memory for every mode, from the catalog and pick history in
+DB_URL (read-only connection; nothing is written, the catalog stays static). From kpopit-backend:
 
-Reads the current catalog and past picks from the DB in DB_URL through a READ ONLY
-connection, then runs the real `draw()` day by day without writing anything. The
-catalog stays as it is today (no new idols/albums during the simulation).
-
-    .venv/Scripts/python.exe scripts/simulate_draw.py            # 730 days, seed 42
-    .venv/Scripts/python.exe scripts/simulate_draw.py --days 365 --seed 7
+    python -m scripts.simulate_draw [--days 730] [--seed 42]
 """
 
 import argparse
-import os
 import random
-import sys
 from collections import Counter
 from datetime import timedelta
 
-sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
-
-from services.daily_draw import _MODES, DrawItem, draw  # noqa: E402
-from services.get_db import get_manual_db, pool  # noqa: E402
-from utils.dates import get_today_date  # noqa: E402
+from services.daily_draw import _MODES, DrawItem, draw
+from services.get_db import get_manual_db, pool
+from utils.dates import get_today_date
 
 MODE_NAMES = {1: "Classic", 2: "Blurry", 3: "Pixelated"}
 RETURN_WINDOW = 30
