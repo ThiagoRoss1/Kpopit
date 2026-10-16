@@ -1,9 +1,12 @@
+import logging
 from flask import Blueprint, jsonify
 from services.get_db import get_db
 from repositories.idol_repository import IdolRepository
 from repositories.idol_repository import CURRENT_CAREER_CTE
 
 idols_page_bp = Blueprint('idols_page', __name__)
+
+logger = logging.getLogger(__name__)
 
 @idols_page_bp.route("/idols-page", methods=["GET"])
 def get_idols_page():
@@ -42,9 +45,9 @@ def get_idols_page():
                 cursor.execute(idol_page_query)
                 return jsonify(cursor.fetchall())
 
-            except Exception as e:
-                print(f"Error fetching idols page data: {e}")
-                return jsonify({"error": str(e)}), 500
+            except Exception:
+                logger.exception("Error fetching idols page data")
+                return jsonify({"error": "Could not load idols"}), 500
         
 @idols_page_bp.route("/idols-page/<int:idol_id>", methods=["GET"])
 def get_idols_page_idol(idol_id):
@@ -130,7 +133,7 @@ def get_idols_page_idol(idol_id):
 
                 return jsonify(response)
             
-            except Exception as e:
-                print(f"Error fetching idol data: {str(e)}")
+            except Exception:
+                logger.exception("Error fetching idol data")
                 return jsonify({"error": "Internal Server Error"}), 500
             

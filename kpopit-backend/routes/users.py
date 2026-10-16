@@ -27,7 +27,6 @@ def generate_user_token():
 
     # Try up to 5 times
     attempts = 0
-    error = ""
 
     while not token_sucessfuly_generated and attempts < 5:
         connect = None
@@ -47,12 +46,11 @@ def generate_user_token():
             
             token_sucessfuly_generated = True
             
-        except Exception as e:
+        except Exception:
             if connect is not None:
                 connect.rollback()
             attempts += 1
-            print(f"Token generation attempt {attempts} failed: {e}")
-            error += str(e)
+            logger.exception("Token generation attempt %s failed", attempts)
         
         finally:
             if cursor is not None:
@@ -61,7 +59,7 @@ def generate_user_token():
     if token_sucessfuly_generated:
         return jsonify({"token": token})
     else:
-        return jsonify({"error": "Failed to generate unique token after 5 attempts", "details": error}), 500
+        return jsonify({"error": "Failed to generate unique token after 5 attempts"}), 500
     
 @user_bp.route("/stats/<user_token>", methods=["GET"])
 def get_user_stats(user_token):
@@ -200,7 +198,6 @@ def generate_transfer_code(user_token):
 
     # Generate unique transfer code
     attempts = 0
-    error = ""
     while not code_generated and attempts < 5:
         try:
             # Guarantee uniqueness by checking existing codes
@@ -232,18 +229,17 @@ def generate_transfer_code(user_token):
             connect.commit()
             code_generated = True
 
-        except Exception as e:
+        except Exception:
             connect.rollback()
             attempts += 1
-            print(f"Transfer code generation attempt {attempts} failed: {e}")
-            error += str(e)
+            logger.exception("Transfer code generation attempt %s failed", attempts)
 
     cursor.close()
 
     if code_generated:
         return jsonify({"transfer_code": code, "expires_at": expires_at.isoformat()})
     else:
-        return jsonify({"error": "Failed to generate unique transfer code after 5 attempts", "details": error}), 500
+        return jsonify({"error": "Failed to generate unique transfer code after 5 attempts"}), 500
     
 @user_bp.route("/transfer-data", methods=["POST"])
 def transfer_data():

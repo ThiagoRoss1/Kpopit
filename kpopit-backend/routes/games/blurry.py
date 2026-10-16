@@ -1,3 +1,4 @@
+import logging
 import os
 from flask import Blueprint, jsonify, request, g
 from utils.auth_decorators import optional_auth
@@ -14,6 +15,8 @@ load_dotenv()
 FLASK_ENV = os.getenv("FLASK_ENV")
 
 blurry_bp = Blueprint('blurry', __name__)
+
+logger = logging.getLogger(__name__)
 
 @blurry_bp.route("/game/blurry/daily-idol", methods=["GET"])
 def get_daily_blurry_idol():
@@ -152,8 +155,8 @@ def guess_blurry_idol():
                 answer_id, current_attempt, today, current_timestamp, analytics_data
             )
         
-        except Exception as e:
-            print(f"Error saving user history: {e}")
+        except Exception:
+            logger.exception("Error saving user history")
             return jsonify({"error": "Database error while saving user history"}), 500
         
         # Prepare for display
@@ -173,9 +176,9 @@ def guess_blurry_idol():
 
         return jsonify(response_data), 200
     
-    except Exception as e:
-        print(f"Error processing guess: {e}")
-        return jsonify({"error": str(e)}), 500
+    except Exception:
+        logger.exception("Error processing %s guess", "blurry")
+        return jsonify({"error": "Could not process the guess"}), 500
 
     finally:
         cursor.close()

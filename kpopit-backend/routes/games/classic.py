@@ -1,3 +1,4 @@
+import logging
 import os
 from flask import Blueprint, request, jsonify, g
 from services.daily_draw import ensure_daily_picks
@@ -14,6 +15,8 @@ load_dotenv()
 FLASK_ENV = os.getenv("FLASK_ENV", "production")
 
 classic_bp = Blueprint('classic', __name__)
+
+logger = logging.getLogger(__name__)
 
 # Create daily idol route
 @classic_bp.route("/game/classic/daily-idol")
@@ -259,8 +262,8 @@ def guess_idol():
                 answer_id, current_attempt, today, current_timestamp, analytics_data
             )
 
-        except Exception as e:
-            print(f"Error saving user history: {e}")
+        except Exception:
+            logger.exception("Error saving user history")
             return jsonify({"error": "Database error saving user history"}), 500
 
         keys_for_display = [
@@ -300,8 +303,8 @@ def guess_idol():
 
         return jsonify(response_data), 200
     
-    except Exception as e:
-        print(f"Error processing guess: {e}")
-        return jsonify({"error": str(e)}), 500
+    except Exception:
+        logger.exception("Error processing %s guess", "classic")
+        return jsonify({"error": "Could not process the guess"}), 500
     finally:
         cursor.close()

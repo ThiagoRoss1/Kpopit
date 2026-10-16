@@ -1,3 +1,4 @@
+import logging
 from flask import Blueprint, jsonify, request
 import os
 from dotenv import load_dotenv
@@ -10,6 +11,8 @@ DB_URL = os.getenv("DB_URL")
 BACKUP_KEY = os.getenv("BACKUP_KEY")
 
 admin_bp = Blueprint('admin', __name__)
+
+logger = logging.getLogger(__name__)
     
 @admin_bp.route("/api/admin/add-idol", methods=["POST"])
 @require_admin
@@ -93,9 +96,10 @@ def add_idol():
         conn.commit()
         return jsonify({"message": "Idol added successfully", "idol_id": final_idol_id}), 201
     
-    except Exception as e:
+    except Exception:
         conn.rollback()
-        return jsonify({"error": str(e)}), 500
+        logger.exception("Failed to add idol")
+        return jsonify({"error": "Failed to add idol"}), 500
     finally:
         cursor.close()
 
