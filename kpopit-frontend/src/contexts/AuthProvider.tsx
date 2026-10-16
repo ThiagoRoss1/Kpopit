@@ -1,7 +1,8 @@
 import { useCallback, useEffect, useRef, useState, type ReactNode } from "react";
 import { useQueryClient } from "@tanstack/react-query";
 import { AuthContext, type AuthState } from "./auth_context";
-import { getMe, refreshToken, restoreSession as restoreGameSession, isTimeoutError } from "../services/api";
+import { getMe, refreshToken, restoreSession as restoreGameSession } from "../services/api";
+import { isSessionRejected, RESTORE_RETRY_DELAYS_MS } from "../utils/authErrors";
 import { setAccessToken, clearAccessToken } from "../services/tokenStore";
 import { useClearGameStorage } from "../hooks/useClearGameStorage";
 import { applyRestoredSession } from "../utils/applyRestoredSession";
@@ -25,6 +26,9 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
 
     const cancelledRef = useRef(false);
     const isRefreshingRef = useRef(false);
+    const retryCountRef = useRef(0);
+    const retryTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+    const restoreSessionRef = useRef<() => Promise<void>>(async () => {});
 
     const restoreSession = useCallback(async () => {
         if (isRefreshingRef.current) return;
@@ -63,12 +67,20 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
                 }
             }
 
+            retryCountRef.current = 0;
             setState({ isAuthenticated: true, isLoading: false, user: me });
         } catch (err) {
-            if (isTimeoutError(err)) {
+            if (!isSessionRejected(err)) {
+                // Transient (network, timeout, 5xx): keep the session markers, the UUID and the
+                // local game state, show logged-out for now and retry in the background.
                 clearAccessToken();
                 if (cancelledRef.current) return;
                 setState({ isAuthenticated: false, isLoading: false, user: null });
+                const delay = RESTORE_RETRY_DELAYS_MS[retryCountRef.current];
+                if (delay !== undefined) {
+                    retryCountRef.current += 1;
+                    retryTimerRef.current = setTimeout(() => restoreSessionRef.current(), delay);
+                }
                 return;
             }
 
@@ -91,6 +103,10 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
             isRefreshingRef.current = false;
         }
     }, []);
+
+    useEffect(() => {
+        restoreSessionRef.current = restoreSession;
+    }, [restoreSession]);
 
     const refetchUser = useCallback(async (): Promise<void> => {
         try {
@@ -115,6 +131,7 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
 
         return () => {
             cancelledRef.current = true;
+            if (retryTimerRef.current) clearTimeout(retryTimerRef.current);
         };
     }, [restoreSession]);
 

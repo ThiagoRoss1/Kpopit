@@ -211,9 +211,9 @@ def refresh():
     except Exception:
         connect.rollback()
         logger.exception("Unexpected error during token refresh")
-        resp = make_response(jsonify({"error": "Could not refresh session"}), 500)
-        _clear_refresh_cookie(resp)
-        return resp
+        # Keep the cookie: a server error says nothing about the session, and clearing it
+        # here logged users out on any transient failure. Only a rejected token (401) clears it.
+        return jsonify({"error": "Could not refresh session"}), 500
 
     finally:
         cursor.close()

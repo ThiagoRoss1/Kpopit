@@ -90,6 +90,48 @@ test.describe('Accounts', () => {
     await expectLoggedIn(other);
   });
 
+  test('a transient refresh failure keeps the session and retries', async ({ page }) => {
+    const user = newUser();
+    await page.goto('/');
+    await registerViaApi(page, user);
+    await page.context().clearCookies();
+    await page.evaluate(() => localStorage.clear());
+    await loginViaUi(page, user, true);
+    await page.evaluate(() => localStorage.setItem('kpopit_marker_game_state', 'kept'));
+
+    // First refresh after the reload: a 503 (deploy, DB blip). Later ones reach the backend.
+    let failed = 0;
+    await page.route('**/api/auth/refresh', async (route) => {
+      if (failed === 0) {
+        failed += 1;
+        await route.fulfill({ status: 503, contentType: 'application/json', body: '{"error":"unavailable"}' });
+      } else {
+        await route.fallback();
+      }
+    });
+    await page.reload();
+    await expect.poll(() => failed).toBe(1);
+    expect(await page.evaluate(() => localStorage.getItem('kpopit_session'))).toBe('true');
+    expect(await page.evaluate(() => localStorage.getItem('userToken'))).toBeTruthy();
+    expect(await page.evaluate(() => localStorage.getItem('kpopit_marker_game_state'))).toBe('kept');
+    await expectLoggedIn(page); // the background retry restores it
+  });
+
+  test('a rejected refresh token logs the user out', async ({ page }) => {
+    const user = newUser();
+    await page.goto('/');
+    await registerViaApi(page, user);
+    await page.context().clearCookies();
+    await page.evaluate(() => localStorage.clear());
+    await loginViaUi(page, user, true);
+
+    await page.route('**/api/auth/refresh', (route) =>
+      route.fulfill({ status: 401, contentType: 'application/json', body: '{"error":"Session expired. Please log in again."}' }));
+    await page.reload();
+    await expectLoggedOut(page);
+    await expect.poll(() => page.evaluate(() => localStorage.getItem('kpopit_session'))).toBeNull();
+  });
+
   test('login rejects a wrong password', async ({ page }) => {
     const user = newUser();
     await page.goto('/');
