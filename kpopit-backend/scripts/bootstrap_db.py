@@ -7,7 +7,7 @@ locally the same way. Never a production copy.
         python scripts/bootstrap_db.py
 
 Refuses any host other than localhost, and exits non-zero if a migration fails
-(migrations/migrations.py on its own only prints the error).
+(the migration runner raises immediately on its first failure).
 """
 
 import os
