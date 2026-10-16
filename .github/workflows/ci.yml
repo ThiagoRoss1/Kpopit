@@ -166,8 +166,10 @@ jobs:
       JWT_SECRET_KEY: ci-dummy-jwt-secret-key-not-used-anywhere-else
       FRONTEND_URL: http://localhost:5173
       VITE_ENCRYPTION_KEY: ci-dummy-encryption-key-0123456789
-      VITE_IMAGE_BUCKET_URL: http://127.0.0.1:9
-      VITE_AVATARS_BUCKET_URL: http://127.0.0.1:9
+      # No image bucket in CI: this fake host is answered by a 1x1 PNG in e2e/support/fixtures.ts.
+      VITE_IMAGE_BUCKET_URL: http://images.e2e.invalid
+      VITE_AVATARS_BUCKET_URL: http://images.e2e.invalid
+      E2E_STUB_IMAGE_ORIGINS: http://images.e2e.invalid
       PYTHONIOENCODING: utf-8
     steps:
       - name: Checkout

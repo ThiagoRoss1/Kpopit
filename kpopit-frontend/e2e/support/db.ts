@@ -47,6 +47,20 @@ export async function dailyPick(mode: ModeName, date: string): Promise<number> {
   return rows[0].id as number;
 }
 
+// A freshly seeded DB (CI) has no picks before today. Gives `date` a pick (any published idol other
+// than today's) only when it has none, so the real local copy is never changed.
+export async function ensurePastIdolPick(mode: 'classic' | 'blurry', date: string, today: string): Promise<void> {
+  await db().query(
+    `INSERT INTO daily_picks (pick_date, idol_id, gamemode_id)
+     SELECT $1, i.id, $2 FROM idols i
+      WHERE i.is_published
+        AND i.id IS DISTINCT FROM (SELECT idol_id FROM daily_picks WHERE pick_date = $3 AND gamemode_id = $2)
+      ORDER BY i.id LIMIT 1
+     ON CONFLICT (pick_date, gamemode_id) DO NOTHING`,
+    [date, GAMEMODE[mode], today],
+  );
+}
+
 export async function albumName(albumId: number): Promise<string> {
   const { rows } = await db().query('SELECT name FROM albums WHERE id = $1', [albumId]);
   return rows[0].name as string;

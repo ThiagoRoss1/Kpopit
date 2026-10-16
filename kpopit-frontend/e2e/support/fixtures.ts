@@ -1,3 +1,5 @@
+import path from 'node:path';
+import { fileURLToPath } from 'node:url';
 import { test as base, expect, type BrowserContext, type Page } from '@playwright/test';
 import { closeDb } from './db';
 
@@ -22,6 +24,21 @@ export async function tagApiRequests(context: BrowserContext, ip: string): Promi
   );
 }
 
+// CI has no image bucket: VITE_IMAGE_BUCKET_URL / VITE_AVATARS_BUCKET_URL point at a fake host
+// listed in E2E_STUB_IMAGE_ORIGINS, and every request to it gets the 512px site logo (CORS-enabled,
+// so the Pixelated canvas can read it; detailed enough for the de-pixelation check). Locally the
+// variable is unset and real images load.
+const STUB_IMAGE_ORIGINS = (process.env.E2E_STUB_IMAGE_ORIGINS ?? '').split(',').map((o) => o.trim()).filter(Boolean);
+const STUB_IMAGE = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '../../public/kpopit-icon.png');
+
+export async function stubImageBuckets(context: BrowserContext): Promise<void> {
+  for (const origin of STUB_IMAGE_ORIGINS) {
+    await context.route(`${origin}/**`, (route) =>
+      route.fulfill({ status: 200, contentType: 'image/png', path: STUB_IMAGE, headers: { 'Access-Control-Allow-Origin': '*' } }),
+    );
+  }
+}
+
 // Noise that is not a site failure: dev-only tooling and third-party loads.
 const IGNORED_CONSOLE = [
   /Download the React DevTools/i,
@@ -44,6 +61,7 @@ export const test = base.extend<{ consoleErrors: ConsoleErrors }, { dbTeardown: 
   context: async ({ context }, provide) => {
     currentIp = nextClientIp();
     await tagApiRequests(context, currentIp);
+    await stubImageBuckets(context);
     await provide(context);
   },
   consoleErrors: async ({ page }, provide) => {
