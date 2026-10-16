@@ -34,7 +34,8 @@ class AuthService:
         bcrypt.checkpw(b"irrelevant", _DUMMY_HASH)
 
     # JWT helpers
-    def generate_access_token(self, user: dict) -> str:
+    def generate_access_token(self, user: dict, session_id: int | None = None) -> str:
+        """`sid` names the refresh session the token came from, so a password change can keep it."""
         now = utc_now()
         payload = {
             "sub": user["token"],
@@ -46,6 +47,8 @@ class AuthService:
             "iat": now,
             "exp": now + timedelta(seconds=JWT_ACCESS_EXPIRES_SECONDS),
         }
+        if session_id is not None:
+            payload["sid"] = session_id
         return jwt.encode(payload, JWT_SECRET_KEY, algorithm="HS256")
 
     def generate_refresh_token(self, user: dict) -> str:
@@ -61,15 +64,15 @@ class AuthService:
         }
         return jwt.encode(payload, JWT_SECRET_KEY, algorithm="HS256")
 
-    def _store_refresh_token(self, cursor, user_id: int, raw_refresh: str, remember_me: bool) -> None:
+    def _store_refresh_token(self, cursor, user_id: int, raw_refresh: str, remember_me: bool) -> int | None:
         token_hash = UserRepository.hash_token_for_storage(raw_refresh)
         expires_at = utc_now() + timedelta(seconds=JWT_REFRESH_EXPIRES_SECONDS)
-        self.user_repo.store_refresh_token(cursor, user_id, token_hash, expires_at, remember_me)
+        return self.user_repo.store_refresh_token(cursor, user_id, token_hash, expires_at, remember_me)
 
     def _build_token_pair(self, cursor, user: dict, remember_me: bool) -> dict:
-        access = self.generate_access_token(user)
         refresh = self.generate_refresh_token(user)
-        self._store_refresh_token(cursor, user["id"], refresh, remember_me)
+        session_id = self._store_refresh_token(cursor, user["id"], refresh, remember_me)
+        access = self.generate_access_token(user, session_id)
 
         return {"access_token": access, "refresh_token": refresh}
 
@@ -224,12 +227,12 @@ class AuthService:
             new_hash = UserRepository.hash_token_for_storage(new_raw_refresh)
             expires_at = utc_now() + timedelta(seconds=JWT_REFRESH_EXPIRES_SECONDS)
 
-            self.user_repo.store_refresh_token(cursor, user["id"], new_hash, expires_at, remember_me)
+            new_session_id = self.user_repo.store_refresh_token(cursor, user["id"], new_hash, expires_at, remember_me)
 
             self.db.commit()
 
             return {
-                "access_token": self.generate_access_token(user),
+                "access_token": self.generate_access_token(user, new_session_id),
                 "new_refresh_token": new_raw_refresh,
                 "remember_me": remember_me,
             }
@@ -237,7 +240,7 @@ class AuthService:
         self.db.commit()
 
         return {
-            "access_token": self.generate_access_token(user),
+            "access_token": self.generate_access_token(user, db_record["id"]),
             "remember_me": remember_me,
         }
 

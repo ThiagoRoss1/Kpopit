@@ -205,3 +205,55 @@ def test_same_second_logins_get_separate_refresh_sessions(app, client, monkeypat
     phone.post("/api/auth/logout")
     assert phone.post("/api/auth/refresh").status_code == 401
     assert laptop.post("/api/auth/refresh").status_code == 200
+
+
+# --- B8: password change ends the other sessions -------------------------------
+
+def _login(app, username, password=PASSWORD):
+    client = app.test_client()
+    res = client.post("/api/auth/login", json={"identifier": username, "password": password})
+    assert res.status_code == 200, res.get_json()
+    return client, res.get_json()["access_token"]
+
+
+def _change_password(client, access, current, new="brand-new-pass1"):
+    return client.patch(
+        "/api/user/change-password",
+        json={"current_password": current, "new_password": new, "confirm_password": new},
+        headers={"Authorization": f"Bearer {access}"},
+    )
+
+
+def test_password_change_revokes_other_sessions_and_keeps_this_one(app, client):
+    assert register(client, "rotator").status_code == 201
+    here, access = _login(app, "rotator")
+    elsewhere, _ = _login(app, "rotator")
+
+    res = _change_password(here, access, PASSWORD)
+    assert res.status_code == 200, res.get_json()
+
+    assert here.post("/api/auth/refresh").status_code == 200
+    assert elsewhere.post("/api/auth/refresh").status_code == 401
+    # The register session (a third device) is gone too.
+    assert client.post("/api/auth/refresh").status_code == 401
+
+
+def test_password_change_with_a_token_from_refresh_keeps_that_session(app, client):
+    assert register(client, "refresher2").status_code == 201
+    here, _ = _login(app, "refresher2")
+    elsewhere, _ = _login(app, "refresher2")
+    refreshed = here.post("/api/auth/refresh").get_json()["access_token"]
+
+    assert _change_password(here, refreshed, PASSWORD).status_code == 200
+    assert here.post("/api/auth/refresh").status_code == 200
+    assert elsewhere.post("/api/auth/refresh").status_code == 401
+
+
+def test_password_change_with_a_token_without_sid_revokes_every_session(app, client, db_conn, make_access_jwt):
+    assert register(client, "legacytok").status_code == 201
+    here, _ = _login(app, "legacytok")
+    user_id = db_conn.execute("SELECT id, token FROM users WHERE username = 'legacytok'").fetchone()
+    legacy_access = make_access_jwt(user_id["id"], user_id["token"], "legacytok")  # minted before `sid` existed
+
+    assert _change_password(here, legacy_access, PASSWORD).status_code == 200
+    assert here.post("/api/auth/refresh").status_code == 401

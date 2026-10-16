@@ -503,10 +503,11 @@ def update_avatar_webp():
 def change_password():
     """Change the password of the currently authenticated user.
 
-    Requires the current password for re-authentication. Refresh tokens
-    on other devices are intentionally NOT revoked here — the session JWT
-    is signed with JWT_SECRET_KEY (not the password), so existing sessions
-    keep working after a password change.
+    Requires the current password for re-authentication. Revokes every other refresh
+    session of the user (other devices must log in again) and keeps the one this access
+    token came from (its `sid` claim). A token minted before `sid` existed can't name its
+    session, so then every session is revoked. Access tokens elsewhere stay valid until
+    they expire (≤1 h).
     """
     data = request.get_json() or {}
     current_password = data.get("current_password", "")
@@ -539,6 +540,7 @@ def change_password():
 
         new_hash = auth_service.hash_password(new_password)
         repository.update_password_hash(cursor, user_id, new_hash)
+        repository.revoke_other_refresh_tokens(cursor, user_id, keep_id=g.auth["payload"].get("sid"))
         connect.commit()
         return jsonify({"message": "Password updated"}), 200
 
