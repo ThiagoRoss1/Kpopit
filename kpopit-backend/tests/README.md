@@ -49,7 +49,7 @@ values (on Windows an empty variable can vanish, and then `.env` fills in the re
 FLASK_ENV=development  COLLECTION_ENABLED=true  RESEND_API_KEY=re_disabled_for_tests
 EMAIL_DELIVERY=outbox  EMAIL_OUTBOX_DIR=<a gitignored folder>  RESEND_EMAIL_FRONTEND_URL=http://localhost:5173
 R2_ENDPOINT_URL=http://127.0.0.1:9   and every other R2_* name = disabled-for-tests
-(R2_ACCESS_KEY_ID R2_SECRET_ACCESS_KEY R2_BUCKET_NAME R2_AVATARS_ACCESS_KEY_ID
+(R2_ACCESS_KEY_ID R2_SECRET_ACCESS_KEY R2_BUCKET_NAME R2_BACKUP_BUCKET_NAME R2_AVATARS_ACCESS_KEY_ID
  R2_AVATARS_SECRET_ACCESS_KEY R2_AVATARS_BUCKET_NAME R2_AVATARS_PREFIX)
 ```
 
@@ -77,7 +77,7 @@ PowerShell, by hand:
 ```powershell
 cd kpopit-backend
 $env:FLASK_ENV='development'; $env:COLLECTION_ENABLED='true'; $env:RESEND_API_KEY='re_disabled_for_tests'
-'R2_ACCESS_KEY_ID','R2_SECRET_ACCESS_KEY','R2_BUCKET_NAME','R2_AVATARS_ACCESS_KEY_ID','R2_AVATARS_SECRET_ACCESS_KEY','R2_AVATARS_BUCKET_NAME','R2_AVATARS_PREFIX' | % { Set-Item "env:$_" 'disabled-for-tests' }
+'R2_ACCESS_KEY_ID','R2_SECRET_ACCESS_KEY','R2_BUCKET_NAME','R2_BACKUP_BUCKET_NAME','R2_AVATARS_ACCESS_KEY_ID','R2_AVATARS_SECRET_ACCESS_KEY','R2_AVATARS_BUCKET_NAME','R2_AVATARS_PREFIX' | % { Set-Item "env:$_" 'disabled-for-tests' }
 $env:R2_ENDPOINT_URL='http://127.0.0.1:9'
 .venv\Scripts\python.exe app.py
 ```

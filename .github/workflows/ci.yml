@@ -129,6 +129,7 @@ jobs:
       R2_ACCESS_KEY_ID: disabled-for-tests
       R2_SECRET_ACCESS_KEY: disabled-for-tests
       R2_BUCKET_NAME: disabled-for-tests
+      R2_BACKUP_BUCKET_NAME: disabled-for-tests
       R2_AVATARS_ACCESS_KEY_ID: disabled-for-tests
       R2_AVATARS_SECRET_ACCESS_KEY: disabled-for-tests
       R2_AVATARS_BUCKET_NAME: disabled-for-tests
