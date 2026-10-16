@@ -1,3 +1,4 @@
+import logging
 import os
 from flask import Flask, request, g, jsonify
 from flask_cors import CORS
@@ -24,6 +25,13 @@ from utils.rate_limiter import limiter
 from flask_limiter import RateLimitExceeded
 from services.collections_service import COLLECTION_ENABLED
 load_dotenv()
+
+# Without this, logger.info/warning calls across the app are dropped (Python's default
+# last-resort handler only prints WARNING+ without names or timestamps).
+logging.basicConfig(
+    level=os.getenv("LOG_LEVEL", "INFO").upper(),
+    format="%(asctime)s %(levelname)s %(name)s: %(message)s",
+)
 
 # Global variables
 DB_URL = os.getenv("DB_URL")
