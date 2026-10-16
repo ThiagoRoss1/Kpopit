@@ -92,6 +92,7 @@ const AuthPage = () => {
     });
 
     const isPending = loginMutation.isPending || registerMutation.isPending;
+    const submitErrorIsUsernameTaken = !isLoginTab && /username is already taken/i.test(error ?? "");
 
     const handleRegisterChange = (e: React.ChangeEvent<HTMLInputElement>) => {
         setRegisterFormData({ ...registerFormData, [e.target.name]: e.target.value });
@@ -280,7 +281,8 @@ const AuthPage = () => {
                                         )}
 
                                     </div>
-                                    {!isLoginTab && usernameStatus === "taken" && (
+                                    {/* Hidden once the submit error says the same thing, so only one message shows. */}
+                                    {!isLoginTab && usernameStatus === "taken" && !submitErrorIsUsernameTaken && (
                                         <p className="pl-1 max-xxs:text-[10px] xxs:text-[12px] font-black uppercase tracking-widest text-red-500">
                                             Username already taken
                                         </p>

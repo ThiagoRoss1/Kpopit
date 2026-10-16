@@ -30,9 +30,6 @@ test.describe('Accounts', () => {
   });
 
   test('register with a taken username shows one error', async ({ page }) => {
-    // Known bug, older than the stack update: the live "already taken" hint stays up and the
-    // submit error is added below it. Remove test.fail once the page shows one message.
-    test.fail();
     const user = newUser();
     await page.goto('/');
     await registerViaApi(page, user);
