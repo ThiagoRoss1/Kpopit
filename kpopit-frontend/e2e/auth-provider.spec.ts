@@ -15,9 +15,10 @@ test('an active provider retains authentication and its token on refresh 503', a
   await page.getByRole('button', { name: 'Refresh session' }).click();
   await failed;
   await expect(page.getByTestId('authenticated')).toHaveText('true');
-  const hasToken = await page.evaluate(async () => {
-    const { getAccessToken } = await import('/src/services/tokenStore.ts');
+  // The exact URL the app loaded: another specifier (e.g. without .ts) gives a fresh module with no token.
+  const hasToken = await page.evaluate(async (moduleUrl) => {
+    const { getAccessToken } = await import(moduleUrl);
     return Boolean(getAccessToken());
-  });
+  }, '/src/services/tokenStore.ts');
   expect(hasToken).toBe(true);
 });
