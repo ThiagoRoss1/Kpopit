@@ -86,7 +86,7 @@ function PixelatedMode() {
     } = useQuery<PixelatedGameData>({
         queryKey: ["pixelatedDailyAlbum", gameMode],
         queryFn: getPixelatedDailyAlbum,
-        enabled: isInitialized || !!decryptedTokenRef.current,
+        enabled: isInitialized,
         staleTime: 1000 * 60 * 60 * 4,
         refetchOnWindowFocus: false,
         placeholderData: (previousData) => previousData,
@@ -111,24 +111,23 @@ function PixelatedMode() {
     const yesterdayAlbumCover = yesterdayAlbumData?.cover_path ?? null;
     const yesterdayAlbumArtist = yesterdayAlbumData?.artist ?? null;
 
+    const serverDate = pixelatedGameData?.server_date;
+
+    // New day: drop yesterday's local state and reload (nothing to keep in React state).
     useEffect(() => {
-        if (!pixelatedGameData?.server_date) return;
+        if (!serverDate || !isNewGameDay(localStorage, "pixelated", serverDate)) return;
+        if (import.meta.env.DEV) console.log("New day detected, clearing pixelated cache.");
+        clearPixelated();
+        localStorage.setItem("pixelatedGameDate", serverDate);
+        safeReload();
+    }, [serverDate, clearPixelated, sessionRestored]);
 
-        const serverDate = pixelatedGameData.server_date;
-
-        if (isNewGameDay(localStorage, "pixelated", serverDate)) {
-            if (import.meta.env.DEV) console.log("New day detected, clearing pixelated cache.");
-            clearPixelated();
-
-            setGuesses([]);
-            setAttempts(0);
-
-            localStorage.setItem("pixelatedGameDate", serverDate);
-
-            safeReload();
-            return;
-        }
-
+    // Same day: restore the cached game once per server date / session restore, while rendering
+    // (React's "adjust state when a value changes"), so no effect has to copy storage into state.
+    const restoreKey = serverDate ? `${serverDate}#${sessionRestored}` : null;
+    const [restoredKey, setRestoredKey] = useState<string | null>(null);
+    if (serverDate && restoreKey !== restoredKey && !isNewGameDay(localStorage, "pixelated", serverDate)) {
+        setRestoredKey(restoreKey);
         if (import.meta.env.DEV) console.log("Same day, restoring pixelated cache.");
 
         const cachedGuesses = localStorage.getItem("pixelatedGuessesDetails");
@@ -154,7 +153,7 @@ function PixelatedMode() {
         }
         setDayChecked(true);
         setConfetti(confettiShown);
-    }, [pixelatedGameData, clearPixelated, sessionRestored]);
+    }
 
     const guessMutation = useMutation({
         mutationFn: getPixelatedGuessAlbum,

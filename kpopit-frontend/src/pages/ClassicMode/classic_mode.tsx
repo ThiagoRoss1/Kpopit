@@ -121,52 +121,53 @@ function ClassicMode() {
   const yesterdayIdolImage = yesterday.data?.image_path ?? null;
   const yesterdayIdolImageVersion = yesterday.data?.image_version ?? null;
 
+  const serverDate = gameData?.server_date;
+
+  // New day: drop yesterday's local state and reload (nothing to keep in React state).
   useEffect(() => {
-    if (!gameData) return;
+    if (!serverDate || !isNewGameDay(localStorage, "classic", serverDate)) return;
+    console.log("New day detected, clearing cache.");
+    clearClassic();
+    localStorage.setItem("gameDate", serverDate);
+    safeReload();
+  }, [serverDate, clearClassic, sessionRestored]);
 
-    const serverDate = gameData?.server_date;
-   
-    if (isNewGameDay(localStorage, "classic", serverDate)) {
-      console.log("New day detected, clearing cache.");
-      clearClassic();
+  // Same day: restore the cached game once per server date / session restore, while rendering
+  // (React's "adjust state when a value changes"), so no effect has to copy storage into state.
+  const restoreKey = serverDate ? `${serverDate}#${sessionRestored}` : null;
+  const [restoredKey, setRestoredKey] = useState<string | null>(null);
+  if (serverDate && restoreKey !== restoredKey && !isNewGameDay(localStorage, "classic", serverDate)) {
+    setRestoredKey(restoreKey);
+    console.log("Same day, restoring cache.");
+    const cachedGuesses = localStorage.getItem("todayGuessesDetails");
+    const gameComplete = localStorage.getItem("gameComplete");
+    const gameWon = localStorage.getItem("gameWon");
+    const closeFeedbackSquares = localStorage.getItem("closeFeedbackSquares") === "true";
+    const confettiShown = localStorage.getItem("confettiShown") === "true";
 
-      localStorage.setItem("gameDate", serverDate || "");
+    if (cachedGuesses) {
+      try {
+        const parsedGuesses = JSON.parse(cachedGuesses) as GuessResponse[];
 
-      safeReload();
-
-      return;
-    } else {
-      console.log("Same day, restoring cache.");
-      const cachedGuesses = localStorage.getItem("todayGuessesDetails");
-      const gameComplete = localStorage.getItem("gameComplete");
-      const gameWon = localStorage.getItem("gameWon");
-      const closeFeedbackSquares = localStorage.getItem("closeFeedbackSquares") === "true";
-      const confettiShown = localStorage.getItem("confettiShown") === "true";
-
-      if (cachedGuesses) {
-        try {
-          const parsedGuesses = JSON.parse(cachedGuesses) as GuessResponse[];
-
-          setGuesses(prev => areGuessesEqual(prev, parsedGuesses) ? prev : parsedGuesses);
-          setAttempts(parsedGuesses.length);
-        } catch (error) {
-          console.error("Error parsing cached guesses:", error);
-        }
+        setGuesses(prev => areGuessesEqual(prev, parsedGuesses) ? prev : parsedGuesses);
+        setAttempts(parsedGuesses.length);
+      } catch (error) {
+        console.error("Error parsing cached guesses:", error);
       }
-      setCloseFeedbackSquares(closeFeedbackSquares);
-
-      if (gameComplete === "true") {
-        setEndGame(true);
-        if (gameWon === "true") {
-          setIsCorrect(true);
-          setShowVictoryCard(true);
-        }
-      }
-
-      setDayChecked(true);
-      setConfetti(confettiShown);
     }
-  }, [gameData, clearClassic, sessionRestored]);
+    setCloseFeedbackSquares(closeFeedbackSquares);
+
+    if (gameComplete === "true") {
+      setEndGame(true);
+      if (gameWon === "true") {
+        setIsCorrect(true);
+        setShowVictoryCard(true);
+      }
+    }
+
+    setDayChecked(true);
+    setConfetti(confettiShown);
+  }
 
   const guessMutation = useMutation({
     mutationFn: async (guessData: CompleteGuessRequest) => {
