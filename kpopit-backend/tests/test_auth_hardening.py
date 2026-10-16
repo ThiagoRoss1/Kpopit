@@ -1,11 +1,13 @@
 """T31 auth hardening: refresh errors, enumeration timing on forgot-password / register / claim."""
 
 import time
+from contextlib import contextmanager
 
 import pytest
 
 from services import auth_service as auth_service_module
 from services.email_service import EmailService
+from routes import email as email_routes
 
 PASSWORD = "password123"
 
@@ -71,6 +73,75 @@ def test_forgot_password_same_answer_and_speed_for_any_email(client, email_outbo
 
 def test_forgot_password_missing_email_is_400(client):
     assert client.post("/api/auth/email/forgot-password", json={}).status_code == 400
+
+
+def test_reset_delivery_releases_database_first(client, monkeypatch):
+    assert register(client, "release", "release@example.com").status_code == 201
+    returned = []
+    real_context = email_routes.get_manual_db
+
+    @contextmanager
+    def checkout():
+        with real_context() as conn:
+            yield conn
+        returned.append(True)
+
+    sent_after_release = []
+    monkeypatch.setattr(email_routes, "get_manual_db", checkout)
+    monkeypatch.setattr(EmailService, "send_password_reset", lambda **kwargs: sent_after_release.append(bool(returned)))
+    email_routes._issue_password_reset("release@example.com")
+    assert sent_after_release == [True]
+
+
+def test_background_reset_rolls_back_before_returning_connection(client, monkeypatch):
+    from psycopg.pq import TransactionStatus
+    assert register(client, "rollback", "rollback@example.com").status_code == 201
+    statuses = []
+    real_context = email_routes.get_manual_db
+
+    @contextmanager
+    def checkout():
+        with real_context() as conn:
+            try:
+                yield conn
+            finally:
+                statuses.append(conn.info.transaction_status)
+
+    real_lookup = email_routes.UserRepository.find_by_email
+
+    def missing_foreign_key(self, cursor, address):
+        user = real_lookup(self, cursor, address)
+        return {**user, "id": 999999999}
+
+    monkeypatch.setattr(email_routes, "get_manual_db", checkout)
+    monkeypatch.setattr(email_routes.UserRepository, "find_by_email", missing_foreign_key)
+    email_routes._issue_password_reset("rollback@example.com")
+    assert statuses == [TransactionStatus.IDLE]
+
+
+@pytest.mark.parametrize("address", [["user@example.com"], {"email": "user@example.com"}, "x" * 10000],
+                         ids=["list", "object", "too-long"])
+def test_forgot_password_rejects_malformed_email(client, address):
+    assert client.post("/api/auth/email/forgot-password", json={"email": address}).status_code == 400
+
+
+def test_reset_queue_is_bounded_and_frees_capacity(client, monkeypatch):
+    from concurrent.futures import Future
+    from threading import BoundedSemaphore
+    futures = []
+
+    def schedule(*args):
+        future = Future()
+        futures.append(future)
+        return future
+
+    monkeypatch.setattr(email_routes, "_background_slots", BoundedSemaphore(1), raising=False)
+    monkeypatch.setattr(email_routes._background, "submit", schedule)
+    assert client.post("/api/auth/email/forgot-password", json={"email": "one@example.com"}).status_code == 200
+    assert client.post("/api/auth/email/forgot-password", json={"email": "two@example.com"}).status_code == 503
+    futures[0].set_result(None)
+    assert client.post("/api/auth/email/forgot-password", json={"email": "three@example.com"}).status_code == 200
+    futures[-1].set_result(None)
 
 
 # --- register / claim hash before the duplicate checks ------------------------

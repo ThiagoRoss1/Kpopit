@@ -9,6 +9,8 @@ from repositories.user_repository import UserRepository
 import secrets
 import hashlib
 from concurrent.futures import ThreadPoolExecutor
+from threading import BoundedSemaphore
+from services.password_reset_service import PasswordResetService
 from datetime import timedelta
 from utils.dates import utc_now
 from services.auth_service import AuthService
@@ -151,41 +153,18 @@ FORGOT_PASSWORD_MESSAGE = "If an account with that email exists, a password rese
 # Forgot-password work (lookup, token write, Resend call) runs off the request thread, so the
 # response time is the same whether or not the email has an account (no enumeration by timing).
 _background = ThreadPoolExecutor(max_workers=2, thread_name_prefix="forgot-password")
+_background_slots = BoundedSemaphore(32)
 
 
 def _issue_password_reset(email: str) -> None:
     try:
         with get_manual_db() as connect:
             with connect.cursor() as cursor:
-                user = UserRepository(connect).find_by_email(cursor, email)
-                if not user:
-                    return
-
-                raw_token = secrets.token_urlsafe(32)
-                token_hash = hashlib.sha256(raw_token.encode()).hexdigest()
-                expires_at = utc_now() + timedelta(hours=1)
-
-                cursor.execute(
-                    """
-                        DELETE FROM email_tokens
-                        WHERE user_id = %s
-                        AND token_type = 'password_reset'
-                        AND used_at IS NULL
-                    """, (user["id"],)
-                )
-                cursor.execute(
-                    """
-                        INSERT INTO email_tokens (user_id, token_hash, token_type, expires_at)
-                        VALUES (%s, %s, 'password_reset', %s)
-                    """, (user["id"], token_hash, expires_at)
-                )
-                connect.commit()
-
-            reset_url = f"{RESEND_EMAIL_FRONTEND_URL}/reset-password?token={raw_token}"
+                delivery = PasswordResetService(connect).issue_token(cursor, email)
+        if delivery:
+            reset_url = f"{RESEND_EMAIL_FRONTEND_URL}/reset-password?token={delivery['token']}"
             EmailService.send_password_reset(
-                to_email=user["email"],
-                username=user["username"],
-                reset_link=reset_url
+                to_email=delivery["email"], username=delivery["username"], reset_link=reset_url
             )
     except Exception:
         logger.exception("Failed to issue a password reset")
@@ -201,7 +180,20 @@ def forgot_password():
     if not email:
         return jsonify({"error": "Missing email"}), 400
 
-    _background.submit(_issue_password_reset, email)
+    if not isinstance(email, str) or len(email) > 254:
+        return jsonify({"error": "Invalid email format."}), 400
+    email = validate_and_normalize_email(email)
+    if not email:
+        return jsonify({"error": "Invalid email format."}), 400
+    if not _background_slots.acquire(blocking=False):
+        return jsonify({"error": "Password reset is temporarily unavailable"}), 503
+    try:
+        future = _background.submit(_issue_password_reset, email)
+        future.add_done_callback(lambda _: _background_slots.release())
+    except Exception:
+        _background_slots.release()
+        logger.exception("Could not queue password reset")
+        return jsonify({"error": "Password reset is temporarily unavailable"}), 503
     return jsonify({"message": FORGOT_PASSWORD_MESSAGE}), 200
 
 @email_bp.route("/auth/email/reset-password", methods=["POST"])
