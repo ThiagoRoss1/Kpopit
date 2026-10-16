@@ -23,36 +23,33 @@ def resolve_test_date_offset(flask_env: str, raw_offset: str | None) -> tuple[bo
 
 TEST_MODE, TEST_DATE_OFFSET = resolve_test_date_offset(FLASK_ENV, os.getenv("TEST_DATE_OFFSET"))
 
-# --- Game day (TEST_DATE_OFFSET applies in development) ---------------------
-# Decide which daily puzzle, history day and streak day it is.
+# Game day (shifted by TEST_DATE_OFFSET in development): which puzzle, history and streak day it is.
 
 def get_today_now() -> datetime:
-    """Returns the current game-day date and time in the EST timezone. Example: datetime.datetime(2024, 6, 15, 14, 30, tzinfo=ZoneInfo('America/New_York')).
-    Shifted by TEST_DATE_OFFSET in development; use est_now()/utc_now() for real moments (tokens, expiries, created_at)."""
+    """Current game-day date and time in America/New_York."""
     if TEST_MODE:
         return datetime.now(TIMEZONE_EST) + timedelta(days=TEST_DATE_OFFSET)
-    
+
     return datetime.now(TIMEZONE_EST)
 
 def get_today_date() -> date:
-    """Returns today's game date in the EST timezone. Example: datetime.date(2024, 6, 15) - 2024-06-15."""
-    return get_today_now().date() # Example - Object Date - 2024-06-15 (Usage: Date Columns)
+    """Today's game date in America/New_York."""
+    return get_today_now().date()
 
 def get_today_date_str() -> str:
-    """Returns today's game date as a string in ISO format (YYYY-MM-DD) in the EST timezone. Example: '2024-06-15'."""
-    return get_today_now().date().isoformat() # Example - String - '2024-06-15' (Usage: API responses, filenames, JSON/Logs)
+    """Today's game date as ISO 'YYYY-MM-DD' (API responses, date columns)."""
+    return get_today_now().date().isoformat()
 
-# --- Real time (never offset) ------------------------------------------------
-# Token iat/exp, refresh/email/reset/transfer expiry, cooldown windows, created_at/updated_at, won_at/started_at.
+# Real time (never offset): token iat/exp, expiries, cooldowns, created_at / won_at / started_at.
 
 def utc_now() -> datetime:
-    """Returns the real current date and time in UTC, never offset. Example: datetime.datetime(2024, 6, 15, 18, 30, tzinfo=datetime.timezone.utc)."""
+    """Real current date and time in UTC."""
     return datetime.now(timezone.utc)
 
 def est_now() -> datetime:
-    """Returns the real current date and time in the EST timezone, never offset."""
+    """Real current date and time in America/New_York."""
     return datetime.now(TIMEZONE_EST)
 
 def get_current_timestamp() -> str:
-    """Returns the real current timestamp as an ISO string in the EST timezone, never offset. Example: '2024-06-15T14:30:00.123456-04:00'."""
-    return est_now().isoformat() # Example - ISO with timezone - '2024-06-15T14:30:00.123456-04:00' (Usage: API responses, database timestamps, timezone-aware logging)
+    """Real current moment as an ISO string with the New York offset, e.g. '2024-06-15T14:30:00.123456-04:00'."""
+    return est_now().isoformat()

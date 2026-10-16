@@ -1,4 +1,4 @@
-"""T32: 500 responses carry a generic message; the exception text only reaches the logs."""
+"""500 responses carry a generic message; the exception text only reaches the logs."""
 
 import logging
 

@@ -1,14 +1,7 @@
-"""
-Build a fresh test database from the repo alone: init_db.py schema → every migration →
-seed CSVs (data/) → Collection cards. Used by CI (pytest and Playwright jobs) and works
-locally the same way. Never a production copy.
-
-    DB_URL=postgresql://postgres:postgres@localhost:5432/kpopit_test DATA_FOLDER=data \
-        python scripts/bootstrap_db.py
-
-Refuses any host other than localhost, and exits non-zero if a migration fails
-(the migration runner raises immediately on its first failure).
-"""
+"""Build a fresh local test database from the repo alone (CI's pytest and Playwright jobs use it):
+init_db schema -> every migration -> seed CSVs -> Collection cards. Never a production copy.
+    DB_URL=<local test database URL> python scripts/bootstrap_db.py
+Refuses non-local hosts and exits 1 if a migration fails."""
 
 import logging
 import os

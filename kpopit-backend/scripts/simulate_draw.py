@@ -1,9 +1,6 @@
-"""
-Simulate services/daily_draw.py in memory for every mode, from the catalog and pick history in
-DB_URL (read-only connection; nothing is written, the catalog stays static). From kpopit-backend:
-
-    python -m scripts.simulate_draw [--days 730] [--seed 42]
-"""
+"""Simulate services/daily_draw.py in memory for every mode, from the catalog and pick history in
+DB_URL (read-only; nothing is written, the catalog stays static). From kpopit-backend:
+    python -m scripts.simulate_draw [--days 730] [--seed 42]"""
 
 import argparse
 import random

@@ -8,9 +8,8 @@ import { ADMIN_ROUTE } from './env';
 let ipCounter = 0;
 let currentIp = '10.0.0.1';
 
-// Flask-Limiter keys on the client IP (ProxyFix trusts X-Forwarded-For), so each test gets a
-// fake IP to keep rate limits apart. Only /api calls get it: on cross-origin font requests
-// the custom header fails the CORS preflight.
+// Rate limits key on the client IP, so each test gets a fake one; only /api calls carry it
+// (on cross-origin font requests the custom header fails the CORS preflight).
 function nextClientIp(): string {
   ipCounter += 1;
   const n = (Date.now() % 50_000) + ipCounter;
@@ -26,10 +25,8 @@ export async function tagApiRequests(context: BrowserContext, ip: string): Promi
   );
 }
 
-// CI has no image bucket: VITE_IMAGE_BUCKET_URL / VITE_AVATARS_BUCKET_URL point at a fake host
-// listed in E2E_STUB_IMAGE_ORIGINS, and every request to it gets the 512px site logo (CORS-enabled,
-// so the Pixelated canvas can read it; detailed enough for the de-pixelation check). Locally the
-// variable is unset and real images load.
+// The image buckets point at a fake host answered with the site logo: CORS-enabled so the
+// Pixelated canvas can read it, and detailed enough for the de-pixelation check.
 const STUB_IMAGE_ORIGINS = (process.env.E2E_STUB_IMAGE_ORIGINS ?? 'http://images.e2e.invalid').split(',').map((o) => o.trim()).filter(Boolean);
 const STUB_IMAGE = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '../../public/kpopit-icon.png');
 

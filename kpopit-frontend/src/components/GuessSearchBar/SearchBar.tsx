@@ -212,10 +212,8 @@ const SearchBar = (props: SearchBarProps) => {
               transition={LIST_SPRING}
               className="absolute left-0 top-full w-full mt-2 z-50"
             >
-            {/* The blur sits on a sibling of the fading list, not on the list itself: opacity < 1
-                makes an element its own backdrop root, so a blurred list under an opacity fade
-                showed the page sharp while animating and the blur popped in/out at the ends
-                (the open/close flicker). Here the blur radius animates alongside the fade. */}
+            {/* Blur on a sibling, not the fading list: opacity < 1 makes the list its own backdrop
+                root, so the blur popped in/out at the ends of the fade (the open/close flicker). */}
             <motion.div
               aria-hidden
               variants={{

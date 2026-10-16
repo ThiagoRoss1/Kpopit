@@ -19,12 +19,8 @@ def _is_uuid(value: str) -> bool:
     return bool(_UUID_REGEX.match(value))
 
 def decode_jwt(token: str, expected_type: str) -> dict | None:
-    """
-    Decode and validate a JWT.
-    Pins algorithm to HS256 only — prevents alg=none and RS256 confusion attacks.
-    Validates the 'type' claim to prevent token substitution (access vs refresh).
-    Returns the payload dict on success, None on any failure.
-    """
+    """Decode a JWT; returns the payload, or None on any failure.
+    Pins HS256 (no alg=none / RS256 confusion) and checks the 'type' claim (access vs refresh)."""
     try:
         payload = jwt.decode(token, JWT_SECRET_KEY, algorithms=["HS256"])
         if payload.get("type") != expected_type:
@@ -39,21 +35,10 @@ def decode_jwt(token: str, expected_type: str) -> dict | None:
         return None
     
 def detect_user(req) -> dict:
-    """
-    Parse the Authorization header and return a standardized identity dict.
-
-    Returns one of:
-      {"source": "jwt", "user_id": int, "token": str, "username": str,
-       "is_admin": bool, "is_authenticated": True, "payload": dict}
-      {"source": "anonymous", "user_id": None, "token": str,
-       "is_admin": False, "is_authenticated": False}
-      {"source": "none",      "user_id": None, "token": None,
-       "is_admin": False, "is_authenticated": False}
-      {"source": "invalid", ...same as "none"}  — a Bearer token that failed to decode
-
-    Does NOT touch the database. Callers needing user_id for anonymous users
-    must resolve it from the DB using the returned token.
-    """
+    """Classify the Authorization header without touching the database. `source` is "jwt" (with
+    user_id, username, is_admin, payload), "anonymous" (bare UUID in `token`; callers resolve the
+    user_id), "none" (no header) or "invalid" (anything else, e.g. an expired/forged Bearer token).
+    Every result also carries is_admin and is_authenticated."""
     auth_header = req.headers.get("Authorization", "").strip()
 
     if not auth_header:

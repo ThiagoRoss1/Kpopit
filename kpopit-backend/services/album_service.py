@@ -63,15 +63,9 @@ class AlbumService:
         analytics_data: dict,
         gamemode_id: int = 3,
     ) -> dict:
-        """Compare guess vs today's correct album and persist to daily_user_history.
-
-        Persistence is delegated to GameService.save_user_history (shared with
-        the classic/blurry modes), which owns the daily_user_history upsert,
-        `score`, aggregate stats / streaks in `user_history`, the double-count
-        guard, and the commit. This method only resolves the correct album,
-        builds the answer payload for logging, and fetches the guessed album
-        for the response.
-        """
+        """Compare the guess with today's album and record it.
+        Persistence (upsert, score, streaks, double-count guard, commit) belongs to
+        GameService.save_user_history; this only resolves both albums for it and the response."""
         today = get_today_date_str()
         current_timestamp = get_current_timestamp()
 

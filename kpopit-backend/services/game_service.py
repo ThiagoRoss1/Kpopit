@@ -96,9 +96,8 @@ class GameService:
                     self._update_user_history(cursor, user_id, gamemode_id, streak, current_attempt, one_shot_win, today)
 
                     if COLLECTION_ENABLED and gamemode_id in COLLECTION_GAMEMODE_IDS:
-                        # A collection failure must never cost the user their win:
-                        # the savepoint confines the grant, because psycopg poisons
-                        # the whole transaction after any errored statement.
+                        # A collection failure must never cost the win: the savepoint confines it,
+                        # since psycopg poisons the whole transaction after any failed statement.
                         cursor.execute("SAVEPOINT collection_grant")
                         try:
                             card_granted = CollectionService(self.db).grant_card_for_win(

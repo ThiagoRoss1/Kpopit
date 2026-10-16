@@ -1,4 +1,4 @@
-"""T31 auth hardening: refresh errors, enumeration timing on forgot-password / register / claim."""
+"""Auth hardening: refresh errors, enumeration timing on forgot-password / register / claim."""
 
 import time
 from contextlib import contextmanager

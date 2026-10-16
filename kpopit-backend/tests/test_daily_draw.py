@@ -1,4 +1,4 @@
-"""Daily draw (plan §3): one stateless draw for every mode, one day ahead."""
+"""Daily draw: one stateless draw for every mode, one day ahead."""
 
 import random
 import os

@@ -21,10 +21,8 @@ COOKIE_DOMAIN = os.getenv("COOKIE_DOMAIN") if IS_PRODUCTION else None
 
 auth_bp = Blueprint("auth", __name__)
 
-# Local development is served over plain HTTP through Vite's same-origin proxy.
-# Safari rejects Secure cookies received over HTTP (and SameSite=None also
-# requires Secure), so use a normal first-party cookie locally. Production stays
-# Secure and keeps the existing SameSite policy.
+# Local dev runs over plain HTTP, where Safari rejects Secure cookies (and SameSite=None needs Secure):
+# use a plain first-party cookie locally; production stays Secure.
 samesite = "Lax"
 secure = IS_PRODUCTION
 
@@ -181,12 +179,8 @@ def logout():
 @auth_bp.route("/auth/refresh", methods=["POST"])
 @limiter.limit("30 per minute")
 def refresh():
-    """
-    Issues a new access token from the httpOnly refresh cookie.
-    Cookie path is /api/auth (prod) or / (dev); SameSite/Secure are set
-    in _set_refresh_cookie. In production refresh tokens rotate after half
-    their lifetime has elapsed (see AuthService.refresh_access_token).
-    """
+    """Issue a new access token from the httpOnly refresh cookie (path /api/auth in prod, / in dev).
+    In production the refresh token rotates after half its lifetime (AuthService.refresh_access_token)."""
     raw_refresh = request.cookies.get("refresh_token")
 
     if not raw_refresh:

@@ -1,4 +1,4 @@
-"""T33: a present-but-invalid/expired access token is a 401 (so the client refreshes),
+"""A present-but-invalid/expired access token is a 401 (so the client refreshes),
 never an anonymous 200 with an empty album that React Query would cache."""
 
 from datetime import timedelta

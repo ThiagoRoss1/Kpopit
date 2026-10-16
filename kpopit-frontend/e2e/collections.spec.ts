@@ -78,8 +78,8 @@ test.describe('Collections', () => {
   });
 });
 
-// T33: an expired access token used to be served as anonymous (200, nothing owned), so the album
-// showed 0% until F5. Now the backend answers 401, the client refreshes, and the replay is owned.
+// An expired access token used to be served as anonymous (200, nothing owned: 0% until F5).
+// Now it is a 401, the client refreshes, and the replay shows the owned card.
 test('an expired access token on the collections list is refreshed, not cached as empty', async ({ page }) => {
   const user = newUser();
   await page.goto('/');

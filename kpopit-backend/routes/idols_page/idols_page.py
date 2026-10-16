@@ -122,15 +122,6 @@ def get_idols_page_idol(idol_id):
                         "game_info": game_info
                     }
 
-                    # past response with everything 
-                    # response = {
-                    #     "idol_data": idol_data,
-                    #     "idol_career": idol_career,
-                    #     "idol_companies": idol_companies,
-                    #     "group_companies": group_companies,
-                    #     "game_modes_available": game_modes
-                    # }
-
                 return jsonify(response)
             
             except Exception:

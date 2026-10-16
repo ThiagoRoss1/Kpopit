@@ -1,21 +1,8 @@
-"""
-Daily draw shared by every gamemode (plan §3).
-
-Stateless: each item's wait comes only from `daily_picks` in its own mode, or from the
-date it entered the game when that mode never picked it. Modes never affect each other.
-
-    N        = eligible items in the mode
-    wait     = days since the item's last pick in this mode (never picked: since entry)
-    cooldown = picked in the last COOLDOWN_DAYS days -> not a candidate
-    overdue  = never picked and wait >= max(300, N), or picked and wait >= max(365, N + 30);
-               if any candidate is overdue, the draw is only among overdue items, weighted by wait
-    weight   = (min(wait, N) / N) ** WAIT_EXPONENT; never picked = NEVER_PICKED_WEIGHT
-    pressure = "late" items (never picked and in the game 60+ days, or wait >= N)
-               are multiplied by 1 + late_count / (PRESSURE_SHARE * N)
-
-Picks are made one day ahead: a request that needs today's pick also makes sure tomorrow's
-exists. Tomorrow's pick is a secret: it is never returned or logged.
-"""
+"""Daily draw for every mode, stateless from `daily_picks` (modes never affect each other); N = eligible items.
+wait = days since the item's last pick in this mode, or since it entered the game; cooldown = COOLDOWN_DAYS.
+Overdue (never picked: wait >= max(300, N); picked: wait >= max(365, N + 30)) -> draw only among overdue, by wait.
+Else weight = (min(wait, N) / N) ** WAIT_EXPONENT (never picked: NEVER_PICKED_WEIGHT); late items x (1 + late / (PRESSURE_SHARE * N)).
+Picks are drawn one day ahead; tomorrow's pick is never returned or logged."""
 
 import logging
 import random

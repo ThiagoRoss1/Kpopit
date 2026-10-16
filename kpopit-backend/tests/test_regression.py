@@ -1,5 +1,5 @@
 """
-Backend regression (T11): Classic/Blurry guess routes, save_user_history (score, streak,
+Backend regression: Classic/Blurry guess routes, save_user_history (score, streak,
 one-shot, double-win guard), auth (login, refresh, claim, reset via the outbox), the Collections
 grant through the guess route (new card + level up) and the idol routes. Real DB rows, no mocks.
 """

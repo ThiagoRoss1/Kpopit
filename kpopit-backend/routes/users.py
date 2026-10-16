@@ -112,7 +112,6 @@ def get_game_state(user_token):
     gamemode_id = request.args.get("gamemode_id", default=1, type=int)
 
     today = get_today_date_str()
-    # today = get_server_date()
 
     # Start db connection
     connect = get_db()
@@ -188,7 +187,6 @@ def generate_transfer_code(user_token):
         cursor.close()
         return jsonify({"error": "Invalid user token"}), 400
 
-    # today = get_server_date()
     
     # Delete expired codes
     cursor.execute("""
@@ -218,7 +216,6 @@ def generate_transfer_code(user_token):
 
             code = f"{secrets.token_hex(2)[:3].upper()}-{secrets.token_hex(2)[:3].upper()}"
             expires_at = est_now() + timedelta(days=3)
-            # expires_at = get_server_datetime_now() + datetime.timedelta(days=3)
 
             # Insert transfer code into database
             cursor.execute("""
@@ -275,7 +272,6 @@ def transfer_data():
         expires_at = datetime.fromisoformat(expires_at)
 
     if expires_at < est_now():
-    # if expires_at < get_server_datetime_now():
         cursor.close()
         return jsonify({"error": "Transfer code has expired"}), 400
     
@@ -296,7 +292,6 @@ def transfer_data():
 def get_active_transfer_code(user_token):
     """Get active transfer code if exists"""
 
-    # today = get_server_datetime_now().isoformat()
 
     # Start db connection
     connect = get_db()
@@ -501,14 +496,10 @@ def update_avatar_webp():
 @require_auth
 @limiter.limit("5 per hour")
 def change_password():
-    """Change the password of the currently authenticated user.
-
-    Requires the current password for re-authentication. Revokes every other refresh
-    session of the user (other devices must log in again) and keeps the one this access
-    token came from (its `sid` claim). A token minted before `sid` existed can't name its
-    session, so then every session is revoked. Access tokens elsewhere stay valid until
-    they expire (≤1 h).
-    """
+    """Change the authenticated user's password (current password required).
+    Revokes the user's other refresh sessions and keeps the one this access token came from (`sid`);
+    a token without `sid` can't name its session, so then all are revoked. Other access tokens
+    stay valid until they expire (≤1 h)."""
     data = request.get_json() or {}
     current_password = data.get("current_password", "")
     new_password = data.get("new_password", "")

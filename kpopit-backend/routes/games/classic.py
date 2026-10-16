@@ -29,9 +29,6 @@ def get_daily_idol():
         idol_id = ensure_daily_picks(cursor, gamemode_id=1)
         connect.commit()
 
-        """ For testing purposes, you can set a fixed idol_id """
-        # idol_id = 1
-
         # Fetch full idol data
         idol_data = repository.fetch_full_idol_data(idol_id)
 
@@ -242,7 +239,6 @@ def guess_idol():
 
         # Final answer (correct or not)
         current_timestamp = get_current_timestamp()
-        # today = get_server_date()
 
         # Update user history
         try:

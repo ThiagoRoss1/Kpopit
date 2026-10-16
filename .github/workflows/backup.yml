@@ -1,7 +1,6 @@
 name: Database backup
 
-# Daily pg_dump → R2, run on the backend (Railway) through POST /api/tasks/backup.
-# DB_URL never leaves Railway; this workflow only holds the route URL and its key.
+# Daily pg_dump → R2 via POST /api/tasks/backup on the backend; the DB URL never leaves Railway.
 # A failed run fails the job, and GitHub emails the repo owner.
 
 on:

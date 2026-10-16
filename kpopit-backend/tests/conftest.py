@@ -305,12 +305,8 @@ def set_yesterday_album_pick(db_conn):
 @pytest.fixture
 def make_soloist_album(db_conn):
     """Insert a soloist album and return (album_id, artist_name).
-
-    The `albums_soloist_check` constraint requires `group_id = 20 AND
-    soloist_id IS NOT NULL`, so this forces a `groups` row with id=20 and
-    attaches a real `idols` row as the soloist. Exercises the
-    COALESCE(artist_name, group_name) branch.
-    """
+    `albums_soloist_check` needs group_id = 20 with a soloist_id, so this forces group 20 and a
+    real idol as the soloist (exercises COALESCE(artist_name, group_name))."""
 
     def _make(name: str, cover_path: str = "/covers/solo.jpg", artist_name: str = "Solo Star") -> tuple[int, str]:
         with db_conn.cursor() as cur:

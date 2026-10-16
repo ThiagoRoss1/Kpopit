@@ -22,7 +22,7 @@ export async function closeDb(): Promise<void> {
 export const GAMEMODE = { classic: 1, blurry: 2, pixelated: 3 } as const;
 export type ModeName = keyof typeof GAMEMODE;
 
-// From daily_picks, not the API payload, which will stop exposing the answer (T40/T90).
+// From daily_picks, not the API payload, which will stop exposing the answer.
 export async function dailyPick(mode: ModeName, date: string): Promise<number> {
   const col = mode === 'pixelated' ? 'album_id' : 'idol_id';
   const { rows } = await db().query(

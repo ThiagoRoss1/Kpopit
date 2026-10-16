@@ -1,21 +1,7 @@
--- Least-privilege database roles (plan §10, T03). Idempotent: safe to run again.
---
--- Run with psql, connected AS THE OWNER role (the one that runs migrations and owns the tables),
--- passing the two passwords as psql variables so none is ever written into this file:
---
---   psql "<owner connection URL>" -v ON_ERROR_STOP=1 \
---        -v app_password='<generated>' -v backup_password='<generated>' \
---        -f scripts/db_roles.sql
---
--- Roles
---   kpopit_app     the backend (DB_URL): CONNECT, USAGE on public, SELECT/INSERT/UPDATE/DELETE on
---                  tables, USAGE/SELECT on sequences. No DDL: it cannot CREATE/ALTER/DROP/TRUNCATE.
---   kpopit_backup  pg_dump only: read-only (pg_read_all_data on PostgreSQL 14+, otherwise SELECT on
---                  every table and sequence).
---   owner          unchanged; migrations (migrations/migrations.py, init_db.py) keep running as it.
---
--- Default privileges cover tables/sequences the owner creates later (new migrations), so no
--- re-run is needed after each migration. Re-run only if a migration is applied by another role.
+-- Least-privilege roles, idempotent. Run as the owner with psql (it uses \gexec and \if):
+--   psql "<owner URL>" -v ON_ERROR_STOP=1 -v app_password=... -v backup_password=... -f scripts/db_roles.sql
+-- kpopit_app: table DML + sequence use, no DDL. kpopit_backup: read-only for pg_dump.
+-- Default privileges cover tables the owner creates later; migrations keep running as the owner.
 
 \if :{?app_password}
 \else
