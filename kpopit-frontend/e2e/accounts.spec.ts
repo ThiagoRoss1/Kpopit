@@ -150,6 +150,30 @@ test.describe('Accounts', () => {
     await expect(page.locator('nav').getByRole('button', { name: 'User menu' }).first()).toBeVisible();
   });
 
+  test('a wrong current password on change-password shows the error without a refresh', async ({ page }) => {
+    const user = newUser();
+    await page.goto('/');
+    await registerViaApi(page, user);
+    await page.goto(`/profile/${user.username}`);
+    await page.getByRole('button', { name: 'Edit Profile' }).click();
+    await page.locator('label').getByText('Password', { exact: true }).locator('xpath=..').getByRole('button').click();
+    await expect(page.getByText('Change Password')).toBeVisible();
+
+    const hidden = page.getByPlaceholder('••••••••••••');
+    await hidden.nth(0).fill('Wrong-Passw0rd!');
+    await page.getByPlaceholder('At least 8 characters').fill('N3w-Passw0rd!');
+    await hidden.nth(1).fill('N3w-Passw0rd!');
+
+    let refreshes = 0;
+    page.on('request', (r) => { if (r.url().includes('/api/auth/refresh')) refreshes += 1; });
+    const answer = page.waitForResponse((r) => r.url().includes('/api/user/change-password'));
+    await page.getByRole('button', { name: 'Save Changes' }).click();
+    expect((await answer).status()).toBe(403);
+    await expect(page.getByText('Current password is incorrect')).toBeVisible();
+    expect(refreshes).toBe(0);
+    await expectLoggedIn(page);
+  });
+
   test('login rejects a wrong password', async ({ page }) => {
     const user = newUser();
     await page.goto('/');

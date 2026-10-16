@@ -257,3 +257,21 @@ def test_password_change_with_a_token_without_sid_revokes_every_session(app, cli
 
     assert _change_password(here, legacy_access, PASSWORD).status_code == 200
     assert here.post("/api/auth/refresh").status_code == 401
+
+
+# --- B11: a wrong current password is 403, so the client never runs a refresh ----
+
+@pytest.mark.parametrize(("method", "url", "body"), [
+    ("patch", "/api/user/change-password",
+     {"current_password": "wrong-password", "new_password": "brand-new-pass1", "confirm_password": "brand-new-pass1"}),
+    ("patch", "/api/user/profile", {"username": "renamed1", "current_password": "wrong-password"}),
+    ("patch", "/api/auth/email/request-email-change", {"new_email": "new@example.com", "current_password": "wrong-password"}),
+])
+def test_wrong_current_password_is_403_not_401(app, client, method, url, body):
+    assert register(client, "pwcheck", "pwcheck@example.com").status_code == 201
+    device, access = _login(app, "pwcheck")
+    res = getattr(device, method)(url, json=body, headers={"Authorization": f"Bearer {access}"})
+    assert res.status_code == 403
+    assert res.get_json() == {"error": "Current password is incorrect"}
+    # The session is untouched.
+    assert device.post("/api/auth/refresh").status_code == 200

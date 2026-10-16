@@ -378,10 +378,10 @@ def update_display_name():
         if username:
             auth_fields = repository.find_auth_fields_by_id(cursor, user_id)
             if not auth_fields or not auth_fields.get("password_hash"):
-                return jsonify({"error": "Current password is incorrect"}), 401
+                return jsonify({"error": "Current password is incorrect"}), 403
             
             if not AuthService(connect).verify_password(current_password, auth_fields["password_hash"]):
-                return jsonify({"error": "Current password is incorrect"}), 401
+                return jsonify({"error": "Current password is incorrect"}), 403
 
             changed_at = auth_fields.get("username_changed_at")
             if changed_at:
@@ -532,11 +532,11 @@ def change_password():
         auth_fields = repository.find_auth_fields_by_id(cursor, user_id)
 
         if not auth_fields or not auth_fields.get("password_hash"):
-            return jsonify({"error": "Current password is incorrect"}), 401
+            return jsonify({"error": "Current password is incorrect"}), 403
 
         auth_service = AuthService(connect)
         if not auth_service.verify_password(current_password, auth_fields["password_hash"]):
-            return jsonify({"error": "Current password is incorrect"}), 401
+            return jsonify({"error": "Current password is incorrect"}), 403
 
         new_hash = auth_service.hash_password(new_password)
         repository.update_password_hash(cursor, user_id, new_hash)

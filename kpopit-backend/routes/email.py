@@ -293,9 +293,9 @@ def request_email_change():
 
         auth_fields = repo.find_auth_fields_by_id(cursor, user_id)
         if not auth_fields or not auth_fields.get("password_hash"):
-            return jsonify({"error": "Current password is incorrect"}), 401
+            return jsonify({"error": "Current password is incorrect"}), 403
         if not AuthService(connect).verify_password(current_password, auth_fields["password_hash"]):
-            return jsonify({"error": "Current password is incorrect"}), 401
+            return jsonify({"error": "Current password is incorrect"}), 403
 
         conflict = repo.find_by_email(cursor, new_email)
         if conflict and conflict["id"] != user_id:
