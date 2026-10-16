@@ -12,7 +12,7 @@ from pathlib import Path
 import jwt as pyjwt
 import pytest
 
-from utils.dates import get_datetime_now_utc
+from utils.dates import utc_now
 
 BACKEND_ROOT = Path(__file__).resolve().parent.parent
 
@@ -20,7 +20,7 @@ ADMIN_ROUTES = [("POST", "/api/admin/add-idol")]
 
 
 def _admin_jwt(user_id: int, token: str) -> str:
-    now = get_datetime_now_utc()
+    now = utc_now()
     payload = {
         "sub": token,
         "user_id": user_id,

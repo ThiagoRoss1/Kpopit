@@ -1,6 +1,7 @@
 import { spawn, type ChildProcess } from 'node:child_process';
 import type { Page } from '@playwright/test';
 import { BACKEND_DIR, BACKEND_PYTHON, testBackendEnv } from './env';
+import { ipHeader } from './fixtures';
 
 // A second backend with TEST_DATE_OFFSET on the same database, so one page can play
 // today against :5000 and then "tomorrow" against this one.
@@ -52,11 +53,22 @@ export class OffsetBackend {
     this.proc = null;
   }
 
+  // Page-level only: the context route that tags the client IP stays in place.
+  static async detach(page: Page): Promise<void> {
+    await page.unroute('**/api/**');
+  }
+
   async attach(page: Page): Promise<void> {
-    await page.route('**/api/**', (route) => {
+    await page.route('**/api/**', async (route) => {
       const url = new URL(route.request().url());
-      // fallback() keeps the context route that adds the test client IP.
-      route.fallback({ url: `${this.origin}${url.pathname}${url.search}` });
+      // Fetched from the test runner and handed back to the page: Chromium strips the cookie
+      // header when a continued request changes host, and the refresh cookie must reach this
+      // backend for a logged-in session to survive the day change. Ends routing here, so the
+      // test client IP the context route would add is set here too.
+      const headers = { ...(await route.request().allHeaders()), ...ipHeader() };
+      const response = await route.fetch({ url: `${this.origin}${url.pathname}${url.search}`, headers, maxRedirects: 0 });
+      await route.fulfill({ response });
     });
   }
+
 }

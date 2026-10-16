@@ -9,7 +9,7 @@ from repositories.user_repository import UserRepository
 import secrets
 import hashlib
 from datetime import timedelta
-from utils.dates import get_datetime_now_utc
+from utils.dates import utc_now
 from services.auth_service import AuthService
 from utils.rate_limiter import limiter
 import logging
@@ -42,7 +42,7 @@ def send_verification_email():
         
         raw_token = secrets.token_urlsafe(32)
         token_hash = hashlib.sha256(raw_token.encode()).hexdigest()
-        expires_at = get_datetime_now_utc() + timedelta(hours=24)
+        expires_at = utc_now() + timedelta(hours=24)
 
         # Delete previous unused tokens for this user
         cursor.execute(
@@ -116,7 +116,7 @@ def verify_email():
         if token_record["used_at"]:
             return jsonify({"error": "Token has already been used"}), 400
         
-        if token_record["expires_at"] < get_datetime_now_utc():
+        if token_record["expires_at"] < utc_now():
             return jsonify({"error": "Token has expired"}), 400
         
         cursor.execute(
@@ -167,7 +167,7 @@ def forgot_password():
         
         raw_token = secrets.token_urlsafe(32)
         token_hash = hashlib.sha256(raw_token.encode()).hexdigest()
-        expires_at = get_datetime_now_utc() + timedelta(hours=1)
+        expires_at = utc_now() + timedelta(hours=1)
 
         cursor.execute(
             """
@@ -241,7 +241,7 @@ def reset_password():
             return jsonify({"error": "Invalid token"}), 400
         if token_record["used_at"]:
             return jsonify({"error": "Token has already been used"}), 400
-        if token_record["expires_at"] < get_datetime_now_utc():
+        if token_record["expires_at"] < utc_now():
             return jsonify({"error": "Token has expired"}), 400
         
         password_hash = auth_service.hash_password(new_password)
@@ -312,7 +312,7 @@ def request_email_change():
         
         raw_token = secrets.token_urlsafe(32)
         token_hash = hashlib.sha256(raw_token.encode()).hexdigest()
-        expires_at = get_datetime_now_utc() + timedelta(hours=24)
+        expires_at = utc_now() + timedelta(hours=24)
 
 
         metadata = {"new_email": new_email}
@@ -382,7 +382,7 @@ def confirm_email_change():
             return jsonify({"error": "Invalid token"}), 400
         if token_record["used_at"]:
             return jsonify({"error": "Token has already been used"}), 400
-        if token_record["expires_at"] < get_datetime_now_utc():
+        if token_record["expires_at"] < utc_now():
             return jsonify({"error": "Token has expired"}), 400
         
         metadata = token_record["metadata"] or {}
@@ -422,7 +422,7 @@ def confirm_email_change():
         if old_email:
             raw_revert_token = secrets.token_urlsafe(32)
             revert_hash = hashlib.sha256(raw_revert_token.encode()).hexdigest()
-            revert_expires_at = get_datetime_now_utc() + timedelta(days=14)
+            revert_expires_at = utc_now() + timedelta(days=14)
             revert_metadata = {"old_email": old_email, "new_email": new_email}
 
             cursor.execute(
@@ -495,7 +495,7 @@ def revert_email_change():
             return jsonify({"error": "Invalid token"}), 400
         if token_record["used_at"]:
             return jsonify({"error": "Token has already been used"}), 400
-        if token_record["expires_at"] < get_datetime_now_utc():
+        if token_record["expires_at"] < utc_now():
             return jsonify({"error": "Token has expired"}), 400
         
         metadata = token_record["metadata"] or {}

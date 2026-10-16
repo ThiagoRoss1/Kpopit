@@ -131,6 +131,15 @@ def db_conn():
 
 
 @pytest.fixture(autouse=True)
+def reset_rate_limits():
+    """In-memory limiter counters are process-wide; start every test from zero."""
+    from utils.rate_limiter import limiter
+
+    limiter.reset()
+    yield
+
+
+@pytest.fixture(autouse=True)
 def reset_db(db_conn):
     with db_conn.cursor() as cur:
         cur.execute(TRUNCATE_SQL)
@@ -422,10 +431,10 @@ def make_access_jwt():
 
     import jwt as pyjwt
 
-    from utils.dates import get_datetime_now_utc
+    from utils.dates import utc_now
 
     def _make(user_id: int, token: str, username: str = "testuser") -> str:
-        now = get_datetime_now_utc()
+        now = utc_now()
         payload = {
             "sub": token,
             "user_id": user_id,

@@ -3,7 +3,7 @@ import json
 import secrets
 from datetime import datetime, timedelta, timezone
 from services.get_db import get_db
-from utils.dates import get_today_now, get_current_timestamp, get_today_date_str, get_datetime_now_utc
+from utils.dates import get_current_timestamp, get_today_date_str, utc_now, est_now
 from flask import Blueprint, request, jsonify, g
 from utils.auth_decorators import require_auth
 from repositories.user_repository import UserRepository
@@ -220,7 +220,7 @@ def generate_transfer_code(user_token):
 
 
             code = f"{secrets.token_hex(2)[:3].upper()}-{secrets.token_hex(2)[:3].upper()}"
-            expires_at = get_today_now() + timedelta(days=3)
+            expires_at = est_now() + timedelta(days=3)
             # expires_at = get_server_datetime_now() + datetime.timedelta(days=3)
 
             # Insert transfer code into database
@@ -278,7 +278,7 @@ def transfer_data():
     if isinstance(expires_at, str):
         expires_at = datetime.fromisoformat(expires_at)
 
-    if expires_at < get_today_now():
+    if expires_at < est_now():
     # if expires_at < get_server_datetime_now():
         cursor.close()
         return jsonify({"error": "Transfer code has expired"}), 400
@@ -391,7 +391,7 @@ def update_display_name():
             if changed_at:
                 if changed_at.tzinfo is None:
                     changed_at = changed_at.replace(tzinfo=timezone.utc)
-                days_since = (get_datetime_now_utc() - changed_at).days
+                days_since = (utc_now() - changed_at).days
 
                 if days_since < 5:
                     return jsonify({"error": f"Username can only be changed once every 5 days. Please wait {5 - days_since} more day(s)."}), 400
