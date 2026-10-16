@@ -37,6 +37,7 @@ import { WinnerExplosion } from "../../utils/confetti";
 import { useClearGameStorage } from "../../hooks/useClearGameStorage";
 import { areGuessesEqual } from "../../utils/areGuessesEqual";
 import { safeReload } from "../../utils/safeReload";
+import { isNewGameDay } from "../../utils/gameStorage";
 import CardGrantedReveal from "../Collection/components/CardGrantedReveal";
 import type { CardGranted } from "../../interfaces/albumInterfaces";
 
@@ -151,9 +152,8 @@ function BlurryMode() {
         if (!blurryGameData?.server_date) return;
 
         const serverDate = blurryGameData?.server_date;
-        const lastGameDate = localStorage.getItem("blurryGameDate");
 
-        if (lastGameDate !== serverDate) {
+        if (isNewGameDay(localStorage, "blurry", serverDate)) {
             console.log("New day detected, clearing cache.");
             clearBlurry();
 

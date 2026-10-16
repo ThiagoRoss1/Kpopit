@@ -10,7 +10,6 @@ import type {
   IdolListItem,
   GuessResponse,
   YesterdayIdol,
-  GuessedIdolData,
   CompleteGuessRequest,
   CompleteGuessTrafficRequest,
 } from "../../interfaces/gameInterfaces.ts";
@@ -34,11 +33,12 @@ import { useGameMode } from "../../hooks/useGameMode.tsx";
 import BackgroundStyle from "../../components/Background/BackgroundStyle.tsx";
 import FeedbackSquares from "../../components/FeedbackSquares/FeedbackSquares.tsx";
 import { WinnerExplosion } from "../../utils/confetti.tsx";
-import { calculateFeedback } from "../../utils/calculateFeedback.ts";
+import { buildLocalClassicGuess } from "../../utils/localGuess.ts";
 import { useAllGameModes } from "../../hooks/useAllGameModes.tsx";
 import { useClearGameStorage } from "../../hooks/useClearGameStorage.tsx";
 import { areGuessesEqual } from "../../utils/areGuessesEqual.ts";
 import { safeReload } from "../../utils/safeReload.ts";
+import { isNewGameDay } from "../../utils/gameStorage.ts";
 import CardGrantedReveal from "../Collection/components/CardGrantedReveal.tsx";
 import type { CardGranted } from "../../interfaces/albumInterfaces.ts";
 
@@ -125,9 +125,8 @@ function ClassicMode() {
     if (!gameData) return;
 
     const serverDate = gameData?.server_date;
-    const lastGameDate = localStorage.getItem("gameDate");
    
-    if (lastGameDate !== serverDate) {
+    if (isNewGameDay(localStorage, "classic", serverDate)) {
       console.log("New day detected, clearing cache.");
       clearClassic();
 
@@ -266,32 +265,12 @@ function ClassicMode() {
       return;
     }
 
-    const guessedIdolData = allIdolsData.find(idol => idol.id === selectedIdol.id);
-    const answerIdolData = allIdolsData.find(idol => idol.id === gameData.answer_id);
+    const localGuessResult = buildLocalClassicGuess(allIdolsData, selectedIdol.id, gameData.answer_id);
 
-    if (!guessedIdolData || !answerIdolData) {
+    if (!localGuessResult) {
       console.error("Idol data not found");
       return;
     }
-
-    // Maps 'id' from list item to 'idol_id' expected calculation types
-    const guessForCalculation: GuessedIdolData = {
-      ...guessedIdolData,
-      idol_id: guessedIdolData.id,
-    };
-
-    const answerForCalculation: GuessedIdolData = {
-      ...answerIdolData,
-      idol_id: answerIdolData.id,
-    };
-    
-    const localFeedback = calculateFeedback(guessForCalculation, answerForCalculation);
-
-    const localGuessResult: GuessResponse = {
-      guess_correct: guessedIdolData.id === gameData.answer_id,
-      feedback: localFeedback,
-      guessed_idol_data: guessForCalculation
-    };
 
     setGuesses(prev => {
       const updatedGuesses = [...prev, localGuessResult]

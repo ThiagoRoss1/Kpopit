@@ -18,6 +18,7 @@ import {GetPixelLevel, PIXEL_LEVELS} from "../../utils/pixelLevels";
 import { WinnerExplosion } from "../../utils/confetti";
 import { useClearGameStorage } from "../../hooks/useClearGameStorage";
 import { safeReload } from "../../utils/safeReload";
+import { isNewGameDay } from "../../utils/gameStorage";
 import { useIsLg } from "../../hooks/useIsDevice";
 import { useAllGameModes } from "../../hooks/useAllGameModes";
 import { BarChart3 } from "lucide-react";
@@ -114,9 +115,8 @@ function PixelatedMode() {
         if (!pixelatedGameData?.server_date) return;
 
         const serverDate = pixelatedGameData.server_date;
-        const lastGameDate = localStorage.getItem("pixelatedGameDate");
 
-        if (lastGameDate !== serverDate) {
+        if (isNewGameDay(localStorage, "pixelated", serverDate)) {
             console.log("New day detected, clearing pixelated cache.");
             clearPixelated();
 
