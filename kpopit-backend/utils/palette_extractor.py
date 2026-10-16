@@ -1,8 +1,11 @@
+import logging
 from io import BytesIO
 import numpy as np
 import requests
 from PIL import Image
 from sklearn.cluster import KMeans
+
+logger = logging.getLogger(__name__)
 
 def extract_palette(image_url: str, k: int = 4) -> list[str]:
     """Return up to k dominant hex colors of an image, sorted brightest-first.
@@ -31,5 +34,5 @@ def extract_palette(image_url: str, k: int = 4) -> list[str]:
             for r, g, b in ordered
         ]
     except Exception as exc:
-        print(f"[palette_extractor] failed for {image_url}: {exc}")
+        logger.warning("Palette extraction failed (%s)", type(exc).__name__)
         return []

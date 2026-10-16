@@ -117,7 +117,7 @@ function PixelatedMode() {
         const serverDate = pixelatedGameData.server_date;
 
         if (isNewGameDay(localStorage, "pixelated", serverDate)) {
-            console.log("New day detected, clearing pixelated cache.");
+            if (import.meta.env.DEV) console.log("New day detected, clearing pixelated cache.");
             clearPixelated();
 
             setGuesses([]);
@@ -129,7 +129,7 @@ function PixelatedMode() {
             return;
         }
 
-        console.log("Same day, restoring pixelated cache.");
+        if (import.meta.env.DEV) console.log("Same day, restoring pixelated cache.");
 
         const cachedGuesses = localStorage.getItem("pixelatedGuessesDetails");
         const gameComplete = localStorage.getItem("pixelatedGameComplete");

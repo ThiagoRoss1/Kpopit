@@ -75,11 +75,7 @@ class GameService:
                     one_shot_win, won_at, started_at_value))
                             
             if is_correct:
-                formatted_analytics_data = ' | '.join([f"{key.capitalize()}: {value}" for key, value in analytics_data.items()])
-                answer_label = answer_data.get('artist_name') or answer_data.get('album_name')
-                answer_type = 'album' if gamemode_id == 3 else 'idol'
-                print(f"Victory! User {user_id} from {analytics_data.get('country', 'Unknown')} guessed correctly {answer_type} {answer_label} of ID {answer_id} in {current_attempt} attempts at date {today}.")
-                print(f"Entire analytics data for User {user_id}: {formatted_analytics_data}")
+                logger.info("Game won: gamemode_id=%s attempts=%s date=%s", gamemode_id, current_attempt, today)
                 S0 = 10
                 decay_rate = 0.1
                 n = current_attempt

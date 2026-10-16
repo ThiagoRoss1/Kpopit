@@ -35,7 +35,7 @@ def get_daily_pixelated_album():
         user_id = user_service.handle_user_streak(gamemode_id=3)
 
         if user_id:
-            print(f"User {user_id} streak checked/updated for pixelated gamemode.")
+            logger.debug("Pixelated streak checked")
             
         return jsonify({
             "answer_id": album["album_id"],

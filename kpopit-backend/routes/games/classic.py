@@ -1,5 +1,4 @@
 import logging
-import os
 from flask import Blueprint, request, jsonify, g
 from services.daily_draw import ensure_daily_picks
 from services.game_service import GameService
@@ -9,10 +8,7 @@ from utils.game_feedback_logic import partial_feedback_function, numerical_feedb
 from utils.analytics import get_analytics_data, get_country_name
 from services.get_db import get_db, get_idol_repo
 from utils.auth_decorators import optional_auth
-from dotenv import load_dotenv
 
-load_dotenv()
-FLASK_ENV = os.getenv("FLASK_ENV", "production")
 
 classic_bp = Blueprint('classic', __name__)
 
@@ -56,12 +52,6 @@ def get_daily_idol():
         else:
             idol_data_dict["group_companies"] = []
 
-        # Debug print
-        if FLASK_ENV == "development":
-            print("\n -- ENTIRE IDOL DATA DICT --")
-            print(idol_data_dict)
-            print(" ------------------------\n")
-
         # Add career data 
         idol_career_for_groups = repository.fetch_full_idol_career(idol_id)
         groups = [career["group_name"] for career in idol_career_for_groups if career.get("is_active")]
@@ -74,7 +64,7 @@ def get_daily_idol():
         user_id = user_service.handle_user_streak(gamemode_id=1)
 
         if user_id:
-            print(f"User {user_id} streak checked/updated for daily idol game.")
+            logger.debug("Classic streak checked")
             
         # Filter data 
         game_data = {
@@ -160,8 +150,7 @@ def guess_idol():
             user_row = cursor.fetchone()
 
             if not user_row:
-                if FLASK_ENV == "development":
-                    print("Invalid user token provided:", user_token)
+                logger.debug("Invalid user token rejected")
 
                 return jsonify({"error": "Invalid user token"}), 400
             

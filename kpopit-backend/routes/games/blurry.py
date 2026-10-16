@@ -1,8 +1,6 @@
 import logging
-import os
 from flask import Blueprint, jsonify, request, g
 from utils.auth_decorators import optional_auth
-from dotenv import load_dotenv
 from services.get_db import get_db, get_idol_repo
 from services.daily_draw import ensure_daily_picks
 from services.user_service import UserService
@@ -10,9 +8,7 @@ from services.game_service import GameService
 from utils.dates import get_today_date_str, get_current_timestamp
 from utils.analytics import get_analytics_data, get_country_name
 
-load_dotenv()
 
-FLASK_ENV = os.getenv("FLASK_ENV")
 
 blurry_bp = Blueprint('blurry', __name__)
 
@@ -42,13 +38,8 @@ def get_daily_blurry_idol():
         user_id = user_service.handle_user_streak(gamemode_id=2)
 
         if user_id:
-            print(f"User {user_id} streak checked/updated for blurry gamemode.")
+            logger.debug("Blurry streak checked")
         
-        if FLASK_ENV == "development":
-            print("\n -- ENTIRE IDOL DICT --")
-            print(idol_blurry_data)
-            print(" ------------------------\n")
-
         blurry_game_data = {
             "answer_id": idol_blurry_data["idol_id"],
             "artist_name": idol_blurry_data["artist_name"],
