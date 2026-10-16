@@ -391,6 +391,22 @@ def test_idols_list_shape(client, make_group, make_career, idol_with, blurry):
     assert rows[a]["active_group"] == "ListGroup"
 
 
+def test_idols_list_group_and_company_order_is_stable(client, db_conn, make_group, make_career, idol_with):
+    idol = idol_with("Multi")
+    for name in ("Zeta", "Alpha", "Mid"):
+        make_career(idol, make_group(name))
+    with db_conn.cursor() as cur:
+        for name in ("Zco", "Aco"):
+            cur.execute("INSERT INTO companies (name) VALUES (%s) RETURNING id", (name,))
+            cur.execute("INSERT INTO idol_company_affiliation (idol_id, company_id) VALUES (%s, %s)", (idol, cur.fetchone()["id"]))
+    db_conn.commit()
+
+    [row] = [r for r in client.get("/api/idols-list").get_json() if r["id"] == idol]
+    assert row["active_group"] == "Alpha, Mid, Zeta"
+    assert row["groups"] == ["Alpha", "Mid", "Zeta"]
+    assert row["companies"] == ["Aco", "Zco"]
+
+
 def test_idols_list_hides_unpublished(client, make_idol):
     hidden = make_idol("Hidden", is_published=False)
     shown = make_idol("Shown")

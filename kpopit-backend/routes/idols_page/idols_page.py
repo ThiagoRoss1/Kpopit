@@ -26,7 +26,7 @@ def get_idols_page():
                         c.id AS company_id,
                         c.name AS company_name,
                         COALESCE(cc.is_former_group, FALSE) AS is_former_group,
-                        (SELECT STRING_AGG(DISTINCT g2.name, ', ')
+                        (SELECT STRING_AGG(DISTINCT g2.name, ', ' ORDER BY g2.name)
                             FROM idol_career AS ic2
                             JOIN groups AS g2 ON ic2.group_id = g2.id
                             WHERE ic2.idol_id = i.id) AS all_groups
