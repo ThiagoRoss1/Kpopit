@@ -13,18 +13,8 @@ load_dotenv()
 logger = logging.getLogger(__name__)
 
 BUCKET_NAME = os.getenv("R2_BUCKET_NAME")
-DB_URL = os.getenv("DB_URL")
+DB_URL = os.getenv("BACKUP_DB_URL") or os.getenv("DB_URL")
 
-
-def sanitize_dump_for_sql_editors(local_path):
-    """Remove psql meta-commands (e.g. \restrict) unsupported by SQL editors like DBeaver."""
-    with open(local_path, "r", encoding="utf-8", errors="ignore") as f:
-        lines = f.readlines()
-
-    cleaned_lines = [line for line in lines if not line.lstrip().startswith("\\")]
-
-    with open(local_path, "w", encoding="utf-8", newline="") as f:
-        f.writelines(cleaned_lines)
 
 def _pg_dump_version(pg_dump: str) -> str:
     try:
@@ -37,9 +27,9 @@ def _pg_dump_version(pg_dump: str) -> str:
 def postgresql_backup_to_s3():
     """Dump the database with pg_dump and upload it to R2 under backups/.
 
-    Returns (success, filename). Failure details go to the logs only, and DB_URL is
-    never logged (it carries the password): pg_dump's own error output is redacted."""
-    filename = f"backup_{datetime.now().strftime('%Y%m%d_%H%M%S')}.sql"
+    Returns (success, filename). Only controlled diagnostics go to logs: neither the
+    database URL nor pg_dump stderr, whose parse errors can echo credential fragments."""
+    prefix = f"backup_{datetime.now().strftime('%Y%m%d_%H%M%S')}_"
 
     missing = []
     if not DB_URL:
@@ -56,9 +46,12 @@ def postgresql_backup_to_s3():
         return False, None
     logger.info("Backup starting with %s", _pg_dump_version(pg_dump))
 
-    local_path = os.path.join(tempfile.gettempdir(), filename)
-
+    local_path = None
     try:
+        # Private, unique files and object names even for requests in the same second.
+        fd, local_path = tempfile.mkstemp(prefix=prefix, suffix=".sql", dir=tempfile.gettempdir())
+        os.close(fd)
+        filename = os.path.basename(local_path)
         result = subprocess.run(
             [
                 pg_dump,
@@ -71,14 +64,15 @@ def postgresql_backup_to_s3():
             ],
             capture_output=True,
             text=True,
+            timeout=300,
         )
         if result.returncode != 0:
-            stderr = (result.stderr or "").replace(DB_URL, "<DB_URL>").strip()
-            logger.error("Backup failed: pg_dump exited with %s: %s", result.returncode, stderr[-2000:])
+            logger.error("Backup failed: pg_dump exited with %s; check database access and client/server versions", result.returncode)
             return False, None
 
-        sanitize_dump_for_sql_editors(local_path)
-        
+        # Preserve pg_dump verbatim, including psql's safety meta-commands and any
+        # backslash-prefixed lines in multiline user data. Restore through psql.
+
         s3 = boto3.client(
             service_name='s3',
             endpoint_url=os.getenv("R2_ENDPOINT_URL"),
@@ -99,7 +93,8 @@ def postgresql_backup_to_s3():
 
     finally:
         try:
-            os.remove(local_path)
+            if local_path is not None:
+                os.remove(local_path)
         except FileNotFoundError:
             pass
         except OSError:
@@ -109,5 +104,5 @@ def postgresql_backup_to_s3():
 if __name__ == "__main__":
     logging.basicConfig(level=logging.INFO)
     success, filename = postgresql_backup_to_s3()
-    print(f"Backup successful: {filename}" if success else "Backup failed (see log above)")
-    
+    logger.info("Backup successful: %s", filename) if success else logger.error("Backup failed (see log above)")
+

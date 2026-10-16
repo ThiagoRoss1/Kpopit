@@ -2,6 +2,9 @@
 
 import logging
 import subprocess
+from concurrent.futures import ThreadPoolExecutor
+from pathlib import Path
+import threading
 
 import pytest
 
@@ -104,7 +107,10 @@ def test_pg_dump_failure_never_logs_db_url_and_removes_dump(service_env, monkeyp
             return subprocess.CompletedProcess(args, 0, stdout="pg_dump (PostgreSQL) 17.2\n", stderr="")
         out = args[args.index("--file") + 1]
         open(out, "w").close()
-        return subprocess.CompletedProcess(args, 1, stdout="", stderr=f'pg_dump: error: connection to "{FAKE_DB_URL}" failed')
+        return subprocess.CompletedProcess(args, 1, stdout="", stderr=(
+            f'pg_dump: error: connection to "{FAKE_DB_URL}" failed; '
+            'invalid percent-encoded token: "s3cret-pass"'
+        ))
 
     monkeypatch.setattr(backup_service.subprocess, "run", fake_run)
     with caplog.at_level(logging.INFO):
@@ -135,3 +141,68 @@ def test_upload_error_never_logs_the_exception_text(service_env, monkeypatch, ca
         assert backup_service.postgresql_backup_to_s3() == (False, None)
     assert "s3cret-pass" not in caplog.text
     assert list(service_env.iterdir()) == []
+
+
+def test_concurrent_backups_have_independent_files_and_object_keys(service_env, monkeypatch):
+    monkeypatch.setattr(backup_service.shutil, "which", lambda _: "/usr/bin/pg_dump")
+    barrier = threading.Barrier(2)
+    uploads = []
+
+    class FrozenTime:
+        @staticmethod
+        def now():
+            from datetime import datetime
+            return datetime(2026, 1, 1)
+
+    monkeypatch.setattr(backup_service, "datetime", FrozenTime)
+
+    def fake_run(args, **kwargs):
+        if "--version" in args:
+            return subprocess.CompletedProcess(args, 0, stdout="pg_dump 18", stderr="")
+        Path(args[args.index("--file") + 1]).write_text("-- intact dump", encoding="utf-8")
+        return subprocess.CompletedProcess(args, 0, stdout="", stderr="")
+
+    class Storage:
+        def upload_file(self, local_path, bucket, key):
+            barrier.wait(timeout=5)
+            uploads.append((local_path, key, Path(local_path).read_text(encoding="utf-8")))
+            barrier.wait(timeout=5)
+
+    monkeypatch.setattr(backup_service.subprocess, "run", fake_run)
+    monkeypatch.setattr(backup_service.boto3, "client", lambda *a, **k: Storage())
+    with ThreadPoolExecutor(max_workers=2) as workers:
+        results = list(workers.map(lambda _: backup_service.postgresql_backup_to_s3(), range(2)))
+    assert all(success for success, _ in results)
+    assert len({path for path, _, _ in uploads}) == 2
+    assert len({key for _, key, _ in uploads}) == 2
+    assert all(content == "-- intact dump" for _, _, content in uploads)
+    assert list(service_env.iterdir()) == []
+
+
+def test_backup_preserves_pg_dump_bytes_and_psql_safety_commands(service_env, monkeypatch):
+    payload = b"\\restrict safety_key\nINSERT INTO example VALUES ('hello\n\\user_data\nworld');\n\\unrestrict safety_key\n"
+    monkeypatch.setattr(backup_service.shutil, "which", lambda _: "/usr/bin/pg_dump")
+    uploaded = []
+
+    def fake_run(args, **kwargs):
+        if "--version" in args:
+            return subprocess.CompletedProcess(args, 0, stdout="pg_dump 18", stderr="")
+        Path(args[args.index("--file") + 1]).write_bytes(payload)
+        return subprocess.CompletedProcess(args, 0, stdout="", stderr="")
+
+    class Storage:
+        def upload_file(self, local_path, bucket, key):
+            uploaded.append(Path(local_path).read_bytes())
+
+    monkeypatch.setattr(backup_service.subprocess, "run", fake_run)
+    monkeypatch.setattr(backup_service.boto3, "client", lambda *a, **k: Storage())
+    assert backup_service.postgresql_backup_to_s3()[0] is True
+    assert uploaded == [payload]
+    assert list(service_env.iterdir()) == []
+
+
+def test_backup_can_use_a_separate_read_only_database_login(monkeypatch):
+    import runpy
+    monkeypatch.setenv("BACKUP_DB_URL", "postgresql://backup@127.0.0.1/example")
+    namespace = runpy.run_path(backup_service.__file__)
+    assert namespace["DB_URL"] == "postgresql://backup@127.0.0.1/example"

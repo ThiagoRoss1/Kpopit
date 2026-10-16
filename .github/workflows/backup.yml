@@ -19,7 +19,8 @@ jobs:
   backup:
     name: Trigger backup
     runs-on: ubuntu-latest
-    timeout-minutes: 15
+    # Two 600-second attempts plus the retry delay must both fit in the job timeout.
+    timeout-minutes: 25
     env:
       BACKUP_URL: ${{ secrets.BACKUP_URL }}
       BACKUP_AUTH_KEY: ${{ secrets.BACKUP_AUTH_KEY }}
