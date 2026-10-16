@@ -177,6 +177,12 @@ Recurring patterns across the codebase — follow them in new code.
 - **Reload via `safeReload()`** — Not `window.location.reload()` directly; its one-shot guard prevents reload loops when multiple triggers fire.
 - **Per-mode React Query keys** — `["pixelatedDailyAlbum", gameMode]`, `["dailyUserCount", gameMode]`, etc. Client-side search lists (`["allAlbums"]`, `["allIdols"]`) are fetched once and filtered locally — no per-keystroke endpoint.
 
+### Comments
+- Inline comments: 1–2 lines, explaining why (not what the code says).
+- Longer explanations (docstrings, module headers, non-obvious workarounds): 3–5 lines max. Anything longer belongs in docs.
+- No commented-out code, no references to local/gitignored docs (e.g. "plan §3"), no `noqa`/`pragma`/`eslint-disable` to hide a problem:
+  fix the cause. If a suppression is truly unavoidable, one line saying why.
+
 ## Architecture — Adding a New Game Mode
 Every mode follows the same shape (Classic → Blurry → Pixelated) on both stacks. Reuse it; don't invent a parallel structure. (Visual/design rules live in `kpopit-frontend/DESIGN.md` — Puff Pop style; exact tokens, components and the reference UI kit live in the design system at `docs/design-system/`, which wins on any value conflict.)
 
