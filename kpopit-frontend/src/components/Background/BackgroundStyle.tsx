@@ -1,5 +1,5 @@
 import React, { useMemo } from "react";
-import { motion } from "framer-motion";
+import { motion } from "motion/react";
 import Star from "../../assets/icons/star-four-fill.svg";
 import { useIsMobile } from "../../hooks/useIsDevice";
 
@@ -129,8 +129,6 @@ const BackgroundStyle = (props: BackgroundStyleProps) => {
                 transform: `rotate(${star.rotation}deg)`,
               }}
             >
-            {/* Debugging IDs */}
-            {/* <span key={star.id} className="absolute text-white text-xs">{star.id}</span> */}
             <img
               src={Star}
               alt="Star"

@@ -1,0 +1,1 @@
+The Kpopit app icon. Use `kpopit-icon-svg.svg` at any size and `kpopit-icon.png` (512px) where a raster is needed (PWA, social). Never recolour or redraw it. The text wordmark is live type (see Type in the README), not an image.

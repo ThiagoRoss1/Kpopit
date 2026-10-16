@@ -1,0 +1,41 @@
+/* KpopIt Retro-Pop colour tokens. Source: tokens/tokens.json (uploaded kit, dev@4b81339).
+   Day is the default; set data-theme="night" on any root element to switch.
+   Values marked FIX differ from the source on purpose (contrast) — see README › Colour. */
+:root,[data-theme="day"]{
+/* brand */
+--neon-pink:#ff3399;--pink-soft:#ff70b8;--pink-deep:#c62368;--coral:#fa7268;--logo-pink:#e70a7d;--logo-coral:#ec4850;
+--ink:#0a0a0a;--cream:#faf6f0;
+/* surfaces */
+--surface-page:#faf6f0;--surface-card:#ffffff;--surface-paper:#fffaf3;--surface-sunken:#faf6f0;--surface-ink:#1f1f1f;--track:#efe4d5;--scrim:rgba(30,20,28,0.55);
+/* lines + offset colour */
+--line:#0a0a0a;--line-strong:#0a0a0a;--offset:#0a0a0a;
+/* text */
+--text:#0a0a0a;--text-soft:#3c2f38;--text-muted:#6b5f55;--text-muted-2:#6f616a;--text-faint:#776a60;/* FIX: was #9a8e83 (3.1:1) → 4.6:1 on cream */
+--text-on-pink:#0a0a0a;/* FIX: was #ffffff (3.4:1) → ink 6.6:1 */
+--text-on-result:#0a0a0a;/* FIX: guess rows were white on #4fffb0 (1.2:1) → ink */
+--text-on-dark:#ffffff;--text-pink:#c62368;/* pink text below 24px bold: use this (5.3:1), not neon-pink */
+/* game results */
+--correct:#4fffb0;--correct-edge:#15803d;--incorrect:#fd5c63;--incorrect-edge:#b91c1c;--partial:#f3e563;--partial-edge:#a16207;
+/* rewards */
+--level-gold:#bf953f;--level-holo:#ff5ba8;--reward-yellow:#ffd86b;
+/* hint sleeves */
+--sleeve-year:#e4e4e4;--sleeve-year-ink:#72401a;--sleeve-artist:#ffd1e8;--sleeve-artist-ink:#5a1a48;
+/* 3D objects */
+--vinyl:#0d0008;--vinyl-hi:#18091a;--key-light:#fff0c8;--fill-light:#b4d2f0;
+/* default album cover palette (deep → light) */
+--album-deep:#c62368;--album-secondary:#d53867;--album-main:#e34c67;--album-accent:#ef5f67;--album-light:#fa7268;
+/* grid paper */
+--grid-line:rgba(255,51,153,0.12);--margin-rule:rgba(255,51,153,0.34);
+/* semantic aliases */
+--accent:var(--neon-pink);--accent-ink:var(--text-on-pink);--eyebrow:var(--pink-deep);--focus-ring:var(--line-strong);
+--surface-raised:var(--surface-card);--surface-modal:var(--surface-paper);--surface-dropdown:var(--surface-paper);
+--border-card:var(--line);--border-focus:var(--line-strong);
+--text-body:var(--text);--text-heading:var(--text);--text-caption:var(--text-muted);--text-modal-title:var(--text-soft);
+}
+[data-theme="night"]{
+--surface-page:#0b0c0f;--surface-card:#16181e;--surface-paper:#16181e;--surface-sunken:#1c1f27;--track:rgba(255,255,255,0.12);
+--line:rgba(255,255,255,0.10);--line-strong:#ff3399;--offset:#ff3399;
+--text:#ffffff;--text-soft:#ffffff;--text-muted:rgba(255,255,255,0.68);--text-muted-2:rgba(255,255,255,0.68);--text-faint:rgba(255,255,255,0.55);/* FIX: was .40 (3.8:1) */
+--text-pink:#ff3399;--eyebrow:#ff3399;
+--grid-line:rgba(255,255,255,0.05);--margin-rule:rgba(255,51,153,0.22);
+}

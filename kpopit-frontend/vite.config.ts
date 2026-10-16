@@ -1,11 +1,10 @@
 import { defineConfig } from 'vite'
 import react from '@vitejs/plugin-react'
-import svgr from 'vite-plugin-svgr'
 import tailwindcss from '@tailwindcss/vite'
 
 // https://vite.dev/config/
 export default defineConfig({
-  plugins: [react(), svgr(), tailwindcss()],
+  plugins: [react(), tailwindcss()],
   server: {
     proxy: {
         '/api': {
@@ -13,6 +12,10 @@ export default defineConfig({
             changeOrigin: true,
             cookieDomainRewrite: 'localhost'
         }
+    },
+    // Test and Lighthouse runs write reports here; watching them would reload the dev server mid-run.
+    watch: {
+        ignored: ['**/playwright-report/**', '**/test-results/**', '**/blob-report/**', '**/.lighthouseci/**', '**/lighthouse/**']
     }
 }
 })

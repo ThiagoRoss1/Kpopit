@@ -59,6 +59,8 @@ os.environ.setdefault("FLASK_ENV", "development")
 # the grant hook both read this at import time. Hook on/off behaviour is still
 # exercised per-test via monkeypatch on services.game_service.COLLECTION_ENABLED.
 os.environ["COLLECTION_ENABLED"] = "true"
+# Register the admin blueprint regardless of the local .env, so its auth rules are always tested.
+os.environ["ADMIN_ENABLED"] = "true"
 
 import psycopg  # noqa: E402
 import pytest  # noqa: E402

@@ -1,0 +1,67 @@
+<!-- @dsCard group="Retro-Pop · Web app" viewport="1280x800" name="KpopIt web app" subtitle="Pixelated mode → victory → Collections, click-through" -->
+<!DOCTYPE html>
+<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>KpopIt — UI kit</title>
+<link rel="stylesheet" href="../../styles.css">
+<script src="https://unpkg.com/react@18.3.1/umd/react.development.js" integrity="sha384-hD6/rw4ppMLGNu3tX5cjIb+uRZ7UkRJ6BPkLpg4hAu/6onKUg4lLsHAs9EBPT82L" crossorigin="anonymous"></script>
+<script src="https://unpkg.com/react-dom@18.3.1/umd/react-dom.development.js" integrity="sha384-u6aeetuaXnQ38mYT8rp6sbXaQe3NL9t+IBXmnYxwkUI2Hw4bsp2Wvmx4yRQF1uAm" crossorigin="anonymous"></script>
+<script src="https://unpkg.com/@babel/standalone@7.29.0/babel.min.js" integrity="sha384-m08KidiNqLdpJqLq95G/LEi8Qvjl/xUYll3QILypMoQ65QorJ9Lvtp2RXYGBFj1y" crossorigin="anonymous"></script>
+<script src="../../_ds_bundle.js"></script>
+<style>
+html,body{margin:0;min-height:100%}body{overflow-x:clip}
+a{color:var(--text-pink)}a:hover{color:var(--neon-pink)}
+.page{min-height:100vh;position:relative;transition:background-color .3s,color .3s}
+.pm-wrap{max-width:1360px;margin:0 auto;padding:40px 40px 80px;display:flex;gap:40px;align-items:flex-start}
+.pm-left{width:560px;flex:none;display:flex;flex-direction:column}.pm-right{flex:1;min-width:0}
+@media (max-width:1023px){.pm-wrap{flex-direction:column;align-items:center;padding:16px}.pm-left{width:100%}.pm-right{width:100%;max-width:560px}}
+.cl-card{margin-top:24px;display:flex;gap:26px;align-items:stretch}
+.cl-cover{position:relative;flex:none;width:132px;height:198px;border:0;border-radius:6px;overflow:hidden;cursor:pointer;display:flex;align-items:flex-end;box-shadow:0 12px 28px -12px rgba(40,26,36,.55);transition:transform .15s}.cl-cover:active{transform:scale(.95)}
+.cl-body{flex:1;min-width:0;display:flex;flex-direction:column;align-items:flex-start}
+.cl-head{margin-top:12px;display:flex;flex-wrap:wrap;align-items:flex-end;justify-content:space-between;gap:16px}
+@media (max-width:767px){.cl-card{flex-direction:column;align-items:center;text-align:center}.cl-body{align-items:center}.cl-head{flex-direction:column;align-items:center}}
+.kit-nav{position:fixed;left:50%;bottom:16px;transform:translateX(-50%);z-index:100;display:flex;gap:6px;padding:6px;border-radius:999px;background:var(--ink);box-shadow:3px 3px 0 var(--neon-pink)}
+.kit-nav button{font:700 13px/1 var(--font-display);border:0;border-radius:999px;padding:9px 14px;cursor:pointer;background:transparent;color:#fff}
+.kit-nav button[aria-current="true"]{background:var(--neon-pink);color:var(--ink)}
+.toast{position:fixed;left:50%;top:20px;transform:translateX(-50%) rotate(-1deg);z-index:300;background:var(--ink);color:#fff;border-radius:12px;padding:10px 16px;font-weight:700;font-size:14px;box-shadow:3px 3px 0 var(--neon-pink)}
+</style></head>
+<body data-style="retro"><div id="root"></div>
+<script type="text/babel" src="data.jsx"></script>
+<script type="text/babel" src="PixelatedScreen.jsx"></script>
+<script type="text/babel" src="VictoryCard.jsx"></script>
+<script type="text/babel" src="CollectionsScreen.jsx"></script>
+<script type="text/babel" src="StatsModal.jsx"></script>
+<script type="text/babel">
+function App() {
+  const [screen, setScreen] = React.useState(() => localStorage.getItem("kpkit-screen") || "pixelated");
+  const [night, setNight] = React.useState(false);
+  const [guesses, setGuesses] = React.useState([]);
+  const [won, setWon] = React.useState(false);
+  const [stats, setStats] = React.useState(false);
+  const [toastMsg, setToast] = React.useState(null);
+  React.useEffect(() => { localStorage.setItem("kpkit-screen", screen); window.scrollTo(0, 0); }, [screen]);
+  const toast = (m) => { setToast(m); setTimeout(() => setToast(null), 1800); };
+  const reset = () => { setGuesses([]); setWon(false); };
+  const theme = screen === "collections" && night ? "night" : "day";
+  return (
+    <div className="page kp-root kp-grid-bg" data-theme={theme}>
+      {screen === "pixelated" && <span className="kp-margin-rule" style={{ position: "fixed" }} />}
+      {screen === "pixelated" && (
+        <>
+          <PixelatedScreen guesses={guesses} setGuesses={setGuesses} won={won} onWin={() => setWon(true)} onOpenStats={() => setStats(true)} />
+          {won && <div style={{ padding: "0 16px 120px" }}><VictoryCard attempts={guesses.length} onCollections={() => setScreen("collections")} /></div>}
+        </>
+      )}
+      {screen === "collections" && <CollectionsScreen night={night} setNight={setNight} toast={toast} />}
+      {stats && <StatsModal onClose={() => setStats(false)} />}
+      {toastMsg && <div className="toast">{toastMsg}</div>}
+      <nav className="kit-nav" aria-label="UI kit screens">
+        <button aria-current={screen === "pixelated"} onClick={() => setScreen("pixelated")}>Pixelated</button>
+        <button aria-current={screen === "collections"} onClick={() => setScreen("collections")}>Collections</button>
+        <button onClick={() => { reset(); setScreen("pixelated"); }}>Reset game</button>
+      </nav>
+    </div>
+  );
+}
+ReactDOM.createRoot(document.getElementById("root")).render(<App />);
+</script>
+</body></html>

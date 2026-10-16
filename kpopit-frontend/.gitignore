@@ -35,3 +35,12 @@ GAMEMODE_ARCHITECTURE.md
 SECURITY_LOCALSTORAGE_VS_COOKIES.md
 SEO_AND_INFRASTRUCTURE_GUIDE.md
 RESPONSIVENESS_GUIDE.md
+
+# Playwright + Lighthouse CI outputs
+test-results/
+playwright-report/
+blob-report/
+playwright/.cache/
+.lighthouseci/
+# Raw Lighthouse reports; only the baseline-*.md summaries are tracked
+lighthouse/baseline/*/

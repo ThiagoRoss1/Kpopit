@@ -74,7 +74,7 @@ export const useAuthUser = () => {
                 return response;
             }
         } catch (error) {
-            throw new Error(extractBackendError(error, "Registration failed"));
+            throw new Error(extractBackendError(error, "Registration failed"), { cause: error });
         }
     }
 
@@ -100,7 +100,7 @@ export const useAuthUser = () => {
             await hydrateAuthenticatedSession();
             return response;
         } catch (error) {
-            throw new Error(extractBackendError(error, "Login failed"));
+            throw new Error(extractBackendError(error, "Login failed"), { cause: error });
         }
     }
 
@@ -115,7 +115,7 @@ export const useAuthUser = () => {
             clearAll();
             return response;
         } catch (error) {
-            throw new Error(extractBackendError(error, "Logout failed"));
+            throw new Error(extractBackendError(error, "Logout failed"), { cause: error });
         }
     }
 
@@ -123,7 +123,7 @@ export const useAuthUser = () => {
         try {
             return await refreshToken();
         } catch (error) {
-            throw new Error(extractBackendError(error, "Token refresh failed"));
+            throw new Error(extractBackendError(error, "Token refresh failed"), { cause: error });
         }
     }
 

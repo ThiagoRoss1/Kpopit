@@ -1,0 +1,82 @@
+/* Puff Pop — the DEFAULT KpopIt style (catalogue sub-style of Retro-Pop, now primary).
+   Source: "KpopIt Idols Catalogue" handoff (PUFF-POP-HANDOFF.md §3) + IdolsFormV2 / AlbumsForm / AlbumPage / IdolPagePersona14 defaults.
+   Overrides the shared Retro-Pop names (--ink, --text, --surface-*, --line, --offset, --press, --offset-*, --tilt) so every component inherits Puff Pop.
+   Retro-Pop is restored under data-style="retro" (tokens/retropop.css). */
+:root{
+/* pink roles — #FF3399 signal (--neon-pink), #FF70B8 tag (--pink-soft), #C62368 small text (--pink-deep) already exist */
+--pink-body:#FF8AC4;--pink-body-hover:#FF9BCC;/* @kind color */
+--side-rose:#FF9BCC;--side-warm:#FFA0B5;/* alternative side colours (not default) */
+--ground-graphite:#1E1C1F;--ground-ink:#141315;--ground-soft:#2A272B;/* night ground options; graphite is default */
+/* shape + depth */
+--r:23px;--r-inner:16px;--depth:5px;--ctl-h:40px;--field-h:50px;--radius-field:18px;--radius-menu:20px;--radius-opt:13px;
+--tilt:0.5deg;/* @kind other */--tilt-title:-1.5deg;/* @kind other */--tilt-tag:4deg;/* @kind other */--tilt-logo:-5deg;/* @kind other */--skew-idol:-7deg;/* @kind other */--sk:-12deg;/* @kind other */--unsk:12deg;/* @kind other */
+/* motion */
+--m:1.25;/* @kind other */
+--ease-settle:cubic-bezier(.22,1,.36,1);/* @kind other */--ease-sweep:cubic-bezier(.25,1,.5,1);/* @kind other */
+--stagger-start:260ms;/* @kind other */--stagger:45ms;/* @kind other */--stagger-booted:28ms;/* @kind other */--stagger-cap:900ms;/* @kind other */
+}
+@media (pointer:coarse){:root{--ctl-h:44px}}
+:root,[data-theme="day"]{
+--ground:#FAF6F0;--dot:rgba(26,20,24,.07);--pp-glow:linear-gradient(transparent,transparent);/* @kind other */
+--face:#FFFDFA;--face-hover:#FFF0F7;--face-ink:#1A1418;--face-muted:#6B5F66;
+--field:#FFFDFA;--field-ink:#1A1418;--chip:#FFFDFA;--chip-ink:#1A1418;--chip-hover:#FFE3F1;--menu-bg:#FFFAF3;--panel:#FFFDFA;--opt-hover:rgba(255,138,196,.24);
+--ink:#1A1418;--ctl-off:#1A1418;--muted:#6B5F66;--rule:rgba(26,20,24,.18);
+--side:#FF8AC4;--tag:#FF70B8;--sig:#E70A7D;--sig-glow:none;/* @kind shadow */--group:#C62368;--sh:26,20,24;/* @kind other */
+--band:#1A1418;--speed:rgba(255,255,255,.06);--tone:rgba(255,51,153,.22);--dots-c:rgba(255,112,184,.50);--pm-bg:#1A1418;--pm-fg:#FFFFFF;--pm-n:#FF8AC4;
+--beam:rgba(255,255,255,.75);--beam-pink:rgba(255,138,196,.32);
+--in:inset 0 2px 0 #FFFFFF,inset 0 -3px 0 rgba(26,20,24,.07);/* @kind shadow */
+--in-pink:inset 0 2px 0 rgba(255,255,255,.55),inset 0 -3px 0 rgba(198,35,104,.28);/* @kind shadow */
+--face-hl:inset 0 7px 6px -6px rgba(26,20,24,.30);/* @kind shadow */
+--off-rest:2px 3px 0 var(--ctl-off);--off-hover:2.5px 3.5px 0 var(--ctl-off);--off-lift:3px 5px 0 var(--ctl-off);--off-field:4px 5px 0 var(--ctl-off);--off-focus:6px 7px 0 var(--ctl-off);--off-flat:0 0 0 var(--ctl-off);
+--puff-title:-2.5px -2.5px 0 #1A1418,2.5px -2.5px 0 #1A1418,-2.5px 2.5px 0 #1A1418,2.5px 2.5px 0 #1A1418,0px 2.5px 0 #1A1418,0px -2.5px 0 #1A1418,2.5px 0px 0 #1A1418,-2.5px 0px 0 #1A1418,1.33px 1.83px 0 #FF8AC4,2.67px 3.67px 0 #FF8AC4,4.00px 5.50px 0 #FF8AC4,1.5px 3px 0 #1A1418,6.5px 3px 0 #1A1418,1.5px 8px 0 #1A1418,6.5px 8px 0 #1A1418,4px 8px 0 #1A1418,4px 3px 0 #1A1418,6.5px 5.5px 0 #1A1418,1.5px 5.5px 0 #1A1418;
+--puff-empty:-1.8px -1.8px 0 #1A1418,1.8px -1.8px 0 #1A1418,-1.8px 1.8px 0 #1A1418,1.8px 1.8px 0 #1A1418,0px 1.8px 0 #1A1418,0px -1.8px 0 #1A1418,1.8px 0px 0 #1A1418,-1.8px 0px 0 #1A1418,0.87px 1.13px 0 #FF8AC4,1.73px 2.27px 0 #FF8AC4,2.60px 3.40px 0 #FF8AC4,0.8px 1.6px 0 #1A1418,4.4px 1.6px 0 #1A1418,0.8px 5.2px 0 #1A1418,4.4px 5.2px 0 #1A1418,2.6px 5.2px 0 #1A1418,2.6px 1.6px 0 #1A1418,4.4px 3.4px 0 #1A1418,0.8px 3.4px 0 #1A1418;
+--puff-value:-2px -2px 0 #1A1418,2px -2px 0 #1A1418,-2px 2px 0 #1A1418,2px 2px 0 #1A1418,0px 2px 0 #1A1418,0px -2px 0 #1A1418,2px 0px 0 #1A1418,-2px 0px 0 #1A1418,1.00px 1.33px 0 #FF8AC4,2.00px 2.67px 0 #FF8AC4,3.00px 4.00px 0 #FF8AC4,1px 2px 0 #1A1418,5px 2px 0 #1A1418,1px 6px 0 #1A1418,5px 6px 0 #1A1418,3px 6px 0 #1A1418,3px 2px 0 #1A1418,5px 4px 0 #1A1418,1px 4px 0 #1A1418;
+--puff-name-stroke:-1.1px -1.1px 0 #1A1418,1.1px -1.1px 0 #1A1418,-1.1px 1.1px 0 #1A1418,1.1px 1.1px 0 #1A1418,0px 1.1px 0 #1A1418,0px -1.1px 0 #1A1418,1.1px 0px 0 #1A1418,-1.1px 0px 0 #1A1418;
+--puff-name-rest:-1.1px -1.1px 0 #1A1418,1.1px -1.1px 0 #1A1418,-1.1px 1.1px 0 #1A1418,1.1px 1.1px 0 #1A1418,0px 1.1px 0 #1A1418,0px -1.1px 0 #1A1418,1.1px 0px 0 #1A1418,-1.1px 0px 0 #1A1418,0.53px 0.73px 0 #FF8AC4,1.07px 1.47px 0 #FF8AC4,1.60px 2.20px 0 #FF8AC4,0.5px 1.1px 0 #1A1418,2.7px 1.1px 0 #1A1418,0.5px 3.3px 0 #1A1418,2.7px 3.3px 0 #1A1418,1.6px 3.3px 0 #1A1418,1.6px 1.1px 0 #1A1418,2.7px 2.2px 0 #1A1418,0.5px 2.2px 0 #1A1418;
+--puff-name-hover:-1.1px -1.1px 0 #1A1418,1.1px -1.1px 0 #1A1418,-1.1px 1.1px 0 #1A1418,1.1px 1.1px 0 #1A1418,0px 1.1px 0 #1A1418,0px -1.1px 0 #1A1418,1.1px 0px 0 #1A1418,-1.1px 0px 0 #1A1418,0.87px 1.13px 0 #FF8AC4,1.73px 2.27px 0 #FF8AC4,2.60px 3.40px 0 #FF8AC4,1.5px 2.3px 0 #1A1418,3.7px 2.3px 0 #1A1418,1.5px 4.5px 0 #1A1418,3.7px 4.5px 0 #1A1418,2.6px 4.5px 0 #1A1418,2.6px 2.3px 0 #1A1418,3.7px 3.4px 0 #1A1418,1.5px 3.4px 0 #1A1418;
+--puff-name-press:-1.1px -1.1px 0 #1A1418,1.1px -1.1px 0 #1A1418,-1.1px 1.1px 0 #1A1418,1.1px 1.1px 0 #1A1418,0px 1.1px 0 #1A1418,0px -1.1px 0 #1A1418,1.1px 0px 0 #1A1418,-1.1px 0px 0 #1A1418,0.20px 0.27px 0 #FF8AC4,0.40px 0.53px 0 #FF8AC4,0.60px 0.80px 0 #FF8AC4,-0.5px -0.3px 0 #1A1418,1.7px -0.3px 0 #1A1418,-0.5px 1.9px 0 #1A1418,1.7px 1.9px 0 #1A1418,0.6px 1.9px 0 #1A1418,0.6px -0.3px 0 #1A1418,1.7px 0.8px 0 #1A1418,-0.5px 0.8px 0 #1A1418;
+--puff-ink:-2px -2px 0 #1A1418,2px -2px 0 #1A1418,-2px 2px 0 #1A1418,2px 2px 0 #1A1418,0px 2px 0 #1A1418,0px -2px 0 #1A1418,2px 0px 0 #1A1418,-2px 0px 0 #1A1418,0.67px 1.00px 0 #1A1418,1.33px 2.00px 0 #1A1418,2.00px 3.00px 0 #1A1418,0px 1px 0 #1A1418,4px 1px 0 #1A1418,0px 5px 0 #1A1418,4px 5px 0 #1A1418,2px 5px 0 #1A1418,2px 1px 0 #1A1418,4px 3px 0 #1A1418,0px 3px 0 #1A1418;
+--tag-text:-0.8px -0.8px 0 #1A1418,0.8px -0.8px 0 #1A1418,-0.8px 0.8px 0 #1A1418,0.8px 0.8px 0 #1A1418,0px 0.8px 0 #1A1418,0px -0.8px 0 #1A1418,0.8px 0px 0 #1A1418,-0.8px 0px 0 #1A1418;
+--tag-text-lg:-2px -2px 0 #1A1418,2px -2px 0 #1A1418,-2px 2px 0 #1A1418,2px 2px 0 #1A1418,0px 2px 0 #1A1418,0px -2px 0 #1A1418,2px 0px 0 #1A1418,-2px 0px 0 #1A1418,3px 4px 0 #1A1418;
+/* shared Retro-Pop names, Puff Pop values */
+--line:#1A1418;--line-strong:#1A1418;--offset:#1A1418;--text:#1A1418;--text-muted:#6B5F66;--surface-card:#FFFDFA;
+--press:0 4px 0 #1A1418;--press-down:0 1px 0 #1A1418;--press-lg:0 5px 0 #1A1418;
+--offset-sm:2px 2px 0 #1A1418;--offset-md:3px 3px 0 #1A1418;--offset-lg:4px 4px 0 #1A1418;--offset-xl:6px 6px 0 #1A1418;
+}
+[data-theme="night"]{
+--ground:#1E1C1F;--dot:rgba(255,255,255,.05);--pp-glow:radial-gradient(ellipse 80% 520px at 50% -140px,rgba(255,244,232,.075),rgba(255,244,232,0) 70%),linear-gradient(180deg,rgba(0,0,0,0) 55%,rgba(0,0,0,.24) 100%);/* @kind other */
+--face:#2F2B2F;--face-hover:#3B343A;--face-ink:#FAF6F0;--face-muted:#CFC5CB;
+--field:#2F2B2F;--field-ink:#FAF6F0;--chip:#2F2B2F;--chip-ink:#FAF6F0;--chip-hover:#3B343A;--menu-bg:#2F2B2F;--panel:#262226;--opt-hover:rgba(255,138,196,.18);
+--ink:#0A0A0A;--ctl-off:#FF8AC4;--muted:#CFC5CB;--rule:rgba(250,246,240,.18);
+--side:#FF8AC4;--tag:#FF70B8;--sig:#FF70B8;--sig-glow:1.5px 2px 0 #0A0A0A;/* @kind shadow */--group:#FF8AC4;--sh:0,0,0;/* @kind other */
+--band:#3A3338;--speed:rgba(255,255,255,.05);--tone:rgba(255,138,196,.22);--dots-c:rgba(255,138,196,.30);--pm-bg:#FAF6F0;--pm-fg:#1A1418;--pm-n:#C62368;
+--beam:rgba(255,240,228,.10);--beam-pink:rgba(255,51,153,.14);
+--in:inset 0 2px 0 rgba(255,255,255,.12),inset 0 -3px 0 rgba(0,0,0,.24);/* @kind shadow */
+--in-pink:inset 0 2px 0 rgba(255,255,255,.55),inset 0 -3px 0 rgba(198,35,104,.28);/* @kind shadow */
+--face-hl:inset 0 2px 0 rgba(255,255,255,.16);/* @kind shadow */
+--off-rest:2px 3px 0 var(--ctl-off);--off-hover:2.5px 3.5px 0 var(--ctl-off);--off-lift:3px 5px 0 var(--ctl-off);--off-field:4px 5px 0 var(--ctl-off);--off-focus:6px 7px 0 var(--ctl-off);--off-flat:0 0 0 var(--ctl-off);
+--puff-title:-2.5px -2.5px 0 #0A0A0A,2.5px -2.5px 0 #0A0A0A,-2.5px 2.5px 0 #0A0A0A,2.5px 2.5px 0 #0A0A0A,0px 2.5px 0 #0A0A0A,0px -2.5px 0 #0A0A0A,2.5px 0px 0 #0A0A0A,-2.5px 0px 0 #0A0A0A,1.33px 1.83px 0 #FF8AC4,2.67px 3.67px 0 #FF8AC4,4.00px 5.50px 0 #FF8AC4,1.5px 3px 0 #0A0A0A,6.5px 3px 0 #0A0A0A,1.5px 8px 0 #0A0A0A,6.5px 8px 0 #0A0A0A,4px 8px 0 #0A0A0A,4px 3px 0 #0A0A0A,6.5px 5.5px 0 #0A0A0A,1.5px 5.5px 0 #0A0A0A;
+--puff-empty:-1.8px -1.8px 0 #0A0A0A,1.8px -1.8px 0 #0A0A0A,-1.8px 1.8px 0 #0A0A0A,1.8px 1.8px 0 #0A0A0A,0px 1.8px 0 #0A0A0A,0px -1.8px 0 #0A0A0A,1.8px 0px 0 #0A0A0A,-1.8px 0px 0 #0A0A0A,0.87px 1.13px 0 #FF8AC4,1.73px 2.27px 0 #FF8AC4,2.60px 3.40px 0 #FF8AC4,0.8px 1.6px 0 #0A0A0A,4.4px 1.6px 0 #0A0A0A,0.8px 5.2px 0 #0A0A0A,4.4px 5.2px 0 #0A0A0A,2.6px 5.2px 0 #0A0A0A,2.6px 1.6px 0 #0A0A0A,4.4px 3.4px 0 #0A0A0A,0.8px 3.4px 0 #0A0A0A;
+--puff-value:-2px -2px 0 #0A0A0A,2px -2px 0 #0A0A0A,-2px 2px 0 #0A0A0A,2px 2px 0 #0A0A0A,0px 2px 0 #0A0A0A,0px -2px 0 #0A0A0A,2px 0px 0 #0A0A0A,-2px 0px 0 #0A0A0A,1.00px 1.33px 0 #FF8AC4,2.00px 2.67px 0 #FF8AC4,3.00px 4.00px 0 #FF8AC4,1px 2px 0 #0A0A0A,5px 2px 0 #0A0A0A,1px 6px 0 #0A0A0A,5px 6px 0 #0A0A0A,3px 6px 0 #0A0A0A,3px 2px 0 #0A0A0A,5px 4px 0 #0A0A0A,1px 4px 0 #0A0A0A;
+--puff-name-stroke:-1.1px -1.1px 0 #1A1418,1.1px -1.1px 0 #1A1418,-1.1px 1.1px 0 #1A1418,1.1px 1.1px 0 #1A1418,0px 1.1px 0 #1A1418,0px -1.1px 0 #1A1418,1.1px 0px 0 #1A1418,-1.1px 0px 0 #1A1418;
+--puff-name-rest:-1.1px -1.1px 0 #1A1418,1.1px -1.1px 0 #1A1418,-1.1px 1.1px 0 #1A1418,1.1px 1.1px 0 #1A1418,0px 1.1px 0 #1A1418,0px -1.1px 0 #1A1418,1.1px 0px 0 #1A1418,-1.1px 0px 0 #1A1418,0.53px 0.73px 0 #FF8AC4,1.07px 1.47px 0 #FF8AC4,1.60px 2.20px 0 #FF8AC4,0.5px 1.1px 0 #1A1418,2.7px 1.1px 0 #1A1418,0.5px 3.3px 0 #1A1418,2.7px 3.3px 0 #1A1418,1.6px 3.3px 0 #1A1418,1.6px 1.1px 0 #1A1418,2.7px 2.2px 0 #1A1418,0.5px 2.2px 0 #1A1418;
+--puff-name-hover:-1.1px -1.1px 0 #1A1418,1.1px -1.1px 0 #1A1418,-1.1px 1.1px 0 #1A1418,1.1px 1.1px 0 #1A1418,0px 1.1px 0 #1A1418,0px -1.1px 0 #1A1418,1.1px 0px 0 #1A1418,-1.1px 0px 0 #1A1418,0.87px 1.13px 0 #FF8AC4,1.73px 2.27px 0 #FF8AC4,2.60px 3.40px 0 #FF8AC4,1.5px 2.3px 0 #1A1418,3.7px 2.3px 0 #1A1418,1.5px 4.5px 0 #1A1418,3.7px 4.5px 0 #1A1418,2.6px 4.5px 0 #1A1418,2.6px 2.3px 0 #1A1418,3.7px 3.4px 0 #1A1418,1.5px 3.4px 0 #1A1418;
+--puff-name-press:-1.1px -1.1px 0 #1A1418,1.1px -1.1px 0 #1A1418,-1.1px 1.1px 0 #1A1418,1.1px 1.1px 0 #1A1418,0px 1.1px 0 #1A1418,0px -1.1px 0 #1A1418,1.1px 0px 0 #1A1418,-1.1px 0px 0 #1A1418,0.20px 0.27px 0 #FF8AC4,0.40px 0.53px 0 #FF8AC4,0.60px 0.80px 0 #FF8AC4,-0.5px -0.3px 0 #1A1418,1.7px -0.3px 0 #1A1418,-0.5px 1.9px 0 #1A1418,1.7px 1.9px 0 #1A1418,0.6px 1.9px 0 #1A1418,0.6px -0.3px 0 #1A1418,1.7px 0.8px 0 #1A1418,-0.5px 0.8px 0 #1A1418;
+--puff-ink:-2px -2px 0 #1A1418,2px -2px 0 #1A1418,-2px 2px 0 #1A1418,2px 2px 0 #1A1418,0px 2px 0 #1A1418,0px -2px 0 #1A1418,2px 0px 0 #1A1418,-2px 0px 0 #1A1418,0.67px 1.00px 0 #1A1418,1.33px 2.00px 0 #1A1418,2.00px 3.00px 0 #1A1418,0px 1px 0 #1A1418,4px 1px 0 #1A1418,0px 5px 0 #1A1418,4px 5px 0 #1A1418,2px 5px 0 #1A1418,2px 1px 0 #1A1418,4px 3px 0 #1A1418,0px 3px 0 #1A1418;
+--tag-text:-0.8px -0.8px 0 #1A1418,0.8px -0.8px 0 #1A1418,-0.8px 0.8px 0 #1A1418,0.8px 0.8px 0 #1A1418,0px 0.8px 0 #1A1418,0px -0.8px 0 #1A1418,0.8px 0px 0 #1A1418,-0.8px 0px 0 #1A1418;
+--tag-text-lg:-2px -2px 0 #1A1418,2px -2px 0 #1A1418,-2px 2px 0 #1A1418,2px 2px 0 #1A1418,0px 2px 0 #1A1418,0px -2px 0 #1A1418,2px 0px 0 #1A1418,-2px 0px 0 #1A1418,3px 4px 0 #1A1418;
+--surface-page:#1E1C1F;--surface-card:#2F2B2F;--surface-paper:#2F2B2F;--surface-sunken:#262226;
+--line:#0A0A0A;--line-strong:#0A0A0A;--offset:#FF8AC4;--text:#FAF6F0;--text-soft:#FAF6F0;--text-muted:#CFC5CB;--text-muted-2:#CFC5CB;--text-faint:#CFC5CB;--text-pink:#FF8AC4;--eyebrow:#FF8AC4;
+--press:0 4px 0 #FF8AC4;--press-down:0 1px 0 #FF8AC4;--press-lg:0 5px 0 #FF8AC4;
+--offset-sm:2px 2px 0 #FF8AC4;--offset-md:3px 3px 0 #FF8AC4;--offset-lg:4px 4px 0 #FF8AC4;--offset-xl:6px 6px 0 #FF8AC4;--offset-pink:3px 3px 0 #FF8AC4;
+}
+@keyframes puffIn{from{opacity:0;transform:translate3d(0,22px,0) scale(.97)}60%{opacity:1}to{opacity:1;transform:translate3d(0,0,0) scale(1)}}
+@keyframes puffSide{from{opacity:0;transform:translate3d(-18px,0,0)}to{opacity:1;transform:translate3d(0,0,0)}}
+@keyframes puffDrop{from{opacity:0;transform:translate3d(0,-14px,0)}to{opacity:1;transform:translate3d(0,0,0)}}
+@keyframes puffMenu{from{opacity:0;transform:translate3d(0,-10px,0) scale(.97)}to{opacity:1;transform:translate3d(0,0,0) scale(1)}}
+@keyframes ipDrop{from{opacity:0;transform:translate3d(0,-8px,0) scale(.97)}to{opacity:1;transform:translate3d(0,0,0) scale(1)}}
+@keyframes ipMenu{from{opacity:0;transform:translate3d(90px,0,0)}to{opacity:1;transform:translate3d(0,0,0)}}
+@keyframes ipTile{from{opacity:0;transform:translate3d(0,10px,0) scale(.96)}to{opacity:1;transform:translate3d(0,0,0) scale(1)}}
+@keyframes ipSide{from{opacity:0;transform:translate3d(-24px,0,0)}to{opacity:1;transform:translate3d(0,0,0)}}
+@keyframes ipPhoto{from{opacity:0;transform:scale(1.12)}to{opacity:1;transform:scale(1)}}
+@keyframes ipBeam{0%,100%{opacity:.75}50%{opacity:1}}

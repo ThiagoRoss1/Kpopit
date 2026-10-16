@@ -9,7 +9,7 @@ import {
     Cake, Ruler, MapPinHouse, UserStar, Users, MessageSquareHeart, 
     Building2, Disc3, Sparkles, Building, UsersRound, BadgeCheck
 } from "lucide-react";
-import { motion } from "framer-motion";
+import { motion } from "motion/react";
 import InfoItem from "./InfoItem";
 import useCalculateAge from "../../hooks/useCalculateAge";
 import { getNationalityFlag } from "../../utils/getFlags";

@@ -1,0 +1,16 @@
+/* Retro-Pop rollback. Put data-style="retro" on any element to restore the original Retro-Pop values
+   for every name Puff Pop overrides. Values are copied verbatim from tokens/colors.css + tokens/spacing.css. */
+[data-style="retro"],[data-style="retro"] [data-theme="day"],[data-theme="day"] [data-style="retro"]{
+--ink:#0a0a0a;--surface-page:#faf6f0;--surface-card:#ffffff;--surface-paper:#fffaf3;--surface-sunken:#faf6f0;
+--line:#0a0a0a;--line-strong:#0a0a0a;--offset:#0a0a0a;--text:#0a0a0a;--text-soft:#3c2f38;--text-muted:#6b5f55;--text-muted-2:#6f616a;--text-faint:#776a60;--text-pink:#c62368;--eyebrow:var(--pink-deep);
+--press:0 4px 0 #0a0a0a;--press-down:0 1px 0 #0a0a0a;--press-lg:0 5px 0 #0a0a0a;
+--offset-sm:2px 2px 0 #0a0a0a;--offset-md:3px 3px 0 #0a0a0a;--offset-lg:4px 4px 0 #0a0a0a;--offset-xl:6px 6px 0 #0a0a0a;--offset-pink:3px 3px 0 #ff3399;
+--tilt:0.6deg;/* @kind other */
+}
+[data-style="retro"][data-theme="night"],[data-style="retro"] [data-theme="night"],[data-theme="night"] [data-style="retro"]{
+--ink:#0a0a0a;--surface-page:#0b0c0f;--surface-card:#16181e;--surface-paper:#16181e;--surface-sunken:#1c1f27;
+--line:rgba(255,255,255,0.10);--line-strong:#ff3399;--offset:#ff3399;--text:#ffffff;--text-soft:#ffffff;--text-muted:rgba(255,255,255,0.68);--text-muted-2:rgba(255,255,255,0.68);--text-faint:rgba(255,255,255,0.55);--text-pink:#ff3399;--eyebrow:#ff3399;
+--press:0 4px 0 rgba(255,255,255,0.22),0 6px 18px -6px rgba(255,51,153,0.7);--press-down:0 1px 0 rgba(255,255,255,0.22),0 6px 18px -6px rgba(255,51,153,0.7);--press-lg:0 5px 0 #0a0a0a;
+--offset-sm:2px 2px 0 #ff3399;--offset-md:3px 3px 0 #ff3399;--offset-lg:0 14px 34px -14px rgba(0,0,0,0.7);--offset-xl:6px 6px 0 #ff3399;--offset-pink:3px 3px 0 #ff3399;
+--tilt:0.6deg;/* @kind other */
+}

@@ -1,0 +1,22 @@
+<!-- @dsCard group="Retro-Pop · Components" viewport="700x400" name="Game" subtitle="GuessRow, PixelCluster, HintSleeve, SearchField" -->
+<!DOCTYPE html><html><head><meta charset="utf-8"><link rel="stylesheet" href="../../styles.css">
+<script src="https://unpkg.com/react@18.3.1/umd/react.development.js" integrity="sha384-hD6/rw4ppMLGNu3tX5cjIb+uRZ7UkRJ6BPkLpg4hAu/6onKUg4lLsHAs9EBPT82L" crossorigin="anonymous"></script>
+<script src="https://unpkg.com/react-dom@18.3.1/umd/react-dom.development.js" integrity="sha384-u6aeetuaXnQ38mYT8rp6sbXaQe3NL9t+IBXmnYxwkUI2Hw4bsp2Wvmx4yRQF1uAm" crossorigin="anonymous"></script>
+<script src="https://unpkg.com/@babel/standalone@7.29.0/babel.min.js" integrity="sha384-m08KidiNqLdpJqLq95G/LEi8Qvjl/xUYll3QILypMoQ65QorJ9Lvtp2RXYGBFj1y" crossorigin="anonymous"></script>
+<script src="../../_ds_bundle.js"></script>
+<style>body{margin:0}.half{padding:20px 24px;display:flex;flex-wrap:wrap;gap:16px;align-items:center}.row{display:flex;flex-wrap:wrap;gap:16px;align-items:center}</style></head>
+<body data-style="retro" class="kp-root"><div id="root"></div>
+<script type="text/babel">
+const NS=window.KpopItDesignSystem_07fd81;
+
+const {GuessRow,PixelCluster,HintSleeve,SearchField}=NS;
+ReactDOM.createRoot(root).render(<div className="kp-grid-bg" style={{display:'grid',gridTemplateColumns:'1fr 330px',gap:24,padding:24,height:400,boxSizing:'border-box'}}>
+<div style={{display:'flex',flexDirection:'column',gap:20}}>
+<SearchField suggestions={[]} placeholder="Type an album or group…"/>
+<GuessRow title="Ad Mare" subtitle="NMIXX" coverSrc="https://cdn.kpopit.net/images/albums/ad_mare.webp" correct={false} tilt="left"/>
+<GuessRow title="After Like" subtitle="IVE" coverSrc="https://cdn.kpopit.net/images/albums/after_like.webp" correct tilt="right"/>
+<div className="row"><PixelCluster ok/><PixelCluster ok={false}/></div>
+</div>
+<div style={{display:'flex',gap:8,paddingTop:16}}><HintSleeve index="01" label="Release Year" korean="발매년도" value="2022" tone="year" remaining={0} defaultOpen/><HintSleeve index="02" label="Artist" korean="아티스트" value="IVE" tone="artist" remaining={3}/></div>
+</div>);
+</script></body></html>

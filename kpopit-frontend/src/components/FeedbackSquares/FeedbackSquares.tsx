@@ -51,7 +51,7 @@ const FeedbackSquares = (props: FeedbackSquaresProps) => {
   const { onClose } = props;
 
   const [isTouched, setIsTouched] = useState<boolean>(false);
-  const hideTimeout = useRef<number | null>(null);
+  const hideTimeout = useRef<ReturnType<typeof setTimeout> | null>(null);
 
     return (
         <div className="w-full flex items-center justify-center">

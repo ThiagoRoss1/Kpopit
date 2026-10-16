@@ -151,7 +151,7 @@ const AvatarModal = ({ isOpen, onClose, onBack, avatarUrl }: AvatarModalProps) =
             return;
         }
 
-        let file: File | null = null;
+        let file: File | null;
         try {
             const [handle] = await window.showOpenFilePicker({
                 multiple: false,

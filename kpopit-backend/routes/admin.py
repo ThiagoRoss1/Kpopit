@@ -2,6 +2,7 @@ from flask import Blueprint, jsonify, request
 import os
 from dotenv import load_dotenv
 from services.get_db import get_db
+from utils.auth_decorators import require_admin
 
 load_dotenv()
 
@@ -11,6 +12,7 @@ BACKUP_KEY = os.getenv("BACKUP_KEY")
 admin_bp = Blueprint('admin', __name__)
     
 @admin_bp.route("/api/admin/add-idol", methods=["POST"])
+@require_admin
 def add_idol():
     data = request.json   
 

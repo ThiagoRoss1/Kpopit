@@ -1,13 +1,13 @@
 ---
 name: KpopIt
-description: A Wordle-inspired daily K-pop idol guessing game with a modern retro-pop aesthetic
-version: 1.0.0
+description: Wordle-inspired daily K-pop idol guessing game — Puff Pop neo-brutalist style
+version: 2.0.0
 tags: [game, kpop, wordle, daily-challenge, idol-guessing, web-game]
 ---
 
 # KpopIt — Design System
 
-> **How to use this file:** Visual reference for the KpopIt frontend. Read before creating or modifying any UI component. Keeps consistency across all pages and features.
+> **How to use this file:** Rules, conventions and implementation tips for the KpopIt frontend. Read before creating or modifying any UI component. Exact values (tokens, components, specimens, sample UI kit) live in the **KpopIt Design System** at `docs/design-system/` — this file points there instead of duplicating it. If the two disagree, the token files win (see §19).
 
 ---
 
@@ -19,17 +19,20 @@ The game features idols from popular K-pop groups including TWICE, BLACKPINK, Ne
 
 ---
 
-## 2. Design Philosophy
+## 2. Design Philosophy — Puff Pop
 
-The KpopIt visual identity blends **modern dark UI** with **retro-pop personality**. The interface should feel:
+**Puff Pop** is KpopIt's visual direction: neo-brutalist retro-pop built from **puffy objects and puffy lettering**. Every object is a **white face sitting on a pink body**, wrapped in a **2px ink outline** and grounded by a **solid offset shadow**. It should feel like stickers and toy plastic — things you want to press.
 
-- **Bold and confident** — thick borders, solid offset shadows, uppercase display typography
-- **Atmospheric, not flat** — subtle textures, layered elements, dark base with neon accents
-- **K-pop fan culture** — pink as the dominant color, Korean typography elements, playful but polished
+- **Solid over blurred** — offset shadows have no blur; depth comes from the pink body and the ink shadow, never from a gaussian glow.
+- **Bold over subtle** — thick ink outlines, chunky puffy display type, clear press-down feedback.
+- **Playful over corporate** — slight tilts, sticker-like tags, halftone-dot grounds.
+- **Pink is an accent** — cream and ink carry most of the page; pink marks bodies, tags and the single signal per view.
+- **Energy without chaos** — objects tilt lightly (±0.5°), titles and tags more; inputs and body text never tilt.
+- **Textured ground** — a cream (day) or graphite (night) ground with a halftone-dot pattern.
 
-Avoid the generic "AI-generated SaaS" look — no soft gaussian shadows, no bubble-rounded everything, no excessive glow effects. When in doubt, choose **solid over blurred**, **bold over subtle**, **playful over corporate**.
+Avoid the generic "AI-generated SaaS" look — no soft gaussian shadows on objects, no bubble-rounded-everything without an outline, no glow effects.
 
-The aesthetic borrows from Y2K design (chunky borders, solid color blocks), retro arcade games (offset shadows, press-down buttons), and modern dark mode UIs (deep blacks, neon accents). The result is a game that feels alive, fun, and unmistakably K-pop.
+**Retro-Pop** (the previous dark neon style) is kept only as a secondary style for rollback: `docs/design-system/tokens/retropop.css`, activated by `data-style="retro"`. Don't build new UI against it.
 
 ---
 
@@ -37,7 +40,7 @@ The aesthetic borrows from Y2K design (chunky borders, solid color blocks), retr
 
 - **React 19** + **TypeScript 5.8**
 - **Tailwind CSS 4** — utilities for layout, color, spacing, and most visual effects
-- **CSS files** — only for keyframe animations and complex effects not covered by Tailwind
+- **CSS files** — only for keyframe animations, token definitions and complex effects not covered by Tailwind
 - **Framer Motion** — component animations
 - **Lucide React** — icons
 - **React Router 7** — navigation
@@ -47,82 +50,80 @@ The aesthetic borrows from Y2K design (chunky borders, solid color blocks), retr
 
 ---
 
-## 4. Colors
+## 4. Colors — roles, not hex values
 
-### Main palette
+Exact values: `docs/design-system/tokens/puffpop.css` (Puff Pop roles) and `tokens/colors.css` (shared palette). Specimens: `docs/design-system/guidelines/puffpop-pinks.html`, `colors-*.html`.
 
-```css
-/* Defined in index.css @theme */
---color-neon-pink: #FF3399;
+### How tokens are wired
 
-/* Tailwind usage */
-text-neon-pink
-bg-neon-pink
-border-neon-pink
-```
+- Tokens are **CSS variables defined once**: port `docs/design-system/tokens/puffpop.css` into `src/index.css`.
+- Map the variables actually used in markup into Tailwind's `@theme` so they're available as utilities; anything else is referenced with Tailwind 4's variable shorthand, e.g. `bg-(--face)` (not `bg-[var(--face)]`).
+- Themes switch with `data-theme="day" | "night"` on the root element. Day is the default (`:root` carries day values).
+- **Never hardcode a hex in a component** — use the role. If a role is missing, add it to the design system first (§19).
 
-| Name | Hex | Usage |
+### Day (default) vs Night
+
+| Role | Token | Day | Night |
+|---|---|---|---|
+| Ground (page) | `--ground` | `#FAF6F0` cream | `#1E1C1F` graphite |
+| Face (object top) | `--face` | `#FFFDFA` | `#2F2B2F` |
+| Ink / outline | `--ink` | `#1A1418` | `#0A0A0A` |
+| Text on face | `--face-ink` / `--text` | `#1A1418` | `#FAF6F0` |
+| Muted text | `--muted` / `--face-muted` | `#6B5F66` | `#CFC5CB` |
+| Offset shadow colour | `--ctl-off` | ink `#1A1418` | **pink `#FF8AC4`** |
+| Ground dots | `--dot` | ink @ 7% | white @ 5% |
+
+At night the **offset shadows turn pink** automatically because every offset token reads its colour from `--ctl-off`. Night also adds the `--pp-glow` vignette over the ground.
+
+### Pink roles — each has one job
+
+| Token | Value | Job |
 |---|---|---|
-| Neon Pink | `#FF3399` | Primary color — CTAs, highlights, active borders |
-| Secondary Pink | `#EF1F72` | Auth pages, active tab backgrounds, action buttons |
-| Deep Pink | `#e70a7d` | Logo, accent gradients |
-| Dark Pink | `#b43777` | Secondary elements, icons |
-| Coral Pink | `#ec4850` | Logo gradient end |
-| Background Dark | `#0a0a0a` | Main page background |
-| Background Panel | `#111111` | Panels, cards, modals |
-| Background Input | `#1a1a1a` | Inputs, form fields |
-| Border Default | `#2a2a2a` | Default border for inputs and cards |
-| White | `#ffffff` | Primary text |
-| Gray Text | `#888888` | Secondary text, placeholders |
+| `--pink-body` (`--side`) | `#FF8AC4` | The puffy body/side under faces and lettering |
+| `--tag` | `#FF70B8` | Tags, chips, group labels |
+| `--sig` | `#E70A7D` (night `#FF70B8`) | The **single signal** per view — active state, primary CTA |
+| `--pink-deep` / `--group` | `#C62368` | Pink small text on light grounds (contrast-safe) |
+| `--neon-pink` | `#FF3399` | Legacy signal — don't use as body text on cream |
 
-### Logo gradient
+### Rules
 
-The site logo "Kpopit" uses a vertical gradient from deep pink to coral pink:
-
-```css
-background: linear-gradient(180deg, #e70a7d, #ec4850);
-```
-
-### Default page background
-
-```css
-background: linear-gradient(#0a0a0a 30%, #0a0a0a 100%);
-```
+- **One signal-pink element per view.** If two things are `--sig`, one of them is wrong.
+- **Never grey text on pink** — use ink or `#C62368` (`--pink-deep`).
+- **Logo gradient stays** `linear-gradient(180deg, #e70a7d, #ec4850)`.
 
 ---
 
 ## 5. Typography
 
-### Fonts
+Exact values: `docs/design-system/tokens/typography.css`, `tokens/fonts.css`. Specimens: `guidelines/type-*.html`, `guidelines/puffpop-lettering.html`.
 
 | Font | Usage |
 |---|---|
-| **DynaPuff** | Default site font for most UI elements |
-| **Tailwind sans** (`font-sans`) | Currently used as the most common alternative — clean and neutral |
-| **Noto Sans KR** | Always used for Korean/Hangul text — `font-korean` class |
-| **Arial / Helvetica** | Fallback for plain text — `normal-font` class |
+| **DynaPuff** | Display — titles, buttons, card names (puffy lettering) |
+| **Major Mono Display** | Small labels, counters, eyebrow/meta text — uppercase, tracked |
+| **Caveat** | Handwritten aside — **one per view at most** ("Guess the album", "Yesterday's album was…") |
+| **Noto Sans KR** (`font-korean`) | **All Hangul, always** |
+
+Puffy lettering is for **names and titles only** (page title, card names, profile values, idol name). Section headers are never puffy — use Major Mono Display, the one Caveat note, or spaced DynaPuff caps.
+
+No other families. `font-sans` is allowed only for long-form body copy (e.g. legal/about pages) where DynaPuff hurts readability.
+
+### Puffy lettering
+
+Puffy text = a white/cream **face** with a layered `text-shadow` stack: **ink outline → pink body → ink shadow**. Never hand-roll the stack — use the token presets:
+
+| Preset | Use |
+|---|---|
+| `--puff-title` | Page titles |
+| `--puff-value` | Large values / numbers |
+| `--puff-empty` | Empty-state headings |
+| `--puff-name-rest` / `-hover` / `-press` | Card names, tracking the card's press state |
+| `--puff-ink` | All-ink puffy text (no pink body) |
+| `--tag-text` / `--tag-text-lg` | Text on tags |
 
 ```tsx
-// Default DynaPuff (applied globally on body)
-<p>Default text</p>
-
-// Tailwind sans
-<p className="font-sans">Clean text</p>
-
-// Korean text — always Noto Sans KR
-<span className="font-korean">아이돌</span>
-
-// Plain Arial fallback
-<span className="normal-font">Plain text</span>
+<h1 className="font-[DynaPuff] text-white text-shadow-(--puff-title) rotate-[-1.5deg]">Idols</h1>
 ```
-
-### Typography hierarchy
-
-Hierarchy is contextual — choose the font and weight that fits the page. The only strict rule:
-
-- **Korean text always uses `font-korean`** (Noto Sans KR)
-
-Beyond that, font choice depends on the section's tone (display retro-pop vs clean modern).
 
 ---
 
@@ -143,50 +144,61 @@ Standard Tailwind breakpoints (`sm`, `md`, `lg`, `xl`, `2xl`) also available.
 
 ---
 
-## 7. Visual Patterns — Modern Retro-Pop
+## 7. Visual Patterns — Puff Pop
 
-### Borders
+Exact values: `tokens/puffpop.css`, `tokens/spacing.css`. Specimens: `guidelines/puffpop-card-anatomy.html`, `puffpop-surfaces.html`, `spacing-*.html`.
 
-```tsx
-// Tailwind classes
-border-2 border-[#2a2a2a]      // default
-border-[3px] border-neon-pink  // active/focus
-border-4 border-neon-pink      // emphasis
+### Outline
+Always **2px `var(--ink)`** — `border-2 border-(--ink)`. No 1px or grey borders on objects.
+
+### Radius
+| Element | Token | Value |
+|---|---|---|
+| Cards | `--r` | 23px |
+| Inner / media | `--r-inner` | 16px |
+| Fields | `--radius-field` | 18px |
+| Menus | `--radius-menu` | 20px |
+| Menu options | `--radius-opt` | 13px |
+| Chips, toggles | — | pill (`rounded-full`) |
+
+### Offset shadows (solid, no blur)
+Elevation scale, smallest to largest:
+
+```
+--off-flat (pressed) → --off-rest 2px 3px → --off-hover 2.5px 3.5px → --off-lift 3px 5px → --off-field 4px 5px → --off-focus 6px 7px
 ```
 
-Border thickness scale: `1px`, `2px`, `3px`, `4px`. Avoid borders thicker than `4px` unless intentional.
+Colour always comes from `--ctl-off`, so night mode turns them pink with no component changes. Apply with `[box-shadow:var(--off-rest)]`.
 
-### Shadows
+### Press-down
+Every clickable object does this:
+- **Hover** — lift: `translate(0,-1px)` and the next offset up (`--off-hover` / `--off-lift`).
+- **Active** — translate *into* the shadow and drop to `--off-flat`.
+- Card names follow along with `--puff-name-rest/hover/press`.
 
-Solid offset shadows are the primary style for cards, buttons, and UI elements — they reinforce the retro-pop aesthetic. Gaussian blur shadows (`drop-shadow-*`, `backdrop-blur-*`) are acceptable for icons, overlays, and modal backdrops.
+### Inner highlight
+- Faces get `--in` (top white line, bottom shade).
+- Pink bodies get `--in-pink`.
+- Combine with the offset: `[box-shadow:var(--in),var(--off-rest)]`.
 
-Tailwind uses bracket notation for custom shadows:
+### Tilt
+| Element | Token | Value |
+|---|---|---|
+| Objects (cards, tiles) | `--tilt` | ±0.5° |
+| Titles | `--tilt-title` | -1.5° |
+| Tags | `--tilt-tag` | 4° |
+| Logo | `--tilt-logo` | -5° |
 
-```tsx
-// Soft retro shadow — cards, buttons
-shadow-[4px_4px_0px_#000]
+Alternate the sign in grids (`odd:` / `even:`) so rows don't lean one way. **Never tilt inputs or body text.**
 
-// Strong retro shadow
-shadow-[6px_6px_0px_rgba(255,51,153,0.25)]
+### Ground
+Cream (day) or graphite (night) `--ground` with halftone dots in `--dot`, plus the `--pp-glow` vignette at night.
 
-// Text shadow
-[text-shadow:1.2px_1.2px_4px_rgba(0,0,0,0.8)]
+### Controls
+Height `--ctl-h` 40px (44px on `pointer:coarse`), fields `--field-h` 50px.
 
-// Multiple stacked text shadows
-[text-shadow:1.2px_1.2px_4px_rgba(0,0,0,0.8),0_0_12px_rgba(180,55,119,0.55)]
-
-// Gaussian drop shadow — icons, decorative elements
-drop-shadow-lg
-
-// Backdrop blur — modal/overlay backgrounds
-backdrop-blur-2xl
-```
-
-**Rule:** Always use Tailwind utilities for shadows. CSS files only for complex animations.
-
-### Border radius
-
-Use what fits the design — there's no hard cap on border radius. Pills (`rounded-full`) for toggles, larger radius for friendly cards, smaller radius for sharp retro-pop elements.
+### Blur
+Gaussian blur only for modal backdrops (`backdrop-blur-*`). Never for cards or buttons.
 
 ---
 
@@ -198,62 +210,40 @@ Use what fits the design — there's no hard cap on border radius. Pills (`round
 - **CSS files** — keyframe animations only (`@keyframes`, complex multi-step animations)
 - **Framer Motion** — component-level enter/exit, page transitions, complex interactive animations
 
-### Existing keyframe animations
+### Motion tokens
 
-```css
-/* Star twinkle background */
-@keyframes twinkle {
-  0%, 100% { opacity: 0.6; transform: scale(1); }
-  50% { opacity: 1; transform: scale(1.06); }
-}
-.star-twinkle { animation: twinkle 4s ease-in-out infinite; }
+Exact values: `tokens/puffpop.css`. Specimen: `guidelines/brand-motion.html`.
 
-/* Profile entry */
-@keyframes profileEntry {
-  from { opacity: 0; transform: translateY(20px); }
-  to { opacity: 1; transform: translateY(0); }
-}
-```
+| Token | Value | Use |
+|---|---|---|
+| `--ease-settle` | `cubic-bezier(.22,1,.36,1)` | Entries |
+| `--ease-sweep` | `cubic-bezier(.25,1,.5,1)` | Slides |
+| `--m` | `1.25` | Global duration multiplier — `calc(200ms * var(--m))` |
+| `--stagger-start` | 260ms | Delay before the first staggered item |
+| `--stagger` | 45ms | Step between items |
+| `--stagger-booted` | 28ms | Step after first boot (return visits within the session) |
+| `--stagger-cap` | 900ms | Max total stagger delay |
 
-### Logo glow effect
+### Keyframes available
+`puffIn`, `puffSide`, `puffDrop`, `puffMenu`, `ipDrop`, `ipMenu`, `ipTile`, `ipSide`, `ipPhoto`, `ipBeam` — defined in `tokens/puffpop.css`; port them, don't redefine.
 
-The `.logo::after` pseudo-element uses `filter: blur(10px)` with reduced opacity to create a soft depth glow behind the logo text. This is the only place `filter: blur()` is used for a decorative/depth purpose on a UI element — it is not a shadow substitute for other components.
+### Reduced motion
+Respect `prefers-reduced-motion`: drop transforms, keep opacity fades.
 
-```css
-.logo::after {
-  background: linear-gradient(180deg, #e70a7d, #ec4850);
-  filter: blur(10px);
-  opacity: 0.6;
-}
-```
-
-### Standard durations
-
-```
-Micro-interactions (hover, focus): 0.15s ease
-State transitions: 0.2-0.3s ease
-Entry animations: 0.4-0.6s ease-out
-Loop animations: 4s ease-in-out infinite
-```
+### Legacy
+`star-twinkle` is still used by `components/Background/BackgroundStyle.tsx` and the collections backdrop; keep it until those are migrated. The old `.logo::after` blur glow has no live consumer — don't use it.
 
 ---
 
-## 9. Custom Scrollbar
+## 9. Scrollbar & Selection
 
-The site uses a custom pink gradient scrollbar defined in `index.css`:
-
-```css
-::-webkit-scrollbar { width: 8px; background: #000; }
-::-webkit-scrollbar-thumb {
-  background: linear-gradient(180deg, #b43777, #ec4850);
-  border-radius: 10px;
-}
-```
-
-Selection color is also custom:
+- **Scrollbar** — thumb `#FF8AC4` (`--pink-body`) with a 2px ink border on a cream (`--ground`) track. Night: graphite track.
+- **Selection** — `#FF8AC4` background, ink text.
 
 ```css
-::selection { background: #b43777; color: white; }
+::-webkit-scrollbar { width: 10px; background: var(--ground); }
+::-webkit-scrollbar-thumb { background: var(--pink-body); border: 2px solid var(--ink); border-radius: 999px; }
+::selection { background: var(--pink-body); color: var(--ink); }
 ```
 
 ---
@@ -284,15 +274,15 @@ Each hue reaches its maximum chroma at a specific value — not always mid-gray:
 - **Blue**: maximum chroma at very dark value (~3/10)
 - **Red**: maximum chroma at middle value (~5/10)
 
-**Kpopit implication:** `#FF3399` is both high-chroma and light in value simultaneously — rare and exactly why it reads as neon. On a dark `#111111` base it maximizes contrast on all three axes at once.
+**KpopIt implication:** the pink family spans value deliberately — `#FF8AC4` (body) is light and soft so it reads as a puffy side, `#E70A7D` (signal) sits near red's peak-chroma value so it pops on cream, and `#C62368` is dark enough to be readable as small text on `#FAF6F0`. On the night graphite ground the light pinks maximize value contrast instead.
 
 ### Color Harmonies
 
-- **Complementary**: 180° apart. Maximum contrast and vibrancy. Use for accents and CTAs, never for large adjacent areas (visual vibration). Kpopit: `#FF3399` ↔ green-cyan `~#33FF99`
-- **Analogous**: within 30–60°. Calm, cohesive. Kpopit: pink → purple → blue — used for secondary UI and shadow undertones
+- **Complementary**: 180° apart. Maximum contrast and vibrancy. Use for accents and CTAs, never for large adjacent areas (visual vibration). KpopIt: pink ↔ green-cyan `~#33FF99`
+- **Analogous**: within 30–60°. Calm, cohesive. KpopIt: pink → rose → warm cream — the Puff Pop day palette
 - **Triadic**: 120° apart. Balanced and energetic; one hue dominant, two as accents
 - **Split-complementary**: a color + the two neighbors of its complement. Strong contrast with less tension than pure complementary
-- **Monochromatic**: single hue, varying chroma and value. Safe, elegant, cohesive
+- **Monochromatic**: single hue, varying chroma and value. Safe, elegant, cohesive — the pink roles (§4) are a monochromatic ladder
 
 ### Color Temperature
 
@@ -321,20 +311,20 @@ When light hits a solid surface, it creates a predictable sequence of tones:
 7. **Cast Shadow** — shadow projected onto another surface
 8. **Occlusion Shadow** — darkest accent where two forms press together and cut off all light
 
-**Critical rule:** Pure black (`#000`) in shadows is almost always wrong. Shadows contain reflected light — they have color and are never fully dark. Use undertoned darks instead (e.g. `#0d0008`).
+**Critical rule:** Pure black (`#000`) in shadows is almost always wrong. Shadows contain reflected light — they have color and are never fully dark. Puff Pop's ink `#1A1418` is already a warm-purple dark, not black; Puff Pop's `--in` inner highlight is a direct application of zones 1 and 5 on a face.
 
 ### Lighting Model (Key / Fill / Rim)
 
-All 3D surfaces follow three-point lighting:
+Applies to emulated-light surfaces (album textures, holo cards) — flat Puff Pop objects use the face/body/offset model in §7 instead.
 
 - **Key light**: warm (`#FFF0C8`), top-right, opacity 0.15–0.20 — defines form. The dominant source.
 - **Fill light**: cold (`#B4D2F0`), left/bottom-left, opacity 0.10–0.14 — fills shadows. Always opposing temperature to the key.
 - **Rim light**: near-white (`#FFFFFF`), edge only, opacity 0.06–0.09 — separates element from background.
-- **Vignette**: black, radial center→edge, opacity 0.45–0.55 — seats the object in space.
+- **Vignette**: black, radial center→edge, opacity 0.45–0.55 — seats the object in space. (Night's `--pp-glow` is a mild version of this.)
 
 **Non-negotiable rule:** Key and fill must ALWAYS be opposing temperatures. Two warm or two cool sources = flat, lifeless result.
 
-**Shadow undertone:** `#0d0008` (dark purple) — complementary to the warm key light, adds depth without pure black.
+**Shadow undertone:** day ink `#1A1418` is a warm-purple dark, never neutral black; at night shadows are carried by the pink offset (`--ctl-off`), not by a dark.
 
 **Tonal separation:** In direct light, maintain ~4–5 value steps between fully lit and fully shadowed zones. Less = flat/diffuse. More = dramatic/harsh.
 
@@ -350,17 +340,17 @@ You never render local color directly — you always modulate it. A "black" viny
 - Highlights desaturate toward the light source's color (toward white/warm)
 - Shadows saturate toward the complementary / ambient color
 - Never use pure neutral gray for shadows on colored surfaces — tint them toward the complement
-- **Chromatic grays** (mixed from complementary pairs: blue+orange, red+green) are far richer than pure neutral grays. They maintain hue identity at low chroma.
+- **Chromatic grays** (mixed from complementary pairs: blue+orange, red+green) are far richer than pure neutral grays. They maintain hue identity at low chroma. Puff Pop's muted `#6B5F66` and night graphite `#1E1C1F` are chromatic greys leaning pink-purple.
 
 ### Gradation
 
-Color never appears flat in nature. It always transitions in hue, chroma, or value — even subtly. A flat color reads as artificial or graphic. CSS radial/linear gradients simulate natural gradation; this is why they read as more realistic than flat fills.
+Color never appears flat in nature. It always transitions in hue, chroma, or value — even subtly. A flat color reads as artificial or graphic. CSS radial/linear gradients simulate natural gradation; this is why they read as more realistic than flat fills. (Puff Pop is deliberately graphic — gradation lives in the ground dots, the `--in` highlight and the night glow, not on object faces.)
 
 ### Opacity as Intensity
 
 Control light strength via rgba opacity, not color changes:
 
-- `0.05–0.08`: subtle, near-imperceptible when static — texture/rim detail
+- `0.05–0.08`: subtle, near-imperceptible when static — texture/rim detail (the `--dot` halftone lives here)
 - `0.10–0.18`: visible, defines form — fill light range
 - `0.20+`: dominant — reserve for main key light only
 
@@ -377,25 +367,27 @@ Key terms:
 - **Saturation cost**: mixed/secondary colors are always lower chroma than the subjective primaries
 - **Excluded colors**: hues outside the polygon — their presence breaks color unity
 
-**Kpopit gamut:**
+**KpopIt (Puff Pop) gamut:**
 
-- Primary 1: `#FF3399` — neon pink, warm-red quadrant, high chroma
-- Primary 2: `#b4d2f0` — cold blue-gray, fill light / ambient shadow
-- Primary 3: `#0d0008` — dark purple shadow undertone
-- Subjective neutral: desaturated warm-cool mid-gray (~`#8a8490`)
-- **Excluded**: pure greens, pure yellows, saturated oranges — these break the retro-pop color mood
+- **Dominant ground**: cream `#FAF6F0` / face `#FFFDFA` + ink `#1A1418` — these carry most of the page
+- **Accent**: the pink family — body `#FF8AC4`, tag `#FF70B8`, signal `#E70A7D`, deep `#C62368`
+- **Night**: graphite `#1E1C1F` / `#2F2B2F` with cream text and pink offsets
+- **Subjective neutral**: warm pink-grey (~`#6B5F66`)
+- **Excluded**: pure greens, pure yellows, saturated oranges, cool blue-greys — they break the Puff Pop mood. Game feedback colours (correct/partial/incorrect) are the documented exception: `guidelines/colors-results.html`.
 
 ### Color Accent
 
 A color accent is a small high-chroma element in a neutral or monochromatic field. It draws the eye immediately and doesn't need to be large. It's usually the complement or near-complement of the dominant color.
 
-`#FF3399` functions as Kpopit's color accent — it sits in a dark neutral field and vibrates because it's the complement of that field's cool undertone. Overusing it collapses the effect.
+`--sig` is KpopIt's color accent — one element per view on a cream/ink field. Overusing it collapses the effect, which is why §4 limits it to one per view.
 
 ### Contrast & Accessibility
 
 - Value (lightness) contrast matters more than hue contrast for readability
 - WCAG minimums: 4.5:1 for normal text, 3:1 for large text
-- `#FF3399` on `#111111` passes; never put `#FF3399` text on white without darkening it first
+- Ink on cream and cream on graphite both pass comfortably
+- **Pink small text on cream must be `#C62368`** (`--pink-deep`); `#FF3399` / `#FF8AC4` text on cream fails — use them only as fills, bodies and large puffy lettering with an ink outline
+- Contrast table: `guidelines/colors-contrast.html`
 
 ---
 
@@ -412,30 +404,44 @@ src/pages/PageName/
 
 Page-specific subcomponents that are only used within that page are placed directly in the page folder. The `components/` folder inside a page is for subcomponents shared or organized separately.
 
-### CSS imports
+### Tokens only
+
+- Components read **only tokens** (`var(--face)`, `var(--ink)`, `var(--off-rest)` …). No hex literals in components.
+- Theme via `data-theme` on the root — components never branch on day/night in JS.
+- Long shadow stacks stay in CSS variables; Tailwind references them: `[box-shadow:var(--off-rest)]`, `[text-shadow:var(--puff-title)]`.
+
+### Reuse design-system parts first
+
+Before building UI, check `docs/design-system/components/puffpop/` for an existing part:
+
+`PuffNav` · `PuffTitle` · `PuffSearch` · `FilterButton` · `FilterMenu` · `AppliedChip` · `IdolCard` · `AlbumCard` · `EmptyState` · `BackButton` · `SlideSearch` · `CutoutName` · `GroupTag` · `ProfileTabs` · `ProfileTile` · `RelatedBand` · `RelatedCard`
+
+Port it to `src/components/puffpop/` as **TSX + Tailwind**, matching all its states — rest / hover / press / focus / disabled, in day and night. Each part ships a `.jsx` reference, a `.d.ts` prop contract, a `.prompt.md` usage note and a `*.card.html` specimen.
+
+`docs/design-system/ui_kits/puffpop/` is the **reference page** (catalogue + idol profile) — match its spacing and behaviour.
+
+### Example
 
 ```tsx
-import './page_name.css';
-// Imported in the component that uses the keyframe animations
+<button
+  className="h-(--ctl-h) rounded-full border-2 border-(--ink) bg-(--face) px-4 text-(--face-ink)
+    [box-shadow:var(--in),var(--off-rest)] transition-[transform,box-shadow] duration-150
+    hover:-translate-y-px hover:[box-shadow:var(--in),var(--off-hover)]
+    active:translate-x-0.5 active:translate-y-0.75 active:[box-shadow:var(--in),var(--off-flat)]"
+>
+  Filter
+</button>
 ```
 
-### Tailwind + CSS together
-
-```tsx
-// Tailwind for layout, colors, basic states
-className="flex flex-col bg-[#111111] border-[3px] border-neon-pink rounded-xl
-  hover:scale-105 transition-transform duration-300
-  shadow-[6px_6px_0px_rgba(255,51,153,0.25)]"
-
-// CSS class for keyframe animation
-className="modal-enter"  // defined in page_name.css
-```
+### Test matrix
+Test every page at **1440px and 390px**, in **day and night**.
 
 ### Avoid
 
-- Don't put static colors, spacing, sizing, or shadows in CSS files — use Tailwind utilities. Exception: runtime-driven color values (e.g. CSS custom properties set by JS for animation, as in `guessgrid.css`) are acceptable in CSS when Tailwind cannot handle it dynamically.
-- Don't use gaussian blur shadows for cards/buttons — use solid offset shadows for retro-pop. Blur is acceptable for icons, overlays, and modal backdrops (see Shadows section).
-- Don't use fonts beyond the design system without discussion
+- Don't put static colors, spacing, sizing, or shadows in CSS files — use tokens + Tailwind utilities. Exception: runtime-driven values (e.g. CSS custom properties set by JS for animation, as in `guessgrid.css`).
+- Don't use gaussian blur shadows for cards/buttons.
+- Don't use fonts beyond the design system without discussion.
+- Don't invent new colours, radii or shadows in a component (§19).
 
 ---
 
@@ -449,34 +455,36 @@ Don't lean on font size alone — it leads to oversized primary text and unreada
 - **Weight** — a heavier weight (600–700) emphasizes without enlarging; keep body at 400–500
 - **Color/contrast** — a softer color de-emphasizes without shrinking
 
-Stick to two or three text levels: primary, secondary, tertiary. In the **dark theme** this is white → muted grey (`#888888`) → lighter grey; in the **light retro-pop theme** it inverts → near-black ink → mid grey → soft grey. The principle is the same in both: each step is reduced contrast against its own background. Avoid font weights under 400 for UI text — they're only acceptable for large display headings (the DynaPuff branding can go lighter).
+Stick to two or three text levels: primary, secondary, tertiary. In **day** this is ink `#1A1418` → muted `#6B5F66` → `--rule`-level faint; in **night** it is cream `#FAF6F0` → `#CFC5CB` → faint. The principle is the same in both: each step is reduced contrast against its own background. Avoid font weights under 400 for UI text — they're only acceptable for large display headings (the DynaPuff branding can go lighter).
 
 ### Emphasize by de-emphasizing
 When a primary element won't stand out no matter what you add to it, stop adding — instead soften everything competing with it. An active nav item pops not by getting louder, but by muting the inactive items. A main content area wins when the sidebar loses its background and sits flat on the page.
 
 ### Don't use grey text on colored backgrounds
-Grey-on-white works because it's *reduced contrast*, not because it's grey. On a colored background (or Kpopit's `#FF3399` panels), don't use grey or transparent white — it looks washed out and disabled, and over images the background bleeds through. Instead, hand-pick a color with the **same hue** as the background, then adjust saturation and lightness until contrast feels right. This keeps the text crisp, not faded.
+Grey-on-cream works because it's *reduced contrast*, not because it's grey. On a colored background (pink bodies, tags, `--sig` fills), don't use grey or transparent white — it looks washed out and disabled, and over images the background bleeds through. Use ink, or hand-pick a color with the **same hue** as the background (`#C62368` on pink), then adjust until contrast feels right.
 
 ### Action hierarchy (buttons)
 Semantics are secondary to hierarchy. Every page has a pyramid: one primary action, a few secondary, some tertiary.
-- **Primary**: solid high-contrast background — in Kpopit, solid `#FF3399` with the retro offset shadow
-- **Secondary**: outline or low-contrast background
+- **Primary**: `--sig` fill, ink outline, offset shadow — the one signal of the view
+- **Secondary**: `--face` fill, ink outline, offset shadow
 - **Tertiary**: styled like a link
 
-A destructive action isn't automatically big and red. If it's not the primary action, give it secondary/tertiary treatment, and save the bold red styling for the confirmation step where deleting *is* the primary action.
+A destructive action isn't automatically big and red. If it's not the primary action, give it secondary/tertiary treatment, and save the bold styling for the confirmation step where deleting *is* the primary action.
 
 ### Labels are a last resort
-Data often reads without a label — a date, a percentage, or a score is obvious from its format. When a label is needed, fold it into the value ("3 guesses left", not "Guesses: 3"; "won by 23 players", not "Players: 23"). When a true label is unavoidable (a stats panel or leaderboard), treat it as secondary: smaller, lighter, lower contrast. The data is what matters.
+Data often reads without a label — a date, a percentage, or a score is obvious from its format. When a label is needed, fold it into the value ("3 guesses left", not "Guesses: 3"; "won by 23 players", not "Players: 23"). When a true label is unavoidable (a stats panel or leaderboard), treat it as secondary: smaller, lighter, lower contrast — Major Mono Display eyebrow style. The data is what matters.
 
 ### Balance weight and contrast
-Heavy elements (bold text, solid icons) draw the eye. To balance an icon against text, lower the icon's contrast with a softer color. Conversely, to emphasize a too-subtle element (a thin 1px border), increase its weight (width) rather than darkening it into harshness.
+Heavy elements (bold text, solid icons) draw the eye. To balance an icon against text, lower the icon's contrast with a softer color. Conversely, to emphasize a too-subtle element, increase its weight (width) rather than darkening it into harshness.
 
 ---
 
 ## 13. Layout & Spacing
 
+Exact values: `tokens/spacing.css`, `guidelines/spacing-scale.html`.
+
 ### Start with too much white space, then remove
-White space should be *removed*, not added. Designers default to giving elements the minimum room to "not look bad" — but great design needs more breathing room. Start with too much space and pull it back until it feels right; what looks like "a little too much" on one element reads as "just enough" in a full UI. Dense layouts (a stats panel, a leaderboard, the Kpopit guess list) are valid, but make density a deliberate choice, not a default.
+White space should be *removed*, not added. Designers default to giving elements the minimum room to "not look bad" — but great design needs more breathing room. Start with too much space and pull it back until it feels right; what looks like "a little too much" on one element reads as "just enough" in a full UI. Dense layouts (a stats panel, a leaderboard, the KpopIt guess list) are valid, but make density a deliberate choice, not a default.
 
 ### Establish a spacing & sizing system
 Never nitpick between 120px and 125px. Define a constrained scale up front and only pick from it. A linear "everything is a multiple of 4px" scale isn't enough — the system must respect *relative* difference: no two adjacent values should be closer than ~25%. Start from a base of 16px (browser default, divides cleanly) and grow with widening gaps:
@@ -485,73 +493,72 @@ Never nitpick between 120px and 125px. Define a constrained scale up front and o
 4 · 8 · 12 · 16 · 24 · 32 · 48 · 64 · 96 · 128 · 192 · 256
 ```
 
-Kpopit already defines custom breakpoints (section 6) — apply the same systematic discipline to spacing. Tailwind's default spacing scale already follows this principle; prefer its tokens over arbitrary bracket values.
+KpopIt already defines custom breakpoints (section 6) — apply the same systematic discipline to spacing. Tailwind's default spacing scale already follows this principle; prefer its tokens over arbitrary bracket values.
 
 ### Avoid ambiguous spacing
-When elements are grouped without a visible border, spacing alone communicates grouping. **Always make the space around a group larger than the space within it.** A form label must sit closer to its own input than to the next field. A section heading needs more space above it than below. This applies horizontally too. Ambiguous spacing forces the user to work harder — and looks worse.
+When elements are grouped without a visible border, spacing alone communicates grouping. **Always make the space around a group larger than the space within it.** A form label must sit closer to its own input than to the next field. A section heading needs more space above it than below. This applies horizontally too.
 
 ### You don't have to fill the screen
 If a layout only needs 600px, use 600px. Don't make something full-width just because the nav is. Give each element only the space it needs. When a narrow component feels unbalanced in a wide layout, split it into columns rather than stretching it.
 
 ### Relative sizing doesn't scale
-Don't lock element sizes to each other with `em` ratios across breakpoints. A 2.5em headline that's perfect on desktop becomes absurd on mobile. Large elements must shrink *faster* than small ones — the gap between big and small should compress at smaller screens. The same applies within a component: a button's padding should grow generously at large sizes and tighten disproportionately at small sizes, so a large button feels genuinely larger, not just zoomed. (Reinforces Kpopit's mobile-first rule from CLAUDE.md.)
+Don't lock element sizes to each other with `em` ratios across breakpoints. A 2.5em headline that's perfect on desktop becomes absurd on mobile. Large elements must shrink *faster* than small ones — the gap between big and small should compress at smaller screens. The same applies within a component: a button's padding should grow generously at large sizes and tighten disproportionately at small sizes.
 
 ### Grids are a tool, not a master
-A 12-column grid brings order, but don't outsource every layout decision to it. Give components the width they actually need; cap them with a max-width so they don't sprawl, and only force them smaller when the screen demands it. Don't be a slave to the grid — especially relevant for Kpopit's intentionally off-kilter, tilted retro-pop compositions (the chaos/tilt system), which deliberately break grid rigidity.
+A 12-column grid brings order, but don't outsource every layout decision to it. Give components the width they actually need; cap them with a max-width so they don't sprawl, and only force them smaller when the screen demands it. Puff Pop's alternating ±0.5° tilt deliberately softens grid rigidity without breaking alignment.
 
 ---
 
-## 14. Depth & Dimensionality (Retro-pop + Modern)
+## 14. Depth & Dimensionality
 
-Kpopit's aesthetic is built on **solid offset shadows** (section 7) — a flat, retro-pop depth language. This section extends that with the underlying physics so depth stays consistent across components, and clarifies when to use flat-retro depth vs. emulated-light depth. Depth cues read differently per theme: solid offset shadows in dark colors work on the light retro-pop theme; on the dark theme the same offset shadow needs a lighter or colored cast (or a neon-pink offset) to stay visible against the dark background.
+Puff Pop's depth language is **face on pink body + solid offset shadow** (§7). This section gives the underlying physics so depth stays consistent. Depth cues flip per theme: in **day** offsets are ink on cream; in **night** they turn pink (`--ctl-off`) so they stay visible on graphite.
 
 ### Light comes from above
-The brain reads depth from a single assumption: light comes from above. A raised element has a lighter top edge (angled toward the light) and a darker bottom edge. An inset element is the reverse — dark at the top (light blocked), light at the bottom. To make anything feel raised or recessed, mimic this. (This is the same key-light logic documented in section 10's Lighting Model — top-right key in Kpopit's case.)
+The brain reads depth from a single assumption: light comes from above. A raised element has a lighter top edge and a darker bottom edge; an inset element is the reverse. Puff Pop encodes this in `--in` (white top line, shaded bottom) and in the downward-right offset shadow.
 
 ### Shadows convey elevation on a z-axis
 Shadow size maps to distance from the surface, and closer = more attention:
-- **Small, tight shadow** → slightly raised (buttons)
-- **Medium shadow** → floating above UI (dropdowns)
-- **Large, diffuse shadow** → close to the user (modals)
+- **Small, tight offset** → resting objects (`--off-rest`)
+- **Medium offset** → hovered/lifted, fields (`--off-lift`, `--off-field`)
+- **Largest offset** → focused (`--off-focus`)
+- **Diffuse blur** → modal backdrops only
 
-Define a fixed elevation scale (≈5 shadows, smallest to largest) just like the spacing system. **For Kpopit**: the retro-pop solid offset shadow (`shadow-[4px_4px_0px_#000]`) is the default flat-depth treatment for cards and buttons. Reserve blurred/diffuse shadows for modals and overlays (consistent with section 7).
+The offset scale in §7 *is* the elevation scale — don't add values outside it.
 
 ### Interactive shadows
-Shadows are feedback, not just decoration. A pressed button drops to a smaller shadow (or removes it) to feel pushed into the page — this is core to the retro arcade "press-down" personality. A dragged item gains a shadow to pop forward. Think in terms of where the element sits on the z-axis, then assign the shadow.
+Shadows are feedback, not just decoration. A pressed object drops to `--off-flat` and moves into its shadow — core to the toy-plastic "press-down" personality. A dragged item gains a bigger offset to pop forward.
 
-### Two-part shadows (for modern-depth components)
-A realistic shadow combines two: a larger, softer, low-opacity shadow for the diffuse ambient cast, plus a tighter, darker shadow for the sharp contact edge. The tight contact shadow should fade as elevation increases (distinct at low elevation, nearly invisible at high). Use this only on modern-depth components (modals, overlays) — not on flat retro-pop cards, which use the solid offset.
+### Two-part shadows
+A realistic shadow combines a soft ambient cast with a tight contact edge. Use this only on emulated-light components (album textures, card zoom) — never on Puff Pop objects, which use the solid offset.
 
 ### Flat designs still have depth
 Even without shadows, depth comes from two sources:
-- **Color**: lighter elements feel closer, darker feel further (consistent with section 10 — warm/light advances, cool/dark recedes). To raise an element, push it *away* from the background's lightness toward the viewer: in the **dark theme** make it lighter than its background; in the **light retro-pop theme** a raised element is often defined by its border and offset shadow rather than going darker, since going darker on white reads as inset. Invert the logic per theme — the rule is "contrast against background = elevation," not "lighter = up" in absolute terms.
-- **Overlap**: overlapping elements create instant layering. Offset a card so it crosses two backgrounds, or make an element taller than its parent so it overlaps both edges. When overlapping images, give them an "invisible border" matching the background color so they don't clash.
-
-Overlap is especially powerful for Kpopit's sticker/washi-tape/polaroid motifs — the tape straddling a card edge is exactly this layering principle.
+- **Color**: contrast against the ground = elevation. In day, faces (`#FFFDFA`) sit slightly above the cream ground and are defined by outline + offset; in night, faces (`#2F2B2F`) are lighter than graphite. The rule is "contrast against background = elevation," not "lighter = up" in absolute terms.
+- **Overlap**: overlapping elements create instant layering. Tags straddling a card edge and the pink body peeking under a face are exactly this principle.
 
 ---
 
 ## 15. Game Design Principles (The Art of Game Design — Jesse Schell)
 
-Kpopit is a game, not just a website. These "lenses" — questions to interrogate the design — are the ones most relevant to a daily guessing game.
+KpopIt is a game, not just a website. These "lenses" — questions to interrogate the design — are the ones most relevant to a daily guessing game.
 
 ### The Lens of the Toy
-Is the core interaction fun *before* you add rules and goals? A toy is fun to play with for its own sake. The guessing input, the pixel-reveal, the vinyl spin — these should feel satisfying to touch and watch even outside a "win." If the moment-to-moment interaction isn't pleasurable, no scoring system will save it.
+Is the core interaction fun *before* you add rules and goals? A toy is fun to play with for its own sake. The guessing input, the pixel-reveal, the press-down of a puffy card — these should feel satisfying to touch and watch even outside a "win." If the moment-to-moment interaction isn't pleasurable, no scoring system will save it.
 
 ### The Lens of Essential Experience
-Define the feeling you're selling, then make every element serve it. Kpopit's essential experience: *the daily thrill of recognition* — that "I know this!" spark when a blurred photo or pixelated cover resolves into a familiar idol/album. Every design decision (reveal pacing, feedback, celebration) should amplify that spark.
+Define the feeling you're selling, then make every element serve it. KpopIt's essential experience: *the daily thrill of recognition* — that "I know this!" spark when a blurred photo or pixelated cover resolves into a familiar idol/album. Every design decision (reveal pacing, feedback, celebration) should amplify that spark.
 
 ### The Lens of Feedback (Juiciness)
-Every player action needs immediate, satisfying feedback. A correct guess should feel *celebratory* — color, motion, sound-like visual punch. A wrong guess should inform without punishing. Kpopit's `PixelCluster` (green/red shrapnel) and the pixel-reveal steps are feedback moments — make them juicy, not flat. Disproportionately reward the win: the payoff is the whole point of the daily loop.
+Every player action needs immediate, satisfying feedback. A correct guess should feel *celebratory* — color, motion, sound-like visual punch. A wrong guess should inform without punishing. KpopIt's `PixelCluster` (green/red shrapnel) and the pixel-reveal steps are feedback moments — make them juicy, not flat. Disproportionately reward the win: the payoff is the whole point of the daily loop.
 
 ### The Lens of the Compulsion Loop
-A daily game lives or dies on the return loop: **anticipation → play → reward → rest → anticipation**. The 00:00 KST reset, "23 people already found today's album," streak counters, and "come back tomorrow" all feed this. The reward must feel worth the wait, and the rest period (no more puzzle today) must build anticipation rather than frustration. Don't let unlimited tries dissolve the tension — the *reveal* is the scarce reward, not the attempts.
+A daily game lives or dies on the return loop: **anticipation → play → reward → rest → anticipation**. The midnight EST reset, "23 people already found today's album," streak counters, and "come back tomorrow" all feed this. The reward must feel worth the wait, and the rest period must build anticipation rather than frustration. Don't let unlimited tries dissolve the tension — the *reveal* is the scarce reward, not the attempts.
 
 ### The Lens of Reward
-Reward types to deploy: praise (celebration screen), points/score, streaks (continuity pressure), and the satisfaction of completion. Vary and stack them. A streak is one of the strongest daily-return mechanics — losing it should sting just enough to bring the player back.
+Reward types to deploy: praise (celebration screen), points/score, streaks (continuity pressure), collection cards, and the satisfaction of completion. Vary and stack them. A streak is one of the strongest daily-return mechanics — losing it should sting just enough to bring the player back.
 
 ### The Lens of Accessibility (Skill vs. Luck)
-A guessing game balances knowledge (skill) against the difficulty curve. The progressive pixelation/blur is the difficulty dial — start hard (high pixelation, res 4) so experts win fast and feel smart, then ease toward easy so casual fans still succeed and feel rewarded. Both ends must feel fair: never unguessable, never trivial.
+A guessing game balances knowledge (skill) against the difficulty curve. The progressive pixelation/blur is the difficulty dial — start hard so experts win fast and feel smart, then ease toward easy so casual fans still succeed and feel rewarded. Both ends must feel fair: never unguessable, never trivial.
 
 ### Applying the lenses
 Before shipping a game feature, ask: Does it serve the essential experience (recognition thrill)? Is the feedback juicy? Does it strengthen the daily loop? If a feature is fun, fair, and feeds the return loop, it belongs. If not, cut it.
@@ -560,53 +567,73 @@ Before shipping a game feature, ask: Does it serve the essential experience (rec
 
 ## 16. Typography in Practice
 
-Section 5 defines the fonts (DynaPuff, font-sans, Noto Sans KR). This section covers how to *apply* type systematically. Korean text always uses `font-korean` (per section 5) — that rule is unchanged.
+Section 5 defines the fonts (DynaPuff, Major Mono Display, Caveat, Noto Sans KR). This section covers how to *apply* type systematically. Korean text always uses `font-korean`.
 
 ### Establish a type scale
-Most UIs use too many font sizes. Define a constrained scale up front and pick only from it. A linear scale doesn't work — small jumps matter at the bottom, but nobody needs to choose between 46px and 48px. A purely modular scale (ratio-based) produces fractional pixel values and too few mid-range sizes for interface work. Hand-pick a practical scale instead, aligned with the spacing system (section 13):
+Most UIs use too many font sizes. Define a constrained scale up front and pick only from it (exact values: `tokens/typography.css`, `guidelines/type-scale.html`). Hand-picked practical scale, aligned with the spacing system (§13):
 
 ```
 12 · 14 · 16 · 18 · 20 · 24 · 30 · 36 · 48 · 60 · 72
 ```
 
-**Never use `em` for the scale** — nested elements compute to values outside your scale. Use `px` or `rem` (or Tailwind's `text-*` tokens, which already follow this). This reinforces CLAUDE.md's existing stance against arbitrary `rem` where Tailwind alternatives exist — prefer the Tailwind type tokens.
+**Never use `em` for the scale** — nested elements compute to values outside your scale. Use `px` or `rem` (or Tailwind's `text-*` tokens). Puffy text-shadow presets are sized for specific type sizes — pick the preset that matches (`--puff-title` for titles, `--puff-name-*` for card names).
 
 ### Line length
-For reading comfort, keep paragraphs between **45 and 75 characters per line**. Wider is risky; narrower fragments the text. In a wide content area, still constrain paragraph width even if surrounding elements are full-width — mixing widths looks more polished, not less.
+For reading comfort, keep paragraphs between **45 and 75 characters per line**. In a wide content area, still constrain paragraph width even if surrounding elements are full-width.
 
 ### Line-height is proportional, two ways
-- **Inversely proportional to font size**: small text needs taller line-height (helps the eye find the next line); large display text can use line-height 1 or close. Kpopit's oversized DynaPuff headings should run tight; body text looser.
-- **Proportional to line length**: narrow columns can use ~1.5; wide columns may need up to 2 so the eye doesn't lose its place jumping back.
+- **Inversely proportional to font size**: small text needs taller line-height; large display text can use line-height 1 or close. Puffy DynaPuff titles run tight (leave room for the shadow stack below); body text looser.
+- **Proportional to line length**: narrow columns can use ~1.5; wide columns may need up to 2.
 
 ### Baseline, not center
-When mixing font sizes on one line (a large title beside smaller actions), align them by their **baseline**, not their vertical center. The baseline is an alignment reference the eye already perceives — centering offsets the baselines and looks subtly wrong, especially when the sizes are close.
+When mixing font sizes on one line (a large title beside smaller actions), align them by their **baseline**, not their vertical center.
 
 ### Letter-spacing
-Fonts are spaced for an intended size. Tighten letter-spacing slightly on large display headings (DynaPuff branding, the oversized Hangul 케이팝잇), and leave body text at its default. All-caps labels (Kpopit uses uppercase tracking-heavy labels) benefit from increased letter-spacing for legibility — the existing `letterSpacing: '0.3em'` style on labels is correct.
+Tighten letter-spacing slightly on large display headings (DynaPuff titles, oversized Hangul 케이팝잇), and leave body text at its default. Major Mono Display labels are uppercase and tracked — the existing `letterSpacing: '0.3em'` label style is correct.
 
-### Two font families maximum
-A change in typeface signals a change in function — restraint reads as intentional. One family across many weights is often enough; a second for contrast is fine. Kpopit's DynaPuff (display/retro-pop) + font-sans (clean/modern) + Noto Sans KR (Korean only) is exactly this discipline — don't introduce a fourth.
+### Font families
+A change in typeface signals a change in function — restraint reads as intentional. DynaPuff (display) + Major Mono Display (labels/meta) + Caveat (one handwritten aside per view) + Noto Sans KR (Korean only) is the whole system — don't introduce another.
 
 ---
 
 ## 17. Composition Principles (Design Elements — Timothy Samara)
 
-These are the higher-level composition rules that sit above individual UI patterns. They come from graphic design tradition and apply to every Kpopit page as a whole.
+These are the higher-level composition rules that sit above individual UI patterns.
 
 ### Have a concept, communicate don't decorate
-Every element must carry meaning. Form that doesn't contribute to the message or composition is eye candy. Before adding a decorative element (sticker, washi tape, floating shape), ask what it communicates. In Kpopit these motifs *do* carry meaning — they signal the playful, fan-culture personality — which is exactly why they earn their place. Decoration without purpose gets cut.
+Every element must carry meaning. Form that doesn't contribute to the message or composition is eye candy. Before adding a decorative element (sticker, tag, halftone, floating shape), ask what it communicates. In KpopIt these motifs *do* carry meaning — they signal the playful, fan-culture, toy-sticker personality — which is exactly why they earn their place. Decoration without purpose gets cut.
 
 ### Speak with one visual voice
-Every element should reinforce every other — in shape, weight, placement, and concept. When one piece feels out of place, it disconnects and weakens the whole. The retro-pop language (offset shadows, thick borders, Hangul, washi tape) is Kpopit's unified voice; a soft gaussian-shadowed SaaS card would break it instantly.
+Every element should reinforce every other — in shape, weight, placement, and concept. When one piece feels out of place, it disconnects and weakens the whole. The Puff Pop language (2px ink outline, pink body, solid offset, puffy lettering, light tilt) is KpopIt's unified voice; a soft gaussian-shadowed SaaS card — or a leftover dark Retro-Pop panel — would break it instantly.
 
 ### Fight the flatness — create tension through opposition
-A composition where everything is the same size, weight, and distance is dead. Create depth and energy through deliberate *contrast*: cluster some elements and push others apart, make some advance (light/warm/large) and others recede (dark/cool/small). Kpopit's intentional tilt/chaos system is this principle applied — controlled opposition, not randomness.
+A composition where everything is the same size, weight, and distance is dead. Create depth and energy through deliberate *contrast*: cluster some elements and push others apart, make some advance and others recede. Puff Pop's tilt system is this principle applied — controlled opposition, not randomness.
 
 ### The seesaw method (congruence vs. opposition)
-Relationships between elements work through balanced tension: establish some *congruence* (shared shape, alignment, color) and balance it with *opposition* (contrast in size, value, direction). Too much congruence = monotone and "enslaved"; too much opposition = disconnected chaos. As you increase contrast somewhere, reinforce a shared trait elsewhere to keep unity. This is how the tilted guess rows stay cohesive despite their angles — they share border, shadow, and pill shape.
+Relationships between elements work through balanced tension: establish some *congruence* (shared shape, alignment, color) and balance it with *opposition* (contrast in size, value, direction). Too much congruence = monotone; too much opposition = chaos. This is how alternately tilted cards stay cohesive — they share outline, radius, body and offset.
 
 ### Beware symmetry
-Symmetry reads as static, traditional, and sometimes lazy. Kpopit's off-axis, tilted, asymmetric compositions are deliberately anti-symmetric — that's the retro-pop energy. When symmetry is used, counteract its stiffness with scale contrast or rotation.
+Symmetry reads as static, traditional, and sometimes lazy. When symmetry is used, counteract its stiffness with scale contrast or rotation.
 
 ### Do it on purpose — trust the eye, not the measurement
-Optical perception beats mathematical measurement. A circle and a square of identical pixel dimensions don't *look* the same size; equal mathematical spacing doesn't always *look* equal. If two elements are aligned by the numbers but look misaligned, the numbers don't matter — fix it by eye. Decisiveness reads as confident design; ambiguity reads as insecurity. Always make placement look intentional.
+Optical perception beats mathematical measurement. A circle and a square of identical pixel dimensions don't *look* the same size; equal mathematical spacing doesn't always *look* equal. If two elements are aligned by the numbers but look misaligned, fix it by eye. Decisiveness reads as confident design.
+
+---
+
+## 18. Open Decisions
+
+Not final yet — implement behind a prop/flag with the noted default so either option can ship:
+
+| Decision | Options | Default |
+|---|---|---|
+| Idol page corners | sharp vs soft | **soft** (`--r`) |
+| Idol photo frame | single vs double pink frame | **single** |
+
+---
+
+## 19. Source of Truth
+
+- Design changes are made in the **KpopIt Design System** first (`docs/design-system/`), then synced into this file.
+- If a value in DESIGN.md and `docs/design-system/tokens/*.css` disagree, **the token file wins**.
+- Don't invent new colours, radii or shadows in code — add them to the design system, then port the token.
+- DESIGN.md is a baseline, not a cage: a feature may intentionally diverge (e.g. the collection flip-book) when the owner asks — record the divergence and, if it becomes the new baseline, update the design system and this file.

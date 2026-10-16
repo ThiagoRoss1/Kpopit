@@ -1,4 +1,3 @@
-// Search bar component
 import React, { useState, useEffect, useRef } from "react";
 import type { IdolListItem } from "../../interfaces/gameInterfaces";
 import { AnimatePresence, motion} from "motion/react";
@@ -14,11 +13,9 @@ interface SearchBarProps {
   excludedIdols?: number[];
   disabled?: boolean;
 
-  // Handle selection
   onIdolSelect: (idolName: string) => void;
   onIdolSelectId?: (idolId: IdolListItem) => void;
 
-  // Game modes
   gameMode: 'classic' | 'blurry' | null;
 }
 
@@ -26,7 +23,6 @@ const SearchBar = (props: SearchBarProps) => {
   const { allIdols, value, onIdolSelect, onIdolSelectId, gameMode, onSubmit, disabled, excludedIdols, onClose } =
     props;
 
-  // Input value and Suggestions state
   const [suggestions, setSuggestions] = useState<IdolListItem[]>([]);
   const [showList, setShowList] = useState(false);
   const [selectedIdol, setSelectedIdol] = useState<IdolListItem | null>(null);
@@ -36,7 +32,7 @@ const SearchBar = (props: SearchBarProps) => {
 
   const isMobile = useIsMobile();
 
-  const pressTimeout = useRef<number | null>(null);
+  const pressTimeout = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   const containerRef = useRef<HTMLDivElement>(null);
 
@@ -51,7 +47,6 @@ const SearchBar = (props: SearchBarProps) => {
     return () => document.removeEventListener("mousedown", handleClickOutside);
   }, [onClose])
 
-  // Handle input changes
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const value = e.target.value;
     onIdolSelect(value);
@@ -66,7 +61,7 @@ const SearchBar = (props: SearchBarProps) => {
             group.toLowerCase().includes(value.toLowerCase())) ||
             idol.all_groups?.some(group =>
               group.toLowerCase().includes(value.toLowerCase())
-            ); // Check in all_groups but only for filtering -> displaying active group(s) only
+            ); // all_groups only widens the filter; the list still shows active group(s)
 
           const isSoloist = (idol.groups?.length === 0) &&
           ("solo".includes(value.toLowerCase()) || value.toLowerCase().includes("solo") && (!idol.groups || idol.groups.length === 0));
@@ -95,7 +90,7 @@ const SearchBar = (props: SearchBarProps) => {
           if (aPriority !== bPriority) return aPriority - bPriority;
           return aName.localeCompare(bName);
         })
-        .slice(0, 20); // Limit to 20 suggestions
+        .slice(0, 20);
       setSuggestions(filteredSuggestions);
 
       setSelectedIdol(filteredSuggestions[0] || null);
@@ -112,24 +107,18 @@ const SearchBar = (props: SearchBarProps) => {
   const [hoveredId, setHoveredId] = useState<number | null>(null);
   const [isButtonHovered, setIsButtonHovered] = useState(false);
 
-  // Format display name
   const formatDisplayName = (idol: IdolListItem) => {
-    const groups = idol.active_group || "Soloist";  // <- Added Groups display
+    const groups = idol.active_group || "Soloist";
     return `${idol.artist_name} (${groups})`;
   };
   
-  // Handle suggestion click
   const handleSuggestionClick = (suggestion: IdolListItem) => {
-    onIdolSelect(formatDisplayName(suggestion));  // suggestion.artist_name <- Before adding groups at searchbar
+    onIdolSelect(formatDisplayName(suggestion));
     onIdolSelectId?.(suggestion);
     setSelectedIdol(suggestion);
     setSuggestions([]);
   };
 
-  // const extractArtistName = (displayValue: string) => {
-  //   return displayValue.split(" (")[0].trim(); // <- Added Groups display
-  // };
-  // Return JSX
   return (
     <div ref={containerRef} className="relative w-fit h-fit rounded-3xl">
       <div className={`relative max-xxs:w-80 max-xxs:h-13 xxs:w-90 xxs:h-13 xs:w-100 xs:h-13 max-w-full 
@@ -138,10 +127,8 @@ const SearchBar = (props: SearchBarProps) => {
         <form className="w-full p-2" 
         onSubmit={(e) => {
           e.preventDefault();
-          // const cleanName = extractArtistName(value);
-          // value.trim().toLocaleLowerCase() <- Before adding groups at searchbar
 
-                if (!disabled && selectedIdol) { // cleanName.length > 0 && (selectedIdol.artist_name.toLocaleLowerCase() === cleanName.toLocaleLowerCase()) -> Certifies that user selected an idol from the list (full name)
+                if (!disabled && selectedIdol) {
                 onSubmit?.();
                 setShowList(false);
                 setSelectedIdol(null);
@@ -175,10 +162,8 @@ const SearchBar = (props: SearchBarProps) => {
                   border border-white/80 transform transition-all ${!isClicked ? "duration-300" : ""} hover:brightness-125 hover:scale-108 
                   hover:border-white hover:cursor-pointer hover:bg-linear-to-br hover:from-[#b43777] hover:to-[#ce757a] hover:rotate-15`}
               onClick={() => {
-                // const cleanName = extractArtistName(value);
-                // value.trim().toLocaleLowerCase() <- Before adding groups at searchbar
                 
-                if (!disabled && selectedIdol && !inCooldown) { // cleanName.length > 0 && (selectedIdol.artist_name.toLocaleLowerCase() === cleanName.toLocaleLowerCase()) -> Certifies that user selected an idol from the list (full name)
+                if (!disabled && selectedIdol && !inCooldown) {
                   setInCooldown(true);
                   onSubmit?.();
                   setShowList(false);

@@ -2,10 +2,10 @@ import { useState } from "react";
 import { Navigate } from "react-router";
 import { addNewIdol } from "../../services/api";
 import type { AddIdolRequest } from "../../interfaces/gameInterfaces";
+import { useAuth } from "../../hooks/useAuth";
 
 const Admin = () => {
-    const [passwordInput, setPasswordInput] = useState("");
-    const [isAuthenticated, setIsAuthenticated] = useState<boolean>(false);
+    const { isAuthenticated, isLoading, user } = useAuth();
     const [idolData, setIdolData] = useState({
         id: 0,
         artist_name: "",
@@ -22,6 +22,12 @@ const Admin = () => {
 
     if (import.meta.env.VITE_ADMIN_ENABLED !== "true") {
     return <Navigate to="/" replace />;
+    }
+
+    // The real check is @require_admin on the API; this only avoids showing the page to non-admins.
+    if (isLoading) return null;
+    if (!isAuthenticated || !user?.user_credentials.is_admin) {
+        return <Navigate to="/" replace />;
     }
 
     const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -86,32 +92,6 @@ const Admin = () => {
             console.error("Error downloading backup:", error);
             alert("Error: " + error);
         }
-    }
-    
-    if (!isAuthenticated) {
-        return (
-            <div className="w-full h-screen flex flex-col justify-center items-center text-white">
-                <h1>Admin Login</h1>
-                <input 
-                type="password"
-                value={passwordInput}
-                onChange={(e) => setPasswordInput(e.target.value)}
-                className="border-2 border-white bg-[#242424] text-white p-2 mb-2 mt-2"
-                />
-                <button 
-                className="border border-white bg-black text-white rounded-2xl px-4"
-                onClick={() => {
-                    if (passwordInput === import.meta.env.VITE_ADMIN_PASSWORD) {
-                        setIsAuthenticated(true)
-                    } else {
-                        return <Navigate to="/" replace />;
-                    }
-                }}
-                >
-                    Submit
-                </button>
-            </div>
-        );
     }
 
     return (

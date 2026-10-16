@@ -1,0 +1,96 @@
+<!-- @dsCard group="Puff Pop · UI kit" viewport="1440x1000" name="Idols catalogue + idol page" subtitle="Click-through: Idols list → idol profile → related; Albums; day/night" -->
+<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1"><title>KpopIt · Puff Pop UI kit</title>
+<link rel="stylesheet" href="../../styles.css">
+<script src="https://unpkg.com/react@18.3.1/umd/react.development.js" integrity="sha384-hD6/rw4ppMLGNu3tX5cjIb+uRZ7UkRJ6BPkLpg4hAu/6onKUg4lLsHAs9EBPT82L" crossorigin="anonymous"></script>
+<script src="https://unpkg.com/react-dom@18.3.1/umd/react-dom.development.js" integrity="sha384-u6aeetuaXnQ38mYT8rp6sbXaQe3NL9t+IBXmnYxwkUI2Hw4bsp2Wvmx4yRQF1uAm" crossorigin="anonymous"></script>
+<script src="https://unpkg.com/@babel/standalone@7.29.0/babel.min.js" integrity="sha384-m08KidiNqLdpJqLq95G/LEi8Qvjl/xUYll3QILypMoQ65QorJ9Lvtp2RXYGBFj1y" crossorigin="anonymous"></script>
+<script src="../../_ds_bundle.js"></script>
+<style>
+body{margin:0}a{color:var(--text-pink)}a:hover{color:var(--neon-pink)}
+.kit-root{min-height:100vh;overflow:hidden}
+.kit-foot{display:flex;justify-content:space-between;gap:20px;margin-top:10px;padding:16px 0 0;border-top:1.5px solid var(--rule);font:500 11px 'DynaPuff';color:var(--muted)}
+.kit-idol{--p-photo:460px;--hero-cols:minmax(0,480px) minmax(0,800px);--tb-cols:var(--hero-cols);--tb-bk-js:center;--tb-bk-w:min(100%,var(--p-photo));--tb-gap:14px 72px;--hero-items:flex-start;--hero-align:left;--rn:58px;--panel-h:480px;--band-top:150px;position:relative;isolation:isolate;padding-bottom:36px}
+@container (max-width:1180px){.kit-idol{--p-photo:400px;--hero-cols:minmax(0,420px) minmax(0,1fr)}}
+@container (max-width:980px){.kit-idol{--p-photo:420px;--hero-cols:minmax(0,1fr);--tb-cols:auto minmax(0,1fr);--tb-bk-js:start;--tb-bk-w:auto;--tb-gap:14px;--hero-items:center;--hero-align:center;--band-top:190px}}
+@container (max-width:560px){.kit-idol{--p-photo:300px;--rn:44px;--panel-h:0px;--band-top:160px}}
+.kit-hband{position:absolute;left:-30%;right:-30%;top:var(--band-top);height:300px;z-index:-1;pointer-events:none;background-color:var(--band);background-image:repeating-linear-gradient(90deg,var(--speed) 0 2px,transparent 2px 26px),linear-gradient(180deg,rgba(255,255,255,.07),rgba(255,255,255,0) 40%);transform:rotate(-9deg)}
+.kit-hband--pink{top:calc(var(--band-top) + 316px);height:12px;background:#FF3399}
+.kit-hband--line{top:calc(var(--band-top) + 334px);height:4px;background:var(--band)}
+.kit-toolbar{position:relative;z-index:8;max-width:1360px;margin:2px auto 0;display:grid;grid-template-columns:var(--tb-cols);justify-content:space-between;align-items:center;gap:var(--tb-gap)}
+.kit-toolbar__back{justify-self:var(--tb-bk-js);width:var(--tb-bk-w);display:flex;justify-content:center;min-width:0}
+.kit-hero{position:relative;width:100%;max-width:1360px;margin:10px auto 0;display:grid;grid-template-columns:var(--hero-cols);justify-content:space-between;gap:44px 72px;align-items:center}
+.kit-photo{position:relative;isolation:isolate;justify-self:center;width:min(100%,var(--p-photo));margin-top:14px;padding-bottom:calc(var(--rn) * .8)}
+.kit-photo__tone{position:absolute;left:-18%;top:-14%;width:136%;aspect-ratio:1/1;z-index:-1;pointer-events:none;background-image:radial-gradient(circle,var(--tone) 2.4px,transparent 2.8px);background-size:11px 11px;-webkit-mask-image:radial-gradient(circle at 55% 45%,#000 0%,rgba(0,0,0,.5) 32%,transparent 62%);mask-image:radial-gradient(circle at 55% 45%,#000 0%,rgba(0,0,0,.5) 32%,transparent 62%)}
+.kit-photo__beam{position:absolute;left:-40%;top:-30%;width:70%;height:150%;z-index:-1;pointer-events:none;background:linear-gradient(180deg,var(--beam) 0%,rgba(255,255,255,0) 85%);transform:rotate(-28deg);transform-origin:top left;clip-path:polygon(30% 0,70% 0,100% 100%,0 100%);animation:ipBeam 5s ease-in-out infinite}
+.kit-photo__beam--pink{left:auto;right:-34%;width:60%;height:140%;background:linear-gradient(180deg,var(--beam-pink) 0%,rgba(255,51,153,0) 80%);transform:rotate(24deg);transform-origin:top right;clip-path:polygon(35% 0,65% 0,100% 100%,0 100%);animation:ipBeam 6s ease-in-out 1.2s infinite}
+.kit-photo__in{position:relative;animation:ipPhoto .7s var(--ease-settle) both}
+.kit-photo__frame{position:relative;transform:skewX(-7deg) rotate(-4deg);border:3px solid #1A1418;background:#1A1418;box-shadow:10px 10px 0 #FF3399,10px 10px 0 3px #1A1418,20px 20px 0 #FF8AC4,20px 20px 0 3px #1A1418;overflow:hidden;aspect-ratio:4/5}
+.kit-photo__frame img{width:100%;height:100%;object-fit:cover;display:block;transition:transform .8s var(--ease-settle)}
+.kit-photo__sweep{position:absolute;top:0;bottom:0;left:-60%;width:220%;pointer-events:none;background:linear-gradient(118deg,rgba(255,255,255,0) 40%,rgba(255,255,255,.13) 47%,rgba(255,255,255,.04) 51%,rgba(255,255,255,0) 57%);will-change:transform;transition:transform .8s var(--ease-sweep)}
+.kit-photo__light{position:absolute;inset:0;pointer-events:none;background:radial-gradient(ellipse 85% 50% at 82% -4%,rgba(255,138,196,.24),rgba(255,138,196,0) 70%);mix-blend-mode:screen}
+.kit-photo__name{position:absolute;left:-18px;right:-18px;bottom:0;z-index:4;display:flex;flex-direction:column;align-items:flex-start;gap:12px;animation:ipSide .5s var(--ease-settle) .2s both}
+.kit-photo__name .ip-gtag{margin-left:8px}
+.kit-info{display:flex;flex-direction:column;gap:22px;min-width:0;width:100%;align-items:var(--hero-items);text-align:var(--hero-align);animation:ipMenu .55s var(--ease-settle) .1s both}
+.kit-info .ip-tabs{justify-content:var(--hero-items)}
+.kit-panel{min-height:var(--panel-h)}
+.kit-rel{max-width:1360px;margin:64px auto 0}
+.kit-rel .ip-related{margin-top:8px}
+.kit-idolfoot{max-width:1360px;margin:48px auto 0;display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:12px 20px;padding-top:16px;border-top:1.5px solid var(--rule);font:500 12px 'DynaPuff';color:var(--muted)}
+.kit-idolfoot__r{display:flex;align-items:center;gap:12px;font:600 14px 'DynaPuff'}
+.kit-contact{height:44px;padding:0 18px;border-radius:999px;border:2px solid #1A1418;background:#FF3399;color:#1A1418;font:700 14px 'DynaPuff';cursor:pointer;box-shadow:0 4px 0 #1A1418,inset 0 2px 0 rgba(255,255,255,.4);transition:transform .2s var(--ease-settle),box-shadow .2s}
+.kit-contact:active{transform:translate3d(0,4px,0);box-shadow:0 0 0 #1A1418,inset 0 2px 0 rgba(255,255,255,.4)}
+/* kit-only experiments (Tweaks) — never touch components/tokens */
+.kit-root[data-frame="single"] .kit-photo__frame{box-shadow:10px 10px 0 #FF3399,10px 10px 0 3px #1A1418}
+.kit-root[data-inkoff="1"] .ip-tab:not([aria-selected="true"]){box-shadow:5px 5px 0 var(--ctl-off)}
+.kit-root[data-inkoff="1"] .ip-search__bar{box-shadow:5px 5px 0 var(--ctl-off)}
+.kit-root[data-inkoff="1"] .ip-tile__label{box-shadow:3px 3px 0 var(--ctl-off),3px 3px 0 2px #1A1418,inset 0 2px 0 rgba(255,255,255,.18)}
+.kit-root[data-inkoff="1"] .ip-tile__corner{background:repeating-linear-gradient(135deg,rgba(26,20,24,.22) 0 2.5px,transparent 2.5px 8px)}
+.kit-root[data-shape="soft"] .ip-tab,.kit-root[data-shape="soft"] .ip-tile__label,.kit-root[data-shape="soft"] .ip-chip,.kit-root[data-shape="soft"] .ip-rcard__photo,.kit-root[data-shape="soft"] .ip-cutout>span,.kit-root[data-shape="soft"] .ip-gtag,.kit-root[data-shape="soft"] .ip-back{border-radius:12px}
+.kit-root[data-shape="soft"] .ip-tile,.kit-root[data-shape="soft"] .ip-rcard,.kit-root[data-shape="soft"] .ip-results{border-radius:20px}
+.kit-root[data-shape="soft"] .ip-panel,.kit-root[data-shape="soft"] .kit-photo__frame{border-radius:30px}
+.kit-root[data-shape="soft"] .ip-search__bar{border-radius:14px}
+.kit-root[data-shape="soft"] .ip-result,.kit-root[data-shape="soft"] .ip-result img{border-radius:12px}
+.kit-root[data-names="light"] .pp-letters__back,.kit-root[data-names="light"] .pp-letters__mid{display:none}
+.kit-root[data-names="light"] .pp-letters__face{text-shadow:var(--puff-name-rest)}
+@container (max-width:580px){.kit-root[data-names="mobile"] .pp-letters__back,.kit-root[data-names="mobile"] .pp-letters__mid{display:none}.kit-root[data-names="mobile"] .pp-letters__face{text-shadow:var(--puff-name-rest)}}
+.kit-puffname{margin:0;font:700 calc(var(--rn) * .95)/1 'DynaPuff';color:#fff;text-shadow:var(--puff-title);transform:rotate(-1.5deg);padding:0 6px 6px 4px}
+</style></head>
+<body><div id="root"></div>
+<script type="text/babel" src="tweaks-panel.jsx"></script>
+<script type="text/babel" src="data.jsx"></script>
+<script type="text/babel" src="Shell.jsx"></script>
+<script type="text/babel" src="IdolsScreen.jsx"></script>
+<script type="text/babel" src="AlbumsScreen.jsx"></script>
+<script type="text/babel" src="IdolScreen.jsx"></script>
+<script type="text/babel">
+const TWEAK_DEFAULTS = /*EDITMODE-BEGIN*/{"frame":"double","inkOffsets":false,"shape":"sharp","idolName":"cutout","cardNames":"full"}/*EDITMODE-END*/;
+function App() {
+  const [t, setTweak] = useTweaks(TWEAK_DEFAULTS);
+  const saved = JSON.parse(localStorage.getItem("kp-puff-kit") || "{}");
+  const [screen, setScreen] = React.useState(saved.screen || "idols"), [slug, setSlug] = React.useState(saved.slug || "sakura");
+  const [theme, setTheme] = React.useState(saved.theme || "day"), [notice, setNotice] = React.useState("");
+  React.useEffect(() => { localStorage.setItem("kp-puff-kit", JSON.stringify({ screen, slug, theme })); }, [screen, slug, theme]);
+  const nt = React.useRef(0);
+  const flash = m => { clearTimeout(nt.current); setNotice(m); nt.current = setTimeout(() => setNotice(""), 2600); };
+  const go = s => { if (s === "play") return flash("Play is outside this kit."); setScreen(s); window.scrollTo(0, 0); };
+  const openIdol = id => { if (!PROFILE[id]) return flash("This idol's profile isn't in the sample yet — try Sakura, Kazuha, Karina or Winter."); setSlug(id); setScreen("idol"); window.scrollTo(0, 0); };
+  const p = { go, theme, toggle: () => setTheme(theme === "night" ? "day" : "night"), openIdol, flash };
+  return (
+    <div className="pp-page kit-root" data-theme={theme} data-screen-label={screen} data-frame={t.frame} data-inkoff={t.inkOffsets ? "1" : "0"} data-shape={t.shape} data-names={t.cardNames}>
+      {screen === "idols" ? <IdolsScreen {...p} /> : screen === "albums" ? <AlbumsScreen {...p} /> : <IdolScreen slug={slug} puffyName={t.idolName === "puffy"} {...p} />}
+      <TweaksPanel>
+        <TweakSection label="1 · Pink budget (idol page)" />
+        <TweakRadio label="Photo frame" value={t.frame} options={["double", "single"]} onChange={v => setTweak("frame", v)} />
+        <TweakToggle label="Ink offsets on tabs, search, labels" value={t.inkOffsets} onChange={v => setTweak("inkOffsets", v)} />
+        <TweakSection label="2 · Bridge catalogue ↔ idol page" />
+        <TweakRadio label="Idol page corners" value={t.shape} options={["sharp", "soft"]} onChange={v => setTweak("shape", v)} />
+        <TweakRadio label="Idol name" value={t.idolName} options={["cutout", "puffy"]} onChange={v => setTweak("idolName", v)} />
+        <TweakSection label="3 · Card names (performance)" />
+        <TweakRadio label="Depth" value={t.cardNames} options={["full", "mobile", "light"]} onChange={v => setTweak("cardNames", v)} />
+      </TweaksPanel>
+      {notice ? <div role="status" className="pp-notice" style={{ position: "fixed" }}>{notice}</div> : null}
+    </div>
+  );
+}
+ReactDOM.createRoot(document.getElementById("root")).render(<App />);
+</script></body></html>

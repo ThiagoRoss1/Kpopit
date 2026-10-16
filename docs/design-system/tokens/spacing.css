@@ -1,0 +1,25 @@
+/* Space, shape, depth, motion. Exact values from the source kit — not snapped. */
+:root{
+--space-1:4px;--space-2:8px;--space-3:12px;--space-4:16px;--space-5:20px;--space-6:24px;--space-8:32px;--space-12:48px;--space-16:64px;--space-24:96px;--space-32:128px;
+--radius-sm:4px;--radius-md:6px;--radius-lg:8px;--radius-xl:12px;--radius-card:14px;--radius-2xl:16px;--radius-sleeve:18px;--radius-panel:20px;--radius-3xl:24px;--radius-pill:9999px;
+--border-hair:1.5px;--border-base:2px;--border-bold:2.5px;--border-heavy:3px;
+--tilt:0.6deg;/* @kind other */--tilt-sleeve:-4deg;/* @kind other */--tilt-tape:34.8deg;/* @kind other */
+--ease-out:ease-out;/* @kind other */--ease-pop:cubic-bezier(.34,1.56,.64,1);/* @kind other */--ease-spring:cubic-bezier(.34,1.4,.64,1);/* @kind other */--ease-std:cubic-bezier(.4,0,.2,1);/* @kind other */
+--dur-micro:.15s;/* @kind other */--dur-state:.3s;/* @kind other */--dur-enter:.4s;/* @kind other */--dur-spin:4s;/* @kind other */
+}
+:root,[data-theme="day"]{
+--press:0 4px 0 #0a0a0a;--press-down:0 1px 0 #0a0a0a;--press-lg:0 5px 0 #0a0a0a;
+--offset-sm:2px 2px 0 #0a0a0a;--offset-md:3px 3px 0 #0a0a0a;--offset-lg:4px 4px 0 #0a0a0a;--offset-xl:6px 6px 0 #0a0a0a;--offset-pink:3px 3px 0 #ff3399;
+--row:0 4px 0 #0a0a0a,0 6px 12px rgba(0,0,0,0.08);
+--cover:3px 1.5px 0 #000000;
+--sleeve:0 14px 30px rgba(0,0,0,0.35),0 4px 10px rgba(0,0,0,0.2);
+--hint-sleeve:0 4px 0 rgba(0,0,0,0.18),0 8px 16px rgba(0,0,0,0.10);
+--dropdown:0 10px 30px rgba(0,0,0,0.18);
+--tape:0 2px 4px rgba(0,0,0,0.12);
+--shadow-card:var(--offset-lg);--shadow-hero:var(--offset-xl);--shadow-modal:var(--offset-xl);
+}
+[data-theme="night"]{
+--press:0 4px 0 rgba(255,255,255,0.22),0 6px 18px -6px rgba(255,51,153,0.7);
+--press-down:0 1px 0 rgba(255,255,255,0.22),0 6px 18px -6px rgba(255,51,153,0.7);
+--offset-sm:2px 2px 0 #ff3399;--offset-md:3px 3px 0 #ff3399;--offset-lg:0 14px 34px -14px rgba(0,0,0,0.7);--offset-xl:6px 6px 0 #ff3399;
+}
