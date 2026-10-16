@@ -1,6 +1,6 @@
 import os
 from flask import Blueprint, request, jsonify, g
-from services.idol_service import IdolService
+from services.daily_draw import ensure_daily_picks
 from services.game_service import GameService
 from services.user_service import UserService
 from utils.dates import get_today_date_str, get_current_timestamp
@@ -26,10 +26,8 @@ def get_daily_idol():
     cursor = connect.cursor()
 
     try:
-        idol_service = IdolService(connect, repository)
-
-        # Choose idol of the day 
-        idol_id = idol_service.choose_idol_of_the_day(cursor, gamemode_id=1)
+        # Today's idol (tomorrow's is drawn ahead and never returned)
+        idol_id = ensure_daily_picks(cursor, gamemode_id=1)
         connect.commit()
 
         """ For testing purposes, you can set a fixed idol_id """

@@ -44,7 +44,7 @@ gunicorn app:app      # Production server
 ### Backend (`kpopit-backend/`)
 - **`app.py`** — Flask entry point; registers 14 blueprints under `/api` (+ `admin` when `ADMIN_ENABLED`), handles CORS and maintenance mode
 - **`routes/games/`** — Game endpoints for classic, blurry, and pixelated modes; all support `gamemode_id` query param (1=classic, 2=blurry, 3=pixelated)
-- **`services/`** — Business logic layer: `idol_service.py` runs the exponential-weighted daily pick algorithm (cooldown: 10 days, weight: `A * exp(K * days_waiting)` where K=0.08); `game_service.py` handles streaks and scoring; `album_service.py` handles Pixelated mode — `AlbumService.process_guess` delegates to `GameService.save_user_history` (single source of truth for upsert/score/streak/commit — never duplicate this logic for new modes)
+- **`services/`** — Business logic layer: `daily_draw.py` runs the one daily draw shared by every mode (`ensure_daily_picks`: stateless from `daily_picks`, 10-day cooldown, ultimatum for overdue items, capped wait weight + never-picked boost + late pressure; draws one day ahead, tomorrow's pick is never returned or logged); `game_service.py` handles streaks and scoring; `album_service.py` handles Pixelated mode — `AlbumService.process_guess` delegates to `GameService.save_user_history` (single source of truth for upsert/score/streak/commit — never duplicate this logic for new modes)
 - **`repositories/`** — Data access layer over PostgreSQL
 - **`utils/game_feedback_logic.py`** — Feedback comparison engine (exact match, partial group match, higher/lower for numerical fields)
 - **`utils/dates.py`** — All daily reset logic is EST-anchored
@@ -182,7 +182,7 @@ Every mode follows the same shape (Classic → Blurry → Pixelated) on both sta
 ### Backend
 - **Blueprint + `gamemode_id`** — Add `routes/games/<mode>.py`, register it under `/api` in `app.py`, and assign the next `gamemode_id`. The active mode is read per-request into `g.gamemode_id` from the `gamemode_id` query param (`load_gamemode` in `app.py`, defaults to 1).
 - **A Service owns the mode's logic** — Put it in `services/<x>_service.py` (e.g. `AlbumService`), constructed with the connection and given `cursor`/`connect` per call. It provides three things:
-  1. **Daily pick** — reuse the exponential-weighting algorithm (`weight = exp(0.08 · days_waiting)`, 10-day cooldown, boost for never-picked), writing the winner to `daily_picks` keyed by `(pick_date, gamemode_id)`.
+  1. **Daily pick** — add the mode to `_MODES` in `services/daily_draw.py` (eligible items + entry date) and call `ensure_daily_picks`; it writes to `daily_picks` keyed by `(pick_date, gamemode_id)`.
   2. **Daily fetch** — return only what the client needs to render/play (no answer-revealing extras beyond what the UI already uses as hints).
   3. **`process_guess`** — resolve the correct answer, then **delegate persistence** (see below).
 - **Scoring is centralized — never reimplemented per mode** — `process_guess` delegates to `GameService.save_user_history`, the single owner of the `daily_user_history` upsert, `score`, `user_history` streaks/aggregates, the double-count guard, and the `commit()`. A new mode adds *zero* scoring/streak code.

@@ -3,7 +3,7 @@ from flask import Blueprint, jsonify, request, g
 from utils.auth_decorators import optional_auth
 from dotenv import load_dotenv
 from services.get_db import get_db, get_idol_repo
-from services.idol_service import IdolService
+from services.daily_draw import ensure_daily_picks
 from services.user_service import UserService
 from services.game_service import GameService
 from utils.dates import get_today_date_str, get_current_timestamp
@@ -22,10 +22,8 @@ def get_daily_blurry_idol():
     cursor = connect.cursor()
 
     try:
-        idol_service = IdolService(connect, repository)
-
-        # Choose idol of the day
-        idol_id = idol_service.choose_idol_of_the_day(cursor, gamemode_id=2)
+        # Today's idol (tomorrow's is drawn ahead and never returned)
+        idol_id = ensure_daily_picks(cursor, gamemode_id=2)
 
         connect.commit()
 
