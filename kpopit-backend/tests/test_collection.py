@@ -379,19 +379,21 @@ def test_album_route_jwt_sees_ownership(client, db_conn, make_user, collection_p
     assert sum(m["owned"] for m in resp.get_json()[0]["members"]) == 1
 
 
-def test_list_and_album_routes_degrade_on_garbage_auth(client, db_conn, make_user, collection_page):
+def test_list_and_album_routes_allow_visitors_but_reject_garbage_auth(client, db_conn, make_user, collection_page):
     owner_id, _ = make_user()
     page = collection_page(n_members=2)
     grant(db_conn, owner_id, page["idol_ids"][0])
 
-    for headers in ({}, {"Authorization": "not-a-uuid-not-a-jwt"}):
-        resp = client.get("/api/collections/list", headers=headers)
-        assert resp.status_code == 200
-        assert resp.get_json()[0]["owned_cards"] == 0
-
-        resp = client.get("/api/collections/album/1", headers=headers)
-        assert resp.status_code == 200
-        assert sum(m["owned"] for m in resp.get_json()[0]["members"]) == 0
+    listing = client.get("/api/collections/list")
+    assert listing.status_code == 200
+    assert listing.get_json()[0]["owned_cards"] == 0
+    album = client.get("/api/collections/album/1")
+    assert album.status_code == 200
+    assert sum(m["owned"] for m in album.get_json()[0]["members"]) == 0
+    for url in ("/api/collections/list", "/api/collections/album/1"):
+        resp = client.get(url, headers={"Authorization": "not-a-uuid-not-a-jwt"})
+        assert resp.status_code == 401
+        assert resp.get_json() == {"error": "Invalid or expired token"}
 
 
 def test_album_param_route_and_404s_unknown(client, make_user, collection_page):

@@ -40,6 +40,11 @@ def test_guess_routes_reject_a_bad_bearer(client, make_user):
     assert res.status_code == 401
 
 
+@pytest.mark.parametrize("header", ["Bearer", "bearer not.a.jwt", "BEARER not.a.jwt", "Basic nonsense", "not-a-token"])
+def test_malformed_present_authorization_cannot_be_cached_as_anonymous(client, header):
+    assert client.get("/api/collections/list", headers={"Authorization": header}).status_code == 401
+
+
 def test_valid_jwt_anonymous_uuid_and_no_header_still_work(client, make_user, collection_page, make_access_jwt):
     user_id, token = make_user()
     collection_page(n_members=2)

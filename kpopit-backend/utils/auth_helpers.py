@@ -59,8 +59,9 @@ def detect_user(req) -> dict:
     if not auth_header:
         return _no_auth()
 
-    if auth_header.startswith("Bearer "):
-        raw_token = auth_header[7:]
+    parts = auth_header.split(maxsplit=1)
+    if parts and parts[0].lower() == "bearer":
+        raw_token = parts[1] if len(parts) == 2 else ""
 
         payload = decode_jwt(raw_token, expected_type="access")
 
@@ -88,7 +89,7 @@ def detect_user(req) -> dict:
             "is_authenticated": False,
         }
 
-    return _no_auth()
+    return {**_no_auth(), "source": "invalid"}
 
 def _no_auth() -> dict:
     return {
