@@ -20,10 +20,7 @@ from utils.dates import get_today_date
 
 @pytest.fixture
 def idol_with(db_conn, make_idol):
-    """A published idol with Classic attributes set.
-
-    `position` defaults to a value: the Classic route fails on a NULL position (every
-    catalog idol has one; noted in the batch report)."""
+    """A published idol with Classic attributes, optionally nullable."""
 
     def _make(name, **attrs):
         attrs.setdefault("position", "Vocalist")
@@ -103,6 +100,26 @@ def play_day(monkeypatch, offset):
 # ---------------------------------------------------------------------------
 # Classic guess route
 # ---------------------------------------------------------------------------
+
+@pytest.mark.parametrize("side", ["guess", "answer", "both"])
+@pytest.mark.parametrize("field,feedback_key", [("position", "position"), ("height", "height"),
+                                               ("birth_date", "birth_date"), ("debut_year", "idol_debut_year")])
+def test_classic_nullable_feedback_is_unknown(client, make_user, idol_with, pin_idol, side, field, feedback_key):
+    _, token = make_user()
+    attributes = {"position": "Vocalist", "height": 165, "birth_date": "2000-01-01", "debut_year": 2018}
+    answer_attributes, guessed_attributes = dict(attributes), dict(attributes)
+    if side in ("answer", "both"):
+        answer_attributes[field] = None
+    if side in ("guess", "both"):
+        guessed_attributes[field] = None
+    answer = idol_with("Answer", **answer_attributes)
+    guessed = idol_with("Guessed", **guessed_attributes)
+    pin_idol(answer)
+    result = guess(client, "classic", token, guessed, answer, 1)
+    assert result.status_code == 200, result.get_json()
+    feedback = result.get_json()["feedback"][feedback_key]
+    assert feedback["status"] == "incorrect"  # unknown is never a match or a numeric direction
+    assert feedback["correct_items"] == []
 
 def test_classic_wrong_guess_feedback(client, make_user, make_group, make_career, idol_with, pin_idol):
     _, token = make_user()

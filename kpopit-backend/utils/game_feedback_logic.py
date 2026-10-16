@@ -1,5 +1,13 @@
 # Partial feedback function
-def partial_feedback_function(guess, answer):
+def partial_feedback_function(guess, answer, *, unknown_if_empty=False):
+        # A missing nullable attribute is unknown, even when both idols lack it.
+        # Empty group/company sets still represent a known absence by default.
+        if unknown_if_empty and (not guess or not answer):
+            return {
+                "status": "incorrect",
+                "correct_items": [],
+                "incorrect_items": list(guess)
+            }
         if guess == answer:
             return {
                 "status": "correct",

@@ -189,7 +189,7 @@ def guess_idol():
                 if idol.get(field) and isinstance(idol[field], str):
                     idol[field] = [item.strip() for item in idol[field].split(",")]
                 else:
-                    idol[field] = idol.get(field, [])
+                    idol[field] = idol.get(field) or []
 
         if not guessed_idol or not answer_data:         
             return jsonify({"error": "Idol not found"}), 404
@@ -201,13 +201,13 @@ def guess_idol():
         position_guess = set(position.strip() for position in (guessed_idol.get("position", [])))
         position_answer = set(position.strip() for position in (answer_data.get("position", [])))
 
-        feedback['position'] = partial_feedback_function(position_guess, position_answer)
+        feedback['position'] = partial_feedback_function(position_guess, position_answer, unknown_if_empty=True)
 
         # Nationality
         idol_nationality_guess = set(nationality.strip() for nationality in (guessed_idol.get("nationality", [])))
         idol_nationality_answer = set(nationality.strip() for nationality in (answer_data.get("nationality", [])))
 
-        feedback["nationality"] = partial_feedback_function(idol_nationality_guess, idol_nationality_answer)
+        feedback["nationality"] = partial_feedback_function(idol_nationality_guess, idol_nationality_answer, unknown_if_empty=True)
         
         # Numbers - debut year, height, birth date, member count, generation...
         numerical_fields = ["idol_debut_year", "height", "birth_date", "member_count"] # removed "generation"
