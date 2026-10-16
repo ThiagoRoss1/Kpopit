@@ -189,3 +189,19 @@ def test_claim_duplicate_email_still_pays_the_hash(client, make_user, hash_calls
     )
     assert res.status_code == 409
     assert hash_calls == [1]
+
+
+def test_same_second_logins_get_separate_refresh_sessions(app, client, monkeypatch):
+    from services import auth_service
+
+    assert register(client, "twodevices").status_code == 201
+    frozen = auth_service.utc_now()
+    monkeypatch.setattr(auth_service, "utc_now", lambda: frozen)  # both logins in the same instant
+    phone, laptop = app.test_client(), app.test_client()
+    for device in (phone, laptop):
+        assert device.post("/api/auth/login", json={"identifier": "twodevices", "password": PASSWORD}).status_code == 200
+    monkeypatch.undo()
+
+    phone.post("/api/auth/logout")
+    assert phone.post("/api/auth/refresh").status_code == 401
+    assert laptop.post("/api/auth/refresh").status_code == 200

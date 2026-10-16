@@ -1,4 +1,5 @@
 import os
+import secrets
 import uuid
 from datetime import timedelta, timezone
 import bcrypt
@@ -52,6 +53,9 @@ class AuthService:
         payload = {
             "sub":  user["token"],
             "type": "refresh",
+            # Without a random id, two logins of one user in the same second got the same
+            # token: one refresh_tokens row, so logging out one device logged out both.
+            "jti":  secrets.token_urlsafe(16),
             "iat":  now,
             "exp":  now + timedelta(seconds=JWT_REFRESH_EXPIRES_SECONDS),
         }
