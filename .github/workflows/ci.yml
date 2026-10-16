@@ -2,9 +2,9 @@ name: CI
 
 on:
   push:
-    branches: [main, dev]
+    branches: [main, dev, major-patch]
   pull_request:
-    branches: [main]
+    branches: [main, major-patch]
 
 jobs:
   changes:
@@ -59,6 +59,9 @@ jobs:
       - name: Build
         run: npm run build
 
+      - name: Unit tests (node --test)
+        run: npm test
+
   backend:
     name: Backend
     needs: changes
@@ -86,3 +89,130 @@ jobs:
 
       - name: Compile check
         run: python -m compileall .
+
+  pytest:
+    name: Backend tests (pytest)
+    needs: changes
+    if: needs.changes.outputs.backend == 'true'
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    defaults:
+      run:
+        working-directory: kpopit-backend
+    services:
+      postgres:
+        image: postgres:18
+        env:
+          POSTGRES_USER: postgres
+          POSTGRES_PASSWORD: postgres
+          POSTGRES_DB: kpopit_test
+        ports: ['5432:5432']
+        options: >-
+          --health-cmd "pg_isready -U postgres" --health-interval 5s --health-timeout 5s --health-retries 10
+    # Throwaway values only: the service DB is created empty for this run, and no real key exists here.
+    env:
+      DB_URL: postgresql://postgres:postgres@localhost:5432/kpopit_test
+      TEST_DB_URL: postgresql://postgres:postgres@localhost:5432/kpopit_test
+      DATA_FOLDER: data
+      FLASK_ENV: development
+      JWT_SECRET_KEY: ci-dummy-jwt-secret-key-not-used-anywhere-else
+      EMAIL_DELIVERY: outbox
+      RESEND_API_KEY: re_disabled_for_tests
+      PYTHONIOENCODING: utf-8
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Python 3.13
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.13'
+          cache: 'pip'
+          cache-dependency-path: kpopit-backend/requirements.txt
+
+      - name: Install dependencies
+        run: pip install -r requirements.txt
+
+      - name: Create kpopit_test (init_db + migrations + seed CSVs)
+        run: python scripts/bootstrap_db.py
+
+      - name: pytest
+        run: python -m pytest -q
+
+  e2e:
+    name: E2E (Playwright, Chromium)
+    needs: changes
+    if: needs.changes.outputs.frontend == 'true' || needs.changes.outputs.backend == 'true'
+    runs-on: ubuntu-latest
+    timeout-minutes: 60
+    services:
+      postgres:
+        image: postgres:18
+        env:
+          POSTGRES_USER: postgres
+          POSTGRES_PASSWORD: postgres
+          POSTGRES_DB: kpopit_e2e
+        ports: ['5432:5432']
+        options: >-
+          --health-cmd "pg_isready -U postgres" --health-interval 5s --health-timeout 5s --health-retries 10
+    # A DB seeded from the repo CSVs (never a production copy), dummy secrets, emails to the outbox.
+    # playwright.config.ts adds the rest of the test backend env (e2e/support/env.ts).
+    env:
+      CI: 'true'
+      DB_URL: postgresql://postgres:postgres@localhost:5432/kpopit_e2e
+      E2E_DB_URL: postgresql://postgres:postgres@localhost:5432/kpopit_e2e
+      E2E_DB_NAME: kpopit_e2e
+      DATA_FOLDER: data
+      JWT_SECRET_KEY: ci-dummy-jwt-secret-key-not-used-anywhere-else
+      FRONTEND_URL: http://localhost:5173
+      VITE_ENCRYPTION_KEY: ci-dummy-encryption-key-0123456789
+      VITE_IMAGE_BUCKET_URL: http://127.0.0.1:9
+      VITE_AVATARS_BUCKET_URL: http://127.0.0.1:9
+      PYTHONIOENCODING: utf-8
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Python 3.13
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.13'
+          cache: 'pip'
+          cache-dependency-path: kpopit-backend/requirements.txt
+
+      - name: Install backend (kpopit-backend/.venv, as e2e/support/env.ts expects)
+        working-directory: kpopit-backend
+        run: |
+          python -m venv .venv
+          .venv/bin/pip install -r requirements.txt
+
+      - name: Create kpopit_e2e (init_db + migrations + seed CSVs)
+        working-directory: kpopit-backend
+        run: .venv/bin/python scripts/bootstrap_db.py
+
+      - name: Setup Node 24
+        uses: actions/setup-node@v4
+        with:
+          node-version: '24'
+          cache: 'npm'
+          cache-dependency-path: kpopit-frontend/package-lock.json
+
+      - name: Install frontend
+        working-directory: kpopit-frontend
+        run: npm ci
+
+      - name: Install Chromium
+        working-directory: kpopit-frontend
+        run: npx playwright install --with-deps chromium
+
+      - name: Playwright (full suite, Chromium projects)
+        working-directory: kpopit-frontend
+        run: npx playwright test
+
+      - name: Upload Playwright report
+        if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: playwright-report
+          path: kpopit-frontend/playwright-report/
+          retention-days: 14

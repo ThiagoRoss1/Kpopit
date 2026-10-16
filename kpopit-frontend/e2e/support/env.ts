@@ -54,5 +54,7 @@ export function testBackendEnv(extra: Record<string, string> = {}): Record<strin
     PYTHONIOENCODING: 'utf-8',
   };
   for (const name of R2_VARS) env[name] = name === 'R2_ENDPOINT_URL' ? DISABLED_R2_ENDPOINT : DISABLED_R2;
+  // A seeded DB (CI) instead of the local production copy in kpopit-backend/.env; see support/db.ts.
+  if (process.env.E2E_DB_URL) env.DB_URL = process.env.E2E_DB_URL;
   return { ...env, ...extra };
 }

@@ -4,16 +4,16 @@ import dotenv from 'dotenv';
 import pg from 'pg';
 import { BACKEND_DIR } from './env';
 
-// kpopit_pre_major_patch is a local copy of production with real users: DB_URL is read from
-// kpopit-backend/.env at runtime and never printed, and tests only touch catalog rows and their own users.
-const EXPECTED_DB = 'kpopit_pre_major_patch';
+// Locally the E2E DB is kpopit_pre_major_patch, a copy of production with real users: DB_URL is read
+// from kpopit-backend/.env at runtime and never printed, and tests only touch catalog rows and their
+// own users. CI (and any other seeded DB) sets E2E_DB_URL + E2E_DB_NAME; the backend gets the same URL.
+const EXPECTED_DB = process.env.E2E_DB_NAME ?? 'kpopit_pre_major_patch';
 const LOCAL_HOSTS = new Set(['localhost', '127.0.0.1', '::1']);
 
 let pool: pg.Pool | null = null;
 
 function connectionString(): string {
-  const parsed = dotenv.parse(fs.readFileSync(path.join(BACKEND_DIR, '.env')));
-  const url = process.env.E2E_DB_URL ?? parsed.DB_URL;
+  const url = process.env.E2E_DB_URL ?? dotenv.parse(fs.readFileSync(path.join(BACKEND_DIR, '.env'))).DB_URL;
   if (!url) throw new Error('DB_URL is not set in kpopit-backend/.env');
   const u = new URL(url);
   const dbName = u.pathname.replace(/^\//, '');
