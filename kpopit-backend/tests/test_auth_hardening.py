@@ -189,4 +189,3 @@ def test_claim_duplicate_email_still_pays_the_hash(client, make_user, hash_calls
     )
     assert res.status_code == 409
     assert hash_calls == [1]
-
