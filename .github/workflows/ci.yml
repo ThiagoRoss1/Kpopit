@@ -6,6 +6,10 @@ on:
   pull_request:
     branches: [main, major-patch]
 
+permissions:
+  contents: read
+  pull-requests: read
+
 jobs:
   changes:
     name: Detect changes
@@ -43,7 +47,7 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v4
 
-      - name: Setup Node 20
+      - name: Setup Node 24
         uses: actions/setup-node@v4
         with:
           node-version: '24'
@@ -118,6 +122,17 @@ jobs:
       JWT_SECRET_KEY: ci-dummy-jwt-secret-key-not-used-anywhere-else
       EMAIL_DELIVERY: outbox
       RESEND_API_KEY: re_disabled_for_tests
+      RESEND_EMAIL_FROM: test@example.com
+      RESEND_EMAIL_FRONTEND_URL: http://localhost:5173
+      FRONTEND_URL: http://localhost:5173
+      R2_ENDPOINT_URL: http://127.0.0.1:9
+      R2_ACCESS_KEY_ID: disabled-for-tests
+      R2_SECRET_ACCESS_KEY: disabled-for-tests
+      R2_BUCKET_NAME: disabled-for-tests
+      R2_AVATARS_ACCESS_KEY_ID: disabled-for-tests
+      R2_AVATARS_SECRET_ACCESS_KEY: disabled-for-tests
+      R2_AVATARS_BUCKET_NAME: disabled-for-tests
+      R2_AVATARS_PREFIX: disabled-for-tests
       PYTHONIOENCODING: utf-8
     steps:
       - name: Checkout
@@ -140,11 +155,11 @@ jobs:
         run: python -m pytest -q
 
   e2e:
-    name: E2E (Playwright, Chromium)
+    name: E2E (Playwright, serial files)
     needs: changes
     if: needs.changes.outputs.frontend == 'true' || needs.changes.outputs.backend == 'true'
     runs-on: ubuntu-latest
-    timeout-minutes: 60
+    timeout-minutes: 90
     services:
       postgres:
         image: postgres:18
@@ -203,13 +218,13 @@ jobs:
         working-directory: kpopit-frontend
         run: npm ci
 
-      - name: Install Chromium
+      - name: Install browser engines
         working-directory: kpopit-frontend
-        run: npx playwright install --with-deps chromium
+        run: npx playwright install --with-deps chromium firefox webkit
 
-      - name: Playwright (full suite, Chromium projects)
+      - name: Playwright (file by file, one worker)
         working-directory: kpopit-frontend
-        run: npx playwright test
+        run: npm run test:e2e
 
       - name: Upload Playwright report
         if: failure()

@@ -1,24 +1,13 @@
 import { test, expect } from './support/fixtures';
-import { OffsetBackend } from './support/tomorrow';
 import { expectLoggedIn, newUser, registerViaApi } from './support/accounts';
 import { serverDate, winGame } from './support/game';
 import { dailyHistory, userHistory, userIdByUsername } from './support/db';
 
-// Four backends on the same DB, each one game day further ahead (+1..+4). The access JWT
+// Restart the same backend for each game day (+1..+4). The access JWT
 // and refresh cookie come from the real clock, so one session must survive all four days.
 const DAYS = [1, 2, 3, 4];
-const backends = DAYS.map((offset) => new OffsetBackend(offset));
 
-test.beforeAll(async () => {
-  test.setTimeout(240_000);
-  await Promise.all(backends.map((b) => b.start()));
-});
-
-test.afterAll(async () => {
-  await Promise.all(backends.map((b) => b.stop()));
-});
-
-test('logged-in account plays four consecutive days: streak 1→4, one row per day, session kept', async ({ page }) => {
+test('logged-in account plays four consecutive days: streak 1→4, one row per day, session kept', async ({ page, backend }) => {
   test.setTimeout(420_000);
   const user = newUser();
   await page.goto('/');
@@ -26,9 +15,8 @@ test('logged-in account plays four consecutive days: streak 1→4, one row per d
   const userId = await userIdByUsername(user.username);
   const playedDates: string[] = [];
 
-  for (const [i, backend] of backends.entries()) {
-    await OffsetBackend.detach(page);
-    await backend.attach(page);
+  for (const [i, offset] of DAYS.entries()) {
+    await backend.restart(offset);
     await page.goto('/');
     await expectLoggedIn(page);
 

@@ -1,87 +1,83 @@
-import { spawn, spawnSync, type ChildProcess } from 'node:child_process';
-import type { Page } from '@playwright/test';
+import { spawn, type ChildProcess } from 'node:child_process';
+import net from 'node:net';
 import { BACKEND_DIR, BACKEND_PYTHON, testBackendEnv } from './env';
-import { ipHeader } from './fixtures';
 
-// A second backend with TEST_DATE_OFFSET on the same database, so one page can play
-// today against :5000 and then "tomorrow" against this one.
-export class OffsetBackend {
+export function portOpen(port: number): Promise<boolean> {
+  return new Promise((resolve) => {
+    const socket = net.connect({ host: '127.0.0.1', port });
+    const finish = (open: boolean) => { socket.destroy(); resolve(open); };
+    socket.once('connect', () => finish(true));
+    socket.once('error', () => finish(false));
+    socket.setTimeout(1_000, () => finish(false));
+  });
+}
+
+// Direct children only: no shell/reloader means stop() owns and waits for the actual server.
+export class LocalServer {
   private proc: ChildProcess | null = null;
-  readonly port: number;
-  readonly offset: number;
 
-  constructor(offset: number, port = 5000 + offset + 100) {
-    this.offset = offset;
-    this.port = port;
-  }
+  constructor(readonly port: number, private command: string, private args: string[],
+    private cwd: string, private env: Record<string, string | undefined>, private healthPath = '/') {}
 
-  get origin() {
-    return `http://127.0.0.1:${this.port}`;
-  }
+  protected childEnv() { return this.env; }
 
   async start(): Promise<void> {
-    this.proc = spawn(
-      BACKEND_PYTHON,
-      ['-m', 'flask', '--app', 'app', 'run', '--port', String(this.port), '--no-reload'],
-      {
-        cwd: BACKEND_DIR,
-        env: { ...process.env, ...testBackendEnv({ TEST_DATE_OFFSET: String(this.offset) }) },
-        stdio: 'ignore',
-        shell: process.platform === 'win32',
-      },
-    );
+    if (this.proc || await portOpen(this.port)) throw new Error(`refusing to reuse a server on :${this.port}`);
+    const proc = spawn(this.command, this.args, { cwd: this.cwd, env: this.childEnv(), stdio: 'ignore', shell: false });
+    this.proc = proc;
+    let startError: Error | null = null;
+    proc.once('error', (error) => { startError = error; });
     const deadline = Date.now() + 60_000;
-    while (Date.now() < deadline) {
-      try {
-        const res = await fetch(`${this.origin}/api/gamemodes-count`);
-        if (res.ok) return;
-      } catch {
-        // not up yet
+    try {
+      while (Date.now() < deadline) {
+        if (startError) throw startError;
+        if (proc.exitCode !== null || proc.signalCode !== null) throw new Error(`server on :${this.port} exited before readiness`);
+        try {
+          const res = await fetch(`http://127.0.0.1:${this.port}${this.healthPath}`, { signal: AbortSignal.timeout(1_000) });
+          if (res.ok) return;
+        } catch { /* not ready yet */ }
+        await new Promise((r) => setTimeout(r, 250));
       }
-      await new Promise((r) => setTimeout(r, 500));
+      throw new Error(`server on :${this.port} did not start`);
+    } catch (error) {
+      await this.stop();
+      throw error;
     }
-    throw new Error(`offset backend on :${this.port} did not start`);
   }
 
-  // Waits until the process tree is gone and the port is closed: a fire-and-forget kill lost the
-  // race with the test runner's exit and left backends listening on 5101-5104.
   async stop(): Promise<void> {
-    if (!this.proc?.pid) return;
-    if (process.platform === 'win32') {
-      spawnSync('taskkill', ['/pid', String(this.proc.pid), '/T', '/F'], { stdio: 'ignore' });
-    } else {
-      this.proc.kill('SIGTERM');
+    const proc = this.proc;
+    if (!proc) return;
+    if (proc.pid && proc.exitCode === null && proc.signalCode === null) {
+      await new Promise<void>((resolve, reject) => {
+        const timer = setTimeout(() => reject(new Error(`server on :${this.port} did not stop`)), 15_000);
+        proc.once('exit', () => { clearTimeout(timer); resolve(); });
+        if (!proc.kill('SIGTERM')) { clearTimeout(timer); reject(new Error(`could not stop :${this.port}`)); }
+      });
     }
     this.proc = null;
     const deadline = Date.now() + 15_000;
-    while (Date.now() < deadline) {
-      try {
-        await fetch(`${this.origin}/api/gamemodes-count`);
-      } catch {
-        return; // connection refused: stopped
-      }
-      await new Promise((r) => setTimeout(r, 250));
+    while (await portOpen(this.port)) {
+      if (Date.now() >= deadline) throw new Error(`server on :${this.port} is still listening after stop()`);
+      await new Promise((r) => setTimeout(r, 100));
     }
-    throw new Error(`offset backend on :${this.port} is still answering after stop()`);
+  }
+}
+
+// Restart one backend on the same port for every simulated day; tokens keep the real clock.
+export class OffsetBackend extends LocalServer {
+  constructor(public offset = 0, port = 5000) {
+    super(port, BACKEND_PYTHON, ['-m', 'flask', '--app', 'app', 'run', '--port', String(port), '--no-reload'],
+      BACKEND_DIR, {}, '/api/gamemodes-count');
   }
 
-
-  // Page-level only: the context route that tags the client IP stays in place.
-  static async detach(page: Page): Promise<void> {
-    await page.unroute('**/api/**');
+  protected childEnv() {
+    return { ...process.env, ...testBackendEnv({ TEST_DATE_OFFSET: String(this.offset) }) };
   }
 
-  async attach(page: Page): Promise<void> {
-    await page.route('**/api/**', async (route) => {
-      const url = new URL(route.request().url());
-      // Fetched from the test runner and handed back to the page: Chromium strips the cookie
-      // header when a continued request changes host, and the refresh cookie must reach this
-      // backend for a logged-in session to survive the day change. Ends routing here, so the
-      // test client IP the context route would add is set here too.
-      const headers = { ...(await route.request().allHeaders()), ...ipHeader() };
-      const response = await route.fetch({ url: `${this.origin}${url.pathname}${url.search}`, headers, maxRedirects: 0 });
-      await route.fulfill({ response });
-    });
+  async restart(offset: number): Promise<void> {
+    await this.stop();
+    this.offset = offset;
+    await this.start();
   }
-
 }

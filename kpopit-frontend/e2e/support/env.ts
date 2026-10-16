@@ -37,11 +37,27 @@ export const DISABLED_RESEND_KEY = 're_disabled_for_tests';
 export const DISABLED_R2 = 'disabled-for-tests';
 export const DISABLED_R2_ENDPOINT = 'http://127.0.0.1:9'; // discard port: uploads fail fast
 
-// load_dotenv() never overrides a variable that is already set, so these beat
-// kpopit-backend/.env: emails go to the outbox, and the dummy Resend key is a second guard.
+export function testDatabaseUrl(): string {
+  const url = process.env.E2E_DB_URL ?? process.env.DB_URL;
+  if (!url) throw new Error('Set E2E_DB_URL to an explicit local test database; no .env files are read.');
+  const parsed = new URL(url);
+  const expected = process.env.E2E_DB_NAME ?? 'kpopit_pre_major_patch';
+  const routingKeys = ['host', 'hostaddr', 'dbname', 'database', 'port', 'service'];
+  if (routingKeys.some((key) => parsed.searchParams.has(key)) ||
+      !['localhost', '127.0.0.1', '[::1]'].includes(parsed.hostname) ||
+      decodeURIComponent(parsed.pathname.slice(1)) !== expected || !['postgresql:', 'postgres:'].includes(parsed.protocol)) {
+    throw new Error(`E2E only connects to the local ${expected} database.`);
+  }
+  return url;
+}
+
+// Explicit local targets and dummy service settings. Dotenv loading is disabled.
 export function testBackendEnv(extra: Record<string, string> = {}): Record<string, string> {
   const env: Record<string, string> = {
     FLASK_ENV: 'development',
+    PYTHON_DOTENV_DISABLED: '1',
+    JWT_SECRET_KEY: 'e2e-only-dummy-jwt-signing-key-at-least-32-characters',
+    RESEND_EMAIL_FROM: 'test@example.com',
     COLLECTION_ENABLED: 'true',
     ADMIN_ENABLED: 'true',
     MAINTENANCE_MODE: 'false',
@@ -55,6 +71,6 @@ export function testBackendEnv(extra: Record<string, string> = {}): Record<strin
   };
   for (const name of R2_VARS) env[name] = name === 'R2_ENDPOINT_URL' ? DISABLED_R2_ENDPOINT : DISABLED_R2;
   // A seeded DB (CI) instead of the local production copy in kpopit-backend/.env; see support/db.ts.
-  if (process.env.E2E_DB_URL) env.DB_URL = process.env.E2E_DB_URL;
+  env.DB_URL = testDatabaseUrl();
   return { ...env, ...extra };
 }

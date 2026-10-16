@@ -14,7 +14,7 @@
     "test": "node --experimental-strip-types --test \"tests/**/*.test.mjs\"",
     "preview": "vite preview",
     "test:album": "node --experimental-strip-types --test tests/album/disclosureTiming.test.mjs tests/album/eagerArtwork.test.mjs",
-    "test:e2e": "playwright test",
+    "test:e2e": "node e2e/run-files.mjs",
     "test:e2e:ui": "playwright test --ui",
     "test:e2e:smoke": "playwright test --grep @smoke --project=desktop",
     "test:lighthouse": "node lighthouse/run.mjs"

@@ -4,6 +4,7 @@ import tailwindcss from '@tailwindcss/vite'
 
 // https://vite.dev/config/
 export default defineConfig({
+  envDir: process.env.E2E_ISOLATED === 'true' ? false : undefined,
   plugins: [react(), tailwindcss()],
   server: {
     proxy: {

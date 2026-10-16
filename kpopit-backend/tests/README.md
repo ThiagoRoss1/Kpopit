@@ -1,12 +1,12 @@
 # Testing KpopIt locally
 
-Two local PostgreSQL databases, both already configured in `kpopit-backend/.env`.
+Two explicit local PostgreSQL test targets. Test runners do not load `.env` files. Export the local connection variables securely before running; never use a production URL.
 Nothing here ever connects to production (Railway).
 
 | Suite | Database | Env var | Notes |
 |---|---|---|---|
 | **pytest** (`kpopit-backend/tests/`) | `kpopit_test` | `TEST_DB_URL` | Every test TRUNCATEs and re-seeds it (see `conftest.py`). Disposable. |
-| **Playwright E2E** (`kpopit-frontend/e2e/`), manual pass, day simulation | `kpopit_pre_major_patch` | `DB_URL` | A copy of production with **real user data**. Tests only add rows (new test users, their games/cards, future picks). Never truncate, never print or export its users. |
+| **Playwright E2E** (`kpopit-frontend/e2e/`), manual pass, day simulation | `kpopit_pre_major_patch` | `E2E_DB_URL` (plus `E2E_DB_NAME` when seeded) | A copy of production with **real user data**. Tests only add rows (new test users, their games/cards, future picks). Never truncate, never print or export its users. |
 
 ## pytest
 
@@ -19,9 +19,18 @@ cd kpopit-backend
 `kpopit_test` must be on the latest migration. Check/apply with the project's runner
 pointed at the test DB (it reads `DB_URL`, so override it for the process only):
 
-```bash
-.venv/Scripts/python.exe -c "import os; from dotenv import load_dotenv; load_dotenv('.env'); os.environ['DB_URL'] = os.environ['TEST_DB_URL']; from migrations.migrations import apply_migrations; apply_migrations()"
+```powershell
+# DB_URL must point at the local disposable test DB for this process only.
+$env:DB_URL = $env:TEST_DB_URL
+$env:PYTHON_DOTENV_DISABLED = '1'
+.venv/Scripts/python.exe migrations/migrations.py
 ```
+
+For a fresh seeded DB, `scripts/bootstrap_db.py` orchestrates init → migrations → CSVs →
+collection cards and fails immediately on a migration error. CI still needs this orchestration.
+Pytest refuses remote hosts and database names other than exactly `kpopit_test` before it can
+TRUNCATE anything. Playwright checks both its helper and backend URL before connecting.
+
 
 ## Test servers (E2E / manual pass)
 
@@ -50,9 +59,17 @@ calling Resend; the dummy key is a second guard. E2E reads the links with
 `e2e/support/outbox.ts` (`latestLink`); pytest gets a per-test `email_outbox` fixture and fails
 any direct Resend call. Avatar uploads fail (R2 endpoint is a closed local port).
 
-Playwright does this for you: `npm run test:e2e` starts both servers from
-`playwright.config.ts` (`webServer`, env from `e2e/support/env.ts`). It refuses to
-reuse a backend already listening on :5000 — stop your own dev server first.
+Playwright does this for you: export `E2E_DB_URL` and, for a seeded run, `E2E_DB_NAME=kpopit_e2e`.
+`npm run test:e2e` runs one spec file at a time, workers 1, with a fresh backend + Vite per worker.
+Worker fixtures launch direct child processes (no Flask reloader or shell) and wait for them to
+exit. Multiday/rollover specs restart the same backend on :5000 for each day; ports 5101–5104
+remain unused. The file runner checks that server ports are closed before and after each file.
+Each file gets separate `playwright-report/<spec>/` and `test-results/<spec>/` artifacts.
+Desktop/mobile Chromium run the full/mobile subsets, Firefox/WebKit run `@smoke`, and
+mobile Safari runs `@mobile`. Browser requests to external services are stubbed locally;
+image tests use the local site logo, and no test calls production/CDN/email/bucket services.
+Test Vite uses `E2E_ISOLATED=true` to disable env-file loading.
+
 `npm run test:lighthouse` does the same through `lighthouse/serve.mjs`.
 
 PowerShell, by hand:
@@ -81,13 +98,10 @@ $env:TEST_DATE_OFFSET='1'   # tomorrow; 2, 3, 4... for a multi-day simulation
 Advance one day by restarting the backend with the next offset. The first request
 of a "new" day draws that day's pick in `kpopit_pre_major_patch` (future rows in
 `daily_picks`; harmless locally, gone after the next restore). The E2E rollover
-spec (`e2e/rollover.spec.ts`) starts a second backend with offset +1 on :5101 and
-points the page's `/api` calls at it.
+spec (`e2e/rollover.spec.ts`) restarts its one backend with offset +1 on :5000.
 
-Known limitation: the offset also shifts `get_datetime_now_utc()`, which stamps the
-JWT `iat`. PyJWT ≥ 2.10 rejects tokens issued "in the future", so **logged-in**
-play breaks while the offset is non-zero (access tokens fail, refresh loops).
-Anonymous play works. Use anonymous users for day simulations.
+Game-day offsets do not change JWT or token expiry clocks. Logged-in multiday play is covered
+by `e2e/multiday.spec.ts` (+1..+4, one account, streak 1→4).
 
 ## Resetting `kpopit_pre_major_patch`
 

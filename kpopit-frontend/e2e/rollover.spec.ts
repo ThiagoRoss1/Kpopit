@@ -1,19 +1,12 @@
 import { test, expect } from './support/fixtures';
-import { OffsetBackend } from './support/tomorrow';
 import {
   DATE_KEY, answerAlbum, answerIdol, guessAlbum, guessIdol, openGame, searchInput, serverDate,
   userToken, victoryMarker,
 } from './support/game';
 import { dailyPick, userHistory, userIdByToken, type ModeName } from './support/db';
 
-const tomorrow = new OffsetBackend(1);
-
-test.beforeAll(async () => {
-  await tomorrow.start();
-});
-
-test.afterAll(async () => {
-  await tomorrow.stop();
+test.beforeEach(async ({ backend }) => {
+  if (backend.offset !== 0) await backend.restart(0);
 });
 
 const plusOneDay = (iso: string) => {
@@ -37,7 +30,7 @@ async function winToday(page: import('@playwright/test').Page, mode: ModeName) {
 
 test.describe('Day rollover (+1 day)', () => {
   for (const mode of ['classic', 'blurry', 'pixelated'] as const) {
-    test(`${mode}: new pick, local state reset, streak continues, yesterday's answer shown`, async ({ page }) => {
+    test(`${mode}: new pick, local state reset, streak continues, yesterday's answer shown`, async ({ page, backend }) => {
       test.setTimeout(180_000);
       await openGame(page, mode);
       const today = await serverDate(page, mode);
@@ -45,7 +38,7 @@ test.describe('Day rollover (+1 day)', () => {
       const userId = await userIdByToken(await userToken(page));
       expect(await userHistory(userId, mode)).toMatchObject({ current_streak: 1 });
 
-      await tomorrow.attach(page);
+      await backend.restart(1);
       await page.reload();
       await page.waitForFunction(
         ([key, day]) => localStorage.getItem(key) === day, [DATE_KEY[mode], plusOneDay(today)] as const,

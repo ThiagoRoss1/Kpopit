@@ -19,33 +19,33 @@ from pathlib import Path
 BACKEND_ROOT = Path(__file__).resolve().parent.parent
 sys.path.insert(0, str(BACKEND_ROOT))
 
-# Load .env so TEST_DB_URL / JWT_SECRET_KEY are available without requiring
-# the developer to export them in the shell first.
-from dotenv import load_dotenv  # noqa: E402
-
-load_dotenv(BACKEND_ROOT / ".env")
+# Test targets and secrets must be explicit; never load workstation .env files.
+os.environ["PYTHON_DOTENV_DISABLED"] = "1"
 
 
 def _resolve_test_db_url() -> str:
-    explicit = os.getenv("TEST_DB_URL")
-    if explicit:
-        return explicit
+    from urllib.parse import urlsplit, urlunsplit
+    from psycopg.conninfo import conninfo_to_dict
 
-    base = os.getenv("DB_URL")
-    if not base:
-        raise RuntimeError(
-            "TEST_DB_URL (or DB_URL) must be set to run the test suite."
-        )
-    if "/kpopit_test" in base:
-        return base
-    # Replace the trailing /<dbname> segment with /kpopit_test so we never
-    # accidentally TRUNCATE the dev DB.
-    head, _, _ = base.rpartition("/")
-    if not head:
-        raise RuntimeError(
-            "Could not derive kpopit_test URL from DB_URL — set TEST_DB_URL explicitly."
-        )
-    return f"{head}/kpopit_test"
+    url = os.getenv("TEST_DB_URL")
+    if not url:
+        base = os.getenv("DB_URL")
+        if not base:
+            raise RuntimeError("Set TEST_DB_URL to the local disposable kpopit_test database.")
+        parsed = urlsplit(base)
+        if parsed.scheme not in ("postgresql", "postgres"):
+            raise RuntimeError("Set an explicit local TEST_DB_URL.")
+        url = urlunsplit(parsed._replace(path="/kpopit_test"))
+    try:
+        params = conninfo_to_dict(url)
+    except Exception:
+        raise RuntimeError("Invalid test database configuration.") from None
+    local_hosts = {"localhost", "127.0.0.1", "::1"}
+    if (params.get("host") not in local_hosts or params.get("dbname") != "kpopit_test"
+            or (params.get("hostaddr") or os.getenv("PGHOSTADDR")) not in (None, "127.0.0.1", "::1")
+            or params.get("service") or os.getenv("PGSERVICE")):
+        raise RuntimeError("Tests require a local disposable database named exactly kpopit_test.")
+    return url
 
 
 TEST_DB_URL = _resolve_test_db_url()
