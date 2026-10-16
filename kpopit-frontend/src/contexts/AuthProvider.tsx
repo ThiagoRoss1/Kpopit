@@ -6,21 +6,30 @@ import { isSessionRejected, RESTORE_RETRY_DELAYS_MS } from "../utils/authErrors"
 import { setAccessToken, clearAccessToken } from "../services/tokenStore";
 import { useClearGameStorage } from "../hooks/useClearGameStorage";
 import { applyRestoredSession } from "../utils/applyRestoredSession";
+import type { MeResponse } from "../interfaces/authInterfaces";
 
 interface AuthProviderProps {
     children: ReactNode;
 }
 
+type RestoreOutcome =
+    | { kind: "authenticated"; user: MeResponse }
+    | { kind: "transient" }
+    | { kind: "rejected" }
+    | { kind: "skipped" };
+
+const hasSessionMarker = () =>
+    (localStorage.getItem('kpopit_session') ?? sessionStorage.getItem('kpopit_session')) !== null;
+
 export const AuthProvider = ({ children }: AuthProviderProps) => {
-    const [state, setState] = useState<AuthState>({
+    // Without a session marker there is nothing to restore, so the first render is already final.
+    const [state, setState] = useState<AuthState>(() => ({
         isAuthenticated: false,
-        isLoading: true,
+        isLoading: hasSessionMarker(),
         user: null,
-    });
+    }));
 
     const { clearAll } = useClearGameStorage();
-    const clearAllRef = useRef(clearAll);
-    clearAllRef.current = clearAll;
 
     const queryClient = useQueryClient();
 
@@ -31,28 +40,20 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
     const transientFailureRef = useRef(false);
     const restoreSessionRef = useRef<() => Promise<void>>(async () => {});
 
-    const restoreSession = useCallback(async () => {
-        if (isRefreshingRef.current) return;
-        if (retryTimerRef.current) {
-            clearTimeout(retryTimerRef.current);
-            retryTimerRef.current = null;
+    // No session marker: only the local leftovers of a lost authenticated session are wiped.
+    const forgetLostSession = useCallback(() => {
+        transientFailureRef.current = false;
+        const wasAuthenticated = localStorage.getItem('kpopit_was_authenticated') === 'true';
+        if (wasAuthenticated) {
+            localStorage.removeItem('userToken');
+            localStorage.removeItem('kpopit_was_authenticated');
+            clearAll();
         }
+    }, [clearAll]);
 
-        const hadSession =
-            localStorage.getItem('kpopit_session') ??
-            sessionStorage.getItem('kpopit_session');
-        if (!hadSession) {
-            transientFailureRef.current = false;
-            const wasAuthenticated = localStorage.getItem('kpopit_was_authenticated') === 'true';
-            if (wasAuthenticated) {
-                localStorage.removeItem('userToken');
-                localStorage.removeItem('kpopit_was_authenticated');
-                clearAllRef.current();
-            }
-            setState({ isAuthenticated: false, isLoading: false, user: null });
-            return;
-        }
-
+    // Talks to the server and handles storage/timers; React state is set by applyOutcome.
+    const restoreFromServer = useCallback(async (): Promise<RestoreOutcome> => {
+        if (isRefreshingRef.current) return { kind: "skipped" };
         isRefreshingRef.current = true;
 
         try {
@@ -61,11 +62,11 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
 
             const me = await getMe();
 
-            if (cancelledRef.current) return;
+            if (cancelledRef.current) return { kind: "skipped" };
 
             try {
                 const gameSession = await restoreGameSession();
-                if (cancelledRef.current) return;
+                if (cancelledRef.current) return { kind: "skipped" };
                 applyRestoredSession(gameSession);
             } catch (err) {
                 if (import.meta.env.DEV) {
@@ -75,20 +76,19 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
 
             retryCountRef.current = 0;
             transientFailureRef.current = false;
-            setState({ isAuthenticated: true, isLoading: false, user: me });
+            return { kind: "authenticated", user: me };
         } catch (err) {
             if (!isSessionRejected(err)) {
                 // A failed refresh cannot invalidate an already authenticated user/token.
                 // On first load we still need the server to confirm the session.
-                if (cancelledRef.current) return;
+                if (cancelledRef.current) return { kind: "skipped" };
                 transientFailureRef.current = true;
-                setState(s => ({ ...s, isLoading: false }));
                 const delay = RESTORE_RETRY_DELAYS_MS[retryCountRef.current];
                 if (delay !== undefined) {
                     retryCountRef.current += 1;
                     retryTimerRef.current = setTimeout(() => restoreSessionRef.current(), delay);
                 }
-                return;
+                return { kind: "transient" };
             }
 
             const wasAuthenticated = localStorage.getItem('kpopit_was_authenticated') === 'true';
@@ -102,15 +102,34 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
                 // happened to fail should keep their UUID and local progress.
                 localStorage.removeItem('userToken');
                 localStorage.removeItem('kpopit_was_authenticated');
-                clearAllRef.current();
+                clearAll();
             }
-            if (cancelledRef.current) return;
-
-            setState({ isAuthenticated: false, isLoading: false, user: null });
+            return { kind: "rejected" };
         } finally {
             isRefreshingRef.current = false;
         }
+    }, [clearAll]);
+
+    const applyOutcome = useCallback((outcome: RestoreOutcome) => {
+        if (cancelledRef.current) return;
+        if (outcome.kind === "authenticated") setState({ isAuthenticated: true, isLoading: false, user: outcome.user });
+        else if (outcome.kind === "transient") setState(s => ({ ...s, isLoading: false }));
+        else if (outcome.kind === "rejected") setState({ isAuthenticated: false, isLoading: false, user: null });
     }, []);
+
+    const restoreSession = useCallback(async () => {
+        if (isRefreshingRef.current) return;
+        if (retryTimerRef.current) {
+            clearTimeout(retryTimerRef.current);
+            retryTimerRef.current = null;
+        }
+        if (!hasSessionMarker()) {
+            forgetLostSession();
+            setState({ isAuthenticated: false, isLoading: false, user: null });
+            return;
+        }
+        applyOutcome(await restoreFromServer());
+    }, [forgetLostSession, restoreFromServer, applyOutcome]);
 
     useEffect(() => {
         restoreSessionRef.current = restoreSession;
@@ -135,7 +154,8 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
 
     useEffect(() => {
         cancelledRef.current = false;
-        restoreSession();
+        if (hasSessionMarker()) void restoreFromServer().then(applyOutcome);
+        else forgetLostSession();
         const retryOnReconnect = () => {
             if (!transientFailureRef.current) return;
             retryCountRef.current = 0;
@@ -150,7 +170,7 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
             window.removeEventListener('online', retryOnReconnect);
             window.removeEventListener('focus', retryOnReconnect);
         };
-    }, [restoreSession]);
+    }, [restoreFromServer, forgetLostSession, applyOutcome]);
 
     // Collection queries (`collectionsList`/`collectionAlbum`) are keyed without the user,
     // so a login/logout doesn't refetch them on its own, to fix it we watch for auth state 
