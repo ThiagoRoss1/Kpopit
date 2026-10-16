@@ -1,10 +1,11 @@
 name: CI
 
+# major-patch is the integration branch of the current patch: remove it from both lists when the patch ends.
 on:
   push:
     branches: [main, dev, major-patch]
   pull_request:
-    branches: [main, major-patch]
+    branches: [main, dev, major-patch]
 
 permissions:
   contents: read
@@ -25,7 +26,7 @@ jobs:
 
       - name: Filter paths
         id: filter
-        uses: dorny/paths-filter@v3
+        uses: dorny/paths-filter@0e4a8c6effa4802afeda77dc8d303f8176d7dfad # v3.0.4
         with:
           filters: |
             frontend:
