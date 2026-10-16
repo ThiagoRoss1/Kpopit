@@ -15,6 +15,16 @@ URL = "/api/tasks/backup"
 KEY = "test-backup-key-0123456789"
 
 
+@pytest.fixture(autouse=True)
+def fresh_rate_limits():
+    """The route allows 3 calls per hour; start each test from zero. Kept here (the shared
+    conftest does the same) so these tests also run alone on a branch without that fixture."""
+    from utils.rate_limiter import limiter
+
+    limiter.reset()
+    yield
+
+
 @pytest.fixture
 def backup_key(monkeypatch):
     monkeypatch.setenv("BACKUP_AUTH_KEY", KEY)
