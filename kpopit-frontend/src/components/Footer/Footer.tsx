@@ -1,13 +1,9 @@
 import { Link } from "react-router";
-import { useSharedGameData } from "../../hooks/useSharedGameData";
 import { Info } from "lucide-react";
 import XLogo from "../../assets/icons/x-logo.svg";
 import Img from "../Img";
 
 const Footer = () => {
-
-    // Every page mounts the footer, so this also starts the anonymous token and idol list for new visitors.
-    useSharedGameData();
 
     return (
         <div className={`w-full flex flex-col items-center justify-center max-[768px]:mt-12 mt-4 mb-0 gap-1`}>
