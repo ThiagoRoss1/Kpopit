@@ -178,8 +178,10 @@ Recurring patterns across the codebase — follow them in new code.
 ### Comments
 - Inline comments: 1–2 lines, explaining why (not what the code says).
 - Longer explanations (docstrings, module headers, non-obvious workarounds): 3–5 lines max. Anything longer belongs in docs.
-- No commented-out code, no references to local/gitignored docs (e.g. "plan §3"), no `noqa`/`pragma`/`eslint-disable` to hide a problem:
-  fix the cause. If a suppression is truly unavoidable, one line saying why.
+- No dead commented-out code, no references to local/gitignored docs (e.g. "plan §3"), no `noqa`/`pragma`/`eslint-disable` to hide a
+  problem: fix the cause. If a suppression is truly unavoidable, one line saying why.
+- Keep on purpose: labeled testing toggles (e.g. the commented `idol_id = 1` / album override in the daily routes, used to force a
+  pick while testing) and usage examples in helpers (e.g. the `utils/dates.py` examples). Don't strip them in cleanups.
 
 ## Architecture — Adding a New Game Mode
 Every mode follows the same shape (Classic → Blurry → Pixelated) on both stacks. Reuse it; don't invent a parallel structure. (Visual/design architecture lives in `kpopit-frontend/DESIGN.md`.)
