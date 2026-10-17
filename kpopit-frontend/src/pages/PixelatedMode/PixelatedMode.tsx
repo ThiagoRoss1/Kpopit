@@ -1,5 +1,4 @@
 import "./PixelatedMode.css";
-import { AxiosError } from "axios";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { useSharedGameData } from "../../hooks/useSharedGameData";
 import { useGameMode } from "../../hooks/useGameMode";
@@ -18,6 +17,7 @@ import { WinnerExplosion } from "../../utils/confetti";
 import { useClearGameStorage } from "../../hooks/useClearGameStorage";
 import { safeReload } from "../../utils/safeReload";
 import { isNewGameDay } from "../../utils/gameStorage";
+import Section, { SectionBoundary, SectionError } from "../../components/Loading/Section";
 import { ALL_ALBUMS_KEY, persistingFetch, readPersistedList } from "../../utils/persistedList";
 import { useIsLg } from "../../hooks/useIsDevice";
 import { useAllGameModes } from "../../hooks/useAllGameModes";
@@ -30,6 +30,10 @@ import ExportDataText from "../../components/buttons/modals/ExportDataContent";
 import { Link } from "react-router";
 
 const REVEAL_LEVEL = PIXEL_LEVELS[PIXEL_LEVELS.length - 1];
+
+// Final sizes reserved while the game data loads: the sleeve/vinyl stage and the two hint cards.
+const STAGE_BOX = "w-full h-70 xxs:h-75 xs:h-80 xm:h-85 zm:h-95 sm:h-100 md:h-110 xl:h-130 mx-auto";
+const HINTS_BOX = "w-62 zm:w-94 sm:w-102 h-37 zm:h-46";
 
 function PixelatedMode() {
     const gameMode = useGameMode();
@@ -47,8 +51,8 @@ function PixelatedMode() {
     const [zoom, setZoom] = useState<"closed" | "open" | "closing">("closed");
     const touchStartRef = useRef<{ x: number; y: number } | null>(null);
 
-    const { initUser, decryptedTokenRef, isInitialized, queryClient, userStatsData, transferData } = useSharedGameData();
-    const { clearPixelated } = useClearGameStorage();
+    const { userToken, initUser, decryptedTokenRef, isInitialized, queryClient, userStatsData, transferData } = useSharedGameData();
+const { clearPixelated } = useClearGameStorage();
 
     const isLg = useIsLg();
 
@@ -80,9 +84,8 @@ function PixelatedMode() {
 
     const {
         data: pixelatedGameData,
-        isLoading: isLoadingPixelatedGameData,
         isError: isErrorPixelatedGameData,
-        error: pixelatedGameDataError,
+        refetch: refetchPixelatedGameData,
     } = useQuery<PixelatedGameData>({
         queryKey: ["pixelatedDailyAlbum", gameMode],
         queryFn: getPixelatedDailyAlbum,
@@ -92,7 +95,7 @@ function PixelatedMode() {
         placeholderData: (previousData) => previousData,
     });
 
-    const { data: allAlbumsData, isLoading: isLoadingAllAlbums } = useQuery<AlbumSearchResult[]>({
+    const { data: allAlbumsData, isError: isErrorAllAlbums, refetch: refetchAllAlbums } = useQuery<AlbumSearchResult[]>({
         queryKey: ["allAlbums"],
         queryFn: persistingFetch(ALL_ALBUMS_KEY, getAllAlbums),
         // Last visit's copy shows at once and counts as stale, so each visit refreshes it once.
@@ -262,28 +265,12 @@ function PixelatedMode() {
     const userCount = dailyUserCount?.data?.user_count ?? 0;
     const winningGuess = guesses.find((g) => g.guess_correct);
 
-    // Loading / error states
-    if ((isLoadingPixelatedGameData || isLoadingAllAlbums || !isInitialized) && !pixelatedGameData) {
-        return (
-            <div className="fixed inset-0 z-100 flex w-full h-screen bg-black justify-center items-center">
-                <span className="text-white animate-pulse">Loading Kpopit...</span>
-            </div>
-        );
-    }
+    // Shell first: title and buttons render at once; the game and the search wait on their own data.
+    const gameError = isErrorPixelatedGameData || userToken.isError;
+    const gameReady = !!pixelatedGameData && dayChecked;
+    const retryGame = () => (userToken.isError ? userToken.refetch() : refetchPixelatedGameData());
 
-    if (isErrorPixelatedGameData || !pixelatedGameData) {
-        const error = pixelatedGameDataError as AxiosError;
-        console.error("Error loading Pixelated Mode data:", error?.response?.data || error?.message);
-        return (
-            <div className="fixed inset-0 z-100 flex w-full h-screen bg-black justify-center items-center">
-                <span className="text-white animate-pulse">Error loading Kpopit. Please try again later.</span>
-            </div>
-        );
-    }
-
-    if (!dayChecked) return null;
-
-    const coverUrl = resolveCdnUrl(pixelatedGameData.cover_path);
+    const coverUrl = pixelatedGameData ? resolveCdnUrl(pixelatedGameData.cover_path) : null;
 
     const statsButton = (
         <button
@@ -355,6 +342,8 @@ function PixelatedMode() {
                         
                         {/* ── LEFT: album sleeve + vinyl + hints ── */}
                         <div className="flex flex-col w-full lg:w-1/2 xl:w-160">
+                                <Section loading={!gameReady && !gameError} error={gameError} onRetry={retryGame} placeholderClassName={STAGE_BOX}>
+                                {() => (
                                 <div
                                     className={`pixel-stage relative w-full h-70 xxs:h-75 xs:h-80 xm:h-85 zm:h-95 sm:h-100 md:h-110 xl:h-130 mx-auto select-none
                                     ${zoom !== "closed" ? "z-50" : ""}`}
@@ -437,14 +426,20 @@ function PixelatedMode() {
                                         </div>
                                     </div>
                                 </div>
+                                )}
+                                </Section>
 
                                 {!endGame && (
                                     <div className="mt-2 lg:mt-6 flex items-center justify-center">
-                                        <PixelatedHints
-                                            guessCount={guesses.length}
-                                            releaseYear={pixelatedGameData.release_year}
-                                            artistName={pixelatedGameData.group_name}
-                                        />
+                                        <Section loading={!gameReady && !gameError} error={false} onRetry={retryGame} placeholderClassName={HINTS_BOX}>
+                                            {() => pixelatedGameData && (
+                                                <PixelatedHints
+                                                    guessCount={guesses.length}
+                                                    releaseYear={pixelatedGameData.release_year}
+                                                    artistName={pixelatedGameData.group_name}
+                                                />
+                                            )}
+                                        </Section>
                                     </div>
                                 )}
                        
@@ -488,18 +483,25 @@ function PixelatedMode() {
 
                             {!endGame && (
                                 <div className="flex justify-center mb-3">
-                                    <PixelatedSearchBar
-                                        allAlbums={allAlbumsData ?? []}
-                                        value={currentGuess}
-                                        onAlbumSelect={handleAlbumSelect}
-                                        onAlbumSelectId={handleAlbumSelectId}
-                                        onSubmit={handleSubmit}
-                                        excludedAlbums={excludedIds}
-                                        disabled={isCorrect || endGame}
-                                    />
+                                    {isErrorAllAlbums && !allAlbumsData ? (
+                                        <SectionError className="h-15 text-ink/80" message="Couldn't load the album list." onRetry={() => refetchAllAlbums()} />
+                                    ) : (
+                                        <PixelatedSearchBar
+                                            allAlbums={allAlbumsData ?? []}
+                                            value={currentGuess}
+                                            onAlbumSelect={handleAlbumSelect}
+                                            onAlbumSelectId={handleAlbumSelectId}
+                                            onSubmit={handleSubmit}
+                                            excludedAlbums={excludedIds}
+                                            disabled={isCorrect || endGame}
+                                            loading={!allAlbumsData || !gameReady}
+                                        />
+                                    )}
                                 </div>
                             )}
 
+                            {gameReady && (
+                            <SectionBoundary>
                             {/* Player count */}
                             <div className="flex flex-row items-center justify-center mb-7 text-base">
                                 <span className="leading-tight">
@@ -531,6 +533,8 @@ function PixelatedMode() {
                                     </span>
                                 </div>
                             )}
+                            </SectionBoundary>
+                            )}
 
                         </div>
                     </div>
@@ -538,7 +542,7 @@ function PixelatedMode() {
                     {statsModals}
 
                     {/* Victory Card */}
-                    {endGame && isCorrect && showVictory && winningGuess && (
+                    {endGame && isCorrect && showVictory && winningGuess && pixelatedGameData && (
                         <div className="mt-25">
                             <PixelatedVictory
                                 albumName={winningGuess.album_name}

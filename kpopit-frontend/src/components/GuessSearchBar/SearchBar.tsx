@@ -13,6 +13,8 @@ interface SearchBarProps {
   onClose?: () => void;
   excludedIdols?: number[];
   disabled?: boolean;
+  // The idol list or the game isn't there yet: the bar keeps its place but can't be used.
+  loading?: boolean;
 
   onIdolSelect: (idolName: string) => void;
   onIdolSelectId?: (idolId: IdolListItem) => void;
@@ -23,7 +25,7 @@ interface SearchBarProps {
 const LIST_SPRING = { type: "spring", stiffness: 500, damping: 50 } as const;
 
 const SearchBar = (props: SearchBarProps) => {
-  const { allIdols, value, onIdolSelect, onIdolSelectId, gameMode, onSubmit, disabled, excludedIdols, onClose } =
+  const { allIdols, value, onIdolSelect, onIdolSelectId, gameMode, onSubmit, disabled, loading, excludedIdols, onClose } =
     props;
 
   const [suggestions, setSuggestions] = useState<IdolListItem[]>([]);
@@ -145,7 +147,9 @@ const SearchBar = (props: SearchBarProps) => {
               rounded-3xl bg-white/5 shadow-lg focus:outline-none focus:ring-1 focus:ring-white/40"
               value={value}
               onChange={handleInputChange}
-              placeholder="Search for an idol or group..."
+              placeholder={loading ? "Loading idols..." : "Search for an idol or group..."}
+              disabled={loading}
+              aria-busy={loading || undefined}
               onFocus={() => value.length > 0 && setShowList(true)}
             />
             <motion.button
@@ -177,7 +181,7 @@ const SearchBar = (props: SearchBarProps) => {
                 }
               }
             }
-              disabled={disabled || inCooldown}
+              disabled={disabled || loading || inCooldown}
               type="button"
             >
               {!isMobile ? (

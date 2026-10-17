@@ -1,5 +1,4 @@
 import "../BlurryMode/blurry_mode.css";
-import { AxiosError } from "axios";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { useSharedGameData } from "../../hooks/useSharedGameData";
 import { useGameMode } from "../../hooks/useGameMode";
@@ -37,13 +36,18 @@ import { useClearGameStorage } from "../../hooks/useClearGameStorage";
 import { areGuessesEqual } from "../../utils/areGuessesEqual";
 import { safeReload } from "../../utils/safeReload";
 import { isNewGameDay } from "../../utils/gameStorage";
+import Section, { SectionBoundary, SectionError } from "../../components/Loading/Section";
 import CardGrantedReveal from "../Collection/components/CardGrantedReveal";
 import type { CardGranted } from "../../interfaces/albumInterfaces";
 import { buildIdolSlug } from "../../utils/formatters";
 import Img from "../../components/Img";
 
+// Final sizes reserved while the game data loads: the photo frame and the mode options.
+const IMAGE_FRAME = "max-xxs:w-55 max-xxs:h-80 xxs:w-60 xxs:h-88 xs:w-70 xs:h-98 xm:w-70 xm:h-98 zm:w-80 zm:h-108 sm:w-100 sm:h-128 rounded-[46px] mb-4";
+const MODE_OPTIONS_BOX = "w-50 h-14 sm:w-60 sm:h-16";
+
 function BlurryMode() {
-    const gameMode = useGameMode();
+const gameMode = useGameMode();
     const [isImageLoading, setIsImageLoading] = useState<boolean>(true);
     const [currentGuess, setCurrentGuess] = useState<string>("");
     const [selectedIdol, setSelectedIdol] = useState<IdolListItem | null>(null);
@@ -60,7 +64,7 @@ function BlurryMode() {
     // Mobile
     const [isTouched, setIsTouched] = useState<boolean>(false);
 
-    const { userToken, initUser, decryptedTokenRef, allIdolsData, isLoadingAllIdols,
+    const { userToken, initUser, decryptedTokenRef, allIdolsData,
         isInitialized, userStatsData, transferData, isErrorAllIdols, queryClient} = useSharedGameData();
 
     const { clearBlurry } = useClearGameStorage();
@@ -94,9 +98,8 @@ function BlurryMode() {
     // Blurry game data
     const {
         data: blurryGameData,
-        isLoading: isLoadingBlurryGameData,
         isError: isErrorBlurryGameData,
-        error: blurryGameDataError,
+        refetch: refetchBlurryGameData,
     } = useQuery<BlurryGameData>({
         queryKey: ['blurryDailyIdol', gameMode],
         queryFn: getBlurryDailyIdol,
@@ -377,27 +380,10 @@ function BlurryMode() {
     const wonWithHardMode = isCorrect && blurryToggleOptions.hardcore;
     const wonWithoutColors = isCorrect && !blurryToggleOptions.color;
 
-    // Loading and error states
-    if ((isLoadingBlurryGameData || isLoadingAllIdols || !isInitialized) && !blurryGameData) {
-        return (
-            <div className="fixed inset-0 z-100 flex w-full h-screen bg-black justify-center items-center">
-                <span className="text-white animate-pulse">Loading Kpopit...</span>
-            </div>
-        );
-    }
-
-    if (isErrorAllIdols || isErrorBlurryGameData || !blurryGameData) {
-        const error = blurryGameDataError as AxiosError;
-        console.error("Error loading Blurry Mode data:", blurryGameDataError);
-        console.error(error?.response?.data || error?.message);
-        return (
-            <div className="fixed inset-0 z-100 flex w-full h-screen bg-black justify-center items-center">
-                <span className="text-white animate-pulse">Error loading Kpopit. Please try again later.</span>
-            </div>
-        );
-    }
-
-    if (!dayChecked) return null;
+    // Shell first: title and buttons render at once; the game and the search wait on their own data.
+    const gameError = isErrorBlurryGameData || userToken.isError;
+    const gameReady = !!blurryGameData && dayChecked;
+    const retryGame = () => (userToken.isError ? userToken.refetch() : refetchBlurryGameData());
 
     return (
         <>
@@ -439,6 +425,8 @@ function BlurryMode() {
             )}
 
             {/* Blurry Image */}
+            <Section loading={!gameReady && !gameError} error={gameError} onRetry={retryGame} placeholderClassName={IMAGE_FRAME}>
+            {() => blurryGameData && (
             <div className="relative group" onTouchEnd={() => setIsTouched(false)}>
                 <div className={`relative flex items-center justify-center bg-transparent border-2 border-white
                 max-xxs:w-55 max-xxs:h-80 xxs:w-60 xxs:h-88 xs:w-70 xs:h-98 xm:w-70 xm:h-98 zm:w-80 zm:h-108 sm:w-100 sm:h-128 rounded-[46px] overflow-hidden mb-4
@@ -476,34 +464,47 @@ function BlurryMode() {
                     />
                 </div>
             </div>
+            )}
+            </Section>
 
             {/* Mode Options */}
             {!endGame && !showVictoryCard && (
             <div className="w-full h-fit flex items-center justify-center mb-4">
-                <ModeOptions
-                    options={blurryToggleOptions}
-                    onToggle={handleToggleOption}
-                    attempts={attempts}
-                    groups={targetIdol?.groups || null}
-                 />
+                <Section loading={!gameReady && !gameError} error={false} onRetry={retryGame} placeholderClassName={MODE_OPTIONS_BOX}>
+                    {() => (
+                        <ModeOptions
+                            options={blurryToggleOptions}
+                            onToggle={handleToggleOption}
+                            attempts={attempts}
+                            groups={targetIdol?.groups || null}
+                         />
+                    )}
+                </Section>
             </div>
             )}
 
             {!endGame && !showVictoryCard && (
             <div className="w-full h-fit flex items-center justify-center mb-4">
-                <SearchBar
-                    allIdols={blurryIdols}
-                    value={currentGuess}
-                    onIdolSelect={handleIdolSelect}
-                    onIdolSelectId={handleIdolSelectId}
-                    onSubmit={handleSubmit}
-                    excludedIdols={excludedIds}
-                    disabled={isCorrect || endGame}
-                    gameMode={"blurry"}
-                />
+                {isErrorAllIdols && !allIdolsData ? (
+                    <SectionError className="h-13" message="Couldn't load the idol list." onRetry={() => queryClient.refetchQueries({ queryKey: ["allIdols"] })} />
+                ) : (
+                    <SearchBar
+                        allIdols={blurryIdols}
+                        value={currentGuess}
+                        onIdolSelect={handleIdolSelect}
+                        onIdolSelectId={handleIdolSelectId}
+                        onSubmit={handleSubmit}
+                        excludedIdols={excludedIds}
+                        disabled={isCorrect || endGame}
+                        loading={!allIdolsData || !gameReady}
+                        gameMode={"blurry"}
+                    />
+                )}
             </div>
             )}
             
+            {gameReady && blurryGameData && (
+            <SectionBoundary>
             <div className="flex flex-row items-center justify-center mb-4">
                 <span className="leading-tight max-xxs:text-[12px] xxs:text-sm xs:text-base sm:text-base">
                     <span className="text-[#b43777] [text-shadow:1.2px_1.2px_4px_rgba(0,0,0,1.8),0_0_12px_rgba(180,55,119,1.0)] brightness-110">
@@ -571,6 +572,8 @@ function BlurryMode() {
                         wonWithoutColors={wonWithoutColors}
                     />
                 </div>
+            )}
+            </SectionBoundary>
             )}
         </div>
         </>

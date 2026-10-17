@@ -5,7 +5,7 @@ import ClientOnly from "../src/components/ClientOnly";
 type GamePageProps = { title: string; description: string; path: string; children: ReactNode };
 
 // Game state lives in localStorage, so the game renders only in the browser; the prerendered
-// HTML carries the page meta and the same loading screen the page shows while it fetches.
+// HTML carries the page meta and an empty, page-high area under the navbar until it mounts.
 export default function GamePage({ title, description, path, children }: GamePageProps) {
   return (
     <>
@@ -17,14 +17,10 @@ export default function GamePage({ title, description, path, children }: GamePag
         <meta property="og:description" content={description} />
       </Helmet>
       <ClientOnly
-        fallback={
-          <div className="fixed inset-0 z-100 flex w-full h-screen bg-black justify-center items-center">
-            <span className="text-white animate-pulse">Loading Kpopit...</span>
-          </div>
-        }
+        fallback={<div aria-busy="true" className="min-h-screen w-full" />}
       >
         {children}
-      </ClientOnly>
+</ClientOnly>
     </>
   );
 }

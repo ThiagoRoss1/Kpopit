@@ -8,6 +8,11 @@ import type { IdolsPageData } from "../../interfaces/gameInterfaces";
 import IdolsSearchBar from "../../components/IdolsSearchBar/IdolsSearchBar";
 import IdolsCards from "../../components/IdolsPageCards/IdolsCards";
 import { formatCompanyName, formatGroupName, buildIdolSlug } from "../../utils/formatters";
+import Section from "../../components/Loading/Section";
+
+// Only the first cards (about one screen) animate in; a delay per card for the whole list made the
+// last ones wait seconds.
+const ANIMATED_CARDS = 24;
 
 // initialIdols: build-time data for the prerendered page; stale at once, so it refetches.
 function IdolsList({ initialIdols }: { initialIdols?: IdolsPageData[] }) {
@@ -22,8 +27,8 @@ function IdolsList({ initialIdols }: { initialIdols?: IdolsPageData[] }) {
 
     const {
         data: idolsData,
-        isLoading: isLoadingIdolsData,
         isError: isErrorIdolsData,
+        refetch: refetchIdolsData,
     } = useQuery<IdolsPageData[]>({
         queryKey: ["idolsPageData"],
         queryFn: getIdolsPage,
@@ -61,23 +66,11 @@ function IdolsList({ initialIdols }: { initialIdols?: IdolsPageData[] }) {
         })
     }, [searchTerm, idolsData]); 
 
-    if (isLoadingIdolsData) {
-        return (
-            <div className="fixed inset-0 z-100 flex w-full h-screen bg-black justify-center items-center">
-                <span className="text-white animate-pulse">Loading Idols Data...</span>
-            </div>
-        );
-    }
+    // A failed background refetch keeps the list it already has; the error shows only without data.
+    const listLoading = !idolsData && !isErrorIdolsData;
+    const listError = isErrorIdolsData && !idolsData;
 
-    if (isErrorIdolsData || !idolsData) {
-        return (
-        <div className="fixed inset-0 z-100 flex w-full h-screen bg-black justify-center items-center">
-            <span className="text-white animate-pulse">Error: Error fetching idols data</span>
-        </div>
-        );
-    }
-
-    return (
+return (
         <div className="w-full min-h-full bg-ink">
             <Helmet>
                 <title>KpopIt - Idols List</title>
@@ -98,10 +91,10 @@ function IdolsList({ initialIdols }: { initialIdols?: IdolsPageData[] }) {
                 
                 {/* Search Bar */}
                 <div className="w-full h-fit flex justify-center items-center mb-19">
-                    <IdolsSearchBar 
-                        idolsData={idolsData} 
+                    <IdolsSearchBar
+                        idolsData={idolsData ?? []}
                         onIdolSelect={setSearchTerm}
-                        value={searchTerm} 
+                        value={searchTerm}
                     />
                 </div>
 
@@ -116,13 +109,17 @@ function IdolsList({ initialIdols }: { initialIdols?: IdolsPageData[] }) {
                     </span>
                 </div>
 
+                <Section loading={listLoading} error={listError} onRetry={() => refetchIdolsData()}
+                    placeholderClassName="w-full min-h-screen">
+                {() => (
                 <div className="grid w-full h-fit gap-6 mb-6 max-xxs:px-2 xs:px-4 md:px-6 lg:px-14 xl:px-20 2xl:px-60
                 grid-cols-[repeat(auto-fill,minmax(150px,1fr))] sm:grid-cols-[repeat(auto-fill,minmax(150px,1fr))] lg:grid-cols-[repeat(auto-fill,minmax(200px,1fr))]">
                     {filteredIdols?.map((idol, i) => (
                         <Link
                             key={idol.id}
                             to={`/idols/${idol.id}/${buildIdolSlug(idol.artist_name, idol.group_name)}`}
-                            className="idol-card-enter" style={{ animationDelay: `${i * 0.02}s` }}>
+                            className={i < ANIMATED_CARDS ? "idol-card-enter" : undefined}
+                            style={i < ANIMATED_CARDS ? { animationDelay: `${i * 0.02}s` } : undefined}>
                         <IdolsCards
                             idolImage={`${import.meta.env.VITE_IMAGE_BUCKET_URL}${idol.image_path}?v=${idol.image_version}`}
                             artistName={idol.artist_name}
@@ -133,7 +130,10 @@ function IdolsList({ initialIdols }: { initialIdols?: IdolsPageData[] }) {
                     ))}
                 </div>
                 
-                {filteredIdols?.length === 0 && (
+                )}
+                </Section>
+
+                {idolsData && filteredIdols?.length === 0 && (
                 <div className="w-full flex justify-center items-center">
                     <span className="text-white font-semibold text-xl [text-shadow:1px_1px_10px_rgba(255,255,255,0.6)]">
                         No idols found

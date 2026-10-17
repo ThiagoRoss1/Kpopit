@@ -1,5 +1,5 @@
 import { useEffect, useState, type ReactNode } from "react";
-import { Links, Meta, Outlet, Scripts } from "react-router";
+import { isRouteErrorResponse, Links, Meta, Outlet, Scripts, useRouteError } from "react-router";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { HelmetProvider } from "react-helmet-async";
 import { SpeedInsights } from "@vercel/speed-insights/react";
@@ -143,4 +143,29 @@ export default function App() {
 // the old index.html.
 export function HydrateFallback() {
   return null;
+}
+
+// Last resort when a page crashes outside its own sections: a plain page with a way back.
+export function ErrorBoundary() {
+  const error = useRouteError();
+  if (import.meta.env.DEV) console.error(error);
+  const status = isRouteErrorResponse(error) ? error.status : null;
+  return (
+    <main className="min-h-screen w-full flex flex-col items-center justify-center gap-4 bg-black text-white text-center px-4">
+      <h1 className="text-3xl font-bold">{status === 404 ? "Page not found" : "Something went wrong"}</h1>
+      <p className="text-white/70">Try again, or go back to the home page.</p>
+      <div className="flex gap-3">
+        <button
+          type="button"
+          onClick={() => window.location.reload()}
+          className="px-4 py-2 rounded-2xl border-2 border-white/60 font-bold hover:bg-white/10 hover:cursor-pointer"
+        >
+          Try again
+        </button>
+        <a href="/" className="px-4 py-2 rounded-2xl bg-white text-black font-bold hover:brightness-90">
+          Home
+        </a>
+      </div>
+    </main>
+  );
 }

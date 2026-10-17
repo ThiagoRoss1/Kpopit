@@ -38,10 +38,14 @@ import { useClearGameStorage } from "../../hooks/useClearGameStorage.tsx";
 import { areGuessesEqual } from "../../utils/areGuessesEqual.ts";
 import { safeReload } from "../../utils/safeReload.ts";
 import { isNewGameDay } from "../../utils/gameStorage.ts";
+import Section, { SectionBoundary, SectionError } from "../../components/Loading/Section.tsx";
 import CardGrantedReveal from "../Collection/components/CardGrantedReveal.tsx";
 import type { CardGranted } from "../../interfaces/albumInterfaces.ts";
 
 const NO_IDOLS: IdolListItem[] = [];
+
+// Final size of the hints box (both of its states), reserved while the game data loads.
+const HINTS_BOX = "w-full max-w-full sm:w-lg max-xxs:h-24 xxs:h-26 xs:h-28 sm:h-30";
 
 function ClassicMode() {
   const gameMode = useGameMode()
@@ -63,7 +67,7 @@ function ClassicMode() {
 
   // Transfer data logic hook
   
-  const { userToken, initUser, decryptedTokenRef, allIdolsData, isLoadingAllIdols, isErrorAllIdols,
+  const { userToken, initUser, decryptedTokenRef, allIdolsData, isErrorAllIdols,
     isInitialized, userStatsData, transferData, queryClient } = useSharedGameData();
 
   const { clearClassic } = useClearGameStorage();
@@ -92,8 +96,8 @@ function ClassicMode() {
   // Daily idol game data
   const {
     data: gameData,
-    isLoading: isLoadingGameData,
     isError: isErrorGameData,
+    refetch: refetchGameData,
   } = useQuery<GameData>({
     queryKey: ["dailyIdol", gameMode],
     queryFn: getDailyIdol,
@@ -330,23 +334,10 @@ function ClassicMode() {
   // All gameModes for victory card
   const { otherModes } = useAllGameModes(gameMode);
   
-  if ((isLoadingGameData || isLoadingAllIdols || !isInitialized) && !gameData) {
-    return (
-      <div className="fixed inset-0 z-100 flex w-full h-screen bg-black justify-center items-center">
-        <span className="text-white animate-pulse">Loading Kpopit...</span>
-      </div>
-    );
-  }
-
-  if (isErrorGameData || isErrorAllIdols) {
-    return (
-      <div className="fixed inset-0 z-100 flex w-full h-screen bg-black justify-center items-center">
-        <span className="text-white animate-pulse">Error: Error fetching game data</span>
-      </div>
-    );
-  }
-
-  if (!dayChecked) return null;
+  // Shell first: title and buttons render at once; the game and the search wait on their own data.
+  const gameError = isErrorGameData || userToken.isError;
+  const gameReady = !!gameData && dayChecked;
+  const retryGame = () => (userToken.isError ? userToken.refetch() : refetchGameData());
 
   // Main return
   return (
@@ -384,13 +375,17 @@ function ClassicMode() {
       </div>
       
       <div className="w-full flex flex-col items-center justify-center mb-10.25">
-        <AnswerHintsBox 
-        memberCount={gameData?.member_count ?? null} 
-        groups={gameData?.groups ?? null} 
-        isFormerGroup={gameData?.is_former_group ?? false}
-        attempts={attempts}
-        gameEnded={endGame}
-        />
+        <Section loading={!gameReady && !gameError} error={gameError} onRetry={retryGame} placeholderClassName={HINTS_BOX}>
+          {() => (
+            <AnswerHintsBox
+            memberCount={gameData?.member_count ?? null}
+            groups={gameData?.groups ?? null}
+            isFormerGroup={gameData?.is_former_group ?? false}
+            attempts={attempts}
+            gameEnded={endGame}
+            />
+          )}
+        </Section>
       </div>
 
       {!endGame && !showVictoryCard && (
@@ -404,20 +399,27 @@ function ClassicMode() {
       {!endGame && !showVictoryCard && (
       <div className="w-full flex flex-col">
         <div className="relative w-full max-w-4xl px-4 mx-auto flex justify-center z-40 mb-4">
-          <SearchBar
-            allIdols={allIdolsData || NO_IDOLS}
-            value={currentGuess}
-            onIdolSelect={handleIdolSelect}
-            onIdolSelectId={handleIdolSelectId}
-            onSubmit={handleSubmit}
-            excludedIdols={excludedIdols}
-            disabled={endGame || guessMutation.isPending || isCorrect}
-            gameMode={"classic"}
-          />
+          {isErrorAllIdols && !allIdolsData ? (
+            <SectionError className="h-13" message="Couldn't load the idol list." onRetry={() => queryClient.refetchQueries({ queryKey: ["allIdols"] })} />
+          ) : (
+            <SearchBar
+              allIdols={allIdolsData || NO_IDOLS}
+              value={currentGuess}
+              onIdolSelect={handleIdolSelect}
+              onIdolSelectId={handleIdolSelectId}
+              onSubmit={handleSubmit}
+              excludedIdols={excludedIdols}
+              disabled={endGame || guessMutation.isPending || isCorrect}
+              loading={!allIdolsData || !gameReady}
+              gameMode={"classic"}
+            />
+          )}
         </div>
       </div>
       )}
       
+      {gameReady && (
+      <SectionBoundary>
       <div className="flex flex-row items-center justify-center mb-10">
         <span className="leading-tight text-base sm:text-base">
           <span className="text-[#b43777] [text-shadow:1.2px_1.2px_4px_rgba(0,0,0,1.8),0_0_12px_rgba(180,55,119,1.0)] brightness-110">
@@ -490,6 +492,8 @@ function ClassicMode() {
           </Link>
         </span>
       </div>
+      )}
+      </SectionBoundary>
       )}
     </div>
     </>

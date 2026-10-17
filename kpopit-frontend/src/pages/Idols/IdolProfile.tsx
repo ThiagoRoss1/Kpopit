@@ -18,6 +18,8 @@ import IdolsProfileSearch from "../../components/IdolsSearchBar/IdolsProfileSear
 import { useHydrated } from "../../hooks/useHydrated";
 import { Helmet } from "react-helmet-async";
 import { buildIdolSlug, formatGroupName } from "../../utils/formatters";
+import { SectionError, SectionPlaceholder } from "../../components/Loading/Section";
+import { useDelayedLoading } from "../../hooks/useDelayedLoading";
 import Img from "../../components/Img";
 
 // initialProfile: build-time data for the prerendered page; stale at once, so it refetches.
@@ -54,6 +56,7 @@ function IdolProfile({ initialProfile }: { initialProfile?: IdolProfileData }) {
         data: idolProfileData,
         isLoading: isLoadingIdolProfileData,
         isError: isErrorIdolProfileData,
+        refetch: refetchIdolProfileData,
     } = useQuery<IdolProfileData>({
         queryKey: ["idolProfileData", id],
         queryFn: () => getIdolInfo(Number(id)),
@@ -79,6 +82,7 @@ function IdolProfile({ initialProfile }: { initialProfile?: IdolProfileData }) {
 
     // Age depends on today's date, which can differ between the build and the visit.
     const hydrated = useHydrated();
+    const loaderVisible = useDelayedLoading(!idolProfileData && !isErrorIdolProfileData);
     const age = useCalculateAge(idolProfile?.birth_date || "");
 
     const nationality = idolProfile?.nationality;
@@ -126,18 +130,13 @@ function IdolProfile({ initialProfile }: { initialProfile?: IdolProfileData }) {
         ));
     }, [gameModesAvailable]);
     
-    if (isLoadingIdolProfileData) {
+    // Navbar and footer stay; the profile area holds its place while loading and retries on error.
+    if (!idolProfileData) {
         return (
-            <div className="fixed inset-0 z-100 flex w-full h-screen bg-black justify-center items-center">
-                <span className="text-white animate-pulse">Loading Idol Profile Data...</span>
-            </div>
-        );
-    }
-
-    if (isErrorIdolProfileData || !idolProfileData) {
-        return (
-            <div className="fixed inset-0 z-100 flex w-full h-screen bg-black justify-center items-center">
-                <span className="text-white animate-pulse">Error: Error fetching idol profile data</span>
+            <div className="w-full min-h-screen bg-ink flex justify-center pt-7">
+                {isErrorIdolProfileData && !isLoadingIdolProfileData
+                    ? <SectionError className="w-full min-h-screen" message="Couldn't load this idol." onRetry={() => refetchIdolProfileData()} />
+                    : <SectionPlaceholder className="w-full max-w-7xl min-h-screen" pulsing={loaderVisible} />}
             </div>
         );
     }

@@ -22,8 +22,11 @@ const NavBar = () => {
 
     const [isMobileMenuOpen, setIsMobileMenuOpen] = useState<boolean>(false);
 
+    // Same box as the Login link, so the slot doesn't shift the navbar when auth resolves.
+    const authSlotPlaceholder = <span aria-hidden className="block max-xxs:w-16 max-xxs:h-10 xxs:w-19 xxs:h-10 sm:w-25 sm:h-12" />;
+
     const renderDesktopAuthSlot = () => {
-        if (isLoading) return null;
+        if (isLoading) return authSlotPlaceholder;
         if (isAuthenticated && user) {
             return <UserDropdown />;
         }
@@ -41,7 +44,7 @@ const NavBar = () => {
     };
 
     const renderMobileAuthSlot = () => {
-        if (isLoading) return null;
+        if (isLoading) return authSlotPlaceholder;
         if (isAuthenticated && user) {
             return <UserDropdownMobile />;
         };
