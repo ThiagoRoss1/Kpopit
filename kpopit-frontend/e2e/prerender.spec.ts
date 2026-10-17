@@ -102,6 +102,24 @@ test.describe('prerendered pages without JavaScript', () => {
     await expect(page).toHaveTitle(new RegExp(idol.artist_name));
   });
 
+  // Was ≈1.0 when the whole list appeared at once after a fixed loader.
+  test('/idols keeps its layout while loading (CLS < 0.1)', async ({ page }) => {
+    await page.setViewportSize({ width: 390, height: 844 });
+    await page.route('**/_vercel/**', (route) => route.fulfill({ status: 200, contentType: 'text/javascript', body: '' }));
+    await page.addInitScript(() => {
+      (window as unknown as { __cls: number }).__cls = 0;
+      new PerformanceObserver((list) => {
+        for (const e of list.getEntries() as (PerformanceEntry & { value: number; hadRecentInput: boolean })[]) {
+          if (!e.hadRecentInput) (window as unknown as { __cls: number }).__cls += e.value;
+        }
+      }).observe({ type: 'layout-shift', buffered: true });
+    });
+    await page.goto(`${PREVIEW}/idols`);
+    await page.waitForLoadState('networkidle');
+    await page.waitForTimeout(2_000);
+    expect(await page.evaluate(() => (window as unknown as { __cls: number }).__cls)).toBeLessThan(0.1);
+  });
+
   test('every idol has a prerendered page', () => {
     const missing = idols.filter((i) =>
       !fs.existsSync(path.join(FRONTEND, 'build/client/idols', String(i.id), slug(i), 'index.html')));
