@@ -18,10 +18,13 @@ async function failApi(page: Page, path: string) {
     route.fulfill({ status: 500, contentType: 'application/json', body: '{"error":"test"}' }));
 }
 
-// Counts full document loads of the page (a reload is a second one).
+// Counts document requests of the main frame: a reload is a second one. (Not 'load' events:
+// Firefox also fires one for the initial about:blank.)
 function countLoads(page: Page): { loads: number } {
   const counter = { loads: 0 };
-  page.on('load', () => { counter.loads += 1; });
+  page.on('request', (r) => {
+    if (r.isNavigationRequest() && r.frame() === page.mainFrame()) counter.loads += 1;
+  });
   return counter;
 }
 
