@@ -1,5 +1,4 @@
 // Test-only browser entry: exercise the real provider while explicitly requesting refreshAuth.
-import '@vitejs/plugin-react/preamble';
 import { createRoot } from 'react-dom/client';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { AuthProvider } from '../../src/contexts/AuthProvider';
