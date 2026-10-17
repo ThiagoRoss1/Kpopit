@@ -56,3 +56,17 @@ def est_now() -> datetime:
 def get_current_timestamp() -> str:
     """Returns the real current timestamp as an ISO string in the EST timezone, never offset. Example: '2024-06-15T14:30:00.123456-04:00'."""
     return est_now().isoformat() # Example - ISO with timezone - '2024-06-15T14:30:00.123456-04:00' (Usage: API responses, database timestamps, timezone-aware logging)
+
+def get_reset_countdown() -> dict:
+    """Returns the time left until the next daily reset (game-day midnight in EST).
+    Example: {'total_seconds': 3600, 'hours': 1, 'minutes': 0, 'seconds': 0, 'next_reset': '2024-06-16T00:00:00-04:00'}."""
+    now = get_today_now()
+    next_reset = now.replace(hour=0, minute=0, second=0, microsecond=0) + timedelta(days=1)
+    total_seconds = int((next_reset - now).total_seconds())
+    return {
+        "total_seconds": total_seconds,
+        "hours": total_seconds // 3600,
+        "minutes": (total_seconds % 3600) // 60,
+        "seconds": total_seconds % 60,
+        "next_reset": next_reset.isoformat()
+    }
