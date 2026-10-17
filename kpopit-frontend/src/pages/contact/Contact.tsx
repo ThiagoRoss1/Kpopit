@@ -6,6 +6,8 @@ const Contact = () => {
         <>
         <Helmet>
             <title>KpopIt - Contact</title>
+            <meta name="description" content="Contact KpopIt to report a bug, wrong idol info or send a suggestion." />
+            <link rel="canonical" href="https://kpopit.net/contact" />
         </Helmet>
         <BackgroundStyle />
         <div className="w-full flex-1 overflow-y-auto flex items-start justify-center">
