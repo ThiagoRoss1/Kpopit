@@ -16,7 +16,7 @@ import {GetPixelLevel, PIXEL_LEVELS} from "../../utils/pixelLevels";
 import { WinnerExplosion } from "../../utils/confetti";
 import { useClearGameStorage } from "../../hooks/useClearGameStorage";
 import { isNewGameDay, startFirstGameDay } from "../../utils/gameStorage";
-import { useGameDay } from "../../contexts/game_day_context";
+import { DAILY_REFETCH, useGameDay } from "../../contexts/game_day_context";
 import PageLoader from "../../components/Loading/PageLoader";
 import { ALL_ALBUMS_KEY, persistingFetch, readPersistedList } from "../../utils/persistedList";
 import { useIsLg } from "../../hooks/useIsDevice";
@@ -89,7 +89,7 @@ const { clearPixelated } = useClearGameStorage();
         queryFn: getPixelatedDailyAlbum,
         enabled: isInitialized,
         staleTime: 1000 * 60 * 60 * 4,
-        refetchOnWindowFocus: false,
+        ...DAILY_REFETCH,
     });
 
     const { data: allAlbumsData, isError: isErrorAllAlbums, refetch: refetchAllAlbums } = useQuery<AlbumSearchResult[]>({

@@ -35,7 +35,7 @@ import { WinnerExplosion } from "../../utils/confetti";
 import { useClearGameStorage } from "../../hooks/useClearGameStorage";
 import { areGuessesEqual } from "../../utils/areGuessesEqual";
 import { isNewGameDay, startFirstGameDay } from "../../utils/gameStorage";
-import { useGameDay } from "../../contexts/game_day_context";
+import { DAILY_REFETCH, useGameDay } from "../../contexts/game_day_context";
 import PageLoader from "../../components/Loading/PageLoader";
 import CardGrantedReveal from "../Collection/components/CardGrantedReveal";
 import type { CardGranted } from "../../interfaces/albumInterfaces";
@@ -103,7 +103,7 @@ const gameMode = useGameMode();
         queryFn: getBlurryDailyIdol,
         enabled: isInitialized,
         staleTime: 1000 * 60 * 60 * 4,
-        refetchOnWindowFocus: false,
+        ...DAILY_REFETCH,
     });
 
     useEffect(() => {

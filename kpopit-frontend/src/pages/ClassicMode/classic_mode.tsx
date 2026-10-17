@@ -37,7 +37,7 @@ import { useAllGameModes } from "../../hooks/useAllGameModes.tsx";
 import { useClearGameStorage } from "../../hooks/useClearGameStorage.tsx";
 import { areGuessesEqual } from "../../utils/areGuessesEqual.ts";
 import { isNewGameDay, startFirstGameDay } from "../../utils/gameStorage.ts";
-import { useGameDay } from "../../contexts/game_day_context.ts";
+import { DAILY_REFETCH, useGameDay } from "../../contexts/game_day_context.ts";
 import PageLoader from "../../components/Loading/PageLoader.tsx";
 import CardGrantedReveal from "../Collection/components/CardGrantedReveal.tsx";
 import type { CardGranted } from "../../interfaces/albumInterfaces.ts";
@@ -102,7 +102,7 @@ function ClassicMode() {
     queryKey: ["dailyIdol", gameMode, day],
     queryFn: getDailyIdol,
     staleTime: 1000 * 60 * 60 * 4,
-    refetchOnWindowFocus: false,
+    ...DAILY_REFETCH,
     enabled: isInitialized,
   });
 
