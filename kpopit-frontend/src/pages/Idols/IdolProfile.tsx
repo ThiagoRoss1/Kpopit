@@ -18,8 +18,7 @@ import IdolsProfileSearch from "../../components/IdolsSearchBar/IdolsProfileSear
 import { useHydrated } from "../../hooks/useHydrated";
 import { Helmet } from "react-helmet-async";
 import { buildIdolSlug, formatGroupName } from "../../utils/formatters";
-import { SectionError, SectionPlaceholder } from "../../components/Loading/Section";
-import { useDelayedLoading } from "../../hooks/useDelayedLoading";
+import PageLoader from "../../components/Loading/PageLoader";
 import Img from "../../components/Img";
 
 // initialProfile: build-time data for the prerendered page; stale at once, so it refetches.
@@ -82,8 +81,7 @@ function IdolProfile({ initialProfile }: { initialProfile?: IdolProfileData }) {
 
     // Age depends on today's date, which can differ between the build and the visit.
     const hydrated = useHydrated();
-    const loaderVisible = useDelayedLoading(!idolProfileData && !isErrorIdolProfileData);
-    const age = useCalculateAge(idolProfile?.birth_date || "");
+const age = useCalculateAge(idolProfile?.birth_date || "");
 
     const nationality = idolProfile?.nationality;
     const nationalities = nationality ? nationality.split(",").map(nat => nat.trim()) : [];
@@ -130,14 +128,15 @@ function IdolProfile({ initialProfile }: { initialProfile?: IdolProfileData }) {
         ));
     }, [gameModesAvailable]);
     
-    // Navbar and footer stay; the profile area holds its place while loading and retries on error.
+    // The prerendered page already has the profile; the loader only shows on a client navigation.
     if (!idolProfileData) {
         return (
-            <div className="w-full min-h-screen bg-ink flex justify-center pt-7">
-                {isErrorIdolProfileData && !isLoadingIdolProfileData
-                    ? <SectionError className="w-full min-h-screen" message="Couldn't load this idol." onRetry={() => refetchIdolProfileData()} />
-                    : <SectionPlaceholder className="w-full max-w-7xl min-h-screen" pulsing={loaderVisible} />}
-            </div>
+            <PageLoader
+                message="Loading Idol Profile Data..."
+                error={isErrorIdolProfileData && !isLoadingIdolProfileData}
+                errorMessage="Error fetching idol profile data."
+                onRetry={() => refetchIdolProfileData()}
+            />
         );
     }
 

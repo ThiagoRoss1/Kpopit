@@ -17,7 +17,7 @@ import { WinnerExplosion } from "../../utils/confetti";
 import { useClearGameStorage } from "../../hooks/useClearGameStorage";
 import { isNewGameDay, startFirstGameDay } from "../../utils/gameStorage";
 import { useGameDay } from "../../contexts/game_day_context";
-import Section, { SectionBoundary, SectionError } from "../../components/Loading/Section";
+import PageLoader from "../../components/Loading/PageLoader";
 import { ALL_ALBUMS_KEY, persistingFetch, readPersistedList } from "../../utils/persistedList";
 import { useIsLg } from "../../hooks/useIsDevice";
 import { useAllGameModes } from "../../hooks/useAllGameModes";
@@ -31,9 +31,6 @@ import { Link } from "react-router";
 
 const REVEAL_LEVEL = PIXEL_LEVELS[PIXEL_LEVELS.length - 1];
 
-// Final sizes reserved while the game data loads: the sleeve/vinyl stage and the two hint cards.
-const STAGE_BOX = "w-full h-70 xxs:h-75 xs:h-80 xm:h-85 zm:h-95 sm:h-100 md:h-110 xl:h-130 mx-auto";
-const HINTS_BOX = "w-62 zm:w-94 sm:w-102 h-37 zm:h-46";
 
 function PixelatedMode() {
     const gameMode = useGameMode();
@@ -268,12 +265,18 @@ const { clearPixelated } = useClearGameStorage();
     const userCount = dailyUserCount?.data?.user_count ?? 0;
     const winningGuess = guesses.find((g) => g.guess_correct);
 
-    // Shell first: title and buttons render at once; the game and the search wait on their own data.
-    const gameError = isErrorPixelatedGameData || userToken.isError;
-    const gameReady = !!pixelatedGameData && dayChecked;
-    const retryGame = () => (userToken.isError ? userToken.refetch() : refetchPixelatedGameData());
+    // One loader until the game, its day check and the album list are all in; then the page renders whole.
+    if (!pixelatedGameData || !dayChecked || !allAlbumsData) {
+        const listError = isErrorAllAlbums && !allAlbumsData;
+        const retry = () => {
+            if (userToken.isError) userToken.refetch();
+            if (isErrorPixelatedGameData) refetchPixelatedGameData();
+            if (listError) refetchAllAlbums();
+        };
+        return <PageLoader error={isErrorPixelatedGameData || userToken.isError || listError} onRetry={retry} />;
+    }
 
-    const coverUrl = pixelatedGameData ? resolveCdnUrl(pixelatedGameData.cover_path) : null;
+    const coverUrl = resolveCdnUrl(pixelatedGameData.cover_path);
 
     const statsButton = (
         <button
@@ -345,8 +348,6 @@ const { clearPixelated } = useClearGameStorage();
                         
                         {/* ── LEFT: album sleeve + vinyl + hints ── */}
                         <div className="flex flex-col w-full lg:w-1/2 xl:w-160">
-                                <Section loading={!gameReady && !gameError} error={gameError} onRetry={retryGame} placeholderClassName={STAGE_BOX}>
-                                {() => (
                                 <div
                                     className={`pixel-stage relative w-full h-70 xxs:h-75 xs:h-80 xm:h-85 zm:h-95 sm:h-100 md:h-110 xl:h-130 mx-auto select-none
                                     ${zoom !== "closed" ? "z-50" : ""}`}
@@ -429,20 +430,14 @@ const { clearPixelated } = useClearGameStorage();
                                         </div>
                                     </div>
                                 </div>
-                                )}
-                                </Section>
 
                                 {!endGame && (
                                     <div className="mt-2 lg:mt-6 flex items-center justify-center">
-                                        <Section loading={!gameReady && !gameError} error={false} onRetry={retryGame} placeholderClassName={HINTS_BOX}>
-                                            {() => pixelatedGameData && (
-                                                <PixelatedHints
-                                                    guessCount={guesses.length}
-                                                    releaseYear={pixelatedGameData.release_year}
-                                                    artistName={pixelatedGameData.group_name}
-                                                />
-                                            )}
-                                        </Section>
+                                        <PixelatedHints
+                                            guessCount={guesses.length}
+                                            releaseYear={pixelatedGameData.release_year}
+                                            artistName={pixelatedGameData.group_name}
+                                        />
                                     </div>
                                 )}
                        
@@ -486,25 +481,18 @@ const { clearPixelated } = useClearGameStorage();
 
                             {!endGame && (
                                 <div className="flex justify-center mb-3">
-                                    {isErrorAllAlbums && !allAlbumsData ? (
-                                        <SectionError className="h-15 text-ink/80" message="Couldn't load the album list." onRetry={() => refetchAllAlbums()} />
-                                    ) : (
-                                        <PixelatedSearchBar
-                                            allAlbums={allAlbumsData ?? []}
-                                            value={currentGuess}
-                                            onAlbumSelect={handleAlbumSelect}
-                                            onAlbumSelectId={handleAlbumSelectId}
-                                            onSubmit={handleSubmit}
-                                            excludedAlbums={excludedIds}
-                                            disabled={isCorrect || endGame}
-                                            loading={!allAlbumsData || !gameReady}
-                                        />
-                                    )}
+                                    <PixelatedSearchBar
+                                        allAlbums={allAlbumsData}
+                                        value={currentGuess}
+                                        onAlbumSelect={handleAlbumSelect}
+                                        onAlbumSelectId={handleAlbumSelectId}
+                                        onSubmit={handleSubmit}
+                                        excludedAlbums={excludedIds}
+                                        disabled={isCorrect || endGame}
+                                    />
                                 </div>
                             )}
 
-                            {gameReady && (
-                            <SectionBoundary>
                             {/* Player count */}
                             <div className="flex flex-row items-center justify-center mb-7 text-base">
                                 <span className="leading-tight">
@@ -536,8 +524,6 @@ const { clearPixelated } = useClearGameStorage();
                                     </span>
                                 </div>
                             )}
-                            </SectionBoundary>
-                            )}
 
                         </div>
                     </div>
@@ -545,7 +531,7 @@ const { clearPixelated } = useClearGameStorage();
                     {statsModals}
 
                     {/* Victory Card */}
-                    {endGame && isCorrect && showVictory && winningGuess && pixelatedGameData && (
+                    {endGame && isCorrect && showVictory && winningGuess && (
                         <div className="mt-25">
                             <PixelatedVictory
                                 albumName={winningGuess.album_name}

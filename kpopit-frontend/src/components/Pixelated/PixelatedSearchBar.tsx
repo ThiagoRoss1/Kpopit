@@ -9,9 +9,7 @@ interface PixelatedSearchBarProps {
   allAlbums: AlbumSearchResult[];
   value: string;
   disabled?: boolean;
-  // The album list or the game isn't there yet: the bar keeps its place but can't be used.
-  loading?: boolean;
-  excludedAlbums?: number[];
+excludedAlbums?: number[];
   onAlbumSelect: (text: string) => void;
   onAlbumSelectId?: (album: AlbumSearchResult) => void;
   onSubmit?: () => void;
@@ -21,7 +19,7 @@ interface PixelatedSearchBarProps {
 const formatDisplayName = (album: AlbumSearchResult) => `${album.name} (${album.group_name})`;
 
 const PixelatedSearchBar = (props: PixelatedSearchBarProps) => {
-  const { allAlbums, value, disabled, loading, excludedAlbums, onAlbumSelect, onAlbumSelectId, onSubmit, onClose } = props;
+  const { allAlbums, value, disabled, excludedAlbums,onAlbumSelect, onAlbumSelectId, onSubmit, onClose } = props;
 
   const [suggestions, setSuggestions] = useState<AlbumSearchResult[]>([]);
   const [showList, setShowList] = useState<boolean>(false);
@@ -116,15 +114,14 @@ const PixelatedSearchBar = (props: PixelatedSearchBarProps) => {
               text-base sm:text-lg font-medium focus:outline-none disabled:opacity-50"
               value={value}
               onChange={handleInputChange}
-              placeholder={loading ? "Loading albums…" : "Type an album or group…"}
-              aria-busy={loading || undefined}
-              disabled={disabled || loading}
+              placeholder="Type an album or group…"
+              disabled={disabled}
               onFocus={() => value.trim().length > 0 && suggestions.length > 0 && setShowList(true)}
             />
             <button
               type="button"
               onClick={submit}
-              disabled={disabled || loading || !selectedAlbum}
+              disabled={disabled || !selectedAlbum}
               className="flex items-center gap-1.5 w-14.5 h-11 px-4 sm:px-4 p-2 rounded-full font-bold 
               bg-neon-pink border-b-2 border-ink shadow-[0_4px_0_var(--color-ink)] firefox:shadow-none firefox:drop-shadow-[0_4px_0_var(--color-ink)] firefox:active:drop-shadow-[0_1px_0_var(--color-ink)] transition-all duration-150
                 hover:brightness-110 hover:cursor-pointer active:translate-y-1 active:shadow-[0_1px_0_var(--color-ink)]

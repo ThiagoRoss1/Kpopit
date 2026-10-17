@@ -8,7 +8,7 @@ import type { IdolsPageData } from "../../interfaces/gameInterfaces";
 import IdolsSearchBar from "../../components/IdolsSearchBar/IdolsSearchBar";
 import IdolsCards from "../../components/IdolsPageCards/IdolsCards";
 import { formatCompanyName, formatGroupName, buildIdolSlug } from "../../utils/formatters";
-import Section from "../../components/Loading/Section";
+import PageLoader from "../../components/Loading/PageLoader";
 
 // Only the first cards (about one screen) animate in; a delay per card for the whole list made the
 // last ones wait seconds.
@@ -66,9 +66,11 @@ function IdolsList({ initialIdols }: { initialIdols?: IdolsPageData[] }) {
         })
     }, [searchTerm, idolsData]); 
 
-    // A failed background refetch keeps the list it already has; the error shows only without data.
-    const listLoading = !idolsData && !isErrorIdolsData;
-    const listError = isErrorIdolsData && !idolsData;
+    // The prerendered page already has the list; the loader only shows on a client navigation, and a
+    // failed background refetch keeps the list it already has.
+    if (!idolsData) {
+        return <PageLoader message="Loading Idols Data..." error={isErrorIdolsData} errorMessage="Error fetching idols data." onRetry={() => refetchIdolsData()} />;
+    }
 
 return (
         <div className="w-full min-h-full bg-ink">
@@ -109,10 +111,7 @@ return (
                     </span>
                 </div>
 
-                <Section loading={listLoading} error={listError} onRetry={() => refetchIdolsData()}
-                    placeholderClassName="w-full min-h-screen">
-                {() => (
-                <div className="grid w-full h-fit gap-6 mb-6 max-xxs:px-2 xs:px-4 md:px-6 lg:px-14 xl:px-20 2xl:px-60
+                <div className="gridw-full h-fit gap-6 mb-6 max-xxs:px-2 xs:px-4 md:px-6 lg:px-14 xl:px-20 2xl:px-60
                 grid-cols-[repeat(auto-fill,minmax(150px,1fr))] sm:grid-cols-[repeat(auto-fill,minmax(150px,1fr))] lg:grid-cols-[repeat(auto-fill,minmax(200px,1fr))]">
                     {filteredIdols?.map((idol, i) => (
                         <Link
@@ -129,11 +128,8 @@ return (
                         </Link>
                     ))}
                 </div>
-                
-                )}
-                </Section>
 
-                {idolsData && filteredIdols?.length === 0 && (
+                {filteredIdols?.length === 0 && (
                 <div className="w-full flex justify-center items-center">
                     <span className="text-white font-semibold text-xl [text-shadow:1px_1px_10px_rgba(255,255,255,0.6)]">
                         No idols found

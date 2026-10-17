@@ -1,8 +1,8 @@
 import { test, expect, type Page } from './support/fixtures';
-import { closeModal, searchInput } from './support/game';
+import { searchInput } from './support/game';
 
-// Each backend-dependent section loads and fails on its own; the page shell (navbar, title,
-// buttons) never waits for it, and nothing reloads the document.
+// Game pages show one loader below the navbar until their data is in (Retry on error), and a
+// day change never reloads the document.
 
 const delay = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms));
 
@@ -42,63 +42,56 @@ async function trackShifts(page: Page) {
 const cls = (page: Page) => page.evaluate(() => (window as unknown as { __cls: number }).__cls);
 const classicTitle = (page: Page) => page.getByRole('heading', { name: /Kpop\s*it/i }).first();
 
-test.describe('sections load on their own', () => {
-  test('a slow game API shows the shell at once and keeps the layout', async ({ page }) => {
+test.describe('page loading', () => {
+  test('a slow game API shows the navbar and one loader, then the whole game', async ({ page }) => {
     await trackShifts(page);
     await holdApi(page, '/game/classic/daily-idol', 2_500);
     await page.goto('/classic');
-    await expect(classicTitle(page)).toBeVisible({ timeout: 2_000 });
-    await expect(page.getByRole('img', { name: 'Stats' }).first()).toBeVisible();
-    await expect(page.locator('[aria-busy="true"][aria-label="Loading"]').first()).toBeVisible();
-    const search = page.getByRole('textbox').first();
-    await expect(search).toBeDisabled();
-    const before = await search.boundingBox();
+    await expect(page.getByRole('status')).toHaveText('Loading Kpopit...', { timeout: 2_000 });
+    await expect(page.locator('nav').getByRole('link', { name: 'Contact' })).toBeVisible();
+    await expect(searchInput(page, 'classic')).toBeHidden();
     await expect(searchInput(page, 'classic')).toBeEnabled({ timeout: 20_000 });
-    const after = await searchInput(page, 'classic').boundingBox();
-    expect(Math.abs((after?.y ?? 0) - (before?.y ?? 0))).toBeLessThan(2);
+    await expect(classicTitle(page)).toBeVisible();
+    await expect(page.getByRole('status')).toBeHidden();
     expect(await cls(page)).toBeLessThan(0.1);
   });
 
-  test('a failing game API shows Retry there; the rest of the page works', async ({ page }) => {
+  test('a failing game API shows the error with Retry; the navbar keeps working', async ({ page }) => {
     await failApi(page, '/game/classic/daily-idol');
     await page.goto('/classic');
     const alert = page.getByRole('alert');
-    await expect(alert).toContainText("Couldn't load this part.", { timeout: 20_000 });
-    await expect(classicTitle(page)).toBeVisible();
-    await page.getByRole('img', { name: 'Stats' }).first().click();
-    await closeModal(page, 'Stats...');
+    await expect(alert).toContainText('Error loading Kpopit.', { timeout: 20_000 });
+    await expect(page.locator('nav').getByRole('link', { name: 'Contact' })).toBeVisible();
 
     await page.unroute('**/api/game/classic/daily-idol*');
     await alert.getByRole('button', { name: 'Retry' }).click();
     await expect(searchInput(page, 'classic')).toBeEnabled({ timeout: 20_000 });
   });
 
-  test('a failing idol list shows Retry in the search; the game area still loads', async ({ page }) => {
+  test('a failing idol list shows the error with Retry and recovers', async ({ page }) => {
     await failApi(page, '/idols-list');
     await page.goto('/classic');
-    await expect(page.getByRole('alert')).toContainText("Couldn't load the idol list.", { timeout: 20_000 });
-    await expect(page.getByText(/Hints grid will be unlocked|Guess any idol to start/).first()).toBeVisible();
+    await expect(page.getByRole('alert')).toContainText('Error loading Kpopit.', { timeout: 20_000 });
 
     await page.unroute('**/api/idols-list*');
     await page.getByRole('alert').getByRole('button', { name: 'Retry' }).click();
     await expect(searchInput(page, 'classic')).toBeEnabled({ timeout: 20_000 });
   });
 
-  test('a failing album list shows Retry in the Pixelated search', async ({ page }) => {
+  test('a failing album list shows the error with Retry on Pixelated', async ({ page }) => {
     await failApi(page, '/game/pixelated/albums-list');
     await page.goto('/pixelated');
-    await expect(page.getByRole('alert')).toContainText("Couldn't load the album list.", { timeout: 20_000 });
-    await expect(page.getByText('Guess the album')).toBeVisible();
+    await expect(page.getByRole('alert')).toContainText('Error loading Kpopit.', { timeout: 20_000 });
+    await expect(page.getByRole('alert').getByRole('button', { name: 'Retry' })).toBeVisible();
   });
 
-  test('a failing idols list keeps the navbar and shows Retry in the grid', async ({ page }) => {
+  test('a failing idols list on a client navigation keeps the navbar and offers Retry', async ({ page }) => {
     await page.goto('/');
     await failApi(page, '/idols-page');
     await page.locator('nav').getByRole('button', { name: 'Idols' }).click();
     await page.locator('nav').getByRole('link', { name: 'All Idols' }).click();
     await expect(page).toHaveURL(/\/idols$/);
-    await expect(page.getByRole('alert')).toContainText("Couldn't load this part.", { timeout: 20_000 });
-    await expect(page.getByRole('heading', { name: 'Kpopit Idols' })).toBeVisible();
+    await expect(page.getByRole('alert')).toContainText('Error fetching idols data.', { timeout: 20_000 });
     await expect(page.locator('nav').getByRole('link', { name: 'Contact' })).toBeVisible();
   });
 });

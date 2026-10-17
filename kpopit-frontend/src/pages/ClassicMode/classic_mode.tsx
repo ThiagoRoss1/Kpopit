@@ -38,14 +38,12 @@ import { useClearGameStorage } from "../../hooks/useClearGameStorage.tsx";
 import { areGuessesEqual } from "../../utils/areGuessesEqual.ts";
 import { isNewGameDay, startFirstGameDay } from "../../utils/gameStorage.ts";
 import { useGameDay } from "../../contexts/game_day_context.ts";
-import Section, { SectionBoundary, SectionError } from "../../components/Loading/Section.tsx";
+import PageLoader from "../../components/Loading/PageLoader.tsx";
 import CardGrantedReveal from "../Collection/components/CardGrantedReveal.tsx";
 import type { CardGranted } from "../../interfaces/albumInterfaces.ts";
 
 const NO_IDOLS: IdolListItem[] = [];
 
-// Final size of the hints box (both of its states), reserved while the game data loads.
-const HINTS_BOX = "w-full max-w-full sm:w-lg max-xxs:h-24 xxs:h-26 xs:h-28 sm:h-30";
 
 function ClassicMode() {
   const gameMode = useGameMode()
@@ -338,10 +336,16 @@ function ClassicMode() {
   // All gameModes for victory card
   const { otherModes } = useAllGameModes(gameMode);
   
-  // Shell first: title and buttons render at once; the game and the search wait on their own data.
-  const gameError = isErrorGameData || userToken.isError;
-  const gameReady = !!gameData && dayChecked;
-  const retryGame = () => (userToken.isError ? userToken.refetch() : refetchGameData());
+  // One loader until the game, its day check and the idol list are all in; then the page renders whole.
+  if (!gameData || !dayChecked || !allIdolsData) {
+    const listError = isErrorAllIdols && !allIdolsData;
+    const retry = () => {
+      if (userToken.isError) userToken.refetch();
+      if (isErrorGameData) refetchGameData();
+      if (listError) queryClient.refetchQueries({ queryKey: ["allIdols"] });
+    };
+    return <PageLoader error={isErrorGameData || userToken.isError || listError} onRetry={retry} />;
+  }
 
   // Main return
   return (
@@ -379,17 +383,13 @@ function ClassicMode() {
       </div>
       
       <div className="w-full flex flex-col items-center justify-center mb-10.25">
-        <Section loading={!gameReady && !gameError} error={gameError} onRetry={retryGame} placeholderClassName={HINTS_BOX}>
-          {() => (
-            <AnswerHintsBox
-            memberCount={gameData?.member_count ?? null}
-            groups={gameData?.groups ?? null}
-            isFormerGroup={gameData?.is_former_group ?? false}
-            attempts={attempts}
-            gameEnded={endGame}
-            />
-          )}
-        </Section>
+        <AnswerHintsBox
+        memberCount={gameData?.member_count ?? null}
+        groups={gameData?.groups ?? null}
+        isFormerGroup={gameData?.is_former_group ?? false}
+        attempts={attempts}
+        gameEnded={endGame}
+        />
       </div>
 
       {!endGame && !showVictoryCard && (
@@ -403,27 +403,20 @@ function ClassicMode() {
       {!endGame && !showVictoryCard && (
       <div className="w-full flex flex-col">
         <div className="relative w-full max-w-4xl px-4 mx-auto flex justify-center z-40 mb-4">
-          {isErrorAllIdols && !allIdolsData ? (
-            <SectionError className="h-13" message="Couldn't load the idol list." onRetry={() => queryClient.refetchQueries({ queryKey: ["allIdols"] })} />
-          ) : (
-            <SearchBar
-              allIdols={allIdolsData || NO_IDOLS}
-              value={currentGuess}
-              onIdolSelect={handleIdolSelect}
-              onIdolSelectId={handleIdolSelectId}
-              onSubmit={handleSubmit}
-              excludedIdols={excludedIdols}
-              disabled={endGame || guessMutation.isPending || isCorrect}
-              loading={!allIdolsData || !gameReady}
-              gameMode={"classic"}
-            />
-          )}
+          <SearchBar
+            allIdols={allIdolsData || NO_IDOLS}
+            value={currentGuess}
+            onIdolSelect={handleIdolSelect}
+            onIdolSelectId={handleIdolSelectId}
+            onSubmit={handleSubmit}
+            excludedIdols={excludedIdols}
+            disabled={endGame || guessMutation.isPending || isCorrect}
+            gameMode={"classic"}
+          />
         </div>
       </div>
       )}
       
-      {gameReady && (
-      <SectionBoundary>
       <div className="flex flex-row items-center justify-center mb-10">
         <span className="leading-tight text-base sm:text-base">
           <span className="text-[#b43777] [text-shadow:1.2px_1.2px_4px_rgba(0,0,0,1.8),0_0_12px_rgba(180,55,119,1.0)] brightness-110">
@@ -496,8 +489,6 @@ function ClassicMode() {
           </Link>
         </span>
       </div>
-      )}
-      </SectionBoundary>
       )}
     </div>
     </>
