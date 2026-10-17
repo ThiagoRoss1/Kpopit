@@ -1,5 +1,6 @@
 from flask import Blueprint, g, jsonify, request
 from services.album_service import AlbumService
+from services.daily_draw import ensure_daily_picks
 from services.get_db import get_db
 from services.user_service import UserService
 from utils.analytics import get_analytics_data, get_country_name
@@ -19,7 +20,8 @@ def get_daily_pixelated_album():
 
     try:
         service = AlbumService(connect)
-        service.choose_album_of_the_day(cursor, gamemode_id=3)
+        # Today's album (tomorrow's is drawn ahead and never returned)
+        ensure_daily_picks(cursor, gamemode_id=3)
         connect.commit()
 
         album = service.get_daily_album(cursor, gamemode_id=3)
@@ -33,7 +35,7 @@ def get_daily_pixelated_album():
         user_id = user_service.handle_user_streak(gamemode_id=3)
 
         if user_id:
-            print(f"User {user_id} streak checked/updated for pixelated gamemode.")
+            logger.debug("Pixelated streak checked")
             
         return jsonify({
             "answer_id": album["album_id"],

@@ -1,6 +1,6 @@
-import os
+import logging
 from flask import Blueprint, request, jsonify, g
-from services.idol_service import IdolService
+from services.daily_draw import ensure_daily_picks
 from services.game_service import GameService
 from services.user_service import UserService
 from utils.dates import get_today_date_str, get_current_timestamp
@@ -8,12 +8,11 @@ from utils.game_feedback_logic import partial_feedback_function, numerical_feedb
 from utils.analytics import get_analytics_data, get_country_name
 from services.get_db import get_db, get_idol_repo
 from utils.auth_decorators import optional_auth
-from dotenv import load_dotenv
 
-load_dotenv()
-FLASK_ENV = os.getenv("FLASK_ENV", "production")
 
 classic_bp = Blueprint('classic', __name__)
+
+logger = logging.getLogger(__name__)
 
 # Create daily idol route
 @classic_bp.route("/game/classic/daily-idol")
@@ -26,10 +25,8 @@ def get_daily_idol():
     cursor = connect.cursor()
 
     try:
-        idol_service = IdolService(connect, repository)
-
-        # Choose idol of the day 
-        idol_id = idol_service.choose_idol_of_the_day(cursor, gamemode_id=1)
+        # Today's idol (tomorrow's is drawn ahead and never returned)
+        idol_id = ensure_daily_picks(cursor, gamemode_id=1)
         connect.commit()
 
         """ For testing purposes, you can set a fixed idol_id """
@@ -55,12 +52,6 @@ def get_daily_idol():
         else:
             idol_data_dict["group_companies"] = []
 
-        # Debug print
-        if FLASK_ENV == "development":
-            print("\n -- ENTIRE IDOL DATA DICT --")
-            print(idol_data_dict)
-            print(" ------------------------\n")
-
         # Add career data 
         idol_career_for_groups = repository.fetch_full_idol_career(idol_id)
         groups = [career["group_name"] for career in idol_career_for_groups if career.get("is_active")]
@@ -73,7 +64,7 @@ def get_daily_idol():
         user_id = user_service.handle_user_streak(gamemode_id=1)
 
         if user_id:
-            print(f"User {user_id} streak checked/updated for daily idol game.")
+            logger.debug("Classic streak checked")
             
         # Filter data 
         game_data = {
@@ -159,8 +150,7 @@ def guess_idol():
             user_row = cursor.fetchone()
 
             if not user_row:
-                if FLASK_ENV == "development":
-                    print("Invalid user token provided:", user_token)
+                logger.debug("Invalid user token rejected")
 
                 return jsonify({"error": "Invalid user token"}), 400
             
@@ -188,7 +178,7 @@ def guess_idol():
                 if idol.get(field) and isinstance(idol[field], str):
                     idol[field] = [item.strip() for item in idol[field].split(",")]
                 else:
-                    idol[field] = idol.get(field, [])
+                    idol[field] = idol.get(field) or []
 
         if not guessed_idol or not answer_data:         
             return jsonify({"error": "Idol not found"}), 404
@@ -200,13 +190,13 @@ def guess_idol():
         position_guess = set(position.strip() for position in (guessed_idol.get("position", [])))
         position_answer = set(position.strip() for position in (answer_data.get("position", [])))
 
-        feedback['position'] = partial_feedback_function(position_guess, position_answer)
+        feedback['position'] = partial_feedback_function(position_guess, position_answer, unknown_if_empty=True)
 
         # Nationality
         idol_nationality_guess = set(nationality.strip() for nationality in (guessed_idol.get("nationality", [])))
         idol_nationality_answer = set(nationality.strip() for nationality in (answer_data.get("nationality", [])))
 
-        feedback["nationality"] = partial_feedback_function(idol_nationality_guess, idol_nationality_answer)
+        feedback["nationality"] = partial_feedback_function(idol_nationality_guess, idol_nationality_answer, unknown_if_empty=True)
         
         # Numbers - debut year, height, birth date, member count, generation...
         numerical_fields = ["idol_debut_year", "height", "birth_date", "member_count"] # removed "generation"
@@ -261,8 +251,8 @@ def guess_idol():
                 answer_id, current_attempt, today, current_timestamp, analytics_data
             )
 
-        except Exception as e:
-            print(f"Error saving user history: {e}")
+        except Exception:
+            logger.exception("Error saving user history")
             return jsonify({"error": "Database error saving user history"}), 500
 
         keys_for_display = [
@@ -302,8 +292,8 @@ def guess_idol():
 
         return jsonify(response_data), 200
     
-    except Exception as e:
-        print(f"Error processing guess: {e}")
-        return jsonify({"error": str(e)}), 500
+    except Exception:
+        logger.exception("Error processing %s guess", "classic")
+        return jsonify({"error": "Could not process the guess"}), 500
     finally:
         cursor.close()

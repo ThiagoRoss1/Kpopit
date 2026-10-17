@@ -37,6 +37,7 @@ import { WinnerExplosion } from "../../utils/confetti";
 import { useClearGameStorage } from "../../hooks/useClearGameStorage";
 import { areGuessesEqual } from "../../utils/areGuessesEqual";
 import { safeReload } from "../../utils/safeReload";
+import { isNewGameDay } from "../../utils/gameStorage";
 import CardGrantedReveal from "../Collection/components/CardGrantedReveal";
 import type { CardGranted } from "../../interfaces/albumInterfaces";
 
@@ -98,7 +99,7 @@ function BlurryMode() {
     } = useQuery<BlurryGameData>({
         queryKey: ['blurryDailyIdol', gameMode],
         queryFn: getBlurryDailyIdol,
-        enabled: isInitialized || !!decryptedTokenRef.current,
+        enabled: isInitialized,
         staleTime: 1000 * 60 * 60 * 4,
         refetchOnWindowFocus: false,
         placeholderData: (previousData) => previousData,
@@ -147,53 +148,49 @@ function BlurryMode() {
     const yesterdayIdolImageVersion = yesterdayIdol.data?.image_version ?? null;
     const yesterdayIdolGroup = yesterdayIdol.data?.groups ?? null; 
     
+    const serverDate = blurryGameData?.server_date;
+
+    // New day: drop yesterday's local state and reload (nothing to keep in React state).
     useEffect(() => {
-        if (!blurryGameData?.server_date) return;
+        if (!serverDate || !isNewGameDay(localStorage, "blurry", serverDate)) return;
+        console.log("New day detected, clearing cache.");
+        clearBlurry();
+        localStorage.setItem("blurryGameDate", serverDate);
+        safeReload();
+    }, [serverDate, clearBlurry, sessionRestored]);
 
-        const serverDate = blurryGameData?.server_date;
-        const lastGameDate = localStorage.getItem("blurryGameDate");
+    // Same day: restore the cached game once per server date / session restore, while rendering
+    // (React's "adjust state when a value changes"), so no effect has to copy storage into state.
+    const restoreKey = serverDate ? `${serverDate}#${sessionRestored}` : null;
+    const [restoredKey, setRestoredKey] = useState<string | null>(null);
+    if (serverDate && restoreKey !== restoredKey && !isNewGameDay(localStorage, "blurry", serverDate)) {
+        setRestoredKey(restoreKey);
+        console.log("Same day, restoring cache.");
 
-        if (lastGameDate !== serverDate) {
-            console.log("New day detected, clearing cache.");
-            clearBlurry();
+        const cachedGuesses = localStorage.getItem("blurryGuessesDetails");
+        const gameComplete = localStorage.getItem("blurryGameComplete");
+        const gameWon = localStorage.getItem("blurryGameWon");
+        const confettiShown = localStorage.getItem("confettiShownBlurry") === "true";
 
-            setGuesses([]);
-            setAttempts(0);
-            setBlurryToggleOptions({ hardcore: false, color: false });
-
-            localStorage.setItem("blurryGameDate", serverDate);
-
-            safeReload();
-            return;
-
-        } else {
-            console.log("Same day, restoring cache.");
-
-            const cachedGuesses = localStorage.getItem("blurryGuessesDetails");
-            const gameComplete = localStorage.getItem("blurryGameComplete");
-            const gameWon = localStorage.getItem("blurryGameWon");
-            const confettiShown = localStorage.getItem("confettiShownBlurry") === "true";
-
-            if (cachedGuesses) {
-                try {
-                    const parsedGuesses = JSON.parse(cachedGuesses) as GuessResponse<Partial<FeedbackData>>[];
-                    setGuesses(prev => areGuessesEqual(prev, parsedGuesses) ? prev : parsedGuesses);
-                    setAttempts(parsedGuesses.length);
-                } catch (error) {
-                    console.error("Error parsing cached guesses:", error);
-                }
+        if (cachedGuesses) {
+            try {
+                const parsedGuesses = JSON.parse(cachedGuesses) as GuessResponse<Partial<FeedbackData>>[];
+                setGuesses(prev => areGuessesEqual(prev, parsedGuesses) ? prev : parsedGuesses);
+                setAttempts(parsedGuesses.length);
+            } catch (error) {
+                console.error("Error parsing cached guesses:", error);
             }
-
-            if (gameComplete === "true") {
-                setEndGame(true);
-                if (gameWon === "true") {
-                    setShowVictoryCard(true);
-                }
-            }
-            setDayChecked(true);
-            setConfetti(confettiShown);
         }
-    }, [blurryGameData, clearBlurry, sessionRestored]);
+
+        if (gameComplete === "true") {
+            setEndGame(true);
+            if (gameWon === "true") {
+                setShowVictoryCard(true);
+            }
+        }
+        setDayChecked(true);
+        setConfetti(confettiShown);
+    }
 
     const blurryIdols = useMemo(() => {
         if (!allIdolsData) return [];

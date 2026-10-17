@@ -18,6 +18,7 @@ import {GetPixelLevel, PIXEL_LEVELS} from "../../utils/pixelLevels";
 import { WinnerExplosion } from "../../utils/confetti";
 import { useClearGameStorage } from "../../hooks/useClearGameStorage";
 import { safeReload } from "../../utils/safeReload";
+import { isNewGameDay } from "../../utils/gameStorage";
 import { useIsLg } from "../../hooks/useIsDevice";
 import { useAllGameModes } from "../../hooks/useAllGameModes";
 import { BarChart3 } from "lucide-react";
@@ -85,7 +86,7 @@ function PixelatedMode() {
     } = useQuery<PixelatedGameData>({
         queryKey: ["pixelatedDailyAlbum", gameMode],
         queryFn: getPixelatedDailyAlbum,
-        enabled: isInitialized || !!decryptedTokenRef.current,
+        enabled: isInitialized,
         staleTime: 1000 * 60 * 60 * 4,
         refetchOnWindowFocus: false,
         placeholderData: (previousData) => previousData,
@@ -110,26 +111,24 @@ function PixelatedMode() {
     const yesterdayAlbumCover = yesterdayAlbumData?.cover_path ?? null;
     const yesterdayAlbumArtist = yesterdayAlbumData?.artist ?? null;
 
+    const serverDate = pixelatedGameData?.server_date;
+
+    // New day: drop yesterday's local state and reload (nothing to keep in React state).
     useEffect(() => {
-        if (!pixelatedGameData?.server_date) return;
+        if (!serverDate || !isNewGameDay(localStorage, "pixelated", serverDate)) return;
+        if (import.meta.env.DEV) console.log("New day detected, clearing pixelated cache.");
+        clearPixelated();
+        localStorage.setItem("pixelatedGameDate", serverDate);
+        safeReload();
+    }, [serverDate, clearPixelated, sessionRestored]);
 
-        const serverDate = pixelatedGameData.server_date;
-        const lastGameDate = localStorage.getItem("pixelatedGameDate");
-
-        if (lastGameDate !== serverDate) {
-            console.log("New day detected, clearing pixelated cache.");
-            clearPixelated();
-
-            setGuesses([]);
-            setAttempts(0);
-
-            localStorage.setItem("pixelatedGameDate", serverDate);
-
-            safeReload();
-            return;
-        }
-
-        console.log("Same day, restoring pixelated cache.");
+    // Same day: restore the cached game once per server date / session restore, while rendering
+    // (React's "adjust state when a value changes"), so no effect has to copy storage into state.
+    const restoreKey = serverDate ? `${serverDate}#${sessionRestored}` : null;
+    const [restoredKey, setRestoredKey] = useState<string | null>(null);
+    if (serverDate && restoreKey !== restoredKey && !isNewGameDay(localStorage, "pixelated", serverDate)) {
+        setRestoredKey(restoreKey);
+        if (import.meta.env.DEV) console.log("Same day, restoring pixelated cache.");
 
         const cachedGuesses = localStorage.getItem("pixelatedGuessesDetails");
         const gameComplete = localStorage.getItem("pixelatedGameComplete");
@@ -154,7 +153,7 @@ function PixelatedMode() {
         }
         setDayChecked(true);
         setConfetti(confettiShown);
-    }, [pixelatedGameData, clearPixelated, sessionRestored]);
+    }
 
     const guessMutation = useMutation({
         mutationFn: getPixelatedGuessAlbum,
@@ -366,8 +365,8 @@ function PixelatedMode() {
                                 >
                                     {/* Vinyl disc */}
                                     <div
-                                        className={`absolute flex left-1/2 -translate-x-[35%] xs:-translate-x-[30%] top-5 w-55 zm:-translate-x-[30%]
-                                        xxs:w-60 xs:w-65 xm:w-70 zm:w-76 sm:w-80 md:-translate-x-[25%] md:top-3 md:w-90 lg:-translate-x-[2%] lg:left-32 lg:w-90 xl:translate-x-[5%] xl:left-36 xl:w-110 aspect-square z-1
+                                        className={`absolute flex left-1/2 translate-x-[-35%] xs:translate-x-[-30%] top-5 w-55 zm:translate-x-[-30%]
+                                        xxs:w-60 xs:w-65 xm:w-70 zm:w-76 sm:w-80 md:translate-x-[-25%] md:top-3 md:w-90 lg:translate-x-[-2%] lg:left-32 lg:w-90 xl:translate-x-[5%] xl:left-36 xl:w-110 aspect-square z-1
                                         transition-opacity duration-300 ${zoom === "open" ? "opacity-0" : "opacity-100"}`}
                                     >
                                         <div className="pixel-vinyl">
@@ -388,9 +387,9 @@ function PixelatedMode() {
 
                                     {/* Sleeve */}
                                     <div
-                                        className={`pixel-sleeve absolute flex z-2 bg-ink border-2 border-cream -rotate-4 left-1/2 -translate-x-[55%] xs:-translate-x-[65%] top-[2%] w-55 h-65 xxs:w-60 xxs:h-70 xs:w-65 xs:h-75 xm:w-70 xm:h-80 zm:w-76 zm:h-86
+                                        className={`pixel-sleeve absolute flex z-2 bg-ink border-2 border-cream -rotate-4 left-1/2 translate-x-[-55%] xs:translate-x-[-65%] top-[2%] w-55 h-65 xxs:w-60 xxs:h-70 xs:w-65 xs:h-75 xm:w-70 xm:h-80 zm:w-76 zm:h-86
                                         shadow-[0_14px_30px_rgba(0,0,0,0.35),0_4px_10px_rgba(0,0,0,0.2)] rounded-2xl rounded-b-3xl
-                                        sm:w-80 sm:h-90 md:-translate-x-[60%] md:w-90 md:h-100 lg:left-0 lg:translate-x-0 lg:w-90 lg:h-100 xl:w-110 xl:h-120
+                                        sm:w-80 sm:h-90 md:translate-x-[-60%] md:w-90 md:h-100 lg:left-0 lg:translate-x-0 lg:w-90 lg:h-100 xl:w-110 xl:h-120
                                         ${zoom === "open" ? "pixel-sleeve-zoom-in" : zoom === "closing" ? "pixel-sleeve-zoom-out" : ""}`}
                                         onTouchStart={(e) => {
                                             const t = e.touches[0];

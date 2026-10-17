@@ -4,12 +4,15 @@ from flask import Blueprint, request, jsonify, g, json
 from utils.auth_decorators import require_auth
 from utils.auth_helpers import validate_password, validate_and_normalize_email
 from services.email_service import EmailService
-from services.get_db import get_db
+from services.get_db import get_db, get_manual_db
 from repositories.user_repository import UserRepository
 import secrets
 import hashlib
+from concurrent.futures import ThreadPoolExecutor
+from threading import BoundedSemaphore
+from services.password_reset_service import PasswordResetService
 from datetime import timedelta
-from utils.dates import get_datetime_now_utc
+from utils.dates import utc_now
 from services.auth_service import AuthService
 from utils.rate_limiter import limiter
 import logging
@@ -42,7 +45,7 @@ def send_verification_email():
         
         raw_token = secrets.token_urlsafe(32)
         token_hash = hashlib.sha256(raw_token.encode()).hexdigest()
-        expires_at = get_datetime_now_utc() + timedelta(hours=24)
+        expires_at = utc_now() + timedelta(hours=24)
 
         # Delete previous unused tokens for this user
         cursor.execute(
@@ -116,7 +119,7 @@ def verify_email():
         if token_record["used_at"]:
             return jsonify({"error": "Token has already been used"}), 400
         
-        if token_record["expires_at"] < get_datetime_now_utc():
+        if token_record["expires_at"] < utc_now():
             return jsonify({"error": "Token has expired"}), 400
         
         cursor.execute(
@@ -145,65 +148,53 @@ def verify_email():
     finally:
         cursor.close()
 
+FORGOT_PASSWORD_MESSAGE = "If an account with that email exists, a password reset link has been sent"
+
+# Forgot-password work (lookup, token write, Resend call) runs off the request thread, so the
+# response time is the same whether or not the email has an account (no enumeration by timing).
+_background = ThreadPoolExecutor(max_workers=2, thread_name_prefix="forgot-password")
+_background_slots = BoundedSemaphore(32)
+
+
+def _issue_password_reset(email: str) -> None:
+    try:
+        with get_manual_db() as connect:
+            with connect.cursor() as cursor:
+                delivery = PasswordResetService(connect).issue_token(cursor, email)
+        if delivery:
+            reset_url = f"{RESEND_EMAIL_FRONTEND_URL}/reset-password?token={delivery['token']}"
+            EmailService.send_password_reset(
+                to_email=delivery["email"], username=delivery["username"], reset_link=reset_url
+            )
+    except Exception:
+        logger.exception("Failed to issue a password reset")
+
+
 @email_bp.route("/auth/email/forgot-password", methods=["POST"])
 @limiter.limit("3 per hour; 5 per day")
 def forgot_password():
-    """Endpoint to trigger sending a password reset link to the user's email address."""
-    data = request.get_json()
+    """Queue a password reset link for the email; always the same answer, at the same speed."""
+    data = request.get_json(silent=True) or {}
     email = data.get("email")
 
     if not email:
         return jsonify({"error": "Missing email"}), 400
 
-    connect = get_db()
-    cursor = connect.cursor()
-
+    if not isinstance(email, str) or len(email) > 254:
+        return jsonify({"error": "Invalid email format."}), 400
+    email = validate_and_normalize_email(email)
+    if not email:
+        return jsonify({"error": "Invalid email format."}), 400
+    if not _background_slots.acquire(blocking=False):
+        return jsonify({"error": "Password reset is temporarily unavailable"}), 503
     try:
-        repo = UserRepository(connect)
-        user = repo.find_by_email(cursor, email)
-
-        if not user:
-            return jsonify({"message": "If an account with that email exists, a password reset link has been sent"}), 200
-        
-        raw_token = secrets.token_urlsafe(32)
-        token_hash = hashlib.sha256(raw_token.encode()).hexdigest()
-        expires_at = get_datetime_now_utc() + timedelta(hours=1)
-
-        cursor.execute(
-            """
-                DELETE FROM email_tokens
-                WHERE user_id = %s
-                AND token_type = 'password_reset'
-                AND used_at IS NULL
-            """, (user["id"],)
-        )
-
-        cursor.execute(
-            """
-                INSERT INTO email_tokens (user_id, token_hash, token_type, expires_at)
-                VALUES (%s, %s, 'password_reset', %s)
-            """, (user["id"], token_hash, expires_at)
-        )
-
-        connect.commit()
-
-        # Send password reset email
-        reset_url = f"{RESEND_EMAIL_FRONTEND_URL}/reset-password?token={raw_token}"
-        EmailService.send_password_reset(
-            to_email=user["email"],
-            username=user["username"],
-            reset_link=reset_url
-        )
-
-        return jsonify({"message": "If an account with that email exists, a password reset link has been sent"}), 200
-        
+        future = _background.submit(_issue_password_reset, email)
+        future.add_done_callback(lambda _: _background_slots.release())
     except Exception:
-        connect.rollback()
-        logger.exception("Failed to send password reset email")
-        return jsonify({"error": "Failed to send password reset email"}), 500
-    
-    finally:
-        cursor.close()
+        _background_slots.release()
+        logger.exception("Could not queue password reset")
+        return jsonify({"error": "Password reset is temporarily unavailable"}), 503
+    return jsonify({"message": FORGOT_PASSWORD_MESSAGE}), 200
 
 @email_bp.route("/auth/email/reset-password", methods=["POST"])
 @limiter.limit("5 per hour; 10 per day")
@@ -241,7 +232,7 @@ def reset_password():
             return jsonify({"error": "Invalid token"}), 400
         if token_record["used_at"]:
             return jsonify({"error": "Token has already been used"}), 400
-        if token_record["expires_at"] < get_datetime_now_utc():
+        if token_record["expires_at"] < utc_now():
             return jsonify({"error": "Token has expired"}), 400
         
         password_hash = auth_service.hash_password(new_password)
@@ -302,9 +293,9 @@ def request_email_change():
 
         auth_fields = repo.find_auth_fields_by_id(cursor, user_id)
         if not auth_fields or not auth_fields.get("password_hash"):
-            return jsonify({"error": "Current password is incorrect"}), 401
+            return jsonify({"error": "Current password is incorrect"}), 403
         if not AuthService(connect).verify_password(current_password, auth_fields["password_hash"]):
-            return jsonify({"error": "Current password is incorrect"}), 401
+            return jsonify({"error": "Current password is incorrect"}), 403
 
         conflict = repo.find_by_email(cursor, new_email)
         if conflict and conflict["id"] != user_id:
@@ -312,7 +303,7 @@ def request_email_change():
         
         raw_token = secrets.token_urlsafe(32)
         token_hash = hashlib.sha256(raw_token.encode()).hexdigest()
-        expires_at = get_datetime_now_utc() + timedelta(hours=24)
+        expires_at = utc_now() + timedelta(hours=24)
 
 
         metadata = {"new_email": new_email}
@@ -382,7 +373,7 @@ def confirm_email_change():
             return jsonify({"error": "Invalid token"}), 400
         if token_record["used_at"]:
             return jsonify({"error": "Token has already been used"}), 400
-        if token_record["expires_at"] < get_datetime_now_utc():
+        if token_record["expires_at"] < utc_now():
             return jsonify({"error": "Token has expired"}), 400
         
         metadata = token_record["metadata"] or {}
@@ -422,7 +413,7 @@ def confirm_email_change():
         if old_email:
             raw_revert_token = secrets.token_urlsafe(32)
             revert_hash = hashlib.sha256(raw_revert_token.encode()).hexdigest()
-            revert_expires_at = get_datetime_now_utc() + timedelta(days=14)
+            revert_expires_at = utc_now() + timedelta(days=14)
             revert_metadata = {"old_email": old_email, "new_email": new_email}
 
             cursor.execute(
@@ -495,7 +486,7 @@ def revert_email_change():
             return jsonify({"error": "Invalid token"}), 400
         if token_record["used_at"]:
             return jsonify({"error": "Token has already been used"}), 400
-        if token_record["expires_at"] < get_datetime_now_utc():
+        if token_record["expires_at"] < utc_now():
             return jsonify({"error": "Token has expired"}), 400
         
         metadata = token_record["metadata"] or {}

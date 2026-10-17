@@ -19,12 +19,8 @@ def _is_uuid(value: str) -> bool:
     return bool(_UUID_REGEX.match(value))
 
 def decode_jwt(token: str, expected_type: str) -> dict | None:
-    """
-    Decode and validate a JWT.
-    Pins algorithm to HS256 only — prevents alg=none and RS256 confusion attacks.
-    Validates the 'type' claim to prevent token substitution (access vs refresh).
-    Returns the payload dict on success, None on any failure.
-    """
+    """Decode a JWT; returns the payload, or None on any failure.
+    Pins HS256 (no alg=none / RS256 confusion) and checks the 'type' claim (access vs refresh)."""
     try:
         payload = jwt.decode(token, JWT_SECRET_KEY, algorithms=["HS256"])
         if payload.get("type") != expected_type:
@@ -39,32 +35,25 @@ def decode_jwt(token: str, expected_type: str) -> dict | None:
         return None
     
 def detect_user(req) -> dict:
-    """
-    Parse the Authorization header and return a standardized identity dict.
-
-    Returns one of:
-      {"source": "jwt", "user_id": int, "token": str, "username": str,
-       "is_admin": bool, "is_authenticated": True, "payload": dict}
-      {"source": "anonymous", "user_id": None, "token": str,
-       "is_admin": False, "is_authenticated": False}
-      {"source": "none",      "user_id": None, "token": None,
-       "is_admin": False, "is_authenticated": False}
-
-    Does NOT touch the database. Callers needing user_id for anonymous users
-    must resolve it from the DB using the returned token.
-    """
+    """Classify the Authorization header without touching the database. `source` is "jwt" (with
+    user_id, username, is_admin, payload), "anonymous" (bare UUID in `token`; callers resolve the
+    user_id), "none" (no header) or "invalid" (anything else, e.g. an expired/forged Bearer token).
+    Every result also carries is_admin and is_authenticated."""
     auth_header = req.headers.get("Authorization", "").strip()
 
     if not auth_header:
         return _no_auth()
 
-    if auth_header.startswith("Bearer "):
-        raw_token = auth_header[7:]
+    parts = auth_header.split(maxsplit=1)
+    if parts and parts[0].lower() == "bearer":
+        raw_token = parts[1] if len(parts) == 2 else ""
 
         payload = decode_jwt(raw_token, expected_type="access")
 
         if payload is None:
-            return _no_auth()
+            # A token was sent but is expired/forged: not the same as no auth. Callers answer 401
+            # so the client refreshes instead of being served (and caching) anonymous data.
+            return {**_no_auth(), "source": "invalid"}
         
         return {
             "source": "jwt",
@@ -85,7 +74,7 @@ def detect_user(req) -> dict:
             "is_authenticated": False,
         }
 
-    return _no_auth()
+    return {**_no_auth(), "source": "invalid"}
 
 def _no_auth() -> dict:
     return {

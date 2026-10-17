@@ -137,14 +137,18 @@ class UserRepository:
         
 
     # Refresh tokens
-    def store_refresh_token(self, cursor, user_id: int, token_hash: str, expires_at, remember_me: bool) -> None:
+    def store_refresh_token(self, cursor, user_id: int, token_hash: str, expires_at, remember_me: bool) -> int | None:
+        """Store a refresh session and return its id (the access token's `sid`)."""
         cursor.execute(
             """
                 INSERT INTO refresh_tokens (user_id, token_hash, expires_at, remember_me)
                 VALUES (%s, %s, %s, %s)
                 ON CONFLICT (token_hash) DO NOTHING
+                RETURNING id
             """, (user_id, token_hash, expires_at, remember_me)
         )
+        row = cursor.fetchone()
+        return row["id"] if row else None
 
     def find_refresh_token(self, cursor, token_hash: str) -> dict | None:
         cursor.execute(
@@ -159,6 +163,13 @@ class UserRepository:
         cursor.execute(
             "UPDATE refresh_tokens SET revoked = TRUE WHERE token_hash = %s",
             (token_hash,)
+        )
+
+    def revoke_other_refresh_tokens(self, cursor, user_id: int, keep_id: int | None) -> None:
+        """Revoke every refresh session of the user except `keep_id` (all of them when it is None)."""
+        cursor.execute(
+            "UPDATE refresh_tokens SET revoked = TRUE WHERE user_id = %s AND revoked = FALSE AND id IS DISTINCT FROM %s",
+            (user_id, keep_id)
         )
 
     def revoke_all_user_refresh_tokens(self, cursor, user_id: int) -> None:

@@ -1,10 +1,6 @@
-"""Integration tests for the Album 1 collection system.
-
-Covers CollectionService grant paths, group_photo unlocks, read shapes, the
-save_user_history hook (through the real guess flow), and the two collection
-routes. The flag-off *blueprint* state is not testable in-process (registration
-happens at app import) — the off-state is covered at the hook level instead.
-"""
+"""Album 1 collection: CollectionService grants, group_photo unlocks, read shapes, the
+save_user_history hook (through the real guess flow) and both collection routes. The flag-off
+blueprint can't be tested in-process (registered at import), so the hook covers the off state."""
 
 from datetime import datetime, timezone
 
@@ -41,7 +37,7 @@ def count_user_cards(db_conn, user_id=None):
 
 
 # ---------------------------------------------------------------------------
-# CollectionService — grant paths (T4–T7)
+# CollectionService — grant paths
 # ---------------------------------------------------------------------------
 
 def test_grant_new_card_level_1(db_conn, make_user, collection_page):
@@ -103,7 +99,7 @@ def test_grant_idol_without_card_row_is_noop(db_conn, make_user, make_idol):
 
 
 # ---------------------------------------------------------------------------
-# CollectionService — group_photo unlock (T8–T13)
+# CollectionService — group_photo unlock
 # ---------------------------------------------------------------------------
 
 def test_completing_page_unlocks_group_photo(db_conn, make_user, collection_page):
@@ -189,8 +185,7 @@ def test_multi_group_idol_does_not_inflate_completion(db_conn, make_user, collec
 
 
 # ---------------------------------------------------------------------------
-# CollectionService — album fallbacks (migrated from the deleted get_group_page
-# tests; the fallback chain now lives in get_album)
+# CollectionService — album fallbacks (the fallback chain lives in get_album)
 # ---------------------------------------------------------------------------
 
 def test_album_member_image_and_no_bonus_fallbacks(db_conn, make_user, make_eligible_group,
@@ -216,7 +211,7 @@ def test_album_member_image_and_no_bonus_fallbacks(db_conn, make_user, make_elig
 
 
 # ---------------------------------------------------------------------------
-# Hook — through the real guess flow (T17–T20)
+# Hook — through the real guess flow
 # ---------------------------------------------------------------------------
 
 def _blurry_guess(client, token, idol_id, today, attempt=1):
@@ -348,8 +343,7 @@ def test_losing_guess_grants_nothing(client, db_conn, make_user, collection_page
 
 
 # ---------------------------------------------------------------------------
-# Routes — /collections/list + /collections/album/<id> (auth scenarios migrated
-# from the deleted overview/groups route tests)
+# Routes — /collections/list + /collections/album/<id> (auth scenarios)
 # ---------------------------------------------------------------------------
 
 def test_collections_list_shape_and_counts(client, db_conn, make_user, collection_page):
@@ -379,19 +373,21 @@ def test_album_route_jwt_sees_ownership(client, db_conn, make_user, collection_p
     assert sum(m["owned"] for m in resp.get_json()[0]["members"]) == 1
 
 
-def test_list_and_album_routes_degrade_on_garbage_auth(client, db_conn, make_user, collection_page):
+def test_list_and_album_routes_allow_visitors_but_reject_garbage_auth(client, db_conn, make_user, collection_page):
     owner_id, _ = make_user()
     page = collection_page(n_members=2)
     grant(db_conn, owner_id, page["idol_ids"][0])
 
-    for headers in ({}, {"Authorization": "not-a-uuid-not-a-jwt"}):
-        resp = client.get("/api/collections/list", headers=headers)
-        assert resp.status_code == 200
-        assert resp.get_json()[0]["owned_cards"] == 0
-
-        resp = client.get("/api/collections/album/1", headers=headers)
-        assert resp.status_code == 200
-        assert sum(m["owned"] for m in resp.get_json()[0]["members"]) == 0
+    listing = client.get("/api/collections/list")
+    assert listing.status_code == 200
+    assert listing.get_json()[0]["owned_cards"] == 0
+    album = client.get("/api/collections/album/1")
+    assert album.status_code == 200
+    assert sum(m["owned"] for m in album.get_json()[0]["members"]) == 0
+    for url in ("/api/collections/list", "/api/collections/album/1"):
+        resp = client.get(url, headers={"Authorization": "not-a-uuid-not-a-jwt"})
+        assert resp.status_code == 401
+        assert resp.get_json() == {"error": "Invalid or expired token"}
 
 
 def test_album_param_route_and_404s_unknown(client, make_user, collection_page):

@@ -1,11 +1,12 @@
 import os
+import secrets
 import uuid
 from datetime import timedelta, timezone
 import bcrypt
 import jwt
 from dotenv import load_dotenv
 from repositories.user_repository import UserRepository
-from utils.dates import get_datetime_now_utc
+from utils.dates import utc_now
 
 load_dotenv()
 
@@ -33,8 +34,9 @@ class AuthService:
         bcrypt.checkpw(b"irrelevant", _DUMMY_HASH)
 
     # JWT helpers
-    def generate_access_token(self, user: dict) -> str:
-        now = get_datetime_now_utc()
+    def generate_access_token(self, user: dict, session_id: int | None = None) -> str:
+        """`sid` names the refresh session the token came from, so a password change can keep it."""
+        now = utc_now()
         payload = {
             "sub": user["token"],
             "user_id": user["id"],
@@ -45,32 +47,40 @@ class AuthService:
             "iat": now,
             "exp": now + timedelta(seconds=JWT_ACCESS_EXPIRES_SECONDS),
         }
+        if session_id is not None:
+            payload["sid"] = session_id
         return jwt.encode(payload, JWT_SECRET_KEY, algorithm="HS256")
 
     def generate_refresh_token(self, user: dict) -> str:
-        now = get_datetime_now_utc()
+        now = utc_now()
         payload = {
             "sub":  user["token"],
             "type": "refresh",
+            # Without a random id, two logins of one user in the same second got the same
+            # token: one refresh_tokens row, so logging out one device logged out both.
+            "jti":  secrets.token_urlsafe(16),
             "iat":  now,
             "exp":  now + timedelta(seconds=JWT_REFRESH_EXPIRES_SECONDS),
         }
         return jwt.encode(payload, JWT_SECRET_KEY, algorithm="HS256")
 
-    def _store_refresh_token(self, cursor, user_id: int, raw_refresh: str, remember_me: bool) -> None:
+    def _store_refresh_token(self, cursor, user_id: int, raw_refresh: str, remember_me: bool) -> int | None:
         token_hash = UserRepository.hash_token_for_storage(raw_refresh)
-        expires_at = get_datetime_now_utc() + timedelta(seconds=JWT_REFRESH_EXPIRES_SECONDS)
-        self.user_repo.store_refresh_token(cursor, user_id, token_hash, expires_at, remember_me)
+        expires_at = utc_now() + timedelta(seconds=JWT_REFRESH_EXPIRES_SECONDS)
+        return self.user_repo.store_refresh_token(cursor, user_id, token_hash, expires_at, remember_me)
 
     def _build_token_pair(self, cursor, user: dict, remember_me: bool) -> dict:
-        access = self.generate_access_token(user)
         refresh = self.generate_refresh_token(user)
-        self._store_refresh_token(cursor, user["id"], refresh, remember_me)
+        session_id = self._store_refresh_token(cursor, user["id"], refresh, remember_me)
+        access = self.generate_access_token(user, session_id)
 
         return {"access_token": access, "refresh_token": refresh}
 
     # Register
     def register(self, cursor, username: str, password: str, email: str | None) -> dict:
+        # Hash first: every outcome pays the bcrypt cost, so a duplicate email isn't faster.
+        password_hash = self.hash_password(password)
+
         if self.user_repo.find_by_username(cursor, username):
             raise ValueError("username_taken")
         
@@ -78,7 +88,6 @@ class AuthService:
             raise ValueError("email_taken")
 
         token = str(uuid.uuid4())
-        password_hash = self.hash_password(password)
         user = self.user_repo.create_with_credentials(cursor, token, username, password_hash, email)
 
         # Create an initial profile record for the new user
@@ -144,6 +153,9 @@ class AuthService:
         if user.get("is_authenticated"):
             raise ValueError("already_claimed")
 
+        # Hash first: every outcome pays the bcrypt cost, so a duplicate email isn't faster.
+        password_hash = self.hash_password(password)
+
         conflict = self.user_repo.find_by_username(cursor, username)
         if conflict and conflict["id"] != user["id"]:
             raise ValueError("username_taken")
@@ -153,8 +165,6 @@ class AuthService:
 
             if conflict and conflict["id"] != user["id"]:
                 raise ValueError("email_taken")
-
-        password_hash = self.hash_password(password)
         updated_user = self.user_repo.upgrade_to_authenticated(cursor, anon_token, username, password_hash, email)
 
         # Create an initial profile record for the new user
@@ -192,7 +202,7 @@ class AuthService:
         if db_record["revoked"]:
             raise ValueError("token_revoked")
 
-        now = get_datetime_now_utc()
+        now = utc_now()
         exp = db_record["expires_at"]
 
         if hasattr(exp, "tzinfo") and exp.tzinfo is None:
@@ -215,14 +225,14 @@ class AuthService:
 
             new_raw_refresh = self.generate_refresh_token(user)
             new_hash = UserRepository.hash_token_for_storage(new_raw_refresh)
-            expires_at = get_datetime_now_utc() + timedelta(seconds=JWT_REFRESH_EXPIRES_SECONDS)
+            expires_at = utc_now() + timedelta(seconds=JWT_REFRESH_EXPIRES_SECONDS)
 
-            self.user_repo.store_refresh_token(cursor, user["id"], new_hash, expires_at, remember_me)
+            new_session_id = self.user_repo.store_refresh_token(cursor, user["id"], new_hash, expires_at, remember_me)
 
             self.db.commit()
 
             return {
-                "access_token": self.generate_access_token(user),
+                "access_token": self.generate_access_token(user, new_session_id),
                 "new_refresh_token": new_raw_refresh,
                 "remember_me": remember_me,
             }
@@ -230,7 +240,7 @@ class AuthService:
         self.db.commit()
 
         return {
-            "access_token": self.generate_access_token(user),
+            "access_token": self.generate_access_token(user, db_record["id"]),
             "remember_me": remember_me,
         }
 

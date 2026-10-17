@@ -3,7 +3,13 @@ import {
   answerIdol, closeModal, guessIdol, idolsList, openGame, searchInput, serverDate,
   userToken, victoryMarker, wrongIdols,
 } from './support/game';
-import { dailyHistory, userHistory, userIdByToken } from './support/db';
+import { dailyHistory, ensurePastIdolPick, userHistory, userIdByToken } from './support/db';
+
+const minusOneDay = (iso: string) => {
+  const d = new Date(`${iso}T12:00:00Z`);
+  d.setUTCDate(d.getUTCDate() - 1);
+  return d.toISOString().slice(0, 10);
+};
 
 // Guess rows render the idol as "Name (Group)" in a single element.
 const rowTile = (page: import('@playwright/test').Page, i: { artist_name: string; active_group: string | null }) =>
@@ -162,9 +168,12 @@ test.describe('Classic', () => {
 
   test("yesterday's idol is linked while playing", async ({ page }) => {
     await openGame(page, 'classic');
+    const today = await serverDate(page, 'classic');
+    await ensurePastIdolPick('classic', minusOneDay(today), today);
+    await page.reload();
     const res = await page.request.get('/api/store-yesterdays-idol?gamemode_id=1');
     const body = await res.json();
-    test.skip(!body.past_idol_id, 'no Classic pick stored for yesterday in this database');
+    expect(body.past_idol_id).toBeTruthy();
     const link = page.getByRole('link').filter({ hasText: body.artist_name });
     await expect(page.getByText("Yesterday's idol was")).toBeVisible();
     await link.first().click();

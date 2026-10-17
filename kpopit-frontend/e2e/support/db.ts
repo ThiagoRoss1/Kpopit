@@ -1,27 +1,12 @@
-import crypto from 'node:crypto';
-import fs from 'node:fs';
-import path from 'node:path';
-import dotenv from 'dotenv';
 import pg from 'pg';
-import { BACKEND_DIR } from './env';
+import { testDatabaseUrl } from './env';
 
-// kpopit_pre_major_patch is a local copy of production with real users: DB_URL is read from
-// kpopit-backend/.env at runtime and never printed, and tests only touch catalog rows and their own users.
-const EXPECTED_DB = 'kpopit_pre_major_patch';
-const LOCAL_HOSTS = new Set(['localhost', '127.0.0.1', '::1']);
-
+// Explicit URL, validated before any backend/helper connects. Default database name remains
+// kpopit_pre_major_patch; seeded runs set E2E_DB_URL + E2E_DB_NAME. Never read .env files.
 let pool: pg.Pool | null = null;
 
 function connectionString(): string {
-  const parsed = dotenv.parse(fs.readFileSync(path.join(BACKEND_DIR, '.env')));
-  const url = process.env.E2E_DB_URL ?? parsed.DB_URL;
-  if (!url) throw new Error('DB_URL is not set in kpopit-backend/.env');
-  const u = new URL(url);
-  const dbName = u.pathname.replace(/^\//, '');
-  if (!LOCAL_HOSTS.has(u.hostname) || dbName !== EXPECTED_DB) {
-    throw new Error(`E2E helpers only connect to the local ${EXPECTED_DB} database.`);
-  }
-  return url;
+  return testDatabaseUrl();
 }
 
 function db(): pg.Pool {
@@ -37,7 +22,7 @@ export async function closeDb(): Promise<void> {
 export const GAMEMODE = { classic: 1, blurry: 2, pixelated: 3 } as const;
 export type ModeName = keyof typeof GAMEMODE;
 
-// From daily_picks, not the API payload, which will stop exposing the answer (T40/T90).
+// From daily_picks, not the API payload, which will stop exposing the answer.
 export async function dailyPick(mode: ModeName, date: string): Promise<number> {
   const col = mode === 'pixelated' ? 'album_id' : 'idol_id';
   const { rows } = await db().query(
@@ -46,6 +31,20 @@ export async function dailyPick(mode: ModeName, date: string): Promise<number> {
   );
   if (!rows[0]?.id) throw new Error(`No ${mode} pick in daily_picks for ${date}`);
   return rows[0].id as number;
+}
+
+// A freshly seeded DB (CI) has no picks before today. Gives `date` a pick (any published idol other
+// than today's) only when it has none, so the real local copy is never changed.
+export async function ensurePastIdolPick(mode: 'classic' | 'blurry', date: string, today: string): Promise<void> {
+  await db().query(
+    `INSERT INTO daily_picks (pick_date, idol_id, gamemode_id)
+     SELECT $1, i.id, $2 FROM idols i
+      WHERE i.is_published
+        AND i.id IS DISTINCT FROM (SELECT idol_id FROM daily_picks WHERE pick_date = $3 AND gamemode_id = $2)
+      ORDER BY i.id LIMIT 1
+     ON CONFLICT (pick_date, gamemode_id) DO NOTHING`,
+    [date, GAMEMODE[mode], today],
+  );
 }
 
 export async function albumName(albumId: number): Promise<string> {
@@ -89,6 +88,14 @@ export async function seedIdolCard(userId: number, idolId: number, level = 1, ti
   );
 }
 
+export async function anyIdolWithCard(): Promise<number> {
+  const { rows } = await db().query(
+    `SELECT idol_id FROM cards WHERE card_type = 'idol' AND collection_id = 1 ORDER BY idol_id LIMIT 1`,
+  );
+  if (!rows[0]) throw new Error('no Album 1 idol card in this database');
+  return rows[0].idol_id as number;
+}
+
 export async function idolHasCard(idolId: number): Promise<boolean> {
   const { rows } = await db().query(
     `SELECT 1 FROM cards WHERE idol_id = $1 AND card_type = 'idol' LIMIT 1`,
@@ -112,23 +119,6 @@ export async function dailyHistory(userId: number, mode: ModeName) {
     [userId, GAMEMODE[mode]],
   );
   return rows;
-}
-
-// Stands in for the reset email, which tests never send: same raw token → SHA-256 scheme
-// as routes/email.py. Returns the raw token for the /reset-password link.
-export async function issuePasswordResetToken(userId: number): Promise<string> {
-  const raw = crypto.randomBytes(32).toString('base64url');
-  const hash = crypto.createHash('sha256').update(raw).digest('hex');
-  await db().query(
-    `DELETE FROM email_tokens WHERE user_id = $1 AND token_type = 'password_reset' AND used_at IS NULL`,
-    [userId],
-  );
-  await db().query(
-    `INSERT INTO email_tokens (user_id, token_hash, token_type, expires_at)
-     VALUES ($1, $2, 'password_reset', NOW() + INTERVAL '1 hour')`,
-    [userId, hash],
-  );
-  return raw;
 }
 
 // Only ever called on users the test just created; the JWT picks it up on the next refresh.

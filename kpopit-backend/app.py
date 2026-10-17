@@ -1,3 +1,4 @@
+import logging
 import os
 from flask import Flask, request, g, jsonify
 from flask_cors import CORS
@@ -25,6 +26,13 @@ from flask_limiter import RateLimitExceeded
 from services.collections_service import COLLECTION_ENABLED
 load_dotenv()
 
+# Without this, logger.info/warning calls across the app are dropped (Python's default
+# last-resort handler only prints WARNING+ without names or timestamps).
+logging.basicConfig(
+    level=os.getenv("LOG_LEVEL", "INFO").upper(),
+    format="%(asctime)s %(levelname)s %(name)s: %(message)s",
+)
+
 # Global variables
 DB_URL = os.getenv("DB_URL")
 ADMIN_ENABLED = os.getenv("ADMIN_ENABLED", "false").lower() == "true"
@@ -39,9 +47,8 @@ app = Flask(__name__)
 app.json.sort_keys = False
 app.config["MAX_CONTENT_LENGTH"] = 20 * 1024 * 1024 # 20 MB limit for incoming requests to prevent attacks and accidental overload. Adjust as needed.
 
-# Trust one proxy hop (Railway/Render/Vercel) so request.remote_addr returns
-# the real client IP. Required for Flask-Limiter to key buckets per user
-# rather than per platform proxy.
+# Trust one proxy hop (Railway) so remote_addr is the real client IP and Flask-Limiter keys
+# per user instead of per platform proxy.
 app.wsgi_app = ProxyFix(app.wsgi_app, x_for=1, x_proto=1, x_host=1)
 
 init_app(app)
@@ -128,10 +135,6 @@ app.register_blueprint(email_bp, url_prefix="/api")
 if COLLECTION_ENABLED:
     app.register_blueprint(collections_bp, url_prefix="/api")
 
-# Repository loading hook (optional future enhancement):
-# If needed, a before_request handler can be added here to attach
-# a repository instance (for example, an IdolRepository) to flask.g
-# for each request.
 
 if __name__ == "__main__":
     app.run(debug=True)

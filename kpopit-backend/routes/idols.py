@@ -107,10 +107,12 @@ def get_idols_list():
 
     for idol in idols_list:
         idol_id = idol["id"]
-        idol["groups"] = list(set(idol_groups_all.get(idol_id, [])))
+        # sorted(): a bare set() follows per-process string hashing, so each worker answered
+        # with a different order ("TWICE, MISAMO" vs "MISAMO, TWICE").
+        idol["groups"] = sorted(set(idol_groups_all.get(idol_id, [])))
         idol["all_groups"] = idol["groups"]
-        idol["active_group"] = ", ".join(set(idol_groups_active.get(idol_id, []))) or None
-        idol["companies"] = list(set(idol_companies.get(idol_id, [])))
+        idol["active_group"] = ", ".join(sorted(set(idol_groups_active.get(idol_id, [])))) or None
+        idol["companies"] = sorted(set(idol_companies.get(idol_id, [])))
         idol["member_count"] = idol_member_counts.get(idol_id)
 
         for field in ["nationality", "position"]:

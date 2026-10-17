@@ -1,79 +1,11 @@
-import math
-import random
-from datetime import date, timedelta
 from services.game_service import GameService
-from utils.dates import get_current_timestamp, get_today_date, get_today_date_str
+from utils.dates import get_current_timestamp, get_today_date_str
 
 class AlbumService:
     """Business logic for the Pixelated gamemode (gamemode_id = 3)."""
 
     def __init__(self, db):
         self.db = db
-
-    def choose_album_of_the_day(self, cursor, gamemode_id: int = 3) -> int | None:
-        """Pick today's album using the same exponential-weighting algorithm
-        as IdolService.choose_idol_of_the_day."""
-
-        COOLDOWN_DAYS = 10
-        BOOST_DAYS = 50
-        MULTIPLIER = 2
-
-        today_str = get_today_date_str()
-        today_obj = get_today_date()
-
-        cursor.execute(
-            "SELECT album_id FROM daily_picks WHERE pick_date = %s AND gamemode_id = %s",
-            (today_str, gamemode_id),
-        )
-        existing = cursor.fetchone()
-        if existing and existing["album_id"]:
-            return existing["album_id"]
-
-        date_limit = (today_obj - timedelta(days=COOLDOWN_DAYS)).isoformat()
-
-        cursor.execute(
-            """
-                SELECT a.id,
-                    (SELECT MAX(pick_date) FROM daily_picks
-                     WHERE album_id = a.id AND gamemode_id = %s AND pick_date <= %s) AS last_picked_date
-                FROM albums a
-                WHERE a.is_published = TRUE
-                AND a.id NOT IN (
-                    SELECT album_id FROM daily_picks
-                    WHERE pick_date >= %s AND gamemode_id = %s AND album_id IS NOT NULL
-                )
-            """,
-            (gamemode_id, today_str, date_limit, gamemode_id),
-        )
-        candidates = cursor.fetchall()
-
-        possible, weights = [], []
-        if candidates:
-            for row in candidates:
-                lpd = row["last_picked_date"]
-                try:
-                    last = lpd if isinstance(lpd, date) else (date.fromisoformat(lpd) if lpd else None)
-                    days_waiting = (today_obj - last).days if last else BOOST_DAYS
-                except Exception:
-                    days_waiting = COOLDOWN_DAYS
-                weight = math.exp(0.08 * days_waiting)
-                if not lpd:
-                    weight *= MULTIPLIER
-                possible.append(row["id"])
-                weights.append(weight)
-            selected_id = random.choices(possible, weights=weights, k=1)[0]
-        else:
-            cursor.execute("SELECT id FROM albums WHERE is_published = TRUE")
-            ids = [r["id"] for r in cursor.fetchall()]
-            if not ids:
-                return None
-            selected_id = random.choice(ids)
-
-        cursor.execute(
-            "INSERT INTO daily_picks (pick_date, album_id, gamemode_id) VALUES (%s, %s, %s)",
-            (today_str, selected_id, gamemode_id),
-        )
-        return selected_id
 
     def get_daily_album(self, cursor, gamemode_id: int = 3) -> dict | None:
         """Return today's album (joined for cover/palette only), or None.
@@ -131,15 +63,9 @@ class AlbumService:
         analytics_data: dict,
         gamemode_id: int = 3,
     ) -> dict:
-        """Compare guess vs today's correct album and persist to daily_user_history.
-
-        Persistence is delegated to GameService.save_user_history (shared with
-        the classic/blurry modes), which owns the daily_user_history upsert,
-        `score`, aggregate stats / streaks in `user_history`, the double-count
-        guard, and the commit. This method only resolves the correct album,
-        builds the answer payload for logging, and fetches the guessed album
-        for the response.
-        """
+        """Compare the guess with today's album and record it.
+        Persistence (upsert, score, streaks, double-count guard, commit) belongs to
+        GameService.save_user_history; this only resolves both albums for it and the response."""
         today = get_today_date_str()
         current_timestamp = get_current_timestamp()
 

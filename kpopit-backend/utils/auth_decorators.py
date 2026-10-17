@@ -3,16 +3,15 @@ from flask import jsonify, g, request
 from utils.auth_helpers import detect_user
 
 def optional_auth(f):
-    """
-    Populates g.auth with the result of detect_user(). Never blocks the request.
-    Use on game routes to enrich context without requiring login.
-
-    Access via: g.auth["source"], g.auth["user_id"], g.auth["is_authenticated"],
-                g.auth["is_admin"], g.auth["token"]
-    """
+    """Populate g.auth from detect_user(); no header and anonymous UUIDs pass.
+    An expired/invalid Bearer token gets 401 so the client refreshes instead of being served
+    anonymous data (e.g. an empty Collections album cached until F5)."""
     @wraps(f)
     def wrapper(*args, **kwargs):
-        g.auth = detect_user(request)
+        auth = detect_user(request)
+        if auth["source"] == "invalid":
+            return jsonify({"error": "Invalid or expired token"}), 401
+        g.auth = auth
         return f(*args, **kwargs)
     return wrapper
 

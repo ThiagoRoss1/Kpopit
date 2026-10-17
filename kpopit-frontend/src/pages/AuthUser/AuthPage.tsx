@@ -25,10 +25,6 @@ const AuthPage = () => {
 
     type UsernameStatus = "idle" | "checking" | "available" | "taken";
 
-    useEffect(() => {
-        setError(null);
-    }, [location.pathname]);
-
     const [registerFormData, setRegisterFormData] = useState<RegisterData>({
         username: "",
         email: "",
@@ -43,10 +39,18 @@ const AuthPage = () => {
     });
 
     const [error, setError] = useState<string | null>(null);
+    // Switching between /login and /register clears the previous form error (adjusted while
+    // rendering, so the old message never flashes on the other tab).
+    const [errorPath, setErrorPath] = useState(location.pathname);
+    if (errorPath !== location.pathname) {
+        setErrorPath(location.pathname);
+        setError(null);
+    }
     const [showPassword, setShowPassword] = useState(false);
     const [showConfirmPassword, setShowConfirmPassword] = useState(false);
 
-    const [usernameStatus, setUsernameStatus] = useState<UsernameStatus>("idle");
+    // The last availability answer and the username it belongs to; the shown status is derived below.
+    const [usernameCheck, setUsernameCheck] = useState<{ username: string; status: "available" | "taken" | "idle" } | null>(null);
     const debounceTimerRef = useRef<number | null>(null);
     const abortControllerRef = useRef<AbortController | null>(null);
 
@@ -92,6 +96,7 @@ const AuthPage = () => {
     });
 
     const isPending = loginMutation.isPending || registerMutation.isPending;
+    const submitErrorIsUsernameTaken = !isLoginTab && /username is already taken/i.test(error ?? "");
 
     const handleRegisterChange = (e: React.ChangeEvent<HTMLInputElement>) => {
         setRegisterFormData({ ...registerFormData, [e.target.name]: e.target.value });
@@ -141,12 +146,7 @@ const AuthPage = () => {
             abortControllerRef.current = null;
         }
 
-        if (isLoginTab || !isValidUsername) {
-            setUsernameStatus("idle");
-            return;
-        }
-
-        setUsernameStatus("checking");
+        if (isLoginTab || !isValidUsername) return;
 
         const username = registerFormData.username;
         debounceTimerRef.current = window.setTimeout(() => {
@@ -157,11 +157,11 @@ const AuthPage = () => {
                 try {
                     const res = await checkUsernameAvailability(username, controller.signal);
                     if (controller.signal.aborted) return;
-                    setUsernameStatus(res.available ? "available" : "taken");
+                    setUsernameCheck({ username, status: res.available ? "available" : "taken" });
                 } catch (error: unknown) {
                     const e = error as { code?: string; name?: string };
                     if (e?.code === "ERR_CANCELED" || e?.name === "AbortError") return;
-                    setUsernameStatus("idle");
+                    setUsernameCheck({ username, status: "idle" });
                 }
             };
 
@@ -179,6 +179,11 @@ const AuthPage = () => {
             }
         };
     }, [registerFormData.username, isLoginTab, isValidUsername]);
+
+    const usernameStatus: UsernameStatus =
+        isLoginTab || !isValidUsername ? "idle"
+        : usernameCheck?.username === registerFormData.username ? usernameCheck.status
+        : "checking";
 
     if (!isAuthLoading && isAuthenticated) {
         return <Navigate to="/" replace />;
@@ -280,7 +285,8 @@ const AuthPage = () => {
                                         )}
 
                                     </div>
-                                    {!isLoginTab && usernameStatus === "taken" && (
+                                    {/* Hidden once the submit error says the same thing, so only one message shows. */}
+                                    {!isLoginTab && usernameStatus === "taken" && !submitErrorIsUsernameTaken && (
                                         <p className="pl-1 max-xxs:text-[10px] xxs:text-[12px] font-black uppercase tracking-widest text-red-500">
                                             Username already taken
                                         </p>

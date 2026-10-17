@@ -1,5 +1,8 @@
+import logging
 from flask import Blueprint, jsonify
 from utils.analytics import get_analytics_data, get_country_name
+
+logger = logging.getLogger(__name__)
 
 session_info = Blueprint('session_info', __name__)
 
@@ -8,6 +11,6 @@ def init_game():
     analytics = get_analytics_data()
     country_name, flag = get_country_name(analytics.get("country"))
 
-    print(f"New session from {country_name} {flag} | Device: {analytics.get('device')} | Language: {analytics.get('lang')} | Source: {analytics.get('source')} | Referrer: {analytics.get('ref')} | Browser: {analytics.get('browser')}")
+    logger.debug("New game session from %s %s", country_name, flag)
 
     return jsonify({"status": "initialized"}), 200

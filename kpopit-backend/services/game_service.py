@@ -12,31 +12,30 @@ class GameService:
         self.repository = repository
 
     def streak_calculation(self, cursor, user_id, gamemode_id):
-            cursor.execute("""
-                    SELECT date, won FROM daily_user_history
-                    WHERE user_id = %s AND won = TRUE AND gamemode_id = %s
-                    ORDER BY date DESC
-                """, (user_id, gamemode_id))
-            
-            results = cursor.fetchall()
+        cursor.execute("""
+                SELECT date, won FROM daily_user_history
+                WHERE user_id = %s AND won = TRUE AND gamemode_id = %s
+                ORDER BY date DESC
+            """, (user_id, gamemode_id))
 
-            if not results:
-                return 0
-            
-            streak = 0
-            expected_date = get_today_date()
-            # expected_date = get_server_date_obj()
-            
-            for row in results:
-                game_date = row["date"] if isinstance(row["date"], date) else date.fromisoformat(row["date"])
+        results = cursor.fetchall()
 
-                if game_date == expected_date:
-                    streak += 1
-                    expected_date -= timedelta(days=1)
-                else:
-                    break
+        if not results:
+            return 0
 
-            return streak
+        streak = 0
+        expected_date = get_today_date()
+
+        for row in results:
+            game_date = row["date"] if isinstance(row["date"], date) else date.fromisoformat(row["date"])
+
+            if game_date == expected_date:
+                streak += 1
+                expected_date -= timedelta(days=1)
+            else:
+                break
+
+        return streak
     
     def save_user_history(self, connect, cursor, user_id, gamemode_id, guessed_id, answer_data, answer_id, current_attempt, today, current_timestamp, analytics_data):
         analytics_data = analytics_data or {}
@@ -75,11 +74,9 @@ class GameService:
                     one_shot_win, won_at, started_at_value))
                             
             if is_correct:
-                formatted_analytics_data = ' | '.join([f"{key.capitalize()}: {value}" for key, value in analytics_data.items()])
-                answer_label = answer_data.get('artist_name') or answer_data.get('album_name')
-                answer_type = 'album' if gamemode_id == 3 else 'idol'
-                print(f"Victory! User {user_id} from {analytics_data.get('country', 'Unknown')} guessed correctly {answer_type} {answer_label} of ID {answer_id} in {current_attempt} attempts at date {today}.")
-                print(f"Entire analytics data for User {user_id}: {formatted_analytics_data}")
+                # Internal id only: never the token, username or email.
+                logger.info("Victory! User %s won gamemode %s in %s attempts at date %s.",
+                            user_id, gamemode_id, current_attempt, today)
                 S0 = 10
                 decay_rate = 0.1
                 n = current_attempt
@@ -99,9 +96,8 @@ class GameService:
                     self._update_user_history(cursor, user_id, gamemode_id, streak, current_attempt, one_shot_win, today)
 
                     if COLLECTION_ENABLED and gamemode_id in COLLECTION_GAMEMODE_IDS:
-                        # A collection failure must never cost the user their win:
-                        # the savepoint confines the grant, because psycopg poisons
-                        # the whole transaction after any errored statement.
+                        # A collection failure must never cost the win: the savepoint confines it,
+                        # since psycopg poisons the whole transaction after any failed statement.
                         cursor.execute("SAVEPOINT collection_grant")
                         try:
                             card_granted = CollectionService(self.db).grant_card_for_win(

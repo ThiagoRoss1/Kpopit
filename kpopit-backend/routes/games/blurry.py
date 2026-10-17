@@ -1,19 +1,18 @@
-import os
+import logging
 from flask import Blueprint, jsonify, request, g
 from utils.auth_decorators import optional_auth
-from dotenv import load_dotenv
 from services.get_db import get_db, get_idol_repo
-from services.idol_service import IdolService
+from services.daily_draw import ensure_daily_picks
 from services.user_service import UserService
 from services.game_service import GameService
 from utils.dates import get_today_date_str, get_current_timestamp
 from utils.analytics import get_analytics_data, get_country_name
 
-load_dotenv()
 
-FLASK_ENV = os.getenv("FLASK_ENV")
 
 blurry_bp = Blueprint('blurry', __name__)
+
+logger = logging.getLogger(__name__)
 
 @blurry_bp.route("/game/blurry/daily-idol", methods=["GET"])
 def get_daily_blurry_idol():
@@ -22,10 +21,8 @@ def get_daily_blurry_idol():
     cursor = connect.cursor()
 
     try:
-        idol_service = IdolService(connect, repository)
-
-        # Choose idol of the day
-        idol_id = idol_service.choose_idol_of_the_day(cursor, gamemode_id=2)
+        # Today's idol (tomorrow's is drawn ahead and never returned)
+        idol_id = ensure_daily_picks(cursor, gamemode_id=2)
 
         connect.commit()
 
@@ -41,13 +38,8 @@ def get_daily_blurry_idol():
         user_id = user_service.handle_user_streak(gamemode_id=2)
 
         if user_id:
-            print(f"User {user_id} streak checked/updated for blurry gamemode.")
+            logger.debug("Blurry streak checked")
         
-        if FLASK_ENV == "development":
-            print("\n -- ENTIRE IDOL DICT --")
-            print(idol_blurry_data)
-            print(" ------------------------\n")
-
         blurry_game_data = {
             "answer_id": idol_blurry_data["idol_id"],
             "artist_name": idol_blurry_data["artist_name"],
@@ -154,8 +146,8 @@ def guess_blurry_idol():
                 answer_id, current_attempt, today, current_timestamp, analytics_data
             )
         
-        except Exception as e:
-            print(f"Error saving user history: {e}")
+        except Exception:
+            logger.exception("Error saving user history")
             return jsonify({"error": "Database error while saving user history"}), 500
         
         # Prepare for display
@@ -175,9 +167,9 @@ def guess_blurry_idol():
 
         return jsonify(response_data), 200
     
-    except Exception as e:
-        print(f"Error processing guess: {e}")
-        return jsonify({"error": str(e)}), 500
+    except Exception:
+        logger.exception("Error processing %s guess", "blurry")
+        return jsonify({"error": "Could not process the guess"}), 500
 
     finally:
         cursor.close()

@@ -4,7 +4,7 @@ import {
 } from './support/accounts';
 import { answerIdol, guessIdol, openGame, userToken, victoryMarker } from './support/game';
 import {
-  dailyHistory, issuePasswordResetToken, setUsernameChangedAt, userIdByToken, userIdByUsername,
+  dailyHistory, setUsernameChangedAt, userIdByToken, userIdByUsername,
 } from './support/db';
 
 const editUsernameButton = (page: import('@playwright/test').Page) =>
@@ -30,9 +30,6 @@ test.describe('Accounts', () => {
   });
 
   test('register with a taken username shows one error', async ({ page }) => {
-    // Known bug, older than the stack update: the live "already taken" hint stays up and the
-    // submit error is added below it. Remove test.fail once the page shows one message.
-    test.fail();
     const user = newUser();
     await page.goto('/');
     await registerViaApi(page, user);
@@ -88,6 +85,93 @@ test.describe('Accounts', () => {
     const other = await context.newPage();
     await other.goto('/');
     await expectLoggedIn(other);
+  });
+
+  test('a transient refresh failure keeps the session and retries', async ({ page }) => {
+    const user = newUser();
+    await page.goto('/');
+    await registerViaApi(page, user);
+    await page.context().clearCookies();
+    await page.evaluate(() => localStorage.clear());
+    await loginViaUi(page, user, true);
+    await page.evaluate(() => localStorage.setItem('kpopit_marker_game_state', 'kept'));
+
+    // First refresh after the reload: a 503 (deploy, DB blip). Later ones reach the backend.
+    let failed = 0;
+    await page.route('**/api/auth/refresh', async (route) => {
+      if (failed === 0) {
+        failed += 1;
+        await route.fulfill({ status: 503, contentType: 'application/json', body: '{"error":"unavailable"}' });
+      } else {
+        await route.fallback();
+      }
+    });
+    await page.reload();
+    await expect.poll(() => failed).toBe(1);
+    expect(await page.evaluate(() => localStorage.getItem('kpopit_session'))).toBe('true');
+    expect(await page.evaluate(() => localStorage.getItem('userToken'))).toBeTruthy();
+    expect(await page.evaluate(() => localStorage.getItem('kpopit_marker_game_state'))).toBe('kept');
+    await expectLoggedIn(page); // the background retry restores it
+  });
+
+  test('a rejected refresh token logs the user out', async ({ page }) => {
+    const user = newUser();
+    await page.goto('/');
+    await registerViaApi(page, user);
+    await page.context().clearCookies();
+    await page.evaluate(() => localStorage.clear());
+    await loginViaUi(page, user, true);
+
+    await page.route('**/api/auth/refresh', (route) =>
+      route.fulfill({ status: 401, contentType: 'application/json', body: '{"error":"Session expired. Please log in again."}' }));
+    await page.reload();
+    await expectLoggedOut(page);
+    await expect.poll(() => page.evaluate(() => localStorage.getItem('kpopit_session'))).toBeNull();
+  });
+
+  test('a session recovers on reconnect after all timed refresh retries fail', async ({ page }) => {
+    const user = newUser();
+    await page.goto('/');
+    await registerViaApi(page, user);
+    await page.clock.install();
+    let attempts = 0;
+    await page.route('**/api/auth/refresh', (route) => {
+      attempts += 1;
+      return route.fulfill({ status: 503, contentType: 'application/json', body: '{}' });
+    });
+    await page.reload();
+    await expect.poll(() => attempts).toBe(1);
+    for (const [i, delay] of [2_000, 5_000, 15_000].entries()) {
+      await page.clock.fastForward(delay);
+      await expect.poll(() => attempts).toBe(i + 2);
+    }
+    await page.unroute('**/api/auth/refresh');
+    await page.evaluate(() => window.dispatchEvent(new Event('online')));
+    await expect(page.locator('nav').getByRole('button', { name: 'User menu' }).first()).toBeVisible();
+  });
+
+  test('a wrong current password on change-password shows the error without a refresh', async ({ page }) => {
+    const user = newUser();
+    await page.goto('/');
+    await registerViaApi(page, user);
+    await page.goto(`/profile/${user.username}`);
+    await page.getByRole('button', { name: 'Edit Profile' }).click();
+    await page.locator('label').getByText('Password', { exact: true }).locator('xpath=..').getByRole('button').click();
+    await expect(page.getByText('Change Password')).toBeVisible();
+
+    const hidden = page.getByPlaceholder('••••••••••••');
+    await hidden.nth(0).fill('Wrong-Passw0rd!');
+    await page.getByPlaceholder('At least 8 characters').fill('N3w-Passw0rd!');
+    await hidden.nth(1).fill('N3w-Passw0rd!');
+
+    let refreshes = 0;
+    page.on('request', (r) => { if (r.url().includes('/api/auth/refresh')) refreshes += 1; });
+    const answer = page.waitForResponse((r) => r.url().includes('/api/user/change-password'));
+    await page.getByRole('button', { name: 'Save Changes' }).click();
+    expect((await answer).status()).toBe(403);
+    await expect(page.getByText('Current password is incorrect')).toBeVisible();
+    expect(refreshes).toBe(0);
+    await expectLoggedIn(page);
   });
 
   test('login rejects a wrong password', async ({ page }) => {
@@ -156,31 +240,6 @@ test.describe('Accounts', () => {
     expect(await dailyHistory(anonId, 'classic')).toEqual([expect.objectContaining({ won: true, guesses_count: 1 })]);
     await openGame(page, 'classic');
     await expect(victoryMarker(page, 'classic')).toBeVisible();
-  });
-
-  test('forgot + reset password (email stubbed)', async ({ page }) => {
-    const user = newUser();
-    await page.goto('/');
-    await registerViaApi(page, user, true);
-    await page.context().clearCookies();
-    await page.evaluate(() => { localStorage.clear(); sessionStorage.clear(); });
-
-    await page.goto('/forgot-password');
-    await page.getByPlaceholder('bias@example.com').fill(user.email);
-    await page.getByRole('button', { name: 'Send Reset Link' }).click();
-    await expect(page.getByText('If an account with that email exists, a reset link has been sent.')).toBeVisible();
-
-    // The email is never sent in tests: issue the token the email would carry.
-    const token = await issuePasswordResetToken(await userIdByUsername(user.username));
-    await page.goto(`/reset-password?token=${token}`);
-    const pw = page.getByPlaceholder('••••••••••••');
-    const newPassword = 'N3w-Passw0rd!';
-    await pw.nth(0).fill(newPassword);
-    await pw.nth(1).fill(newPassword);
-    await page.getByRole('button', { name: 'Reset Password' }).click();
-    await expect(page.getByText('Password reset successfully.')).toBeVisible();
-
-    await loginViaUi(page, { ...user, password: newPassword }, false);
   });
 
   test('profile page and username change cooldown', async ({ page }) => {

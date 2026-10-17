@@ -1,9 +1,12 @@
+import logging
 from flask import Blueprint, jsonify
 from services.get_db import get_db
 from repositories.idol_repository import IdolRepository
 from repositories.idol_repository import CURRENT_CAREER_CTE
 
 idols_page_bp = Blueprint('idols_page', __name__)
+
+logger = logging.getLogger(__name__)
 
 @idols_page_bp.route("/idols-page", methods=["GET"])
 def get_idols_page():
@@ -26,7 +29,7 @@ def get_idols_page():
                         c.id AS company_id,
                         c.name AS company_name,
                         COALESCE(cc.is_former_group, FALSE) AS is_former_group,
-                        (SELECT STRING_AGG(DISTINCT g2.name, ', ')
+                        (SELECT STRING_AGG(DISTINCT g2.name, ', ' ORDER BY g2.name)
                             FROM idol_career AS ic2
                             JOIN groups AS g2 ON ic2.group_id = g2.id
                             WHERE ic2.idol_id = i.id) AS all_groups
@@ -42,9 +45,9 @@ def get_idols_page():
                 cursor.execute(idol_page_query)
                 return jsonify(cursor.fetchall())
 
-            except Exception as e:
-                print(f"Error fetching idols page data: {e}")
-                return jsonify({"error": str(e)}), 500
+            except Exception:
+                logger.exception("Error fetching idols page data")
+                return jsonify({"error": "Could not load idols"}), 500
         
 @idols_page_bp.route("/idols-page/<int:idol_id>", methods=["GET"])
 def get_idols_page_idol(idol_id):
@@ -119,18 +122,9 @@ def get_idols_page_idol(idol_id):
                         "game_info": game_info
                     }
 
-                    # past response with everything 
-                    # response = {
-                    #     "idol_data": idol_data,
-                    #     "idol_career": idol_career,
-                    #     "idol_companies": idol_companies,
-                    #     "group_companies": group_companies,
-                    #     "game_modes_available": game_modes
-                    # }
-
                 return jsonify(response)
             
-            except Exception as e:
-                print(f"Error fetching idol data: {str(e)}")
+            except Exception:
+                logger.exception("Error fetching idol data")
                 return jsonify({"error": "Internal Server Error"}), 500
             

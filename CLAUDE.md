@@ -44,7 +44,7 @@ gunicorn app:app      # Production server
 ### Backend (`kpopit-backend/`)
 - **`app.py`** — Flask entry point; registers 14 blueprints under `/api` (+ `admin` when `ADMIN_ENABLED`), handles CORS and maintenance mode
 - **`routes/games/`** — Game endpoints for classic, blurry, and pixelated modes; all support `gamemode_id` query param (1=classic, 2=blurry, 3=pixelated)
-- **`services/`** — Business logic layer: `idol_service.py` runs the exponential-weighted daily pick algorithm (cooldown: 10 days, weight: `A * exp(K * days_waiting)` where K=0.08); `game_service.py` handles streaks and scoring; `album_service.py` handles Pixelated mode — `AlbumService.process_guess` delegates to `GameService.save_user_history` (single source of truth for upsert/score/streak/commit — never duplicate this logic for new modes)
+- **`services/`** — Business logic layer: `daily_draw.py` runs the one daily draw shared by every mode (`ensure_daily_picks`: stateless from `daily_picks`, 10-day cooldown, ultimatum for overdue items, capped wait weight + never-picked boost + late pressure; draws one day ahead, tomorrow's pick is never returned or logged); `game_service.py` handles streaks and scoring; `album_service.py` handles Pixelated mode — `AlbumService.process_guess` delegates to `GameService.save_user_history` (single source of truth for upsert/score/streak/commit — never duplicate this logic for new modes)
 - **`repositories/`** — Data access layer over PostgreSQL
 - **`utils/game_feedback_logic.py`** — Feedback comparison engine (exact match, partial group match, higher/lower for numerical fields)
 - **`utils/dates.py`** — All daily reset logic is EST-anchored
@@ -93,9 +93,9 @@ Use these for any user-facing auth/profile input. They return `None` if valid, a
 - `validate_password` — 8–128 chars (upper bound prevents bcrypt-cost-12 DoS via huge payloads).
 
 ## Date/Time Conventions (`utils/dates.py`)
-- **EST helpers** for daily-game logic: `get_today_now()`, `get_today_date()`, `get_today_date_str()` (ISO `YYYY-MM-DD`), `get_current_timestamp()`. Anchored to `America/New_York`.
-- **UTC helper** for token/session timestamps: `get_datetime_now_utc()` — use this for all `email_tokens.expires_at` / `refresh_tokens.expires_at` comparisons.
-- **`TEST_MODE`** — When `FLASK_ENV=development`, can be flipped on to offset "today" by `TEST_DATE_OFFSET` days; production always returns real time.
+- **Game-day helpers** (which puzzle, history day and streak day it is): `get_today_now()`, `get_today_date()`, `get_today_date_str()` (ISO `YYYY-MM-DD`). Anchored to `America/New_York`; the daily reset is midnight there.
+- **Real-time helpers** (never offset): `utc_now()` for token/session timestamps and every `email_tokens` / `refresh_tokens` expiry; `est_now()` / `get_current_timestamp()` for real New York moments (`created_at`, `won_at`, transfer-code expiry).
+- **`TEST_MODE`** — With `FLASK_ENV=development`, `TEST_DATE_OFFSET` shifts only the game-day helpers by that many days; tokens and expiries keep the real clock. Production ignores it.
 
 ## Frontend Auth Layer (`kpopit-frontend/src/`)
 - **`contexts/AuthProvider.tsx` + `contexts/auth_context.ts`** — `AuthProvider` is mounted at the app root and exposes `{ isAuthenticated, isLoading, user, refreshAuth }` via `AuthContext`. On mount it attempts a silent refresh via `/auth/refresh` → `/auth/me` if a session marker exists.
@@ -130,7 +130,10 @@ Use these for any user-facing auth/profile input. They return `None` if valid, a
 | `ADMIN_ENABLED` | Enables admin blueprint |
 | `MAINTENANCE_MODE` | Disables all `/api` routes |
 | `COLLECTION_ENABLED` | Registers `collection_bp` and enables the win→card grant hook (Album 1 collection) |
-| `R2_*` | Cloudflare R2 credentials/bucket names for idol photos, user avatars (`R2_AVATARS_BUCKET_NAME`), and DB backups |
+| `R2_*` | Cloudflare R2 credentials/bucket names for idol photos (`R2_BUCKET_NAME`, the public image bucket — backups never use it) and user avatars (`R2_AVATARS_BUCKET_NAME`) |
+| `R2_BACKUP_BUCKET_NAME` | Private bucket for DB backups (`services/backup_service.py`, objects under `backups_db/`). Required: when missing or empty the backup fails closed and uploads nothing — there is no fallback to `R2_BUCKET_NAME`. Uses `R2_ACCESS_KEY_ID` / `R2_SECRET_ACCESS_KEY` / `R2_ENDPOINT_URL` |
+| `BACKUP_DB_URL` | Optional database URL for `pg_dump` (e.g. the read-only `kpopit_backup` role); falls back to `DB_URL` |
+| `BACKUP_AUTH_KEY` | Bearer key for `POST /api/tasks/backup`; when unset the route rejects every request |
 | `JWT_*` | JWT signing + expiry (`JWT_SECRET_KEY` ≥32 chars, `JWT_ACCESS_TOKEN_EXPIRES`, `JWT_REFRESH_TOKEN_EXPIRES`) |
 | `RESEND_*` | Resend email delivery (`RESEND_API_KEY`, `RESEND_EMAIL_FROM`, `RESEND_EMAIL_FRONTEND_URL` — base URL used to build all email links) |
 
@@ -151,7 +154,7 @@ Use these for any user-facing auth/profile input. They return `None` if valid, a
 - `group_features` — Album 1 presentation data per group (`image_path`, `palette` JSONB with named stops `deep/secondary/main/accent/text`); core identity (incl. `hangul_name`) stays on `groups`
 
 ## Collection System (Album 1)
-Sticker-album collection layered on the daily games (flag: `COLLECTION_ENABLED`; plan of record: `albumplanning.md`). Winning Classic/Blurry (`COLLECTION_GAMEMODE_IDS = (1, 2)`; Pixelated never grants) gives the user that idol's single card — **one card per idol per collection** (`card_type='idol'`, `group_id` NULL); which group pages display it is resolved at read time through `idol_career`. Repeat wins level the card up (`LEVEL_CAP = 3`) and increment the uncapped `times_won`. Completing every idol card on a `has_bonus_cover` page auto-grants that page's `group_photo` card (one win can complete several pages at once).
+Sticker-album collection layered on the daily games (flag: `COLLECTION_ENABLED`). Winning Classic/Blurry (`COLLECTION_GAMEMODE_IDS = (1, 2)`; Pixelated never grants) gives the user that idol's single card — **one card per idol per collection** (`card_type='idol'`, `group_id` NULL); which group pages display it is resolved at read time through `idol_career`. Repeat wins level the card up (`LEVEL_CAP = 3`) and increment the uncapped `times_won`. Completing every idol card on a `has_bonus_cover` page auto-grants that page's `group_photo` card (one win can complete several pages at once).
 - **Grant hook** — inside `GameService.save_user_history` (first daily win only, via the `already_won_today` guard), wrapped in `SAVEPOINT collection_grant` so a collection failure never rolls back the win. Returns `(is_correct, card_granted)`; Classic/Blurry guess responses carry `card_granted: {card_id, is_new, level, times_won, group_photo: [group_id]} | null`.
 - **Card numbering** — Each idol card carries a contiguous per-collection `card_number` (`1..N`, one per idol) computed at **read time** via `DENSE_RANK() OVER (ORDER BY idol_id)` in the member query — no schema column, no migration. It's append-only and shared: a multi-group idol shows the same number on every page. Group-photo cards are never numbered (`Reward` label). Threaded through `albumMapper.ts` → `AlbumMembersPage` (locked + owned slots) + `CardZoomModal` (`Card #N`).
 - **Reads** — `routes/collections/collections.py`: `GET /api/collections/list` (per-collection rows with distinct `total_cards`/`owned_cards` for the collections list page) and `GET /api/collections/album/<collection_id>` (bulk payload for the flip-book: every eligible group with `hangul_name`, `debut_year`, `fandom_name`, `company`/`label` from `group_company_affiliation`+`companies` (label falls back to the Label company when no Parent Company row), `group_features` `image_path`/`palette`, member roster with ownership, `group_photo`; unknown collection → 404). All `@optional_auth`; anonymous UUIDs resolve via `resolve_user_id`. Card art falls back via `COALESCE` — idol cards to `idols.image_path`, group_photo cards to `group_features.image_path`. (The old `/overview` + `/groups/<id>` reads were removed 2026-07-18 — consumerless after the flip-book design.)
@@ -174,6 +177,14 @@ Recurring patterns across the codebase — follow them in new code.
 - **Reload via `safeReload()`** — Not `window.location.reload()` directly; its one-shot guard prevents reload loops when multiple triggers fire.
 - **Per-mode React Query keys** — `["pixelatedDailyAlbum", gameMode]`, `["dailyUserCount", gameMode]`, etc. Client-side search lists (`["allAlbums"]`, `["allIdols"]`) are fetched once and filtered locally — no per-keystroke endpoint.
 
+### Comments
+- Inline comments: 1–2 lines, explaining why (not what the code says).
+- Longer explanations (docstrings, module headers, non-obvious workarounds): 3–5 lines max. Anything longer belongs in docs.
+- No dead commented-out code, no references to local/gitignored docs (e.g. "plan §3"), no `noqa`/`pragma`/`eslint-disable` to hide a
+  problem: fix the cause. If a suppression is truly unavoidable, one line saying why.
+- Keep on purpose: labeled testing toggles (e.g. the commented `idol_id = 1` / album override in the daily routes, used to force a
+  pick while testing) and usage examples in helpers (e.g. the `utils/dates.py` examples). Don't strip them in cleanups.
+
 ## Architecture — Adding a New Game Mode
 Every mode follows the same shape (Classic → Blurry → Pixelated) on both stacks. Reuse it; don't invent a parallel structure. (Visual/design rules live in `kpopit-frontend/DESIGN.md` — Puff Pop style; exact tokens, components and the reference UI kit live in the design system at `docs/design-system/`, which wins on any value conflict.)
 
@@ -182,7 +193,7 @@ Every mode follows the same shape (Classic → Blurry → Pixelated) on both sta
 ### Backend
 - **Blueprint + `gamemode_id`** — Add `routes/games/<mode>.py`, register it under `/api` in `app.py`, and assign the next `gamemode_id`. The active mode is read per-request into `g.gamemode_id` from the `gamemode_id` query param (`load_gamemode` in `app.py`, defaults to 1).
 - **A Service owns the mode's logic** — Put it in `services/<x>_service.py` (e.g. `AlbumService`), constructed with the connection and given `cursor`/`connect` per call. It provides three things:
-  1. **Daily pick** — reuse the exponential-weighting algorithm (`weight = exp(0.08 · days_waiting)`, 10-day cooldown, boost for never-picked), writing the winner to `daily_picks` keyed by `(pick_date, gamemode_id)`.
+  1. **Daily pick** — add the mode to `_MODES` in `services/daily_draw.py` (eligible items + entry date) and call `ensure_daily_picks`; it writes to `daily_picks` keyed by `(pick_date, gamemode_id)`.
   2. **Daily fetch** — return only what the client needs to render/play (no answer-revealing extras beyond what the UI already uses as hints).
   3. **`process_guess`** — resolve the correct answer, then **delegate persistence** (see below).
 - **Scoring is centralized — never reimplemented per mode** — `process_guess` delegates to `GameService.save_user_history`, the single owner of the `daily_user_history` upsert, `score`, `user_history` streaks/aggregates, the double-count guard, and the `commit()`. A new mode adds *zero* scoring/streak code.

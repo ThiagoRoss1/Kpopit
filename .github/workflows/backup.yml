@@ -1,0 +1,57 @@
+name: Database backup
+
+# Daily pg_dump → R2 via POST /api/tasks/backup on the backend; the DB URL never leaves Railway.
+# A failed run fails the job, and GitHub emails the repo owner.
+
+on:
+  schedule:
+    - cron: '0 7 * * *' # 07:00 UTC daily (03:00 EDT / 02:00 EST), after the midnight EST reset
+  workflow_dispatch:
+
+permissions: {}
+
+concurrency:
+  group: database-backup
+  cancel-in-progress: false
+
+jobs:
+  backup:
+    name: Trigger backup
+    runs-on: ubuntu-latest
+    # Two 600-second attempts plus the retry delay must both fit in the job timeout.
+    timeout-minutes: 25
+    env:
+      BACKUP_URL: ${{ secrets.BACKUP_URL }}
+      BACKUP_AUTH_KEY: ${{ secrets.BACKUP_AUTH_KEY }}
+    steps:
+      - name: Check secrets
+        id: secrets
+        run: |
+          if [ -z "$BACKUP_URL" ] || [ -z "$BACKUP_AUTH_KEY" ]; then
+            echo "::notice title=Backup skipped::BACKUP_URL or BACKUP_AUTH_KEY secret is not set."
+            echo "ready=false" >> "$GITHUB_OUTPUT"
+          else
+            echo "ready=true" >> "$GITHUB_OUTPUT"
+          fi
+
+      - name: POST /api/tasks/backup
+        if: steps.secrets.outputs.ready == 'true'
+        run: |
+          # One retry, 30 s apart. The route allows 3 calls per hour, so this stays inside it.
+          # --max-time covers pg_dump + upload on the backend.
+          for attempt in 1 2; do
+            if curl --fail --silent --show-error \
+                 --max-time 600 \
+                 -X POST "$BACKUP_URL" \
+                 -H "Authorization: Bearer $BACKUP_AUTH_KEY" \
+                 -o /dev/null -w "HTTP %{http_code}\n"; then
+              echo "Backup succeeded on attempt $attempt."
+              exit 0
+            fi
+            if [ "$attempt" = 1 ]; then
+              echo "Attempt 1 failed; retrying in 30 s."
+              sleep 30
+            fi
+          done
+          echo "::error title=Backup failed::Both attempts failed. Check the backend logs on Railway."
+          exit 1

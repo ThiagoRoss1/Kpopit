@@ -10,7 +10,6 @@ import type {
   IdolListItem,
   GuessResponse,
   YesterdayIdol,
-  GuessedIdolData,
   CompleteGuessRequest,
   CompleteGuessTrafficRequest,
 } from "../../interfaces/gameInterfaces.ts";
@@ -34,11 +33,12 @@ import { useGameMode } from "../../hooks/useGameMode.tsx";
 import BackgroundStyle from "../../components/Background/BackgroundStyle.tsx";
 import FeedbackSquares from "../../components/FeedbackSquares/FeedbackSquares.tsx";
 import { WinnerExplosion } from "../../utils/confetti.tsx";
-import { calculateFeedback } from "../../utils/calculateFeedback.ts";
+import { buildLocalClassicGuess } from "../../utils/localGuess.ts";
 import { useAllGameModes } from "../../hooks/useAllGameModes.tsx";
 import { useClearGameStorage } from "../../hooks/useClearGameStorage.tsx";
 import { areGuessesEqual } from "../../utils/areGuessesEqual.ts";
 import { safeReload } from "../../utils/safeReload.ts";
+import { isNewGameDay } from "../../utils/gameStorage.ts";
 import CardGrantedReveal from "../Collection/components/CardGrantedReveal.tsx";
 import type { CardGranted } from "../../interfaces/albumInterfaces.ts";
 
@@ -121,53 +121,53 @@ function ClassicMode() {
   const yesterdayIdolImage = yesterday.data?.image_path ?? null;
   const yesterdayIdolImageVersion = yesterday.data?.image_version ?? null;
 
+  const serverDate = gameData?.server_date;
+
+  // New day: drop yesterday's local state and reload (nothing to keep in React state).
   useEffect(() => {
-    if (!gameData) return;
+    if (!serverDate || !isNewGameDay(localStorage, "classic", serverDate)) return;
+    console.log("New day detected, clearing cache.");
+    clearClassic();
+    localStorage.setItem("gameDate", serverDate);
+    safeReload();
+  }, [serverDate, clearClassic, sessionRestored]);
 
-    const serverDate = gameData?.server_date;
-    const lastGameDate = localStorage.getItem("gameDate");
-   
-    if (lastGameDate !== serverDate) {
-      console.log("New day detected, clearing cache.");
-      clearClassic();
+  // Same day: restore the cached game once per server date / session restore, while rendering
+  // (React's "adjust state when a value changes"), so no effect has to copy storage into state.
+  const restoreKey = serverDate ? `${serverDate}#${sessionRestored}` : null;
+  const [restoredKey, setRestoredKey] = useState<string | null>(null);
+  if (serverDate && restoreKey !== restoredKey && !isNewGameDay(localStorage, "classic", serverDate)) {
+    setRestoredKey(restoreKey);
+    console.log("Same day, restoring cache.");
+    const cachedGuesses = localStorage.getItem("todayGuessesDetails");
+    const gameComplete = localStorage.getItem("gameComplete");
+    const gameWon = localStorage.getItem("gameWon");
+    const closeFeedbackSquares = localStorage.getItem("closeFeedbackSquares") === "true";
+    const confettiShown = localStorage.getItem("confettiShown") === "true";
 
-      localStorage.setItem("gameDate", serverDate || "");
+    if (cachedGuesses) {
+      try {
+        const parsedGuesses = JSON.parse(cachedGuesses) as GuessResponse[];
 
-      safeReload();
-
-      return;
-    } else {
-      console.log("Same day, restoring cache.");
-      const cachedGuesses = localStorage.getItem("todayGuessesDetails");
-      const gameComplete = localStorage.getItem("gameComplete");
-      const gameWon = localStorage.getItem("gameWon");
-      const closeFeedbackSquares = localStorage.getItem("closeFeedbackSquares") === "true";
-      const confettiShown = localStorage.getItem("confettiShown") === "true";
-
-      if (cachedGuesses) {
-        try {
-          const parsedGuesses = JSON.parse(cachedGuesses) as GuessResponse[];
-
-          setGuesses(prev => areGuessesEqual(prev, parsedGuesses) ? prev : parsedGuesses);
-          setAttempts(parsedGuesses.length);
-        } catch (error) {
-          console.error("Error parsing cached guesses:", error);
-        }
+        setGuesses(prev => areGuessesEqual(prev, parsedGuesses) ? prev : parsedGuesses);
+        setAttempts(parsedGuesses.length);
+      } catch (error) {
+        console.error("Error parsing cached guesses:", error);
       }
-      setCloseFeedbackSquares(closeFeedbackSquares);
-
-      if (gameComplete === "true") {
-        setEndGame(true);
-        if (gameWon === "true") {
-          setIsCorrect(true);
-          setShowVictoryCard(true);
-        }
-      }
-
-      setDayChecked(true);
-      setConfetti(confettiShown);
     }
-  }, [gameData, clearClassic, sessionRestored]);
+    setCloseFeedbackSquares(closeFeedbackSquares);
+
+    if (gameComplete === "true") {
+      setEndGame(true);
+      if (gameWon === "true") {
+        setIsCorrect(true);
+        setShowVictoryCard(true);
+      }
+    }
+
+    setDayChecked(true);
+    setConfetti(confettiShown);
+  }
 
   const guessMutation = useMutation({
     mutationFn: async (guessData: CompleteGuessRequest) => {
@@ -266,32 +266,12 @@ function ClassicMode() {
       return;
     }
 
-    const guessedIdolData = allIdolsData.find(idol => idol.id === selectedIdol.id);
-    const answerIdolData = allIdolsData.find(idol => idol.id === gameData.answer_id);
+    const localGuessResult = buildLocalClassicGuess(allIdolsData, selectedIdol.id, gameData.answer_id);
 
-    if (!guessedIdolData || !answerIdolData) {
+    if (!localGuessResult) {
       console.error("Idol data not found");
       return;
     }
-
-    // Maps 'id' from list item to 'idol_id' expected calculation types
-    const guessForCalculation: GuessedIdolData = {
-      ...guessedIdolData,
-      idol_id: guessedIdolData.id,
-    };
-
-    const answerForCalculation: GuessedIdolData = {
-      ...answerIdolData,
-      idol_id: answerIdolData.id,
-    };
-    
-    const localFeedback = calculateFeedback(guessForCalculation, answerForCalculation);
-
-    const localGuessResult: GuessResponse = {
-      guess_correct: guessedIdolData.id === gameData.answer_id,
-      feedback: localFeedback,
-      guessed_idol_data: guessForCalculation
-    };
 
     setGuesses(prev => {
       const updatedGuesses = [...prev, localGuessResult]
@@ -397,14 +377,12 @@ function ClassicMode() {
         <TopButtons
           onSubmitHowToPlay={() => { setShowModal("how-to-play") }}
           onSubmitStats={() => { setShowModal("stats") }}
-          // onSubmitStreak={() => { setShowModal("streak") }}
           onSubmitShare={() => { setShowModal("share") }}
         />
         {showModal === "how-to-play" && <Modal isOpen onClose={() => setShowModal(null)} title="How to Play..."><HowToPlayText /></Modal>}
 
         {showModal === "stats" && <Modal isOpen onClose={() => setShowModal(null)} title="Stats..."><StatsText stats={userStatsData} onSubmitTransferData={() => {setShowModal("transfer-data")}} /></Modal>}
         {showModal === "share" && <Modal isOpen onClose={() => setShowModal(null)} title="Share..."><ShareText guesses={guesses} hasWon={isCorrect} attempts={attempts} gameMode={"classic"} /></Modal>}
-        {/* {showModal === "streak" && <Modal onClose={() => setShowModal(null)} title="Streak..."><p>Working in progress...</p></Modal>} */}
 
         {/* Sub-Stats Modals */}
         {showModal === "transfer-data" && <Modal isOpen onClose={() => setShowModal(null)} title="Transfer Data..." isTransferDataSubPages={true} returnPage={() => {setShowModal("stats")}}><TransferDataText onSubmitImportData={() => {setShowModal("import-data")}} onSubmitExportData={() => {setShowModal("export-data")}} /></Modal>}
@@ -481,7 +459,6 @@ function ClassicMode() {
         }}
         />
       )} 
-      {/* See later */}
 
       {endGame && showVictoryCard && <CardGrantedReveal cardGranted={cardGranted} />}
 

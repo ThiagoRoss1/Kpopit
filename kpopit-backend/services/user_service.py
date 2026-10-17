@@ -12,7 +12,7 @@ class UserService:
 
         auth = detect_user(request)
 
-        if auth["source"] == "none":
+        if auth["source"] in ("none", "invalid"):
             cursor.close()
             return None
 

@@ -5,6 +5,7 @@ import type { MeResponse, UpdateProfilePayload } from '../interfaces/authInterfa
 import { decryptToken } from '../utils/tokenEncryption';
 import { setAccessToken, getAccessToken, clearAccessToken } from './tokenStore';
 import { safeReload } from '../utils/safeReload';
+import { isSessionRejected } from '../utils/authErrors';
 // Api instance with base URL
 const api = axios.create({
     baseURL: import.meta.env.DEV ? '/api' : `${import.meta.env.VITE_API_URL}/api`,
@@ -18,9 +19,6 @@ const MODES: Record<string, number> = {
     "blurry": 2,
     "pixelated": 3
 };
-
-export const isTimeoutError = (err: unknown): boolean =>
-    axios.isAxiosError(err) && err.code === 'ECONNABORTED';
 
 // Response interceptor to handle invalid user token globally
 api.interceptors.response.use(
@@ -41,10 +39,13 @@ api.interceptors.response.use(
                 original.headers['Authorization'] = `Bearer ${data.access_token}`;
                 return api(original);
             } catch (refreshError) {
-                const isTimeout = isTimeoutError(refreshError);
-                const hadToken = !!getAccessToken();
-                clearAccessToken();
-                if (hadToken && !isTimeout) safeReload();
+                // Only a rejected session ends it. A network error, timeout or 5xx on refresh
+                // keeps the token and the session: this request fails, the next 401 retries.
+                if (isSessionRejected(refreshError)) {
+                    const hadToken = !!getAccessToken();
+                    clearAccessToken();
+                    if (hadToken) safeReload();
+                }
             }
         }
         if (error.response?.status === 400) {

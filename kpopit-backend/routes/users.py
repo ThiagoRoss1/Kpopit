@@ -3,7 +3,7 @@ import json
 import secrets
 from datetime import datetime, timedelta, timezone
 from services.get_db import get_db
-from utils.dates import get_today_now, get_current_timestamp, get_today_date_str, get_datetime_now_utc
+from utils.dates import get_current_timestamp, get_today_date_str, utc_now, est_now
 from flask import Blueprint, request, jsonify, g
 from utils.auth_decorators import require_auth
 from repositories.user_repository import UserRepository
@@ -27,7 +27,6 @@ def generate_user_token():
 
     # Try up to 5 times
     attempts = 0
-    error = ""
 
     while not token_sucessfuly_generated and attempts < 5:
         connect = None
@@ -47,12 +46,11 @@ def generate_user_token():
             
             token_sucessfuly_generated = True
             
-        except Exception as e:
+        except Exception:
             if connect is not None:
                 connect.rollback()
             attempts += 1
-            print(f"Token generation attempt {attempts} failed: {e}")
-            error += str(e)
+            logger.exception("Token generation attempt %s failed", attempts)
         
         finally:
             if cursor is not None:
@@ -61,7 +59,7 @@ def generate_user_token():
     if token_sucessfuly_generated:
         return jsonify({"token": token})
     else:
-        return jsonify({"error": "Failed to generate unique token after 5 attempts", "details": error}), 500
+        return jsonify({"error": "Failed to generate unique token after 5 attempts"}), 500
     
 @user_bp.route("/stats/<user_token>", methods=["GET"])
 def get_user_stats(user_token):
@@ -114,7 +112,6 @@ def get_game_state(user_token):
     gamemode_id = request.args.get("gamemode_id", default=1, type=int)
 
     today = get_today_date_str()
-    # today = get_server_date()
 
     # Start db connection
     connect = get_db()
@@ -190,7 +187,6 @@ def generate_transfer_code(user_token):
         cursor.close()
         return jsonify({"error": "Invalid user token"}), 400
 
-    # today = get_server_date()
     
     # Delete expired codes
     cursor.execute("""
@@ -200,7 +196,6 @@ def generate_transfer_code(user_token):
 
     # Generate unique transfer code
     attempts = 0
-    error = ""
     while not code_generated and attempts < 5:
         try:
             # Guarantee uniqueness by checking existing codes
@@ -220,8 +215,7 @@ def generate_transfer_code(user_token):
 
 
             code = f"{secrets.token_hex(2)[:3].upper()}-{secrets.token_hex(2)[:3].upper()}"
-            expires_at = get_today_now() + timedelta(days=3)
-            # expires_at = get_server_datetime_now() + datetime.timedelta(days=3)
+            expires_at = est_now() + timedelta(days=3)
 
             # Insert transfer code into database
             cursor.execute("""
@@ -232,18 +226,17 @@ def generate_transfer_code(user_token):
             connect.commit()
             code_generated = True
 
-        except Exception as e:
+        except Exception:
             connect.rollback()
             attempts += 1
-            print(f"Transfer code generation attempt {attempts} failed: {e}")
-            error += str(e)
+            logger.exception("Transfer code generation attempt %s failed", attempts)
 
     cursor.close()
 
     if code_generated:
         return jsonify({"transfer_code": code, "expires_at": expires_at.isoformat()})
     else:
-        return jsonify({"error": "Failed to generate unique transfer code after 5 attempts", "details": error}), 500
+        return jsonify({"error": "Failed to generate unique transfer code after 5 attempts"}), 500
     
 @user_bp.route("/transfer-data", methods=["POST"])
 def transfer_data():
@@ -278,8 +271,7 @@ def transfer_data():
     if isinstance(expires_at, str):
         expires_at = datetime.fromisoformat(expires_at)
 
-    if expires_at < get_today_now():
-    # if expires_at < get_server_datetime_now():
+    if expires_at < est_now():
         cursor.close()
         return jsonify({"error": "Transfer code has expired"}), 400
     
@@ -300,7 +292,6 @@ def transfer_data():
 def get_active_transfer_code(user_token):
     """Get active transfer code if exists"""
 
-    # today = get_server_datetime_now().isoformat()
 
     # Start db connection
     connect = get_db()
@@ -382,16 +373,16 @@ def update_display_name():
         if username:
             auth_fields = repository.find_auth_fields_by_id(cursor, user_id)
             if not auth_fields or not auth_fields.get("password_hash"):
-                return jsonify({"error": "Current password is incorrect"}), 401
+                return jsonify({"error": "Current password is incorrect"}), 403
             
             if not AuthService(connect).verify_password(current_password, auth_fields["password_hash"]):
-                return jsonify({"error": "Current password is incorrect"}), 401
+                return jsonify({"error": "Current password is incorrect"}), 403
 
             changed_at = auth_fields.get("username_changed_at")
             if changed_at:
                 if changed_at.tzinfo is None:
                     changed_at = changed_at.replace(tzinfo=timezone.utc)
-                days_since = (get_datetime_now_utc() - changed_at).days
+                days_since = (utc_now() - changed_at).days
 
                 if days_since < 5:
                     return jsonify({"error": f"Username can only be changed once every 5 days. Please wait {5 - days_since} more day(s)."}), 400
@@ -505,13 +496,10 @@ def update_avatar_webp():
 @require_auth
 @limiter.limit("5 per hour")
 def change_password():
-    """Change the password of the currently authenticated user.
-
-    Requires the current password for re-authentication. Refresh tokens
-    on other devices are intentionally NOT revoked here — the session JWT
-    is signed with JWT_SECRET_KEY (not the password), so existing sessions
-    keep working after a password change.
-    """
+    """Change the authenticated user's password (current password required).
+    Revokes the user's other refresh sessions and keeps the one this access token came from (`sid`);
+    a token without `sid` can't name its session, so then all are revoked. Other access tokens
+    stay valid until they expire (≤1 h)."""
     data = request.get_json() or {}
     current_password = data.get("current_password", "")
     new_password = data.get("new_password", "")
@@ -535,14 +523,15 @@ def change_password():
         auth_fields = repository.find_auth_fields_by_id(cursor, user_id)
 
         if not auth_fields or not auth_fields.get("password_hash"):
-            return jsonify({"error": "Current password is incorrect"}), 401
+            return jsonify({"error": "Current password is incorrect"}), 403
 
         auth_service = AuthService(connect)
         if not auth_service.verify_password(current_password, auth_fields["password_hash"]):
-            return jsonify({"error": "Current password is incorrect"}), 401
+            return jsonify({"error": "Current password is incorrect"}), 403
 
         new_hash = auth_service.hash_password(new_password)
         repository.update_password_hash(cursor, user_id, new_hash)
+        repository.revoke_other_refresh_tokens(cursor, user_id, keep_id=g.auth["payload"].get("sid"))
         connect.commit()
         return jsonify({"message": "Password updated"}), 200
 

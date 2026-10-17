@@ -1,3 +1,4 @@
+import logging
 from flask import Blueprint, jsonify, request
 import os
 from dotenv import load_dotenv
@@ -10,6 +11,8 @@ DB_URL = os.getenv("DB_URL")
 BACKUP_KEY = os.getenv("BACKUP_KEY")
 
 admin_bp = Blueprint('admin', __name__)
+
+logger = logging.getLogger(__name__)
     
 @admin_bp.route("/api/admin/add-idol", methods=["POST"])
 @require_admin
@@ -93,30 +96,9 @@ def add_idol():
         conn.commit()
         return jsonify({"message": "Idol added successfully", "idol_id": final_idol_id}), 201
     
-    except Exception as e:
+    except Exception:
         conn.rollback()
-        return jsonify({"error": str(e)}), 500
+        logger.exception("Failed to add idol")
+        return jsonify({"error": "Failed to add idol"}), 500
     finally:
         cursor.close()
-
-
-# @admin_bp.route("/api/admin/download-backup", methods=["GET"])
-# def download_backup():
-#     key = request.args.get("key")
-
-#     if not BACKUP_KEY:
-#         return jsonify({"error": "Backup key not configured on server"}), 500
-    
-#     if key != BACKUP_KEY:
-#         return jsonify({"error": "Invalid backup key"}), 403
-
-#     if os.path.exists(DB_URL):
-#         try:
-#             return send_file(DB_URL, as_attachment=True, download_name="kpopit-backup.db")
-#         except Exception as e:
-#             return jsonify({"error": f"Failed to send file: {str(e)}"}), 500
-        
-#     else:
-#         return jsonify({"error": f"Backup file not found: {DB_URL}"}), 404
-
-# Already have backup functionality in backup_service.py that uploads to S3, so no need for this endpoint to download directly from server. Can implement S3 download if needed in the future.

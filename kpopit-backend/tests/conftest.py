@@ -1,51 +1,46 @@
 """
-Integration-test scaffolding for kpopit-backend.
-
-Requirements
-------------
-- A local PostgreSQL database with the full schema already applied.
-- `TEST_DB_URL` env var pointing to that DB.
-  If unset, we fall back to `DB_URL` with the database name swapped to
-  `kpopit_test` so accidental runs never touch the dev/prod DB.
-
-The fixture suite TRUNCATEs every transactional table before each test and
-re-seeds the three gamemodes (FK targets), giving each test a clean slate.
+Integration-test scaffolding: a local, disposable `kpopit_test` database (TEST_DB_URL).
+Every test starts from TRUNCATEd tables with the gamemodes and Album 1 re-seeded.
 """
 
 import os
 import sys
 from pathlib import Path
 
+import psycopg
+import pytest
+from psycopg.rows import dict_row
+
 BACKEND_ROOT = Path(__file__).resolve().parent.parent
 sys.path.insert(0, str(BACKEND_ROOT))
 
-# Load .env so TEST_DB_URL / JWT_SECRET_KEY are available without requiring
-# the developer to export them in the shell first.
-from dotenv import load_dotenv  # noqa: E402
-
-load_dotenv(BACKEND_ROOT / ".env")
+# Test targets and secrets must be explicit; never load workstation .env files.
+os.environ["PYTHON_DOTENV_DISABLED"] = "1"
 
 
 def _resolve_test_db_url() -> str:
-    explicit = os.getenv("TEST_DB_URL")
-    if explicit:
-        return explicit
+    from urllib.parse import urlsplit, urlunsplit
+    from psycopg.conninfo import conninfo_to_dict
 
-    base = os.getenv("DB_URL")
-    if not base:
-        raise RuntimeError(
-            "TEST_DB_URL (or DB_URL) must be set to run the test suite."
-        )
-    if "/kpopit_test" in base:
-        return base
-    # Replace the trailing /<dbname> segment with /kpopit_test so we never
-    # accidentally TRUNCATE the dev DB.
-    head, _, _ = base.rpartition("/")
-    if not head:
-        raise RuntimeError(
-            "Could not derive kpopit_test URL from DB_URL — set TEST_DB_URL explicitly."
-        )
-    return f"{head}/kpopit_test"
+    url = os.getenv("TEST_DB_URL")
+    if not url:
+        base = os.getenv("DB_URL")
+        if not base:
+            raise RuntimeError("Set TEST_DB_URL to the local disposable kpopit_test database.")
+        parsed = urlsplit(base)
+        if parsed.scheme not in ("postgresql", "postgres"):
+            raise RuntimeError("Set an explicit local TEST_DB_URL.")
+        url = urlunsplit(parsed._replace(path="/kpopit_test"))
+    try:
+        params = conninfo_to_dict(url)
+    except Exception:
+        raise RuntimeError("Invalid test database configuration.") from None
+    local_hosts = {"localhost", "127.0.0.1", "::1"}
+    if (params.get("host") not in local_hosts or params.get("dbname") != "kpopit_test"
+            or (params.get("hostaddr") or os.getenv("PGHOSTADDR")) not in (None, "127.0.0.1", "::1")
+            or params.get("service") or os.getenv("PGSERVICE")):
+        raise RuntimeError("Tests require a local disposable database named exactly kpopit_test.")
+    return url
 
 
 TEST_DB_URL = _resolve_test_db_url()
@@ -55,19 +50,17 @@ os.environ.setdefault(
     "test_jwt_secret_key_at_least_32_chars_long_for_pytest_runs",
 )
 os.environ.setdefault("FLASK_ENV", "development")
-# Force the collection feature on for the suite: collection_bp registration and
-# the grant hook both read this at import time. Hook on/off behaviour is still
-# exercised per-test via monkeypatch on services.game_service.COLLECTION_ENABLED.
+# Read at import by collection_bp and the grant hook; tests flip the hook via monkeypatch.
 os.environ["COLLECTION_ENABLED"] = "true"
 # Register the admin blueprint regardless of the local .env, so its auth rules are always tested.
 os.environ["ADMIN_ENABLED"] = "true"
+# No test may reach Resend: emails go to a per-test outbox (see the email_outbox fixture),
+# and the real key from .env is replaced before email_service reads it at import.
+os.environ["EMAIL_DELIVERY"] = "outbox"
+os.environ["RESEND_API_KEY"] = "re_disabled_for_tests"
 
-import psycopg  # noqa: E402
-import pytest  # noqa: E402
-from psycopg.rows import dict_row  # noqa: E402
-
-from app import app as flask_app  # noqa: E402
-from utils.dates import get_today_date_str  # noqa: E402
+# The app and every module that reads env vars at import are imported lazily, inside the
+# fixtures, so the environment above is always in place first.
 
 
 TRUNCATE_SQL = """
@@ -112,6 +105,8 @@ SEED_COLLECTIONS_SQL = """
 
 @pytest.fixture(scope="session")
 def app():
+    from app import app as flask_app
+
     flask_app.config["TESTING"] = True
     yield flask_app
 
@@ -130,6 +125,59 @@ def db_conn():
         conn.close()
 
 
+class Outbox:
+    """Emails written by EmailService._send in outbox mode, oldest first."""
+
+    def __init__(self, path):
+        self.path = path
+
+    def all(self) -> list[dict]:
+        import json
+
+        return [json.loads(p.read_text(encoding="utf-8")) for p in sorted(self.path.glob("*.json"))]
+
+    def latest_to(self, address: str) -> dict | None:
+        sent = [m for m in self.all() if m["to"] == address]
+        return sent[-1] if sent else None
+
+    def wait_for(self, address: str, timeout: float = 5.0) -> dict | None:
+        """latest_to, polling: some emails (forgot-password) are sent off the request thread."""
+        import time
+
+        deadline = time.monotonic() + timeout
+        while time.monotonic() < deadline:
+            mail = self.latest_to(address)
+            if mail:
+                return mail
+            time.sleep(0.05)
+        return None
+
+
+@pytest.fixture(autouse=True)
+def email_outbox(monkeypatch, tmp_path):
+    """Fresh outbox per test; a direct Resend call fails the test."""
+    import resend
+
+    def _no_resend(*_args, **_kwargs):
+        raise AssertionError("tests must never call Resend")
+
+    outbox_dir = tmp_path / "outbox"
+    monkeypatch.setenv("EMAIL_DELIVERY", "outbox")
+    monkeypatch.setenv("EMAIL_OUTBOX_DIR", str(outbox_dir))
+    monkeypatch.setattr(resend.Emails, "send", _no_resend)
+    return Outbox(outbox_dir)
+
+
+@pytest.fixture(autouse=True)
+def reset_rate_limits(app):
+    """In-memory limiter counters are process-wide; start every test from zero.
+    Depends on `app`: the limiter only has storage once the app has called init_app."""
+    from utils.rate_limiter import limiter
+
+    limiter.reset()
+    yield
+
+
 @pytest.fixture(autouse=True)
 def reset_db(db_conn):
     with db_conn.cursor() as cur:
@@ -142,6 +190,8 @@ def reset_db(db_conn):
 
 @pytest.fixture
 def today():
+    from utils.dates import get_today_date_str
+
     return get_today_date_str()
 
 
@@ -255,12 +305,8 @@ def set_yesterday_album_pick(db_conn):
 @pytest.fixture
 def make_soloist_album(db_conn):
     """Insert a soloist album and return (album_id, artist_name).
-
-    The `albums_soloist_check` constraint requires `group_id = 20 AND
-    soloist_id IS NOT NULL`, so this forces a `groups` row with id=20 and
-    attaches a real `idols` row as the soloist. Exercises the
-    COALESCE(artist_name, group_name) branch.
-    """
+    `albums_soloist_check` needs group_id = 20 with a soloist_id, so this forces group 20 and a
+    real idol as the soloist (exercises COALESCE(artist_name, group_name))."""
 
     def _make(name: str, cover_path: str = "/covers/solo.jpg", artist_name: str = "Solo Star") -> tuple[int, str]:
         with db_conn.cursor() as cur:
@@ -422,10 +468,10 @@ def make_access_jwt():
 
     import jwt as pyjwt
 
-    from utils.dates import get_datetime_now_utc
+    from utils.dates import utc_now
 
     def _make(user_id: int, token: str, username: str = "testuser") -> str:
-        now = get_datetime_now_utc()
+        now = utc_now()
         payload = {
             "sub": token,
             "user_id": user_id,

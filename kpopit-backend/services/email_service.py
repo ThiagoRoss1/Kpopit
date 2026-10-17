@@ -1,6 +1,12 @@
-﻿import os
-import resend
+﻿import json
 import logging
+import os
+import re
+import time
+import uuid
+from pathlib import Path
+
+import resend
 
 resend.api_key = os.getenv("RESEND_API_KEY")
 
@@ -10,14 +16,56 @@ RESEND_EMAIL_FRONTEND_URL = os.getenv("RESEND_EMAIL_FRONTEND_URL")
 
 logger = logging.getLogger(__name__)
 
+# The action link (verify / reset / change / revert) is the only href carrying a token.
+_TOKEN_LINK_RE = re.compile(r'href="([^"]*[?&]token=[^"]*)"')
+
+_warned_outbox_ignored = False
+
+
+def _outbox_dir() -> Path | None:
+    """Return the outbox directory when EMAIL_DELIVERY=outbox is active, else None.
+
+    Honored only with FLASK_ENV=development; anywhere else it is ignored (with a warning)
+    and emails go through Resend as usual."""
+    global _warned_outbox_ignored
+    if os.getenv("EMAIL_DELIVERY", "").strip().lower() != "outbox":
+        return None
+    if os.getenv("FLASK_ENV", "production").strip().lower() != "development":
+        if not _warned_outbox_ignored:
+            logger.warning("EMAIL_DELIVERY=outbox ignored: only honored when FLASK_ENV=development")
+            _warned_outbox_ignored = True
+        return None
+    return Path(os.getenv("EMAIL_OUTBOX_DIR") or Path(__file__).resolve().parent.parent / ".email-outbox")
+
+
 class EmailService:
+
+    @staticmethod
+    def _send(payload: dict) -> None:
+        """Deliver one email: Resend, or a JSON file in the outbox (development tests only)."""
+        outbox = _outbox_dir()
+        if outbox is None:
+            resend.Emails.send(payload)
+            return
+
+        match = _TOKEN_LINK_RE.search(payload.get("html") or "")
+        outbox.mkdir(parents=True, exist_ok=True)
+        record = {
+            "to": payload.get("to"),
+            "subject": payload.get("subject"),
+            "html": payload.get("html"),
+            "link": match.group(1).replace("&amp;", "&") if match else None,
+            "sent_at": time.time(),
+        }
+        name = f"{time.time_ns()}-{uuid.uuid4().hex[:8]}.json"
+        (outbox / name).write_text(json.dumps(record), encoding="utf-8")
         
     @staticmethod
     def send_email_verification(to_email: str, username: str, verification_link: str) -> bool:
         """Send an email verification link to the specified email address."""
 
         try:
-            resend.Emails.send({
+            EmailService._send({
                 "from": SENDER_EMAIL,
                 "to": to_email,
                 "subject": "Verify your email for KpopIt",
@@ -108,7 +156,7 @@ class EmailService:
         """Send a password reset link to the specified email address."""
 
         try:
-            resend.Emails.send({
+            EmailService._send({
                 "from": SENDER_EMAIL,
                 "to": to_email,
                 "subject": "KpopIt Password Reset",
@@ -202,7 +250,7 @@ class EmailService:
         """Send an email change link to the user."""
 
         try:
-            resend.Emails.send({
+            EmailService._send({
                 "from": SENDER_EMAIL,
                 "to": to_email,
                 "subject": "Confirm your new KpopIt email",
@@ -297,7 +345,7 @@ class EmailService:
         """Send an email confirming the email change, with a revert link in case it wasn't the user who made the change."""
 
         try:
-            resend.Emails.send({
+            EmailService._send({
                 "from": SENDER_EMAIL,
                 "to": to_email,
                 "subject": "Your KpopIt email was changed",
@@ -400,7 +448,7 @@ class EmailService:
         """Send an email confirming that the new email was added to the account (Previously without an email)."""
 
         try:
-            resend.Emails.send({
+            EmailService._send({
                 "from": SENDER_EMAIL,
                 "to": to_email,
                 "subject": "Your KpopIt email has been set",
@@ -478,7 +526,7 @@ class EmailService:
     def send_email_revert_confirmation(to_email: str, username: str) -> bool:
         """Send an email confirming that the email change was reverted."""
         try:
-            resend.Emails.send({
+            EmailService._send({
                 "from": SENDER_EMAIL,
                 "to": to_email,
                 "subject": "Your KpopIt email was restored",
