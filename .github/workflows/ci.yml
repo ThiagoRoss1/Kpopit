@@ -11,6 +11,11 @@ permissions:
   contents: read
   pull-requests: read
 
+# One run per PR/branch: a new push cancels the run still in progress.
+concurrency:
+  group: ci-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: true
+
 jobs:
   changes:
     name: Detect changes
@@ -220,13 +225,43 @@ jobs:
         working-directory: kpopit-frontend
         run: npm ci
 
-      - name: Install browser engines
+      # major-patch (pushes and PRs into it) is gated on Chromium only; dev and main run every engine.
+      - name: Pick browser projects
+        id: browsers
         working-directory: kpopit-frontend
-        run: npx playwright install --with-deps chromium firefox webkit
+        env:
+          TARGET_BRANCH: ${{ github.base_ref || github.ref_name }}
+        run: |
+          if [ "$TARGET_BRANCH" = "major-patch" ]; then
+            echo "engines=chromium" >> "$GITHUB_OUTPUT"
+            echo "projects=--project=desktop --project=mobile" >> "$GITHUB_OUTPUT"
+          else
+            echo "engines=chromium firefox webkit" >> "$GITHUB_OUTPUT"
+            echo "projects=" >> "$GITHUB_OUTPUT"
+          fi
+          echo "playwright=$(node -p "require('@playwright/test/package.json').version")" >> "$GITHUB_OUTPUT"
+
+      - name: Cache browser engines
+        id: browser-cache
+        uses: actions/cache@v4
+        with:
+          path: ~/.cache/ms-playwright
+          key: playwright-${{ runner.os }}-${{ steps.browsers.outputs.playwright }}-${{ steps.browsers.outputs.engines }}
+
+      - name: Install browser engines
+        if: steps.browser-cache.outputs.cache-hit != 'true'
+        working-directory: kpopit-frontend
+        run: npx playwright install --with-deps ${{ steps.browsers.outputs.engines }}
+
+      # The cache holds the browsers only; their system libraries still come from apt.
+      - name: Install browser system dependencies
+        if: steps.browser-cache.outputs.cache-hit == 'true'
+        working-directory: kpopit-frontend
+        run: npx playwright install-deps ${{ steps.browsers.outputs.engines }}
 
       - name: Playwright (file by file, one worker)
         working-directory: kpopit-frontend
-        run: npm run test:e2e
+        run: npm run test:e2e -- ${{ steps.browsers.outputs.projects }}
 
       - name: Upload Playwright report
         if: failure()
