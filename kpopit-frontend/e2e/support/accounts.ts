@@ -30,6 +30,20 @@ export async function registerViaApi(page: Page, user: TestUser, withEmail = fal
   });
 }
 
+// Registers before the first page load: the refresh cookie lands in the context and the session
+// markers are written by an init script, so the first load already restores the session.
+export async function registerBeforeLoad(page: Page, user: TestUser): Promise<void> {
+  const res = await page.request.post('/api/auth/register', {
+    headers: ipHeader(),
+    data: { username: user.username, password: user.password },
+  });
+  expect(res.status(), await res.text()).toBe(201);
+  await page.addInitScript(() => {
+    localStorage.setItem('kpopit_session', 'true');
+    localStorage.setItem('kpopit_was_authenticated', 'true');
+  });
+}
+
 export async function registerViaUi(page: Page, user: TestUser, withEmail = false): Promise<void> {
   await page.goto('/register');
   await page.getByPlaceholder('Pick your stage name').fill(user.username);

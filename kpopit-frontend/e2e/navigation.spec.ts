@@ -1,5 +1,5 @@
 import { test, expect, type Page } from './support/fixtures';
-import { newUser, registerViaApi } from './support/accounts';
+import { newUser, registerBeforeLoad } from './support/accounts';
 import { closeModal, openGame, searchInput } from './support/game';
 
 async function expectCleanLoad(page: Page, errors: { list: string[] }) {
@@ -71,9 +71,12 @@ test.describe('every route loads @mobile', () => {
 
   test('/profile/:username loads for a logged-in user @smoke', async ({ page, consoleErrors }) => {
     const user = newUser();
+    // One page load, then an in-app route change: a second page.goto would cancel the home
+    // page's in-flight requests, which WebKit reports as page errors.
+    await registerBeforeLoad(page, user);
     await page.goto('/');
-    await registerViaApi(page, user);
-    await page.goto(`/profile/${user.username}`);
+    await page.getByRole('button', { name: /user menu/i }).filter({ visible: true }).first().click();
+    await page.getByRole('link', { name: 'Profile' }).filter({ visible: true }).first().click();
     await expect(page).toHaveURL(new RegExp(`/profile/${user.username}$`, 'i'));
     await expect(page.getByRole('complementary', { name: 'Identity' }).getByText(`@${user.username}`, { exact: true })).toBeVisible();
     await expectCleanLoad(page, consoleErrors);
