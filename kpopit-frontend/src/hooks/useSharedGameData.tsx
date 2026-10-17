@@ -8,7 +8,9 @@ import { useIsMobile } from "./useIsDevice";
 
 export const useSharedGameData = () => {
     const [isInitialized, setIsInitialized] = useState<boolean>(false);
-    const [shouldFetchToken, setShouldFetchToken] = useState<boolean>(!localStorage.getItem("userToken"));
+    // Prerender has no storage and must not fetch; the browser decides on its first render.
+    const [shouldFetchToken, setShouldFetchToken] = useState<boolean>(() =>
+        typeof window !== "undefined" && !localStorage.getItem("userToken"));
 
     // Is mobile
     const isMobile = useIsMobile(); 
@@ -90,7 +92,7 @@ export const useSharedGameData = () => {
     const userStats = useQuery<UserStats>({
         queryKey: ["userStats", userToken.data?.id],
         queryFn: async () => getUserStats(await initUser() || ""),
-        enabled: !!localStorage.getItem("userToken"),
+        enabled: typeof window !== "undefined" && !!localStorage.getItem("userToken"),
         refetchOnWindowFocus: false,
     });
 

@@ -7,6 +7,7 @@ import { setAccessToken, clearAccessToken } from "../services/tokenStore";
 import { useClearGameStorage } from "../hooks/useClearGameStorage";
 import { applyRestoredSession } from "../utils/applyRestoredSession";
 import type { MeResponse } from "../interfaces/authInterfaces";
+import { useHydrated } from "../hooks/useHydrated";
 
 interface AuthProviderProps {
     children: ReactNode;
@@ -19,6 +20,7 @@ type RestoreOutcome =
     | { kind: "skipped" };
 
 const hasSessionMarker = () =>
+    typeof window !== 'undefined' &&
     (localStorage.getItem('kpopit_session') ?? sessionStorage.getItem('kpopit_session')) !== null;
 
 export const AuthProvider = ({ children }: AuthProviderProps) => {
@@ -28,6 +30,9 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
         isLoading: hasSessionMarker(),
         user: null,
     }));
+
+    // Prerendered HTML can't know the session, so hydration renders "loading" for everyone.
+    const hydrated = useHydrated();
 
     const { clearAll } = useClearGameStorage();
 
@@ -182,7 +187,7 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
     }, [state.isAuthenticated, state.isLoading, queryClient]);
 
     return (
-        <AuthContext.Provider value={{ ...state, refreshAuth: restoreSession, refetchUser }}>
+        <AuthContext.Provider value={{ ...state, isLoading: !hydrated || state.isLoading, refreshAuth: restoreSession, refetchUser }}>
             {children}
         </AuthContext.Provider>
     );
