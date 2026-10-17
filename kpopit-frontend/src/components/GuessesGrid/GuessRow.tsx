@@ -5,7 +5,7 @@ import type { GuessResponse } from "../../interfaces/gameInterfaces";
 import ArrowUp from "../../assets/icons/arrow-fat-line-up-fill.svg";
 import ArrowDown from "../../assets/icons/arrow-fat-line-down-fill.svg";
 import { useDateLocale } from "../../hooks/useDateLocale";
-import { formatCompanyName } from "../../utils/formatters";
+import { formatCompanyName, buildIdolSlug } from "../../utils/formatters";
 import { getNationalityFlag } from "../../utils/getFlags";
 import { useIsMobile } from "../../hooks/useIsDevice";
 
@@ -137,7 +137,7 @@ const GuessRow = (props: GuessRowProps) => {
                     onTouchEnd={handleTouchEnd}   
                     >
                     <Link 
-                        to={`/idols/${guess.guessed_idol_data.idol_id}/${guess.guessed_idol_data.artist_name.toLowerCase()}-${guess.guessed_idol_data.active_group?.toLowerCase()}`.trim().replace(/\s+/g, '-')}>
+                        to={`/idols/${guess.guessed_idol_data.idol_id}/${buildIdolSlug(guess.guessed_idol_data.artist_name, guess.guessed_idol_data.active_group)}`}>
                         <img
                             src={`${import.meta.env.VITE_IMAGE_BUCKET_URL}${guess.guessed_idol_data.image_path}?v=${guess.guessed_idol_data.image_version}`}
                             alt="Idol"

@@ -7,6 +7,7 @@ import GlassSurface from "../GlassSurface";
 import trophyIcon from "../../assets/icons/trophy.svg";
 import XLogo from "../../assets/icons/x-logo-small-victory.svg";
 import { X, Download } from 'lucide-react';
+import { buildIdolSlug } from "../../utils/formatters";
 
 interface VictoryCardSmallProps<T = FeedbackData> {
     onClose?: () => void;
@@ -156,7 +157,7 @@ const VictoryCardSmall = <T = FeedbackData, >(props: VictoryCardSmallProps<T>) =
 
                             <div className="absolute left-5 flex items-center justify-center h-20 w-20 sm:h-20 sm:w-20 bg-transparent rounded-[20px] hover:scale-110 hover:rotate-4 transition-transform duration-500 will-change-transform transform-gpu">
                                 <Link
-                                    to={`/idols/${cardInfo.idol_id}/${cardInfo.artist_name}-${cardInfo.active_group}`.trim().replace(/\s+/g, '-').toLowerCase()}>
+                                    to={`/idols/${cardInfo.idol_id}/${buildIdolSlug(cardInfo.artist_name, cardInfo.active_group)}`}>
                                     <img 
                                         src={`${import.meta.env.VITE_IMAGE_BUCKET_URL}${cardInfo.image_path}?v=${cardInfo.image_version}`} 
                                         alt="Idol" 

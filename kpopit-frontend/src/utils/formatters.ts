@@ -26,10 +26,16 @@ const FORMER_GROUP_PREFIX = "";
 export const formatGroupName = (groupName: string, isFormerGroup?: boolean): string =>
     isFormerGroup ? `${FORMER_GROUP_PREFIX}${groupName}` : groupName;
 
+// URL- and file-name-safe: only [a-z0-9-_] ("Rosé" → "rose", "Y:SY" → "ysy"). Prerendered pages are
+// written to disk under this name, and old slugs still resolve through the idol page's redirect.
 export const buildIdolSlug = (artistName: string, groupName?: string | null): string =>
     [artistName, groupName]
         .filter(Boolean)
         .join("-")
-        .trim()
+        .normalize("NFD")
+        .replace(/[̀-ͯ]/g, "")
+        .toLowerCase()
         .replace(/\s+/g, "-")
-        .toLowerCase();
+        .replace(/[^a-z0-9_-]/g, "")
+        .replace(/-{2,}/g, "-")
+        .replace(/^-+|-+$/g, "") || "idol";

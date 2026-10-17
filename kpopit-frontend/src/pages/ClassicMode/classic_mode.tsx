@@ -19,7 +19,7 @@ import SearchBar from "../../components/GuessSearchBar/SearchBar.tsx";
 import GuessesGrid from "../../components/GuessesGrid/GuessGrid.tsx";
 import VictoryCardHud from "../../components/VictoryCard/VictoryCardHud.tsx";
 import AnswerHintsBox from "../../components/AnswerHints/AnswerHintsBox.tsx";
-import { formatGroupName } from "../../utils/formatters";
+import { formatGroupName, buildIdolSlug } from "../../utils/formatters";
 import TopButtons from "../../components/buttons/TopButtons.tsx";
 import Modal from "../../components/buttons/modals/Modal.tsx";
 import HowToPlayText from "../../components/buttons/modals/HowToPlayContent.tsx";
@@ -490,7 +490,7 @@ function ClassicMode() {
           <span className="text-white">
             Yesterday's idol was
           </span> <Link 
-                  to={`/idols/${yesterday.data?.past_idol_id}/${yesterdayArtist}-${yesterdayArtistGroup}`.trim().replace(/\s+/g, '-').toLowerCase()}>
+                  to={`/idols/${yesterday.data?.past_idol_id}/${buildIdolSlug(yesterdayArtist, yesterdayArtistGroup[0])}`}>
               <span 
                   className="text-[#b43777] [text-shadow:1.2px_1.2px_4px_rgba(0,0,0,1.8),0_0_12px_rgba(180,55,119,1.0)] brightness-105 underline hover:brightness-125 transition-all duration-300">
                   {yesterdayArtist ? `${yesterdayArtist} (${yesterdayArtistGroup && yesterdayArtistGroup.length > 0 ? yesterdayArtistGroup : "Soloist"})` : "Unknown"}

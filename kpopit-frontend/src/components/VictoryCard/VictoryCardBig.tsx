@@ -5,6 +5,7 @@ import TargetAttempt from "../../assets/icons/target.svg";
 import RankPosition from "../../assets/icons/ranking-fill.svg";
 import PositionTrend from "../../assets/icons/trending-up.svg";
 import { Share2 } from "lucide-react";
+import { buildIdolSlug } from "../../utils/formatters";
 
 interface GameMode {
     id: string;
@@ -59,7 +60,7 @@ return (
             hover:border-white hover:scale-120 hover:rotate-6 transform duration-1000 will-change-transform 
             shadow-[0_0_20px_4px_rgba(255,255,255,0.1),0_0_40px_10px_rgba(255,255,255,0.1)]">
                 <Link 
-                    to={`/idols/${cardInfo.idol_id}/${cardInfo.artist_name}-${cardInfo.active_group}`.trim().replace(/\s+/g, '-').toLowerCase()}>
+                    to={`/idols/${cardInfo.idol_id}/${buildIdolSlug(cardInfo.artist_name, cardInfo.active_group)}`}>
                     <img 
                         src={`${import.meta.env.VITE_IMAGE_BUCKET_URL}${cardInfo.image_path}?v=${cardInfo.image_version}`} 
                         alt="Idol" 
@@ -137,7 +138,7 @@ return (
 
                     <div className="flex flex-row w-full h-full items-center justify-start max-xxs:pr-0 xxs:pr-2 xs:pr-4 xm:pr-2 sm:pr-4 ml-10 sm:ml-20 gap-2 sm:gap-6">
                         <Link
-                            to={`/idols/${yesterdayIdolId}/${yesterdayIdol}-${yesterdayGroup}`.trim().replace(/\s+/g, '-').toLowerCase()}>
+                            to={`/idols/${yesterdayIdolId}/${buildIdolSlug(yesterdayIdol, yesterdayGroup)}`}>
                             <img 
                                 src={`${import.meta.env.VITE_IMAGE_BUCKET_URL}${yesterdayIdolImage}${yesterdayImageVersion}`} 
                                 alt="Idol" className="max-xxs:w-16 max-xxs:h-16 xxs:w-20 xxs:h-20 xs:w-22 xs:h-22 sm:w-28 sm:h-28 rounded-full sm:rounded-full object-cover object-center hover:scale-105 

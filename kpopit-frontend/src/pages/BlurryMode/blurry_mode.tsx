@@ -40,6 +40,7 @@ import { safeReload } from "../../utils/safeReload";
 import { isNewGameDay } from "../../utils/gameStorage";
 import CardGrantedReveal from "../Collection/components/CardGrantedReveal";
 import type { CardGranted } from "../../interfaces/albumInterfaces";
+import { buildIdolSlug } from "../../utils/formatters";
 
 function BlurryMode() {
     const gameMode = useGameMode();
@@ -534,7 +535,7 @@ function BlurryMode() {
                 <span className="text-white">
                     Yesterday's idol was
                 </span> <Link 
-                        to={`/idols/${yesterdayIdol.data?.past_idol_id}/${yesterdayArtist}-${yesterdayIdolGroup}`.trim().replace(/\s+/g, '-').toLowerCase()}>
+                        to={`/idols/${yesterdayIdol.data?.past_idol_id}/${buildIdolSlug(yesterdayArtist, yesterdayIdolGroup?.[0])}`}>
                         <span className="text-[#b43777] [text-shadow:1.2px_1.2px_4px_rgba(0,0,0,1.8),0_0_12px_rgba(180,55,119,1.0)] brightness-105 underline hover:brightness-125 transition-all duration-300">
                             {yesterdayArtist ? `${yesterdayArtist}` : "Unknown"}
                         </span>

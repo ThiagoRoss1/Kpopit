@@ -4,6 +4,7 @@ import TargetAttempt from "../../../assets/icons/target.svg";
 import RankPosition from "../../../assets/icons/ranking-fill.svg";
 import PositionTrend from "../../../assets/icons/trending-up.svg";
 import { Share2 } from "lucide-react";
+import { buildIdolSlug } from "../../../utils/formatters";
 
 interface GameMode {
     id: string;
@@ -53,7 +54,7 @@ const VictoryCardBigBlurry = (props: BlurryVictoryCardBigProps) => {
                 <div className="absolute flex items-center justify-center max-xxs:w-24 max-xxs:h-24 xxs:w-27 xxs:h-27 xs:w-30 xs:h-30 sm:w-35 sm:h-35 rounded-[48px] sm:rounded-[50px] top-5 border-2 border-white/80 
                 hover:border-white hover:scale-120 hover:rotate-6 transform duration-1000 will-change-transform 
                 shadow-[0_0_20px_4px_rgba(255,255,255,0.1),0_0_40px_10px_rgba(255,255,255,0.1)]">
-                    <Link to={`/idols/${cardInfo.idol_id}/${cardInfo.artist_name}-${cardInfo.active_group}`.trim().replace(/\s+/g, '-').toLowerCase()}>
+                    <Link to={`/idols/${cardInfo.idol_id}/${buildIdolSlug(cardInfo.artist_name, cardInfo.active_group)}`}>
                         <img 
                             src={`${import.meta.env.VITE_IMAGE_BUCKET_URL}${cardInfo.image_path}?v=${cardInfo.image_version}`} 
                             alt="Idol" className="max-xxs:w-23 max-xxs:h-23 xxs:w-26 xxs:h-26 xs:w-29 xs:h-29 sm:w-34 sm:h-34 rounded-[48px] sm:rounded-[50px] object-cover object-top transform-gpu" 
@@ -131,7 +132,7 @@ const VictoryCardBigBlurry = (props: BlurryVictoryCardBigProps) => {
                 <div className="absolute flex items-center justify-center bg-transparent border-2 border-white
                 w-fit h-64 sm:w-50 sm:h-64 rounded-[46px] overflow-hidden z-20 mb-4
                 hover:scale-110 hover:z-30 hover:brightness-110 hover:cursor-pointer transition-all duration-500 transform-gpu">
-                    <Link to={`/idols/${cardInfo.idol_id}/${cardInfo.artist_name}-${cardInfo.active_group}`.trim().replace(/\s+/g, '-').toLowerCase()}>
+                    <Link to={`/idols/${cardInfo.idol_id}/${buildIdolSlug(cardInfo.artist_name, cardInfo.active_group)}`}>
                         <img
                             src={`${import.meta.env.VITE_IMAGE_BUCKET_URL}${idol_blur_image}?v=${idol_blur_image_version}`}
                             alt={`Blurry image of ${cardInfo.artist_name}`}
@@ -165,7 +166,7 @@ const VictoryCardBigBlurry = (props: BlurryVictoryCardBigProps) => {
                         </span>
 
                         <div className="flex flex-row w-full h-full items-center justify-start max-xxs:pr-0 pl-8 sm:pl-12 max-xxs:gap-2 xxs:gap-4 sm:gap-8">
-                            <Link to={`/idols/${yesterdayIdolId}/${yesterdayIdol}-${yesterdayGroup}`.trim().replace(/\s+/g, '-').toLowerCase()}>
+                            <Link to={`/idols/${yesterdayIdolId}/${buildIdolSlug(yesterdayIdol, yesterdayGroup)}`}>
                                 <img 
                                     src={`${import.meta.env.VITE_IMAGE_BUCKET_URL}${yesterdayIdolImage}?v=${yesterdayIdolImageVersion}`} 
                                     alt="Idol" 
