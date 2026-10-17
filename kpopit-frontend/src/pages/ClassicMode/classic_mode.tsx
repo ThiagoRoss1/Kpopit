@@ -36,8 +36,8 @@ import { buildLocalClassicGuess } from "../../utils/localGuess.ts";
 import { useAllGameModes } from "../../hooks/useAllGameModes.tsx";
 import { useClearGameStorage } from "../../hooks/useClearGameStorage.tsx";
 import { areGuessesEqual } from "../../utils/areGuessesEqual.ts";
-import { safeReload } from "../../utils/safeReload.ts";
-import { isNewGameDay } from "../../utils/gameStorage.ts";
+import { isNewGameDay, startFirstGameDay } from "../../utils/gameStorage.ts";
+import { useGameDay } from "../../contexts/game_day_context.ts";
 import Section, { SectionBoundary, SectionError } from "../../components/Loading/Section.tsx";
 import CardGrantedReveal from "../Collection/components/CardGrantedReveal.tsx";
 import type { CardGranted } from "../../interfaces/albumInterfaces.ts";
@@ -70,6 +70,8 @@ function ClassicMode() {
   const { userToken, initUser, decryptedTokenRef, allIdolsData, isErrorAllIdols,
     isInitialized, userStatsData, transferData, queryClient } = useSharedGameData();
 
+  const { day, onNewDay } = useGameDay();
+
   const { clearClassic } = useClearGameStorage();
 
   useEffect(() => {
@@ -87,7 +89,7 @@ function ClassicMode() {
 
 
   const dailyUserCount = useQuery({
-    queryKey: ["dailyUserCount", gameMode],
+    queryKey: ["dailyUserCount", gameMode, day],
     queryFn: getDailyUserCount,
     staleTime: 1000 * 60 * 5,
     refetchOnWindowFocus: false,
@@ -99,16 +101,15 @@ function ClassicMode() {
     isError: isErrorGameData,
     refetch: refetchGameData,
   } = useQuery<GameData>({
-    queryKey: ["dailyIdol", gameMode],
+    queryKey: ["dailyIdol", gameMode, day],
     queryFn: getDailyIdol,
     staleTime: 1000 * 60 * 60 * 4,
     refetchOnWindowFocus: false,
     enabled: isInitialized,
-    placeholderData: (previousData) => previousData,
   });
 
   const yesterday = useQuery<YesterdayIdol>({
-    queryKey: ["yesterdayIdol", gameMode],
+    queryKey: ["yesterdayIdol", gameMode, day],
     queryFn: getYesterdaysIdol,
     staleTime: 1000 * 60 * 60 * 4,
     refetchOnWindowFocus: false,
@@ -126,14 +127,17 @@ function ClassicMode() {
 
   const serverDate = gameData?.server_date;
 
-  // New day: drop yesterday's local state and reload (nothing to keep in React state).
+  // First visit: nothing to reset, just record today (while rendering, so the restore below runs now).
+  if (serverDate) startFirstGameDay(localStorage, "classic", serverDate);
+
+  // New day: drop yesterday's local state and remount on the new day (no page reload).
   useEffect(() => {
     if (!serverDate || !isNewGameDay(localStorage, "classic", serverDate)) return;
-    console.log("New day detected, clearing cache.");
+    if (import.meta.env.DEV) console.log("New day detected, clearing cache.");
     clearClassic();
     localStorage.setItem("gameDate", serverDate);
-    safeReload();
-  }, [serverDate, clearClassic, sessionRestored]);
+    onNewDay(serverDate);
+  }, [serverDate, clearClassic, sessionRestored, onNewDay]);
 
   // Same day: restore the cached game once per server date / session restore, while rendering
   // (React's "adjust state when a value changes"), so no effect has to copy storage into state.
@@ -239,7 +243,7 @@ function ClassicMode() {
   });
 
   const userPosition = useQuery({
-    queryKey: ["userPosition", userToken],
+    queryKey: ["userPosition", userToken, day],
     queryFn: async () => getUserPosition(await initUser() || ""),
     enabled: isInitialized,
     refetchOnWindowFocus: false,

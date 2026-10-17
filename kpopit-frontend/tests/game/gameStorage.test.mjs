@@ -2,6 +2,7 @@ import test from 'node:test';
 import assert from 'node:assert/strict';
 import {
     BLURRY_KEYS, CLASSIC_KEYS, GAME_DATE_KEY, MODE_KEYS, PIXELATED_KEYS, clearModeKeys, isNewGameDay,
+    startFirstGameDay,
 } from '../../src/utils/gameStorage.ts';
 
 const fakeStorage = (entries = {}) => {
@@ -41,4 +42,17 @@ test('a new day is any server date different from the stored one, first visit in
     assert.equal(isNewGameDay(storage, 'classic', '2026-10-17'), true);
     assert.equal(isNewGameDay(storage, 'blurry', '2026-10-16'), true);
     assert.equal(isNewGameDay(storage, 'pixelated', '2026-10-16'), true);
+});
+
+test('a first visit only records the date; a stored date is left alone', () => {
+    const first = fakeStorage({ GuessedIdols: '["stale"]', userToken: 'enc' });
+    assert.equal(startFirstGameDay(first, 'classic', '2026-10-17'), true);
+    assert.equal(first.getItem('gameDate'), '2026-10-17');
+    assert.equal(first.getItem('GuessedIdols'), null);
+    assert.equal(first.getItem('userToken'), 'enc');
+
+    const returning = fakeStorage({ gameDate: '2026-10-16', todayGuessesDetails: '[1]' });
+    assert.equal(startFirstGameDay(returning, 'classic', '2026-10-17'), false);
+    assert.equal(returning.getItem('gameDate'), '2026-10-16');
+    assert.equal(returning.getItem('todayGuessesDetails'), '[1]');
 });

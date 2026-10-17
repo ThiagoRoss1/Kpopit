@@ -34,8 +34,8 @@ import ExportDataText from "../../components/buttons/modals/ExportDataContent";
 import { WinnerExplosion } from "../../utils/confetti";
 import { useClearGameStorage } from "../../hooks/useClearGameStorage";
 import { areGuessesEqual } from "../../utils/areGuessesEqual";
-import { safeReload } from "../../utils/safeReload";
-import { isNewGameDay } from "../../utils/gameStorage";
+import { isNewGameDay, startFirstGameDay } from "../../utils/gameStorage";
+import { useGameDay } from "../../contexts/game_day_context";
 import Section, { SectionBoundary, SectionError } from "../../components/Loading/Section";
 import CardGrantedReveal from "../Collection/components/CardGrantedReveal";
 import type { CardGranted } from "../../interfaces/albumInterfaces";
@@ -67,6 +67,8 @@ const gameMode = useGameMode();
     const { userToken, initUser, decryptedTokenRef, allIdolsData,
         isInitialized, userStatsData, transferData, isErrorAllIdols, queryClient} = useSharedGameData();
 
+    const { day, onNewDay } = useGameDay();
+
     const { clearBlurry } = useClearGameStorage();
 
     const isCorrect = guesses.some(g => g.guess_correct === true);
@@ -88,7 +90,7 @@ const gameMode = useGameMode();
     const queryUserCount = useQueryClient();
 
     const dailyUserCount = useQuery({
-        queryKey: ["dailyUserCount", gameMode],
+        queryKey: ["dailyUserCount", gameMode, day],
         queryFn: getDailyUserCount,
         staleTime: 1000 * 60 * 5,
         refetchOnWindowFocus: false,
@@ -101,12 +103,11 @@ const gameMode = useGameMode();
         isError: isErrorBlurryGameData,
         refetch: refetchBlurryGameData,
     } = useQuery<BlurryGameData>({
-        queryKey: ['blurryDailyIdol', gameMode],
+        queryKey: ['blurryDailyIdol', gameMode, day],
         queryFn: getBlurryDailyIdol,
         enabled: isInitialized,
         staleTime: 1000 * 60 * 60 * 4,
         refetchOnWindowFocus: false,
-        placeholderData: (previousData) => previousData,
     });
 
     useEffect(() => {
@@ -137,7 +138,7 @@ const gameMode = useGameMode();
 
     // Yesterday idol
     const yesterdayIdol = useQuery<YesterdayIdol>({
-        queryKey: ['blurryYesterdayIdol', gameMode],
+        queryKey: ['blurryYesterdayIdol', gameMode, day],
         queryFn: getYesterdaysIdol,
         staleTime: 1000 * 60 * 60 * 4,
         refetchOnWindowFocus: false,
@@ -154,14 +155,17 @@ const gameMode = useGameMode();
     
     const serverDate = blurryGameData?.server_date;
 
-    // New day: drop yesterday's local state and reload (nothing to keep in React state).
+    // First visit: nothing to reset, just record today (while rendering, so the restore below runs now).
+    if (serverDate) startFirstGameDay(localStorage, "blurry", serverDate);
+
+    // New day: drop yesterday's local state and remount on the new day (no page reload).
     useEffect(() => {
         if (!serverDate || !isNewGameDay(localStorage, "blurry", serverDate)) return;
-        console.log("New day detected, clearing cache.");
+        if (import.meta.env.DEV) console.log("New day detected, clearing cache.");
         clearBlurry();
         localStorage.setItem("blurryGameDate", serverDate);
-        safeReload();
-    }, [serverDate, clearBlurry, sessionRestored]);
+        onNewDay(serverDate);
+    }, [serverDate, clearBlurry, sessionRestored, onNewDay]);
 
     // Same day: restore the cached game once per server date / session restore, while rendering
     // (React's "adjust state when a value changes"), so no effect has to copy storage into state.
@@ -260,7 +264,7 @@ const gameMode = useGameMode();
 
     // User ranks 
     const userPosition = useQuery({
-        queryKey: ['blurryUserPosition', gameMode],
+        queryKey: ['blurryUserPosition', gameMode, day],
         queryFn: async () => {
             if (!userToken) return null;
             return getUserPosition(await initUser() || "");

@@ -1,6 +1,7 @@
 import type { ReactNode } from "react";
 import { Helmet } from "react-helmet-async";
 import ClientOnly from "../src/components/ClientOnly";
+import GameDayProvider from "../src/components/GameDayProvider";
 
 type GamePageProps = { title: string; description: string; path: string; children: ReactNode };
 
@@ -19,8 +20,8 @@ export default function GamePage({ title, description, path, children }: GamePag
       <ClientOnly
         fallback={<div aria-busy="true" className="min-h-screen w-full" />}
       >
-        {children}
-</ClientOnly>
+        <GameDayProvider>{children}</GameDayProvider>
+      </ClientOnly>
     </>
   );
 }

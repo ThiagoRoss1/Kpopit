@@ -33,8 +33,8 @@ export const victoryMarker = (page: Page, mode: ModeName): Locator =>
     ? page.getByText('Score', { exact: true })
     : page.getByText('Share Results', { exact: true });
 
-// Each mode's first visit of the day stores the server date and reloads once,
-// so wait for the date key, then for the board or the victory card.
+// Wait for the stored server date, then for the usable search (its placeholder changes once the
+// list and game data are in) or the victory card.
 export async function openGame(page: Page, mode: ModeName): Promise<void> {
   await page.goto(`/${mode}`);
   await page.waitForFunction((key) => !!localStorage.getItem(key), DATE_KEY[mode], { timeout: 30_000 });

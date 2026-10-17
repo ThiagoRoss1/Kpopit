@@ -2,11 +2,13 @@ import { getResetTimer } from "../services/api";
 import type { ResetTimer } from "../interfaces/gameInterfaces";
 import { useQuery } from "@tanstack/react-query";
 import { useState, useEffect } from "react";
-import { safeReload } from "../utils/safeReload";
+import { useGameDay } from "../contexts/game_day_context";
 
 export const useResetTimer = () => {
+    const { day, refreshDay } = useGameDay();
+    // Keyed by the game day: after a day change the countdown comes from a fresh request.
     const { data, dataUpdatedAt } = useQuery<ResetTimer>({
-        queryKey: ['resetTimer'],
+        queryKey: ['resetTimer', day],
         queryFn: getResetTimer,
         staleTime: 1000 * 60 * 10, // 10 minutes
         refetchOnWindowFocus: true,
@@ -38,7 +40,7 @@ export const useResetTimer = () => {
 
             if (diff <= 0) {
                 setDayHasChanged(true);
-                safeReload();
+                refreshDay();
             }
             setTimeRemaining(diff);
         };
@@ -48,7 +50,7 @@ export const useResetTimer = () => {
         const interval = setInterval(updateTimer, 1000);
 
         return () => clearInterval(interval);
-    }, [targetTime, dayHasChanged]);
+    }, [targetTime, dayHasChanged, refreshDay]);
 
     const hours = timeRemaining !== null ? Math.floor(timeRemaining / 3600) : 0;
     const minutes = timeRemaining !== null ? Math.floor((timeRemaining % 3600) / 60) : 0;

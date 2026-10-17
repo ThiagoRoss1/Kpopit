@@ -100,36 +100,6 @@ export const useSharedGameData = () => {
         refetchOnWindowFocus: false,
     });
 
-    const checkAndResetDay = useCallback((mode: 'classic' | 'blurry', currentServerDate: string) => {
-        const lastPlayedDateKey = `${mode}_lastPlayedDate`;
-        const lastPlayedDate = localStorage.getItem(lastPlayedDateKey);
-
-        if (lastPlayedDate !== currentServerDate) {
-            console.log(`New day detected for ${mode} mode. Resetting local data.`);
-
-            if (mode === 'classic') {
-                const classicKeys = [
-                    "todayGuessesDetails", "GuessedIdols", "gameComplete", "gameWon", "hint1Revealed", "showHint1", 
-                    "colorize1", "hint2Revealed", "showHint2", "colorize2", "animatedIdols", "closeFeedbackSquares", "confettiShown"
-                ];
-                classicKeys.forEach(key => localStorage.removeItem(key));
-            } else if (mode === 'blurry') {
-                const blurryKeys = [
-                    "blurryGuessesDetails", "blurryGuessedIdols", "blurryGameComplete", "blurryGameWon"
-                ];
-                blurryKeys.forEach(key => localStorage.removeItem(key));
-            }
-
-            localStorage.setItem(lastPlayedDateKey, currentServerDate);
-            localStorage.setItem(`${mode}_gameDate`, currentServerDate);
-
-            window.location.reload();
-
-            return true;
-        }
-        return false;
-    }, []);
-
     return {
         userToken,
         isMobile,
@@ -142,6 +112,5 @@ export const useSharedGameData = () => {
         userStatsData: userStats.data,
         transferData,
         queryClient,
-        checkAndResetDay,
     };
 }

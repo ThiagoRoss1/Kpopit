@@ -15,8 +15,8 @@ import PixelatedVictory from "../../components/Pixelated/PixelatedVictory";
 import {GetPixelLevel, PIXEL_LEVELS} from "../../utils/pixelLevels";
 import { WinnerExplosion } from "../../utils/confetti";
 import { useClearGameStorage } from "../../hooks/useClearGameStorage";
-import { safeReload } from "../../utils/safeReload";
-import { isNewGameDay } from "../../utils/gameStorage";
+import { isNewGameDay, startFirstGameDay } from "../../utils/gameStorage";
+import { useGameDay } from "../../contexts/game_day_context";
 import Section, { SectionBoundary, SectionError } from "../../components/Loading/Section";
 import { ALL_ALBUMS_KEY, persistingFetch, readPersistedList } from "../../utils/persistedList";
 import { useIsLg } from "../../hooks/useIsDevice";
@@ -52,6 +52,7 @@ function PixelatedMode() {
     const touchStartRef = useRef<{ x: number; y: number } | null>(null);
 
     const { userToken, initUser, decryptedTokenRef, isInitialized, queryClient, userStatsData, transferData } = useSharedGameData();
+    const { day, onNewDay } = useGameDay();
 const { clearPixelated } = useClearGameStorage();
 
     const isLg = useIsLg();
@@ -76,7 +77,7 @@ const { clearPixelated } = useClearGameStorage();
     }, [isCorrect, endGame, guesses.length]);
 
     const dailyUserCount = useQuery({
-        queryKey: ["dailyUserCount", gameMode],
+        queryKey: ["dailyUserCount", gameMode, day],
         queryFn: getDailyUserCount,
         staleTime: 1000 * 60 * 5,
         refetchOnWindowFocus: false,
@@ -87,12 +88,11 @@ const { clearPixelated } = useClearGameStorage();
         isError: isErrorPixelatedGameData,
         refetch: refetchPixelatedGameData,
     } = useQuery<PixelatedGameData>({
-        queryKey: ["pixelatedDailyAlbum", gameMode],
+        queryKey: ["pixelatedDailyAlbum", gameMode, day],
         queryFn: getPixelatedDailyAlbum,
         enabled: isInitialized,
         staleTime: 1000 * 60 * 60 * 4,
         refetchOnWindowFocus: false,
-        placeholderData: (previousData) => previousData,
     });
 
     const { data: allAlbumsData, isError: isErrorAllAlbums, refetch: refetchAllAlbums } = useQuery<AlbumSearchResult[]>({
@@ -107,7 +107,7 @@ const { clearPixelated } = useClearGameStorage();
     });
 
     const { data: yesterdayAlbumData } = useQuery<YesterdayAlbum>({
-        queryKey: ["yesterdaysAlbum"],
+        queryKey: ["yesterdaysAlbum", day],
         queryFn: getYesterdaysAlbum,
         staleTime: 1000 * 60 * 60 * 24,
         refetchOnWindowFocus: false,
@@ -119,14 +119,17 @@ const { clearPixelated } = useClearGameStorage();
 
     const serverDate = pixelatedGameData?.server_date;
 
-    // New day: drop yesterday's local state and reload (nothing to keep in React state).
+    // First visit: nothing to reset, just record today (while rendering, so the restore below runs now).
+    if (serverDate) startFirstGameDay(localStorage, "pixelated", serverDate);
+
+    // New day: drop yesterday's local state and remount on the new day (no page reload).
     useEffect(() => {
         if (!serverDate || !isNewGameDay(localStorage, "pixelated", serverDate)) return;
         if (import.meta.env.DEV) console.log("New day detected, clearing pixelated cache.");
         clearPixelated();
         localStorage.setItem("pixelatedGameDate", serverDate);
-        safeReload();
-    }, [serverDate, clearPixelated, sessionRestored]);
+        onNewDay(serverDate);
+    }, [serverDate, clearPixelated, sessionRestored, onNewDay]);
 
     // Same day: restore the cached game once per server date / session restore, while rendering
     // (React's "adjust state when a value changes"), so no effect has to copy storage into state.
@@ -184,7 +187,7 @@ const { clearPixelated } = useClearGameStorage();
     });
 
     const userPosition = useQuery({
-        queryKey: ["pixelatedUserPosition", gameMode],
+        queryKey: ["pixelatedUserPosition", gameMode, day],
         queryFn: async () => getUserPosition((await initUser()) || ""),
         enabled: isInitialized,
         refetchOnWindowFocus: false,
