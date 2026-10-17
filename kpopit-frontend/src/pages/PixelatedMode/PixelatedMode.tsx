@@ -18,6 +18,7 @@ import { WinnerExplosion } from "../../utils/confetti";
 import { useClearGameStorage } from "../../hooks/useClearGameStorage";
 import { safeReload } from "../../utils/safeReload";
 import { isNewGameDay } from "../../utils/gameStorage";
+import { ALL_ALBUMS_KEY, persistingFetch, readPersistedList } from "../../utils/persistedList";
 import { useIsLg } from "../../hooks/useIsDevice";
 import { useAllGameModes } from "../../hooks/useAllGameModes";
 import { BarChart3 } from "lucide-react";
@@ -93,7 +94,10 @@ function PixelatedMode() {
 
     const { data: allAlbumsData, isLoading: isLoadingAllAlbums } = useQuery<AlbumSearchResult[]>({
         queryKey: ["allAlbums"],
-        queryFn: getAllAlbums,
+        queryFn: persistingFetch(ALL_ALBUMS_KEY, getAllAlbums),
+        // Last visit's copy shows at once and counts as stale, so each visit refreshes it once.
+        initialData: () => readPersistedList<AlbumSearchResult>(ALL_ALBUMS_KEY),
+        initialDataUpdatedAt: 0,
         staleTime: 1000 * 60 * 60 * 24 * 5,
         gcTime: 1000 * 60 * 60 * 24 * 6,
         refetchOnWindowFocus: false,

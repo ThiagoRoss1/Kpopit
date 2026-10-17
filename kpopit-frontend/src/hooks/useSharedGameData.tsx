@@ -5,6 +5,7 @@ import { encryptToken, decryptToken } from "../utils/tokenEncryption";
 import { useTransferDataLogic } from "./useTransferDataLogic";
 import type { Users, UserStats, IdolListItem } from "../interfaces/gameInterfaces";
 import { useIsMobile } from "./useIsDevice";
+import { ALL_IDOLS_KEY, persistingFetch, readPersistedList } from "../utils/persistedList";
 
 export const useSharedGameData = () => {
     const [isInitialized, setIsInitialized] = useState<boolean>(false);
@@ -83,7 +84,10 @@ export const useSharedGameData = () => {
         isError: isErrorAllIdols,
     } = useQuery<IdolListItem[]>({
         queryKey: ["allIdols"],
-        queryFn: getAllIdols,
+        queryFn: persistingFetch(ALL_IDOLS_KEY, getAllIdols),
+        // Last visit's copy shows at once and counts as stale, so each visit refreshes it once.
+        initialData: () => readPersistedList<IdolListItem>(ALL_IDOLS_KEY),
+        initialDataUpdatedAt: 0,
         staleTime: 1000 * 60 * 60 * 24 * 5, // See functionality
         gcTime: 1000 * 60 * 60 * 24 * 6, // Can be this the YG error.
         refetchOnWindowFocus: false,
