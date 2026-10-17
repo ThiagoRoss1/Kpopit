@@ -2,6 +2,7 @@ import React, { useMemo } from "react";
 import { motion } from "motion/react";
 import Star from "../../assets/icons/star-four-fill.svg";
 import { useIsMobile } from "../../hooks/useIsDevice";
+import Img from "../Img";
 
 interface BackgroundStyleProps {
     attempts?: number;
@@ -129,7 +130,7 @@ const BackgroundStyle = (props: BackgroundStyleProps) => {
                 transform: `rotate(${star.rotation}deg)`,
               }}
             >
-            <img
+            <Img
               src={Star}
               alt="Star"
               className={`${getSizeClass(star.size)} star-twinkle origin-center`}

@@ -3,6 +3,7 @@ import { Link, useLocation } from "react-router";
 import { useState, useEffect, useRef } from "react";
 import { GAMES_LINKS, IDOLS_LINKS } from "./navigation";
 import { ChevronDown } from "lucide-react";
+import Img from "../Img";
 
 
 interface ButtonsListMobileProps {
@@ -93,7 +94,7 @@ const ButtonsListMobile = (props: ButtonsListMobileProps) => {
                                         className="flex w-full max-xxs:h-12 xxs:h-14 xs:h-16 bg-black/40 rounded-2xl items-center px-4 gap-3 cursor-default"
                                     >
                                         {game.icon && (
-                                            <img 
+                                            <Img 
                                                 src={game.icon} 
                                                 alt={`${game.label} icon`} 
                                                 className="grayscale w-9 h-9"
@@ -117,7 +118,7 @@ const ButtonsListMobile = (props: ButtonsListMobileProps) => {
                                         className="flex items-center justify-center gap-3 w-full"
                                     >
                                         {game.icon && (
-                                            <img 
+                                            <Img 
                                                 src={game.icon} 
                                                 alt={`${game.label} icon`} 
                                                 className="w-9 h-9"
@@ -162,7 +163,7 @@ const ButtonsListMobile = (props: ButtonsListMobileProps) => {
                                         className="flex w-full max-xxs:h-12 xxs:h-14 xs:h-16 bg-black/40 rounded-2xl items-center px-4 gap-3 cursor-default"
                                     >
                                         {idol.icon && (
-                                            <img 
+                                            <Img 
                                                 src={idol.icon} 
                                                 alt={`${idol.label} icon`} 
                                                 className="grayscale w-9 h-9"
@@ -186,7 +187,7 @@ const ButtonsListMobile = (props: ButtonsListMobileProps) => {
                                         className="flex items-center gap-3 w-full"
                                     >
                                         {idol.icon && (
-                                            <img 
+                                            <Img 
                                                 src={idol.icon} 
                                                 alt={`${idol.label} icon`} 
                                                 className="w-9 h-9"

@@ -1,6 +1,7 @@
 // Top Buttons Blurry component
 import Stats from "../../assets/icons/chart-bar-fill.svg";
 import Share from "../../assets/icons/share-network-fill.svg";
+import Img from "../Img";
 
 interface TopButtonsProps {
     onSubmitStats: () => void;
@@ -35,7 +36,7 @@ const TopButtons = (props: TopButtonsProps) => {
                 <button onClick={onSubmitStats} type="button" className={RoundedButtonStyle}>
                     <span className={RoundedButtonAnimation} />
                         <span className={RoundedButtonBackgroundStyle}>
-                            <img src={Stats} alt="Stats" className={ImageStyle} draggable={false} />
+                            <Img src={Stats} alt="Stats" className={ImageStyle} draggable={false} />
                         </span>
                 </button>
 
@@ -51,7 +52,7 @@ const TopButtons = (props: TopButtonsProps) => {
                 <button onClick={onSubmitShare} type="button" className={RoundedButtonStyle}>
                     <span className={RoundedButtonAnimation} />
                         <span className={RoundedButtonBackgroundStyle}>
-                            <img src={Share} alt="Share" className={ImageStyle} draggable={false} />
+                            <Img src={Share} alt="Share" className={ImageStyle} draggable={false} />
                         </span>
                 </button>
             </div>

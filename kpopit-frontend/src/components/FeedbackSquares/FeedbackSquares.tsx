@@ -2,6 +2,7 @@ import { useState, useRef } from "react";
 import ArrowUp from "../../assets/icons/arrow-fat-line-up-fill.svg";
 import ArrowDown from "../../assets/icons/arrow-fat-line-down-fill.svg";
 import { X } from "lucide-react";
+import Img from "../Img";
 
 interface FeedbackSquaresProps {
   onClose?: () => void;
@@ -87,7 +88,7 @@ const FeedbackSquares = (props: FeedbackSquaresProps) => {
                     <div className={`w-10 h-10 sm:w-10 sm:h-10 flex items-center justify-center rounded-lg border border-white ${getStatusColor(status.key)}`}>
                     
                     {getStatusIcon(status.key) && (
-                      <img src={getStatusIcon(status.key)!} alt="status" className="w-10 h-10 sm:w-10 sm:h-10" draggable={false} />
+                      <Img src={getStatusIcon(status.key)!} alt="status" className="w-10 h-10 sm:w-10 sm:h-10" draggable={false} />
                     )}
                       </div>
 

@@ -3,6 +3,7 @@ import { useState, useRef } from "react";
 import { Link, useLocation } from "react-router";
 import { ChevronDown } from "lucide-react";
 import type { DropLink } from "./navigation";
+import Img from "../Img";
 
 interface ButtonsDroplistProps {
     buttonName: string;
@@ -45,7 +46,7 @@ const ButtonsDroplist = (props: ButtonsDroplistProps) => {
                                         className={`relative flex w-full items-center text-white/40 max-xxs:text-[14px] xxs:text-[14px] xs:text-[14px] sm:text-base rounded-xl h-15 sm:h-17 px-2 sm:px-4 gap-4 sm:gap-4 
                                         hover:bg-neon-pink/20 cursor-default select-none ${dropdownClassName || ""}
                                         ${isPath ? "bg-white/10" : ""} ${isLastOdd ? "xl:col-span-2 justify-center" : ""}`}>
-                                            {item.icon && <img src={item.icon} alt={`${item.label} icon`} className="grayscale w-9 h-9 sm:w-10 sm:h-10" />}
+                                            {item.icon && <Img src={item.icon} alt={`${item.label} icon`} className="grayscale w-9 h-9 sm:w-10 sm:h-10" />}
                                             <span className="italic">{item.label}</span>
                                         </div>
                                 );
@@ -60,7 +61,7 @@ const ButtonsDroplist = (props: ButtonsDroplistProps) => {
                                     ${isPath ? "bg-white/10" : ""} ${isLastOdd ? "xl:col-span-2 xl:justify-center" : ""}`}
                                     onClick={() => setIsOpen(false)}
                                     >
-                                    {item.icon && <img src={item.icon} alt={`${item.label} icon`} className="w-8 h-8 sm:w-10 sm:h-10" />}
+                                    {item.icon && <Img src={item.icon} alt={`${item.label} icon`} className="w-8 h-8 sm:w-10 sm:h-10" />}
                                     <span className="font-normal">
                                         {isPath && (
                                         <span className="text-neon-pink [text-shadow:1px_1px_10px_#FF3399,1px_1px_10px_#FF3399] pr-1">• </span>

@@ -7,6 +7,7 @@ import UserDropdownMobile from "./UserDropdownMobile";
 import { GAMES_LINKS, IDOLS_LINKS } from "./navigation";
 import { Menu, X } from "lucide-react";
 import { useAuth } from "../../hooks/useAuth";
+import Img from "../Img";
 
 export type PageName = "classic" | "blurry" | "contact" | "idols" | "login" | "register" | "profile" | "pixelated" | "collections";
 const MODES: PageName[] = ["classic", "blurry", "contact", "idols", "login", "register", "profile", "pixelated", "collections"];
@@ -68,7 +69,7 @@ const NavBar = () => {
                         to="/"
                         className="flex items-center gap-1 hover:opacity-80 transition-opacity duration-300"
                     >
-                        <img
+                        <Img
                             src="/kpopit-icon-svg.svg"
                             alt="Kpopit logo"
                             className="max-xxs:w-7 max-xxs:h-7 xxs:w-8 xxs:h-8 xs:w-9 xs:h-9 sm:w-12 sm:h-12 object-contain"

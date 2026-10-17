@@ -18,6 +18,7 @@ import IdolsProfileSearch from "../../components/IdolsSearchBar/IdolsProfileSear
 import { useHydrated } from "../../hooks/useHydrated";
 import { Helmet } from "react-helmet-async";
 import { buildIdolSlug, formatGroupName } from "../../utils/formatters";
+import Img from "../../components/Img";
 
 // initialProfile: build-time data for the prerendered page; stale at once, so it refetches.
 function IdolProfile({ initialProfile }: { initialProfile?: IdolProfileData }) {
@@ -199,7 +200,8 @@ function IdolProfile({ initialProfile }: { initialProfile?: IdolProfileData }) {
                 <div className="idol-profile-enter justify-center flex max-lg:items-center flex-col lg:flex-row w-full h-fit bg-white/0 max-lg:border-b-2 max-lg:border-t-2 lg:border-r-2 lg:border-b-2 border-neon-pink rounded-4xl">
                     {/* Idol card */}
                     <div className="group relative flex zm:w-100 zm:h-120 sm:w-120 sm:h-120 md:w-120 md:h-120 lg:w-90 lg:h-160 xl:w-114 xl:h-160 rounded-3xl shrink-0 overflow-hidden max-zm:border-b-2 zm:border-2 lg:border-0 lg:border-t-2 lg:border-r-2 border-neon-pink max-lg:mt-4">
-                        <img
+                        <Img
+                            priority
                             src={`${import.meta.env.VITE_IMAGE_BUCKET_URL}${idolProfile?.image_path}?v=${idolProfile?.image_version}`}
                             alt={`${idolProfile?.artist_name} photo`}
                             className="idol-photo-enter w-full h-full object-cover group-hover:scale-105 transition-transform firefox:duration-500 duration-700 transform-gpu"
@@ -321,7 +323,7 @@ function IdolProfile({ initialProfile }: { initialProfile?: IdolProfileData }) {
                                     value={nationalities.map((nat, i) => {
                                         const flag = getNationalityFlag(nat);
                                         return flag ? (
-                                            <img key={i} src={flag} alt={`${nat} flag`} className="w-10 h-7.5 rounded-sm inline-block" draggable={false} />
+                                            <Img key={i} src={flag} alt={`${nat} flag`} className="w-10 h-7.5 rounded-sm inline-block" draggable={false} />
                                         ) : nat })
                                     }
                                     size="small"

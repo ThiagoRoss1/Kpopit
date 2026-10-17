@@ -40,6 +40,7 @@ import { isNewGameDay } from "../../utils/gameStorage";
 import CardGrantedReveal from "../Collection/components/CardGrantedReveal";
 import type { CardGranted } from "../../interfaces/albumInterfaces";
 import { buildIdolSlug } from "../../utils/formatters";
+import Img from "../../components/Img";
 
 function BlurryMode() {
     const gameMode = useGameMode();
@@ -462,7 +463,8 @@ function BlurryMode() {
                     ))}
 
                     {/* Image */}
-                    <img
+                    <Img
+                        priority
                         src={`${import.meta.env.VITE_IMAGE_BUCKET_URL}${blurryGameData.blur_image_path}?v=${blurryGameData.blur_image_version}`}
                         style={{filter: `${endGame ? "blur(0px)" : `blur(${currentBlur}px)`} ${endGame ? "grayscale(0%)" : `grayscale(${blurryToggleOptions.color ? 0 : 100}%)`}`}}
                         alt={`Blurry image of ${artistName}`}

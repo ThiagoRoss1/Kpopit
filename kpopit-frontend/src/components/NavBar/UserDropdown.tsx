@@ -5,6 +5,7 @@ import { LogOut, User } from "lucide-react";
 import { useAuth } from "../../hooks/useAuth";
 import { useAuthUser } from "../../hooks/useAuthUser";
 import { resolveAvatarUrl } from "../../utils/resolveAvatarUrl";
+import Img from "../Img";
 
 const UserDropdown = () => {
     const { user, refreshAuth } = useAuth();
@@ -53,7 +54,7 @@ const UserDropdown = () => {
                 aria-expanded={isOpen}
             >
                 {avatarSrc ? (
-                    <img
+                    <Img
                         src={avatarSrc}
                         alt="User avatar"
                         className="w-full h-full rounded-full object-cover"
@@ -71,7 +72,7 @@ const UserDropdown = () => {
                 {/* Header */}
                 <div className="flex flex-row items-center gap-3 px-4 py-3 border-b border-neon-pink/20">
                     {avatarSrc ? (
-                        <img
+                        <Img
                             src={avatarSrc}
                             alt="User avatar"
                             className="w-10 h-10 rounded-full object-cover shrink-0"

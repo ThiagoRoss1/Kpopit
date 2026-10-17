@@ -1,3 +1,5 @@
+import Img from "../Img";
+
 interface IdolsCardsProps {
     idolImage?: string;
     artistName?: string;
@@ -13,7 +15,7 @@ const IdolsCards = (props: IdolsCardsProps) => {
         hover:cursor-pointer hover:scale-105 hover:border-white transition-transform duration-300 ease-out transform-gpu will-change-transform backface-hidden">
             {/* Idol Image */}
             <div className="w-full h-full flex justify-center items-center overflow-hidden">
-                <img 
+                <Img 
                     src={idolImage} 
                     alt={`${artistName} image`} 
                     className="w-full h-full object-cover transform-gpu hover:scale-110 transition-transform duration-700 " 

@@ -4,6 +4,7 @@ import { useIdolSearch } from "../../hooks/useIdolSearch";
 import type { IdolsPageData } from "../../interfaces/gameInterfaces";
 import { Link, useNavigate } from "react-router";
 import { buildIdolSlug } from "../../utils/formatters";
+import Img from "../Img";
 
 interface IdolsProfileSearchProps {
     idolsData: IdolsPageData[];
@@ -101,7 +102,7 @@ const IdolsProfileSearch = (props: IdolsProfileSearchProps) => {
                                     >
                                         {idol.image_path && (
                                             <div className="flex justify-start items-center gap-3">
-                                                <img 
+                                                <Img 
                                                     src={`${import.meta.env.VITE_IMAGE_BUCKET_URL}${idol.image_path}?v=${idol.image_version}`}
                                                     alt={`${idol.artist_name} image`}
                                                     className="w-11 h-11 sm:w-12 sm:h-12 object-cover rounded-2xl border border-white

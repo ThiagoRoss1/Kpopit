@@ -6,6 +6,7 @@ import RankPosition from "../../assets/icons/ranking-fill.svg";
 import PositionTrend from "../../assets/icons/trending-up.svg";
 import { Share2 } from "lucide-react";
 import { buildIdolSlug } from "../../utils/formatters";
+import Img from "../Img";
 
 interface GameMode {
     id: string;
@@ -61,7 +62,7 @@ return (
             shadow-[0_0_20px_4px_rgba(255,255,255,0.1),0_0_40px_10px_rgba(255,255,255,0.1)]">
                 <Link 
                     to={`/idols/${cardInfo.idol_id}/${buildIdolSlug(cardInfo.artist_name, cardInfo.active_group)}`}>
-                    <img 
+                    <Img 
                         src={`${import.meta.env.VITE_IMAGE_BUCKET_URL}${cardInfo.image_path}?v=${cardInfo.image_version}`} 
                         alt="Idol" 
                         className="max-xxs:w-23 max-xxs:h-23 xxs:w-26 xxs:h-26 xs:w-29 xs:h-29 sm:w-34 sm:h-34 rounded-[48px] sm:rounded-[50px] object-cover object-top transform-gpu" 
@@ -92,7 +93,7 @@ return (
             <div className="relative grid grid-cols-3 gap-5">
                 <div className="relative flex flex-col items-center justify-start text-center max-xxs:h-21.5 xxs:h-21.5 xs:w-27 xs:h-25 xm:w-29 xm:h-25 sm:w-45 sm:h-25 bg-linear-to-br from-[#db3189] to-[#511061] 
                     gap-0.5 rounded-[18px] sm:rounded-[20px]">
-                    <img src={TargetAttempt} alt="M" className="max-xxs:w-4 max-xxs:h-4 xxs:w-5 xxs:h-5 xs:w-6 xs:h-6 sm:w-6 sm:h-6 mt-2" draggable={false} /> {/* w-27 */}
+                    <Img src={TargetAttempt} alt="M" className="max-xxs:w-4 max-xxs:h-4 xxs:w-5 xxs:h-5 xs:w-6 xs:h-6 sm:w-6 sm:h-6 mt-2" draggable={false} /> {/* w-27 */}
                     <span className="max-xxs:text-lg xxs:text-[20px] xs:text-[22px] font-bold">
                         {attempts}
                     </span>
@@ -103,7 +104,7 @@ return (
 
                 <div className="relative flex flex-col items-center justify-start text-center max-xxs:h-21.5 xxs:h-21.5 xs:w-27 xs:h-25 xm:w-29 xm:h-25 sm:w-45 sm:h-25 bg-linear-to-br from-[#7a4de4] to-[#1f2686] 
                     gap-0.5 rounded-[18px] sm:rounded-[20px]">
-                    <img src={RankPosition} alt="P" className="max-xxs:w-4 max-xxs:h-4 xxs:w-5 xxs:h-5 xs:w-6 xs:h-6 sm:w-6 sm:h-6 mt-2" draggable={false} />
+                    <Img src={RankPosition} alt="P" className="max-xxs:w-4 max-xxs:h-4 xxs:w-5 xxs:h-5 xs:w-6 xs:h-6 sm:w-6 sm:h-6 mt-2" draggable={false} />
                     <span className="max-xxs:text-lg xxs:text-[20px] xs:text-[22px] font-bold">
                         {userRank ?? "-"}
                     </span>
@@ -114,7 +115,7 @@ return (
 
                 <div className="relative flex flex-col items-center justify-start text-center max-xxs:h-21.5 xxs:h-21.5 xs:w-27 xs:h-25 xm:w-29 xm:h-25 sm:w-45 sm:h-25 bg-linear-to-br from-[#ec5e65] to-[#802256] 
                     gap-0.5 rounded-[18px] sm:rounded-[20px]">
-                    <img src={PositionTrend} alt="S" className="max-xxs:w-4 max-xxs:h-4 xxs:w-5 xxs:h-5 xs:w-6 xs:h-6 sm:w-6 sm:h-6 mt-2" draggable={false} />
+                    <Img src={PositionTrend} alt="S" className="max-xxs:w-4 max-xxs:h-4 xxs:w-5 xxs:h-5 xs:w-6 xs:h-6 sm:w-6 sm:h-6 mt-2" draggable={false} />
                     <span className="max-xxs:text-lg xxs:text-[20px] xs:text-[22px] font-bold">
                         {userScore?.toFixed(2)}
                     </span>
@@ -139,7 +140,7 @@ return (
                     <div className="flex flex-row w-full h-full items-center justify-start max-xxs:pr-0 xxs:pr-2 xs:pr-4 xm:pr-2 sm:pr-4 ml-10 sm:ml-20 gap-2 sm:gap-6">
                         <Link
                             to={`/idols/${yesterdayIdolId}/${buildIdolSlug(yesterdayIdol, yesterdayGroup)}`}>
-                            <img 
+                            <Img 
                                 src={`${import.meta.env.VITE_IMAGE_BUCKET_URL}${yesterdayIdolImage}${yesterdayImageVersion}`} 
                                 alt="Idol" className="max-xxs:w-16 max-xxs:h-16 xxs:w-20 xxs:h-20 xs:w-22 xs:h-22 sm:w-28 sm:h-28 rounded-full sm:rounded-full object-cover object-center hover:scale-105 
                                 select-none transition-transform duration-500 will-change-transform transform-gpu" 
@@ -196,7 +197,7 @@ return (
                                         hover:scale-105 hover:cursor-pointer active:scale-95 ease-[cubic-bezier(0.34,1.56,0.64,1)] transition-all duration-500 transform-gpu
                                         ${mode.won ? "opacity-50" : "opacity-100"}`}
                                     >
-                                        <img
+                                        <Img
                                             src="/kpopit-icon-svg.svg"
                                             alt="Kpopit Icon"
                                             draggable={false}

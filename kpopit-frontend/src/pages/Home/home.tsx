@@ -8,6 +8,7 @@ import InfoButtons from "../../components/buttons/InfoButtons";
 import Modal from "../../components/buttons/modals/Modal";
 import ChangelogText from "../../components/buttons/modals/ChangelogContent";
 import AboutText from "../../components/buttons/modals/AboutContent";
+import Img from "../../components/Img";
 
 function Home() {
     const [showModal, setShowModal] = useState<null | "changelog" | "about">(null);
@@ -64,7 +65,7 @@ function Home() {
                             hover:bg-black hover:translate-x-1 hover:translate-y-1 transition-all duration-200 transform-gpu
                             active:shadow-[0px_0px_0px_0px_rgba(255,255,255,1)] active:bg-black active:translate-x-1 active:translate-y-1">
                             <div className="flex w-20 h-20 bg-white/0 rounded-full items-center text-center justify-center">
-                                <img
+                                <Img
                                     src="/kpopit-icon-svg.svg"
                                     alt="Kpopit Icon"
                                     className="max-xxs:w-10 max-xxs:h-10 xxs:w-10 xxs:h-10 xs:w-12 xs:h-12 sm:w-12 sm:h-12"
@@ -106,7 +107,7 @@ function Home() {
                             hover:bg-black hover:translate-x-1 hover:translate-y-1 transition-all duration-200 transform-gpu
                             active:shadow-[0px_0px_0px_0px_rgba(255,255,255,1)] active:bg-black active:translate-x-1 active:translate-y-1">
                             <div className="flex w-20 h-20 bg-white/0 rounded-full items-center text-center justify-center">
-                                <img
+                                <Img
                                     src="/kpopit-icon-svg.svg"
                                     alt="Kpopit Icon"
                                     className="max-xxs:w-10 max-xxs:h-10 xxs:w-10 xxs:h-10 xs:w-12 xs:h-12 sm:w-12 sm:h-12 blur-[2px]"
@@ -148,7 +149,7 @@ function Home() {
                             hover:bg-black hover:translate-x-1 hover:translate-y-1 transition-all duration-200 transform-gpu
                             active:shadow-[0px_0px_0px_0px_rgba(255,255,255,1)] active:bg-black active:translate-x-1 active:translate-y-1">
                             <div className="flex w-20 h-20 bg-white/0 rounded-full items-center text-center justify-center">
-                                <img
+                                <Img
                                     src="/kpopit-icon-svg.svg"
                                     alt="Kpopit Icon"
                                     className="max-xxs:w-10 max-xxs:h-10 xxs:w-10 xxs:h-10 xs:w-12 xs:h-12 sm:w-12 sm:h-12 [image-rendering:pixelated]"

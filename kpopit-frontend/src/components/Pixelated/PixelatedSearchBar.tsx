@@ -3,6 +3,7 @@ import { AnimatePresence, motion } from "motion/react";
 import type { AlbumSearchResult } from "../../interfaces/gameInterfaces";
 import { resolveCdnUrl } from "../../utils/imageUrl";
 import SearchIcon from "../../assets/icons/magnifying-glass-fill.svg";
+import Img from "../Img";
 
 interface PixelatedSearchBarProps {
   allAlbums: AlbumSearchResult[];
@@ -126,7 +127,7 @@ const PixelatedSearchBar = (props: PixelatedSearchBarProps) => {
                 hover:brightness-110 hover:cursor-pointer active:translate-y-1 active:shadow-[0_1px_0_var(--color-ink)]
                 disabled:opacity-50 disabled:pointer-events-none"
             >
-              <img src={SearchIcon} alt="Search Icon" aria-hidden="true" className="w-full h-full" draggable={false} />
+              <Img src={SearchIcon} alt="Search Icon" aria-hidden="true" className="w-full h-full" draggable={false} />
             </button>
 
             <AnimatePresence>
@@ -154,7 +155,7 @@ const PixelatedSearchBar = (props: PixelatedSearchBarProps) => {
                         group-hover:bg-neon-pink/20 flex gap-3 items-center text-ink"
                     >
                       {album.cover_path && (
-                        <img
+                        <Img
                           src={resolveCdnUrl(album.cover_path) ?? undefined}
                           alt=""
                           className="w-12 h-12 object-cover rounded-full border-2 border-ink shrink-0"

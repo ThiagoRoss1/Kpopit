@@ -3,6 +3,7 @@ import React, { useState, useEffect, useCallback, useMemo } from "react";
 import { Link } from "react-router";
 import type { FeedbackData, GuessResponse } from "../../../interfaces/gameInterfaces";
 import { buildIdolSlug } from "../../../utils/formatters";
+import Img from "../../Img";
 
 interface GuessRowProps {
     guess: GuessResponse<Partial<FeedbackData>>;
@@ -60,7 +61,7 @@ const GuessRow = (props: GuessRowProps) => {
 
             {/* Photo and name */}
             <div className="relative flex items-center justify-start gap-2 w-full h-fit">
-                <img
+                <Img
                     src={`${import.meta.env.VITE_IMAGE_BUCKET_URL}${guess.guessed_idol_data.image_path}?v=${guess.guessed_idol_data.image_version}`}
                     alt="Idol image"
                     className={`${shouldAnimate ? 'guess-photo-enter' : ''} 

@@ -1,3 +1,5 @@
+import Img from "../../components/Img";
+
 const MaintenanceDatabase = () => {
     const HANNI_GIF = "https://media3.giphy.com/media/v1.Y2lkPTc5MGI3NjExN2g1dHU4Njk1eXN5aGYzZWpnaGJ4bWVleGNwcHBucTNmdDA1YnN3MSZlcD12MV9pbnRlcm5hbF9naWZfYnlfaWQmY3Q9Zw/IShxz9vFSpUSR30gH0/giphy.gif";
     const HAERIN_GIF = "https://media3.giphy.com/media/v1.Y2lkPTc5MGI3NjExZ2ttaGFkbGN5cnhuNTBqZTYxMWo1MDQ0dm1vZmF3OTZvNXRwdHJ0YyZlcD12MV9pbnRlcm5hbF9naWZfYnlfaWQmY3Q9Zw/8bJD3Nxiu7DqfF7c5M/giphy.gif";
@@ -14,7 +16,7 @@ const MaintenanceDatabase = () => {
             </div>
 
             <div className="flex justify-center items-center">
-                <img src={HANNI_GIF} alt="Hanni Gif" className="w-40 h-40 sm:w-60 sm:h-60" />
+                <Img src={HANNI_GIF} alt="Hanni Gif" className="w-40 h-40 sm:w-60 sm:h-60" />
             </div>
 
             <div className="w-fit h-fit flex flex-col gap-6 justify-center items-center">
@@ -73,7 +75,7 @@ const MaintenanceDatabase = () => {
                 </div>
 
                 <div className="flex justify-center items-center mb-6 sm:mb-10">
-                    <img src={HAERIN_GIF} alt="Haerin Gif" className="w-60 h-60 sm:w-80 sm:h-80"/>
+                    <Img src={HAERIN_GIF} alt="Haerin Gif" className="w-60 h-60 sm:w-80 sm:h-80"/>
                 </div>               
             </div>
         </div>

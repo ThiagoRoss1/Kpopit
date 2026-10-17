@@ -8,6 +8,7 @@ import trophyIcon from "../../assets/icons/trophy.svg";
 import XLogo from "../../assets/icons/x-logo-small-victory.svg";
 import { X, Download } from 'lucide-react';
 import { buildIdolSlug } from "../../utils/formatters";
+import Img from "../Img";
 
 interface VictoryCardSmallProps<T = FeedbackData> {
     onClose?: () => void;
@@ -122,7 +123,7 @@ const VictoryCardSmall = <T = FeedbackData, >(props: VictoryCardSmallProps<T>) =
                     
                     <div className="absolute flex items-center justify-center top-0 left-1/2 transform -translate-x-1/2 w-16 h-16 sm:w-16 sm:h-16 rounded-full mt-7.5">
                         <div className="hover:scale-105 transform duration-1000">
-                            <img src={trophyIcon} alt="Trophy" className="w-12 h-12 sm:w-12 sm:h-12" draggable={false}/>
+                            <Img src={trophyIcon} alt="Trophy" className="w-12 h-12 sm:w-12 sm:h-12" draggable={false}/>
                         </div>
                         
                     </div>
@@ -158,7 +159,7 @@ const VictoryCardSmall = <T = FeedbackData, >(props: VictoryCardSmallProps<T>) =
                             <div className="absolute left-5 flex items-center justify-center h-20 w-20 sm:h-20 sm:w-20 bg-transparent rounded-[20px] hover:scale-110 hover:rotate-4 transition-transform duration-500 will-change-transform transform-gpu">
                                 <Link
                                     to={`/idols/${cardInfo.idol_id}/${buildIdolSlug(cardInfo.artist_name, cardInfo.active_group)}`}>
-                                    <img 
+                                    <Img 
                                         src={`${import.meta.env.VITE_IMAGE_BUCKET_URL}${cardInfo.image_path}?v=${cardInfo.image_version}`} 
                                         alt="Idol" 
                                         className="w-20 h-20 sm:w-full sm:h-full rounded-[20px] object-cover object-top transform-gpu" 
@@ -247,7 +248,7 @@ const VictoryCardSmall = <T = FeedbackData, >(props: VictoryCardSmallProps<T>) =
                                 hover:scale-110 hover:brightness-110 hover:cursor-pointer hover:rotate-3 hover:bg-black transform duration-300 transform-gpu`}
                                 onClick={() => shareOnTwitter(attempts, stats, userRank, userScore)}>
                                     <div className="flex w-full h-full items-center justify-center text-center brightness-100 hover:brightness-110 transform duration-300">
-                                        <img src={XLogo} alt="X" className="w-8 h-8 sm:w-9 sm:h-9" draggable={false} />
+                                        <Img src={XLogo} alt="X" className="w-8 h-8 sm:w-9 sm:h-9" draggable={false} />
                                     </div>
                                 </button>
 
@@ -256,7 +257,7 @@ const VictoryCardSmall = <T = FeedbackData, >(props: VictoryCardSmallProps<T>) =
                                     <div className="flex w-full h-full items-center justify-center text-center brightness-100 hover:brightness-110"
                                     onClick={() => handleWip()}>
                                         <Download size={30} color="#ce757a" className="w-8 h-8 sm:w-9 sm:h-9" />
-                                        {/* <img src={InstagramLogo} alt="Insta" className="w-8 h-8 sm:w-9 sm:h-9" draggable={false} /> */}
+                                        {/* <Img src={InstagramLogo} alt="Insta" className="w-8 h-8 sm:w-9 sm:h-9" draggable={false} /> */}
                                     </div>
                                 </button>
                                 <AnimatePresence>

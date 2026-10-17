@@ -8,6 +8,7 @@ import TargetAttempt from "../../assets/icons/target.svg";
 import RankPosition from "../../assets/icons/ranking-fill.svg";
 import PositionTrend from "../../assets/icons/trending-up.svg";
 import Xlogo from "../../assets/icons/x-logo.svg";
+import Img from "../Img";
 
 interface  GameMode {
     id: string;
@@ -126,7 +127,7 @@ const PixelatedVictory = (props: PixelatedVictoryProps) => {
                     <div className="pixel-vinyl">
                         <div className="pixel-vinyl__spin">
                             <div className="pixel-vinyl__label overflow-hidden rounded-full">
-                                <img src={coverUrl ?? undefined} alt={`${albumName} cover`} className="w-full h-full object-cover" draggable={false} />
+                                <Img src={coverUrl ?? undefined} alt={`${albumName} cover`} className="w-full h-full object-cover" draggable={false} />
                             </div>
                         </div>
                         <div className="pixel-vinyl__light" />
@@ -139,7 +140,7 @@ const PixelatedVictory = (props: PixelatedVictoryProps) => {
                     shadow-[0_8px_22px_rgba(10,10,10,0.25),0_0_0_2px_rgba(10,10,10,0.6)]
                     firefox:shadow-none firefox:drop-shadow-[0_8px_22px_rgba(10,10,10,0.25)] firefox:active:drop-shadow-[0_0_0_2px_0_rgba(10,10,10,0.6)]">
                     <div className="relative max-xxs:w-39 max-xxs:h-39 w-47.5 h-47.5 sm:w-57.5 sm:h-57.5 rounded-lg overflow-hidden">
-                        <img
+                        <Img
                             src={coverUrl ?? undefined}
                             alt={`${albumName} cover`}
                             className="w-full h-full object-cover"
@@ -181,7 +182,7 @@ const PixelatedVictory = (props: PixelatedVictoryProps) => {
                                     <div className="pixel-vinyl">
                                         <div className="pixel-vinyl__spin">
                                             <div className="pixel-vinyl__label overflow-hidden rounded-full">
-                                                <img 
+                                                <Img 
                                                     src={yesterdayAlbumCover ? resolveCdnUrl(yesterdayAlbumCover) ?? undefined : undefined} 
                                                     alt={`${yesterdayAlbum} cover`} 
                                                     className="w-full h-full object-cover" draggable={false} />
@@ -195,7 +196,7 @@ const PixelatedVictory = (props: PixelatedVictoryProps) => {
                                 {/* Album sleeve */}
                                 <div className="absolute left-0 top-1/2 -translate-y-1/2 -rotate-3 max-xxs:w-19 max-xxs:h-19 w-23 h-23 sm:w-24 sm:h-24 z-1 p-1 rounded-[9px]
                                 bg-[#1c1c1c] shadow-[0_5px_14px_rgba(10,10,10,0.25)]">
-                                    <img
+                                    <Img
                                         src={yesterdayCoverUrl ?? undefined}
                                         alt={`${yesterdayAlbum} cover`}
                                         className="w-full h-full object-cover rounded-md"
@@ -251,7 +252,7 @@ const PixelatedVictory = (props: PixelatedVictoryProps) => {
                     className="flex flex-1 flex-col justify-start items-center text-center max-xxs:py-2.5 max-xxs:px-1 py-3 px-2 gap-1 bg-linear-to-r from-[#1f1f1f] to-[#1f1f1f]/90 rounded-3xl
                     shadow-[3px_3px_0_var(--color-neon-pink)] text-cream hover:translate-y-1 hover:translate-x-1 hover:shadow-[0px_1px_0_var(--color-neon-pink)] transition-all duration-300"
                 >
-                    <img src={TargetAttempt} alt="Attempts Icon" className="w-4 h-4 sm:w-6 sm:h-6" draggable={false} />
+                    <Img src={TargetAttempt} alt="Attempts Icon" className="w-4 h-4 sm:w-6 sm:h-6" draggable={false} />
 
                     <div className="font-bold max-xxs:text-xl text-2xl">{attempts}</div>
 
@@ -263,7 +264,7 @@ const PixelatedVictory = (props: PixelatedVictoryProps) => {
                     className="flex flex-1 flex-col justify-start items-center text-center max-xxs:py-2.5 max-xxs:px-1 py-3 px-2 gap-1 bg-linear-to-r from-[#1f1f1f] to-[#1f1f1f]/90 rounded-3xl
                     shadow-[3px_3px_0_var(--color-neon-pink)] text-cream hover:translate-y-1 hover:translate-x-1 hover:shadow-[0px_1px_0_var(--color-neon-pink)] transition-all duration-300"
                 >
-                    <img src={RankPosition} alt="Rank Icon" className="w-4 h-4 sm:w-6 sm:h-6" draggable={false} />
+                    <Img src={RankPosition} alt="Rank Icon" className="w-4 h-4 sm:w-6 sm:h-6" draggable={false} />
 
                     <div className="font-bold max-xxs:text-xl text-2xl">{fmt(rank)}</div>
 
@@ -274,7 +275,7 @@ const PixelatedVictory = (props: PixelatedVictoryProps) => {
                     className="flex flex-1 flex-col justify-start items-center text-center max-xxs:py-2.5 max-xxs:px-1 py-3 px-2 gap-1 bg-linear-to-r from-[#1f1f1f] to-[#1f1f1f]/90 rounded-3xl
                     shadow-[3px_3px_0_var(--color-neon-pink)] text-cream hover:translate-y-1 hover:translate-x-1 hover:shadow-[0px_1px_0_var(--color-neon-pink)] transition-all duration-300"
                 >
-                    <img src={PositionTrend} alt="Position Icon" className="w-4 h-4 sm:w-6 sm:h-6" draggable={false} />
+                    <Img src={PositionTrend} alt="Position Icon" className="w-4 h-4 sm:w-6 sm:h-6" draggable={false} />
 
                     <div className="font-bold max-xxs:text-xl text-2xl">{fmt(score, 2)}</div>
 
@@ -315,7 +316,7 @@ const PixelatedVictory = (props: PixelatedVictoryProps) => {
                     firefox:active:drop-shadow-[0_1px_0_var(--color-ink)] transition-all duration-200 transform-gpu
                     hover:scale-101 firefox:hover:scale-100 hover:brightness-110 hover:cursor-pointer active:translate-y-1 active:shadow-[0_1px_0_var(--color-ink)]"
                 >
-                    <img 
+                    <Img 
                         src={Xlogo} 
                         alt="X" 
                         className="w-8 h-8 object-cover" 

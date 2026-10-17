@@ -8,6 +8,7 @@ import { useDateLocale } from "../../hooks/useDateLocale";
 import { formatCompanyName, buildIdolSlug } from "../../utils/formatters";
 import { getNationalityFlag } from "../../utils/getFlags";
 import { useIsMobile } from "../../hooks/useIsDevice";
+import Img from "../Img";
 
 interface GuessRowProps {
     guess: GuessResponse;
@@ -138,7 +139,7 @@ const GuessRow = (props: GuessRowProps) => {
                     >
                     <Link 
                         to={`/idols/${guess.guessed_idol_data.idol_id}/${buildIdolSlug(guess.guessed_idol_data.artist_name, guess.guessed_idol_data.active_group)}`}>
-                        <img
+                        <Img
                             src={`${import.meta.env.VITE_IMAGE_BUCKET_URL}${guess.guessed_idol_data.image_path}?v=${guess.guessed_idol_data.image_version}`}
                             alt="Idol"
                             className="w-20 h-20 sm:w-28 sm:h-28 object-cover select-none"
@@ -207,7 +208,7 @@ const GuessRow = (props: GuessRowProps) => {
 
                             if (flagSrc) {
                                 return (
-                                    <img 
+                                    <Img 
                                     key={index}
                                     src={flagSrc} 
                                     alt={nationality}
@@ -237,7 +238,7 @@ const GuessRow = (props: GuessRowProps) => {
             className={`${getStatusColor(guess.feedback.birth_date?.status)} relative w-20 h-20 sm:h-28 sm:w-28 flex flex-col items-center justify-center 
             text-center rounded-2xl sm:rounded-[18px] inset-shadow-sm border-2 border-white hover:brightness-110 hover:cursor-default transform-3d perspective-[1000px] transform-gpu firefox:isolate`}>
                 {guess.feedback.birth_date?.status !== "correct" && (
-                <img src={getStatusIcon(guess.feedback.birth_date?.status)}
+                <Img src={getStatusIcon(guess.feedback.birth_date?.status)}
                 alt="Birth Date"
                 className="w-20 h-20 sm:w-28 sm:h-28 object-cover"
                 draggable={false} 
@@ -252,7 +253,7 @@ const GuessRow = (props: GuessRowProps) => {
             className={`${getStatusColor(guess.feedback.idol_debut_year?.status)} relative w-20 h-20 sm:h-28 sm:w-28 flex flex-col items-center justify-center 
             text-center rounded-2xl sm:rounded-[18px] inset-shadow-sm border-2 border-white hover:brightness-110 hover:cursor-default transform-3d perspective-[1000px] transform-gpu firefox:isolate`}>
                 {guess.feedback.idol_debut_year?.status !== "correct" && (
-                <img src={getStatusIcon(guess.feedback.idol_debut_year?.status)}
+                <Img src={getStatusIcon(guess.feedback.idol_debut_year?.status)}
                 alt="Debut" 
                 className="w-20 h-20 sm:w-28 sm:h-28 object-cover"
                 draggable={false} 
@@ -267,7 +268,7 @@ const GuessRow = (props: GuessRowProps) => {
             className={`${getStatusColor(guess.feedback.height?.status)} relative w-20 h-20 sm:h-28 sm:w-28 flex flex-col items-center justify-center 
             text-center rounded-2xl sm:rounded-[18px] inset-shadow-sm border-2 border-white hover:brightness-110 hover:cursor-default transform-3d perspective-[1000px] transform-gpu firefox:isolate`}>
                 {guess.feedback.height?.status !== "correct" && (
-                <img src={getStatusIcon(guess.feedback.height?.status)}
+                <Img src={getStatusIcon(guess.feedback.height?.status)}
                 alt="Height"
                 className="w-20 h-20 sm:w-28 sm:h-28 object-cover"
                 draggable={false}

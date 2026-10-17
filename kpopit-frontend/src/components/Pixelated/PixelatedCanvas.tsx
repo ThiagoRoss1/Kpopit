@@ -93,6 +93,8 @@ const PixelatedCanvas = ({ imageUrl, blockSize, alt, className }: PixelatedCanva
         loadedRef.current = false;
         setLoadFailed(false);
         const img = new Image();
+        // The cover is the page's LCP image, drawn on the canvas instead of an <img>.
+        img.fetchPriority = "high";
         imgRef.current = img;
 
         const handleLoad = () => {

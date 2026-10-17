@@ -13,6 +13,7 @@ import HaerinGif from "../../assets/imgs/haerin.gif";
 import HaerinWebp from "../../assets/imgs/haerinok.webp";
 import { resolveAvatarUrl } from "../../utils/resolveAvatarUrl";
 import { Helmet } from "react-helmet-async";
+import Img from "../../components/Img";
 
 const EMAIL_BANNER_DISMISS_KEY = "emailVerifiedBannerDismissed";
 
@@ -282,7 +283,7 @@ const UserProfile = () => {
                                     <div className="flex flex-col items-center xxs:flex-row xxs:justify-center xxs:items-center gap-3 xxs:gap-6 sm:gap-8">
                                         <div className="grid place-items-center w-28 sxs:w-32 h-28 sxs:h-32 rounded-sm overflow-hidden bg-transparent -rotate-[1.5deg] border-t-2 border-l-2 border-neon-pink shrink-0">
                                             {avatarSrc ? (
-                                                <img
+                                                <Img
                                                     src={avatarSrc}
                                                     alt={`${displayName} avatar`}
                                                     className="w-full h-full object-cover hover:cursor-pointer hover:brightness-90"
@@ -480,7 +481,7 @@ const UserProfile = () => {
                                     shadow-[5px_5px_0px_#fff,0_0_24px_rgba(255,51,153,0.18)]">
                                     <div aria-hidden="true" className="absolute inset-0
                                         bg-[radial-gradient(circle_at_50%_35%,rgba(255,51,153,0.18),transparent_60%),linear-gradient(135deg,#1a1a1a,#0e0e0e)]" />
-                                    <img
+                                    <Img
                                         src={isGif ? HaerinGif : HaerinWebp}
                                         alt="Coming soon"
                                         className="relative z-10 w-full h-full object-cover opacity-90 drop-shadow-[0_0_10px_rgba(255,51,153,0.35)] 

@@ -5,6 +5,7 @@ import { LogOut, User, X } from "lucide-react";
 import { useAuth } from "../../hooks/useAuth";
 import { useAuthUser } from "../../hooks/useAuthUser";
 import { resolveAvatarUrl } from "../../utils/resolveAvatarUrl";
+import Img from "../Img";
 
 const UserDropdownMobile = () => {
     const { user, refreshAuth } = useAuth();
@@ -61,7 +62,7 @@ const UserDropdownMobile = () => {
                     aria-label="Open user menu"
                 >
                     {avatarSrc ? (
-                        <img
+                        <Img
                             src={avatarSrc}
                             alt="User avatar"
                             className="w-full h-full rounded-full object-cover"
@@ -92,7 +93,7 @@ const UserDropdownMobile = () => {
                     className={`flex flex-col ${isOpen ? "mobile-navbar-enter" : "mobile-navbar-exit"} items-center gap-3 max-xxs:w-75 xxs:w-90 xs:w-100 sm:w-100 bg-ink border-b-2 border-t-2 border-neon-pink rounded-3xl mt-20 py-8 px-6`}
                 >
                     {avatarSrc ? (
-                        <img
+                        <Img
                             src={avatarSrc}
                             alt="User avatar"
                             className="w-16 h-16 rounded-full object-cover"

@@ -3,6 +3,7 @@ import ArrowDown from "../../../assets/icons/arrow-fat-line-down-fill.svg";
 import ChaewonBanner from "../../../assets/imgs/chaewon_guess.png";
 import EunbiBanner from "../../../assets/imgs/eunbi_guess.png";
 import useResetTimer from "../../../hooks/useResetTimer";
+import Img from "../../Img";
 
 const HowToPlayText = () => {
     const nextReset  = useResetTimer();
@@ -66,7 +67,7 @@ const HowToPlayText = () => {
                         <div className="flex flex-col items-start justify-center gap-2">
                             <div className="flex flex-row items-center gap-2">
                                 <div className="sm:w-12 sm:h-12 bg-[#fd5c63] shadow-[0_0_10px_2px_rgba(253,92,99,0.15),0_0_10px_2px_rgba(253,92,99,0.15)] rounded-lg">
-                                    <img src={ArrowUp} alt="Arrow Up Icon" className="sm:w-12 sm:h-12 object-cover" draggable={false} />               
+                                    <Img src={ArrowUp} alt="Arrow Up Icon" className="sm:w-12 sm:h-12 object-cover" draggable={false} />               
                                 </div> 
                                     <span className="font-semibold text-[#fd5c63] text-shadow-2xs"> -{'>'} Up arrow means today's idol is <b>above</b> - 
                                     younger, taller or debuted recently</span>
@@ -75,7 +76,7 @@ const HowToPlayText = () => {
 
                             <div className="flex flex-row items-center gap-2">
                                 <div className="sm:w-12 sm:h-12 bg-[#fd5c63] shadow-[0_0_10px_2px_rgba(253,92,99,0.15),0_0_10px_2px_rgba(253,92,99,0.15)] rounded-lg">
-                                    <img src={ArrowDown} alt="Arrow Down Icon" className="sm:w-12 sm:h-12 object-cover" draggable={false} />               
+                                    <Img src={ArrowDown} alt="Arrow Down Icon" className="sm:w-12 sm:h-12 object-cover" draggable={false} />               
                                 </div> 
                                     <span className="font-semibold text-[#fd5c63] text-shadow-2xs"> -{'>'} Down arrow means today's idol is <b>below</b> - 
                                     older, shorter or debuted earlier</span>
@@ -252,13 +253,13 @@ const HowToPlayText = () => {
                     </div>
 
                     <div className="flex flex-col gap-6 mt-4">
-                        <img src={EunbiBanner} alt="Kwon Eunbi" className="border-2 border-white rounded-3xl" draggable={false} />
+                        <Img src={EunbiBanner} alt="Kwon Eunbi" className="border-2 border-white rounded-3xl" draggable={false} />
 
                         <div className="flex flex-col gap-4">
                             <span className="normal-font">Buf if you guess <b className="text-[#b43777] brightness-110 [text-shadow:1.2px_1.2px_4px_rgba(0,0,0,0.8),0_0_12px_rgba(180,55,119,0.60)]">
                                 Kim Chaewon
                             </b>, you get this:</span>
-                            <img src={ChaewonBanner} alt="Kim Chaewon" className="border-2 border-white rounded-3xl" draggable={false} />
+                            <Img src={ChaewonBanner} alt="Kim Chaewon" className="border-2 border-white rounded-3xl" draggable={false} />
                         </div>
                     </div>
                     

@@ -1,5 +1,6 @@
 import { useGfx } from '../useCollectionFx';
 import paperSrc from '../../../assets/materials/AlbumOfCol/crumpled_paper-baked.jpg';
+import Img from "../../../components/Img";
 
 // Collection's background components
 
@@ -75,7 +76,7 @@ function SheetTexture({ night }: { night: boolean }) {
     if (!on) return null;
 
     return (
-        <img
+        <Img
             src={paperSrc}
             alt=""
             aria-hidden

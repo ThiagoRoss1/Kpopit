@@ -3,6 +3,7 @@ import type { IdolListItem } from "../../interfaces/gameInterfaces";
 import { AnimatePresence, motion} from "motion/react";
 import SearchIcon from "../../assets/icons/magnifying-glass-fill.svg";
 import { useIsMobile } from "../../hooks/useIsDevice";
+import Img from "../Img";
 
 
 interface SearchBarProps {
@@ -193,7 +194,7 @@ const SearchBar = (props: SearchBarProps) => {
                 }}
               />
               ) : (
-                <img
+                <Img
                 src={SearchIcon} 
                 alt="G" 
                 className="w-5.5 h-5.5 sm:w-5.5 sm:h-5.5 mx-auto" 

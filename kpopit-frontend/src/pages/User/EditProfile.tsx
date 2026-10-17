@@ -10,6 +10,7 @@ import UsernameModal from "./UsernameModal";
 import PasswordModal from "./PasswordModal";
 import EmailModal from "./EmailModal";
 import "./EditProfile.css";
+import Img from "../../components/Img";
 
 type SubModal = "none" | "avatar" | "username" | "password" | "email";
 
@@ -109,7 +110,7 @@ const EditProfile = (props: EditProfileProps) => {
                                 disabled:opacity-60 disabled:cursor-not-allowed"
                         >
                             {avatarSrc ? (
-                                <img
+                                <Img
                                     src={avatarSrc}
                                     alt="Avatar"
                                     className="w-full h-full object-cover transform-gpu"

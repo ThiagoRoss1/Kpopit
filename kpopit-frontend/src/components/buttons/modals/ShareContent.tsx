@@ -3,6 +3,7 @@ import type { GuessResponse } from '../../../interfaces/gameInterfaces';
 import { Copy } from "lucide-react";
 import Twitter from "../../../assets/icons/twitter-white.svg";
 import { AnimatePresence, motion } from "motion/react";
+import Img from "../../Img";
 
 interface ShareContentProps {
     guesses: GuessResponse[];
@@ -181,7 +182,7 @@ const ShareText = (props: ShareContentProps) => {
                             }
                         })}>
                         <div className='relative flex flex-row items-center justify-center gap-2'>
-                            <img src={Twitter} alt="Twitter" className='w-6 h-6 sm:w-6 sm:h-6' />
+                            <Img src={Twitter} alt="Twitter" className='w-6 h-6 sm:w-6 sm:h-6' />
                             <span className='text-base'>Share</span>
                         </div>
                     </button>

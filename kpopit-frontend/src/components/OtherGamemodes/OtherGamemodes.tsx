@@ -1,4 +1,5 @@
 import { Link } from "react-router";
+import Img from "../Img";
 
 interface  GameMode {
     id: string;
@@ -29,7 +30,7 @@ export const OtherGamemodes = (props: OtherGamemodesProps) => {
                             active:scale-95 ease-[cubic-bezier(0.34,1.56,0.64,1)] transition-all duration-500 transform-gpu
                             ${mode.won ? "opacity-50" : "opacity-100"}`}
                         >
-                            <img
+                            <Img
                                 src="/kpopit-icon-svg.svg"
                                 alt={mode.name}
                                 draggable={false}
