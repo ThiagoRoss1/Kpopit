@@ -1,4 +1,3 @@
-import uuid
 import json
 import secrets
 from datetime import datetime, timedelta, timezone
@@ -12,6 +11,7 @@ from utils.convert_to_webp import convert_to_webp_bytes
 from utils.r2 import R2Client
 from utils.rate_limiter import limiter
 from services.auth_service import AuthService
+from services.user_service import UserService
 import logging
 
 user_bp = Blueprint('users', __name__)
@@ -22,89 +22,43 @@ logger = logging.getLogger(__name__)
 @user_bp.route("/user/init", methods=["POST"])
 def generate_user_token():
     """Generate a new user token and store it in the database"""
-    token_sucessfuly_generated = False
     current_timestamp = get_current_timestamp()
+    token = None
 
     # Try up to 5 times
-    attempts = 0
-
-    while not token_sucessfuly_generated and attempts < 5:
+    for attempt in range(1, 6):
         connect = None
         cursor = None
         try:
-            token = str(uuid.uuid4())
-
-            # Start db connection 
             connect = get_db()
             cursor = connect.cursor()
-            
-            token_insert_sql = """
-                INSERT INTO users (token, created_at) VALUES (%s, %s)
-            """
-            cursor.execute(token_insert_sql, (token, current_timestamp))
-            connect.commit()
-            
-            token_sucessfuly_generated = True
-            
+            token = UserService(connect).create_anonymous_user(cursor, current_timestamp)
+            break
         except Exception:
             if connect is not None:
                 connect.rollback()
-            attempts += 1
-            logger.exception("Token generation attempt %s failed", attempts)
-        
+            logger.exception("Token generation attempt %s failed", attempt)
         finally:
             if cursor is not None:
                 cursor.close()
 
-    if token_sucessfuly_generated:
+    if token:
         return jsonify({"token": token})
-    else:
-        return jsonify({"error": "Failed to generate unique token after 5 attempts"}), 500
-    
+    return jsonify({"error": "Failed to generate unique token after 5 attempts"}), 500
+
 @user_bp.route("/stats/<user_token>", methods=["GET"])
 def get_user_stats(user_token):
     """Return user stats based on the provided token"""
     gamemode_id = request.args.get("gamemode_id", default=1, type=int)
-
-    # Start db connection
     connect = get_db()
     cursor = connect.cursor()
-
-    # Validate user token 
-    cursor.execute("""
-            SELECT id FROM users WHERE token = %s
-        """, (user_token,))
-    
-    user_row = cursor.fetchone()
-
-    if not user_row:
+    try:
+        stats = UserService(connect).get_stats(cursor, user_token, gamemode_id)
+    finally:
         cursor.close()
+    if stats is None:
         return jsonify({"error": "Invalid user token"}), 400
-    
-    user_id = user_row["id"]
-
-    # Fetch user stats 
-    cursor.execute("""
-            SELECT current_streak, max_streak, wins_count, average_guesses, one_shot_wins
-            FROM user_history
-            WHERE user_id = %s AND gamemode_id = %s
-        """, (user_id, gamemode_id))
-    
-    stats_row = cursor.fetchone()
-    cursor.close()
-
-    if stats_row:
-        user_stats = stats_row
-    else:
-        user_stats = {
-            "current_streak": 0,
-            "max_streak": 0,
-            "wins_count": 0,
-            "average_guesses": 0.0,
-            "one_shot_wins": 0
-        }
-    
-    return jsonify(user_stats)
+    return jsonify(stats)
 
 @user_bp.route("/game-state/<user_token>", methods=["GET", "POST"])
 def get_game_state(user_token):
