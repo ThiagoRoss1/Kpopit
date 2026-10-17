@@ -257,13 +257,17 @@ class RecordingStorage:
 
 def _fake_tools(monkeypatch, module):
     """Fake pg_dump and boto3; returns (dumped DSNs, storage, created clients)."""
-    dsns, clients, storage = [], [], RecordingStorage()
+    dsns, clients, storage, envs = [], [], RecordingStorage(), []
     monkeypatch.setattr(module.shutil, "which", lambda _: "/usr/bin/pg_dump")
+    monkeypatch.setattr(module, "_last_envs", envs, raising=False)
 
     def fake_run(args, **kwargs):
         if "--version" in args:
             return subprocess.CompletedProcess(args, 0, stdout="pg_dump (PostgreSQL) 18.3\n", stderr="")
-        dsns.append(args[args.index("--dbname") + 1])
+        env = kwargs["env"]
+        assert "--dbname" not in args and not any("postgresql://" in a for a in args)
+        dsns.append(f"postgresql://{env['PGUSER']}@{env['PGHOST']}/{env['PGDATABASE']}")
+        envs.append(env)
         Path(args[args.index("--file") + 1]).write_text("-- dump", encoding="utf-8")
         return subprocess.CompletedProcess(args, 0, stdout="", stderr="")
 
@@ -330,3 +334,26 @@ def test_missing_database_names_both_variables_and_no_url(configured, monkeypatc
         assert module.postgresql_backup_to_s3() == (False, None)
     assert (dsns, storage.calls) == ([], [])
     assert "missing environment variables: BACKUP_DB_URL or DB_URL" in caplog.text
+
+
+def test_pg_dump_gets_the_password_through_its_environment_not_argv(configured, monkeypatch):
+    module = configured(DB_URL="postgresql://owner:s3cret-pw@db.internal:6543/kpopit?sslmode=require",
+                        R2_BACKUP_BUCKET_NAME="private-backups")
+    monkeypatch.setenv("PGSERVICE", "inherited-service")  # must not leak into pg_dump
+    _fake_tools(monkeypatch, module)
+    assert module.postgresql_backup_to_s3()[0]
+    [env] = module._last_envs
+    assert (env["PGHOST"], env["PGPORT"], env["PGDATABASE"]) == ("db.internal", "6543", "kpopit")
+    assert (env["PGUSER"], env["PGPASSWORD"], env["PGSSLMODE"]) == ("owner", "s3cret-pw", "require")
+    assert "PGSERVICE" not in env
+
+
+def test_unsupported_connection_parameter_fails_closed(configured, monkeypatch, caplog):
+    module = configured(DB_URL="postgresql://owner@127.0.0.1/kpopit?gssencmode=disable",
+                        R2_BACKUP_BUCKET_NAME="private-backups")
+    dsns, storage, _ = _fake_tools(monkeypatch, module)
+    with caplog.at_level(logging.ERROR):
+        assert module.postgresql_backup_to_s3() == (False, None)
+    assert (dsns, storage.calls) == ([], [])
+    assert "unsupported format or connection parameter" in caplog.text
+    assert "postgresql://" not in caplog.text

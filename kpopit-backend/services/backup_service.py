@@ -7,6 +7,7 @@ import tempfile
 import boto3
 from datetime import datetime
 from dotenv import load_dotenv
+from psycopg.conninfo import conninfo_to_dict
 
 load_dotenv()
 
@@ -18,6 +19,28 @@ BUCKET_NAME = os.getenv("R2_BACKUP_BUCKET_NAME")
 # A read-only role (kpopit_backup) when set; otherwise the app's own connection.
 DB_URL = os.getenv("BACKUP_DB_URL") or os.getenv("DB_URL")
 OBJECT_PREFIX = "backups_db/"
+
+
+# libpq environment variables for each connection parameter: the URL (password included) goes to
+# pg_dump through its environment, never its argv, which other processes can read.
+_PG_ENV = {
+    "host": "PGHOST", "hostaddr": "PGHOSTADDR", "port": "PGPORT", "dbname": "PGDATABASE",
+    "user": "PGUSER", "password": "PGPASSWORD", "sslmode": "PGSSLMODE", "sslrootcert": "PGSSLROOTCERT",
+    "sslcert": "PGSSLCERT", "sslkey": "PGSSLKEY", "connect_timeout": "PGCONNECT_TIMEOUT",
+    "application_name": "PGAPPNAME", "options": "PGOPTIONS", "target_session_attrs": "PGTARGETSESSIONATTRS",
+}
+
+
+def _pg_env(db_url: str) -> dict | None:
+    """The process environment plus the connection as PG* variables; None if the URL can't be mapped."""
+    try:
+        params = conninfo_to_dict(db_url)
+    except Exception:
+        return None
+    if any(key not in _PG_ENV for key in params):
+        return None
+    clean = {k: v for k, v in os.environ.items() if not k.startswith("PG")}
+    return {**clean, **{_PG_ENV[key]: str(value) for key, value in params.items()}}
 
 
 def _pg_dump_version(pg_dump: str) -> str:
@@ -56,10 +79,13 @@ def postgresql_backup_to_s3():
         fd, local_path = tempfile.mkstemp(prefix=prefix, suffix=".sql", dir=tempfile.gettempdir())
         os.close(fd)
         filename = os.path.basename(local_path)
+        env = _pg_env(DB_URL)
+        if env is None:
+            logger.error("Backup failed: the database URL has an unsupported format or connection parameter")
+            return False, None
         result = subprocess.run(
             [
                 pg_dump,
-                '--dbname', DB_URL,
                 '--file', local_path,
                 '--no-owner',
                 '--no-privileges',
@@ -69,6 +95,7 @@ def postgresql_backup_to_s3():
             capture_output=True,
             text=True,
             timeout=300,
+            env=env,
         )
         if result.returncode != 0:
             logger.error("Backup failed: pg_dump exited with %s; check database access and client/server versions", result.returncode)
