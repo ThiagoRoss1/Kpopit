@@ -10,7 +10,7 @@ const cli = path.join(root, 'node_modules/@playwright/test/cli.js');
 const files = fs.readdirSync(path.join(root, 'e2e')).filter((f) => f.endsWith('.spec.ts')).sort();
 
 async function assertPortsClosed() {
-  for (const port of [5000, 5101, 5102, 5103, 5104, 5173]) {
+  for (const port of [4173, 5000, 5101, 5102, 5103, 5104, 5173]) {
     const open = await new Promise((resolve) => {
       const socket = net.connect({ host: '127.0.0.1', port });
       const finish = (value) => { socket.destroy(); resolve(value); };
