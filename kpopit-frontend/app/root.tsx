@@ -4,7 +4,9 @@ import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { HelmetProvider } from "react-helmet-async";
 import { SpeedInsights } from "@vercel/speed-insights/react";
 import { Analytics } from "@vercel/analytics/react";
+import "../src/assets/fonts/fonts.css";
 import "../src/index.css";
+import dynaPuffLatin from "../src/assets/fonts/dynapuff-latin-wght-normal.woff2?url";
 import ScrollToTop from "../src/hooks/useScrollToTop";
 import { AuthProvider } from "../src/contexts/AuthProvider";
 import MaintenancePage from "../src/pages/Maintenance/MaintenancePage";
@@ -99,12 +101,8 @@ export function Layout({ children }: { children: ReactNode }) {
         <meta name="referrer" content="no-referrer-when-downgrade" />
         <link rel="manifest" href="/manifest.json" />
         <meta name="theme-color" content="#e70a7d" />
-        <link rel="preconnect" href="https://fonts.googleapis.com" />
-        <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="" />
-        <link
-          href="https://fonts.googleapis.com/css2?family=DynaPuff:wght@400..700&family=Caveat:wght@500;600;700&family=Major+Mono+Display&display=swap"
-          rel="stylesheet"
-        />
+        {/* The body font: fetched with the HTML instead of after the CSS is parsed. */}
+        <link rel="preload" href={dynaPuffLatin} as="font" type="font/woff2" crossOrigin="" />
         <Meta />
         <Links />
       </head>

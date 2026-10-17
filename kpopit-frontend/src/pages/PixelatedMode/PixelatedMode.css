@@ -7,7 +7,7 @@
     --kp-tape-b: #ff70b8;
     --kp-chaos: 0.6;
 
-    --kp-font-display: "DynaPuff", "Fredoka", system-ui, sans-serif;
+    --kp-font-display: "DynaPuff", "DynaPuff Fallback", "Fredoka", system-ui, sans-serif;
 
     position: relative;
     min-height: 100%;
