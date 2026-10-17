@@ -1,7 +1,6 @@
 import React, { useMemo } from "react";
 import { motion } from "motion/react";
 import Star from "../../assets/icons/star-four-fill.svg";
-import { useIsMobile } from "../../hooks/useIsDevice";
 import Img from "../Img";
 
 interface BackgroundStyleProps {
@@ -11,7 +10,6 @@ interface BackgroundStyleProps {
 const BackgroundStyle = (props: BackgroundStyleProps) => {
     const { attempts } = props;
 
-    const isMobile = useIsMobile();
 
     const stars = useMemo(() => [
 
@@ -116,12 +114,11 @@ const BackgroundStyle = (props: BackgroundStyleProps) => {
         ) : null}
       
       <div className="absolute inset-0">
-        {stars
-            .filter(star => !isMobile || star.showOnMobile !== false)
-            .map((star) => (
+        {/* Desktop-only stars are hidden by a breakpoint, so the prerendered page matches the phone. */}
+        {stars.map((star) => (
             <div 
               key={star.id}
-              className="absolute"
+              className={`absolute ${star.showOnMobile === false ? "max-[768px]:hidden" : ""}`}
               style={{
                 top: star.top,
                 bottom: star.bottom,
