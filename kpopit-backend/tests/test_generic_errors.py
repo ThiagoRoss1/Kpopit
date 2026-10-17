@@ -42,21 +42,13 @@ def test_guess_route_hides_exception_text(client, make_user, monkeypatch, caplog
 
 def test_idols_page_hides_exception_text(client, monkeypatch, caplog):
     class BadConn:
-        def __enter__(self):
-            return self
-
-        def __exit__(self, *a):
-            return False
-
         def cursor(self):
             return BadCursor()
 
+    # Every query fails; closing the cursor (the route's finally) works.
     class BadCursor(Boom):
-        def __enter__(self):
-            return self
-
-        def __exit__(self, *a):
-            return False
+        def close(self):
+            pass
 
     monkeypatch.setattr(idols_page, "get_db", lambda: BadConn())
     with caplog.at_level(logging.ERROR):
