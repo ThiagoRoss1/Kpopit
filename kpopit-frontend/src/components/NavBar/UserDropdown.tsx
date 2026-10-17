@@ -1,6 +1,6 @@
 import "./droplist.css";
 import { useEffect, useRef, useState } from "react";
-import { Link, useNavigate } from "react-router-dom";
+import { Link, useNavigate } from "react-router";
 import { LogOut, User } from "lucide-react";
 import { useAuth } from "../../hooks/useAuth";
 import { useAuthUser } from "../../hooks/useAuthUser";

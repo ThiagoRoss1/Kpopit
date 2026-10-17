@@ -1,6 +1,6 @@
 import "./UserProfile.css";
 import { useEffect, useMemo, useState } from "react";
-import { Navigate, useNavigate, useParams } from "react-router-dom";
+import { Navigate, useNavigate, useParams } from "react-router";
 import { useMutation, useQuery } from "@tanstack/react-query";
 import { Mail, X } from "lucide-react";
 import { useAuth } from "../../hooks/useAuth";

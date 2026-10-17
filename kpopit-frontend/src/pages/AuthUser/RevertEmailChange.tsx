@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState } from "react";
-import { Link, useSearchParams } from "react-router-dom";
+import { Link, useSearchParams } from "react-router";
 import { CheckCircle, Loader2, XCircle } from "lucide-react";
 import { useAuth } from "../../hooks/useAuth";
 import { revertEmailChange, authError } from "../../services/api";

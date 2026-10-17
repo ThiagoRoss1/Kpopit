@@ -1,8 +1,8 @@
 import { useEffect, useState } from "react";
-import { Outlet } from "react-router-dom";
+import { Outlet } from "react-router";
 import NavBar from "../NavBar/NavBar";
 import Footer from "../Footer/Footer";
-import { Link } from "react-router-dom";
+import { Link } from "react-router";
 import { getUserAnalytics } from "../../services/api";
 import GlobalNotices from "../GlobalNotices/GlobalNotices";
 import { useHydrated } from "../../hooks/useHydrated";

@@ -1,6 +1,6 @@
 import "./PrivacyPolicy.css";
 import BackgroundStyle from "../../components/Background/BackgroundStyle";
-import { Link } from "react-router-dom";
+import { Link } from "react-router";
 import { Helmet } from "react-helmet-async";
 
 const PrivacyPolicy = () => {

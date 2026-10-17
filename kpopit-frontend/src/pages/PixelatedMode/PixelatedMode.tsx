@@ -1,7 +1,6 @@
 import "./PixelatedMode.css";
 import { AxiosError } from "axios";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
-import { Helmet } from "react-helmet-async";
 import { useSharedGameData } from "../../hooks/useSharedGameData";
 import { useGameMode } from "../../hooks/useGameMode";
 import { useState, useEffect, useCallback, useMemo, useRef } from "react";
@@ -27,7 +26,7 @@ import StatsText from "../../components/buttons/modals/StatsContent";
 import TransferDataText from "../../components/buttons/modals/TransferDataContent";
 import ImportDataText from "../../components/buttons/modals/ImportDataContent";
 import ExportDataText from "../../components/buttons/modals/ExportDataContent";
-import { Link } from "react-router-dom";
+import { Link } from "react-router";
 
 const REVEAL_LEVEL = PIXEL_LEVELS[PIXEL_LEVELS.length - 1];
 
@@ -307,13 +306,6 @@ function PixelatedMode() {
 
     return (
         <>
-            <Helmet>
-                <title>KpopIt Pixelated - K-pop Album Cover Guessing Game</title>
-                <meta name="description" content="Guess today's K-pop album from its pixelated cover art in KpopIt's daily Pixelated mode." />
-                <link rel="canonical" href={`https://kpopit.net/pixelated`} />
-                <meta property="og:title" content="KpopIt Pixelated - K-pop Album Cover Guessing Game" />
-                <meta property="og:description" content="Guess today's K-pop album from its pixelated cover art in KpopIt's daily Pixelated mode." />
-            </Helmet>
 
             <div className="pixelmode min-h-full w-full">
                 <div className="pixelmode__bg" aria-hidden="true">

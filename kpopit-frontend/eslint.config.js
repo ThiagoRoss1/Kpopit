@@ -6,7 +6,8 @@ import tseslint from 'typescript-eslint'
 import { globalIgnores } from 'eslint/config'
 
 export default tseslint.config([
-  globalIgnores(['dist']),
+  // build/ and .react-router/ are React Router's build output and generated route types.
+  globalIgnores(['dist', 'build', '.react-router']),
   {
     files: ['**/*.{ts,tsx}'],
     extends: [
@@ -27,6 +28,15 @@ export default tseslint.config([
       'react-hooks/purity': 'warn',
       'react-hooks/immutability': 'warn',
       'react-hooks/preserve-manual-memoization': 'warn',
+    },
+  },
+  {
+    // Route modules also export React Router's data/meta functions; its Vite plugin handles their HMR.
+    files: ['app/**/*.tsx'],
+    rules: {
+      'react-refresh/only-export-components': ['error', {
+        allowExportNames: ['loader', 'clientLoader', 'meta', 'links', 'Layout', 'HydrateFallback', 'ErrorBoundary'],
+      }],
     },
   },
   {

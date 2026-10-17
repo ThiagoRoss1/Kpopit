@@ -48,3 +48,7 @@ playwright/.cache/
 
 # Raw Lighthouse reports; only the baseline-*.md summaries are tracked
 lighthouse/baseline/*/
+
+# React Router build output and generated types
+build/
+.react-router/

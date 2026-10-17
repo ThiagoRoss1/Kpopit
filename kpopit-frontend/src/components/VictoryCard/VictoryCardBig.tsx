@@ -1,6 +1,6 @@
 //import React from "react";
 import type { GuessedIdolData, YesterdayIdol } from "../../interfaces/gameInterfaces";
-import { Link } from "react-router-dom";
+import { Link } from "react-router";
 import TargetAttempt from "../../assets/icons/target.svg";
 import RankPosition from "../../assets/icons/ranking-fill.svg";
 import PositionTrend from "../../assets/icons/trending-up.svg";

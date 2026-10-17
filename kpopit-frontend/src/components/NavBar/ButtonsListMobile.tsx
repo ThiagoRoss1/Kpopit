@@ -1,5 +1,5 @@
 import "./droplist.css";
-import { Link, useLocation } from "react-router-dom";
+import { Link, useLocation } from "react-router";
 import { useState, useEffect, useRef } from "react";
 import { GAMES_LINKS, IDOLS_LINKS } from "./navigation";
 import { ChevronDown } from "lucide-react";

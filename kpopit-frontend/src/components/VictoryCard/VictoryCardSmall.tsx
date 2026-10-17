@@ -1,4 +1,4 @@
-import { Link } from "react-router-dom";
+import { Link } from "react-router";
 import type {  FeedbackData, GuessedIdolData, GuessResponse, UserStats } from "../../interfaces/gameInterfaces";
 import { useIsMobile, isSafari, isGeckoEngine } from "../../hooks/useIsDevice";
 import { useState } from "react";

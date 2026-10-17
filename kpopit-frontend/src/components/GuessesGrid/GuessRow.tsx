@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-import { Link } from "react-router-dom";
+import { Link } from "react-router";
 import { motion } from "motion/react";
 import type { GuessResponse } from "../../interfaces/gameInterfaces";
 import ArrowUp from "../../assets/icons/arrow-fat-line-up-fill.svg";

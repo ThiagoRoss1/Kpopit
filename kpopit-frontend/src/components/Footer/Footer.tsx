@@ -1,4 +1,4 @@
-import { Link } from "react-router-dom";
+import { Link } from "react-router";
 import { useSharedGameData } from "../../hooks/useSharedGameData";
 import { Info } from "lucide-react";
 import XLogo from "../../assets/icons/x-logo.svg";

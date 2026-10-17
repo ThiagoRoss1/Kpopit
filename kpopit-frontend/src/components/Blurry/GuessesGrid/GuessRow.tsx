@@ -1,6 +1,6 @@
 import "./guessgrid.css";
 import React, { useState, useEffect, useCallback, useMemo } from "react";
-import { Link } from "react-router-dom";
+import { Link } from "react-router";
 import type { FeedbackData, GuessResponse } from "../../../interfaces/gameInterfaces";
 import { buildIdolSlug } from "../../../utils/formatters";
 

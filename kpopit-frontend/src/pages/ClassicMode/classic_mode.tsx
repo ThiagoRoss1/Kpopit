@@ -1,7 +1,6 @@
 import "../../index.css";
 import "./style.css";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
-import { Helmet } from "react-helmet-async";
 import { useSharedGameData } from "../../hooks/useSharedGameData.tsx";
 import { useState, useEffect, useCallback, useMemo, useRef } from "react";
 import { getDailyIdol, getGuessIdol, getYesterdaysIdol, getDailyUserCount, getUserPosition, saveGameState } from "../../services/api.ts";
@@ -13,7 +12,7 @@ import type {
   CompleteGuessRequest,
   CompleteGuessTrafficRequest,
 } from "../../interfaces/gameInterfaces.ts";
-import { Link } from "react-router-dom";
+import { Link } from "react-router";
 import { decryptToken } from "../../utils/tokenEncryption.ts";
 import SearchBar from "../../components/GuessSearchBar/SearchBar.tsx";
 import GuessesGrid from "../../components/GuessesGrid/GuessGrid.tsx";
@@ -352,13 +351,6 @@ function ClassicMode() {
   // Main return
   return (
     <>
-    <Helmet>
-      <title>KpopIt Classic - K-pop Idol Guessing Game</title>
-      <meta name="description" content="Guess today's K-pop idol by comparing attributes in KpopIt's daily Classic mode." />
-      <link rel="canonical" href="https://kpopit.net/classic" />
-      <meta property="og:title" content="KpopIt Classic - K-pop Idol Guessing Game" />
-      <meta property="og:description" content="Guess today's K-pop idol by comparing attributes in KpopIt's daily Classic mode." />
-    </Helmet>
     <BackgroundStyle attempts={attempts} />
     <div className="min-h-full w-full flex flex-col items-center justify-start">
       <div className="flex items-center justify-center p-2 w-3xs sm:w-3xs h-9 sm:h-20 mt-12 mb-13 text-center">

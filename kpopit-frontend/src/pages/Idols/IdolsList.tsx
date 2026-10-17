@@ -1,6 +1,6 @@
 import "./IdolsList.css";
 import { useState, useEffect, useMemo } from "react";
-import { Link } from "react-router-dom";
+import { Link } from "react-router";
 import { useQuery } from "@tanstack/react-query";
 import { Helmet } from "react-helmet-async";
 import { getIdolsPage } from "../../services/api";
@@ -9,7 +9,8 @@ import IdolsSearchBar from "../../components/IdolsSearchBar/IdolsSearchBar";
 import IdolsCards from "../../components/IdolsPageCards/IdolsCards";
 import { formatCompanyName, formatGroupName, buildIdolSlug } from "../../utils/formatters";
 
-function IdolsList() {
+// initialIdols: build-time data for the prerendered page; stale at once, so it refetches.
+function IdolsList({ initialIdols }: { initialIdols?: IdolsPageData[] }) {
     const [searchTerm, setSearchTerm] = useState("");
 
     useEffect(() => {
@@ -26,6 +27,8 @@ function IdolsList() {
     } = useQuery<IdolsPageData[]>({
         queryKey: ["idolsPageData"],
         queryFn: getIdolsPage,
+        initialData: initialIdols,
+        initialDataUpdatedAt: 0,
         staleTime: 1000 * 60 * 60 * 4,
         refetchOnWindowFocus: false,
         enabled: true,

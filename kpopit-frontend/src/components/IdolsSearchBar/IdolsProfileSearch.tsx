@@ -2,7 +2,7 @@ import "./IdolsSearchBar.css";
 import { useEffect, useRef, useState } from "react";
 import { useIdolSearch } from "../../hooks/useIdolSearch";
 import type { IdolsPageData } from "../../interfaces/gameInterfaces";
-import { Link, useNavigate } from "react-router-dom";
+import { Link, useNavigate } from "react-router";
 import { buildIdolSlug } from "../../utils/formatters";
 
 interface IdolsProfileSearchProps {

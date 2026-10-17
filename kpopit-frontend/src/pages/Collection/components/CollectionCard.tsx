@@ -1,4 +1,4 @@
-import { Link } from 'react-router-dom';
+import { Link } from 'react-router';
 import AlbumCover from '../../../components/Albums/AlbumOfCol/pages/AlbumCover';
 import type { CollectionListItem } from '../../../interfaces/albumInterfaces';
 import { ArrowRight } from 'lucide-react';

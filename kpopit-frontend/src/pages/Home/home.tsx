@@ -1,6 +1,6 @@
 import "./home.css";
 import "../../index.css";
-import { Link } from "react-router-dom";
+import { Link } from "react-router";
 import { useState } from "react";
 import { Helmet } from "react-helmet-async";
 import BackgroundStyle from "../../components/Background/BackgroundStyle";

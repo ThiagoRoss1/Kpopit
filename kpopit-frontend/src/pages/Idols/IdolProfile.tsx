@@ -15,11 +15,12 @@ import useCalculateAge from "../../hooks/useCalculateAge";
 import { getNationalityFlag } from "../../utils/getFlags";
 import { useDateLocale } from "../../hooks/useDateLocale";
 import IdolsProfileSearch from "../../components/IdolsSearchBar/IdolsProfileSearch";
-import { useIsMobile } from "../../hooks/useIsDevice";
+import { useHydrated } from "../../hooks/useHydrated";
 import { Helmet } from "react-helmet-async";
 import { buildIdolSlug, formatGroupName } from "../../utils/formatters";
 
-function IdolProfile() {
+// initialProfile: build-time data for the prerendered page; stale at once, so it refetches.
+function IdolProfile({ initialProfile }: { initialProfile?: IdolProfileData }) {
 
     const { formatBirthDate } = useDateLocale();
 
@@ -35,7 +36,6 @@ function IdolProfile() {
         return () => clearTimeout(time);
     }, []);
     
-    const isMobile = useIsMobile();
 
     const shouldStagger = activeTab === "Profile" && isFirstLoad;
 
@@ -56,6 +56,8 @@ function IdolProfile() {
     } = useQuery<IdolProfileData>({
         queryKey: ["idolProfileData", id],
         queryFn: () => getIdolInfo(Number(id)),
+        initialData: initialProfile,
+        initialDataUpdatedAt: 0,
         staleTime: 1000 * 60 * 60 * 4,
         refetchOnWindowFocus: false,
         enabled: !!id,
@@ -74,6 +76,8 @@ function IdolProfile() {
         }
     }, [idolProfile, idolCareer, id, slug, navigate]);
 
+    // Age depends on today's date, which can differ between the build and the visit.
+    const hydrated = useHydrated();
     const age = useCalculateAge(idolProfile?.birth_date || "");
 
     const nationality = idolProfile?.nationality;
@@ -178,8 +182,7 @@ function IdolProfile() {
 
                     </div>
 
-                    {!isMobile && (
-                    <div className="flex flex-row w-full justify-end items-center gap-4">
+                    <div className="max-[768px]:hidden flex flex-row w-full justify-end items-center gap-4">
                         <span className="font-sans font-bold text-white text-lg sm:text-xl">
                             Wrong info ?
                         </span>
@@ -190,7 +193,6 @@ function IdolProfile() {
                                 Contact me
                         </Link>
                     </div>
-                    )}
                 </div>
 
                 {/* Idol profile content */}
@@ -296,7 +298,7 @@ function IdolProfile() {
                                     index={4}
                                     icon={Cake}
                                     label="Age"
-                                    value={age !== 0 ? age.toString() : "N/A"} 
+                                    value={!hydrated ? "" : age !== 0 ? age.toString() : "N/A"} 
                                     size="small"
                                     shouldStagger={shouldStagger}
                                 />
@@ -418,8 +420,7 @@ function IdolProfile() {
                     </div>
                 </div>
                 
-                {isMobile && (
-                     <div className="flex flex-row w-full justify-center items-center gap-4 mt-6">
+                <div className="min-[769px]:hidden flex flex-row w-full justify-center items-center gap-4 mt-6">
                         <span className="font-sans font-bold text-white text-lg sm:text-xl">
                             Wrong info ?
                         </span>
@@ -430,7 +431,6 @@ function IdolProfile() {
                                 Contact me
                         </Link>
                     </div>
-                )}
             </div>
         </div>
     );
