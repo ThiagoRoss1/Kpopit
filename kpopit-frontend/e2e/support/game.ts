@@ -113,15 +113,8 @@ export async function wrongAlbums(page: Page, answerId: number, n: number): Prom
     .slice(0, n);
 }
 
-// The pointer is left where the last suggestion was clicked; a list reopening under it starts the
-// rows' hover animation, which slow WebKit runners never report as stable. Typing doesn't hover.
-async function movePointerAway(page: Page): Promise<void> {
-  await page.mouse.move(0, 0);
-}
-
 export async function guessIdol(page: Page, mode: 'classic' | 'blurry', idol: IdolEntry): Promise<void> {
   const input = searchInput(page, mode);
-  await movePointerAway(page);
   await input.fill(idol.artist_name);
   const exact = new RegExp(`^\\s*${escapeRe(idol.artist_name)}\\s*\\(${escapeRe(idol.active_group || 'Soloist')}\\)\\s*$`);
   await page.locator('li').filter({ hasText: exact }).first().click();
@@ -134,7 +127,6 @@ export async function guessIdol(page: Page, mode: 'classic' | 'blurry', idol: Id
 
 export async function guessAlbum(page: Page, album: AlbumEntry): Promise<void> {
   const input = searchInput(page, 'pixelated');
-  await movePointerAway(page);
   await input.fill(album.name);
   await page
     .locator('li')

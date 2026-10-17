@@ -140,13 +140,18 @@ const PixelatedSearchBar = (props: PixelatedSearchBarProps) => {
                     searchbar-scroll border-2 border-ink/60 bg-[#fffaf3] shadow-[0_10px_30px_rgba(0,0,0,0.18)] z-50 max-h-60 sm:max-h-72 transform-gpu"
                 >
                   {suggestions.map((album) => (
+                    // Hover moves the inner row, never the li: a moving hit area loops hover on WebKit.
                     <motion.li
                       key={album.id}
                       onClick={() => handleSuggestionClick(album)}
-                      whileHover={{ x: 4 }}
+                      whileHover="hover"
+                      className="group select-none cursor-pointer border-b border-ink/10 last:border-b-0"
+                    >
+                    <motion.div
+                      variants={{ hover: { x: 4 } }}
                       transition={{ type: "spring", stiffness: 300, damping: 25 }}
-                      className="relative px-3 py-2.5 select-none cursor-pointer transition-colors duration-150 transform-gpu
-                        hover:bg-neon-pink/20 flex gap-3 items-center text-ink border-b border-ink/10 last:border-b-0"
+                      className="relative px-3 py-2.5 transition-colors duration-150 transform-gpu
+                        group-hover:bg-neon-pink/20 flex gap-3 items-center text-ink"
                     >
                       {album.cover_path && (
                         <img
@@ -163,6 +168,7 @@ const PixelatedSearchBar = (props: PixelatedSearchBarProps) => {
                           {album.group_name}
                         </span>
                       </p>
+                    </motion.div>
                     </motion.li>
                   ))}
                 </motion.ul>
