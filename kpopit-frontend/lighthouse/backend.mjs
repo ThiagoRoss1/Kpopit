@@ -6,7 +6,7 @@ import { fileURLToPath } from 'node:url';
 
 const BACKEND = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '../../kpopit-backend');
 const win = process.platform === 'win32';
-const python = win ? '.venv\Scripts\python.exe' : '.venv/bin/python';
+const python = path.join(BACKEND, win ? '.venv/Scripts/python.exe' : '.venv/bin/python');
 
 const R2_VARS = [
   'R2_ACCESS_KEY_ID', 'R2_SECRET_ACCESS_KEY', 'R2_BUCKET_NAME', 'R2_ENDPOINT_URL',
@@ -41,7 +41,9 @@ export async function waitFor(url) {
 }
 
 export async function startBackend() {
-  const child = spawn(python, ['app.py'], { cwd: BACKEND, env: backendEnv, stdio: 'ignore', shell: win });
+  // Like the E2E fixture: no debug reloader and no shell. app.py's reloader never came up with stdio ignored.
+  const child = spawn(python, ['-m', 'flask', '--app', 'app', 'run', '--port', '5000', '--no-reload'],
+    { cwd: BACKEND, env: backendEnv, stdio: 'ignore', shell: false });
   await waitFor('http://127.0.0.1:5000/api/gamemodes-count');
   return child;
 }
