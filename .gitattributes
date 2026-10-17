@@ -1,0 +1,3 @@
+# CSS is inlined into the dev HTML (React Router critical CSS). With CRLF there the page logs a
+# hydration mismatch: the HTML parser drops carriage returns that React's string still has.
+*.css text eol=lf
