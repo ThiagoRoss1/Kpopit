@@ -1,8 +1,7 @@
 import json
-import secrets
-from datetime import datetime, timedelta, timezone
+from datetime import timezone
 from services.get_db import get_db
-from utils.dates import get_current_timestamp, get_today_date_str, utc_now, est_now
+from utils.dates import get_current_timestamp, get_today_date_str, utc_now
 from flask import Blueprint, request, jsonify, g
 from utils.auth_decorators import require_auth
 from repositories.user_repository import UserRepository
@@ -12,6 +11,7 @@ from utils.r2 import R2Client
 from utils.rate_limiter import limiter
 from services.auth_service import AuthService
 from services.user_service import UserService
+from services.transfer_service import TransferError, TransferService
 import logging
 
 user_bp = Blueprint('users', __name__)
@@ -122,76 +122,18 @@ def get_game_state(user_token):
 @user_bp.route("/generate-transfer-code/<user_token>", methods=["POST"])
 def generate_transfer_code(user_token):
     """Generate a transfer code for the user to transfer their data to another device"""
-    code_generated = False
-    # Start db connection
-
     connect = get_db()
     cursor = connect.cursor()
-
-    current_timestamp = get_current_timestamp()
-
-    # Validate user token
-    cursor.execute("""
-            SELECT id FROM users WHERE token = %s
-        """, (user_token,))
-    
-    user_row = cursor.fetchone()
-
-    if not user_row:
+    try:
+        result = TransferService(connect).generate_code(cursor, user_token)
+    except TransferError as err:
+        return jsonify({"error": str(err)}), 400
+    finally:
         cursor.close()
-        return jsonify({"error": "Invalid user token"}), 400
-
-    
-    # Delete expired codes
-    cursor.execute("""
-            DELETE FROM transfer_data
-            WHERE expires_at < %s
-        """, (current_timestamp,))
-
-    # Generate unique transfer code
-    attempts = 0
-    while not code_generated and attempts < 5:
-        try:
-            # Guarantee uniqueness by checking existing codes
-            cursor.execute("""
-                    SELECT code, expires_at FROM transfer_data
-                    WHERE user_token = %s AND expires_at >= %s AND used = FALSE
-                """, (user_token, current_timestamp))
-            existing_code = cursor.fetchone()
-
-            if existing_code:
-                cursor.close()
-
-                return jsonify({
-                    "transfer_code": existing_code["code"],
-                    "expires_at": existing_code["expires_at"]
-                    })
-
-
-            code = f"{secrets.token_hex(2)[:3].upper()}-{secrets.token_hex(2)[:3].upper()}"
-            expires_at = est_now() + timedelta(days=3)
-
-            # Insert transfer code into database
-            cursor.execute("""
-                INSERT INTO transfer_data (user_token, code, created_at, expires_at)
-                VALUES (%s, %s, %s, %s)
-            """, (user_token, code, current_timestamp, expires_at.isoformat()))
-                
-            connect.commit()
-            code_generated = True
-
-        except Exception:
-            connect.rollback()
-            attempts += 1
-            logger.exception("Transfer code generation attempt %s failed", attempts)
-
-    cursor.close()
-
-    if code_generated:
-        return jsonify({"transfer_code": code, "expires_at": expires_at.isoformat()})
-    else:
+    if result is None:
         return jsonify({"error": "Failed to generate unique transfer code after 5 attempts"}), 500
-    
+    return jsonify(result)
+
 @user_bp.route("/transfer-data", methods=["POST"])
 def transfer_data():
     """Transfer user data using a transfer code"""
@@ -200,90 +142,27 @@ def transfer_data():
 
     if not transfer_code:
         return jsonify({"error": "Missing transfer code"}), 400
-    
-    # Start db connection
+
     connect = get_db()
     cursor = connect.cursor()
-
-    # Validate transfer code
-    cursor.execute("""
-            SELECT code, user_token, expires_at, used FROM transfer_data
-            WHERE code = %s
-        """, (transfer_code,))
-        
-    code_row = cursor.fetchone()
-
-    if not code_row:
+    try:
+        return jsonify({"user_token": TransferService(connect).redeem(cursor, transfer_code)})
+    except TransferError as err:
+        return jsonify({"error": str(err)}), 400
+    finally:
         cursor.close()
-        return jsonify({"error": "Invalid transfer code"}), 400
-    
-    if code_row["used"]:
-        cursor.close()
-        return jsonify({"error": "Transfer code has already been used"}), 400
-    
-    expires_at = code_row["expires_at"]
-    if isinstance(expires_at, str):
-        expires_at = datetime.fromisoformat(expires_at)
-
-    if expires_at < est_now():
-        cursor.close()
-        return jsonify({"error": "Transfer code has expired"}), 400
-    
-    user_token = code_row["user_token"]
-
-    # Mark code as used
-    cursor.execute("""
-            UPDATE transfer_data
-            SET used = TRUE
-            WHERE code = %s AND used = FALSE
-        """, (transfer_code,))
-    connect.commit()
-    cursor.close()
-
-    return jsonify({"user_token": user_token})
 
 @user_bp.route("/get-active-transfer-code/<user_token>", methods=["GET"])
 def get_active_transfer_code(user_token):
     """Get active transfer code if exists"""
-
-
-    # Start db connection
     connect = get_db()
     cursor = connect.cursor()
-    
-    current_timestamp = get_current_timestamp()
-
-    # Validate user token 
-    cursor.execute("""
-            SELECT id FROM users
-            WHERE token = %s
-        """, (user_token,))
-    
-    user_row = cursor.fetchone()
-
-    if not user_row:
+    try:
+        return jsonify(TransferService(connect).get_active_code(cursor, user_token))
+    except TransferError as err:
+        return jsonify({"error": str(err)}), 400
+    finally:
         cursor.close()
-        return jsonify({"error": "Invalid user token"}), 400
-    
-    # Get active transfer code 
-    cursor.execute("""
-            SELECT code, expires_at FROM transfer_data
-            WHERE user_token = %s AND used = FALSE AND expires_at >= %s
-        """, (user_token, current_timestamp))
-    
-    result = cursor.fetchone()
-    cursor.close()
-
-    if result:
-        return jsonify({
-            "transfer_code": result["code"],
-            "expires_at": result["expires_at"],
-        })
-    
-    return jsonify({
-            "transfer_code": None,
-            "expires_at": None,
-        })
 
 @user_bp.route("/user/profile", methods=["PATCH"])
 @require_auth
