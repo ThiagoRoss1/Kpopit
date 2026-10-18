@@ -1,8 +1,7 @@
 import "./IdolProfile.css";
 import { useState, useMemo, useEffect } from "react";
 import { useQuery } from "@tanstack/react-query";
-import { getIdolsPage, getIdolInfo } from "../../services/api";
-import type { IdolsPageData, IdolProfileData } from "../../interfaces/gameInterfaces";
+import type { IdolProfileData } from "../../interfaces/gameInterfaces";
 import { Link, useParams, useNavigate } from "react-router";
 import { 
     CircleChevronLeft, MicVocal, SquareUserRound, CalendarDays, 
@@ -15,11 +14,16 @@ import useCalculateAge from "../../hooks/useCalculateAge";
 import { getNationalityFlag } from "../../utils/getFlags";
 import { useDateLocale } from "../../hooks/useDateLocale";
 import IdolsProfileSearch from "../../components/IdolsSearchBar/IdolsProfileSearch";
-import { useIsMobile } from "../../hooks/useIsDevice";
+import { useHydrated } from "../../hooks/useHydrated";
 import { Helmet } from "react-helmet-async";
 import { buildIdolSlug, formatGroupName } from "../../utils/formatters";
+import PageLoader from "../../components/Loading/PageLoader";
+import Img from "../../components/Img";
+import IntentLink from "../../components/Links/IntentLink";
+import { idolProfileQuery, idolsListQuery, prefetchIdolsList } from "./idolsData";
 
-function IdolProfile() {
+// initialProfile: build-time data for the prerendered page; stale at once, so it refetches.
+function IdolProfile({ initialProfile }: { initialProfile?: IdolProfileData }) {
 
     const { formatBirthDate } = useDateLocale();
 
@@ -29,34 +33,34 @@ function IdolProfile() {
     const [activeTab, setActiveTab] = useState<string>("Profile");
     const [isFirstLoad, setIsFirstLoad] = useState(true);
     const [searchTerm, setSearchTerm] = useState("");
+    // A new idol (picked from the search) starts with an empty search, set while rendering.
+    const [searchFor, setSearchFor] = useState(id);
+    if (searchFor !== id) {
+        setSearchFor(id);
+        setSearchTerm("");
+    }
 
     useEffect(() => {
         const time = setTimeout(() => setIsFirstLoad(false), 2000);
         return () => clearTimeout(time);
     }, []);
     
-    const isMobile = useIsMobile();
 
     const shouldStagger = activeTab === "Profile" && isFirstLoad;
 
     const {
         data: idolPageData,
-    } = useQuery<IdolsPageData[]>({
-        queryKey: ["idolsPageData"],
-        queryFn: getIdolsPage,
-        staleTime: 1000 * 60 * 60 * 4,
-        refetchOnWindowFocus: false,
-        enabled: true,
-    })
+    } = useQuery({ ...idolsListQuery, refetchOnWindowFocus: false });
 
     const {
         data: idolProfileData,
         isLoading: isLoadingIdolProfileData,
         isError: isErrorIdolProfileData,
-    } = useQuery<IdolProfileData>({
-        queryKey: ["idolProfileData", id],
-        queryFn: () => getIdolInfo(Number(id)),
-        staleTime: 1000 * 60 * 60 * 4,
+        refetch: refetchIdolProfileData,
+    } = useQuery({
+        ...idolProfileQuery(id ?? ""),
+        initialData: initialProfile,
+        initialDataUpdatedAt: 0,
         refetchOnWindowFocus: false,
         enabled: !!id,
     });
@@ -74,6 +78,8 @@ function IdolProfile() {
         }
     }, [idolProfile, idolCareer, id, slug, navigate]);
 
+    // Age depends on today's date, which can differ between the build and the visit.
+    const hydrated = useHydrated();
     const age = useCalculateAge(idolProfile?.birth_date || "");
 
     const nationality = idolProfile?.nationality;
@@ -121,19 +127,16 @@ function IdolProfile() {
         ));
     }, [gameModesAvailable]);
     
-    if (isLoadingIdolProfileData) {
+    // The route hands the page its profile (prerendered or loaded before the switch); this only shows
+    // if the cache lost it.
+    if (!idolProfileData) {
         return (
-            <div className="fixed inset-0 z-100 flex w-full h-screen bg-black justify-center items-center">
-                <span className="text-white animate-pulse">Loading Idol Profile Data...</span>
-            </div>
-        );
-    }
-
-    if (isErrorIdolProfileData || !idolProfileData) {
-        return (
-            <div className="fixed inset-0 z-100 flex w-full h-screen bg-black justify-center items-center">
-                <span className="text-white animate-pulse">Error: Error fetching idol profile data</span>
-            </div>
+            <PageLoader
+                message="Loading Idol Profile Data..."
+                error={isErrorIdolProfileData && !isLoadingIdolProfileData}
+                errorMessage="Error fetching idol profile data."
+                onRetry={() => refetchIdolProfileData()}
+            />
         );
     }
 
@@ -162,11 +165,13 @@ function IdolProfile() {
             <div className="flex flex-col relative max-w-7xl mx-auto">
                 <div className="flex flex-row w-full mt-7 justify-between items-center mb-8">
                     <div className="flex flex-row w-full justify-center md:justify-start items-center gap-6">
-                        <Link
-                            to="/idols" 
+                        <IntentLink
+                            to="/idols"
+                            onIntent={prefetchIdolsList}
+                            aria-label="Back to the idols list"
                             className="group w-14 h-14 sm:w-15 sm:h-15 rounded-full flex items-center justify-center hover:scale-105 transition-transform duration-300">
                             <CircleChevronLeft className="text-white/50 group-hover:text-white w-15 h-15 transition-colors duration-300" size={24} />
-                        </Link>
+                        </IntentLink>
 
                         <IdolsProfileSearch
                             idolsData={idolPageData || []} 
@@ -178,8 +183,7 @@ function IdolProfile() {
 
                     </div>
 
-                    {!isMobile && (
-                    <div className="flex flex-row w-full justify-end items-center gap-4">
+                    <div className="max-[768px]:hidden flex flex-row w-full justify-end items-center gap-4">
                         <span className="font-sans font-bold text-white text-lg sm:text-xl">
                             Wrong info ?
                         </span>
@@ -190,14 +194,14 @@ function IdolProfile() {
                                 Contact me
                         </Link>
                     </div>
-                    )}
                 </div>
 
                 {/* Idol profile content */}
                 <div className="idol-profile-enter justify-center flex max-lg:items-center flex-col lg:flex-row w-full h-fit bg-white/0 max-lg:border-b-2 max-lg:border-t-2 lg:border-r-2 lg:border-b-2 border-neon-pink rounded-4xl">
                     {/* Idol card */}
                     <div className="group relative flex zm:w-100 zm:h-120 sm:w-120 sm:h-120 md:w-120 md:h-120 lg:w-90 lg:h-160 xl:w-114 xl:h-160 rounded-3xl shrink-0 overflow-hidden max-zm:border-b-2 zm:border-2 lg:border-0 lg:border-t-2 lg:border-r-2 border-neon-pink max-lg:mt-4">
-                        <img
+                        <Img
+                            priority
                             src={`${import.meta.env.VITE_IMAGE_BUCKET_URL}${idolProfile?.image_path}?v=${idolProfile?.image_version}`}
                             alt={`${idolProfile?.artist_name} photo`}
                             className="idol-photo-enter w-full h-full object-cover group-hover:scale-105 transition-transform firefox:duration-500 duration-700 transform-gpu"
@@ -296,7 +300,7 @@ function IdolProfile() {
                                     index={4}
                                     icon={Cake}
                                     label="Age"
-                                    value={age !== 0 ? age.toString() : "N/A"} 
+                                    value={!hydrated ? "" : age !== 0 ? age.toString() : "N/A"} 
                                     size="small"
                                     shouldStagger={shouldStagger}
                                 />
@@ -319,7 +323,7 @@ function IdolProfile() {
                                     value={nationalities.map((nat, i) => {
                                         const flag = getNationalityFlag(nat);
                                         return flag ? (
-                                            <img key={i} src={flag} alt={`${nat} flag`} className="w-10 h-7.5 rounded-sm inline-block" draggable={false} />
+                                            <Img key={i} src={flag} alt={`${nat} flag`} className="w-10 h-7.5 rounded-sm inline-block" draggable={false} />
                                         ) : nat })
                                     }
                                     size="small"
@@ -418,8 +422,7 @@ function IdolProfile() {
                     </div>
                 </div>
                 
-                {isMobile && (
-                     <div className="flex flex-row w-full justify-center items-center gap-4 mt-6">
+                <div className="min-[769px]:hidden flex flex-row w-full justify-center items-center gap-4 mt-6">
                         <span className="font-sans font-bold text-white text-lg sm:text-xl">
                             Wrong info ?
                         </span>
@@ -430,7 +433,6 @@ function IdolProfile() {
                                 Contact me
                         </Link>
                     </div>
-                )}
             </div>
         </div>
     );

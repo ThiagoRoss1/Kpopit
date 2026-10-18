@@ -3,6 +3,7 @@ import type { GuessResponse } from '../../../interfaces/gameInterfaces';
 import { Copy } from "lucide-react";
 import Twitter from "../../../assets/icons/twitter-white.svg";
 import { AnimatePresence, motion } from "motion/react";
+import Img from "../../Img";
 
 interface ShareContentProps {
     guesses: GuessResponse[];
@@ -66,24 +67,7 @@ const ShareText = (props: ShareContentProps) => {
     }
 
     const shareOnTwitter = (guesses: GuessResponse[], attempts?: number) => {
-        const text = gameMode === 'blurry'
-        ? encodeURIComponent(textToCopyCategoriesBlurry(attempts))
-        : encodeURIComponent(textToCopy(guesses, attempts));
-        const twitterWebIntentUrl = `https://twitter.com/intent/tweet?text=${text}`;
-
-        const isMobile = /Android|iPhone|iPad|iPod/i.test(navigator.userAgent);
-        if (isMobile) {
-            const twitterAppUrl = `twitter://post?message=${text}`;
-            const now = Date.now();
-            window.location.href = twitterAppUrl;
-            setTimeout(() => {
-                if (Date.now() - now < 1000) {
-                    window.open(twitterWebIntentUrl, "_blank", "noopener,noreferrer");
-                }
-            }, 800);
-        } else {
-            window.open(twitterWebIntentUrl, "_blank", "noopener,noreferrer");
-        };
+        openTweet(gameMode === 'blurry' ? textToCopyCategoriesBlurry(attempts) : textToCopy(guesses, attempts));
     }
 
     return (
@@ -181,7 +165,7 @@ const ShareText = (props: ShareContentProps) => {
                             }
                         })}>
                         <div className='relative flex flex-row items-center justify-center gap-2'>
-                            <img src={Twitter} alt="Twitter" className='w-6 h-6 sm:w-6 sm:h-6' />
+                            <Img src={Twitter} alt="Twitter" className='w-6 h-6 sm:w-6 sm:h-6' />
                             <span className='text-base'>Share</span>
                         </div>
                     </button>
@@ -192,5 +176,23 @@ const ShareText = (props: ShareContentProps) => {
 }
 
 export default ShareText;
-                        
 
+// Click-only browser work, kept outside the component: phones try the X app first and fall back
+// to the web intent if the app didn't open within a second.
+function openTweet(message: string) {
+    const text = encodeURIComponent(message);
+    const twitterWebIntentUrl = `https://twitter.com/intent/tweet?text=${text}`;
+
+    const isMobile = /Android|iPhone|iPad|iPod/i.test(navigator.userAgent);
+    if (isMobile) {
+        const now = Date.now();
+        window.location.href = `twitter://post?message=${text}`;
+        setTimeout(() => {
+            if (Date.now() - now < 1000) {
+                window.open(twitterWebIntentUrl, "_blank", "noopener,noreferrer");
+            }
+        }, 800);
+    } else {
+        window.open(twitterWebIntentUrl, "_blank", "noopener,noreferrer");
+    }
+}

@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
-import { Link, useParams } from 'react-router-dom';
+import { Link, useParams } from 'react-router';
 import { Helmet } from 'react-helmet-async';
 import { useQuery } from '@tanstack/react-query';
 import { isAxiosError } from 'axios';
@@ -22,7 +22,7 @@ import { getCollectionFxAttrs } from './collectionFxAttrs';
 import { useCollectionFx } from './useCollectionFx';
 import { useCollectionNight } from './useCollectionNight';
 import { useDisclosure } from '../../hooks/useDisclosure';
-import { getCollectionAlbum, getCollectionsList } from '../../services/api';
+import { collectionAlbumQuery, collectionsListQuery } from './collectionData';
 import { useIsLg, isSafari } from '../../hooks/useIsDevice';
 import type { AlbumGroup } from '../../interfaces/albumInterfaces';
 import {
@@ -106,19 +106,16 @@ export default function CollectionAlbum() {
     const parsedId = Number(collectionId);
     const validId = Number.isInteger(parsedId) && parsedId > 0;
 
+    // Usually already cached by the route loader; on a first visit the page loads them itself.
     const { data, isLoading, isError, error } = useQuery({
-        queryKey: ['collectionAlbum', parsedId],
-        queryFn: () => getCollectionAlbum(parsedId),
+        ...collectionAlbumQuery(parsedId),
         enabled: validId,
-        staleTime: 1000 * 60 * 5,
         refetchOnWindowFocus: false,
     });
-    
+
     const { data: collections } = useQuery({
-        queryKey: ['collectionsList'],
-        queryFn: getCollectionsList,
+        ...collectionsListQuery,
         enabled: validId,
-        staleTime: 1000 * 60 * 5,
         refetchOnWindowFocus: false,
     });
 
@@ -168,9 +165,8 @@ export default function CollectionAlbum() {
     const { open: openZoom, close: closeZoom, mounted: zoomMounted } = zoom;
     const zoomHistoryEntry = useRef(false);
 
-    useEffect(() => {
-        if (!zoomMounted) setZoomTarget(null);
-    }, [zoomMounted]);
+    // Drop the card once the zoom has fully closed (adjusted while rendering, not in an effect).
+    if (!zoomMounted && zoomTarget) setZoomTarget(null);
 
     const openCardZoom = useCallback(
         (target: CardZoomTarget) => {
@@ -257,9 +253,11 @@ export default function CollectionAlbum() {
     // finish/skip; replay from the info modal just re-arms the state.
 
     const [tourActive, setTourActive] = useState(false);
-    useEffect(() => {
-        if (groups && !hasSeenCollectionGuide()) setTourActive(true);
-    }, [groups]);
+    const [tourChecked, setTourChecked] = useState(false);
+    if (groups && !tourChecked) {
+        setTourChecked(true);
+        if (!hasSeenCollectionGuide()) setTourActive(true);
+    }
 
     const firstStickerSpread = useMemo(() => {
         if (!book || !groups) return null;

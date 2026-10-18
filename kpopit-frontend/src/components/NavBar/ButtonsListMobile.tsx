@@ -1,8 +1,11 @@
 import "./droplist.css";
-import { Link, useLocation } from "react-router-dom";
+import { Link, useLocation } from "react-router";
 import { useState, useEffect, useRef } from "react";
 import { GAMES_LINKS, IDOLS_LINKS } from "./navigation";
 import { ChevronDown } from "lucide-react";
+import Img from "../Img";
+import { prefetchCollectionsList } from "../../pages/Collection/collectionData";
+import IntentLink from "../Links/IntentLink";
 
 
 interface ButtonsListMobileProps {
@@ -38,15 +41,12 @@ const ButtonsListMobile = (props: ButtonsListMobileProps) => {
         };
     }, [isOpen, onClose, containerRef]);
 
+    // Mount at once on open (adjusted while rendering); unmount after the 500ms fade-out.
+    if (isOpen && !isRendered) setIsRendered(true);
     useEffect(() => {
-        if (isOpen) {
-            setIsRendered(true);
-        } else {
-            const timer = setTimeout(() => {
-                setIsRendered(false);
-            }, 500);
-            return () => clearTimeout(timer);
-        }
+        if (isOpen) return;
+        const timer = setTimeout(() => setIsRendered(false), 500);
+        return () => clearTimeout(timer);
     }, [isOpen]);
 
     if (!isRendered) return null;
@@ -93,7 +93,7 @@ const ButtonsListMobile = (props: ButtonsListMobileProps) => {
                                         className="flex w-full max-xxs:h-12 xxs:h-14 xs:h-16 bg-black/40 rounded-2xl items-center px-4 gap-3 cursor-default"
                                     >
                                         {game.icon && (
-                                            <img 
+                                            <Img 
                                                 src={game.icon} 
                                                 alt={`${game.label} icon`} 
                                                 className="grayscale w-9 h-9"
@@ -111,13 +111,14 @@ const ButtonsListMobile = (props: ButtonsListMobileProps) => {
                                         isPath ? "bg-white/10" : "bg-black/0"
                                     }`}
                                 >
-                                    <Link 
-                                        to={game.path} 
+                                    <IntentLink
+                                        to={game.path}
+                                        onIntent={game.onIntent}
                                         onClick={onClose} 
                                         className="flex items-center justify-center gap-3 w-full"
                                     >
                                         {game.icon && (
-                                            <img 
+                                            <Img 
                                                 src={game.icon} 
                                                 alt={`${game.label} icon`} 
                                                 className="w-9 h-9"
@@ -129,7 +130,7 @@ const ButtonsListMobile = (props: ButtonsListMobileProps) => {
                                             )}
                                             <span className="[text-shadow:1.2px_1.6px_2.0px_rgba(255,51,153,1)]">{game.label}</span>
                                         </span>
-                                    </Link>
+                                    </IntentLink>
                                 </li>
                             );
                         })}
@@ -162,7 +163,7 @@ const ButtonsListMobile = (props: ButtonsListMobileProps) => {
                                         className="flex w-full max-xxs:h-12 xxs:h-14 xs:h-16 bg-black/40 rounded-2xl items-center px-4 gap-3 cursor-default"
                                     >
                                         {idol.icon && (
-                                            <img 
+                                            <Img 
                                                 src={idol.icon} 
                                                 alt={`${idol.label} icon`} 
                                                 className="grayscale w-9 h-9"
@@ -180,13 +181,14 @@ const ButtonsListMobile = (props: ButtonsListMobileProps) => {
                                         isPath ? "bg-white/10" : "bg-black/80"
                                     }`}
                                 >
-                                    <Link 
-                                        to={idol.path} 
+                                    <IntentLink
+                                        to={idol.path}
+                                        onIntent={idol.onIntent}
                                         onClick={onClose}
                                         className="flex items-center gap-3 w-full"
                                     >
                                         {idol.icon && (
-                                            <img 
+                                            <Img 
                                                 src={idol.icon} 
                                                 alt={`${idol.label} icon`} 
                                                 className="w-9 h-9"
@@ -198,7 +200,7 @@ const ButtonsListMobile = (props: ButtonsListMobileProps) => {
                                             )}
                                             <span className="[text-shadow:1.2px_1.6px_2.0px_rgba(255,51,153,1)]">{idol.label}</span>
                                         </span>
-                                    </Link>
+                                    </IntentLink>
                                 </li>
                             );
                         })}
@@ -208,8 +210,9 @@ const ButtonsListMobile = (props: ButtonsListMobileProps) => {
                 {/* Collection */}
                 {import.meta.env.VITE_COLLECTION_ENABLED === "true" && (
                     <li className="w-full flex items-center justify-center list-none">
-                        <Link
+                        <IntentLink
                             to="/collections"
+                            onIntent={prefetchCollectionsList}
                             onClick={onClose}
                             className={`flex w-full max-xxs:h-12 xxs:h-14 xs:h-16 bg-black rounded-2xl items-center justify-center text-center ${text}`}>
                                 <span className={text}>
@@ -218,7 +221,7 @@ const ButtonsListMobile = (props: ButtonsListMobileProps) => {
                                     )}
                                     Collections
                                 </span>
-                        </Link>
+                        </IntentLink>
                     </li>
                 )}
 

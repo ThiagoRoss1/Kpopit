@@ -345,8 +345,11 @@ export default function FxPanel({ night, onClose, albumName, closing, onAnimatio
     const [openGroups, setOpenGroups] = useState({ graphics: true, animation: wide, controls: wide });
     const [pendingHeavy, setPendingHeavy] = useState<PendingHeavyAction | null>(null);
 
+    // Read by the document listeners below without re-binding them on every change.
     const pendingRef = useRef(false);
-    pendingRef.current = pendingHeavy !== null;
+    useEffect(() => {
+        pendingRef.current = pendingHeavy !== null;
+    }, [pendingHeavy]);
 
     // On a device Auto-resolved to Low, intercept the first heavy graphics change
     // (High preset / full-res textures / holo shimmer) with a one-time confirm.

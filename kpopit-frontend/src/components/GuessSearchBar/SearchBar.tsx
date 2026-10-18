@@ -3,6 +3,7 @@ import type { IdolListItem } from "../../interfaces/gameInterfaces";
 import { AnimatePresence, motion} from "motion/react";
 import SearchIcon from "../../assets/icons/magnifying-glass-fill.svg";
 import { useIsMobile } from "../../hooks/useIsDevice";
+import Img from "../Img";
 
 
 interface SearchBarProps {
@@ -193,7 +194,7 @@ const SearchBar = (props: SearchBarProps) => {
                 }}
               />
               ) : (
-                <img
+                <Img
                 src={SearchIcon} 
                 alt="G" 
                 className="w-5.5 h-5.5 sm:w-5.5 sm:h-5.5 mx-auto" 
@@ -239,10 +240,14 @@ const SearchBar = (props: SearchBarProps) => {
                 const isLast = suggestions.indexOf(suggestion) === suggestions.length - 1;
                 const isUnique = suggestions.length === 1;
 
+                const isHovered = hoveredId === suggestion.id;
+
                 return (
-                <motion.li
-                  onHoverStart={() => setHoveredId(suggestion.id)}
-                  onHoverEnd={() => setHoveredId(null)}
+                // The li is a fixed hit area; only the inner row moves. Moving the li itself slid it out
+                // from under a pointer resting near its edge, and WebKit re-hit-tests: an endless hover loop.
+                <li
+                  onPointerEnter={(e) => e.pointerType !== "touch" && setHoveredId(suggestion.id)}
+                  onPointerLeave={() => setHoveredId(null)}
                   onTouchStart={() => {
                     pressTimeout.current = setTimeout(() => setIsTouched(suggestion.id), 100);
                   }}
@@ -253,39 +258,29 @@ const SearchBar = (props: SearchBarProps) => {
                     setIsTouched(null);
                   }}
                   onContextMenu={(e) => e.preventDefault()}
-                  whileHover={isUnique ? {
-                    y: 0,
-                    x: 20,
-                    scale: 1.05,
-                    translateZ: 30,
-                    zIndex: 10,
-                  } : isLast ? {
-                    y: -6,
-                    x: 20,
-                    scale: 1.05,
-                    translateZ: 30,
-                    zIndex: 10,
-                  } : {
-                    y: 6,
-                    x: 20,
-                    scale: 1.05,
-                    translateZ: 30,
-                    zIndex: 10,
-                }}
-                  transition={{ 
-                    type: "spring", 
-                    stiffness: 250, 
-                    damping: 25 }}
-                  className={`relative px-4 py-3 select-none cursor-pointer transition-colors duration-200 shadow=[0px_0px_0px_0px_rgba(0,0,0,0.35)]
-                    hover:bg-linear-to-r hover:from-[#8a0449] hover:via-[#0d0314] hover:to-[#000000]/0 
-                    bg-size-[200%_100%] bg-left hover:animate-[moveGradient_0.3s_linear_forwards]
-                    ${isTouched === suggestion.id ? 
-                      "bg-linear-to-r from-[#8a0449] via-[#0d0314] to-[#000000]/0 bg-size-[200%_100%] bg-left animate-[moveGradient_0.3s_linear_forwards]" : ""}
-                    flex grow gap-4 items-center text-white drop-shadow-md 
-                    border border-white/20 transform-gpu will-change-transform
-                    hover:shadow-[2px_2px_12px_8px_rgba(0,0,0,0.35)]`} // had to remove backdrop-blur-md due "white corner glitch / artifact"
+                  className={`group relative select-none cursor-pointer ${isHovered ? "z-10" : ""}`}
                   key={suggestion.id}
                   onClick={() => handleSuggestionClick(suggestion)}
+                >
+                <motion.div
+                  animate={isHovered ? {
+                    y: isUnique ? 0 : isLast ? -6 : 6,
+                    x: 20,
+                    scale: 1.05,
+                    translateZ: 30,
+                  } : { y: 0, x: 0, scale: 1, translateZ: 0 }}
+                  transition={{
+                    type: "spring",
+                    stiffness: 250,
+                    damping: 25 }}
+                  className={`relative px-4 py-3 transition-colors duration-200 shadow=[0px_0px_0px_0px_rgba(0,0,0,0.35)]
+                    group-hover:bg-linear-to-r group-hover:from-[#8a0449] group-hover:via-[#0d0314] group-hover:to-[#000000]/0
+                    bg-size-[200%_100%] bg-left group-hover:animate-[moveGradient_0.3s_linear_forwards]
+                    ${isTouched === suggestion.id ?
+                      "bg-linear-to-r from-[#8a0449] via-[#0d0314] to-[#000000]/0 bg-size-[200%_100%] bg-left animate-[moveGradient_0.3s_linear_forwards]" : ""}
+                    flex grow gap-4 items-center text-white drop-shadow-md
+                    border border-white/20 transform-gpu will-change-transform
+                    group-hover:shadow-[2px_2px_12px_8px_rgba(0,0,0,0.35)]`} // had to remove backdrop-blur-md due "white corner glitch / artifact"
                 >
                   {suggestion.image_path && (
                     <motion.img 
@@ -294,7 +289,7 @@ const SearchBar = (props: SearchBarProps) => {
                     className="w-11 h-11 object-cover rounded-full border border-white"
                     loading="eager"
                     fetchPriority="high"
-                    animate={{ scale: hoveredId === suggestion.id ? 1.16 : 1 }}
+                    animate={{ scale: isHovered ? 1.16 : 1 }}
                     transition={{ type: "spring", stiffness: 300, damping: 25 }}/>
                   )}
                   <p className="relative">
@@ -304,7 +299,8 @@ const SearchBar = (props: SearchBarProps) => {
                     {`(${suggestion.active_group ? suggestion.active_group : "Soloist"})`}
                   </span>
                   </p>
-                </motion.li>
+                </motion.div>
+                </li>
               );
               })}
             </motion.ul>

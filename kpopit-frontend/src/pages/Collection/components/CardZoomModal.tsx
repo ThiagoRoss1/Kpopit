@@ -10,6 +10,7 @@ import { useSyncAlbumAnimations } from '../../../components/Albums/AlbumOfCol/ca
 import { useGfx } from '../useCollectionFx';
 import { EAGER_ARTWORK_PROPS } from '../../../components/Albums/AlbumOfCol/albumArtworkLoading';
 import { COLLECTION_CARD_ZOOM_EXIT_MS } from '../collectionMotion';
+import Img from "../../../components/Img";
 
 interface CardZoomModalProps {
     target: CardZoomTarget;
@@ -263,7 +264,7 @@ export default function CardZoomModal(props: CardZoomModalProps) {
                         <TextureFill treatment={groupPhotoFrame} />
 
                         <div className="relative size-full overflow-clip rounded-br-[20px] rounded-tl-[20px]">
-                            <img
+                            <Img
                                 src={group.group_photo?.src || undefined}
                                 alt={group.group_name}
                                 className="h-full w-full object-contain lg:object-cover"

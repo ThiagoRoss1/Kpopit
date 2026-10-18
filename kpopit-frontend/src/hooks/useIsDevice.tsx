@@ -1,16 +1,14 @@
-import { useState, useEffect } from "react";
+import { useCallback, useSyncExternalStore } from "react";
 import { isSafariUserAgent } from './safariDetection';
 
+// Prerender and hydration have no viewport: both hooks report false there, then the real value.
 export function useIsMobile(breakpoint = 768) {
-    const [isMobile, setIsMobile] = useState(window.innerWidth <= breakpoint);
+    const subscribe = useCallback((onChange: () => void) => {
+        window.addEventListener("resize", onChange);
+        return () => window.removeEventListener("resize", onChange);
+    }, []);
 
-    useEffect(() => {
-        const onResize = () => setIsMobile(window.innerWidth <= breakpoint);
-        window.addEventListener("resize", onResize);
-        return () => window.removeEventListener("resize", onResize);
-    }, [breakpoint]);
-
-    return isMobile;
+    return useSyncExternalStore(subscribe, () => window.innerWidth <= breakpoint, () => false);
 }
 
 // Keep the broad historical flag for existing site-wide consumers. In
@@ -30,18 +28,16 @@ export const isGeckoEngine = typeof window !== "undefined" &&
   (window.CSS && CSS.supports('-moz-appearance', 'none'));
 
 export function useIsLg(breakpoint = 1024) {
-    const [isLg, setIsLg] = useState(() => window.matchMedia(`(min-width: ${breakpoint}px)`).matches);
+    return useMediaQuery(`(min-width: ${breakpoint}px)`);
+}
 
-    useEffect(() => {
-        const mediaQuery = window.matchMedia(`(min-width: ${breakpoint}px)`);
-        const handleChange = (event: MediaQueryListEvent) => {
-            setIsLg(event.matches);
-        }
+// Any media query as live state; false during prerender and hydration.
+export function useMediaQuery(query: string) {
+    const subscribe = useCallback((onChange: () => void) => {
+        const mediaQuery = window.matchMedia(query);
+        mediaQuery.addEventListener("change", onChange);
+        return () => mediaQuery.removeEventListener("change", onChange);
+    }, [query]);
 
-        mediaQuery.addEventListener("change", handleChange);
-
-        return () => mediaQuery.removeEventListener("change", handleChange);
-    }, [breakpoint]);
-
-    return isLg;
+    return useSyncExternalStore(subscribe, () => window.matchMedia(query).matches, () => false);
 }

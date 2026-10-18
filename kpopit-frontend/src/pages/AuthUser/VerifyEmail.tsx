@@ -1,59 +1,29 @@
-import { useEffect, useRef, useState } from "react";
-import { Link, useSearchParams } from "react-router-dom";
+import { useState } from "react";
+import { Link, useSearchParams } from "react-router";
 import { useMutation } from "@tanstack/react-query";
 import { CheckCircle, XCircle, Loader2 } from "lucide-react";
 import { useAuth } from "../../hooks/useAuth";
-import { verifyEmail, sendVerificationEmail, authError } from "../../services/api";
+import { useEmailLinkAction } from "../../hooks/useEmailLinkAction";
+import { verifyEmail, sendVerificationEmail } from "../../services/api";
 import AuthBackground from "./AuthBackground";
 import { Helmet } from "react-helmet-async";
 import "./authPage.css";
 
-type Status = "loading" | "success" | "error";
-
 const VerifyEmail = () => {
-    const { isAuthenticated, refreshAuth } = useAuth();
+    const { isAuthenticated } = useAuth();
     const [searchParams] = useSearchParams();
     const token = searchParams.get("token");
 
-    const [status, setStatus] = useState<Status>("loading");
-    const [errorMessage, setErrorMessage] = useState<string | null>(null);
+    const { status, errorMessage } = useEmailLinkAction("verify", token, verifyEmail, {
+        missing: "Invalid verification link.",
+        failed: "Something went wrong verifying your email.",
+    });
     const [resendSent, setResendSent] = useState(false);
-    const verifiedOnce = useRef(false);
 
     const resendMutation = useMutation({
         mutationFn: () => sendVerificationEmail(),
         onSuccess: () => setResendSent(true),
     });
-
-    useEffect(() => {
-        if (verifiedOnce.current) return;
-        verifiedOnce.current = true;
-
-        if (!token) {
-            setStatus("error");
-            setErrorMessage("Invalid verification link.");
-            return;
-        }
-
-        const run = async () => {
-            try {
-                await verifyEmail(token);
-                if (isAuthenticated) {
-                    await refreshAuth();
-                }
-                setStatus("success");
-            } catch (err: unknown) {
-                if (authError(err)) {
-                    setErrorMessage(err.response.data.error);
-                } else {
-                    setErrorMessage("Something went wrong verifying your email.");
-                }
-                setStatus("error");
-            }
-        };
-
-        run();
-    }, [token, isAuthenticated, refreshAuth]);
 
     return (
         <>

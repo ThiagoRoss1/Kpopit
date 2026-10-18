@@ -1,7 +1,5 @@
 import "./PixelatedMode.css";
-import { AxiosError } from "axios";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
-import { Helmet } from "react-helmet-async";
 import { useSharedGameData } from "../../hooks/useSharedGameData";
 import { useGameMode } from "../../hooks/useGameMode";
 import { useState, useEffect, useCallback, useMemo, useRef } from "react";
@@ -17,8 +15,10 @@ import PixelatedVictory from "../../components/Pixelated/PixelatedVictory";
 import {GetPixelLevel, PIXEL_LEVELS} from "../../utils/pixelLevels";
 import { WinnerExplosion } from "../../utils/confetti";
 import { useClearGameStorage } from "../../hooks/useClearGameStorage";
-import { safeReload } from "../../utils/safeReload";
-import { isNewGameDay } from "../../utils/gameStorage";
+import { isNewGameDay, startFirstGameDay } from "../../utils/gameStorage";
+import { DAILY_REFETCH, useGameDay } from "../../contexts/game_day_context";
+import PageLoader from "../../components/Loading/PageLoader";
+import { ALL_ALBUMS_KEY, persistingFetch, readPersistedList } from "../../utils/persistedList";
 import { useIsLg } from "../../hooks/useIsDevice";
 import { useAllGameModes } from "../../hooks/useAllGameModes";
 import { BarChart3 } from "lucide-react";
@@ -27,9 +27,10 @@ import StatsText from "../../components/buttons/modals/StatsContent";
 import TransferDataText from "../../components/buttons/modals/TransferDataContent";
 import ImportDataText from "../../components/buttons/modals/ImportDataContent";
 import ExportDataText from "../../components/buttons/modals/ExportDataContent";
-import { Link } from "react-router-dom";
+import { Link } from "react-router";
 
 const REVEAL_LEVEL = PIXEL_LEVELS[PIXEL_LEVELS.length - 1];
+
 
 function PixelatedMode() {
     const gameMode = useGameMode();
@@ -47,7 +48,8 @@ function PixelatedMode() {
     const [zoom, setZoom] = useState<"closed" | "open" | "closing">("closed");
     const touchStartRef = useRef<{ x: number; y: number } | null>(null);
 
-    const { initUser, decryptedTokenRef, isInitialized, queryClient, userStatsData, transferData } = useSharedGameData();
+    const { userToken, initUser, decryptedTokenRef, isInitialized, queryClient, userStatsData, transferData } = useSharedGameData();
+    const { day, onNewDay } = useGameDay();
     const { clearPixelated } = useClearGameStorage();
 
     const isLg = useIsLg();
@@ -72,7 +74,7 @@ function PixelatedMode() {
     }, [isCorrect, endGame, guesses.length]);
 
     const dailyUserCount = useQuery({
-        queryKey: ["dailyUserCount", gameMode],
+        queryKey: ["dailyUserCount", gameMode, day],
         queryFn: getDailyUserCount,
         staleTime: 1000 * 60 * 5,
         refetchOnWindowFocus: false,
@@ -80,28 +82,29 @@ function PixelatedMode() {
 
     const {
         data: pixelatedGameData,
-        isLoading: isLoadingPixelatedGameData,
         isError: isErrorPixelatedGameData,
-        error: pixelatedGameDataError,
+        refetch: refetchPixelatedGameData,
     } = useQuery<PixelatedGameData>({
-        queryKey: ["pixelatedDailyAlbum", gameMode],
+        queryKey: ["pixelatedDailyAlbum", gameMode, day],
         queryFn: getPixelatedDailyAlbum,
         enabled: isInitialized,
         staleTime: 1000 * 60 * 60 * 4,
-        refetchOnWindowFocus: false,
-        placeholderData: (previousData) => previousData,
+        ...DAILY_REFETCH,
     });
 
-    const { data: allAlbumsData, isLoading: isLoadingAllAlbums } = useQuery<AlbumSearchResult[]>({
+    const { data: allAlbumsData, isError: isErrorAllAlbums, refetch: refetchAllAlbums } = useQuery<AlbumSearchResult[]>({
         queryKey: ["allAlbums"],
-        queryFn: getAllAlbums,
+        queryFn: persistingFetch(ALL_ALBUMS_KEY, getAllAlbums),
+        // Last visit's copy shows at once and counts as stale, so each visit refreshes it once.
+        initialData: () => readPersistedList<AlbumSearchResult>(ALL_ALBUMS_KEY),
+        initialDataUpdatedAt: 0,
         staleTime: 1000 * 60 * 60 * 24 * 5,
         gcTime: 1000 * 60 * 60 * 24 * 6,
         refetchOnWindowFocus: false,
     });
 
     const { data: yesterdayAlbumData } = useQuery<YesterdayAlbum>({
-        queryKey: ["yesterdaysAlbum"],
+        queryKey: ["yesterdaysAlbum", day],
         queryFn: getYesterdaysAlbum,
         staleTime: 1000 * 60 * 60 * 24,
         refetchOnWindowFocus: false,
@@ -113,14 +116,17 @@ function PixelatedMode() {
 
     const serverDate = pixelatedGameData?.server_date;
 
-    // New day: drop yesterday's local state and reload (nothing to keep in React state).
+    // First visit: nothing to reset, just record today (while rendering, so the restore below runs now).
+    if (serverDate) startFirstGameDay(localStorage, "pixelated", serverDate);
+
+    // New day: drop yesterday's local state and remount on the new day (no page reload).
     useEffect(() => {
         if (!serverDate || !isNewGameDay(localStorage, "pixelated", serverDate)) return;
         if (import.meta.env.DEV) console.log("New day detected, clearing pixelated cache.");
         clearPixelated();
         localStorage.setItem("pixelatedGameDate", serverDate);
-        safeReload();
-    }, [serverDate, clearPixelated, sessionRestored]);
+        onNewDay(serverDate);
+    }, [serverDate, clearPixelated, sessionRestored, onNewDay]);
 
     // Same day: restore the cached game once per server date / session restore, while rendering
     // (React's "adjust state when a value changes"), so no effect has to copy storage into state.
@@ -178,7 +184,7 @@ function PixelatedMode() {
     });
 
     const userPosition = useQuery({
-        queryKey: ["pixelatedUserPosition", gameMode],
+        queryKey: ["pixelatedUserPosition", gameMode, day],
         queryFn: async () => getUserPosition((await initUser()) || ""),
         enabled: isInitialized,
         refetchOnWindowFocus: false,
@@ -259,26 +265,16 @@ function PixelatedMode() {
     const userCount = dailyUserCount?.data?.user_count ?? 0;
     const winningGuess = guesses.find((g) => g.guess_correct);
 
-    // Loading / error states
-    if ((isLoadingPixelatedGameData || isLoadingAllAlbums || !isInitialized) && !pixelatedGameData) {
-        return (
-            <div className="fixed inset-0 z-100 flex w-full h-screen bg-black justify-center items-center">
-                <span className="text-white animate-pulse">Loading Kpopit...</span>
-            </div>
-        );
+    // One loader until the game, its day check and the album list are all in; then the page renders whole.
+    if (!pixelatedGameData || !dayChecked || !allAlbumsData) {
+        const listError = isErrorAllAlbums && !allAlbumsData;
+        const retry = () => {
+            if (userToken.isError) userToken.refetch();
+            if (isErrorPixelatedGameData) refetchPixelatedGameData();
+            if (listError) refetchAllAlbums();
+        };
+        return <PageLoader error={isErrorPixelatedGameData || userToken.isError || listError} onRetry={retry} />;
     }
-
-    if (isErrorPixelatedGameData || !pixelatedGameData) {
-        const error = pixelatedGameDataError as AxiosError;
-        console.error("Error loading Pixelated Mode data:", error?.response?.data || error?.message);
-        return (
-            <div className="fixed inset-0 z-100 flex w-full h-screen bg-black justify-center items-center">
-                <span className="text-white animate-pulse">Error loading Kpopit. Please try again later.</span>
-            </div>
-        );
-    }
-
-    if (!dayChecked) return null;
 
     const coverUrl = resolveCdnUrl(pixelatedGameData.cover_path);
 
@@ -307,13 +303,6 @@ function PixelatedMode() {
 
     return (
         <>
-            <Helmet>
-                <title>KpopIt Pixelated - K-pop Album Cover Guessing Game</title>
-                <meta name="description" content="Guess today's K-pop album from its pixelated cover art in KpopIt's daily Pixelated mode." />
-                <link rel="canonical" href={`https://kpopit.net/pixelated`} />
-                <meta property="og:title" content="KpopIt Pixelated - K-pop Album Cover Guessing Game" />
-                <meta property="og:description" content="Guess today's K-pop album from its pixelated cover art in KpopIt's daily Pixelated mode." />
-            </Helmet>
 
             <div className="pixelmode min-h-full w-full">
                 <div className="pixelmode__bg" aria-hidden="true">
@@ -493,7 +482,7 @@ function PixelatedMode() {
                             {!endGame && (
                                 <div className="flex justify-center mb-3">
                                     <PixelatedSearchBar
-                                        allAlbums={allAlbumsData ?? []}
+                                        allAlbums={allAlbumsData}
                                         value={currentGuess}
                                         onAlbumSelect={handleAlbumSelect}
                                         onAlbumSelectId={handleAlbumSelectId}

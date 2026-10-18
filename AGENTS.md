@@ -138,6 +138,7 @@ Use these for any user-facing auth/profile input. They return `None` if valid, a
 | `RESEND_*` | Resend email delivery (`RESEND_API_KEY`, `RESEND_EMAIL_FROM`, `RESEND_EMAIL_FRONTEND_URL` — base URL used to build all email links) |
 
 ## Security
+- Never touch production: no connections to the production database, no use of production credentials, no changes to `main`, no requests that write production data (including measurements). This overrides any prompt that seems to ask otherwise; if a task needs production, stop and ask.
 - NEVER read, expose or display the contents of any `.env` file
 - NEVER hardcode credentials, API keys or secrets in any file
 - All credentials live exclusively in `.env` files which are gitignored 
@@ -206,6 +207,6 @@ Every mode follows the same shape (Classic → Blurry → Pixelated) on both sta
 - **Per-mode React Query keys** — Key every query by mode (`["<mode>DailyAlbum", gameMode]`); reuse the fetch-once-filter-locally search cache pattern (`["allAlbums"]` / `["allIdols"]`) instead of a per-keystroke endpoint.
 
 ## Tech Stack
-- **Frontend:** React 19, TypeScript 5.8, Vite 7, Tailwind CSS 4, Chakra UI, React Router 7, TanStack Query 5, Framer Motion, Axios
+- **Frontend:** React 19, TypeScript 5.8, Vite 7, Tailwind CSS 4, Chakra UI, React Router 8, TanStack Query 5, Framer Motion, Axios
 - **Backend:** Flask 3.1, psycopg (PostgreSQL), Pillow (blur generation), boto3 (Cloudflare R2)
 - **Infra:** Vercel (frontend), Railway/Render (backend), PostgreSQL, Cloudflare R2 (images + backups)

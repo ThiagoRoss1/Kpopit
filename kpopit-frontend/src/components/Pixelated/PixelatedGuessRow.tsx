@@ -2,6 +2,7 @@ import React, { useState, useEffect, useCallback } from "react";
 import "./PixelatedGuess.css";
 import type { PixelatedGuessDetail } from "../../interfaces/gameInterfaces";
 import { resolveCdnUrl } from "../../utils/imageUrl";
+import Img from "../Img";
 
 interface PixelatedGuessRowProps {
     guess: PixelatedGuessDetail;
@@ -58,7 +59,7 @@ const PixelatedGuessRow = ({
                         className="w-12 h-12 rounded-xl border-2 border-ink bg-ink shadow-[3px_1.5px_0_rgba(0,0,0,1)]
                         overflow-hidden hover:scale-110 transition-transform duration-300 transform-gpu"
                     >
-                        <img
+                        <Img
                             src={coverUrl ?? undefined}
                             alt={`${guess.album_name} cover`}
                             className="w-full h-full object-cover"

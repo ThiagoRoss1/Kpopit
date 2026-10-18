@@ -1,14 +1,17 @@
 import { useQuery, useQueryClient } from "@tanstack/react-query";
-import { useState, useEffect, useCallback, useRef } from "react";
+import { useState, useCallback, useRef } from "react";
 import { getAllIdols, getUserToken, getUserStats } from "../services/api";
 import { encryptToken, decryptToken } from "../utils/tokenEncryption";
 import { useTransferDataLogic } from "./useTransferDataLogic";
 import type { Users, UserStats, IdolListItem } from "../interfaces/gameInterfaces";
 import { useIsMobile } from "./useIsDevice";
+import { ALL_IDOLS_KEY, persistingFetch, readPersistedList } from "../utils/persistedList";
 
 export const useSharedGameData = () => {
-    const [isInitialized, setIsInitialized] = useState<boolean>(false);
-    const [shouldFetchToken, setShouldFetchToken] = useState<boolean>(!localStorage.getItem("userToken"));
+    // Decided once per mount: only a browser without a stored token asks for a new one
+    // (prerender has no storage and must not fetch).
+    const [shouldFetchToken] = useState<boolean>(() =>
+        typeof window !== "undefined" && !localStorage.getItem("userToken"));
 
     // Is mobile
     const isMobile = useIsMobile(); 
@@ -24,6 +27,8 @@ export const useSharedGameData = () => {
         enabled: shouldFetchToken,
         queryKey: ["userToken"],
         queryFn: getUserToken,
+        // One token per browser: never refetched once issued.
+        staleTime: Infinity,
         refetchOnWindowFocus: false,
     });
 
@@ -42,7 +47,6 @@ export const useSharedGameData = () => {
                 try {
                     const token = await decryptToken(encrypted);
                     decryptedTokenRef.current = token;
-                    setIsInitialized(true);
                     return token;
                 } catch (error) {
                     lastError = error;
@@ -60,19 +64,22 @@ export const useSharedGameData = () => {
         const encryptedToken = await encryptToken(userToken.data.token);
         localStorage.setItem("userToken", encryptedToken);
         decryptedTokenRef.current = userToken.data.token;
-        setIsInitialized(true);
         return userToken.data.token;
         }
 
         return null;
     }, [userToken.data]);
 
-    useEffect(() => {
-        if (localStorage.getItem("userToken") || userToken.data) {
-        initUser();
-        setShouldFetchToken(false);
-        }
-    }, [initUser, userToken.data]);
+    // Ready once the stored token is decrypted (or a new one is stored); the game queries wait on it.
+    const tokenReady = useQuery({
+        queryKey: ["decryptedUserToken", userToken.data?.token ?? null],
+        queryFn: async () => (await initUser()) ?? null,
+        enabled: typeof window !== "undefined" && (!!localStorage.getItem("userToken") || !!userToken.data),
+        staleTime: Infinity,
+        retry: false,
+        refetchOnWindowFocus: false,
+    });
+    const isInitialized = !!tokenReady.data;
 
     // All idols list
     const {
@@ -81,7 +88,10 @@ export const useSharedGameData = () => {
         isError: isErrorAllIdols,
     } = useQuery<IdolListItem[]>({
         queryKey: ["allIdols"],
-        queryFn: getAllIdols,
+        queryFn: persistingFetch(ALL_IDOLS_KEY, getAllIdols),
+        // Last visit's copy shows at once and counts as stale, so each visit refreshes it once.
+        initialData: () => readPersistedList<IdolListItem>(ALL_IDOLS_KEY),
+        initialDataUpdatedAt: 0,
         staleTime: 1000 * 60 * 60 * 24 * 5, // See functionality
         gcTime: 1000 * 60 * 60 * 24 * 6, // Can be this the YG error.
         refetchOnWindowFocus: false,
@@ -90,39 +100,9 @@ export const useSharedGameData = () => {
     const userStats = useQuery<UserStats>({
         queryKey: ["userStats", userToken.data?.id],
         queryFn: async () => getUserStats(await initUser() || ""),
-        enabled: !!localStorage.getItem("userToken"),
+        enabled: typeof window !== "undefined" && !!localStorage.getItem("userToken"),
         refetchOnWindowFocus: false,
     });
-
-    const checkAndResetDay = useCallback((mode: 'classic' | 'blurry', currentServerDate: string) => {
-        const lastPlayedDateKey = `${mode}_lastPlayedDate`;
-        const lastPlayedDate = localStorage.getItem(lastPlayedDateKey);
-
-        if (lastPlayedDate !== currentServerDate) {
-            console.log(`New day detected for ${mode} mode. Resetting local data.`);
-
-            if (mode === 'classic') {
-                const classicKeys = [
-                    "todayGuessesDetails", "GuessedIdols", "gameComplete", "gameWon", "hint1Revealed", "showHint1", 
-                    "colorize1", "hint2Revealed", "showHint2", "colorize2", "animatedIdols", "closeFeedbackSquares", "confettiShown"
-                ];
-                classicKeys.forEach(key => localStorage.removeItem(key));
-            } else if (mode === 'blurry') {
-                const blurryKeys = [
-                    "blurryGuessesDetails", "blurryGuessedIdols", "blurryGameComplete", "blurryGameWon"
-                ];
-                blurryKeys.forEach(key => localStorage.removeItem(key));
-            }
-
-            localStorage.setItem(lastPlayedDateKey, currentServerDate);
-            localStorage.setItem(`${mode}_gameDate`, currentServerDate);
-
-            window.location.reload();
-
-            return true;
-        }
-        return false;
-    }, []);
 
     return {
         userToken,
@@ -136,6 +116,5 @@ export const useSharedGameData = () => {
         userStatsData: userStats.data,
         transferData,
         queryClient,
-        checkAndResetDay,
     };
 }

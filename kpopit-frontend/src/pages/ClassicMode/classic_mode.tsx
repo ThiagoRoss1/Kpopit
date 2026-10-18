@@ -1,7 +1,6 @@
 import "../../index.css";
 import "./style.css";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
-import { Helmet } from "react-helmet-async";
 import { useSharedGameData } from "../../hooks/useSharedGameData.tsx";
 import { useState, useEffect, useCallback, useMemo, useRef } from "react";
 import { getDailyIdol, getGuessIdol, getYesterdaysIdol, getDailyUserCount, getUserPosition, saveGameState } from "../../services/api.ts";
@@ -13,13 +12,13 @@ import type {
   CompleteGuessRequest,
   CompleteGuessTrafficRequest,
 } from "../../interfaces/gameInterfaces.ts";
-import { Link } from "react-router-dom";
+import { Link } from "react-router";
 import { decryptToken } from "../../utils/tokenEncryption.ts";
 import SearchBar from "../../components/GuessSearchBar/SearchBar.tsx";
 import GuessesGrid from "../../components/GuessesGrid/GuessGrid.tsx";
 import VictoryCardHud from "../../components/VictoryCard/VictoryCardHud.tsx";
 import AnswerHintsBox from "../../components/AnswerHints/AnswerHintsBox.tsx";
-import { formatGroupName } from "../../utils/formatters";
+import { formatGroupName, buildIdolSlug } from "../../utils/formatters";
 import TopButtons from "../../components/buttons/TopButtons.tsx";
 import Modal from "../../components/buttons/modals/Modal.tsx";
 import HowToPlayText from "../../components/buttons/modals/HowToPlayContent.tsx";
@@ -37,12 +36,14 @@ import { buildLocalClassicGuess } from "../../utils/localGuess.ts";
 import { useAllGameModes } from "../../hooks/useAllGameModes.tsx";
 import { useClearGameStorage } from "../../hooks/useClearGameStorage.tsx";
 import { areGuessesEqual } from "../../utils/areGuessesEqual.ts";
-import { safeReload } from "../../utils/safeReload.ts";
-import { isNewGameDay } from "../../utils/gameStorage.ts";
+import { isNewGameDay, startFirstGameDay } from "../../utils/gameStorage.ts";
+import { DAILY_REFETCH, useGameDay } from "../../contexts/game_day_context.ts";
+import PageLoader from "../../components/Loading/PageLoader.tsx";
 import CardGrantedReveal from "../Collection/components/CardGrantedReveal.tsx";
 import type { CardGranted } from "../../interfaces/albumInterfaces.ts";
 
 const NO_IDOLS: IdolListItem[] = [];
+
 
 function ClassicMode() {
   const gameMode = useGameMode()
@@ -64,8 +65,10 @@ function ClassicMode() {
 
   // Transfer data logic hook
   
-  const { userToken, initUser, decryptedTokenRef, allIdolsData, isLoadingAllIdols, isErrorAllIdols,
+  const { userToken, initUser, decryptedTokenRef, allIdolsData, isErrorAllIdols,
     isInitialized, userStatsData, transferData, queryClient } = useSharedGameData();
+
+  const { day, onNewDay } = useGameDay();
 
   const { clearClassic } = useClearGameStorage();
 
@@ -84,7 +87,7 @@ function ClassicMode() {
 
 
   const dailyUserCount = useQuery({
-    queryKey: ["dailyUserCount", gameMode],
+    queryKey: ["dailyUserCount", gameMode, day],
     queryFn: getDailyUserCount,
     staleTime: 1000 * 60 * 5,
     refetchOnWindowFocus: false,
@@ -93,19 +96,18 @@ function ClassicMode() {
   // Daily idol game data
   const {
     data: gameData,
-    isLoading: isLoadingGameData,
     isError: isErrorGameData,
+    refetch: refetchGameData,
   } = useQuery<GameData>({
-    queryKey: ["dailyIdol", gameMode],
+    queryKey: ["dailyIdol", gameMode, day],
     queryFn: getDailyIdol,
     staleTime: 1000 * 60 * 60 * 4,
-    refetchOnWindowFocus: false,
+    ...DAILY_REFETCH,
     enabled: isInitialized,
-    placeholderData: (previousData) => previousData,
   });
 
   const yesterday = useQuery<YesterdayIdol>({
-    queryKey: ["yesterdayIdol", gameMode],
+    queryKey: ["yesterdayIdol", gameMode, day],
     queryFn: getYesterdaysIdol,
     staleTime: 1000 * 60 * 60 * 4,
     refetchOnWindowFocus: false,
@@ -123,14 +125,17 @@ function ClassicMode() {
 
   const serverDate = gameData?.server_date;
 
-  // New day: drop yesterday's local state and reload (nothing to keep in React state).
+  // First visit: nothing to reset, just record today (while rendering, so the restore below runs now).
+  if (serverDate) startFirstGameDay(localStorage, "classic", serverDate);
+
+  // New day: drop yesterday's local state and remount on the new day (no page reload).
   useEffect(() => {
     if (!serverDate || !isNewGameDay(localStorage, "classic", serverDate)) return;
-    console.log("New day detected, clearing cache.");
+    if (import.meta.env.DEV) console.log("New day detected, clearing cache.");
     clearClassic();
     localStorage.setItem("gameDate", serverDate);
-    safeReload();
-  }, [serverDate, clearClassic, sessionRestored]);
+    onNewDay(serverDate);
+  }, [serverDate, clearClassic, sessionRestored, onNewDay]);
 
   // Same day: restore the cached game once per server date / session restore, while rendering
   // (React's "adjust state when a value changes"), so no effect has to copy storage into state.
@@ -236,7 +241,7 @@ function ClassicMode() {
   });
 
   const userPosition = useQuery({
-    queryKey: ["userPosition", userToken],
+    queryKey: ["userPosition", userToken, day],
     queryFn: async () => getUserPosition(await initUser() || ""),
     enabled: isInitialized,
     refetchOnWindowFocus: false,
@@ -331,34 +336,20 @@ function ClassicMode() {
   // All gameModes for victory card
   const { otherModes } = useAllGameModes(gameMode);
   
-  if ((isLoadingGameData || isLoadingAllIdols || !isInitialized) && !gameData) {
-    return (
-      <div className="fixed inset-0 z-100 flex w-full h-screen bg-black justify-center items-center">
-        <span className="text-white animate-pulse">Loading Kpopit...</span>
-      </div>
-    );
+  // One loader until the game, its day check and the idol list are all in; then the page renders whole.
+  if (!gameData || !dayChecked || !allIdolsData) {
+    const listError = isErrorAllIdols && !allIdolsData;
+    const retry = () => {
+      if (userToken.isError) userToken.refetch();
+      if (isErrorGameData) refetchGameData();
+      if (listError) queryClient.refetchQueries({ queryKey: ["allIdols"] });
+    };
+    return <PageLoader error={isErrorGameData || userToken.isError || listError} onRetry={retry} />;
   }
-
-  if (isErrorGameData || isErrorAllIdols) {
-    return (
-      <div className="fixed inset-0 z-100 flex w-full h-screen bg-black justify-center items-center">
-        <span className="text-white animate-pulse">Error: Error fetching game data</span>
-      </div>
-    );
-  }
-
-  if (!dayChecked) return null;
 
   // Main return
   return (
     <>
-    <Helmet>
-      <title>KpopIt Classic - K-pop Idol Guessing Game</title>
-      <meta name="description" content="Guess today's K-pop idol by comparing attributes in KpopIt's daily Classic mode." />
-      <link rel="canonical" href="https://kpopit.net/classic" />
-      <meta property="og:title" content="KpopIt Classic - K-pop Idol Guessing Game" />
-      <meta property="og:description" content="Guess today's K-pop idol by comparing attributes in KpopIt's daily Classic mode." />
-    </Helmet>
     <BackgroundStyle attempts={attempts} />
     <div className="min-h-full w-full flex flex-col items-center justify-start">
       <div className="flex items-center justify-center p-2 w-3xs sm:w-3xs h-9 sm:h-20 mt-12 mb-13 text-center">
@@ -392,9 +383,9 @@ function ClassicMode() {
       </div>
       
       <div className="w-full flex flex-col items-center justify-center mb-10.25">
-        <AnswerHintsBox 
-        memberCount={gameData?.member_count ?? null} 
-        groups={gameData?.groups ?? null} 
+        <AnswerHintsBox
+        memberCount={gameData?.member_count ?? null}
+        groups={gameData?.groups ?? null}
         isFormerGroup={gameData?.is_former_group ?? false}
         attempts={attempts}
         gameEnded={endGame}
@@ -490,7 +481,7 @@ function ClassicMode() {
           <span className="text-white">
             Yesterday's idol was
           </span> <Link 
-                  to={`/idols/${yesterday.data?.past_idol_id}/${yesterdayArtist}-${yesterdayArtistGroup}`.trim().replace(/\s+/g, '-').toLowerCase()}>
+                  to={`/idols/${yesterday.data?.past_idol_id}/${buildIdolSlug(yesterdayArtist, yesterdayArtistGroup[0])}`}>
               <span 
                   className="text-[#b43777] [text-shadow:1.2px_1.2px_4px_rgba(0,0,0,1.8),0_0_12px_rgba(180,55,119,1.0)] brightness-105 underline hover:brightness-125 transition-all duration-300">
                   {yesterdayArtist ? `${yesterdayArtist} (${yesterdayArtistGroup && yesterdayArtistGroup.length > 0 ? yesterdayArtistGroup : "Soloist"})` : "Unknown"}

@@ -1,7 +1,7 @@
 import './collections.css';
 import { useQuery } from '@tanstack/react-query';
 import { Helmet } from 'react-helmet-async';
-import { getCollectionsList } from '../../services/api';
+import { collectionsListQuery } from './collectionData';
 import CollectionsBackdrop from './components/CollectionsBackdrop';
 import { CollectionCard } from './components/CollectionCard';
 import { ThemedCard } from './components/ThemedCard';
@@ -22,11 +22,10 @@ export default function Collection() {
 
     const [night, setNight] = useCollectionNight();
 
+    // Usually already cached by the route loader; on a first visit it waits for the session.
     const { data: collections, isLoading } = useQuery({
-        queryKey: ['collectionsList'],
-        queryFn: getCollectionsList,
+        ...collectionsListQuery,
         enabled: !isAuthLoading,
-        staleTime: 1000 * 60 * 5,
         refetchOnWindowFocus: false,
     });
     const totalStickers = collections?.reduce((sum, collection) => sum + collection.total_cards, 0);
@@ -56,7 +55,7 @@ export default function Collection() {
                             <span className="text-neon-pink">Vol. I · Est. 2026</span>
                         </div>
                         <div className="mt-3 flex flex-col items-center gap-2 text-center md:flex-row md:flex-wrap md:items-end md:justify-between md:gap-4 md:text-left">
-                            <h1 className={`font-serif text-center text-[clamp(47.5px,8vw,88px)] leading-[0.82] -tracking-[0.02em] md:text-left ${textMain}`}>
+                            <h1 className={`font-serif text-center text-[clamp(47.5px,8vw,88px)] leading-[0.82] tracking-[-0.02em] md:text-left ${textMain}`}>
                                 Collections<span className="text-neon-pink">.</span>
                             </h1>
                             <div className="relative flex items-center gap-2.5 md:pb-2">

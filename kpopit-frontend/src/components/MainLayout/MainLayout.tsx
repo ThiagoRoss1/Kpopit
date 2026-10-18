@@ -1,10 +1,11 @@
 import { useEffect, useState } from "react";
-import { Outlet } from "react-router-dom";
+import { Outlet } from "react-router";
 import NavBar from "../NavBar/NavBar";
 import Footer from "../Footer/Footer";
-import { Link } from "react-router-dom";
+import { Link } from "react-router";
 import { getUserAnalytics } from "../../services/api";
 import GlobalNotices from "../GlobalNotices/GlobalNotices";
+import { useHydrated } from "../../hooks/useHydrated";
 
 const MainLayout = () => {
     useEffect(() => {
@@ -17,10 +18,14 @@ const MainLayout = () => {
         }
     }, []);
 
-    const [isNoticeVisible, setIsNoticeVisible] = useState(import.meta.env.VITE_GLOBAL_NOTICE === "true" && !sessionStorage.getItem('kpopit_notice_closed'));
+    // The closed flag lives in sessionStorage, so the notice appears only after hydration.
+    const hydrated = useHydrated();
+    const [isNoticeClosed, setIsNoticeClosed] = useState(() =>
+        typeof window !== "undefined" && !!sessionStorage.getItem('kpopit_notice_closed'));
+    const isNoticeVisible = hydrated && import.meta.env.VITE_GLOBAL_NOTICE === "true" && !isNoticeClosed;
 
     const handleNoticeClose = () => {
-        setIsNoticeVisible(false);
+        setIsNoticeClosed(true);
         sessionStorage.setItem('kpopit_notice_closed', 'true');
     }
 

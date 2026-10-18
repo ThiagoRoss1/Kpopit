@@ -1,48 +1,22 @@
-import { useEffect, useRef, useState } from "react";
-import { Link, useSearchParams } from "react-router-dom";
+import { Link, useSearchParams } from "react-router";
 import { CheckCircle, Loader2, XCircle } from "lucide-react";
 import { useAuth } from "../../hooks/useAuth";
-import { confirmEmailChange, authError } from "../../services/api";
+import { useEmailLinkAction } from "../../hooks/useEmailLinkAction";
+import { confirmEmailChange } from "../../services/api";
 import AuthBackground from "./AuthBackground";
 import { Helmet } from "react-helmet-async";
 import "./authPage.css";
 
-type Status = "loading" | "success" | "error";
-
 const ConfirmEmailChange = () => {
-    const { isAuthenticated, refreshAuth } = useAuth();
+    const { isAuthenticated } = useAuth();
     const [searchParams] = useSearchParams();
     const token = searchParams.get("token");
 
-    const [status, setStatus] = useState<Status>("loading");
-    const [errorMessage, setErrorMessage] = useState<string | null>(null);
-    const [wasAdded, setWasAdded] = useState(false);
-    const ranOnce = useRef(false);
-
-    useEffect(() => {
-        if (ranOnce.current) return;
-        ranOnce.current = true;
-
-        if (!token) {
-            setStatus("error");
-            setErrorMessage("Invalid confirmation link.");
-            return;
-        }
-
-        const run = async () => {
-            try {
-                const data = await confirmEmailChange(token);
-                if (isAuthenticated) await refreshAuth();
-                setWasAdded(typeof data?.message === "string" && data.message.toLowerCase().includes("added"));
-                setStatus("success");
-            } catch (err: unknown) {
-                setErrorMessage(authError(err) ? err.response.data.error : "Something went wrong confirming your email change.");
-                setStatus("error");
-            }
-        };
-
-        run();
-    }, [token, isAuthenticated, refreshAuth]);
+    const { status, errorMessage, data } = useEmailLinkAction("confirm-change", token, confirmEmailChange, {
+        missing: "Invalid confirmation link.",
+        failed: "Something went wrong confirming your email change.",
+    });
+    const wasAdded = typeof data?.message === "string" && data.message.toLowerCase().includes("added");
 
     return (
         <>

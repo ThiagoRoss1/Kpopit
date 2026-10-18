@@ -3,6 +3,7 @@
 // import StreakOn from "../../assets/icons/fire-fill.svg";
 import Stats from "../../assets/icons/chart-bar-fill.svg";
 import Share from "../../assets/icons/share-network-fill.svg";
+import Img from "../Img";
 
 interface BottomButtonsProps {
     onSubmitStats: () => void;
@@ -24,12 +25,12 @@ const BottomButtons = (props: BottomButtonsProps) => {
                 <button onClick={onSubmitStats} type="button" className={`${ButtonStyle}`}>
                     <span className="absolute inset-[-1000%] animate-[spin_2s_linear_infinite] bg-[conic-gradient(from_90deg_at_50%_50%,#b43777_0%,#bf898c_50%,#b43777_100%)]" />
                         <span className="inline-flex h-full w-full cursor-pointer items-center justify-center rounded-full bg-slate-950 px-1 font-medium text-white backdrop-blur-3xl">
-                            <img src={Stats} alt="Stats" className={ImageStyle} draggable={false} />
+                            <Img src={Stats} alt="Stats" className={ImageStyle} draggable={false} />
                         </span>
                 </button>
 
                 {/* <button onClick={onSubmitStreak} type="button" className={`${ButtonStyle}`}>
-                    <img src={`${streak >= 1 ? StreakOn : StreakOff}`} alt="Streak" className={`${ImageStyle}`} />
+                    <Img src={`${streak >= 1 ? StreakOn : StreakOff}`} alt="Streak" className={`${ImageStyle}`} />
                     <span className={`text-[18px] absolute font-light text-center text-white hover:pointer-events-none [text-shadow:1.6px_1.6px_3px_rgba(25,25,25,0.8)]`}>
                         {streak}
                     </span>
@@ -38,7 +39,7 @@ const BottomButtons = (props: BottomButtonsProps) => {
                 <button onClick={onSubmitShare} type="button" className={`${ButtonStyle}`}>
                     <span className="absolute inset-[-1000%] animate-[spin_2s_linear_infinite] bg-[conic-gradient(from_90deg_at_50%_50%,#b43777_0%,#bf898c_50%,#b43777_100%)]" />
                         <span className="inline-flex h-full w-full cursor-pointer items-center justify-center rounded-full bg-slate-950 px-1 font-medium text-white backdrop-blur-3xl">
-                            <img src={Share} alt="Share" className={ImageStyle} draggable={false} />
+                            <Img src={Share} alt="Share" className={ImageStyle} draggable={false} />
                         </span>
                 </button>
             </div>

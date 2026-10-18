@@ -18,9 +18,9 @@ kpopit/
 
 ### Frontend (`kpopit-frontend/`)
 ```bash
-npm run dev       # Start dev server (Vite with HMR)
-npm run build     # TypeScript compile + Vite bundle
-npm run lint      # Run ESLint
+npm run dev       # Start dev server (react-router dev, Vite with HMR)
+npm run build     # TypeScript compile + react-router build (prerenders; needs the backend, see PRERENDER_API_URL)
+npm run lint      # Run ESLint (--max-warnings 0, same as CI)
 npm run preview   # Preview production build
 ```
 
@@ -50,8 +50,10 @@ gunicorn app:app      # Production server
 - **`utils/dates.py`** — All daily reset logic is EST-anchored
 
 ### Frontend (`kpopit-frontend/src/`)
-- **`main.tsx`** — App entry; React Router v7 with nested routes; admin and maintenance routes gated by env vars
-- **`hooks/useSharedGameData.tsx`** — Core state hook; owns the localStorage game state lifecycle (reads on load, clears on new day, triggers page reload)
+- **`app/`** (next to `src/`) — React Router 8 framework mode, `ssr: false` (static build on Vercel, output `build/client`). `root.tsx` holds the site-wide `<head>` and the providers (QueryClient, Helmet, AuthProvider, ScrollToTop, Vercel Analytics/Speed Insights) and maintenance mode; `routes.ts` lists the routes (MainLayout and ProtectedRoute as layouts) pointing at thin modules in `app/routes/` that render the `src/pages` components. Collections checks its env flag inside the route module; the admin route is only registered (at `VITE_ADMIN_ROUTE`) when `VITE_ADMIN_ENABLED=true`, read in `routes.ts` via Vite's `loadEnv`, so without the flag it isn't in the build. `react-router.config.ts` prerenders `/`, the three game pages, `/idols`, `/privacy-policy`, `/contact` and every `/idols/:id/:slug`; other routes load from `__spa-fallback.html` (the `vercel.json` rewrite)
+- **Prerender rules** — Prerendered HTML must match the first browser render: browser-only values (storage, viewport, today's date) wait for `useHydrated()` / `<ClientOnly>`; game pages render client-only behind `app/game-page.tsx`. Each page sets its own title/description/og via Helmet (the root head has none). Idol slugs come only from `buildIdolSlug` (`[a-z0-9-_]`); the idol page redirects any other slug to the canonical one
+- **`hooks/useSharedGameData.tsx`** — Core state hook: user token (issue/decrypt, readiness as a query), the `["allIdols"]` list, user stats
+- **`components/GameDayProvider.tsx`** — Wraps every game page: keys the page by its game day (a new day remounts it, no reload), runs the midnight countdown, and refetches on the api's "Game date mismatch" event. Daily queries spread `DAILY_REFETCH` (refetch on tab focus/visibility + every 30 min), so a new `server_date` is noticed with the tab open
 - **`hooks/`** — `useGameMode`, `useResetTimer`, `useIdolSearch`, `useTransferDataLogic`
 - **`services/api.ts`** — Axios client; attaches decrypted user token to every request via interceptor
 - **`pages/`** — `ClassicMode/`, `BlurryMode/`, `PixelatedMode/`, `Idols/` (list + `/:id/:slug` profile), `Home/`, `admin/`. Pixelated uses client-side album search (`["allAlbums"]` cached, no search endpoint) and `components/Pixelated/` (canvas, search bar, guess grid, hints, victory card)
@@ -59,7 +61,7 @@ gunicorn app:app      # Production server
 - **`utils/tokenEncryption.ts`** — AES encryption/decryption for localStorage token storage
 
 ### State Management
-- **React Query (TanStack Query)** — All server state; `["allIdols"]` cached for 5+ days, `["userStats", token]` per-user
+- **React Query (TanStack Query)** — All server state; `["allIdols"]` / `["allAlbums"]` start from a localStorage copy (`utils/persistedList.ts`, versioned keys, ignored after 7 days) and refetch once per visit, `["userStats", token]` per-user
 - **localStorage** — Game state per mode: `GuessedIdols`, `todayGuessesDetails`, `gameComplete`, `gameWon`, `hint1Revealed`, `hint2Revealed`, plus `{mode}_lastPlayedDate` for day-change detection
 - No React Context — React Query replaces global state needs
 
@@ -121,6 +123,7 @@ Use these for any user-facing auth/profile input. They return `None` if valid, a
 | `VITE_ADMIN_ENABLED` | Enables `/admin` route |
 | `VITE_MAINTENANCE_MODE` | Redirects all traffic to maintenance page |
 | `VITE_COLLECTION_ENABLED` | Mounts the `/collections` routes and NavBar entry; gates the `CardGrantedReveal` win-celebration slot |
+| `PRERENDER_API_URL` | Build time only (not `VITE_`): API the prerender reads the idol list/profiles from. Default `http://127.0.0.1:5000` (local seeded backend); production API only on Vercel |
 
 ### Backend (`.env`)
 | Variable | Purpose |
@@ -138,6 +141,7 @@ Use these for any user-facing auth/profile input. They return `None` if valid, a
 | `RESEND_*` | Resend email delivery (`RESEND_API_KEY`, `RESEND_EMAIL_FROM`, `RESEND_EMAIL_FRONTEND_URL` — base URL used to build all email links) |
 
 ## Security
+- Never touch production: no connections to the production database, no use of production credentials, no changes to `main`, no requests that write production data (including measurements). This overrides any prompt that seems to ask otherwise; if a task needs production, stop and ask.
 - NEVER read, expose or display the contents of any `.env` file
 - Agent scripts must NEVER open, read, parse or load `.env*` files (no `dotenv`, `fs.readFileSync`, `cat`, etc.); application code loads them at runtime, and agents reference variable names only
 - NEVER hardcode credentials, API keys or secrets in any file
@@ -159,7 +163,7 @@ Sticker-album collection layered on the daily games (flag: `COLLECTION_ENABLED`)
 - **Card numbering** — Each idol card carries a contiguous per-collection `card_number` (`1..N`, one per idol) computed at **read time** via `DENSE_RANK() OVER (ORDER BY idol_id)` in the member query — no schema column, no migration. It's append-only and shared: a multi-group idol shows the same number on every page. Group-photo cards are never numbered (`Reward` label). Threaded through `albumMapper.ts` → `AlbumMembersPage` (locked + owned slots) + `CardZoomModal` (`Card #N`).
 - **Reads** — `routes/collections/collections.py`: `GET /api/collections/list` (per-collection rows with distinct `total_cards`/`owned_cards` for the collections list page) and `GET /api/collections/album/<collection_id>` (bulk payload for the flip-book: every eligible group with `hangul_name`, `debut_year`, `fandom_name`, `company`/`label` from `group_company_affiliation`+`companies` (label falls back to the Label company when no Parent Company row), `group_features` `image_path`/`palette`, member roster with ownership, `group_photo`; unknown collection → 404). All `@optional_auth`; anonymous UUIDs resolve via `resolve_user_id`. Card art falls back via `COALESCE` — idol cards to `idols.image_path`, group_photo cards to `group_features.image_path`. (The old `/overview` + `/groups/<id>` reads were removed 2026-07-18 — consumerless after the flip-book design.)
 - **Seeding** — `collections` + `collection_group_eligibility` come from CSVs via `seed_db.py`; the derived card catalog from `seed_collection_cards.py` (publish flow: flip `is_eligible` in the CSV → `seed_db.py` → `seed_collection_cards.py`). `group_features.csv` is generated by `generate_group_features_csv.py` (5-stop named palette via `generate_group_palette.py`, which splits the five stops across the 1–5 hex colors declared for a group — first color wins `main` and the largest share, the rest sort darkest→lightest into deep/secondary/accent/light). `backfill_collection_cards.py` replays historical wins once before launch (runbook in its header).
-- **Frontend** — `/collections` is the collections *list* page (`pages/Collection/Collections.tsx`; the old `/collection` path is not a route — it falls to the catch-all and goes home). The album lives at `/collections/:collectionId/:slug` (`CollectionAlbum.tsx`): the flip-book engine (`components/Albums/AlbumOfCol/AlbumOfCol.tsx`, folders `pages/`/`shell/`/`cards/`; layout constants + `COVER_PALETTE` in `albumConstants.ts`) mounted `chromeless` inside the album-page chrome — top bar, collapsible Summary rail (`AlbumPageIndex`), side arrows, bottom mini-page carousel (`AlbumPageCarousel`), info modal (`AlbumInfoModal`), mobile index modal + rotate hint — driven through `controlRef`/`onPosChange`/`onBookInit`. Both collection pages share the persisted night mode (`useCollectionNight`, key `kpopit-collections-night`), `useQuery(["collectionAlbum", id], () => getCollectionAlbum(id))` + the shared `albumMapper.ts`. Collection types live in `interfaces/albumInterfaces.ts`. Card levels: LV1 group-color frame, LV2 gold, LV3 animated holo (`AlbumMemberCard`). Winning Classic/Blurry shows `CardGrantedReveal` (from the guess response's `card_granted`) and invalidates both `["collectionAlbum"]` and `["collectionsList"]` (only when `card_granted` is non-null). Album interactions: **tap-to-zoom** a card (`CardZoomModal`, animated flight to/from its slot), a mobile-only **Focus mode** (reads one page at a time; shares a synchronous navigation lock with leaf turns so rapid input can't desync), and an **FX settings panel** (`data-fx-*` attribute-driven — sparkles, etc. — never props that re-render the book). The carousel lazy-mounts thumbnails via `IntersectionObserver` windowing + preview-gated shell chrome (measured ~84% DOM-node reduction on load). A one-shot DevTools **console easter egg** (`utils/consoleEasterEgg.ts`) prints once per browser session from `main.tsx`.
+- **Frontend** — `/collections` is the collections *list* page (`pages/Collection/Collections.tsx`; the old `/collection` path is not a route — it falls to the catch-all and goes home). The album lives at `/collections/:collectionId/:slug` (`CollectionAlbum.tsx`): the flip-book engine (`components/Albums/AlbumOfCol/AlbumOfCol.tsx`, folders `pages/`/`shell/`/`cards/`; layout constants + `COVER_PALETTE` in `albumConstants.ts`) mounted `chromeless` inside the album-page chrome — top bar, collapsible Summary rail (`AlbumPageIndex`), side arrows, bottom mini-page carousel (`AlbumPageCarousel`), info modal (`AlbumInfoModal`), mobile index modal + rotate hint — driven through `controlRef`/`onPosChange`/`onBookInit`. Both collection pages share the persisted night mode (`useCollectionNight`, key `kpopit-collections-night`), `useQuery(["collectionAlbum", id], () => getCollectionAlbum(id))` + the shared `albumMapper.ts`. Collection types live in `interfaces/albumInterfaces.ts`. Card levels: LV1 group-color frame, LV2 gold, LV3 animated holo (`AlbumMemberCard`). Winning Classic/Blurry shows `CardGrantedReveal` (from the guess response's `card_granted`) and invalidates both `["collectionAlbum"]` and `["collectionsList"]` (only when `card_granted` is non-null). Album interactions: **tap-to-zoom** a card (`CardZoomModal`, animated flight to/from its slot), a mobile-only **Focus mode** (reads one page at a time; shares a synchronous navigation lock with leaf turns so rapid input can't desync), and an **FX settings panel** (`data-fx-*` attribute-driven — sparkles, etc. — never props that re-render the book). The carousel lazy-mounts thumbnails via `IntersectionObserver` windowing + preview-gated shell chrome (measured ~84% DOM-node reduction on load). A one-shot DevTools **console easter egg** (`utils/consoleEasterEgg.ts`) prints once per browser session from `app/root.tsx`.
 
 ## Code Conventions
 Recurring patterns across the codebase — follow them in new code.
@@ -201,10 +205,10 @@ Every mode follows the same shape (Classic → Blurry → Pixelated) on both sta
 - **Dates over the wire** — Send derived/minimal fields (e.g. `release_year` via `EXTRACT(YEAR FROM release_date)::int`), never full timestamps; expose full dates only through dedicated detail endpoints. Use `utils/dates.py` — EST for daily-reset logic, UTC for token/session timestamps.
 
 ### Frontend
-- **Page + route** — Add `pages/<Mode>/`, register a `<Route path="/<mode>" …>` under `MainLayout` in `main.tsx`, and extend the `GameMode` union + `MODES` list in `hooks/useGameMode.tsx`. `useGameMode` derives the active mode from the URL path and writes it to `localStorage["kpopit_gamemode"]`.
+- **Page + route** — Add `pages/<Mode>/`, add a route module in `app/routes/` (wrapped in `GamePage`) and register it under the `MainLayout` layout in `app/routes.ts` (plus `react-router.config.ts` to prerender it), and extend the `GameMode` union + `MODES` list in `hooks/useGameMode.tsx`. `useGameMode` derives the active mode from the URL path and writes it to `localStorage["kpopit_gamemode"]`.
 - **`gamemode_id` is injected globally** — The `api.ts` request interceptor reads `kpopit_gamemode`, maps it via the `MODES` name→id table, and attaches `gamemode_id` to every non-`/auth` request. New endpoints don't pass it manually; just add the mode to the map.
 - **Endpoints, types, components** — Add the mode's calls to `services/api.ts`, its data shapes to `interfaces/gameInterfaces.ts`, and its UI under `components/<Mode>/`.
-- **Game-state lifecycle** — Register the mode's `localStorage` keys as a `<MODE>_KEYS` array in `useClearGameStorage`. The page compares the server's `server_date` against the stored `<mode>GameDate`; on mismatch it clears those keys and calls `safeReload()`. Stats/history stay server-side; only per-day game state lives in `localStorage`.
+- **Game-state lifecycle** — Register the mode's `localStorage` keys as a `<MODE>_KEYS` array in `useClearGameStorage`. The page compares the server's `server_date` against the stored `<mode>GameDate`; on mismatch it clears those keys and calls `onNewDay(serverDate)` from `useGameDay()`, which remounts the page on the new day (first visits just start the day). Stats/history stay server-side; only per-day game state lives in `localStorage`.
 - **Per-mode React Query keys** — Key every query by mode (`["<mode>DailyAlbum", gameMode]`); reuse the fetch-once-filter-locally search cache pattern (`["allAlbums"]` / `["allIdols"]`) instead of a per-keystroke endpoint.
 
 ## Git & Commits
@@ -227,6 +231,6 @@ Rules for every commit Claude makes in this repo. They override any default comm
 - **Merging** — NEVER merge (branches, PRs, `git merge`, merge buttons/APIs). Merges are done only by the user.
 
 ## Tech Stack
-- **Frontend:** React 19, TypeScript 5.8, Vite 7, Tailwind CSS 4, Chakra UI, React Router 7, TanStack Query 5, Framer Motion, Axios
+- **Frontend:** React 19, TypeScript 6, Vite 8, Tailwind CSS 4, React Router 8 (framework mode, prerendered), TanStack Query 5, Motion, Axios
 - **Backend:** Flask 3.1, psycopg (PostgreSQL), Pillow (blur generation), boto3 (Cloudflare R2)
 - **Infra:** Vercel (frontend), Railway/Render (backend), PostgreSQL, Cloudflare R2 (images + backups)

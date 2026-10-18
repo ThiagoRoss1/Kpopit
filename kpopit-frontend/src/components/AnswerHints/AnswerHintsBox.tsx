@@ -3,6 +3,7 @@ import { useEffect, useState } from "react";
 import React from "react";
 import Mic from "../../assets/icons/mic-vocal.svg";
 import { formatGroupName } from "../../utils/formatters";
+import Img from "../Img";
 // import LockedIcon from "../../assets/icons/lock-key-fill.svg";
 // import UnlockedIcon from "../../assets/icons/lock-key-open-fill.svg";
 
@@ -98,7 +99,7 @@ const AnswerHintsBox = (props: AnswerHintsBoxProps) => {
                         <div className="relative z-10 max-xxs:w-74 max-xxs:h-24 xxs:w-80 xxs:h-26 xs:w-86 xs:h-28 max-w-full sm:w-96 sm:h-30 mx-auto
                         flex flex-row items-center justify-center gap-4 rounded-[20px] bg-transparent shadow-[4px_4px_4px_1px_rgba(24,24,24,0.25),inset_0_4px_4px_rgba(24,24,24,0.25)] cursor-default">
                             <span className="relative flex flex-col text-2xl text-white text-center [text-shadow:1.2px_1.2px_4px_rgba(0,0,0,0.8)] items-center justify-center gap-2">
-                                <img src={Mic} alt="microphone" className="relative flex max-xxs:w-5 max-xxs:h-5 xxs:w-6 xxs:h-6 xs:w-7 xs:h-7 sm:w-8 sm:h-8 animate-pulse object-cover" draggable={false} />
+                                <Img src={Mic} alt="microphone" className="relative flex max-xxs:w-5 max-xxs:h-5 xxs:w-6 xxs:h-6 xs:w-7 xs:h-7 sm:w-8 sm:h-8 animate-pulse object-cover" draggable={false} />
                                 <h2 className="max-xxs:text-base xxs:text-base xs:text-[18px] sm:text-[20px] font-light">
                                     Guess any idol to start the game!
                                 </h2>

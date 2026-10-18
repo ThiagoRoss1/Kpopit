@@ -1,4 +1,5 @@
-import { useEffect, useState } from "react";
+import { useState } from "react";
+import { useDebouncedValue } from "../../../hooks/useDebouncedValue";
 
 interface ImportDataTextProps {
     handleRedeem?: (code: string) => void;
@@ -10,18 +11,8 @@ const ImportDataText = (props: ImportDataTextProps) => {
     const { handleRedeem, isRedeeming, redeemError } = props;
 
     const [inputCode, setInputCode] = useState<string>("");
-    const [showLoading, setShowLoading] = useState<boolean>(false);
-
-    useEffect(() => {
-        let timer: ReturnType<typeof setTimeout>;
-
-        if (isRedeeming) {
-            timer = setTimeout(() => setShowLoading(true), 100);
-        } else {
-            setShowLoading(false);
-        }
-        return () => clearTimeout(timer);
-    }, [isRedeeming]);
+    // "Redeeming..." only when it takes longer than a blink.
+    const showLoading = useDebouncedValue(!!isRedeeming, 100) && !!isRedeeming;
 
 
     return (

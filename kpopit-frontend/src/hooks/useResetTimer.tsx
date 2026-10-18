@@ -1,54 +1,40 @@
 import { getResetTimer } from "../services/api";
 import type { ResetTimer } from "../interfaces/gameInterfaces";
 import { useQuery } from "@tanstack/react-query";
-import { useState, useEffect } from "react";
-import { safeReload } from "../utils/safeReload";
+import { useEffect, useRef } from "react";
+import { useGameDay } from "../contexts/game_day_context";
+import { useNow } from "./useNow";
 
-export const useResetTimer = () => {
+type ResetTimerOptions = {
+    // Called once when the countdown reaches zero (the game page's day provider uses it).
+    onZero?: () => void;
+    // The provider passes its own day: it sits above the context it provides.
+    day?: string | null;
+};
+
+export const useResetTimer = (options: ResetTimerOptions = {}) => {
+    const context = useGameDay();
+    const day = options.day !== undefined ? options.day : context.day;
+    // Keyed by the game day: after a day change the countdown comes from a fresh request.
     const { data, dataUpdatedAt } = useQuery<ResetTimer>({
-        queryKey: ['resetTimer'],
+        queryKey: ['resetTimer', day],
         queryFn: getResetTimer,
         staleTime: 1000 * 60 * 10, // 10 minutes
         refetchOnWindowFocus: true,
     });
 
-    const [timeRemaining, setTimeRemaining] = useState<number | null>(null);
-    const [targetTime, setTargetTime] = useState<number | null>(null);
-    const [dayHasChanged, setDayHasChanged] = useState<boolean>(false);
+    const now = useNow();
+    const targetTime = data && dataUpdatedAt ? dataUpdatedAt + data.total_seconds * 1000 : null;
+    const timeRemaining = targetTime !== null && now > 0 ? Math.max(0, Math.floor((targetTime - now) / 1000)) : null;
+    const dayHasChanged = timeRemaining === 0;
 
+    const { onZero } = options;
+    const firedFor = useRef<number | null>(null);
     useEffect(() => {
-        if (data?.total_seconds !== undefined && data?.total_seconds !== null && dataUpdatedAt) {
-            const end = dataUpdatedAt + (data.total_seconds * 1000);
-
-            setTargetTime((prev) => {
-                if (!prev || Math.abs(prev - end) > 2000) {
-                    return end;
-                }
-                return prev;
-            });
-        }
-    }, [data, dataUpdatedAt]);
-
-    useEffect(() => {
-        if (!targetTime || dayHasChanged) return;
-
-        const updateTimer = () => {
-            const now = Date.now();
-            const diff = Math.max(0, Math.floor((targetTime - now) / 1000));
-
-            if (diff <= 0) {
-                setDayHasChanged(true);
-                safeReload();
-            }
-            setTimeRemaining(diff);
-        };
-
-        updateTimer();
-        
-        const interval = setInterval(updateTimer, 1000);
-
-        return () => clearInterval(interval);
-    }, [targetTime, dayHasChanged]);
+        if (!dayHasChanged || targetTime === null || firedFor.current === targetTime) return;
+        firedFor.current = targetTime;
+        onZero?.();
+    }, [dayHasChanged, targetTime, onZero]);
 
     const hours = timeRemaining !== null ? Math.floor(timeRemaining / 3600) : 0;
     const minutes = timeRemaining !== null ? Math.floor((timeRemaining % 3600) / 60) : 0;

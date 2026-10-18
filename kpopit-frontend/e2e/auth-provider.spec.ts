@@ -4,8 +4,10 @@ import { newUser, registerViaApi } from './support/accounts';
 test('an active provider retains authentication and its token on refresh 503', async ({ page }) => {
   await page.goto('/');
   await registerViaApi(page, newUser());
+  // React Router's dev server injects its HMR preamble into the pages it renders; this bare page loads it first.
   await page.route('**/__auth-harness', (route) => route.fulfill({ contentType: 'text/html',
-    body: '<div id="root"></div><script type="module" src="/e2e/support/auth-harness.tsx"></script>' }));
+    body: '<div id="root"></div><script type="module" src="/@id/__x00__virtual:react-router/inject-hmr-runtime"></script>'
+      + '<script type="module" src="/e2e/support/auth-harness.tsx"></script>' }));
   await page.goto('/__auth-harness');
   await expect(page.getByTestId('authenticated')).toHaveText('true');
   await page.clock.install();

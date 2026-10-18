@@ -5,12 +5,20 @@ import fs from 'node:fs';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { summarizeDir, toMarkdown } from './summarize.mjs';
+import { startBackend, stopProcess } from './backend.mjs';
 
 const FRONTEND = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
 const run = (cmd, env = {}) =>
   execSync(cmd, { cwd: FRONTEND, stdio: 'inherit', env: { ...process.env, ...env } });
 
-run('npm run build', { VITE_API_URL: 'http://localhost:4173', VITE_COLLECTION_ENABLED: 'true' });
+// The build prerenders from the test backend; lhci then starts its own (serve.mjs).
+const backend = await startBackend();
+try {
+  run('npm run build', { VITE_API_URL: 'http://localhost:4173', VITE_COLLECTION_ENABLED: 'true' });
+} finally {
+  stopProcess(backend);
+}
+await new Promise((r) => setTimeout(r, 2_000)); // let :5000 close before serve.mjs reopens it
 
 const rows = [];
 for (const device of ['mobile', 'desktop']) {

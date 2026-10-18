@@ -1,7 +1,9 @@
 import "./guessgrid.css";
 import React, { useState, useEffect, useCallback, useMemo } from "react";
-import { Link } from "react-router-dom";
+import { Link } from "react-router";
 import type { FeedbackData, GuessResponse } from "../../../interfaces/gameInterfaces";
+import { buildIdolSlug } from "../../../utils/formatters";
+import Img from "../../Img";
 
 interface GuessRowProps {
     guess: GuessResponse<Partial<FeedbackData>>;
@@ -49,7 +51,7 @@ const GuessRow = (props: GuessRowProps) => {
     }, [isLatest, isAnimated, idolId, onIdolAnimated]);
 
     return (
-        <Link to={`/idols/${guess.guessed_idol_data.idol_id}/${guess.guessed_idol_data.artist_name}-${guess.guessed_idol_data.active_group}`.trim().replace(/\s+/g, '-').toLowerCase()}>
+        <Link to={`/idols/${guess.guessed_idol_data.idol_id}/${buildIdolSlug(guess.guessed_idol_data.artist_name, guess.guessed_idol_data.active_group)}`}>
         <div 
             style={{'--status-bg-color': statusColorRgb} as React.CSSProperties}
             className={`guess-card-color-container ${shouldAnimate ? 'guess-card-color-fade' : ''} flex items-center justify-center 
@@ -59,7 +61,7 @@ const GuessRow = (props: GuessRowProps) => {
 
             {/* Photo and name */}
             <div className="relative flex items-center justify-start gap-2 w-full h-fit">
-                <img
+                <Img
                     src={`${import.meta.env.VITE_IMAGE_BUCKET_URL}${guess.guessed_idol_data.image_path}?v=${guess.guessed_idol_data.image_version}`}
                     alt="Idol image"
                     className={`${shouldAnimate ? 'guess-photo-enter' : ''} 

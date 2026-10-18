@@ -1,10 +1,16 @@
 import "./droplist.css";
 import { useEffect, useRef, useState } from "react";
-import { Link, useNavigate } from "react-router-dom";
+import { useNavigate } from "react-router";
 import { LogOut, User, X } from "lucide-react";
 import { useAuth } from "../../hooks/useAuth";
 import { useAuthUser } from "../../hooks/useAuthUser";
 import { resolveAvatarUrl } from "../../utils/resolveAvatarUrl";
+import Img from "../Img";
+import IntentLink from "../Links/IntentLink";
+import { loadProfileStats } from "../../pages/User/profileData";
+
+// Profile link intent: start the stats request (the route loader then finds it in the cache).
+const prefetchProfile = () => void loadProfileStats();
 
 const UserDropdownMobile = () => {
     const { user, refreshAuth } = useAuth();
@@ -61,7 +67,7 @@ const UserDropdownMobile = () => {
                     aria-label="Open user menu"
                 >
                     {avatarSrc ? (
-                        <img
+                        <Img
                             src={avatarSrc}
                             alt="User avatar"
                             className="w-full h-full rounded-full object-cover"
@@ -92,7 +98,7 @@ const UserDropdownMobile = () => {
                     className={`flex flex-col ${isOpen ? "mobile-navbar-enter" : "mobile-navbar-exit"} items-center gap-3 max-xxs:w-75 xxs:w-90 xs:w-100 sm:w-100 bg-ink border-b-2 border-t-2 border-neon-pink rounded-3xl mt-20 py-8 px-6`}
                 >
                     {avatarSrc ? (
-                        <img
+                        <Img
                             src={avatarSrc}
                             alt="User avatar"
                             className="w-16 h-16 rounded-full object-cover"
@@ -113,14 +119,15 @@ const UserDropdownMobile = () => {
 
                     <div className="w-full border-t border-neon-pink/40 my-2" />
 
-                    <Link
+                    <IntentLink
                         to={`/profile/${username.toLowerCase()}`}
+                        onIntent={prefetchProfile}
                         onClick={() => setIsOpen(false)}
                         className="flex items-center justify-start gap-4 px-4 h-12 w-full text-left text-white rounded-[10px] bg-transparent hover:bg-gray-700/30 hover:text-neon-pink transition-colors duration-300 font-sans font-bold"
                     >
                         <User className="w-4 h-4" />
                         <span className="text-sm sm:text-base">Profile</span>
-                    </Link>
+                    </IntentLink>
                     <button
                         type="button"
                         onClick={handleLogout}

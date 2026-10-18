@@ -1,7 +1,7 @@
 import { test, expect } from './support/fixtures';
 import {
   DATE_KEY, answerAlbum, answerIdol, guessAlbum, guessIdol, openGame, searchInput, serverDate,
-  userToken, victoryMarker,
+  userToken, victoryMarker, wrongIdols,
 } from './support/game';
 import { dailyPick, userHistory, userIdByToken, type ModeName } from './support/db';
 
@@ -64,4 +64,30 @@ test.describe('Day rollover (+1 day)', () => {
       expect(await userHistory(userId, mode)).toMatchObject({ wins_count: 2, max_streak: 2 });
     });
   }
+});
+
+// The tab stays open while the day changes (here: the backend moves to +1 day). Returning to the
+// tab refetches the daily data, and the page swaps to the new day without F5 or a reload.
+test('an open tab picks up the next day on focus, without a reload @smoke', async ({ page, backend }) => {
+  test.setTimeout(120_000);
+  let documentLoads = 0;
+  page.on('request', (r) => { if (r.isNavigationRequest() && r.frame() === page.mainFrame()) documentLoads += 1; });
+  await openGame(page, 'classic');
+  const today = await serverDate(page, 'classic');
+  const [wrong] = await wrongIdols(page, 'classic', (await answerIdol(page, 'classic')).id, 1);
+  await guessIdol(page, 'classic', wrong);
+  expect(await page.evaluate(() => localStorage.getItem('todayGuessesDetails'))).toContain(wrong.artist_name);
+
+  await backend.restart(1);
+  // What a browser fires when the user comes back to the tab (it bubbles up to window).
+  await page.evaluate(() => {
+    document.dispatchEvent(new Event('visibilitychange', { bubbles: true }));
+    window.dispatchEvent(new Event('focus'));
+  });
+  await page.waitForFunction(([key, day]) => localStorage.getItem(key) === day, [DATE_KEY.classic, plusOneDay(today)] as const,
+    { timeout: 30_000 });
+  await expect(searchInput(page, 'classic')).toBeEnabled({ timeout: 30_000 });
+  expect(await page.evaluate(() => localStorage.getItem('todayGuessesDetails'))).toBeNull();
+  await expect(page.getByText(`${wrong.artist_name} (${wrong.active_group || 'Soloist'})`)).toBeHidden();
+  expect(documentLoads).toBe(1);
 });

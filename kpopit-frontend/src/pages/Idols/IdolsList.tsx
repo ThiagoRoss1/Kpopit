@@ -1,34 +1,39 @@
 import "./IdolsList.css";
 import { useState, useEffect, useMemo } from "react";
-import { Link } from "react-router-dom";
 import { useQuery } from "@tanstack/react-query";
 import { Helmet } from "react-helmet-async";
-import { getIdolsPage } from "../../services/api";
 import type { IdolsPageData } from "../../interfaces/gameInterfaces";
 import IdolsSearchBar from "../../components/IdolsSearchBar/IdolsSearchBar";
 import IdolsCards from "../../components/IdolsPageCards/IdolsCards";
 import { formatCompanyName, formatGroupName, buildIdolSlug } from "../../utils/formatters";
+import PageLoader from "../../components/Loading/PageLoader";
+import IntentLink from "../../components/Links/IntentLink";
+import { idolsListQuery, prefetchIdolProfile } from "./idolsData";
 
-function IdolsList() {
+// Only the first cards (about one screen) animate in; a delay per card for the whole list made the
+// last ones wait seconds.
+const ANIMATED_CARDS = 24;
+
+// The entrance plays once per visit: coming back to the list shows it as it was left.
+let cardsIntroPlayed = false;
+
+// initialIdols: build-time data for the prerendered page; stale at once, so it refetches.
+function IdolsList({ initialIdols }: { initialIdols?: IdolsPageData[] }) {
     const [searchTerm, setSearchTerm] = useState("");
-
+    const [animateCards] = useState(() => !cardsIntroPlayed);
     useEffect(() => {
-        if ('scrollRestoration' in window.history) {
-            window.history.scrollRestoration = 'manual';
-        }
-        window.scrollTo(0, 0);
+        cardsIntroPlayed = true;
     }, []);
 
     const {
         data: idolsData,
-        isLoading: isLoadingIdolsData,
         isError: isErrorIdolsData,
-    } = useQuery<IdolsPageData[]>({
-        queryKey: ["idolsPageData"],
-        queryFn: getIdolsPage,
-        staleTime: 1000 * 60 * 60 * 4,
+        refetch: refetchIdolsData,
+    } = useQuery({
+        ...idolsListQuery,
+        initialData: initialIdols,
+        initialDataUpdatedAt: 0,
         refetchOnWindowFocus: false,
-        enabled: true,
     });
 
     // Idol filtering
@@ -58,20 +63,10 @@ function IdolsList() {
         })
     }, [searchTerm, idolsData]); 
 
-    if (isLoadingIdolsData) {
-        return (
-            <div className="fixed inset-0 z-100 flex w-full h-screen bg-black justify-center items-center">
-                <span className="text-white animate-pulse">Loading Idols Data...</span>
-            </div>
-        );
-    }
-
-    if (isErrorIdolsData || !idolsData) {
-        return (
-        <div className="fixed inset-0 z-100 flex w-full h-screen bg-black justify-center items-center">
-            <span className="text-white animate-pulse">Error: Error fetching idols data</span>
-        </div>
-        );
+    // The route hands the page its list (prerendered or loaded before the switch); this only shows if
+    // the cache lost it. A failed background refetch keeps the list it already has.
+    if (!idolsData) {
+        return <PageLoader message="Loading Idols Data..." error={isErrorIdolsData} errorMessage="Error fetching idols data." onRetry={() => refetchIdolsData()} />;
     }
 
     return (
@@ -95,10 +90,10 @@ function IdolsList() {
                 
                 {/* Search Bar */}
                 <div className="w-full h-fit flex justify-center items-center mb-19">
-                    <IdolsSearchBar 
-                        idolsData={idolsData} 
+                    <IdolsSearchBar
+                        idolsData={idolsData ?? []}
                         onIdolSelect={setSearchTerm}
-                        value={searchTerm} 
+                        value={searchTerm}
                     />
                 </div>
 
@@ -116,20 +111,22 @@ function IdolsList() {
                 <div className="grid w-full h-fit gap-6 mb-6 max-xxs:px-2 xs:px-4 md:px-6 lg:px-14 xl:px-20 2xl:px-60
                 grid-cols-[repeat(auto-fill,minmax(150px,1fr))] sm:grid-cols-[repeat(auto-fill,minmax(150px,1fr))] lg:grid-cols-[repeat(auto-fill,minmax(200px,1fr))]">
                     {filteredIdols?.map((idol, i) => (
-                        <Link
+                        <IntentLink
                             key={idol.id}
                             to={`/idols/${idol.id}/${buildIdolSlug(idol.artist_name, idol.group_name)}`}
-                            className="idol-card-enter" style={{ animationDelay: `${i * 0.02}s` }}>
+                            onIntent={() => prefetchIdolProfile(idol.id)}
+                            className={animateCards && i < ANIMATED_CARDS ? "idol-card-enter" : undefined}
+                            style={animateCards && i < ANIMATED_CARDS ? { animationDelay: `${i * 0.02}s` } : undefined}>
                         <IdolsCards
                             idolImage={`${import.meta.env.VITE_IMAGE_BUCKET_URL}${idol.image_path}?v=${idol.image_version}`}
                             artistName={idol.artist_name}
                             groupName={idol.group_name && formatGroupName(idol.group_name, idol.is_former_group)}
                             companyName={idol.company_name ? formatCompanyName(idol.company_name) : idol.company_name}
                         />
-                        </Link>
+                        </IntentLink>
                     ))}
                 </div>
-                
+
                 {filteredIdols?.length === 0 && (
                 <div className="w-full flex justify-center items-center">
                     <span className="text-white font-semibold text-xl [text-shadow:1px_1px_10px_rgba(255,255,255,0.6)]">

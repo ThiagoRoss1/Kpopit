@@ -1,7 +1,5 @@
 import "../BlurryMode/blurry_mode.css";
-import { AxiosError } from "axios";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
-import { Helmet } from "react-helmet-async";
 import { useSharedGameData } from "../../hooks/useSharedGameData";
 import { useGameMode } from "../../hooks/useGameMode";
 import { useState, useEffect, useMemo, useCallback, useRef } from "react";
@@ -15,7 +13,7 @@ import type {
     CompleteGuessRequest,
     CompleteGuessTrafficRequest,
 } from "../../interfaces/gameInterfaces";
-import { Link } from "react-router-dom";
+import { Link } from "react-router";
 import { decryptToken } from "../../utils/tokenEncryption";
 import BackgroundStyle from "../../components/Background/BackgroundStyle";
 import SearchBar from "../../components/GuessSearchBar/SearchBar";
@@ -36,13 +34,16 @@ import ExportDataText from "../../components/buttons/modals/ExportDataContent";
 import { WinnerExplosion } from "../../utils/confetti";
 import { useClearGameStorage } from "../../hooks/useClearGameStorage";
 import { areGuessesEqual } from "../../utils/areGuessesEqual";
-import { safeReload } from "../../utils/safeReload";
-import { isNewGameDay } from "../../utils/gameStorage";
+import { isNewGameDay, startFirstGameDay } from "../../utils/gameStorage";
+import { DAILY_REFETCH, useGameDay } from "../../contexts/game_day_context";
+import PageLoader from "../../components/Loading/PageLoader";
 import CardGrantedReveal from "../Collection/components/CardGrantedReveal";
 import type { CardGranted } from "../../interfaces/albumInterfaces";
+import { buildIdolSlug } from "../../utils/formatters";
+import Img from "../../components/Img";
 
 function BlurryMode() {
-    const gameMode = useGameMode();
+const gameMode = useGameMode();
     const [isImageLoading, setIsImageLoading] = useState<boolean>(true);
     const [currentGuess, setCurrentGuess] = useState<string>("");
     const [selectedIdol, setSelectedIdol] = useState<IdolListItem | null>(null);
@@ -59,8 +60,10 @@ function BlurryMode() {
     // Mobile
     const [isTouched, setIsTouched] = useState<boolean>(false);
 
-    const { userToken, initUser, decryptedTokenRef, allIdolsData, isLoadingAllIdols,
+    const { userToken, initUser, decryptedTokenRef, allIdolsData,
         isInitialized, userStatsData, transferData, isErrorAllIdols, queryClient} = useSharedGameData();
+
+    const { day, onNewDay } = useGameDay();
 
     const { clearBlurry } = useClearGameStorage();
 
@@ -83,7 +86,7 @@ function BlurryMode() {
     const queryUserCount = useQueryClient();
 
     const dailyUserCount = useQuery({
-        queryKey: ["dailyUserCount", gameMode],
+        queryKey: ["dailyUserCount", gameMode, day],
         queryFn: getDailyUserCount,
         staleTime: 1000 * 60 * 5,
         refetchOnWindowFocus: false,
@@ -93,16 +96,14 @@ function BlurryMode() {
     // Blurry game data
     const {
         data: blurryGameData,
-        isLoading: isLoadingBlurryGameData,
         isError: isErrorBlurryGameData,
-        error: blurryGameDataError,
+        refetch: refetchBlurryGameData,
     } = useQuery<BlurryGameData>({
-        queryKey: ['blurryDailyIdol', gameMode],
+        queryKey: ['blurryDailyIdol', gameMode, day],
         queryFn: getBlurryDailyIdol,
         enabled: isInitialized,
         staleTime: 1000 * 60 * 60 * 4,
-        refetchOnWindowFocus: false,
-        placeholderData: (previousData) => previousData,
+        ...DAILY_REFETCH,
     });
 
     useEffect(() => {
@@ -133,7 +134,7 @@ function BlurryMode() {
 
     // Yesterday idol
     const yesterdayIdol = useQuery<YesterdayIdol>({
-        queryKey: ['blurryYesterdayIdol', gameMode],
+        queryKey: ['blurryYesterdayIdol', gameMode, day],
         queryFn: getYesterdaysIdol,
         staleTime: 1000 * 60 * 60 * 4,
         refetchOnWindowFocus: false,
@@ -150,14 +151,17 @@ function BlurryMode() {
     
     const serverDate = blurryGameData?.server_date;
 
-    // New day: drop yesterday's local state and reload (nothing to keep in React state).
+    // First visit: nothing to reset, just record today (while rendering, so the restore below runs now).
+    if (serverDate) startFirstGameDay(localStorage, "blurry", serverDate);
+
+    // New day: drop yesterday's local state and remount on the new day (no page reload).
     useEffect(() => {
         if (!serverDate || !isNewGameDay(localStorage, "blurry", serverDate)) return;
-        console.log("New day detected, clearing cache.");
+        if (import.meta.env.DEV) console.log("New day detected, clearing cache.");
         clearBlurry();
         localStorage.setItem("blurryGameDate", serverDate);
-        safeReload();
-    }, [serverDate, clearBlurry, sessionRestored]);
+        onNewDay(serverDate);
+    }, [serverDate, clearBlurry, sessionRestored, onNewDay]);
 
     // Same day: restore the cached game once per server date / session restore, while rendering
     // (React's "adjust state when a value changes"), so no effect has to copy storage into state.
@@ -256,7 +260,7 @@ function BlurryMode() {
 
     // User ranks 
     const userPosition = useQuery({
-        queryKey: ['blurryUserPosition', gameMode],
+        queryKey: ['blurryUserPosition', gameMode, day],
         queryFn: async () => {
             if (!userToken) return null;
             return getUserPosition(await initUser() || "");
@@ -376,37 +380,19 @@ function BlurryMode() {
     const wonWithHardMode = isCorrect && blurryToggleOptions.hardcore;
     const wonWithoutColors = isCorrect && !blurryToggleOptions.color;
 
-    // Loading and error states
-    if ((isLoadingBlurryGameData || isLoadingAllIdols || !isInitialized) && !blurryGameData) {
-        return (
-            <div className="fixed inset-0 z-100 flex w-full h-screen bg-black justify-center items-center">
-                <span className="text-white animate-pulse">Loading Kpopit...</span>
-            </div>
-        );
+    // One loader until the game, its day check and the idol list are all in; then the page renders whole.
+    if (!blurryGameData || !dayChecked || !allIdolsData) {
+        const listError = isErrorAllIdols && !allIdolsData;
+        const retry = () => {
+            if (userToken.isError) userToken.refetch();
+            if (isErrorBlurryGameData) refetchBlurryGameData();
+            if (listError) queryClient.refetchQueries({ queryKey: ["allIdols"] });
+        };
+        return <PageLoader error={isErrorBlurryGameData || userToken.isError || listError} onRetry={retry} />;
     }
-
-    if (isErrorAllIdols || isErrorBlurryGameData || !blurryGameData) {
-        const error = blurryGameDataError as AxiosError;
-        console.error("Error loading Blurry Mode data:", blurryGameDataError);
-        console.error(error?.response?.data || error?.message);
-        return (
-            <div className="fixed inset-0 z-100 flex w-full h-screen bg-black justify-center items-center">
-                <span className="text-white animate-pulse">Error loading Kpopit. Please try again later.</span>
-            </div>
-        );
-    }
-
-    if (!dayChecked) return null;
 
     return (
         <>
-        <Helmet>
-            <title>KpopIt Blurry - K-pop Idol Image Guessing Game</title>
-            <meta name="description" content="Identify today's K-pop idol from a gradually unblurred photo in KpopIt's daily Blurry mode." />
-            <link rel="canonical" href={`https://kpopit.net/blurry`} />
-            <meta property="og:title" content="KpopIt Blurry - K-pop Idol Image Guessing Game" />
-            <meta property="og:description" content="Identify today's K-pop idol from a gradually unblurred photo in KpopIt's daily Blurry mode." />
-        </Helmet>
 
         <BackgroundStyle attempts={attempts} />
         <div className="min-h-full w-full flex flex-col items-center justify-start mt-4">
@@ -469,7 +455,8 @@ function BlurryMode() {
                     ))}
 
                     {/* Image */}
-                    <img
+                    <Img
+                        priority
                         src={`${import.meta.env.VITE_IMAGE_BUCKET_URL}${blurryGameData.blur_image_path}?v=${blurryGameData.blur_image_version}`}
                         style={{filter: `${endGame ? "blur(0px)" : `blur(${currentBlur}px)`} ${endGame ? "grayscale(0%)" : `grayscale(${blurryToggleOptions.color ? 0 : 100}%)`}`}}
                         alt={`Blurry image of ${artistName}`}
@@ -534,7 +521,7 @@ function BlurryMode() {
                 <span className="text-white">
                     Yesterday's idol was
                 </span> <Link 
-                        to={`/idols/${yesterdayIdol.data?.past_idol_id}/${yesterdayArtist}-${yesterdayIdolGroup}`.trim().replace(/\s+/g, '-').toLowerCase()}>
+                        to={`/idols/${yesterdayIdol.data?.past_idol_id}/${buildIdolSlug(yesterdayArtist, yesterdayIdolGroup?.[0])}`}>
                         <span className="text-[#b43777] [text-shadow:1.2px_1.2px_4px_rgba(0,0,0,1.8),0_0_12px_rgba(180,55,119,1.0)] brightness-105 underline hover:brightness-125 transition-all duration-300">
                             {yesterdayArtist ? `${yesterdayArtist}` : "Unknown"}
                         </span>

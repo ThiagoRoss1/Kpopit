@@ -1,11 +1,10 @@
 import "./UserProfile.css";
 import { useEffect, useMemo, useState } from "react";
-import { Navigate, useNavigate, useParams } from "react-router-dom";
+import { Navigate, useNavigate, useParams } from "react-router";
 import { useMutation, useQuery } from "@tanstack/react-query";
 import { Mail, X } from "lucide-react";
 import { useAuth } from "../../hooks/useAuth";
-import { getUserStats, sendVerificationEmail } from "../../services/api";
-import { decryptToken } from "../../utils/tokenEncryption";
+import { sendVerificationEmail } from "../../services/api";
 import type { UserStats } from "../../interfaces/gameInterfaces";
 import StatsCard from "./StatsCard";
 import EditProfile from "./EditProfile";
@@ -13,16 +12,13 @@ import HaerinGif from "../../assets/imgs/haerin.gif";
 import HaerinWebp from "../../assets/imgs/haerinok.webp";
 import { resolveAvatarUrl } from "../../utils/resolveAvatarUrl";
 import { Helmet } from "react-helmet-async";
+import Img from "../../components/Img";
+import PageLoader from "../../components/Loading/PageLoader";
+import { profileStatsQuery, readUserToken, rememberedUserToken } from "./profileData";
 
 const EMAIL_BANNER_DISMISS_KEY = "emailVerifiedBannerDismissed";
 
 type GamemodeFilter = "all" | "classic" | "blurry" | "pixelated";
-
-interface CombinedStats {
-    classic: UserStats;
-    blurry: UserStats;
-    pixelated: UserStats;
-}
 
 const EMPTY_STATS: UserStats = {
     current_streak: 0,
@@ -30,22 +26,6 @@ const EMPTY_STATS: UserStats = {
     wins_count: 0,
     average_guesses: 0,
     one_shot_wins: 0,
-};
-
-const GAMEMODE_IDS: Record<Exclude<GamemodeFilter, "all">, number> = {
-    classic: 1,
-    blurry: 2,
-    pixelated: 3,
-};
-
-const fetchAllModeStats = async (userToken: string): Promise<CombinedStats> => {
-    const [classic, blurry, pixelated] = await Promise.all([
-        getUserStats(userToken, GAMEMODE_IDS.classic) as Promise<UserStats>,
-        getUserStats(userToken, GAMEMODE_IDS.blurry) as Promise<UserStats>,
-        getUserStats(userToken, GAMEMODE_IDS.pixelated) as Promise<UserStats>,
-    ]);
-
-    return { classic, blurry, pixelated };
 };
 
 const formatJoined = (raw: string | undefined) => {
@@ -65,7 +45,8 @@ const UserProfile = () => {
     const navigate = useNavigate();
 
     const [filter, setFilter] = useState<GamemodeFilter>("all");
-    const [decryptedToken, setDecryptedToken] = useState<string | null>(null);
+    // undefined until the stored game token is decrypted (already known when the route loader ran).
+    const [decryptedToken, setDecryptedToken] = useState<string | null | undefined>(rememberedUserToken);
     const [isGif, setIsGif] = useState(true);
     const [bannerDismissed, setBannerDismissed] = useState<boolean>(() => sessionStorage.getItem(EMAIL_BANNER_DISMISS_KEY) === "true");
     const [resendSent, setResendSent] = useState(false);
@@ -93,18 +74,8 @@ const UserProfile = () => {
         let cancelled = false;
 
         const decrypt = async () => {
-            const encrypted = localStorage.getItem("userToken");
-            if (!encrypted) {
-                setDecryptedToken(null);
-                return;
-            }
-
-            try {
-                const token = await decryptToken(encrypted);
-                if (!cancelled) setDecryptedToken(token);
-            } catch {
-                if (!cancelled) setDecryptedToken(null);
-            }
+            const token = await readUserToken();
+            if (!cancelled) setDecryptedToken(token);
         };
 
         decrypt();
@@ -113,12 +84,9 @@ const UserProfile = () => {
 
     }, [user]);
 
-    const { data: combinedStats, isLoading: isStatsLoading } = useQuery<CombinedStats>({
-        queryKey: ["userProfileStats", decryptedToken],
-        queryFn: () => fetchAllModeStats(decryptedToken as string),
+    const { data: combinedStats, isLoading: isStatsLoading } = useQuery({
+        ...profileStatsQuery(decryptedToken ?? ""),
         enabled: !!decryptedToken && isAuthenticated,
-        staleTime: 5 * 60 * 1000,
-        gcTime: 10 * 60 * 1000,
         refetchOnWindowFocus: false,
     });
 
@@ -176,6 +144,10 @@ const UserProfile = () => {
 
     if (!isAuthLoading && !isAuthenticated) {
         return <Navigate to="/login" replace />;
+    }
+    // One loader until the stats are in (usually already loaded by the route), never placeholder cards.
+    if (isAuthLoading || decryptedToken === undefined || isStatsLoading) {
+        return <PageLoader />;
     }
 
     const displayName = user?.profile.display_name ?? null;
@@ -266,7 +238,7 @@ const UserProfile = () => {
 
                                 {/* Polaroid avatar */}
                                 <div className="relative flex h-fit px-2 pt-2 pb-7 mt-1.5 mb-1 rounded-sm bg-[#f4f0e8]
-                                    shadow-[4px_4px_0px_#ff3399] -rotate-[1.5deg] transform-gpu">
+                                    shadow-[4px_4px_0px_#ff3399] rotate-[-1.5deg] transform-gpu">
 
                                     {/* Washi tape ribbons */}
                                     <span aria-hidden="true"
@@ -280,9 +252,9 @@ const UserProfile = () => {
                                         shadow-[1px_1px_0px_rgba(0,0,0,0.4)]" />
 
                                     <div className="flex flex-col items-center xxs:flex-row xxs:justify-center xxs:items-center gap-3 xxs:gap-6 sm:gap-8">
-                                        <div className="grid place-items-center w-28 sxs:w-32 h-28 sxs:h-32 rounded-sm overflow-hidden bg-transparent -rotate-[1.5deg] border-t-2 border-l-2 border-neon-pink shrink-0">
+                                        <div className="grid place-items-center w-28 sxs:w-32 h-28 sxs:h-32 rounded-sm overflow-hidden bg-transparent rotate-[-1.5deg] border-t-2 border-l-2 border-neon-pink shrink-0">
                                             {avatarSrc ? (
-                                                <img
+                                                <Img
                                                     src={avatarSrc}
                                                     alt={`${displayName} avatar`}
                                                     className="w-full h-full object-cover hover:cursor-pointer hover:brightness-90"
@@ -298,7 +270,7 @@ const UserProfile = () => {
                                             )}
                                         </div>
 
-                                        <div className="absolute left-0 right-0 bottom-1.5 text-center text-[13px] -rotate-[1.5deg] tracking-[0.5px] text-[#444]">
+                                        <div className="absolute left-0 right-0 bottom-1.5 text-center text-[13px] rotate-[-1.5deg] tracking-[0.5px] text-[#444]">
                                             ~ KpopIt ID ~
                                         </div>
                                     </div>
@@ -480,7 +452,7 @@ const UserProfile = () => {
                                     shadow-[5px_5px_0px_#fff,0_0_24px_rgba(255,51,153,0.18)]">
                                     <div aria-hidden="true" className="absolute inset-0
                                         bg-[radial-gradient(circle_at_50%_35%,rgba(255,51,153,0.18),transparent_60%),linear-gradient(135deg,#1a1a1a,#0e0e0e)]" />
-                                    <img
+                                    <Img
                                         src={isGif ? HaerinGif : HaerinWebp}
                                         alt="Coming soon"
                                         className="relative z-10 w-full h-full object-cover opacity-90 drop-shadow-[0_0_10px_rgba(255,51,153,0.35)] 

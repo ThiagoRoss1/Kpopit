@@ -5,6 +5,7 @@ import type { MeResponse, UpdateProfilePayload } from '../interfaces/authInterfa
 import { decryptToken } from '../utils/tokenEncryption';
 import { setAccessToken, getAccessToken, clearAccessToken } from './tokenStore';
 import { safeReload } from '../utils/safeReload';
+import { GAME_DAY_CHANGED_EVENT } from '../contexts/game_day_context';
 import { isSessionRejected } from '../utils/authErrors';
 // Api instance with base URL
 const api = axios.create({
@@ -61,8 +62,8 @@ api.interceptors.response.use(
             }
 
             else if (error.response?.data?.error === 'Game date mismatch') {
-                console.warn("Game date mismatch detected. Reloading the page.");
-                safeReload();
+                // The day changed mid-game: the game page swaps to the new day without a reload.
+                window.dispatchEvent(new Event(GAME_DAY_CHANGED_EVENT));
             }
         }
         return Promise.reject(error);

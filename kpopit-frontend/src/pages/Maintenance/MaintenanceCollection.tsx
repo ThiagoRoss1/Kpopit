@@ -1,4 +1,5 @@
 import { Clock, Sparkles, ShieldCheck, Layers, RefreshCw } from "lucide-react";
+import Img from "../../components/Img";
 
 const MaintenanceCollection = () => {
     const HANNI_GIF = "https://media3.giphy.com/media/v1.Y2lkPTc5MGI3NjExN2g1dHU4Njk1eXN5aGYzZWpnaGJ4bWVleGNwcHBucTNmdDA1YnN3MSZlcD12MV9pbnRlcm5hbF9naWZfYnlfaWQmY3Q9Zw/IShxz9vFSpUSR30gH0/giphy.gif";
@@ -54,7 +55,7 @@ const MaintenanceCollection = () => {
             {/* Polaroid gifs — retro-pop tilt + offset shadow */}
             <div className="flex items-center justify-center gap-4 sm:gap-6">
                 <figure className="rotate-[-4deg] hover:rotate-0 transition-transform duration-300 bg-[#f5f5f5] p-2 pb-6 rounded-md border-2 border-[#2a2a2a] shadow-[6px_6px_0px_rgba(0,0,0,0.5)]">
-                    <img
+                    <Img
                         src={HANNI_GIF}
                         alt="Hanni"
                         className="w-28 h-28 sm:w-40 sm:h-40 object-cover rounded-sm"
@@ -65,7 +66,7 @@ const MaintenanceCollection = () => {
                 </figure>
 
                 <figure className="rotate-[4deg] hover:rotate-0 transition-transform duration-300 bg-[#f5f5f5] p-2 pb-6 rounded-md border-2 border-[#2a2a2a] shadow-[6px_6px_0px_rgba(255,51,153,0.35)]">
-                    <img
+                    <Img
                         src={HAERIN_GIF}
                         alt="Haerin"
                         className="w-28 h-28 sm:w-40 sm:h-40 object-cover rounded-sm"

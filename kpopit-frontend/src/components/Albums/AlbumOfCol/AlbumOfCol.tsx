@@ -423,18 +423,20 @@ function AlbumOfCol({
     const flippingForward = flip !== null && flip.direction > 0;
     const leafSide: 'left' | 'right' = flippingForward ? 'right' : 'left';
 
-    // Only while the rotation is live: once the spread has advanced, `position`
-    // no longer describes the pages the leaf is carrying.
-    const lastLeafContent = useRef<{ front: ReactNode; back: ReactNode }>({ front: null, back: null });
-    if (turning) {
-        lastLeafContent.current = {
-            front: flippingForward ? rightPageAt(position) : leftPageAt(position),
-            back: flippingForward ? leftPageAt(position + 1) : rightPageAt(position - 1),
-        };
+    // Captured (in state, while rendering) only while the rotation is live: once the spread has
+    // advanced, `position` no longer describes the pages the leaf carries through landing.
+    const [leafSource, setLeafSource] = useState<{ position: number; forward: boolean } | null>(null);
+    if (turning && (leafSource?.position !== position || leafSource.forward !== flippingForward)) {
+        setLeafSource({ position, forward: flippingForward });
     }
-
-    const leafFront = lastLeafContent.current.front;
-    const leafBack = lastLeafContent.current.back;
+    const { front: leafFront, back: leafBack } = useMemo<{ front: ReactNode; back: ReactNode }>(() => {
+        if (!leafSource) return { front: null, back: null };
+        const { position: at, forward } = leafSource;
+        return {
+            front: forward ? rightPageAt(at) : leftPageAt(at),
+            back: forward ? leftPageAt(at + 1) : rightPageAt(at - 1),
+        };
+    }, [leafSource, leftPageAt, rightPageAt]);
     const bookShiftPx = Math.round(
         focus === 'left'
             ? (ALBUM_PAGE_W * scale) / 2

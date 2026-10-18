@@ -11,6 +11,11 @@ permissions:
   contents: read
   pull-requests: read
 
+# One run per PR/branch: a new push cancels the run still in progress.
+concurrency:
+  group: ci-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: true
+
 jobs:
   changes:
     name: Detect changes
@@ -44,9 +49,57 @@ jobs:
     defaults:
       run:
         working-directory: kpopit-frontend
+    # The build prerenders every idol page from the API: a backend on a DB seeded from the repo CSVs
+    # serves it (PRERENDER_API_URL defaults to http://127.0.0.1:5000). Never production.
+    services:
+      postgres:
+        image: postgres:18
+        env:
+          POSTGRES_USER: postgres
+          POSTGRES_PASSWORD: postgres
+          POSTGRES_DB: kpopit_build
+        ports: ['5432:5432']
+        options: >-
+          --health-cmd "pg_isready -U postgres" --health-interval 5s --health-timeout 5s --health-retries 10
+    env:
+      DB_URL: postgresql://postgres:postgres@localhost:5432/kpopit_build
+      DATA_FOLDER: data
+      FLASK_ENV: development
+      PYTHON_DOTENV_DISABLED: '1'
+      JWT_SECRET_KEY: ci-dummy-jwt-secret-key-not-used-anywhere-else
+      EMAIL_DELIVERY: outbox
+      RESEND_API_KEY: re_disabled_for_tests
+      RESEND_EMAIL_FROM: test@example.com
+      FRONTEND_URL: http://localhost:5173
+      R2_ENDPOINT_URL: http://127.0.0.1:9
+      R2_ACCESS_KEY_ID: disabled-for-tests
+      R2_SECRET_ACCESS_KEY: disabled-for-tests
+      R2_BUCKET_NAME: disabled-for-tests
+      R2_BACKUP_BUCKET_NAME: disabled-for-tests
+      R2_AVATARS_ACCESS_KEY_ID: disabled-for-tests
+      R2_AVATARS_SECRET_ACCESS_KEY: disabled-for-tests
+      R2_AVATARS_BUCKET_NAME: disabled-for-tests
+      R2_AVATARS_PREFIX: disabled-for-tests
+      PYTHONIOENCODING: utf-8
     steps:
       - name: Checkout
         uses: actions/checkout@v4
+
+      - name: Setup Python 3.13
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.13'
+          cache: 'pip'
+          cache-dependency-path: kpopit-backend/requirements.txt
+
+      - name: Start the build-time backend (seeded DB)
+        working-directory: kpopit-backend
+        run: |
+          pip install -r requirements.txt
+          python scripts/bootstrap_db.py
+          nohup python app.py > "$RUNNER_TEMP/backend.log" 2>&1 &
+          for i in $(seq 1 60); do curl -sf http://127.0.0.1:5000/api/idols-page > /dev/null && exit 0; sleep 1; done
+          cat "$RUNNER_TEMP/backend.log"; exit 1
 
       - name: Setup Node 24
         uses: actions/setup-node@v4
@@ -220,13 +273,43 @@ jobs:
         working-directory: kpopit-frontend
         run: npm ci
 
-      - name: Install browser engines
+      # major-patch (pushes and PRs into it) is gated on Chromium only; dev and main run every engine.
+      - name: Pick browser projects
+        id: browsers
         working-directory: kpopit-frontend
-        run: npx playwright install --with-deps chromium firefox webkit
+        env:
+          TARGET_BRANCH: ${{ github.base_ref || github.ref_name }}
+        run: |
+          if [ "$TARGET_BRANCH" = "major-patch" ]; then
+            echo "engines=chromium" >> "$GITHUB_OUTPUT"
+            echo "projects=--project=desktop --project=mobile" >> "$GITHUB_OUTPUT"
+          else
+            echo "engines=chromium firefox webkit" >> "$GITHUB_OUTPUT"
+            echo "projects=" >> "$GITHUB_OUTPUT"
+          fi
+          echo "playwright=$(node -p "require('@playwright/test/package.json').version")" >> "$GITHUB_OUTPUT"
+
+      - name: Cache browser engines
+        id: browser-cache
+        uses: actions/cache@v4
+        with:
+          path: ~/.cache/ms-playwright
+          key: playwright-${{ runner.os }}-${{ steps.browsers.outputs.playwright }}-${{ steps.browsers.outputs.engines }}
+
+      - name: Install browser engines
+        if: steps.browser-cache.outputs.cache-hit != 'true'
+        working-directory: kpopit-frontend
+        run: npx playwright install --with-deps ${{ steps.browsers.outputs.engines }}
+
+      # The cache holds the browsers only; their system libraries still come from apt.
+      - name: Install browser system dependencies
+        if: steps.browser-cache.outputs.cache-hit == 'true'
+        working-directory: kpopit-frontend
+        run: npx playwright install-deps ${{ steps.browsers.outputs.engines }}
 
       - name: Playwright (file by file, one worker)
         working-directory: kpopit-frontend
-        run: npm run test:e2e
+        run: npm run test:e2e -- ${{ steps.browsers.outputs.projects }}
 
       - name: Upload Playwright report
         if: failure()

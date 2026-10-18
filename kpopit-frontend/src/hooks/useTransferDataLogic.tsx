@@ -1,14 +1,13 @@
-import { useState, useEffect } from 'react';
+import { useState } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { addGeneratedCodes, redeemTransferCode, fetchGameState, getActiveTransferCode } from '../services/api';
 import { encryptToken, decryptToken } from '../utils/tokenEncryption';
 import { safeReload } from '../utils/safeReload';
 import type { GeneratedCodes, GuessResponse, RedeemUserToken } from '../interfaces/gameInterfaces';
 import type { AxiosError } from 'axios';
+import { useNow } from './useNow';
 
 export const useTransferDataLogic = () => {
-    const [generatedCodes, setGeneratedCodes] = useState<string | null>(null);
-    const [expiresAt, setExpiresAt] = useState<string | null>(null);
     const [redeemError, setRedeemError] = useState<string | null>(null);
 
     const queryClient = useQueryClient();
@@ -26,17 +25,9 @@ export const useTransferDataLogic = () => {
         staleTime: 1000 * 60 * 5,
     });
 
-    useEffect(() => {
-        if (activeCodeData?.transfer_code) {
-            setGeneratedCodes(activeCodeData.transfer_code);
-            setExpiresAt(activeCodeData.expires_at);
-           
-        } else if (activeCodeData && !activeCodeData.transfer_code) {
-            setGeneratedCodes(null);
-            setExpiresAt(null);
-
-        }
-    }, [activeCodeData]);
+    // The active code is the query's data; generating a code writes it there.
+    const generatedCodes = activeCodeData?.transfer_code || null;
+    const expiresAt = generatedCodes ? activeCodeData?.expires_at ?? null : null;
 
     const generateMutation = useMutation<GeneratedCodes>({
         mutationKey: ['generateCodes'],
@@ -46,12 +37,9 @@ export const useTransferDataLogic = () => {
             return addGeneratedCodes(decrypted);
         },
         onSuccess: (data) => {
-            setGeneratedCodes(data.transfer_code);  
-            setExpiresAt(data.expires_at);
-            queryClient.invalidateQueries({ queryKey: ['activeTransferCode'] }); // Refetch without the need to reload
-            
-            console.log("Generated Codes:", data.transfer_code);
-            console.log("Expires at:", data.expires_at);
+            queryClient.setQueryData(['activeTransferCode'], data);
+
+            if (import.meta.env.DEV) console.log("Generated code:", data.transfer_code, "expires at:", data.expires_at);
         }
     });
 
@@ -60,7 +48,7 @@ export const useTransferDataLogic = () => {
         mutationFn: async (code) => redeemTransferCode(code),
         onSuccess: async (data) => {
             const gameState = await fetchGameState(data.user_token);
-            console.log("Fetched game state after redeem:", gameState);
+            if (import.meta.env.DEV) console.log("Fetched game state after redeem:", gameState);
 
             if (gameState && gameState.today_guesses_details) {
                 localStorage.setItem("todayGuessesDetails", JSON.stringify(gameState.today_guesses_details));
@@ -93,7 +81,7 @@ export const useTransferDataLogic = () => {
 
             const encrypted = await encryptToken(data.user_token);
             localStorage.setItem('userToken', encrypted);
-            console.log("Redeemed user token", data.user_token);
+            if (import.meta.env.DEV) console.log("Redeemed user token", data.user_token);
 
             safeReload();
         },
@@ -120,10 +108,12 @@ export const useTransferDataLogic = () => {
     const manipulatedDate = new Date();
     if (canManipulate) manipulatedDate.setDate(manipulatedDate.getDate() + 0);
 
-    const timeLeft = expiresAt ? Math.ceil((new Date(expiresAt).getTime() - Date.now()) / (1000 * 60 * 60 * 24)) : null;
+    const now = useNow();
+    const timeLeft = expiresAt && now > 0 ? Math.ceil((new Date(expiresAt).getTime() - now) / (1000 * 60 * 60 * 24)) : null;
 
     const fetchActiveCodeWrapper = async () => {
-        await refetchActiveCode();
+        const result = await refetchActiveCode();
+        return result.data?.transfer_code || null;
     }
 
     return {

@@ -1,8 +1,12 @@
+import { prefetchIdolsList } from "../../pages/Idols/idolsData";
+
 export interface DropLink {
     label: string;
     path: string;
     icon?: string;
     isWip?: boolean;
+    // Starts the page's data request on hover/focus/touch (see IntentLink).
+    onIntent?: () => void;
 }
 
 export const GAMES_LINKS: DropLink[] = [
@@ -30,5 +34,6 @@ export const IDOLS_LINKS: DropLink[] = [
         label: "All Idols",
         path: "/idols",
         icon: "/kpopit-icon-svg.svg",
+        onIntent: prefetchIdolsList,
     }
 ]

@@ -1,10 +1,16 @@
 import "./PrivacyPolicy.css";
 import BackgroundStyle from "../../components/Background/BackgroundStyle";
-import { Link } from "react-router-dom";
+import { Link } from "react-router";
+import { Helmet } from "react-helmet-async";
 
 const PrivacyPolicy = () => {
     return (
         <>
+        <Helmet>
+            <title>KpopIt - Privacy Policy</title>
+            <meta name="description" content="How KpopIt collects, uses and protects your data." />
+            <link rel="canonical" href="https://kpopit.net/privacy-policy" />
+        </Helmet>
         <BackgroundStyle />
         <div className="w-full h-full flex items-start justify-center">
             <div className="flex flex-col items-center justify-center">

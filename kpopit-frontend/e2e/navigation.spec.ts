@@ -43,6 +43,16 @@ test.describe('every route loads @mobile', () => {
     });
   }
 
+  test('the idols list lays its cards out in a grid @smoke', async ({ page }) => {
+    await page.goto('/idols');
+    const cards = page.locator('a[href^="/idols/"]');
+    await expect(cards.nth(1)).toBeVisible();
+    const [a, b] = [await cards.nth(0).boundingBox(), await cards.nth(1).boundingBox()];
+    // Side by side on one row, even on a phone (two columns at least): not a single stacked column.
+    expect(Math.abs(a!.y - b!.y)).toBeLessThan(2);
+    expect(b!.x).toBeGreaterThan(a!.x + a!.width - 1);
+  });
+
   test('an idol page loads from the idols list @smoke', async ({ page, consoleErrors }) => {
     await page.goto('/idols');
     const first = page.locator('a[href^="/idols/"]').first();
@@ -114,13 +124,6 @@ test.describe('navbar, footer and home modals', () => {
       await nav.getByRole('button', { name: menu }).click();
       await nav.getByRole('link', { name: item }).click();
       await expect(page).toHaveURL(url);
-      // A game page's first visit stores the server date and reloads once (safeReload):
-      // wait for that reload, or the next dropdown click lands mid-reload.
-      if (menu === 'Games') {
-        await page.waitForFunction(() =>
-          (performance.getEntriesByType('navigation')[0] as PerformanceNavigationTiming | undefined)?.type === 'reload');
-        await page.waitForLoadState('load');
-      }
     }
     await nav.getByRole('link', { name: 'Collections' }).click();
     await expect(page).toHaveURL(/\/collections$/);
@@ -140,8 +143,6 @@ test.describe('navbar, footer and home modals', () => {
     await nav.getByRole('button', { name: /^Games/ }).last().click();
     await nav.getByRole('link', { name: /Classic/ }).last().click();
     await expect(page).toHaveURL(/\/classic$/);
-    // A game page's first visit of the day reloads once; let it settle so the
-    // reload can't close the menu we open next.
     await expect(searchInput(page, 'classic')).toBeVisible({ timeout: 30_000 });
     await page.locator('#mobile-menu-button').click();
     await nav.getByRole('link', { name: 'Contact' }).last().click();

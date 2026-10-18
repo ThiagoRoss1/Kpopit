@@ -1,4 +1,4 @@
-import { Link, useLocation } from "react-router-dom";
+import { Link, useLocation } from "react-router";
 import { useState } from "react";
 import ButtonsDroplist from "./ButtonsDroplist";
 import ButtonsListMobile from "./ButtonsListMobile";
@@ -7,6 +7,9 @@ import UserDropdownMobile from "./UserDropdownMobile";
 import { GAMES_LINKS, IDOLS_LINKS } from "./navigation";
 import { Menu, X } from "lucide-react";
 import { useAuth } from "../../hooks/useAuth";
+import Img from "../Img";
+import { prefetchCollectionsList } from "../../pages/Collection/collectionData";
+import IntentLink from "../Links/IntentLink";
 
 export type PageName = "classic" | "blurry" | "contact" | "idols" | "login" | "register" | "profile" | "pixelated" | "collections";
 const MODES: PageName[] = ["classic", "blurry", "contact", "idols", "login", "register", "profile", "pixelated", "collections"];
@@ -21,8 +24,11 @@ const NavBar = () => {
 
     const [isMobileMenuOpen, setIsMobileMenuOpen] = useState<boolean>(false);
 
+    // Same box as the Login link, so the slot doesn't shift the navbar when auth resolves.
+    const authSlotPlaceholder = <span aria-hidden className="block max-xxs:w-16 max-xxs:h-10 xxs:w-19 xxs:h-10 sm:w-25 sm:h-12" />;
+
     const renderDesktopAuthSlot = () => {
-        if (isLoading) return null;
+        if (isLoading) return authSlotPlaceholder;
         if (isAuthenticated && user) {
             return <UserDropdown />;
         }
@@ -40,7 +46,7 @@ const NavBar = () => {
     };
 
     const renderMobileAuthSlot = () => {
-        if (isLoading) return null;
+        if (isLoading) return authSlotPlaceholder;
         if (isAuthenticated && user) {
             return <UserDropdownMobile />;
         };
@@ -68,7 +74,7 @@ const NavBar = () => {
                         to="/"
                         className="flex items-center gap-1 hover:opacity-80 transition-opacity duration-300"
                     >
-                        <img
+                        <Img
                             src="/kpopit-icon-svg.svg"
                             alt="Kpopit logo"
                             className="max-xxs:w-7 max-xxs:h-7 xxs:w-8 xxs:h-8 xs:w-9 xs:h-9 sm:w-12 sm:h-12 object-contain"
@@ -97,12 +103,13 @@ const NavBar = () => {
                     />
                     {/* Collections */}
                     {import.meta.env.VITE_COLLECTION_ENABLED === "true" && (
-                    <Link
+                    <IntentLink
                         to="/collections"
+                        onIntent={prefetchCollectionsList}
                         className="flex items-center justify-center rounded-3xl hover:cursor-pointer hover:scale-105 hover:bg-[#b43777] transition-all
                         duration-300 transform-gpu bg-transparent max-xxs:w-18 max-xxs:h-10 xxs:w-22 xxs:h-10 xs:w-24 xs:h-10 sm:w-30 sm:h-12">
                             <span className="flex flex-row text-white max-xxs:text-[14px] xxs:text-[14px] sm:text-base gap-1">Collections</span>
-                    </Link>
+                    </IntentLink>
                     )}
                     {/* Contact */}
                     <Link

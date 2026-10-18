@@ -91,8 +91,8 @@ interface Rect {
     height: number;
 }
 
-function readRect(selector: string): Rect | null {
-    const el = document.querySelector(selector);
+function readRect(selector: string, doc: Document = document): Rect | null {
+    const el = doc.querySelector(selector);
 
     if (!el) return null;
 
@@ -166,8 +166,17 @@ export default function OnboardingTour({ night, onClose, onShowSticker }: Onboar
         setRect(step.target ? readRect(step.target) : null);
     }, [step.target]);
 
+    // First measure before paint, read through the tour's own node (a layout measurement);
+    // later ones come from resize events.
     useLayoutEffect(() => {
-        measure();
+        const doc = rootRef.current?.ownerDocument;
+        const view = doc?.defaultView;
+        if (!doc || !view) return;
+        setViewport({ w: view.innerWidth, h: view.innerHeight });
+        setRect(step.target ? readRect(step.target, doc) : null);
+    }, [step.target]);
+
+    useEffect(() => {
         window.addEventListener('resize', measure);
         return () => window.removeEventListener('resize', measure);
     }, [measure]);

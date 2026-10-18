@@ -1,4 +1,12 @@
 {
+    "git": {
+        "deploymentEnabled": {
+            "main": true,
+            "dev": true,
+            "major-patch": true,
+            "**": false
+        }
+    },
     "headers": [
         {
             "source": "/(.*)",
@@ -13,7 +21,7 @@
     "rewrites": [
         {
             "source": "/(.*)",
-            "destination": "/index.html"
+            "destination": "/__spa-fallback.html"
         }
     ]
 }

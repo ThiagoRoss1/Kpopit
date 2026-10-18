@@ -8,6 +8,7 @@ import type { IdolsPageData } from "../../interfaces/gameInterfaces";
 import { resolveAvatarUrl } from "../../utils/resolveAvatarUrl";
 import { getCroppedImg } from "../../utils/cropImage";
 import EditProfileModal from "./EditProfileModal";
+import Img from "../../components/Img";
 
 const MAX_AVATAR_SIZE_BYTES = 5 * 1024 * 1024;
 const ALLOWED_AVATAR_MIME_TYPES = ["image/jpeg", "image/png", "image/webp", "image/gif"];
@@ -80,28 +81,7 @@ const AvatarModal = ({ isOpen, onClose, onBack, avatarUrl }: AvatarModalProps) =
         );
     }, [idols, idolSearch]);
 
-    // Reset state every time the modal opens; release any tracked blob URLs on close.
-    useEffect(() => {
-        if (isOpen) {
-            setTab("upload");
-            setCropSrc(null);
-            setCrop({ x: 0, y: 0 });
-            setZoom(1);
-            setCroppedAreaPixels(null);
-            setCroppedBlob(null);
-            setCroppedPreviewUrl(null);
-            setSelectedIdolUrl(null);
-            setIdolSearch("");
-            setUploadError(null);
-            setSaveError(null);
-            setHasChosen(false);
-            return;
-        }
-        const tracked = blobUrlsRef.current;
-        tracked.forEach((u) => URL.revokeObjectURL(u));
-        tracked.clear();
-    }, [isOpen]);
-
+    // The modal mounts fresh on every open; release its blob URLs when it closes.
     useEffect(() => {
         const tracked = blobUrlsRef.current;
         return () => {
@@ -315,11 +295,11 @@ const AvatarModal = ({ isOpen, onClose, onBack, avatarUrl }: AvatarModalProps) =
                             border-2 border-neon-pink transform-gpu"
                     >
                         {croppedPreviewUrl ? (
-                            <img src={croppedPreviewUrl} alt="Cropped preview" className="w-full h-full object-cover" draggable={false} />
+                            <Img src={croppedPreviewUrl} alt="Cropped preview" className="w-full h-full object-cover" draggable={false} />
                         ) : selectedIdolUrl ? (
-                            <img src={resolveAvatarUrl(selectedIdolUrl) ?? ""} alt="Idol preview" className="w-full h-full object-cover" draggable={false} />
+                            <Img src={resolveAvatarUrl(selectedIdolUrl) ?? ""} alt="Idol preview" className="w-full h-full object-cover" draggable={false} />
                         ) : (!hasChosen) ? (
-                            <img src={avatarUrl} alt="Current avatar" className="w-full h-full object-cover" draggable={false} />
+                            <Img src={avatarUrl} alt="Current avatar" className="w-full h-full object-cover" draggable={false} />
                         ) : (
                             <div className="w-full h-full bg-linear-to-b from-[#2a2a2a] to-[#0e0e0e]" />
                         )}
@@ -445,7 +425,7 @@ const AvatarModal = ({ isOpen, onClose, onBack, avatarUrl }: AvatarModalProps) =
                                                     ? "border-neon-pink shadow-[2px_2px_0px_rgba(255,51,153,1)]"
                                                     : "border-white/25 group-hover:border-neon-pink/70"}`}
                                         >
-                                            <img
+                                            <Img
                                                 src={resolveAvatarUrl(idol.image_path) ?? ""}
                                                 alt={idol.artist_name}
                                                 loading="lazy"

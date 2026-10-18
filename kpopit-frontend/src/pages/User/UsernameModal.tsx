@@ -1,7 +1,8 @@
-import { useEffect, useMemo, useRef, useState } from "react";
-import { useMutation } from "@tanstack/react-query";
+import { useState } from "react";
+import { useMutation, useQuery } from "@tanstack/react-query";
 import { Check, ChevronLeft, Loader2, User, X } from "lucide-react";
 import { useAuth } from "../../hooks/useAuth";
+import { useDebouncedValue } from "../../hooks/useDebouncedValue";
 import { checkUsernameAvailability, updateProfile } from "../../services/api";
 import EditProfileModal from "./EditProfileModal";
 import PasswordInput from "./PasswordInput";
@@ -32,80 +33,38 @@ const UsernameModal = ({ isOpen, onClose, onBack }: UsernameModalProps) => {
 
     const [username, setUsername] = useState(currentUsername);
     const [password, setPassword] = useState("");
-    const [status, setStatus] = useState<Status>("idle");
     const [saveError, setSaveError] = useState<string | null>(null);
-
-    const debounceRef = useRef<number | null>(null);
-    const abortRef = useRef<AbortController | null>(null);
 
     const USERNAME_MIN_LENGTH = 3;
     const USERNAME_MAX_LENGTH = 12;
 
-    // Reset every time the modal opens.
-    useEffect(() => {
-        if (!isOpen) return;
-        setUsername(currentUsername);
-        setPassword("");
-        setStatus("idle");
-        setSaveError(null);
-    }, [isOpen, currentUsername]);
-
-    const daysLeft = useMemo(() => {
+    // Read once when the modal opens (it mounts fresh each time).
+    const [daysLeft] = useState(() => {
         if (!usernameChangedAt) return 0;
         const daysSince = Math.floor((Date.now() - new Date(usernameChangedAt).getTime()) / 86_400_000);
         return Math.max(0, USERNAME_COOLDOWN_DAYS - daysSince);
-    }, [usernameChangedAt]);
+    });
     const locked = daysLeft > 0;
 
     const isValid = username.length >= USERNAME_MIN_LENGTH && username.length <= USERNAME_MAX_LENGTH && USERNAME_REGEX.test(username);
     const unchanged = username === currentUsername;
+    const checkable = isValid && !unchanged;
 
-    // Debounced availability check
-    useEffect(() => {
-        if (debounceRef.current !== null) {
-            clearTimeout(debounceRef.current);
-            debounceRef.current = null;
-        }
-        if (abortRef.current) {
-            abortRef.current.abort();
-            abortRef.current = null;
-        }
-
-        if (!isOpen || !isValid || unchanged) {
-            setStatus("idle");
-            return;
-        }
-
-        setStatus("checking");
-        const target = username;
-
-        debounceRef.current = window.setTimeout(() => {
-            const controller = new AbortController();
-            abortRef.current = controller;
-            (async () => {
-                try {
-                    const res = await checkUsernameAvailability(target, controller.signal);
-                    if (controller.signal.aborted) return;
-                    setStatus(res.available ? "available" : "taken");
-                } catch (err: unknown) {
-                    const e = err as { code?: string; name?: string };
-                    if (e?.code === "ERR_CANCELED" || e?.name === "AbortError") return;
-                    setStatus("idle");
-                }
-            })();
-        }, 400);
-
-        return () => {
-            if (debounceRef.current !== null) {
-                clearTimeout(debounceRef.current);
-                debounceRef.current = null;
-            }
-            if (abortRef.current) {
-                abortRef.current.abort();
-                abortRef.current = null;
-            }
-        };
-    }, [username, isOpen, isValid, unchanged]);
+    // Availability of the name once typing pauses; React Query cancels the request a newer name replaces.
+    const debounced = useDebouncedValue(username, 400);
+    const availability = useQuery({
+        queryKey: ["usernameAvailable", debounced],
+        queryFn: ({ signal }) => checkUsernameAvailability(debounced, signal),
+        enabled: checkable && debounced === username,
+        staleTime: 30_000,
+        retry: false,
+        refetchOnWindowFocus: false,
+    });
+    const status: Status = !checkable
+        ? "idle"
+        : debounced !== username || availability.isFetching
+            ? "checking"
+            : availability.data ? (availability.data.available ? "available" : "taken") : "idle";
 
     const saveMutation = useMutation({
         mutationFn: () => updateProfile({ username, current_password: password }),

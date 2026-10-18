@@ -1,4 +1,5 @@
 import { useEffect, useRef, useState } from "react";
+import { useDebouncedValue } from "../../../hooks/useDebouncedValue";
 import { Copy } from "lucide-react";
 import { AnimatePresence, motion } from "motion/react";
 
@@ -9,49 +10,29 @@ interface ExportDataTextProps {
     isGenerating?: boolean;
     expires_At?: string | null;
     timeLeft?: number | null;
-    fetchActiveCode?: () => Promise<void>;
+    fetchActiveCode?: () => Promise<string | null>;
 }
 
 const ExportDataText = (props: ExportDataTextProps) => {
     const { generatedCodes, handleGenerate, isGenerating, timeLeft, expires_At, fetchActiveCode } = props;
 
-    const hasCalledGenerate = useRef(false);
-    const hasCalledFetch = useRef(false);
+    const started = useRef(false);
 
     const [copied, setCopied] = useState<boolean>(false);
-    const [showLoading, setShowLoading] = useState<boolean>(false);
-    const [isFetching, setIsFetching] = useState<boolean>(true);
-    
+    const [isFetching, setIsFetching] = useState<boolean>(!!fetchActiveCode);
+    // "Generating..." only when it takes longer than a blink.
+    const showLoading = useDebouncedValue(!!isGenerating, 100) && !!isGenerating;
+
+    // On open: show the user's active code, or create one when there is none.
     useEffect(() => {
-        let timer: ReturnType<typeof setTimeout>;
-
-        if (isGenerating) {
-            timer = setTimeout(() => setShowLoading(true), 100);
-        } else {
-            setShowLoading(false);
-        }
-        
-        const fetchCode = async () => {
-            if (fetchActiveCode && !hasCalledFetch.current) {
-            hasCalledFetch.current = true;
-            setIsFetching(true);
-            try {
-                await fetchActiveCode();
-            } finally {
-                setIsFetching(false);
-            }
-            }
-        }
-
-        fetchCode();
-
-        if (handleGenerate && !hasCalledGenerate.current && !isGenerating && !generatedCodes && !isFetching) {
-            hasCalledGenerate.current = true;
-            handleGenerate();
-        }
-        return (() => clearTimeout(timer));
-
-    }, [handleGenerate, isGenerating, fetchActiveCode, generatedCodes, isFetching]);
+        if (started.current) return;
+        started.current = true;
+        void (async () => {
+            const code = fetchActiveCode ? await fetchActiveCode() : null;
+            setIsFetching(false);
+            if (!code) handleGenerate?.();
+        })();
+    }, [fetchActiveCode, handleGenerate]);
 
     return (
         <div className="w-full bg-transparent">

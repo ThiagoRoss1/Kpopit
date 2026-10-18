@@ -1,5 +1,5 @@
 import { useState, useMemo, useEffect, useRef } from "react";
-import { Link, Navigate, useLocation, useNavigate } from "react-router-dom";
+import { Link, Navigate, useLocation, useNavigate } from "react-router";
 import { motion, AnimatePresence } from "motion/react";
 import { useMutation, useQuery } from "@tanstack/react-query";
 import { User, Lock, Check, Eye, EyeOff, Loader2, X } from "lucide-react";

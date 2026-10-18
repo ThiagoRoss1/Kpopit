@@ -69,3 +69,14 @@ export const clearModeKeys = (storage: KeyValueStorage, mode: GameModeKey): void
 /** True when the server's date differs from the one the mode last stored (includes a first visit). */
 export const isNewGameDay = (storage: KeyValueStorage, mode: GameModeKey, serverDate: string): boolean =>
     storage.getItem(GAME_DATE_KEY[mode]) !== serverDate;
+
+/**
+ * First visit (no stored date): records today's date and returns true. Nothing is reset or
+ * reloaded; leftover keys without a date are dropped first. Returns false once a date exists.
+ */
+export const startFirstGameDay = (storage: KeyValueStorage, mode: GameModeKey, serverDate: string): boolean => {
+    if (storage.getItem(GAME_DATE_KEY[mode]) !== null) return false;
+    clearModeKeys(storage, mode);
+    storage.setItem(GAME_DATE_KEY[mode], serverDate);
+    return true;
+};
