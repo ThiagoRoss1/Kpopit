@@ -11,21 +11,21 @@ type HeldDataProps<T> = {
     children: (value: T | undefined) => ReactNode;
 };
 
-// Renders a route's held data: the page at once when it arrived in time, otherwise the loader
-// until it does. One tree for both, so a same-route navigation with ready data keeps the page
-// mounted (open modals, typed input); only a pending one gets a fresh boundary for its loader.
+// Renders a route's held data: the page at once when it arrived in time (or nothing was loaded
+// ahead), otherwise the loader until it does. Routes always render through here, so a same-route
+// navigation with ready data keeps the page mounted (open modals, typed input). Ready data never
+// goes through Suspense: the prerender would stream the loader into the HTML ahead of the page.
 export default function HeldData<T>({ data, message, errorMessage, children }: HeldDataProps<T>) {
     const location = useLocation();
     const revalidator = useRevalidator();
-    const pending = data !== null && !data.ready;
-    const resolve = data === null ? undefined : data.ready ? data.value : data.promise;
+    if (data === null || data.ready) return children(data?.value);
     return (
-        <Suspense key={pending ? location.key : "ready"} fallback={<PageLoader message={message} />}>
+        <Suspense key={location.key} fallback={<PageLoader message={message} />}>
             <Await
-                resolve={resolve}
+                resolve={data.promise}
                 errorElement={<PageLoader error errorMessage={errorMessage} onRetry={() => revalidator.revalidate()} />}
             >
-                {(value) => children(value as T | undefined)}
+                {(value) => children(value as T)}
             </Await>
         </Suspense>
     );

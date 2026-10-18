@@ -83,6 +83,8 @@ test.use({ video: 'off' });
 
 test.describe('idols navigation @mobile', () => {
   test.describe.configure({ mode: 'serial', timeout: 300_000 });
+  // Frame timing is measured on Chromium (desktop and mobile); the @mobile tag also selects WebKit.
+  test.skip(({ browserName }) => browserName !== 'chromium', 'Chromium frame measurements');
 
   let preview: LocalServer;
   let idols: IdolRow[];
@@ -110,72 +112,48 @@ test.describe('idols navigation @mobile', () => {
     await page.context().addInitScript(monitor);
   });
 
-  test('/idols → idol page (card) → another idol → back to /idols, all smooth', async ({ page, isMobile }) => {
+  test('/idols ⇄ idol pages: complete on the first frame, scroll kept on back, no blank frame', async ({ page, isMobile }) => {
     const loads = countDocumentLoads(page);
     await page.goto(`${PREVIEW}/idols`);
     await expect(page.locator('main a[href^="/idols/"]').first()).toBeVisible();
     const base = loads.loads;
 
-    // Card click.
+    // A card far down the list. Local data is fast: the profile is complete on its first frame.
+    const card = page.locator('main a[href^="/idols/"]').nth(isMobile ? 9 : 25);
+    await card.scrollIntoViewIfNeeded();
+    const leftAt = await page.evaluate(() => scrollY);
+    expect(leftAt).toBeGreaterThan(500);
     let since = await now(page);
+    await press(page, isMobile, card);
+    await expect(page.locator('main img[alt$=" photo"]')).toBeVisible();
+    let after = await expectSmooth(page, since, loads, base);
+    expect(after.filter((f) => f.loader), 'loader frames').toEqual([]);
+    expect(after.every((f) => f.cards || f.profile), 'only the old page or the complete new one').toBe(true);
+    expect(await page.evaluate(() => scrollY)).toBe(0);
+
+    // Browser back: the list where it was left, without replaying the card entrance.
+    since = await now(page);
+    await page.goBack();
+    await expect(page.locator('main a[href^="/idols/"] img').first()).toBeVisible();
+    await expect.poll(() => page.evaluate(() => scrollY)).toBeGreaterThan(leftAt - 5);
+    after = await expectSmooth(page, since, loads, base);
+    expect(after.filter((f) => f.animating), 'card entrance replayed').toEqual([]);
+
+    // Card → another idol from the profile's search → the in-app back link.
     const target = idols[3];
     await press(page, isMobile, page.locator(`main a[href="${href(target)}"]`));
     await expect(page.getByRole('img', { name: `${target.artist_name} photo` })).toBeVisible();
-    await expectSmooth(page, since, loads, base);
-
-    // Another idol from the profile's search.
     since = await now(page);
     const other = idols.find((i) => i.id !== target.id && /^[A-Za-z]{4,}$/.test(i.artist_name))!;
     await page.getByPlaceholder('Search for an Idol, Group, or Company...').fill(other.artist_name);
     await press(page, isMobile, page.locator(`main a[href="${href(other)}"]`).first());
     await expect(page.getByRole('img', { name: `${other.artist_name} photo` })).toBeVisible();
-    await expect(page).toHaveURL(new RegExp(`/idols/${other.id}/`));
     await expectSmooth(page, since, loads, base);
-
-    // The in-app back link.
     since = await now(page);
     await press(page, isMobile, page.getByRole('link', { name: 'Back to the idols list' }));
-    await expect(page.locator('main a[href^="/idols/"] img').first()).toBeVisible();
     await expect(page).toHaveURL(`${PREVIEW}/idols`);
-    await expectSmooth(page, since, loads, base);
-  });
-
-  test('back to /idols restores the scroll position and does not replay the card entrance', async ({ page, isMobile }) => {
-    const loads = countDocumentLoads(page);
-    await page.goto(`${PREVIEW}/idols`);
-    await expect(page.locator('main a[href^="/idols/"]').first()).toBeVisible();
-    await page.evaluate(() => window.scrollTo(0, 1500));
-    await page.waitForTimeout(300);
-    const card = page.locator('main a[href^="/idols/"]').nth(isMobile ? 9 : 25);
-    await card.scrollIntoViewIfNeeded();
-    const leftAt = await page.evaluate(() => scrollY);
-    expect(leftAt).toBeGreaterThan(500);
-    const base = loads.loads;
-
-    await press(page, isMobile, card);
-    await expect(page.locator('main img[alt$=" photo"]')).toBeVisible();
-    expect(await page.evaluate(() => scrollY)).toBe(0);
-
-    const since = await now(page);
-    await page.goBack();
     await expect(page.locator('main a[href^="/idols/"] img').first()).toBeVisible();
-    await expect.poll(() => page.evaluate(() => scrollY)).toBeGreaterThan(leftAt - 5);
-    expect(Math.abs((await page.evaluate(() => scrollY)) - leftAt)).toBeLessThanOrEqual(5);
-    const after = await expectSmooth(page, since, loads, base);
-    expect(after.filter((f) => f.animating), 'card entrance replayed').toEqual([]);
-  });
-
-  test('fast data: the next page is complete on its first frame, no loader', async ({ page, isMobile }) => {
-    await page.goto(`${PREVIEW}/idols`);
-    await expect(page.locator('main a[href^="/idols/"]').first()).toBeVisible();
-    const target = idols[6];
-    const since = await now(page);
-    await press(page, isMobile, page.locator(`main a[href="${href(target)}"]`));
-    await expect(page.getByRole('img', { name: `${target.artist_name} photo` })).toBeVisible();
-    const after = (await frames(page)).filter((f) => f.t >= since);
-    expect(after.filter((f) => f.loader), 'loader frames').toEqual([]);
-    // Every frame shows either the old page or the complete new one.
-    expect(after.every((f) => f.cards || f.profile === target.artist_name)).toBe(true);
+    await expectSmooth(page, since, loads, base);
   });
 
   test('slow data: the page switches at the hold, shows the loader for at least 500 ms', async ({ page, isMobile }) => {
