@@ -87,7 +87,10 @@ test.describe('page loading', () => {
 
   test('a failing idols list on a client navigation keeps the navbar and offers Retry', async ({ page }) => {
     await page.goto('/');
+    // Both sources fail: the API and the page's prerendered snapshot (/idols.data), which alone
+    // would still show the list during an API outage.
     await failApi(page, '/idols-page');
+    await page.route('**/idols.data*', (route) => route.fulfill({ status: 500, body: '' }));
     await page.locator('nav').getByRole('button', { name: 'Idols' }).click();
     await page.locator('nav').getByRole('link', { name: 'All Idols' }).click();
     await expect(page).toHaveURL(/\/idols$/);
