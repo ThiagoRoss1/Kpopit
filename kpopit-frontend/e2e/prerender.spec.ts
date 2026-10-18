@@ -67,6 +67,8 @@ test.describe('prerendered pages without JavaScript', () => {
     expect(meta(html, 'description')).toContain(idol.artist_name);
     expect(meta(html, 'og:title')).toContain(idol.artist_name);
     expect(meta(html, 'og:description')).toContain(idol.group_name!);
+    // The page itself, not a streamed loader with the content hidden until JavaScript swaps it in.
+    expect(html).not.toContain('role="status"');
   });
 
   test.describe('in a browser', () => {
