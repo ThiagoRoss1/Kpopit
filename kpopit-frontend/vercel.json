@@ -1,4 +1,5 @@
 {
+    "outputDirectory": "build/client",
     "git": {
         "deploymentEnabled": {
             "main": true,
