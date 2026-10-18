@@ -39,15 +39,12 @@ const ButtonsListMobile = (props: ButtonsListMobileProps) => {
         };
     }, [isOpen, onClose, containerRef]);
 
+    // Mount at once on open (adjusted while rendering); unmount after the 500ms fade-out.
+    if (isOpen && !isRendered) setIsRendered(true);
     useEffect(() => {
-        if (isOpen) {
-            setIsRendered(true);
-        } else {
-            const timer = setTimeout(() => {
-                setIsRendered(false);
-            }, 500);
-            return () => clearTimeout(timer);
-        }
+        if (isOpen) return;
+        const timer = setTimeout(() => setIsRendered(false), 500);
+        return () => clearTimeout(timer);
     }, [isOpen]);
 
     if (!isRendered) return null;
