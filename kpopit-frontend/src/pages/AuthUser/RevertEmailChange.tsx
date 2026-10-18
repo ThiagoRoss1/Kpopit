@@ -1,46 +1,21 @@
-import { useEffect, useRef, useState } from "react";
 import { Link, useSearchParams } from "react-router";
 import { CheckCircle, Loader2, XCircle } from "lucide-react";
 import { useAuth } from "../../hooks/useAuth";
-import { revertEmailChange, authError } from "../../services/api";
+import { useEmailLinkAction } from "../../hooks/useEmailLinkAction";
+import { revertEmailChange } from "../../services/api";
 import AuthBackground from "./AuthBackground";
 import { Helmet } from "react-helmet-async";
 import "./authPage.css";
 
-type Status = "loading" | "success" | "error";
-
 const RevertEmailChange = () => {
-    const { isAuthenticated, refreshAuth } = useAuth();
+    const { isAuthenticated } = useAuth();
     const [searchParams] = useSearchParams();
     const token = searchParams.get("token");
 
-    const [status, setStatus] = useState<Status>("loading");
-    const [errorMessage, setErrorMessage] = useState<string | null>(null);
-    const ranOnce = useRef(false);
-
-    useEffect(() => {
-        if (ranOnce.current) return;
-        ranOnce.current = true;
-
-        if (!token) {
-            setStatus("error");
-            setErrorMessage("Invalid revert link.");
-            return;
-        }
-
-        const run = async () => {
-            try {
-                await revertEmailChange(token);
-                if (isAuthenticated) await refreshAuth();
-                setStatus("success");
-            } catch (err: unknown) {
-                setErrorMessage(authError(err) ? err.response.data.error : "Something went wrong reverting your email change.");
-                setStatus("error");
-            }
-        };
-
-        run();
-    }, [token, isAuthenticated, refreshAuth]);
+    const { status, errorMessage } = useEmailLinkAction("revert-change", token, revertEmailChange, {
+        missing: "Invalid revert link.",
+        failed: "Something went wrong reverting your email change.",
+    });
 
     return (
         <>
