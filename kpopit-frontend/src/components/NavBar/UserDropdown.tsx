@@ -1,11 +1,16 @@
 import "./droplist.css";
 import { useEffect, useRef, useState } from "react";
-import { Link, useNavigate } from "react-router";
+import { useNavigate } from "react-router";
 import { LogOut, User } from "lucide-react";
 import { useAuth } from "../../hooks/useAuth";
 import { useAuthUser } from "../../hooks/useAuthUser";
 import { resolveAvatarUrl } from "../../utils/resolveAvatarUrl";
 import Img from "../Img";
+import IntentLink from "../Links/IntentLink";
+import { loadProfileStats } from "../../pages/User/profileData";
+
+// Profile link intent: start the stats request (the route loader then finds it in the cache).
+const prefetchProfile = () => void loadProfileStats();
 
 const UserDropdown = () => {
     const { user, refreshAuth } = useAuth();
@@ -93,15 +98,16 @@ const UserDropdown = () => {
 
                 {/* Buttons */}
                 <div className="flex flex-col gap-1.5 px-2 py-2 font-sans font-bold">
-                    <Link
+                    <IntentLink
                         to={`/profile/${username.toLowerCase()}`}
+                        onIntent={prefetchProfile}
                         onClick={() => setIsOpen(false)}
                         className="flex items-center justify-start gap-4 px-4 h-12 text-left text-white rounded-[10px]
                         bg-transparent hover:bg-gray-700/30 hover:text-neon-pink transition-colors duration-300"
                     >
                         <User className="w-4 h-4" />
                         <span className="text-sm sm:text-base">Profile</span>
-                    </Link>
+                    </IntentLink>
 
                     <button
                         type="button"
