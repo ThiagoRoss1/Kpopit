@@ -43,6 +43,16 @@ test.describe('every route loads @mobile', () => {
     });
   }
 
+  test('the idols list lays its cards out in a grid @smoke', async ({ page }) => {
+    await page.goto('/idols');
+    const cards = page.locator('a[href^="/idols/"]');
+    await expect(cards.nth(1)).toBeVisible();
+    const [a, b] = [await cards.nth(0).boundingBox(), await cards.nth(1).boundingBox()];
+    // Side by side on one row, even on a phone (two columns at least): not a single stacked column.
+    expect(Math.abs(a!.y - b!.y)).toBeLessThan(2);
+    expect(b!.x).toBeGreaterThan(a!.x + a!.width - 1);
+  });
+
   test('an idol page loads from the idols list @smoke', async ({ page, consoleErrors }) => {
     await page.goto('/idols');
     const first = page.locator('a[href^="/idols/"]').first();
