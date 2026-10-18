@@ -81,7 +81,7 @@ function IdolProfile({ initialProfile }: { initialProfile?: IdolProfileData }) {
 
     // Age depends on today's date, which can differ between the build and the visit.
     const hydrated = useHydrated();
-const age = useCalculateAge(idolProfile?.birth_date || "");
+    const age = useCalculateAge(idolProfile?.birth_date || "");
 
     const nationality = idolProfile?.nationality;
     const nationalities = nationality ? nationality.split(",").map(nat => nat.trim()) : [];

@@ -50,7 +50,7 @@ function PixelatedMode() {
 
     const { userToken, initUser, decryptedTokenRef, isInitialized, queryClient, userStatsData, transferData } = useSharedGameData();
     const { day, onNewDay } = useGameDay();
-const { clearPixelated } = useClearGameStorage();
+    const { clearPixelated } = useClearGameStorage();
 
     const isLg = useIsLg();
 
