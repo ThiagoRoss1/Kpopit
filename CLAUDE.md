@@ -20,7 +20,7 @@ kpopit/
 ```bash
 npm run dev       # Start dev server (react-router dev, Vite with HMR)
 npm run build     # TypeScript compile + react-router build (prerenders; needs the backend, see PRERENDER_API_URL)
-npm run lint      # Run ESLint
+npm run lint      # Run ESLint (--max-warnings 0, same as CI)
 npm run preview   # Preview production build
 ```
 
@@ -50,9 +50,10 @@ gunicorn app:app      # Production server
 - **`utils/dates.py`** — All daily reset logic is EST-anchored
 
 ### Frontend (`kpopit-frontend/src/`)
-- **`app/`** (next to `src/`) — React Router 7 framework mode, `ssr: false` (static build on Vercel, output `build/client`). `root.tsx` holds the site-wide `<head>` and the providers (QueryClient, Helmet, AuthProvider, ScrollToTop, Vercel Analytics/Speed Insights) and maintenance mode; `routes.ts` lists the routes (MainLayout and ProtectedRoute as layouts) pointing at thin modules in `app/routes/` that render the `src/pages` components. Collections and admin check their env flag inside the route module (admin lives in the catch-all, since its path is an env var). `react-router.config.ts` prerenders `/`, the three game pages, `/idols`, `/privacy-policy`, `/contact` and every `/idols/:id/:slug`; other routes load from `__spa-fallback.html` (the `vercel.json` rewrite)
+- **`app/`** (next to `src/`) — React Router 7 framework mode, `ssr: false` (static build on Vercel, output `build/client`). `root.tsx` holds the site-wide `<head>` and the providers (QueryClient, Helmet, AuthProvider, ScrollToTop, Vercel Analytics/Speed Insights) and maintenance mode; `routes.ts` lists the routes (MainLayout and ProtectedRoute as layouts) pointing at thin modules in `app/routes/` that render the `src/pages` components. Collections checks its env flag inside the route module; the admin route is only registered (at `VITE_ADMIN_ROUTE`) when `VITE_ADMIN_ENABLED=true`, read in `routes.ts` via Vite's `loadEnv`, so without the flag it isn't in the build. `react-router.config.ts` prerenders `/`, the three game pages, `/idols`, `/privacy-policy`, `/contact` and every `/idols/:id/:slug`; other routes load from `__spa-fallback.html` (the `vercel.json` rewrite)
 - **Prerender rules** — Prerendered HTML must match the first browser render: browser-only values (storage, viewport, today's date) wait for `useHydrated()` / `<ClientOnly>`; game pages render client-only behind `app/game-page.tsx`. Each page sets its own title/description/og via Helmet (the root head has none). Idol slugs come only from `buildIdolSlug` (`[a-z0-9-_]`); the idol page redirects any other slug to the canonical one
-- **`hooks/useSharedGameData.tsx`** — Core state hook; owns the localStorage game state lifecycle (reads on load, clears on new day, triggers page reload)
+- **`hooks/useSharedGameData.tsx`** — Core state hook: user token (issue/decrypt, readiness as a query), the `["allIdols"]` list, user stats
+- **`components/GameDayProvider.tsx`** — Wraps every game page: keys the page by its game day (a new day remounts it, no reload), runs the midnight countdown, and refetches on the api's "Game date mismatch" event. Daily queries spread `DAILY_REFETCH` (refetch on tab focus/visibility + every 5 min), so a new `server_date` is noticed with the tab open
 - **`hooks/`** — `useGameMode`, `useResetTimer`, `useIdolSearch`, `useTransferDataLogic`
 - **`services/api.ts`** — Axios client; attaches decrypted user token to every request via interceptor
 - **`pages/`** — `ClassicMode/`, `BlurryMode/`, `PixelatedMode/`, `Idols/` (list + `/:id/:slug` profile), `Home/`, `admin/`. Pixelated uses client-side album search (`["allAlbums"]` cached, no search endpoint) and `components/Pixelated/` (canvas, search bar, guess grid, hints, victory card)
@@ -60,7 +61,7 @@ gunicorn app:app      # Production server
 - **`utils/tokenEncryption.ts`** — AES encryption/decryption for localStorage token storage
 
 ### State Management
-- **React Query (TanStack Query)** — All server state; `["allIdols"]` cached for 5+ days, `["userStats", token]` per-user
+- **React Query (TanStack Query)** — All server state; `["allIdols"]` / `["allAlbums"]` start from a localStorage copy (`utils/persistedList.ts`, versioned keys, ignored after 7 days) and refetch once per visit, `["userStats", token]` per-user
 - **localStorage** — Game state per mode: `GuessedIdols`, `todayGuessesDetails`, `gameComplete`, `gameWon`, `hint1Revealed`, `hint2Revealed`, plus `{mode}_lastPlayedDate` for day-change detection
 - No React Context — React Query replaces global state needs
 
@@ -206,7 +207,7 @@ Every mode follows the same shape (Classic → Blurry → Pixelated) on both sta
 - **Page + route** — Add `pages/<Mode>/`, add a route module in `app/routes/` (wrapped in `GamePage`) and register it under the `MainLayout` layout in `app/routes.ts` (plus `react-router.config.ts` to prerender it), and extend the `GameMode` union + `MODES` list in `hooks/useGameMode.tsx`. `useGameMode` derives the active mode from the URL path and writes it to `localStorage["kpopit_gamemode"]`.
 - **`gamemode_id` is injected globally** — The `api.ts` request interceptor reads `kpopit_gamemode`, maps it via the `MODES` name→id table, and attaches `gamemode_id` to every non-`/auth` request. New endpoints don't pass it manually; just add the mode to the map.
 - **Endpoints, types, components** — Add the mode's calls to `services/api.ts`, its data shapes to `interfaces/gameInterfaces.ts`, and its UI under `components/<Mode>/`.
-- **Game-state lifecycle** — Register the mode's `localStorage` keys as a `<MODE>_KEYS` array in `useClearGameStorage`. The page compares the server's `server_date` against the stored `<mode>GameDate`; on mismatch it clears those keys and calls `safeReload()`. Stats/history stay server-side; only per-day game state lives in `localStorage`.
+- **Game-state lifecycle** — Register the mode's `localStorage` keys as a `<MODE>_KEYS` array in `useClearGameStorage`. The page compares the server's `server_date` against the stored `<mode>GameDate`; on mismatch it clears those keys and calls `onNewDay(serverDate)` from `useGameDay()`, which remounts the page on the new day (first visits just start the day). Stats/history stay server-side; only per-day game state lives in `localStorage`.
 - **Per-mode React Query keys** — Key every query by mode (`["<mode>DailyAlbum", gameMode]`); reuse the fetch-once-filter-locally search cache pattern (`["allAlbums"]` / `["allIdols"]`) instead of a per-keystroke endpoint.
 
 ## Git & Commits
