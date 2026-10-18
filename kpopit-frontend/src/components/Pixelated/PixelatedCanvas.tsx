@@ -14,12 +14,14 @@ const PixelatedCanvas = ({ imageUrl, blockSize, alt, className }: PixelatedCanva
     const imgRef = useRef<HTMLImageElement | null>(null);
     const loadedRef = useRef<boolean>(false);
 
-    const [loadFailed, setLoadFailed] = useState<boolean>(false);
     const [retryCount, setRetryCount] = useState<number>(0);
+    // A failure belongs to one cover + attempt, so a new cover or a retry clears it by itself.
+    const attempt = `${imageUrl ?? ""}#${retryCount}`;
+    const [failedAttempt, setFailedAttempt] = useState<string | null>(null);
+    const loadFailed = failedAttempt === attempt;
 
-    // Read the latest blockSize inside render() without re-creating render().
+    // Read the latest blockSize inside render() without re-creating render(); updated in the effect below.
     const blockSizeRef = useRef<number>(blockSize);
-    blockSizeRef.current = blockSize;
 
     const render = useCallback(() => {
         const canvas = canvasRef.current;
@@ -90,8 +92,12 @@ const PixelatedCanvas = ({ imageUrl, blockSize, alt, className }: PixelatedCanva
     }, [render]);
 
     useEffect(() => {
+        blockSizeRef.current = blockSize;
+        render();
+    }, [blockSize, render]);
+
+    useEffect(() => {
         loadedRef.current = false;
-        setLoadFailed(false);
         const img = new Image();
         // The cover is the page's LCP image, drawn on the canvas instead of an <img>.
         img.fetchPriority = "high";
@@ -101,7 +107,7 @@ const PixelatedCanvas = ({ imageUrl, blockSize, alt, className }: PixelatedCanva
             loadedRef.current = true;
             sizeAndRender();
         };
-        const handleError = () => setLoadFailed(true);
+        const handleError = () => setFailedAttempt(attempt);
 
         img.addEventListener("load", handleLoad);
         img.addEventListener("error", handleError);
@@ -112,7 +118,7 @@ const PixelatedCanvas = ({ imageUrl, blockSize, alt, className }: PixelatedCanva
             img.removeEventListener("load", handleLoad);
             img.removeEventListener("error", handleError);
         };
-    }, [imageUrl, sizeAndRender, retryCount]);
+    }, [imageUrl, sizeAndRender, attempt]);
 
     useEffect(() => {
         const canvas = canvasRef.current;
@@ -121,10 +127,6 @@ const PixelatedCanvas = ({ imageUrl, blockSize, alt, className }: PixelatedCanva
         observer.observe(canvas);
         return () => observer.disconnect();
     }, [sizeAndRender, loadFailed]);
-
-    useEffect(() => {
-        render();
-    }, [blockSize, render]);
 
     if (loadFailed) {
         return (
@@ -136,10 +138,7 @@ const PixelatedCanvas = ({ imageUrl, blockSize, alt, className }: PixelatedCanva
                 <span className="text-sm font-bold">Cover failed to load</span>
                 <button
                     type="button"
-                    onClick={() => {
-                        setLoadFailed(false);
-                        setRetryCount((c) => c + 1);
-                    }}
+                    onClick={() => setRetryCount((c) => c + 1)}
                     className="px-4 py-1.5 rounded-full font-bold text-sm text-white bg-neon-pink border-2 border-ink
                     shadow-[0_3px_0_var(--color-ink)] transition-all duration-150
                     hover:brightness-110 hover:cursor-pointer active:translate-y-1 active:shadow-[0_1px_0_var(--color-ink)]"
