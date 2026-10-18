@@ -123,21 +123,27 @@ test.describe('no full page reload', () => {
   });
 
   test('the midnight timer swaps the day without reloading', async ({ page }) => {
-    // The countdown ends one second after it starts.
+    // Midnight is one minute away; the test moves the page's clock past it.
+    await page.clock.install();
     await page.route('**/api/reset-timer*', (route) => route.fulfill({
       contentType: 'application/json',
-      body: JSON.stringify({ total_seconds: 1, hours: 0, minutes: 0, seconds: 1, next_reset: '' }),
+      body: JSON.stringify({ total_seconds: 60, hours: 0, minutes: 1, seconds: 0, next_reset: '' }),
     }));
-    let dailyCalls = 0;
-    page.on('request', (r) => { if (r.url().includes('/api/game/classic/daily-idol')) dailyCalls += 1; });
     const counter = countLoads(page);
     await page.goto('/classic');
     await expect(searchInput(page, 'classic')).toBeEnabled({ timeout: 20_000 });
-    const before = dailyCalls;
-    // The How to Play modal runs the timer; at zero the page remounts on a new day key (which also
-    // closes the modal) and fetches the daily data again.
     await page.getByRole('button', { name: 'How to Play' }).click();
-    await expect.poll(() => dailyCalls, { timeout: 15_000 }).toBeGreaterThan(before);
+    await expect(page.getByRole('heading', { name: 'How to Play...', exact: true })).toBeVisible();
+
+    // After midnight the server reports the next day.
+    const tomorrow = '2099-01-01';
+    await page.route('**/api/game/classic/daily-idol*', async (route) => {
+      const response = await route.fetch();
+      await route.fulfill({ response, json: { ...(await response.json()), server_date: tomorrow } });
+    });
+    await page.clock.fastForward('01:05');
+    // At zero the data is refetched and the new date remounts the page on its day (closing the modal).
+    await page.waitForFunction((day) => localStorage.getItem('gameDate') === day, tomorrow, { timeout: 15_000 });
     await expect(page.getByRole('heading', { name: 'How to Play...', exact: true })).toBeHidden();
     await expect(searchInput(page, 'classic')).toBeEnabled({ timeout: 20_000 });
     expect(counter.loads).toBe(1);
