@@ -14,9 +14,9 @@ export interface GameDayValue {
 
 export const GAME_DAY_CHANGED_EVENT = "kpopit:game-day-changed";
 
-// The page's daily data re-checks the day on tab focus / visibility and every 5 minutes while
+// The page's daily data re-checks the day on tab focus / visibility and every 30 minutes while
 // visible, so a day change (or a test date offset) shows up without F5.
-export const DAILY_REFETCH = { refetchOnWindowFocus: "always", refetchInterval: 5 * 60_000 } as const;
+export const DAILY_REFETCH = { refetchOnWindowFocus: "always", refetchInterval: 30 * 60_000 } as const;
 
 export const GameDayContext = createContext<GameDayValue | null>(null);
 
