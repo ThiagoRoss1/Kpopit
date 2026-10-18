@@ -10,7 +10,7 @@
     "dev": "react-router dev",
     "dev:host": "react-router dev --host",
     "build": "tsc -b && react-router build",
-    "lint": "eslint .",
+    "lint": "eslint . --max-warnings 0",
     "test": "node --experimental-strip-types --test \"tests/**/*.test.mjs\"",
     "preview": "vite preview",
     "test:album": "node --experimental-strip-types --test tests/album/disclosureTiming.test.mjs tests/album/eagerArtwork.test.mjs",
