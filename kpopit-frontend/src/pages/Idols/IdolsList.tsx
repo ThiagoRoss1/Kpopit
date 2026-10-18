@@ -72,7 +72,7 @@ function IdolsList({ initialIdols }: { initialIdols?: IdolsPageData[] }) {
         return <PageLoader message="Loading Idols Data..." error={isErrorIdolsData} errorMessage="Error fetching idols data." onRetry={() => refetchIdolsData()} />;
     }
 
-return (
+    return (
         <div className="w-full min-h-full bg-ink">
             <Helmet>
                 <title>KpopIt - Idols List</title>

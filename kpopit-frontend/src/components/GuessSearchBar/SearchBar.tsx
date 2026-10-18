@@ -146,7 +146,7 @@ const SearchBar = (props: SearchBarProps) => {
               value={value}
               onChange={handleInputChange}
               placeholder="Search for an idol or group..."
-onFocus={() => value.length > 0 && setShowList(true)}
+              onFocus={() => value.length > 0 && setShowList(true)}
             />
             <motion.button
             onTapStart={() => setIsClicked(true)}

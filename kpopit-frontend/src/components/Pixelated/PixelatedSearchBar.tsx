@@ -9,7 +9,7 @@ interface PixelatedSearchBarProps {
   allAlbums: AlbumSearchResult[];
   value: string;
   disabled?: boolean;
-excludedAlbums?: number[];
+  excludedAlbums?: number[];
   onAlbumSelect: (text: string) => void;
   onAlbumSelectId?: (album: AlbumSearchResult) => void;
   onSubmit?: () => void;

@@ -25,7 +25,7 @@ const VerifyEmail = () => {
         onSuccess: () => setResendSent(true),
     });
 
-return (
+    return (
         <>
             <Helmet>
                 <title>KpopIt - Verify Email</title>
