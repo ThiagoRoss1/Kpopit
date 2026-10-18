@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import { useMutation } from "@tanstack/react-query";
 import { Camera, Eye, EyeOff, Loader2, Lock, Mail, User } from "lucide-react";
 import { useAuth } from "../../hooks/useAuth";
@@ -35,7 +35,14 @@ const extractError = (err: unknown): string | null => {
     return null;
 };
 
+// Mounted only while open, so every open starts from the saved profile with no reset effect.
 const EditProfile = (props: EditProfileProps) => {
+    const { user } = useAuth();
+    if (!props.isOpen || !user) return null;
+    return <EditProfileContent {...props} />;
+};
+
+const EditProfileContent = (props: EditProfileProps) => {
     const { isOpen, onClose, initialTab = "fields" } = props;
 
     const { user, refetchUser } = useAuth();
@@ -48,21 +55,12 @@ const EditProfile = (props: EditProfileProps) => {
     const currentAvatarUrl = profile?.avatar_url ?? null;
     const avatarVersion = profile?.updated_at;
 
-    const [subModal, setSubModal] = useState<SubModal>("none");
+    const [subModal, setSubModal] = useState<SubModal>(initialTab === "avatar" ? "avatar" : "none");
     const [displayName, setDisplayName] = useState(currentDisplayName);
     const [showEmail, setShowEmail] = useState(false);
     const [saveError, setSaveError] = useState<string | null>(null);
 
     const DISPLAY_NAME_MAX_LENGTH = 30;
-
-    // Reset when the modal (re)opens.
-    useEffect(() => {
-        if (!isOpen) return;
-        setDisplayName(currentDisplayName);
-        setShowEmail(false);
-        setSaveError(null);
-        setSubModal(initialTab === "avatar" ? "avatar" : "none");
-    }, [isOpen, initialTab, currentDisplayName]);
 
     const saveMutation = useMutation({
         mutationFn: (name: string) => updateProfile({ display_name: name }),
@@ -274,27 +272,36 @@ const EditProfile = (props: EditProfileProps) => {
                 </footer>
             </EditProfileModal>
 
-            <AvatarModal
-                isOpen={isOpen && subModal === "avatar"}
-                onClose={onClose}
-                onBack={() => setSubModal("none")}
-                avatarUrl={resolveAvatarUrl(currentAvatarUrl, avatarVersion) ?? undefined}
-            />
-            <UsernameModal
-                isOpen={isOpen && subModal === "username"}
-                onClose={onClose}
-                onBack={() => setSubModal("none")}
-            />
-            <PasswordModal
-                isOpen={isOpen && subModal === "password"}
-                onClose={onClose}
-                onBack={() => setSubModal("none")}
-            />
-            <EmailModal
-                isOpen={isOpen && subModal === "email"}
-                onClose={onClose}
-                onBack={() => setSubModal("none")}
-            />
+            {/* Each sub-modal mounts on open, so it starts empty without a reset effect. */}
+            {subModal === "avatar" && (
+                <AvatarModal
+                    isOpen={isOpen && subModal === "avatar"}
+                    onClose={onClose}
+                    onBack={() => setSubModal("none")}
+                    avatarUrl={resolveAvatarUrl(currentAvatarUrl, avatarVersion) ?? undefined}
+                />
+            )}
+            {subModal === "username" && (
+                <UsernameModal
+                    isOpen={isOpen && subModal === "username"}
+                    onClose={onClose}
+                    onBack={() => setSubModal("none")}
+                />
+            )}
+            {subModal === "password" && (
+                <PasswordModal
+                    isOpen={isOpen && subModal === "password"}
+                    onClose={onClose}
+                    onBack={() => setSubModal("none")}
+                />
+            )}
+            {subModal === "email" && (
+                <EmailModal
+                    isOpen={isOpen && subModal === "email"}
+                    onClose={onClose}
+                    onBack={() => setSubModal("none")}
+                />
+            )}
         </>
     );
 };

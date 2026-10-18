@@ -81,28 +81,7 @@ const AvatarModal = ({ isOpen, onClose, onBack, avatarUrl }: AvatarModalProps) =
         );
     }, [idols, idolSearch]);
 
-    // Reset state every time the modal opens; release any tracked blob URLs on close.
-    useEffect(() => {
-        if (isOpen) {
-            setTab("upload");
-            setCropSrc(null);
-            setCrop({ x: 0, y: 0 });
-            setZoom(1);
-            setCroppedAreaPixels(null);
-            setCroppedBlob(null);
-            setCroppedPreviewUrl(null);
-            setSelectedIdolUrl(null);
-            setIdolSearch("");
-            setUploadError(null);
-            setSaveError(null);
-            setHasChosen(false);
-            return;
-        }
-        const tracked = blobUrlsRef.current;
-        tracked.forEach((u) => URL.revokeObjectURL(u));
-        tracked.clear();
-    }, [isOpen]);
-
+    // The modal mounts fresh on every open; release its blob URLs when it closes.
     useEffect(() => {
         const tracked = blobUrlsRef.current;
         return () => {

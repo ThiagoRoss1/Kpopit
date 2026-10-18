@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import { useMutation } from "@tanstack/react-query";
 import { ChevronLeft, Loader2, Mail } from "lucide-react";
 import { useAuth } from "../../hooks/useAuth";
@@ -31,14 +31,6 @@ const EmailModal = ({ isOpen, onClose, onBack }: EmailModalProps) => {
     const [password, setPassword] = useState("");
     const [saveError, setSaveError] = useState<string | null>(null);
     const [sent, setSent] = useState(false);
-
-    useEffect(() => {
-        if (!isOpen) return;
-        setNewEmail("");
-        setPassword("");
-        setSaveError(null);
-        setSent(false);
-    }, [isOpen]);
 
     const trimmed = newEmail.trim();
     const isValid = EMAIL_REGEX.test(trimmed) && trimmed.length <= EMAIL_MAX_LENGTH;

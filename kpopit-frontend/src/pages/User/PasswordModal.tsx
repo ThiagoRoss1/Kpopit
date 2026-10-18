@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import { useMutation } from "@tanstack/react-query";
 import { ChevronLeft, Loader2 } from "lucide-react";
 import { useAuth } from "../../hooks/useAuth";
@@ -28,14 +28,6 @@ const PasswordModal = ({ isOpen, onClose, onBack }: PasswordModalProps) => {
     const [newPassword, setNewPassword] = useState("");
     const [confirmPassword, setConfirmPassword] = useState("");
     const [saveError, setSaveError] = useState<string | null>(null);
-
-    useEffect(() => {
-        if (!isOpen) return;
-        setCurrentPassword("");
-        setNewPassword("");
-        setConfirmPassword("");
-        setSaveError(null);
-    }, [isOpen]);
 
     const strength = getPasswordStrength(newPassword);
     const passwordsMatch = newPassword.length > 0 && newPassword === confirmPassword;
