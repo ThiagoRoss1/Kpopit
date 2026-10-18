@@ -28,7 +28,11 @@ export const isGeckoEngine = typeof window !== "undefined" &&
   (window.CSS && CSS.supports('-moz-appearance', 'none'));
 
 export function useIsLg(breakpoint = 1024) {
-    const query = `(min-width: ${breakpoint}px)`;
+    return useMediaQuery(`(min-width: ${breakpoint}px)`);
+}
+
+// Any media query as live state; false during prerender and hydration.
+export function useMediaQuery(query: string) {
     const subscribe = useCallback((onChange: () => void) => {
         const mediaQuery = window.matchMedia(query);
         mediaQuery.addEventListener("change", onChange);

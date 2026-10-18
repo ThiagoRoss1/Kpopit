@@ -1,4 +1,5 @@
-import React, { useEffect, useRef, useState, useId } from 'react';
+import React, { useEffect, useLayoutEffect, useRef, useId } from 'react';
+import { useMediaQuery } from '../hooks/useIsDevice';
 
 export interface GlassSurfaceProps {
   children?: React.ReactNode;
@@ -41,22 +42,7 @@ export interface GlassSurfaceProps {
   style?: React.CSSProperties;
 }
 
-const useDarkMode = () => {
-  const [isDark, setIsDark] = useState(false);
-
-  useEffect(() => {
-    if (typeof window === 'undefined') return;
-
-    const mediaQuery = window.matchMedia('(prefers-color-scheme: dark)');
-    setIsDark(mediaQuery.matches);
-
-    const handler = (e: MediaQueryListEvent) => setIsDark(e.matches);
-    mediaQuery.addEventListener('change', handler);
-    return () => mediaQuery.removeEventListener('change', handler);
-  }, []);
-
-  return isDark;
-};
+const useDarkMode = () => useMediaQuery('(prefers-color-scheme: dark)');
 
 const GlassSurface: React.FC<GlassSurfaceProps> = ({
   children,
@@ -80,7 +66,6 @@ const GlassSurface: React.FC<GlassSurfaceProps> = ({
   className = '',
   style = {}
 }) => {
-  const [isReady, setIsReady] = useState(false);
   const uniqueId = useId().replace(/:/g, '-');
   const filterId = `glass-filter-${uniqueId}`;
   const redGradId = `red-grad-${uniqueId}`;
@@ -128,7 +113,8 @@ const GlassSurface: React.FC<GlassSurfaceProps> = ({
   }, [generateDisplacementMap]);
 
 
-  useEffect(() => {
+  // Before paint, so the surface never shows a frame with the filter unset.
+  useLayoutEffect(() => {
     updateDisplacementMap();
     [
       { ref: redChannelRef, offset: redOffset },
@@ -143,9 +129,6 @@ const GlassSurface: React.FC<GlassSurfaceProps> = ({
     });
 
     gaussianBlurRef.current?.setAttribute('stdDeviation', displace.toString());
-    
-    // ✅ MARCAR COMO PRONTO IMEDIATAMENTE
-    setIsReady(true);
   }, [
     updateDisplacementMap,
     width,
@@ -295,11 +278,7 @@ const GlassSurface: React.FC<GlassSurfaceProps> = ({
     <div
       ref={containerRef}
       className={`${glassSurfaceClasses} ${focusVisibleClasses} ${className}`}
-      style={{
-        ...getContainerStyles(),
-        opacity: isReady ? 1 : 0,
-        transition: 'opacity 0.05s ease-out'
-      }}
+      style={getContainerStyles()}
     >
       <svg
         className="w-full h-full pointer-events-none absolute inset-0 opacity-0 -z-10"
