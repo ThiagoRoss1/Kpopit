@@ -186,8 +186,9 @@ test.describe('idols navigation @mobile', () => {
     const firstLoader = after.find((f) => f.loader)!;
     const firstProfile = after.find((f) => f.profile === target.artist_name)!;
     expect(firstLoader, 'loader shown').toBeTruthy();
-    // The 200 ms hold plus the router's commit and a paint: 245-280 ms measured, room for a busy machine.
-    expect(firstLoader.t - clicked).toBeLessThan(330);
+    // The 200 ms hold plus the router's commit and a paint (245-280 ms measured, 435 on a busy machine);
+    // well under the 1 s data delay, so the page still switched without waiting for its data.
+    expect(firstLoader.t - clicked).toBeLessThan(700);
     expect(firstProfile.t - firstLoader.t).toBeGreaterThanOrEqual(500);
     // The pressed card while the navigation was held.
     expect(after.filter((f) => f.t < firstLoader.t).some((f) => f.pending), 'pressed state during the hold').toBe(true);
