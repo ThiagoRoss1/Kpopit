@@ -5,17 +5,21 @@ import PageLoader from "../../src/components/Loading/PageLoader";
 import { loadIdolProfile } from "../../src/pages/Idols/idolsData";
 import { holdForData } from "../../src/utils/holdNavigation";
 import type { IdolProfileData } from "../../src/interfaces/gameInterfaces";
-import { fetchIdolProfile } from "../prerender-api";
+import { orNothing, fetchIdolProfile } from "../prerender-api";
 
 // Build time only: each prerendered idol page gets its profile baked in.
 export async function loader({ params }: LoaderFunctionArgs) {
-  return { profile: await fetchIdolProfile(Number(params.id)) };
+  return { profile: await orNothing(fetchIdolProfile(Number(params.id))) };
 }
 
 // Client navigations: the cached profile, else the prerendered .data, else the API (idols added after
 // the build); held up to 200 ms.
 export async function clientLoader({ params, serverLoader }: ClientLoaderFunctionArgs) {
-  const snapshot = async () => ((await serverLoader()) as { profile: IdolProfileData }).profile;
+  const snapshot = async () => {
+    const { profile } = (await serverLoader()) as { profile: IdolProfileData | null };
+    if (!profile) throw new Error("No build-time data");
+    return profile;
+  };
   return { held: await holdForData(loadIdolProfile(params.id ?? "", snapshot)) };
 }
 
@@ -28,7 +32,8 @@ export function HydrateFallback() {
 export default function IdolRoute() {
   const data = useLoaderData<typeof loader | typeof clientLoader>();
   // The prerendered page's profile counts as held data that arrived in time.
-  const held = "profile" in data ? { ready: true as const, value: data.profile } : data.held;
+  // None (preview build with the API down): the page loads its own.
+  const held = "profile" in data ? (data.profile && { ready: true as const, value: data.profile }) : data.held;
   return (
     <HeldData data={held} message="Loading Idol Profile Data..." errorMessage="Error fetching idol profile data.">
       {(profile) => <IdolProfile initialProfile={profile} />}
