@@ -168,9 +168,8 @@ export default function CollectionAlbum() {
     const { open: openZoom, close: closeZoom, mounted: zoomMounted } = zoom;
     const zoomHistoryEntry = useRef(false);
 
-    useEffect(() => {
-        if (!zoomMounted) setZoomTarget(null);
-    }, [zoomMounted]);
+    // Drop the card once the zoom has fully closed (adjusted while rendering, not in an effect).
+    if (!zoomMounted && zoomTarget) setZoomTarget(null);
 
     const openCardZoom = useCallback(
         (target: CardZoomTarget) => {
@@ -257,9 +256,11 @@ export default function CollectionAlbum() {
     // finish/skip; replay from the info modal just re-arms the state.
 
     const [tourActive, setTourActive] = useState(false);
-    useEffect(() => {
-        if (groups && !hasSeenCollectionGuide()) setTourActive(true);
-    }, [groups]);
+    const [tourChecked, setTourChecked] = useState(false);
+    if (groups && !tourChecked) {
+        setTourChecked(true);
+        if (!hasSeenCollectionGuide()) setTourActive(true);
+    }
 
     const firstStickerSpread = useMemo(() => {
         if (!book || !groups) return null;
