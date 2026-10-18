@@ -33,7 +33,7 @@ export const buildIdolSlug = (artistName: string, groupName?: string | null): st
         .filter(Boolean)
         .join("-")
         .normalize("NFD")
-        .replace(/[̀-ͯ]/g, "")
+        .replace(/[\u0300-\u036f]/g, "")
         .toLowerCase()
         .replace(/\s+/g, "-")
         .replace(/[^a-z0-9_-]/g, "")
