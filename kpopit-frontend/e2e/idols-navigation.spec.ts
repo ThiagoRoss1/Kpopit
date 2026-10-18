@@ -112,7 +112,7 @@ test.describe('idols navigation @mobile', () => {
     await page.context().addInitScript(monitor);
   });
 
-  test('/idols ⇄ idol pages: complete on the first frame, scroll kept on back, no blank frame', async ({ page, isMobile }) => {
+  test('/idols ⇄ idol pages: complete on the first frame, scroll kept on back, one history entry per pick, no blank frame', async ({ page, isMobile }) => {
     const loads = countDocumentLoads(page);
     await page.goto(`${PREVIEW}/idols`);
     await expect(page.locator('main a[href^="/idols/"]').first()).toBeVisible();
@@ -149,6 +149,10 @@ test.describe('idols navigation @mobile', () => {
     await press(page, isMobile, page.locator(`main a[href="${href(other)}"]`).first());
     await expect(page.getByRole('img', { name: `${other.artist_name} photo` })).toBeVisible();
     await expectSmooth(page, since, loads, base);
+    // The search pushed one history entry: a single browser back returns to the previous idol.
+    await page.goBack();
+    await expect(page).toHaveURL(`${PREVIEW}${href(target)}`);
+    await expect(page.getByRole('img', { name: `${target.artist_name} photo` })).toBeVisible();
     since = await now(page);
     await press(page, isMobile, page.getByRole('link', { name: 'Back to the idols list' }));
     await expect(page).toHaveURL(`${PREVIEW}/idols`);
