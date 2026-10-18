@@ -1,9 +1,10 @@
 import DroplistBase from "./DroplistBase";
 import { useState, useRef } from "react";
-import { Link, useLocation } from "react-router";
+import { useLocation } from "react-router";
 import { ChevronDown } from "lucide-react";
 import type { DropLink } from "./navigation";
 import Img from "../Img";
+import IntentLink from "../Links/IntentLink";
 
 interface ButtonsDroplistProps {
     buttonName: string;
@@ -53,9 +54,10 @@ const ButtonsDroplist = (props: ButtonsDroplistProps) => {
                             }
                             {/* Regular Item */}
                             return (
-                                <Link 
+                                <IntentLink
                                     key={item.path}
                                     to={item.path}
+                                    onIntent={item.onIntent}
                                     className={`relative flex w-full items-center text-white max-xxs:text-[14px] xxs:text-base xs:text-base xm:text-lg 2xl:text-xl rounded-xl h-15 sm:h-17 px-4 gap-2 hover:bg-neon-pink/80 
                                     transition-[flex,background-color,transform]  ${dropdownClassName || ""} 
                                     ${isPath ? "bg-white/10" : ""} ${isLastOdd ? "xl:col-span-2 xl:justify-center" : ""}`}
@@ -68,7 +70,7 @@ const ButtonsDroplist = (props: ButtonsDroplistProps) => {
                                         )}
                                             <span className="[text-shadow:1.2px_1.6px_2.0px_rgba(255,51,153,1)]">{item.label}</span>
                                     </span>
-                                </Link>
+                                </IntentLink>
                             );
                         })}
                     </div>

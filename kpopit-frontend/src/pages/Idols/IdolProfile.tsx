@@ -1,8 +1,7 @@
 import "./IdolProfile.css";
 import { useState, useMemo, useEffect } from "react";
 import { useQuery } from "@tanstack/react-query";
-import { getIdolsPage, getIdolInfo } from "../../services/api";
-import type { IdolsPageData, IdolProfileData } from "../../interfaces/gameInterfaces";
+import type { IdolProfileData } from "../../interfaces/gameInterfaces";
 import { Link, useParams, useNavigate } from "react-router";
 import { 
     CircleChevronLeft, MicVocal, SquareUserRound, CalendarDays, 
@@ -20,6 +19,8 @@ import { Helmet } from "react-helmet-async";
 import { buildIdolSlug, formatGroupName } from "../../utils/formatters";
 import PageLoader from "../../components/Loading/PageLoader";
 import Img from "../../components/Img";
+import IntentLink from "../../components/Links/IntentLink";
+import { idolProfileQuery, idolsListQuery, prefetchIdolsList } from "./idolsData";
 
 // initialProfile: build-time data for the prerendered page; stale at once, so it refetches.
 function IdolProfile({ initialProfile }: { initialProfile?: IdolProfileData }) {
@@ -32,6 +33,12 @@ function IdolProfile({ initialProfile }: { initialProfile?: IdolProfileData }) {
     const [activeTab, setActiveTab] = useState<string>("Profile");
     const [isFirstLoad, setIsFirstLoad] = useState(true);
     const [searchTerm, setSearchTerm] = useState("");
+    // A new idol (picked from the search) starts with an empty search, set while rendering.
+    const [searchFor, setSearchFor] = useState(id);
+    if (searchFor !== id) {
+        setSearchFor(id);
+        setSearchTerm("");
+    }
 
     useEffect(() => {
         const time = setTimeout(() => setIsFirstLoad(false), 2000);
@@ -43,25 +50,17 @@ function IdolProfile({ initialProfile }: { initialProfile?: IdolProfileData }) {
 
     const {
         data: idolPageData,
-    } = useQuery<IdolsPageData[]>({
-        queryKey: ["idolsPageData"],
-        queryFn: getIdolsPage,
-        staleTime: 1000 * 60 * 60 * 4,
-        refetchOnWindowFocus: false,
-        enabled: true,
-    })
+    } = useQuery({ ...idolsListQuery, refetchOnWindowFocus: false });
 
     const {
         data: idolProfileData,
         isLoading: isLoadingIdolProfileData,
         isError: isErrorIdolProfileData,
         refetch: refetchIdolProfileData,
-    } = useQuery<IdolProfileData>({
-        queryKey: ["idolProfileData", id],
-        queryFn: () => getIdolInfo(Number(id)),
+    } = useQuery({
+        ...idolProfileQuery(id ?? ""),
         initialData: initialProfile,
         initialDataUpdatedAt: 0,
-        staleTime: 1000 * 60 * 60 * 4,
         refetchOnWindowFocus: false,
         enabled: !!id,
     });
@@ -128,7 +127,8 @@ function IdolProfile({ initialProfile }: { initialProfile?: IdolProfileData }) {
         ));
     }, [gameModesAvailable]);
     
-    // The prerendered page already has the profile; the loader only shows on a client navigation.
+    // The route hands the page its profile (prerendered or loaded before the switch); this only shows
+    // if the cache lost it.
     if (!idolProfileData) {
         return (
             <PageLoader
@@ -165,11 +165,13 @@ function IdolProfile({ initialProfile }: { initialProfile?: IdolProfileData }) {
             <div className="flex flex-col relative max-w-7xl mx-auto">
                 <div className="flex flex-row w-full mt-7 justify-between items-center mb-8">
                     <div className="flex flex-row w-full justify-center md:justify-start items-center gap-6">
-                        <Link
-                            to="/idols" 
+                        <IntentLink
+                            to="/idols"
+                            onIntent={prefetchIdolsList}
+                            aria-label="Back to the idols list"
                             className="group w-14 h-14 sm:w-15 sm:h-15 rounded-full flex items-center justify-center hover:scale-105 transition-transform duration-300">
                             <CircleChevronLeft className="text-white/50 group-hover:text-white w-15 h-15 transition-colors duration-300" size={24} />
-                        </Link>
+                        </IntentLink>
 
                         <IdolsProfileSearch
                             idolsData={idolPageData || []} 

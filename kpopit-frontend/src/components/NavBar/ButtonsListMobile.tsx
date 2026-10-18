@@ -4,6 +4,7 @@ import { useState, useEffect, useRef } from "react";
 import { GAMES_LINKS, IDOLS_LINKS } from "./navigation";
 import { ChevronDown } from "lucide-react";
 import Img from "../Img";
+import IntentLink from "../Links/IntentLink";
 
 
 interface ButtonsListMobileProps {
@@ -109,8 +110,9 @@ const ButtonsListMobile = (props: ButtonsListMobileProps) => {
                                         isPath ? "bg-white/10" : "bg-black/0"
                                     }`}
                                 >
-                                    <Link 
-                                        to={game.path} 
+                                    <IntentLink
+                                        to={game.path}
+                                        onIntent={game.onIntent}
                                         onClick={onClose} 
                                         className="flex items-center justify-center gap-3 w-full"
                                     >
@@ -127,7 +129,7 @@ const ButtonsListMobile = (props: ButtonsListMobileProps) => {
                                             )}
                                             <span className="[text-shadow:1.2px_1.6px_2.0px_rgba(255,51,153,1)]">{game.label}</span>
                                         </span>
-                                    </Link>
+                                    </IntentLink>
                                 </li>
                             );
                         })}
@@ -178,8 +180,9 @@ const ButtonsListMobile = (props: ButtonsListMobileProps) => {
                                         isPath ? "bg-white/10" : "bg-black/80"
                                     }`}
                                 >
-                                    <Link 
-                                        to={idol.path} 
+                                    <IntentLink
+                                        to={idol.path}
+                                        onIntent={idol.onIntent}
                                         onClick={onClose}
                                         className="flex items-center gap-3 w-full"
                                     >
@@ -196,7 +199,7 @@ const ButtonsListMobile = (props: ButtonsListMobileProps) => {
                                             )}
                                             <span className="[text-shadow:1.2px_1.6px_2.0px_rgba(255,51,153,1)]">{idol.label}</span>
                                         </span>
-                                    </Link>
+                                    </IntentLink>
                                 </li>
                             );
                         })}

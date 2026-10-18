@@ -1,16 +1,16 @@
 import { useEffect, useState, type ReactNode } from "react";
-import { isRouteErrorResponse, Links, Meta, Outlet, Scripts, useRouteError } from "react-router";
-import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
+import { isRouteErrorResponse, Links, Meta, Outlet, Scripts, ScrollRestoration, useRouteError } from "react-router";
+import { QueryClientProvider } from "@tanstack/react-query";
 import { HelmetProvider } from "react-helmet-async";
 import { SpeedInsights } from "@vercel/speed-insights/react";
 import { Analytics } from "@vercel/analytics/react";
 import "../src/assets/fonts/fonts.css";
 import "../src/index.css";
 import dynaPuffLatin from "../src/assets/fonts/dynapuff-latin-wght-normal.woff2?url";
-import ScrollToTop from "../src/hooks/useScrollToTop";
 import { AuthProvider } from "../src/contexts/AuthProvider";
 import MaintenancePage from "../src/pages/Maintenance/MaintenancePage";
 import { printEasterEgg } from "../src/utils/consoleEasterEgg";
+import { getQueryClient } from "../src/services/queryClient";
 import PageLoader from "../src/components/Loading/PageLoader";
 
 const WEB_APPLICATION_LD = {
@@ -109,6 +109,8 @@ export function Layout({ children }: { children: ReactNode }) {
       </head>
       <body>
         {children}
+        {/* New pages start at the top; back/forward returns to where the page was left. */}
+        <ScrollRestoration />
         <Scripts />
       </body>
     </html>
@@ -116,8 +118,8 @@ export function Layout({ children }: { children: ReactNode }) {
 }
 
 export default function App() {
-  // One client per render tree: prerendering many pages in one process must not share a cache.
-  const [queryClient] = useState(() => new QueryClient());
+  // The browser's shared client (route loaders fill it too); a fresh one per prerendered page.
+  const [queryClient] = useState(getQueryClient);
 
   useEffect(() => {
     printEasterEgg();
@@ -127,7 +129,6 @@ export default function App() {
     <>
       <QueryClientProvider client={queryClient}>
         <HelmetProvider>
-          <ScrollToTop />
           <AuthProvider>
             {import.meta.env.VITE_MAINTENANCE_MODE === "true" ? <MaintenancePage type="collection" /> : <Outlet />}
           </AuthProvider>

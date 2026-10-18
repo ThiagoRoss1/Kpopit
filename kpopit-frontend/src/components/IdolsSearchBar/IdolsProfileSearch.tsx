@@ -2,9 +2,11 @@ import "./IdolsSearchBar.css";
 import { useEffect, useRef, useState } from "react";
 import { useIdolSearch } from "../../hooks/useIdolSearch";
 import type { IdolsPageData } from "../../interfaces/gameInterfaces";
-import { Link, useNavigate } from "react-router";
+import { useNavigate } from "react-router";
 import { buildIdolSlug } from "../../utils/formatters";
 import Img from "../Img";
+import IntentLink from "../Links/IntentLink";
+import { prefetchIdolProfile } from "../../pages/Idols/idolsData";
 
 interface IdolsProfileSearchProps {
     idolsData: IdolsPageData[];
@@ -87,14 +89,12 @@ const IdolsProfileSearch = (props: IdolsProfileSearchProps) => {
                     border-2 border-white/50 max-h-60 sm:max-h-60`}>
                         {searchResults.map((idol) => {
                             return (
-                                <Link 
+                                // The list stays (the picked row pressed) until the new idol shows; the page then clears the search.
+                                <IntentLink
                                     to={`/idols/${idol.id}/${buildIdolSlug(idol.artist_name, idol.group_name)}`}
                                     key={idol.id}
-                                    onClick={() => {
-                                        onChoose(idol)
-                                        onChange?.("");
-                                        setShowList(false);
-                                    }}
+                                    onIntent={() => prefetchIdolProfile(idol.id)}
+                                    onClick={() => onChoose(idol)}
                                 >
                                     <li 
                                         className="group relative px-4 py-3 bg-ink/80 hover:bg-[#1f1f1f] cursor-pointer 
@@ -122,7 +122,7 @@ const IdolsProfileSearch = (props: IdolsProfileSearchProps) => {
                                             </div>
                                         )}
                                     </li>
-                                </Link>
+                                </IntentLink>
                             )}).filter((_, index) => index < 20)}
                     </ul>
                     )}
