@@ -30,7 +30,7 @@ test.describe('prerendered pages without JavaScript', () => {
     // A plain-ASCII name, so the page text matches the slug's spelling.
     idol = idols.find((i) => i.group_name && /^[A-Za-z0-9 ]+$/.test(i.artist_name))!;
 
-    const build = spawnSync(process.execPath, [path.join(FRONTEND, 'node_modules/@react-router/dev/bin.js'), 'build'], {
+    const build = spawnSync(process.execPath, [path.join(FRONTEND, 'node_modules/@react-router/dev/bin.cjs'), 'build'], {
       cwd: FRONTEND, stdio: 'inherit', shell: false,
       // The preview proxies /api to the test backend, so the built app calls its own origin.
       env: { ...process.env, E2E_ISOLATED: 'true', PRERENDER_API_URL: 'http://127.0.0.1:5000', VITE_API_URL: PREVIEW },
