@@ -11,6 +11,7 @@ import ScrollToTop from "../src/hooks/useScrollToTop";
 import { AuthProvider } from "../src/contexts/AuthProvider";
 import MaintenancePage from "../src/pages/Maintenance/MaintenancePage";
 import { printEasterEgg } from "../src/utils/consoleEasterEgg";
+import PageLoader from "../src/components/Loading/PageLoader";
 
 const WEB_APPLICATION_LD = {
   "@context": "https://schema.org",
@@ -139,10 +140,15 @@ export default function App() {
   );
 }
 
-// Non-prerendered routes start from the SPA fallback: an empty body until the route loads, like
-// the old index.html.
+// __spa-fallback.html (paths that aren't prerendered): the navbar's bar and the loader, in the
+// places the real navbar and page take, so nothing jumps when the app takes over.
 export function HydrateFallback() {
-  return null;
+  return (
+    <div className="min-h-screen bg-black">
+      <div aria-hidden className="sticky top-0 z-100 w-full h-12 sm:h-15 border-b border-neon-pink/40 bg-black/50" />
+      <PageLoader />
+    </div>
+  );
 }
 
 // Last resort when a page crashes outside its own sections: a plain page with a way back.

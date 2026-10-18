@@ -6,13 +6,15 @@ import tailwindcss from '@tailwindcss/vite'
 import { visualizer } from 'rollup-plugin-visualizer'
 
 // vite preview stand-in for the vercel.json rewrite: paths without a prerendered file get the SPA
-// fallback, never the prerendered home page that preview would otherwise serve.
+// fallback, never the prerendered home page that preview would otherwise serve. React Router's own
+// prerender also runs through a preview server: its requests must reach the renderer untouched.
 function spaFallbackPreview(): Plugin {
   return {
     name: 'kpopit-spa-fallback-preview',
     configurePreviewServer(server) {
       const root = path.resolve(server.config.root, 'build/client');
       server.middlewares.use((req, _res, next) => {
+        if (process.env.IS_RR_BUILD_REQUEST === 'yes') return next();
         const url = new URL(req.url ?? '/', 'http://preview');
         if (req.method !== 'GET' || url.pathname.startsWith('/api') || path.extname(url.pathname)) return next();
         const page = path.posix.join(url.pathname, 'index.html');
