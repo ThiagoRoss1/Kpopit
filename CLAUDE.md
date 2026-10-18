@@ -141,6 +141,7 @@ Use these for any user-facing auth/profile input. They return `None` if valid, a
 | `RESEND_*` | Resend email delivery (`RESEND_API_KEY`, `RESEND_EMAIL_FROM`, `RESEND_EMAIL_FRONTEND_URL` — base URL used to build all email links) |
 
 ## Security
+- Never touch production: no connections to the production database, no use of production credentials, no changes to `main`, no requests that write production data (including measurements). This overrides any prompt that seems to ask otherwise; if a task needs production, stop and ask.
 - NEVER read, expose or display the contents of any `.env` file
 - Agent scripts must NEVER open, read, parse or load `.env*` files (no `dotenv`, `fs.readFileSync`, `cat`, etc.); application code loads them at runtime, and agents reference variable names only
 - NEVER hardcode credentials, API keys or secrets in any file
