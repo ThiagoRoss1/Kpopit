@@ -1,5 +1,5 @@
 import { useQuery, useQueryClient } from "@tanstack/react-query";
-import { useState, useEffect, useCallback, useRef } from "react";
+import { useState, useCallback, useRef } from "react";
 import { getAllIdols, getUserToken, getUserStats } from "../services/api";
 import { encryptToken, decryptToken } from "../utils/tokenEncryption";
 import { useTransferDataLogic } from "./useTransferDataLogic";
@@ -8,9 +8,9 @@ import { useIsMobile } from "./useIsDevice";
 import { ALL_IDOLS_KEY, persistingFetch, readPersistedList } from "../utils/persistedList";
 
 export const useSharedGameData = () => {
-    const [isInitialized, setIsInitialized] = useState<boolean>(false);
-    // Prerender has no storage and must not fetch; the browser decides on its first render.
-    const [shouldFetchToken, setShouldFetchToken] = useState<boolean>(() =>
+    // Decided once per mount: only a browser without a stored token asks for a new one
+    // (prerender has no storage and must not fetch).
+    const [shouldFetchToken] = useState<boolean>(() =>
         typeof window !== "undefined" && !localStorage.getItem("userToken"));
 
     // Is mobile
@@ -27,6 +27,8 @@ export const useSharedGameData = () => {
         enabled: shouldFetchToken,
         queryKey: ["userToken"],
         queryFn: getUserToken,
+        // One token per browser: never refetched once issued.
+        staleTime: Infinity,
         refetchOnWindowFocus: false,
     });
 
@@ -45,7 +47,6 @@ export const useSharedGameData = () => {
                 try {
                     const token = await decryptToken(encrypted);
                     decryptedTokenRef.current = token;
-                    setIsInitialized(true);
                     return token;
                 } catch (error) {
                     lastError = error;
@@ -63,19 +64,22 @@ export const useSharedGameData = () => {
         const encryptedToken = await encryptToken(userToken.data.token);
         localStorage.setItem("userToken", encryptedToken);
         decryptedTokenRef.current = userToken.data.token;
-        setIsInitialized(true);
         return userToken.data.token;
         }
 
         return null;
     }, [userToken.data]);
 
-    useEffect(() => {
-        if (localStorage.getItem("userToken") || userToken.data) {
-        initUser();
-        setShouldFetchToken(false);
-        }
-    }, [initUser, userToken.data]);
+    // Ready once the stored token is decrypted (or a new one is stored); the game queries wait on it.
+    const tokenReady = useQuery({
+        queryKey: ["decryptedUserToken", userToken.data?.token ?? null],
+        queryFn: async () => (await initUser()) ?? null,
+        enabled: typeof window !== "undefined" && (!!localStorage.getItem("userToken") || !!userToken.data),
+        staleTime: Infinity,
+        retry: false,
+        refetchOnWindowFocus: false,
+    });
+    const isInitialized = !!tokenReady.data;
 
     // All idols list
     const {
