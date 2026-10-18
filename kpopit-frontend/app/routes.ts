@@ -1,7 +1,16 @@
+/// <reference types="node" />
 import { type RouteConfig, index, layout, route } from "@react-router/dev/routes";
+import { loadEnv } from "vite";
 
-// Runs at build time, where VITE_* flags aren't loaded: the env-gated pages (Collections, admin)
-// are always registered and check their flag in the route module instead.
+// Runs in Node (build, dev start), where Vite hasn't loaded the VITE_* values yet: read them the
+// same way. Isolated E2E runs pass everything through the process env (no .env files).
+const env: Record<string, string | undefined> = process.env.E2E_ISOLATED === "true"
+  ? process.env
+  : { ...loadEnv(process.env.NODE_ENV === "production" ? "production" : "development", process.cwd(), "VITE_"), ...process.env };
+
+// Without the flag the route doesn't exist, so the admin code isn't in the build at all.
+const ADMIN_ROUTE = env.VITE_ADMIN_ENABLED === "true" ? env.VITE_ADMIN_ROUTE?.replace(/^\/+/, "") : undefined;
+
 export default [
   layout("routes/main-layout.tsx", [
     index("routes/home.tsx"),
@@ -24,7 +33,8 @@ export default [
     layout("routes/protected.tsx", [
       route("profile/:username", "routes/profile.tsx"),
     ]),
-    // Unknown paths go home; the admin page also lives here because its path comes from an env var.
+    ...(ADMIN_ROUTE ? [route(ADMIN_ROUTE, "routes/admin.tsx")] : []),
+    // Unknown paths go home.
     route("*", "routes/catch-all.tsx"),
   ]),
 ] satisfies RouteConfig;
