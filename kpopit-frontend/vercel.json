@@ -3,6 +3,7 @@
         "deploymentEnabled": {
             "main": true,
             "dev": true,
+            "major-patch": true,
             "**": false
         }
     },
