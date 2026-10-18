@@ -267,7 +267,7 @@ const UserProfile = () => {
 
                                 {/* Polaroid avatar */}
                                 <div className="relative flex h-fit px-2 pt-2 pb-7 mt-1.5 mb-1 rounded-sm bg-[#f4f0e8]
-                                    shadow-[4px_4px_0px_#ff3399] -rotate-[1.5deg] transform-gpu">
+                                    shadow-[4px_4px_0px_#ff3399] rotate-[-1.5deg] transform-gpu">
 
                                     {/* Washi tape ribbons */}
                                     <span aria-hidden="true"
@@ -281,7 +281,7 @@ const UserProfile = () => {
                                         shadow-[1px_1px_0px_rgba(0,0,0,0.4)]" />
 
                                     <div className="flex flex-col items-center xxs:flex-row xxs:justify-center xxs:items-center gap-3 xxs:gap-6 sm:gap-8">
-                                        <div className="grid place-items-center w-28 sxs:w-32 h-28 sxs:h-32 rounded-sm overflow-hidden bg-transparent -rotate-[1.5deg] border-t-2 border-l-2 border-neon-pink shrink-0">
+                                        <div className="grid place-items-center w-28 sxs:w-32 h-28 sxs:h-32 rounded-sm overflow-hidden bg-transparent rotate-[-1.5deg] border-t-2 border-l-2 border-neon-pink shrink-0">
                                             {avatarSrc ? (
                                                 <Img
                                                     src={avatarSrc}
@@ -299,7 +299,7 @@ const UserProfile = () => {
                                             )}
                                         </div>
 
-                                        <div className="absolute left-0 right-0 bottom-1.5 text-center text-[13px] -rotate-[1.5deg] tracking-[0.5px] text-[#444]">
+                                        <div className="absolute left-0 right-0 bottom-1.5 text-center text-[13px] rotate-[-1.5deg] tracking-[0.5px] text-[#444]">
                                             ~ KpopIt ID ~
                                         </div>
                                     </div>
