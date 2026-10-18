@@ -55,7 +55,7 @@ export default function Collection() {
                             <span className="text-neon-pink">Vol. I · Est. 2026</span>
                         </div>
                         <div className="mt-3 flex flex-col items-center gap-2 text-center md:flex-row md:flex-wrap md:items-end md:justify-between md:gap-4 md:text-left">
-                            <h1 className={`font-serif text-center text-[clamp(47.5px,8vw,88px)] leading-[0.82] -tracking-[0.02em] md:text-left ${textMain}`}>
+                            <h1 className={`font-serif text-center text-[clamp(47.5px,8vw,88px)] leading-[0.82] tracking-[-0.02em] md:text-left ${textMain}`}>
                                 Collections<span className="text-neon-pink">.</span>
                             </h1>
                             <div className="relative flex items-center gap-2.5 md:pb-2">
