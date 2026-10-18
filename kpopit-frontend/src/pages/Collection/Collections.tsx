@@ -1,7 +1,7 @@
 import './collections.css';
 import { useQuery } from '@tanstack/react-query';
 import { Helmet } from 'react-helmet-async';
-import { getCollectionsList } from '../../services/api';
+import { collectionsListQuery } from './collectionData';
 import CollectionsBackdrop from './components/CollectionsBackdrop';
 import { CollectionCard } from './components/CollectionCard';
 import { ThemedCard } from './components/ThemedCard';
@@ -22,11 +22,10 @@ export default function Collection() {
 
     const [night, setNight] = useCollectionNight();
 
+    // Usually already cached by the route loader; on a first visit it waits for the session.
     const { data: collections, isLoading } = useQuery({
-        queryKey: ['collectionsList'],
-        queryFn: getCollectionsList,
+        ...collectionsListQuery,
         enabled: !isAuthLoading,
-        staleTime: 1000 * 60 * 5,
         refetchOnWindowFocus: false,
     });
     const totalStickers = collections?.reduce((sum, collection) => sum + collection.total_cards, 0);

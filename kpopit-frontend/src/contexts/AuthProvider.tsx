@@ -8,6 +8,7 @@ import { useClearGameStorage } from "../hooks/useClearGameStorage";
 import { applyRestoredSession } from "../utils/applyRestoredSession";
 import type { MeResponse } from "../interfaces/authInterfaces";
 import { useHydrated } from "../hooks/useHydrated";
+import { hasSessionMarker } from "../utils/sessionMarker";
 
 interface AuthProviderProps {
     children: ReactNode;
@@ -18,10 +19,6 @@ type RestoreOutcome =
     | { kind: "transient" }
     | { kind: "rejected" }
     | { kind: "skipped" };
-
-const hasSessionMarker = () =>
-    typeof window !== 'undefined' &&
-    (localStorage.getItem('kpopit_session') ?? sessionStorage.getItem('kpopit_session')) !== null;
 
 export const AuthProvider = ({ children }: AuthProviderProps) => {
     // Without a session marker there is nothing to restore, so the first render is already final.
@@ -173,15 +170,16 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
         };
     }, [restoreFromServer, forgetLostSession, applyOutcome]);
 
-    // Collection queries aren't keyed by user, so refetch them when the auth state flips.
+    // Collection queries aren't keyed by user: when the auth state flips, drop the old user's data
+    // (not just mark it stale) so no page or route loader shows it while the new one loads.
 
     const prevAuthRef = useRef<boolean | null>(null);
     
     useEffect(() => {
         if (state.isLoading) return;
         if (prevAuthRef.current !== null && prevAuthRef.current !== state.isAuthenticated) {
-            queryClient.invalidateQueries({ queryKey: ['collectionsList'] });
-            queryClient.invalidateQueries({ queryKey: ['collectionAlbum'] });
+            void queryClient.resetQueries({ queryKey: ['collectionsList'] });
+            void queryClient.resetQueries({ queryKey: ['collectionAlbum'] });
         }
         prevAuthRef.current = state.isAuthenticated;
     }, [state.isAuthenticated, state.isLoading, queryClient]);

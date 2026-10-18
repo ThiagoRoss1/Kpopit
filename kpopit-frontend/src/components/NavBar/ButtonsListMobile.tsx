@@ -4,6 +4,7 @@ import { useState, useEffect, useRef } from "react";
 import { GAMES_LINKS, IDOLS_LINKS } from "./navigation";
 import { ChevronDown } from "lucide-react";
 import Img from "../Img";
+import { prefetchCollectionsList } from "../../pages/Collection/collectionData";
 import IntentLink from "../Links/IntentLink";
 
 
@@ -209,8 +210,9 @@ const ButtonsListMobile = (props: ButtonsListMobileProps) => {
                 {/* Collection */}
                 {import.meta.env.VITE_COLLECTION_ENABLED === "true" && (
                     <li className="w-full flex items-center justify-center list-none">
-                        <Link
+                        <IntentLink
                             to="/collections"
+                            onIntent={prefetchCollectionsList}
                             onClick={onClose}
                             className={`flex w-full max-xxs:h-12 xxs:h-14 xs:h-16 bg-black rounded-2xl items-center justify-center text-center ${text}`}>
                                 <span className={text}>
@@ -219,7 +221,7 @@ const ButtonsListMobile = (props: ButtonsListMobileProps) => {
                                     )}
                                     Collections
                                 </span>
-                        </Link>
+                        </IntentLink>
                     </li>
                 )}
 

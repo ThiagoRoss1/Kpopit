@@ -22,7 +22,7 @@ import { getCollectionFxAttrs } from './collectionFxAttrs';
 import { useCollectionFx } from './useCollectionFx';
 import { useCollectionNight } from './useCollectionNight';
 import { useDisclosure } from '../../hooks/useDisclosure';
-import { getCollectionAlbum, getCollectionsList } from '../../services/api';
+import { collectionAlbumQuery, collectionsListQuery } from './collectionData';
 import { useIsLg, isSafari } from '../../hooks/useIsDevice';
 import type { AlbumGroup } from '../../interfaces/albumInterfaces';
 import {
@@ -106,19 +106,16 @@ export default function CollectionAlbum() {
     const parsedId = Number(collectionId);
     const validId = Number.isInteger(parsedId) && parsedId > 0;
 
+    // Usually already cached by the route loader; on a first visit the page loads them itself.
     const { data, isLoading, isError, error } = useQuery({
-        queryKey: ['collectionAlbum', parsedId],
-        queryFn: () => getCollectionAlbum(parsedId),
+        ...collectionAlbumQuery(parsedId),
         enabled: validId,
-        staleTime: 1000 * 60 * 5,
         refetchOnWindowFocus: false,
     });
-    
+
     const { data: collections } = useQuery({
-        queryKey: ['collectionsList'],
-        queryFn: getCollectionsList,
+        ...collectionsListQuery,
         enabled: validId,
-        staleTime: 1000 * 60 * 5,
         refetchOnWindowFocus: false,
     });
 

@@ -8,6 +8,8 @@ import { GAMES_LINKS, IDOLS_LINKS } from "./navigation";
 import { Menu, X } from "lucide-react";
 import { useAuth } from "../../hooks/useAuth";
 import Img from "../Img";
+import { prefetchCollectionsList } from "../../pages/Collection/collectionData";
+import IntentLink from "../Links/IntentLink";
 
 export type PageName = "classic" | "blurry" | "contact" | "idols" | "login" | "register" | "profile" | "pixelated" | "collections";
 const MODES: PageName[] = ["classic", "blurry", "contact", "idols", "login", "register", "profile", "pixelated", "collections"];
@@ -101,12 +103,13 @@ const NavBar = () => {
                     />
                     {/* Collections */}
                     {import.meta.env.VITE_COLLECTION_ENABLED === "true" && (
-                    <Link
+                    <IntentLink
                         to="/collections"
+                        onIntent={prefetchCollectionsList}
                         className="flex items-center justify-center rounded-3xl hover:cursor-pointer hover:scale-105 hover:bg-[#b43777] transition-all
                         duration-300 transform-gpu bg-transparent max-xxs:w-18 max-xxs:h-10 xxs:w-22 xxs:h-10 xs:w-24 xs:h-10 sm:w-30 sm:h-12">
                             <span className="flex flex-row text-white max-xxs:text-[14px] xxs:text-[14px] sm:text-base gap-1">Collections</span>
-                    </Link>
+                    </IntentLink>
                     )}
                     {/* Contact */}
                     <Link

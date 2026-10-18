@@ -1,4 +1,5 @@
-import { Link } from 'react-router';
+import IntentLink from '../../../components/Links/IntentLink';
+import { prefetchCollectionAlbum } from '../collectionData';
 import AlbumCover from '../../../components/Albums/AlbumOfCol/pages/AlbumCover';
 import type { CollectionListItem } from '../../../interfaces/albumInterfaces';
 import { ArrowRight } from 'lucide-react';
@@ -69,6 +70,7 @@ function AlbumCoverThumb({ variant = 'front' }: { variant?: 'front' | 'back' }) 
 export function CollectionCard({ collection, night }: { collection: CollectionListItem; night: boolean }) {
     const koreanLabel = `케이팝잇 ● 앨범 ${collection.collection_id}`;
     const albumHref = `/collections/${collection.collection_id}/${albumSlug(collection.name)}`;
+    const prefetchAlbum = () => prefetchCollectionAlbum(collection.collection_id);
 
     const textMain = night ? 'text-white' : 'text-ink';
     const textMuted = night ? 'text-white/62' : 'text-[#6b5f55]';
@@ -82,9 +84,9 @@ export function CollectionCard({ collection, night }: { collection: CollectionLi
                     : 'border-ink bg-white shadow-[6px_6px_0px_#0a0a0a]'
             }`}
         >
-            <Link to={albumHref} className="relative flex-none transition-transform duration-150 active:scale-95">
+            <IntentLink to={albumHref} onIntent={prefetchAlbum} className="relative flex-none transition-transform duration-150 active:scale-95">
                 <AlbumCoverThumb />
-            </Link>
+            </IntentLink>
 
             <div className="flex w-full min-w-0 flex-col items-center md:w-auto md:flex-1 md:basis-70 md:items-start">
                 {collection.album_label && (
@@ -100,8 +102,9 @@ export function CollectionCard({ collection, night }: { collection: CollectionLi
                     {collection.description}
                 </p>
                 <div className="flex flex-wrap items-center justify-center gap-2.5 pt-4 md:mt-auto md:justify-start">
-                    <Link
+                    <IntentLink
                         to={albumHref}
+                        onIntent={prefetchAlbum}
                         className={`flex justify-center items-center gap-1 rounded-full border-2 bg-neon-pink px-5.5 py-2.75 text-[14px] font-bold text-white 
                         transition-all duration-500 transform-gpu hover:brightness-110 hover:scale-105 active:translate-y-1 ${
                             night
@@ -110,7 +113,7 @@ export function CollectionCard({ collection, night }: { collection: CollectionLi
                         }`}
                     >
                         Open album <ArrowRight className="inline-block w-4 h-4" />
-                    </Link>
+                    </IntentLink>
 
                     <div className="flex items-center justify-center gap-2.5 max-md:basis-full">
                         <Pill night={night}>{collection.total_cards} stickers</Pill>
