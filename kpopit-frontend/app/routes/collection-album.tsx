@@ -18,7 +18,6 @@ export async function clientLoader({ params }: ClientLoaderFunctionArgs) {
 export default function CollectionAlbumRoute() {
   const { held } = useLoaderData<typeof clientLoader>();
   if (!ENABLED) return <Navigate to="/" replace />;
-  if (!held) return <CollectionAlbum />;
   return (
     <HeldData data={held} message="Loading Kpopit..." errorMessage="Error loading the album.">
       {() => <CollectionAlbum />}

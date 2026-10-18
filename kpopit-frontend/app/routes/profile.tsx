@@ -12,7 +12,6 @@ export async function clientLoader() {
 
 export default function ProfileRoute() {
   const { held } = useLoaderData<typeof clientLoader>();
-  if (!held) return <UserProfile />;
   return (
     <HeldData data={held} message="Loading Kpopit..." errorMessage="Error loading your profile.">
       {() => <UserProfile />}

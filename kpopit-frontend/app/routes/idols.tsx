@@ -26,9 +26,10 @@ export function HydrateFallback() {
 
 export default function IdolsRoute() {
   const data = useLoaderData<typeof loader | typeof clientLoader>();
-  if ("idols" in data) return <IdolsList initialIdols={data.idols} />;
+  // The prerendered page's list counts as held data that arrived in time.
+  const held = "idols" in data ? { ready: true as const, value: data.idols } : data.held;
   return (
-    <HeldData data={data.held} message="Loading Idols Data..." errorMessage="Error fetching idols data.">
+    <HeldData data={held} message="Loading Idols Data..." errorMessage="Error fetching idols data.">
       {(idols) => <IdolsList initialIdols={idols} />}
     </HeldData>
   );

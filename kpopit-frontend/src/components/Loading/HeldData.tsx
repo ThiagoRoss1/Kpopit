@@ -4,25 +4,28 @@ import type { Held } from "../../utils/holdNavigation";
 import PageLoader from "./PageLoader";
 
 type HeldDataProps<T> = {
-    data: Held<T>;
+    // null: nothing was loaded ahead (the page loads its own data).
+    data: Held<T> | null;
     message: string;
     errorMessage: string;
-    children: (value: T) => ReactNode;
+    children: (value: T | undefined) => ReactNode;
 };
 
 // Renders a route's held data: the page at once when it arrived in time, otherwise the loader
-// until it does. Keyed by location so a new page in the same route shows its own loader.
+// until it does. One tree for both, so a same-route navigation with ready data keeps the page
+// mounted (open modals, typed input); only a pending one gets a fresh boundary for its loader.
 export default function HeldData<T>({ data, message, errorMessage, children }: HeldDataProps<T>) {
     const location = useLocation();
     const revalidator = useRevalidator();
-    if (data.ready) return children(data.value);
+    const pending = data !== null && !data.ready;
+    const resolve = data === null ? undefined : data.ready ? data.value : data.promise;
     return (
-        <Suspense key={location.key} fallback={<PageLoader message={message} />}>
+        <Suspense key={pending ? location.key : "ready"} fallback={<PageLoader message={message} />}>
             <Await
-                resolve={data.promise}
+                resolve={resolve}
                 errorElement={<PageLoader error errorMessage={errorMessage} onRetry={() => revalidator.revalidate()} />}
             >
-                {(value) => children(value as T)}
+                {(value) => children(value as T | undefined)}
             </Await>
         </Suspense>
     );

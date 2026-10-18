@@ -15,7 +15,6 @@ export async function clientLoader() {
 export default function CollectionsRoute() {
   const { held } = useLoaderData<typeof clientLoader>();
   if (!ENABLED) return <Navigate to="/" replace />;
-  if (!held) return <Collections />;
   return (
     <HeldData data={held} message="Loading Kpopit..." errorMessage="Error loading your collections.">
       {() => <Collections />}

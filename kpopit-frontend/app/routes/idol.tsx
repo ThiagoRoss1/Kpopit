@@ -27,9 +27,10 @@ export function HydrateFallback() {
 
 export default function IdolRoute() {
   const data = useLoaderData<typeof loader | typeof clientLoader>();
-  if ("profile" in data) return <IdolProfile initialProfile={data.profile} />;
+  // The prerendered page's profile counts as held data that arrived in time.
+  const held = "profile" in data ? { ready: true as const, value: data.profile } : data.held;
   return (
-    <HeldData data={data.held} message="Loading Idol Profile Data..." errorMessage="Error fetching idol profile data.">
+    <HeldData data={held} message="Loading Idol Profile Data..." errorMessage="Error fetching idol profile data.">
       {(profile) => <IdolProfile initialProfile={profile} />}
     </HeldData>
   );
