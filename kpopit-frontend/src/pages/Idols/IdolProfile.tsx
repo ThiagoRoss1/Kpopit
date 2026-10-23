@@ -15,7 +15,8 @@ import { getNationalityFlag } from "../../utils/getFlags";
 import { useDateLocale } from "../../hooks/useDateLocale";
 import IdolsProfileSearch from "../../components/IdolsSearchBar/IdolsProfileSearch";
 import { useHydrated } from "../../hooks/useHydrated";
-import { Helmet } from "react-helmet-async";
+import PageMeta, { SITE_URL } from "../../components/Seo/PageMeta";
+import { resolveCdnUrl } from "../../utils/imageUrl";
 import { buildIdolSlug, formatGroupName } from "../../utils/formatters";
 import PageLoader from "../../components/Loading/PageLoader";
 import Img from "../../components/Img";
@@ -140,13 +141,26 @@ function IdolProfile({ initialProfile }: { initialProfile?: IdolProfileData }) {
         );
     }
 
-    // Helmet SEO
+    // Page meta (title, link previews, structured data)
     const artistName = idolProfileData.idol_profile.artist_name;
     const groupName = idolProfileData.idol_career.group_name;
     // `groupName` is null when the idol has no active career row - keep the copy readable instead of printing "null".
     const nameWithGroup = groupName ? `${artistName} (${groupName})` : artistName;
     const ofGroup = groupName ? `${artistName} of ${groupName}` : artistName;
-    const canonicalUrl = `https://kpopit.net/idols/${idolProfileData.idol_profile.idol_id}/${buildIdolSlug(artistName, groupName)}`;
+    const canonicalPath = `/idols/${idolProfileData.idol_profile.idol_id}/${buildIdolSlug(artistName, groupName)}`;
+    const idolImage = resolveCdnUrl(idolProfileData.idol_profile.image_path, idolProfileData.idol_profile.image_version) ?? undefined;
+    const idolJsonLd = {
+        "@context": "https://schema.org",
+        "@type": "ProfilePage",
+        "url": `${SITE_URL}${canonicalPath}`,
+        "mainEntity": {
+            "@type": "Person",
+            "name": artistName,
+            ...(idolProfileData.idol_profile.real_name && { "alternateName": idolProfileData.idol_profile.real_name }),
+            ...(groupName && { "memberOf": { "@type": "MusicGroup", "name": groupName } }),
+            ...(idolImage && { "image": idolImage }),
+        },
+    };
     const idolTitle = `${nameWithGroup} · Stats & Profile - KpopIt`;
     const idolDescription = `Stats and profile for ${ofGroup} on KpopIt.`;
     const ogTitle = `${nameWithGroup} · KpopIt`;
@@ -154,13 +168,14 @@ function IdolProfile({ initialProfile }: { initialProfile?: IdolProfileData }) {
 
     return (
         <div className="w-full min-h-full bg-ink">
-            <Helmet>
-                <title>{idolTitle}</title>
-                <meta name="description" content={idolDescription} />
-                <link rel="canonical" href={canonicalUrl} />
-                <meta property="og:title" content={ogTitle} />
-                <meta property="og:description" content={ogDescription} />
-            </Helmet>
+            <PageMeta
+                title={idolTitle}
+                description={idolDescription}
+                path={canonicalPath}
+                image={idolImage}
+                social={{ title: ogTitle, description: ogDescription }}
+                jsonLd={idolJsonLd}
+            />
             
             <div className="flex flex-col relative max-w-7xl mx-auto">
                 <div className="flex flex-row w-full mt-7 justify-between items-center mb-8">

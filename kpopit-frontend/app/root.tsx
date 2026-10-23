@@ -36,7 +36,7 @@ const FAQ_LD = {
       "name": "What is KpopIt?",
       "acceptedAnswer": {
         "@type": "Answer",
-        "text": "KpopIt is a free daily K-pop idol guessing game inspired by Wordle. Every day, a new mystery K-pop idol is selected and players guess who it is using clues about their group, company... It features over 150 idols from groups like TWICE, BLACKPINK, NewJeans, IVE, aespa, LE SSERAFIM. It features two game modes: Classic and Blurry, and it keeps expanding with new idols and games.",
+        "text": "KpopIt is a free daily K-pop idol guessing game inspired by Wordle. Every day, a new mystery K-pop idol is selected and players guess who it is using clues about their group, company... It features over 150 idols from groups like TWICE, BLACKPINK, NewJeans, IVE, aespa, LE SSERAFIM. It features three game modes: Classic, Blurry and Pixelated, and it keeps expanding with new idols and games.",
       },
     },
     {
@@ -44,7 +44,7 @@ const FAQ_LD = {
       "name": "How do you play KpopIt?",
       "acceptedAnswer": {
         "@type": "Answer",
-        "text": "Type the name of a K-pop idol in the search bar and submit your guess. The game gives you color-coded feedback on each category on Classic Mode, and for Blurry Mode, you guess the idol from a blurred photo that gets clearer with each attempt. Use the clues to narrow down and find the mystery idol in as few attempts as possible.",
+        "text": "Type the name of a K-pop idol in the search bar and submit your guess. The game gives you color-coded feedback on each category on Classic Mode, for Blurry Mode, you guess the idol from a blurred photo that gets clearer with each attempt, and for Pixelated Mode, you guess the album from a pixelated cover. Use the clues to narrow down and find the mystery idol in as few attempts as possible.",
       },
     },
     {
@@ -52,7 +52,7 @@ const FAQ_LD = {
       "name": "Is KpopIt the same as Kpopdle?",
       "acceptedAnswer": {
         "@type": "Answer",
-        "text": "KpopIt is a Kpopdle-style game - a daily K-pop Wordle where you guess K-pop idols. It features two game modes: Classic (guess using category clues) and Blurry (guess from a blurred idol photo that gets clearer with each attempt).",
+        "text": "KpopIt is a Kpopdle-style game - a daily K-pop Wordle where you guess K-pop idols. It features three game modes: Classic (guess using category clues), Blurry (guess from a blurred idol photo that gets clearer with each attempt) and Pixelated (guess the album from its pixelated cover).",
       },
     },
     {
@@ -60,7 +60,7 @@ const FAQ_LD = {
       "name": "Is KpopIt free to play?",
       "acceptedAnswer": {
         "@type": "Answer",
-        "text": "Yes, KpopIt is completely free to play. A new idol is available to guess every day at midnight EST. No account or download required.",
+        "text": "Yes, KpopIt is completely free to play. A new challenge is available in every mode every day at midnight EST. No account or download required.",
       },
     },
     {
@@ -68,7 +68,7 @@ const FAQ_LD = {
       "name": "What game modes does KpopIt have?",
       "acceptedAnswer": {
         "@type": "Answer",
-        "text": "KpopIt has two game modes: Classic Mode, where you guess the idol using category-based clues like group, company nationality, and debut year; and Blurry Mode, where you guess the idol from a blurred photo that gradually becomes clearer with each wrong guess. Blurry Mode also features Hardcore and Grayscale options for extra challenge.",
+        "text": "KpopIt has three game modes: Classic Mode, where you guess the idol using category-based clues like group, company, nationality and debut year; Blurry Mode, where you guess the idol from a blurred photo that gradually becomes clearer with each wrong guess (with Hardcore and Grayscale options for extra challenge); and Pixelated Mode, where you guess the album of the day from a pixelated cover.",
       },
     },
   ],
@@ -94,8 +94,8 @@ export function Layout({ children }: { children: ReactNode }) {
         <meta name="author" content="KpopIt" />
         <meta name="robots" content="index, follow" />
         <meta property="og:type" content="website" />
-        <meta property="twitter:card" content="summary_large_image" />
-        <meta property="twitter:creator" content="@TgoRoss1" />
+        <meta name="twitter:card" content="summary_large_image" />
+        <meta name="twitter:creator" content="@TgoRoss1" />
         <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(WEB_APPLICATION_LD) }} />
         <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(FAQ_LD) }} />
         <meta httpEquiv="X-Content-Type-Options" content="nosniff" />

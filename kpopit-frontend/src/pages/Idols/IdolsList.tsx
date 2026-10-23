@@ -1,7 +1,7 @@
 import "./IdolsList.css";
 import { useState, useEffect, useMemo } from "react";
 import { useQuery } from "@tanstack/react-query";
-import { Helmet } from "react-helmet-async";
+import PageMeta from "../../components/Seo/PageMeta";
 import type { IdolsPageData } from "../../interfaces/gameInterfaces";
 import IdolsSearchBar from "../../components/IdolsSearchBar/IdolsSearchBar";
 import IdolsCards from "../../components/IdolsPageCards/IdolsCards";
@@ -71,13 +71,11 @@ function IdolsList({ initialIdols }: { initialIdols?: IdolsPageData[] }) {
 
     return (
         <div className="w-full min-h-full bg-ink">
-            <Helmet>
-                <title>KpopIt - Idols List</title>
-                <meta name="description" content="Browse every K-pop idol featured in KpopIt's daily guessing game." />
-                <link rel="canonical" href="https://kpopit.net/idols" />
-                <meta property="og:title" content="KpopIt - Idols List" />
-                <meta property="og:description" content="Browse every K-pop idol featured in KpopIt's daily guessing game." />
-            </Helmet>
+            <PageMeta
+                title="KpopIt - Idols List"
+                description="Browse every K-pop idol featured in KpopIt's daily guessing game."
+                path="/idols"
+            />
             
             <div className="flex flex-col w-full h-full justify-start items-center">
                 {/* Title */}

@@ -1,14 +1,14 @@
 import BackgroundStyle from "../../components/Background/BackgroundStyle";
-import { Helmet } from "react-helmet-async";
+import PageMeta from "../../components/Seo/PageMeta";
 
 const Contact = () => {
     return (
         <>
-        <Helmet>
-            <title>KpopIt - Contact</title>
-            <meta name="description" content="Contact KpopIt to report a bug, wrong idol info or send a suggestion." />
-            <link rel="canonical" href="https://kpopit.net/contact" />
-        </Helmet>
+        <PageMeta
+            title="KpopIt - Contact"
+            description="Contact KpopIt to report a bug, wrong idol info or send a suggestion."
+            path="/contact"
+        />
         <BackgroundStyle />
         <div className="w-full flex-1 overflow-y-auto flex items-start justify-center">
             <div className="flex flex-col items-center justify-center">
