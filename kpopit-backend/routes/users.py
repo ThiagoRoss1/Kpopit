@@ -1,6 +1,7 @@
 import json
 from datetime import timezone
-from services.get_db import get_db
+from services.get_db import get_db, get_idol_repo
+from services.restore_service import RestoreService, screen_state_only
 from utils.dates import get_current_timestamp, get_today_date_str, utc_now
 from flask import Blueprint, request, jsonify, g
 from utils.auth_decorators import require_auth
@@ -62,62 +63,42 @@ def get_user_stats(user_token):
 
 @user_bp.route("/game-state/<user_token>", methods=["GET", "POST"])
 def get_game_state(user_token):
-    """Return the current game state for the user"""
+    """GET: today's game in one mode, rebuilt by the server. POST: store the screen state
+    (hints, animations); guesses in the payload are dropped, the server records its own."""
     gamemode_id = request.args.get("gamemode_id", default=1, type=int)
-
     today = get_today_date_str()
 
-    # Start db connection
     connect = get_db()
     cursor = connect.cursor()
 
-    # Validate user token
-    cursor.execute("""
-            SELECT id FROM users
-            WHERE token = %s
-        """, (user_token,))
-    
-    user_row = cursor.fetchone()
-
-    if not user_row:
-        cursor.close()
-        return jsonify({"error": "Invalid user token"}), 400
-    
-    user_id = user_row["id"]
-
-    if request.method == "POST":
-        data = request.get_json()
-        game_state_json = json.dumps(data.get("game_state"))
-
+    try:
         cursor.execute("""
-                UPDATE daily_user_history
-                SET game_state = %s
-                WHERE user_id = %s AND date = %s AND gamemode_id = %s
-            """, (game_state_json, user_id, today, gamemode_id))
-        
+                SELECT id FROM users
+                WHERE token = %s
+            """, (user_token,))
+        user_row = cursor.fetchone()
+
+        if not user_row:
+            return jsonify({"error": "Invalid user token"}), 400
+
+        user_id = user_row["id"]
+
+        if request.method == "POST":
+            data = request.get_json() or {}
+            cursor.execute("""
+                    UPDATE daily_user_history
+                    SET game_state = %s
+                    WHERE user_id = %s AND date = %s AND gamemode_id = %s
+                """, (json.dumps(screen_state_only(data.get("game_state"))), user_id, today, gamemode_id))
+            connect.commit()
+            return jsonify({"message": "Game state updated successfully"}), 200
+
+        state = RestoreService(connect, get_idol_repo()).build_mode(cursor, user_id, today, gamemode_id)
         connect.commit()
+        return jsonify(state if state else {"game_state": None})
+
+    finally:
         cursor.close()
-
-        return jsonify({"message": "Game state updated successfully"}), 200
-    
-    else:
-        cursor.execute("""
-                SELECT game_state FROM daily_user_history
-                WHERE user_id = %s AND date = %s AND gamemode_id = %s
-            """, (user_id, today, gamemode_id))
-        
-        result = cursor.fetchone()
-        cursor.close()
-
-        if result and result["game_state"]:
-            state = result["game_state"]
-
-            if isinstance(state, str):
-                return jsonify(json.loads(state))
-            
-            return jsonify(state)
-        
-        return jsonify({"game_state": None})
     
 @user_bp.route("/generate-transfer-code/<user_token>", methods=["POST"])
 def generate_transfer_code(user_token):

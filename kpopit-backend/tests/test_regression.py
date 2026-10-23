@@ -224,12 +224,14 @@ def test_blurry_wrong_then_correct(client, db_conn, make_user, idol_with, pin_id
 def test_score_decays_with_attempts(db_conn, make_user, idol_with, attempt, score):
     user_id, _ = make_user()
     idol = idol_with("Score")
+    misses = [idol_with(f"Miss {n}") for n in range(attempt - 1)]
     today = dates.get_today_date_str()
     with db_conn.cursor() as cur:
-        GameService(db_conn, None).save_user_history(
-            db_conn, cur, user_id, 1, idol, {"artist_name": "Score"}, idol, attempt, today,
-            dates.get_current_timestamp(), {},
-        )
+        for guessed in [*misses, idol]:
+            GameService(db_conn, None).save_user_history(
+                db_conn, cur, user_id, 1, guessed, {"artist_name": "Score"}, idol, today,
+                dates.get_current_timestamp(), {},
+            )
     [day], agg = history(db_conn, user_id)
     assert float(day["score"]) == pytest.approx(score, abs=0.01)
     assert day["one_shot_win"] is (attempt == 1)
@@ -239,6 +241,7 @@ def test_score_decays_with_attempts(db_conn, make_user, idol_with, attempt, scor
 def test_streak_counts_consecutive_days_and_resets_after_a_gap(client, db_conn, make_user, idol_with, pin_idol, monkeypatch):
     user_id, token = make_user()
     idol = idol_with("Daily")
+    miss = idol_with("Miss")
     real_today = get_today_date()
 
     for offset in (0, 1, 2):
@@ -250,6 +253,7 @@ def test_streak_counts_consecutive_days_and_resets_after_a_gap(client, db_conn, 
 
     play_day(monkeypatch, 4)  # day 3 skipped
     pin_idol(idol, pick_date=real_today + timedelta(days=4))
+    guess(client, "classic", token, miss, idol, 1)
     guess(client, "classic", token, idol, idol, 2)
     days, agg = history(db_conn, user_id)
     assert len(days) == 4
@@ -463,8 +467,10 @@ def test_win_log_names_the_internal_user_id_only(client, make_user, idol_with, p
 
     user_id, token = make_user()
     idol = idol_with("Logged")
+    miss = idol_with("Missed")
     pin_idol(idol)
     with caplog.at_level(logging.INFO, logger="services.game_service"):
+        guess(client, "classic", token, miss, idol, 1)
         guess(client, "classic", token, idol, idol, 2)
     assert f"Victory! User {user_id} won gamemode 1 in 2 attempts at date {dates.get_today_date_str()}." in caplog.text
     assert token not in caplog.text

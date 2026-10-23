@@ -53,15 +53,15 @@ def get_daily_pixelated_album():
 @pixelated_bp.route("/game/pixelated/guess", methods=["POST"])
 @optional_auth
 def guess_pixelated_album():
+    # current_attempt from the body is ignored: the server counts the attempts.
     data = request.get_json() or {}
     guess_album_id = data.get("album_id") or data.get("guessed_album_id")
-    current_attempt = data.get("current_attempt")
     game_date = data.get("game_date")
 
     if game_date and game_date != get_today_date_str():
         return jsonify({"error": "Game date mismatch"}), 400
-    if not guess_album_id or not current_attempt:
-        return jsonify({"error": "Missing album_id or current_attempt"}), 400
+    if not guess_album_id:
+        return jsonify({"error": "Missing album_id"}), 400
 
     connect = get_db()
     cursor = connect.cursor()
@@ -91,8 +91,7 @@ def guess_pixelated_album():
 
         service = AlbumService(connect)
         result = service.process_guess(
-            cursor, connect, user_id, int(guess_album_id), int(current_attempt),
-            analytics_data, gamemode_id=3,
+            cursor, connect, user_id, int(guess_album_id), analytics_data, gamemode_id=3,
         )
         if "error" in result:
             return jsonify(result), 400
