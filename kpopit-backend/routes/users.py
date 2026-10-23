@@ -6,7 +6,7 @@ from utils.dates import get_current_timestamp, get_today_date_str, utc_now
 from flask import Blueprint, request, jsonify, g
 from utils.auth_decorators import require_auth
 from repositories.user_repository import UserRepository
-from utils.auth_helpers import validate_display_name, validate_username, validate_password
+from utils.auth_helpers import validate_display_name, validate_username, validate_password, user_token_from_header
 from utils.convert_to_webp import convert_to_webp_bytes
 from utils.r2 import R2Client
 from utils.rate_limiter import limiter
@@ -18,6 +18,8 @@ import logging
 user_bp = Blueprint('users', __name__)
 
 logger = logging.getLogger(__name__)
+
+MISSING_TOKEN = ({"error": "Missing user token"}, 400)
 
 # Generate a new user token and stores it in the database
 @user_bp.route("/user/init", methods=["POST"])
@@ -47,9 +49,12 @@ def generate_user_token():
         return jsonify({"token": token})
     return jsonify({"error": "Failed to generate unique token after 5 attempts"}), 500
 
-@user_bp.route("/stats/<user_token>", methods=["GET"])
-def get_user_stats(user_token):
-    """Return user stats based on the provided token"""
+@user_bp.route("/stats", methods=["GET"])
+def get_user_stats():
+    """Return user stats for the X-User-Token user"""
+    user_token = user_token_from_header(request)
+    if not user_token:
+        return MISSING_TOKEN
     gamemode_id = request.args.get("gamemode_id", default=1, type=int)
     connect = get_db()
     cursor = connect.cursor()
@@ -61,10 +66,13 @@ def get_user_stats(user_token):
         return jsonify({"error": "Invalid user token"}), 400
     return jsonify(stats)
 
-@user_bp.route("/game-state/<user_token>", methods=["GET", "POST"])
-def get_game_state(user_token):
+@user_bp.route("/game-state", methods=["GET", "POST"])
+def get_game_state():
     """GET: today's game in one mode, rebuilt by the server. POST: store the screen state
     (hints, animations); guesses in the payload are dropped, the server records its own."""
+    user_token = user_token_from_header(request)
+    if not user_token:
+        return MISSING_TOKEN
     gamemode_id = request.args.get("gamemode_id", default=1, type=int)
     today = get_today_date_str()
 
@@ -100,9 +108,12 @@ def get_game_state(user_token):
     finally:
         cursor.close()
     
-@user_bp.route("/generate-transfer-code/<user_token>", methods=["POST"])
-def generate_transfer_code(user_token):
+@user_bp.route("/generate-transfer-code", methods=["POST"])
+def generate_transfer_code():
     """Generate a transfer code for the user to transfer their data to another device"""
+    user_token = user_token_from_header(request)
+    if not user_token:
+        return MISSING_TOKEN
     connect = get_db()
     cursor = connect.cursor()
     try:
@@ -133,9 +144,12 @@ def transfer_data():
     finally:
         cursor.close()
 
-@user_bp.route("/get-active-transfer-code/<user_token>", methods=["GET"])
-def get_active_transfer_code(user_token):
+@user_bp.route("/get-active-transfer-code", methods=["GET"])
+def get_active_transfer_code():
     """Get active transfer code if exists"""
+    user_token = user_token_from_header(request)
+    if not user_token:
+        return MISSING_TOKEN
     connect = get_db()
     cursor = connect.cursor()
     try:

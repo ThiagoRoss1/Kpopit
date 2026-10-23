@@ -94,6 +94,9 @@ api.interceptors.request.use(
         return Promise.reject(error);
     });
 
+// Routes keyed by the anonymous token take it in this header, never in the URL.
+const userTokenHeader = (token: string | null) => (token ? { 'X-User-Token': token } : {});
+
 // Get daily idol game data endpoint
 export const getDailyIdol = async () => {
     const encrypted = localStorage.getItem('userToken');
@@ -146,8 +149,9 @@ export const getUserToken = async () => {
 }
 
 export const getUserStats = async (user_token: string, gamemode_id?: number) => {
-    const response = await api.get(`/stats/${user_token}`, {
+    const response = await api.get('/stats', {
         params: gamemode_id !== undefined ? { gamemode_id } : undefined,
+        headers: userTokenHeader(user_token),
     });
     return response.data;
 }
@@ -163,12 +167,12 @@ export const getDailyUserCount = async () => {
 }
 
 export const getUserPosition = async (user_token: string) => {
-    const response = await api.get(`/daily-rank/${user_token}`);
+    const response = await api.get('/daily-rank', { headers: userTokenHeader(user_token) });
     return response.data;
 }
 
 export const addGeneratedCodes = async (user_token: string) => {
-    const response = await api.post(`/generate-transfer-code/${user_token}`);
+    const response = await api.post('/generate-transfer-code', {}, { headers: userTokenHeader(user_token) });
     return response.data;
 }
 
@@ -181,11 +185,11 @@ export const saveGameState = async (gameState: object) => {
     const encrypted = localStorage.getItem("userToken");
     const token = encrypted ? await decryptToken(encrypted) : null;
 
-    return api.post(`/game-state/${token}`, { game_state: gameState });
+    return api.post('/game-state', { game_state: gameState }, { headers: userTokenHeader(token) });
 }
 
 export const fetchGameState = async (user_token: string) => {
-    const response = await api.get(`/game-state/${user_token}`);
+    const response = await api.get('/game-state', { headers: userTokenHeader(user_token) });
     return response.data;
 }
 
@@ -198,7 +202,7 @@ export const restoreSession = async (anonymousToken?: string): Promise<RestoreSe
 }
 
 export const getActiveTransferCode = async (user_token: string) => {
-    const response = await api.get(`/get-active-transfer-code/${user_token}`);
+    const response = await api.get('/get-active-transfer-code', { headers: userTokenHeader(user_token) });
     return response.data;
 }
 

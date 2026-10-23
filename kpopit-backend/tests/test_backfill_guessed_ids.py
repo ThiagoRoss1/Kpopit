@@ -121,4 +121,4 @@ def test_backfill_rows_never_rank(client, db_conn, make_user):
         )
     db_conn.commit()
     assert client.get("/api/daily-users-count?gamemode_id=1").get_json() == {"user_count": 0}
-    assert client.get(f"/api/daily-rank/{token}?gamemode_id=1").get_json()["rank"] is None
+    assert client.get("/api/daily-rank?gamemode_id=1", headers={"X-User-Token": token}).get_json()["rank"] is None

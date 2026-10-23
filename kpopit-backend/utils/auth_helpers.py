@@ -15,6 +15,16 @@ _UUID_REGEX = re.compile(
     re.IGNORECASE
 )
 
+# Header for the routes keyed by the anonymous token itself (stats, rank, game state, transfer):
+# the token stays out of URLs and access logs, and a logged-in Bearer header can't replace it.
+USER_TOKEN_HEADER = "X-User-Token"
+
+
+def user_token_from_header(req) -> str | None:
+    """The X-User-Token value, or None when it is missing or blank."""
+    return (req.headers.get(USER_TOKEN_HEADER) or "").strip() or None
+
+
 def _is_uuid(value: str) -> bool:
     return bool(_UUID_REGEX.match(value))
 

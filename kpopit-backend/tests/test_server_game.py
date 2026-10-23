@@ -186,7 +186,8 @@ def test_game_state_keeps_screen_state_only(client, db_conn, make_user, idol, pi
     pin(answer)
     classic_guess(client, token, wrong)
     client.post(
-        f"/api/game-state/{token}?gamemode_id=1",
+        "/api/game-state?gamemode_id=1",
+        headers={"X-User-Token": token},
         json={"game_state": {"today_guesses_details": [{"forged": True}], "game_won": True,
                              "hints_revealed": {"hint1": True}, "game_date": "x"}},
     )
@@ -199,7 +200,8 @@ def test_anonymous_restore_rebuilds_the_day(client, make_user, idol, pin):
     pin(answer)
     classic_guess(client, token, wrong)
     classic_guess(client, token, answer)
-    client.post(f"/api/game-state/{token}?gamemode_id=1", json={"game_state": {"hints_revealed": {"hint1": True}}})
+    client.post("/api/game-state?gamemode_id=1", headers={"X-User-Token": token},
+                json={"game_state": {"hints_revealed": {"hint1": True}}})
 
     res = client.get("/api/game/restore-session", headers={"Authorization": token})
     assert res.status_code == 200
