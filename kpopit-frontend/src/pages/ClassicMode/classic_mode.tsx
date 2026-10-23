@@ -37,6 +37,7 @@ import { useAllGameModes } from "../../hooks/useAllGameModes.tsx";
 import { useClearGameStorage } from "../../hooks/useClearGameStorage.tsx";
 import { areGuessesEqual } from "../../utils/areGuessesEqual.ts";
 import { isNewGameDay, startFirstGameDay } from "../../utils/gameStorage.ts";
+import { useServerDayRestore } from "../../hooks/useServerDayRestore.ts";
 import { DAILY_REFETCH, useGameDay } from "../../contexts/game_day_context.ts";
 import PageLoader from "../../components/Loading/PageLoader.tsx";
 import CardGrantedReveal from "../Collection/components/CardGrantedReveal.tsx";
@@ -127,6 +128,7 @@ function ClassicMode() {
 
   // First visit: nothing to reset, just record today (while rendering, so the restore below runs now).
   if (serverDate) startFirstGameDay(localStorage, "classic", serverDate);
+  useServerDayRestore("classic", serverDate, initUser);
 
   // New day: drop yesterday's local state and remount on the new day (no page reload).
   useEffect(() => {

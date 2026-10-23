@@ -16,6 +16,7 @@ import {GetPixelLevel, PIXEL_LEVELS} from "../../utils/pixelLevels";
 import { WinnerExplosion } from "../../utils/confetti";
 import { useClearGameStorage } from "../../hooks/useClearGameStorage";
 import { isNewGameDay, startFirstGameDay } from "../../utils/gameStorage";
+import { useServerDayRestore } from "../../hooks/useServerDayRestore";
 import { DAILY_REFETCH, useGameDay } from "../../contexts/game_day_context";
 import PageLoader from "../../components/Loading/PageLoader";
 import { ALL_ALBUMS_KEY, persistingFetch, readPersistedList } from "../../utils/persistedList";
@@ -118,6 +119,7 @@ function PixelatedMode() {
 
     // First visit: nothing to reset, just record today (while rendering, so the restore below runs now).
     if (serverDate) startFirstGameDay(localStorage, "pixelated", serverDate);
+    useServerDayRestore("pixelated", serverDate, initUser);
 
     // New day: drop yesterday's local state and remount on the new day (no page reload).
     useEffect(() => {

@@ -189,8 +189,11 @@ export const fetchGameState = async (user_token: string) => {
     return response.data;
 }
 
-export const restoreSession = async (): Promise<RestoreSessionResponse> => {
-    const response = await api.get('/game/restore-session');
+// Logged in: the interceptor's Bearer token wins. Anonymous: the UUID identifies the player.
+export const restoreSession = async (anonymousToken?: string): Promise<RestoreSessionResponse> => {
+    const response = await api.get('/game/restore-session', {
+        headers: anonymousToken ? { 'Authorization': anonymousToken } : {}
+    });
     return response.data;
 }
 
