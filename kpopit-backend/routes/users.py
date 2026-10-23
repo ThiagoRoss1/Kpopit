@@ -13,6 +13,7 @@ from utils.rate_limiter import limiter
 from services.auth_service import AuthService
 from services.user_service import UserService
 from services.transfer_service import TransferError, TransferService
+from services.profile_service import ProfileError, ProfileService
 import logging
 
 user_bp = Blueprint('users', __name__)
@@ -231,6 +232,39 @@ def update_display_name():
         connect.rollback()
         logger.exception("Failed to update profile")
         return jsonify({"error": "Failed to update profile"}), 500
+
+    finally:
+        cursor.close()
+
+@user_bp.route("/user/profile/settings", methods=["GET", "PATCH"])
+@require_auth
+@limiter.limit("30 per minute")
+def profile_settings():
+    """The caller's bias idol/group and visibility toggles (PATCH sends only the fields to change)."""
+    user_id = g.auth["user_id"]
+    connect = get_db()
+    cursor = connect.cursor()
+
+    try:
+        service = ProfileService(connect)
+        if request.method == "GET":
+            settings = service.get_settings(cursor, user_id)
+            if not settings:
+                return jsonify({"error": "Profile not found"}), 404
+            return jsonify(settings), 200
+
+        settings = service.update_settings(cursor, user_id, request.get_json() or {})
+        connect.commit()
+        return jsonify(settings), 200
+
+    except ProfileError as err:
+        connect.rollback()
+        return jsonify({"error": str(err)}), 400
+
+    except Exception:
+        connect.rollback()
+        logger.exception("Failed to update profile settings")
+        return jsonify({"error": "Failed to update profile settings"}), 500
 
     finally:
         cursor.close()

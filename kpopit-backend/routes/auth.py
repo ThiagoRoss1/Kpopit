@@ -248,6 +248,13 @@ def me():
                 "email_verified": bool(user.get("email_verified", False)),
                 "created_at": profile["created_at"].isoformat() if profile and profile.get("created_at") else None,
                 "updated_at": profile["updated_at"].isoformat() if profile and profile.get("updated_at") else None,
+                "bias_idol_id": profile["bias_idol_id"] if profile else None,
+                "bias_group_id": profile["bias_group_id"] if profile else None,
+                "visibility": {
+                    "is_public": bool(profile["is_public"]),
+                    "show_match_history": bool(profile["show_match_history"]),
+                    "show_calendar": bool(profile["show_calendar"]),
+                } if profile else None,
             }
         }), 200
 

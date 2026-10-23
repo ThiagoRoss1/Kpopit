@@ -21,9 +21,11 @@ from routes.idols_page.idols_page import idols_page_bp
 from routes.auth import auth_bp
 from routes.email import email_bp
 from routes.collections.collections import collections_bp
+from routes.profile import profile_bp
 from utils.rate_limiter import limiter
 from flask_limiter import RateLimitExceeded
 from services.collections_service import COLLECTION_ENABLED
+from services.profile_service import PUBLIC_PROFILE_ENABLED
 load_dotenv()
 
 # Without this, logger.info/warning calls across the app are dropped (Python's default
@@ -134,6 +136,10 @@ app.register_blueprint(email_bp, url_prefix="/api")
 # Collection blueprint - Register collection routes
 if COLLECTION_ENABLED:
     app.register_blueprint(collections_bp, url_prefix="/api")
+
+# Public profile blueprint - /profile/<username>, off until PUBLIC_PROFILE_ENABLED
+if PUBLIC_PROFILE_ENABLED:
+    app.register_blueprint(profile_bp, url_prefix="/api")
 
 
 if __name__ == "__main__":
