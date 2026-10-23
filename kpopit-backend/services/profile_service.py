@@ -76,6 +76,7 @@ class ProfileService:
                 FROM users u
                 JOIN user_profiles p ON p.user_id = u.id
                 WHERE LOWER(u.username) = LOWER(%s) AND u.is_authenticated = TRUE
+                  AND u.deletion_requested_at IS NULL
             """, (username,)
         )
         return cursor.fetchone()

@@ -19,7 +19,7 @@ class UserRepository:
         cursor.execute(
             """
                 SELECT id, token, username, password_hash, email, email_verified,
-                is_authenticated, is_admin FROM users WHERE LOWER(username) = LOWER(%s)
+                is_authenticated, is_admin, deletion_requested_at FROM users WHERE LOWER(username) = LOWER(%s)
             """, (username,)
         )
         return cursor.fetchone()
@@ -28,7 +28,7 @@ class UserRepository:
         cursor.execute(
             """
                 SELECT id, token, username, password_hash, email, email_verified,
-                is_authenticated, is_admin FROM users WHERE LOWER(email) = LOWER(%s)
+                is_authenticated, is_admin, deletion_requested_at FROM users WHERE LOWER(email) = LOWER(%s)
             """, (email,)
         )
         return cursor.fetchone()
@@ -121,6 +121,9 @@ class UserRepository:
             (token, username, password_hash, email)
         )
         return cursor.fetchone()
+
+    def cancel_deletion(self, cursor, user_id: int) -> None:
+        cursor.execute("UPDATE users SET deletion_requested_at = NULL WHERE id = %s", (user_id,))
 
     def update_last_login(self, cursor, user_id: int) -> None:
         cursor.execute(

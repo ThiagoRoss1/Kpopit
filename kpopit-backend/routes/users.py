@@ -14,6 +14,7 @@ from services.auth_service import AuthService
 from services.user_service import UserService
 from services.transfer_service import TransferError, TransferService
 from services.profile_service import ProfileError, ProfileService
+from services.account_deletion_service import AccountDeletionError, AccountDeletionService
 import logging
 
 user_bp = Blueprint('users', __name__)
@@ -407,6 +408,40 @@ def change_password():
         connect.rollback()
         logger.exception("Failed to change password")
         return jsonify({"error": "Failed to change password"}), 500
+
+    finally:
+        cursor.close()
+@user_bp.route("/user/delete-account", methods=["POST"])
+@require_auth
+@limiter.limit("5 per hour")
+def request_account_deletion():
+    """Schedule the caller's account for deletion in 15 days (current password required).
+    Ends every session; logging in again within the 15 days cancels the request."""
+    data = request.get_json() or {}
+    current_password = data.get("current_password", "")
+    if not current_password:
+        return jsonify({"error": "Current password is required"}), 400
+
+    connect = get_db()
+    cursor = connect.cursor()
+
+    try:
+        service = AccountDeletionService(connect, AuthService(connect))
+        deletes_at = service.request(cursor, g.auth["user_id"], current_password)
+        connect.commit()
+        return jsonify({
+            "message": "Account scheduled for deletion. Log in again within 15 days to cancel.",
+            "deletion_scheduled_for": deletes_at.isoformat(),
+        }), 200
+
+    except AccountDeletionError as err:
+        connect.rollback()
+        return jsonify({"error": str(err)}), err.status
+
+    except Exception:
+        connect.rollback()
+        logger.exception("Failed to schedule account deletion")
+        return jsonify({"error": "Failed to schedule account deletion"}), 500
 
     finally:
         cursor.close()
