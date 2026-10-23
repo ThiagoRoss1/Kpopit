@@ -148,7 +148,9 @@ function IdolProfile({ initialProfile }: { initialProfile?: IdolProfileData }) {
     const nameWithGroup = groupName ? `${artistName} (${groupName})` : artistName;
     const ofGroup = groupName ? `${artistName} of ${groupName}` : artistName;
     const canonicalPath = `/idols/${idolProfileData.idol_profile.idol_id}/${buildIdolSlug(artistName, groupName)}`;
-    const idolImage = resolveCdnUrl(idolProfileData.idol_profile.image_path, idolProfileData.idol_profile.image_version) ?? undefined;
+    const cdnImage = resolveCdnUrl(idolProfileData.idol_profile.image_path, idolProfileData.idol_profile.image_version);
+    // Link previews need an absolute URL; without a bucket URL in the build, keep the site image.
+    const idolImage = cdnImage && /^https?:\/\//.test(cdnImage) ? cdnImage : undefined;
     const idolJsonLd = {
         "@context": "https://schema.org",
         "@type": "ProfilePage",
