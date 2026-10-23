@@ -461,7 +461,8 @@ const gameMode = useGameMode();
                         priority
                         src={`${import.meta.env.VITE_IMAGE_BUCKET_URL}${blurryGameData.blur_image_path}?v=${blurryGameData.blur_image_version}`}
                         style={{filter: `${endGame ? "blur(0px)" : `blur(${currentBlur}px)`} ${endGame ? "grayscale(0%)" : `grayscale(${blurryToggleOptions.color ? 0 : 100}%)`}`}}
-                        alt={`Blurry image of ${artistName}`}
+                        // The name is the answer: screen readers and the DOM get it only once the game ends.
+                        alt={endGame ? `Blurry image of ${artistName}` : "Blurry image of today's idol"}
                         onLoad={() => setIsImageLoading(false)}
                         onError={() => setIsImageLoading(false)}
                         draggable={false}
