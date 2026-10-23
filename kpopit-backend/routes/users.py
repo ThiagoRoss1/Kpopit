@@ -1,5 +1,5 @@
 import json
-from datetime import timezone
+from datetime import timedelta, timezone
 from services.get_db import get_db, get_idol_repo
 from services.restore_service import RestoreService, screen_state_only
 from utils.dates import get_current_timestamp, get_today_date_str, utc_now
@@ -21,6 +21,7 @@ user_bp = Blueprint('users', __name__)
 logger = logging.getLogger(__name__)
 
 MISSING_TOKEN = ({"error": "Missing user token"}, 400)
+USERNAME_RESERVATION = timedelta(days=15)
 
 # Generate a new user token and stores it in the database
 @user_bp.route("/user/init", methods=["POST"])
@@ -216,14 +217,19 @@ def update_display_name():
                 if days_since < 5:
                     return jsonify({"error": f"Username can only be changed once every 5 days. Please wait {5 - days_since} more day(s)."}), 400
 
-            if repository.check_username_exists(cursor, username):
+            if repository.check_username_exists(cursor, username, exclude_user_id=user_id):
                 return jsonify({"error": "Username already exists"}), 400
             
         if display_name:
             result["display_name"] = repository.update_display_name(cursor, user_id, display_name)
 
-        if username:    
+        if username:
+            old_username = repository.find_by_id(cursor, user_id)["username"]
+            repository.release_own_reservation(cursor, user_id, username)
             result["username"] = repository.update_username(cursor, user_id, username)
+            if old_username and old_username.lower() != username.lower():
+                # The old name stays this user's for 15 days: nobody can take it and links redirect.
+                repository.reserve_username(cursor, user_id, old_username, utc_now() + USERNAME_RESERVATION)
 
         connect.commit()
         return jsonify(result), 200

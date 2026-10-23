@@ -81,7 +81,7 @@ class AuthService:
         # Hash first: every outcome pays the bcrypt cost, so a duplicate email isn't faster.
         password_hash = self.hash_password(password)
 
-        if self.user_repo.find_by_username(cursor, username):
+        if self.user_repo.check_username_exists(cursor, username):
             raise ValueError("username_taken")
         
         if email and self.user_repo.find_by_email(cursor, email):
@@ -156,8 +156,7 @@ class AuthService:
         # Hash first: every outcome pays the bcrypt cost, so a duplicate email isn't faster.
         password_hash = self.hash_password(password)
 
-        conflict = self.user_repo.find_by_username(cursor, username)
-        if conflict and conflict["id"] != user["id"]:
+        if self.user_repo.check_username_exists(cursor, username, exclude_user_id=user["id"]):
             raise ValueError("username_taken")
         
         if email:

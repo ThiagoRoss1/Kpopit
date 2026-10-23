@@ -1,4 +1,5 @@
 import hashlib
+from utils.dates import utc_now
 
 class UserRepository:
     def __init__(self, db):
@@ -53,13 +54,48 @@ class UserRepository:
         )
         return cursor.fetchone()
     
-    def check_username_exists(self, cursor, username: str) -> bool:
+    def check_username_exists(self, cursor, username: str, exclude_user_id: int | None = None) -> bool:
+        """True when the name belongs to an account or is reserved after a rename. The excluded
+        user may take back a name only they hold (their own current or reserved one)."""
         cursor.execute(
             """
-                SELECT 1 FROM users WHERE LOWER(username) = LOWER(%s)
-            """, (username,)
+                SELECT 1 FROM users WHERE LOWER(username) = LOWER(%s) AND id IS DISTINCT FROM %s
+                UNION ALL
+                SELECT 1 FROM username_reservations
+                WHERE LOWER(username) = LOWER(%s) AND reserved_until > %s AND user_id IS DISTINCT FROM %s
+            """, (username, exclude_user_id, username, utc_now(), exclude_user_id)
         )
         return cursor.fetchone() is not None
+
+    # Username reservations
+    def reserve_username(self, cursor, user_id: int, username: str, reserved_until) -> None:
+        cursor.execute(
+            """
+                INSERT INTO username_reservations (username, user_id, reserved_until)
+                VALUES (%s, %s, %s)
+            """, (username, user_id, reserved_until)
+        )
+
+    def release_own_reservation(self, cursor, user_id: int, username: str) -> None:
+        """A user taking back a name they reserved ends that reservation."""
+        cursor.execute(
+            "DELETE FROM username_reservations WHERE user_id = %s AND LOWER(username) = LOWER(%s)",
+            (user_id, username)
+        )
+
+    def find_reservation_owner(self, cursor, username: str) -> dict | None:
+        """The account an active reservation points to (its current username), or None."""
+        cursor.execute(
+            """
+                SELECT u.id, u.username FROM username_reservations r
+                JOIN users u ON u.id = r.user_id
+                WHERE LOWER(r.username) = LOWER(%s) AND r.reserved_until > %s
+                  AND u.is_authenticated = TRUE AND u.username IS NOT NULL
+                ORDER BY r.reserved_until DESC
+                LIMIT 1
+            """, (username, utc_now())
+        )
+        return cursor.fetchone()
 
     # Mutations
     def upgrade_to_authenticated(self, cursor, token: str, username: str, password_hash: str, email: str | None) -> dict | None:

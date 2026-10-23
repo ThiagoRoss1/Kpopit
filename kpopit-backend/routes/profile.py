@@ -1,5 +1,6 @@
 import logging
-from flask import Blueprint, jsonify
+from flask import Blueprint, jsonify, url_for
+from repositories.user_repository import UserRepository
 from services.get_db import get_db
 from services.profile_service import ProfileService
 from utils.auth_helpers import validate_username
@@ -24,6 +25,13 @@ def get_public_profile(username):
         service = ProfileService(connect)
         owner = service.find_profile_owner(cursor, username)
         if not owner:
+            # A name renamed in the last 15 days points to the account's current name.
+            renamed = UserRepository(connect).find_reservation_owner(cursor, username)
+            if renamed:
+                response = jsonify({"redirect_to": renamed["username"]})
+                response.status_code = 301
+                response.headers["Location"] = url_for("profile.get_public_profile", username=renamed["username"])
+                return response
             return jsonify({"error": "Profile not found"}), 404
         return jsonify(service.public_profile(cursor, owner, get_today_date())), 200
     except Exception:
