@@ -1,4 +1,4 @@
-"""T40: the server owns the answer and the attempt count. guessed_ids records each id once, in
+"""The server owns the answer and the attempt count. guessed_ids records each id once, in
 order; the body's answer_id / current_attempt are ignored; restore-session rebuilds the day for a
 logged-in or an anonymous caller, scoped to that caller."""
 

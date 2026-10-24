@@ -1,4 +1,4 @@
-// Plain-text page content shared by the About / How to play pages (Phase 6b) and the existing modals.
+// Plain-text page content shared by the About / How to play pages and the existing modals.
 // Rendering (styles, links, images) stays in the components.
 
 export interface ContentSection {

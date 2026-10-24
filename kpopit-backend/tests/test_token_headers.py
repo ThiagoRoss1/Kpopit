@@ -1,4 +1,4 @@
-"""T47: routes keyed by the anonymous token read it from X-User-Token. The old /<user_token> path
+"""Routes keyed by the anonymous token read it from X-User-Token. The old /<user_token> path
 still works for one release (the header wins); a missing or unknown token is rejected as before,
 and request logs never show a token."""
 

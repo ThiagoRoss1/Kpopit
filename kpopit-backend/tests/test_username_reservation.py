@@ -1,4 +1,4 @@
-"""T44: a rename keeps the 5-day cooldown and the password check; the old name is reserved for
+"""A rename keeps the 5-day cooldown and the password check; the old name is reserved for
 15 days (nobody else can take it, /profile/<old> redirects), then it is free again."""
 
 from datetime import timedelta

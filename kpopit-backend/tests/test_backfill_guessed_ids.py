@@ -1,4 +1,4 @@
-"""T41: scripts/backfill_guessed_ids.py fills guessed_ids from old game_state ('backfill'),
+"""Scripts/backfill_guessed_ids.py fills guessed_ids from old game_state ('backfill'),
 idempotently, skips what it can't read, and backfill rows never rank."""
 
 import json

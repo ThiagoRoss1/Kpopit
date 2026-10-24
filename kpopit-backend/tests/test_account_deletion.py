@@ -1,4 +1,4 @@
-"""T45: deletion request (password), cancel by logging in within 15 days, and the daily purge task
+"""Deletion request (password), cancel by logging in within 15 days, and the daily purge task
 that deletes only accounts past the grace period, with all their game and profile data."""
 
 import pytest

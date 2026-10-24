@@ -1,4 +1,4 @@
-"""T42/T43: profile fields, visibility toggles and the public profile lookup."""
+"""Profile fields, visibility toggles and the public profile lookup."""
 
 import importlib
 from datetime import timedelta

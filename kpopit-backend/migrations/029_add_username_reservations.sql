@@ -1,4 +1,4 @@
-/* Username reservations (T44): after a rename the old name stays held by its owner until
+/* Username reservations: after a rename the old name stays held by its owner until
    reserved_until (15 days), so nobody else can take it and /profile/<old> can redirect. */
 
 BEGIN;

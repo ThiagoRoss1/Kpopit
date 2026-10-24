@@ -1,4 +1,4 @@
-/* Profile fields + visibility (T42/T43). Each toggle is added with the value existing accounts get
+/* Profile fields + visibility. Each toggle is added with the value existing accounts get
    (private), then its default switches to what new accounts get: public, match history private. */
 
 BEGIN;

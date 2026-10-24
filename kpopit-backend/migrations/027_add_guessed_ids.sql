@@ -1,4 +1,4 @@
-/* Server-recorded guesses (T40): ids in guess order + where they came from.
+/* Server-recorded guesses: ids in guess order + where they came from.
    Old rows stay NULL until the history backfill fills them as 'backfill'; defaults only apply to new rows. */
 
 BEGIN;

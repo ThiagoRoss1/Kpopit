@@ -1,4 +1,4 @@
-/* Account deletion grace period (T45): set when the owner asks to delete the account, cleared by a
+/* Account deletion grace period: set when the owner asks to delete the account, cleared by a
    login within 15 days; the daily purge task deletes accounts past that. */
 
 BEGIN;
