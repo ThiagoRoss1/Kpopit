@@ -126,6 +126,25 @@ def test_started_live_and_finished_in_the_calendar_becomes_calendar(client, db_c
     assert (r["guessed_ids"], r["won"], r["is_calendar"]) == ([week["wrong"], week[0]], True, True)
 
 
+def test_a_calendar_win_for_yesterday_does_not_extend_todays_streak(client, db_conn, make_user, week, monkeypatch):
+    user_id, token = make_user()
+    monkeypatch.setattr(dates, "TEST_MODE", True)
+    monkeypatch.setattr(dates, "TEST_DATE_OFFSET", -2)  # play day -2 live
+    assert live_guess(client, token, week[-2]).get_json()["guess_correct"] is True
+    monkeypatch.setattr(dates, "TEST_MODE", False)
+    monkeypatch.setattr(dates, "TEST_DATE_OFFSET", 0)
+
+    # Day -1 was missed live and is won through the calendar: the streak doesn't bridge it.
+    assert cal_guess(client, token, -1, week[-1]).get_json()["guess_correct"] is True
+    s = stats(db_conn, user_id)
+    assert (s["current_streak"], s["max_streak"], s["last_played_date"]) == (1, 1, get_today_date() - timedelta(days=2))
+
+    live_guess(client, token, week[0])
+    s = stats(db_conn, user_id)
+    assert (s["wins_count"], s["current_streak"], s["max_streak"]) == (3, 1, 1)
+    assert s["last_played_date"] == get_today_date()
+
+
 def test_calendar_wins_count_in_stats_but_not_streak_or_ranking(client, db_conn, make_user, week):
     user_id, token = make_user()
     other_id, other_token = make_user()
