@@ -1,5 +1,5 @@
 // sitemap.xml for the build, from the prerendered paths (react-router.config.ts buildEnd).
-const SITE_URL = "https://kpopit.net";
+import { SITE_URL } from "../src/utils/site";
 
 const escapeXml = (value: string) =>
   value.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;").replace(/'/g, "&apos;");

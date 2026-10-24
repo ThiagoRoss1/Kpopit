@@ -14,7 +14,7 @@ const WEB_APPLICATION_LD = {
     "@type": "WebApplication",
     "name": "KpopIt",
     "alternateName": ALTERNATE_NAMES,
-    "url": "https://kpopit.net",
+    "url": "https://kpopit.net/",
     "description": "Daily K-pop idol Wordle guessing game. Guess the idol based on clues about their group, company, career details, nationality and a lot more.",
     "applicationCategory": "Game",
     "keywords": "kpopdle, kpop wordle, kpop guessing game, daily kpop game, guess the idol, kpop quiz, kpop, game, wordle like, kpop idol guessing game",
@@ -32,7 +32,7 @@ const FAQ_LD = {
             "name": "What is KpopIt?",
             "acceptedAnswer": {
                 "@type": "Answer",
-                "text": "KpopIt is a free daily K-pop idol guessing game inspired by Wordle. Every day, a new mystery K-pop idol is selected and players guess who it is using clues about their group, company... It features over 150 idols from groups like TWICE, BLACKPINK, NewJeans, IVE, aespa, LE SSERAFIM. It features three game modes: Classic, Blurry and Pixelated, and it keeps expanding with new idols and games.",
+                "text": "KpopIt is a free daily K-pop idol guessing game inspired by Wordle. Every day, a new mystery K-pop idol is selected and players guess who it is using clues about their group, company... It features over 200 idols from groups like TWICE, BLACKPINK, NewJeans, IVE, aespa, LE SSERAFIM. It features three game modes: Classic, Blurry and Pixelated, and it keeps expanding with new idols and games.",
             },
         },
         {
@@ -64,7 +64,7 @@ const FAQ_LD = {
             "name": "What game modes does KpopIt have?",
             "acceptedAnswer": {
                 "@type": "Answer",
-                "text": "KpopIt has three game modes: Classic Mode, where you guess the idol using category-based clues like group, company, nationality and debut year; Blurry Mode, where you guess the idol from a blurred photo that gradually becomes clearer with each wrong guess (with Hardcore and Grayscale options for extra challenge); and Pixelated Mode, where you guess the album of the day from a pixelated cover.",
+                "text": "KpopIt has three game modes: Classic Mode, where you guess the idol using category-based clues like group, company, nationality and debut year; Blurry Mode, where you guess the idol from a blurred photo that gradually becomes clearer with each wrong guess (with a Hardmode option that keeps the photo blurred for extra challenge, and a Color option unlocked after 4 guesses); and Pixelated Mode, where you guess the album of the day from a pixelated cover.",
             },
         },
     ],
