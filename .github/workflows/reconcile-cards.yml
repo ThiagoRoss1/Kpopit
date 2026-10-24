@@ -1,0 +1,55 @@
+name: Reconcile collection cards
+
+# Daily call to POST /api/tasks/reconcile-cards: grants every Album 1 card a failed win grant left
+# behind (each win at most once). Scheduled runs only fire from the default branch (main).
+
+on:
+  schedule:
+    - cron: '0 8 * * *' # 08:00 UTC daily, after the midnight EST reset, the backup and the purge
+  workflow_dispatch:
+
+permissions: {}
+
+concurrency:
+  group: reconcile-cards
+  cancel-in-progress: false
+
+jobs:
+  reconcile:
+    name: Trigger reconciliation
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    env:
+      CARD_RECONCILE_URL: ${{ secrets.CARD_RECONCILE_URL }}
+      CARD_RECONCILE_AUTH_KEY: ${{ secrets.CARD_RECONCILE_AUTH_KEY }}
+    steps:
+      - name: Check secrets
+        id: secrets
+        run: |
+          if [ -z "$CARD_RECONCILE_URL" ] || [ -z "$CARD_RECONCILE_AUTH_KEY" ]; then
+            echo "::notice title=Reconciliation skipped::CARD_RECONCILE_URL or CARD_RECONCILE_AUTH_KEY secret is not set."
+            echo "ready=false" >> "$GITHUB_OUTPUT"
+          else
+            echo "ready=true" >> "$GITHUB_OUTPUT"
+          fi
+
+      - name: POST /api/tasks/reconcile-cards
+        if: steps.secrets.outputs.ready == 'true'
+        run: |
+          # One retry, 30 s apart; the route allows 3 calls per hour.
+          for attempt in 1 2; do
+            if curl --fail --silent --show-error \
+                 --max-time 120 \
+                 -X POST "$CARD_RECONCILE_URL" \
+                 -H "Authorization: Bearer $CARD_RECONCILE_AUTH_KEY" \
+                 -o /dev/null -w "HTTP %{http_code}\n"; then
+              echo "Reconciliation succeeded on attempt $attempt."
+              exit 0
+            fi
+            if [ "$attempt" = 1 ]; then
+              echo "Attempt 1 failed; retrying in 30 s."
+              sleep 30
+            fi
+          done
+          echo "::error title=Reconciliation failed::Both attempts failed. Check the backend logs on Railway."
+          exit 1

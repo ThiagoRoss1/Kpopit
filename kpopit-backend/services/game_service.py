@@ -127,19 +127,20 @@ class GameService:
                 if COLLECTION_ENABLED and gamemode_id in COLLECTION_GAMEMODE_IDS:
                     # A collection failure must never cost the win: the savepoint confines it,
                     # since psycopg poisons the whole transaction after any failed statement.
+                    collections = CollectionService(self.db)
                     cursor.execute("SAVEPOINT collection_grant")
                     try:
-                        card_granted = CollectionService(self.db).grant_card_for_win(
-                            cursor, user_id, int(answer_id), current_timestamp
+                        card_granted = collections.grant_for_win(
+                            cursor, user_id, gamemode_id, today, int(answer_id), current_timestamp
                         )
                         cursor.execute("RELEASE SAVEPOINT collection_grant")
                     except Exception:
                         cursor.execute("ROLLBACK TO SAVEPOINT collection_grant")
-                        card_granted = None
                         logger.exception(
                             "Collection card grant failed for user_id=%s idol_id=%s gamemode_id=%s date=%s "
-                            "— win was saved, card was NOT granted. Manual backfill needed.", user_id, answer_id, gamemode_id, today
+                            "— win was saved; retrying through reconciliation", user_id, answer_id, gamemode_id, today
                         )
+                        card_granted = self._retry_card_grant(collections, cursor, user_id, gamemode_id, today)
 
             connect.commit()
             return is_correct, card_granted
@@ -148,6 +149,21 @@ class GameService:
             connect.rollback()
             logger.exception("Error updating user history")
             raise e
+
+    def _retry_card_grant(self, collections, cursor, user_id, gamemode_id, today):
+        """One reconciliation pass for the user after a failed grant, in its own savepoint so it can't
+        cost the win either. Returns this win's grant, or None (the daily task picks it up later)."""
+        cursor.execute("SAVEPOINT collection_retry")
+        try:
+            granted = collections.reconcile_cards(cursor, user_id)
+            cursor.execute("RELEASE SAVEPOINT collection_retry")
+        except Exception:
+            cursor.execute("ROLLBACK TO SAVEPOINT collection_retry")
+            logger.exception("Card reconciliation retry failed for user_id=%s; left for the daily task", user_id)
+            return None
+        day = today if isinstance(today, date) else date.fromisoformat(today)
+        return next((g["card_granted"] for g in granted
+                     if g["date"] == day and g["gamemode_id"] == gamemode_id), None)
 
     def _add_calendar_win(self, cursor, user_id, gamemode_id, attempt, one_shot_win):
         """Win stats only: a calendar win never moves the streak or the last played day."""
