@@ -34,7 +34,7 @@ export default {
   prerender: () => (paths ??= prerenderPaths()),
   // The sitemap lists exactly what was prerendered, so it can't drift from the routes.
   async buildEnd({ reactRouterConfig }) {
-    const xml = buildSitemap(await (paths ??= prerenderPaths()), new Date().toISOString().slice(0, 10));
+    const xml = buildSitemap(await (paths ??= prerenderPaths()));
     await writeFile(path.join(reactRouterConfig.buildDirectory, "client", "sitemap.xml"), xml);
   },
 } satisfies Config;

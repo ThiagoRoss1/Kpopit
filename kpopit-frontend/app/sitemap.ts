@@ -7,13 +7,13 @@ const escapeXml = (value: string) =>
 /** Daily games change every day; the rest changes rarely. */
 const changefreq = (path: string) => (["/", "/classic", "/blurry", "/pixelated"].includes(path) ? "daily" : "weekly");
 
-export function buildSitemap(paths: string[], lastmod: string): string {
+// No <lastmod>: the only date at hand is the build date, which would mark every page as changed on each deploy.
+export function buildSitemap(paths: string[]): string {
   const urls = [...new Set(paths)]
     .filter((path) => path.startsWith("/") && !path.endsWith("/preview"))
     .map((path) => [
       "  <url>",
       `    <loc>${escapeXml(`${SITE_URL}${path}`)}</loc>`,
-      `    <lastmod>${lastmod}</lastmod>`,
       `    <changefreq>${changefreq(path)}</changefreq>`,
       "  </url>",
     ].join("\n"));
