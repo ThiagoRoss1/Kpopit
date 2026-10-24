@@ -32,6 +32,12 @@ python seed_db.py     # Seed database with idol data
 gunicorn app:app      # Production server
 ```
 
+### Full local check (repo root)
+```bash
+scripts/check.sh      # CI without E2E, in order, stops at the first failure: ruff, compileall, pytest, lint, tsc, npm test, build
+```
+Needs `TEST_DB_URL` (local `kpopit_test`) and a local test backend for the build's prerender: `.claude/launch.json` `kpopit-backend-build-mac` serves a `scripts/bootstrap_db.py`-built `kpopit_build` with dotenv disabled and dummy secrets. Run it (it also works in Git Bash on Windows) and have it pass before reporting READY TO MERGE.
+
 ## Architecture
 
 ### Data Flow
