@@ -25,12 +25,14 @@ def get_public_profile(username):
         service = ProfileService(connect)
         owner = service.find_profile_owner(cursor, username)
         if not owner:
-            # A name renamed in the last 15 days points to the account's current name.
+            # A name renamed in the last 15 days points to the account's current name. Temporary and
+            # never cached: once the reservation ends the name may belong to someone else.
             renamed = UserRepository(connect).find_reservation_owner(cursor, username)
             if renamed:
                 response = jsonify({"redirect_to": renamed["username"]})
-                response.status_code = 301
+                response.status_code = 302
                 response.headers["Location"] = url_for("profile.get_public_profile", username=renamed["username"])
+                response.headers["Cache-Control"] = "no-store"
                 return response
             return jsonify({"error": "Profile not found"}), 404
         return jsonify(service.public_profile(cursor, owner, get_today_date())), 200

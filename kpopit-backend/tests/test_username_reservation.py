@@ -67,7 +67,8 @@ def test_old_profile_link_redirects_within_the_window(client):
     _, auth = register(client, "alice")
     rename(client, auth, "alicia")
     res = client.get("/api/profile/alice")
-    assert res.status_code == 301
+    assert res.status_code == 302
+    assert res.headers["Cache-Control"] == "no-store"
     assert res.headers["Location"].endswith("/api/profile/alicia")
     assert res.get_json() == {"redirect_to": "alicia"}
     assert client.get("/api/profile/alice", follow_redirects=True).get_json()["username"] == "alicia"
