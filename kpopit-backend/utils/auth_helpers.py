@@ -20,9 +20,10 @@ _UUID_REGEX = re.compile(
 USER_TOKEN_HEADER = "X-User-Token"
 
 
-def user_token_from_header(req) -> str | None:
-    """The X-User-Token value, or None when it is missing or blank."""
-    return (req.headers.get(USER_TOKEN_HEADER) or "").strip() or None
+def user_token_from_header(req, path_token: str | None = None) -> str | None:
+    """The X-User-Token value, else the legacy /<user_token> path segment; None when both are blank.
+    The path form stays for one release (deploy window, long-open tabs); the header wins."""
+    return (req.headers.get(USER_TOKEN_HEADER) or "").strip() or (path_token or "").strip() or None
 
 
 def _is_uuid(value: str) -> bool:

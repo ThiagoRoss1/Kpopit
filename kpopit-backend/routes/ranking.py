@@ -16,9 +16,10 @@ def get_daily_users_count():
         cursor.close()
 
 @ranking_bp.route("/daily-rank", methods=["GET"])
-def get_daily_rank():
+@ranking_bp.route("/daily-rank/<user_token>", methods=["GET"])
+def get_daily_rank(user_token=None):
     """Return the X-User-Token user's rank for today's game"""
-    user_token = user_token_from_header(request)
+    user_token = user_token_from_header(request, user_token)
     if not user_token:
         return jsonify({"error": "Missing user token"}), 400
     connect = get_db()

@@ -53,9 +53,10 @@ def generate_user_token():
     return jsonify({"error": "Failed to generate unique token after 5 attempts"}), 500
 
 @user_bp.route("/stats", methods=["GET"])
-def get_user_stats():
+@user_bp.route("/stats/<user_token>", methods=["GET"])
+def get_user_stats(user_token=None):
     """Return user stats for the X-User-Token user"""
-    user_token = user_token_from_header(request)
+    user_token = user_token_from_header(request, user_token)
     if not user_token:
         return MISSING_TOKEN
     gamemode_id = request.args.get("gamemode_id", default=1, type=int)
@@ -70,10 +71,11 @@ def get_user_stats():
     return jsonify(stats)
 
 @user_bp.route("/game-state", methods=["GET", "POST"])
-def get_game_state():
+@user_bp.route("/game-state/<user_token>", methods=["GET", "POST"])
+def get_game_state(user_token=None):
     """GET: today's game in one mode, rebuilt by the server. POST: store the screen state
     (hints, animations); guesses in the payload are dropped, the server records its own."""
-    user_token = user_token_from_header(request)
+    user_token = user_token_from_header(request, user_token)
     if not user_token:
         return MISSING_TOKEN
     gamemode_id = request.args.get("gamemode_id", default=1, type=int)
@@ -112,9 +114,10 @@ def get_game_state():
         cursor.close()
     
 @user_bp.route("/generate-transfer-code", methods=["POST"])
-def generate_transfer_code():
+@user_bp.route("/generate-transfer-code/<user_token>", methods=["POST"])
+def generate_transfer_code(user_token=None):
     """Generate a transfer code for the user to transfer their data to another device"""
-    user_token = user_token_from_header(request)
+    user_token = user_token_from_header(request, user_token)
     if not user_token:
         return MISSING_TOKEN
     connect = get_db()
@@ -148,9 +151,10 @@ def transfer_data():
         cursor.close()
 
 @user_bp.route("/get-active-transfer-code", methods=["GET"])
-def get_active_transfer_code():
+@user_bp.route("/get-active-transfer-code/<user_token>", methods=["GET"])
+def get_active_transfer_code(user_token=None):
     """Get active transfer code if exists"""
-    user_token = user_token_from_header(request)
+    user_token = user_token_from_header(request, user_token)
     if not user_token:
         return MISSING_TOKEN
     connect = get_db()

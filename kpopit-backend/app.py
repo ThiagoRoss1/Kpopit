@@ -23,6 +23,7 @@ from routes.email import email_bp
 from routes.collections.collections import collections_bp
 from routes.profile import profile_bp
 from utils.rate_limiter import limiter
+from utils.log_redaction import install_token_redaction
 from flask_limiter import RateLimitExceeded
 from services.collections_service import COLLECTION_ENABLED
 from services.profile_service import PUBLIC_PROFILE_ENABLED
@@ -34,6 +35,8 @@ logging.basicConfig(
     level=os.getenv("LOG_LEVEL", "INFO").upper(),
     format="%(asctime)s %(levelname)s %(name)s: %(message)s",
 )
+# Request logs must never show a user token (the legacy /<user_token> routes put one in the path).
+install_token_redaction()
 
 # Global variables
 DB_URL = os.getenv("DB_URL")
