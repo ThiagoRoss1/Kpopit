@@ -9,14 +9,7 @@ import Modal from "../../components/buttons/modals/Modal";
 import ChangelogText from "../../components/buttons/modals/ChangelogContent";
 import AboutText from "../../components/buttons/modals/AboutContent";
 import Img from "../../components/Img";
-
-const WEBSITE_LD = {
-    "@context": "https://schema.org",
-    "@type": "WebSite",
-    "name": "KpopIt",
-    "alternateName": "Kpopdle",
-    "url": "https://kpopit.net/",
-};
+import { HOME_JSON_LD } from "./homeJsonLd";
 
 function Home() {
     const [showModal, setShowModal] = useState<null | "changelog" | "about">(null);
@@ -27,7 +20,7 @@ function Home() {
             title="KpopIt - Daily K-pop Idol Wordle Guessing Game"
             description="Test your K-pop knowledge with KpopIt, the daily K-pop Wordle-inspired game (Kpopdle)! Guess the secret idol of the day and show your mastery by solving the challenge in the fewest attempts."
             path="/"
-            jsonLd={WEBSITE_LD}
+            jsonLd={HOME_JSON_LD}
         />
         
         <BackgroundStyle />
@@ -48,6 +41,10 @@ function Home() {
                     <span className="text-white max-xxs:text-base xxs:text-base xs:text-xl sm:text-2xl [text-shadow:2px_2px_0px_rgba(0,0,0,1),0_0_12px_rgba(255,255,255,0.40)]">
                         Pick a game and have fun!
                     </span>
+
+                    <p className="mt-2 px-4 text-center text-white/80 max-xxs:text-xs xxs:text-xs xs:text-sm sm:text-base [text-shadow:2px_2px_0px_rgba(0,0,0,1)]">
+                        A Kpopdle-style daily K-pop Wordle: guess the idol of the day.
+                    </p>
                 </div>
                 
                 <div className="flex w-fit h-fit items-center justify-center mb-15">

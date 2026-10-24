@@ -84,13 +84,14 @@ test.describe('prerendered pages without JavaScript', () => {
       expect(meta(html, 'og:image'), `${p} og:image`).toMatch(/^https?:\/\//);
       expect(meta(html, 'twitter:title'), `${p} twitter:title`).toBeTruthy();
       const blocks = [...html.matchAll(/<script type="application\/ld\+json"[^>]*>([\s\S]*?)<\/script>/g)].map((m) => m[1]);
-      expect(blocks.length, `${p} JSON-LD`).toBeGreaterThan(0);
       const types = blocks.map((block) => {
         const data = JSON.parse(block);
         expect(data['@context'], `${p} @context`).toBe('https://schema.org');
         return data['@type'];
       });
-      if (p === '/') expect(types).toContain('WebSite');
+      // The app and FAQ data describe the home page only; a copy on every page competes with it.
+      if (p === '/') expect(types.sort(), `${p} JSON-LD`).toEqual(['FAQPage', 'WebApplication', 'WebSite']);
+      else expect(types.filter((t) => t === 'WebApplication' || t === 'FAQPage'), `${p} JSON-LD`).toEqual([]);
       if (p.startsWith('/idols/')) expect(types).toContain('ProfilePage');
     }
   });

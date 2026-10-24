@@ -3,6 +3,8 @@ import { Helmet } from "react-helmet-async";
 export const SITE_URL = "https://kpopit.net";
 const DEFAULT_IMAGE = `${SITE_URL}/kpopit-icon.png`;
 
+type JsonLd = Record<string, unknown>;
+
 type PageMetaProps = {
     title: string;
     description: string;
@@ -12,12 +14,12 @@ type PageMetaProps = {
     image?: string;
     /** Shorter title/description for link previews (the page's own by default). */
     social?: { title: string; description: string };
-    /** Structured data (schema.org) for this page only. */
-    jsonLd?: Record<string, unknown>;
+    /** Structured data (schema.org) for this page only: one object, or several (one script each). */
+    jsonLd?: JsonLd | JsonLd[];
 };
 
 // JSON inside <script> must not be able to close the tag.
-const serializeJsonLd = (data: Record<string, unknown>) => JSON.stringify(data).replace(/</g, "\\u003c");
+const serializeJsonLd = (data: JsonLd) => JSON.stringify(data).replace(/</g, "\\u003c");
 
 /** Each page's head: one title and description, canonical URL, Open Graph and Twitter tags. */
 export default function PageMeta({ title, description, path, image = DEFAULT_IMAGE, social, jsonLd }: PageMetaProps) {
@@ -36,7 +38,9 @@ export default function PageMeta({ title, description, path, image = DEFAULT_IMA
             <meta name="twitter:title" content={preview.title} />
             <meta name="twitter:description" content={preview.description} />
             <meta name="twitter:image" content={image} />
-            {jsonLd && <script type="application/ld+json">{serializeJsonLd(jsonLd)}</script>}
+            {(Array.isArray(jsonLd) ? jsonLd : jsonLd ? [jsonLd] : []).map((data, i) => (
+                <script key={i} type="application/ld+json">{serializeJsonLd(data)}</script>
+            ))}
         </Helmet>
     );
 }
