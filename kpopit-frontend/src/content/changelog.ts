@@ -1,7 +1,7 @@
-import { loadPosts } from "../utils/markdown";
+import { newestFirst, type Post } from "../utils/posts";
 
-// Changelog posts live in content/changelog/*.md (frontmatter: title, date, description). Vite
-// inlines them at build time, so pages render the HTML without fetching anything. No route yet (Phase 6b).
-const sources = import.meta.glob<string>("/content/changelog/*.md", { query: "?raw", import: "default", eager: true });
+// Changelog posts live in content/changelog/*.md (see content/README.md). The ?post query hands
+// each file to the markdownPosts Vite plugin, which renders it at build time. No route yet (Phase 6b).
+const posts = import.meta.glob<Post>("/content/changelog/*.md", { query: "?post", import: "default", eager: true });
 
-export const CHANGELOG_POSTS = loadPosts(sources);
+export const CHANGELOG_POSTS = newestFirst(Object.values(posts));

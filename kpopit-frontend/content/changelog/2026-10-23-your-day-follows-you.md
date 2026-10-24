@@ -2,6 +2,9 @@
 title: Your daily game now follows you
 date: 2026-10-23
 description: Guesses are saved by the server, so clearing your browser or switching devices no longer loses the day.
+# SAMPLE thumbnail: replace public/blog/2026-10-23-your-day-follows-you/sample-thumbnail.png before publishing
+image: /blog/2026-10-23-your-day-follows-you/sample-thumbnail.png
+imageAlt: Sample placeholder thumbnail (to be replaced)
 ---
 
 ## What changed

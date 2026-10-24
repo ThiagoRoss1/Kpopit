@@ -1,6 +1,7 @@
 import { Helmet } from "react-helmet-async";
+import { SITE_URL } from "../../utils/site";
 
-export const SITE_URL = "https://kpopit.net";
+export { SITE_URL };
 const DEFAULT_IMAGE = `${SITE_URL}/kpopit-icon.png`;
 
 type JsonLd = Record<string, unknown>;

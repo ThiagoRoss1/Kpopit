@@ -1,22 +1,35 @@
-// Markdown for the repo's own posts (changelog / blog), rendered at build time. A small subset
-// with every bit of text HTML-escaped first: headings, paragraphs, lists, bold, italic, code, links.
+// Markdown for the repo's own posts (changelog / blog), rendered with `marked` at build time only.
+// Raw HTML in a post is escaped; links must be https or site paths; images must come from the
+// site (/...) or the image bucket. Anything else is shown as plain text.
+import { Marked, type Tokens } from "marked";
+import { newestFirst, type Post, type PostFrontmatter } from "./posts.ts";
 
-export interface PostFrontmatter {
-    title: string;
-    date: string;
-    description: string;
-}
-
-export interface Post extends PostFrontmatter {
-    slug: string;
-    html: string;
+export interface RenderOptions {
+    /** Image bucket origin (VITE_IMAGE_BUCKET_URL's), the only allowed absolute image source. */
+    imageOrigin?: string;
 }
 
 const escapeHtml = (value: string) =>
     value.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;").replace(/'/g, "&#39;");
 
-/** Splits `---` frontmatter (key: value lines) from the body; throws on a missing required field. */
-export function parseFrontmatter(source: string): { data: PostFrontmatter; body: string } {
+const isSitePath = (url: string) => url.startsWith("/") && !url.startsWith("//") && !url.startsWith("/\\");
+
+export function isAllowedImage(src: string, imageOrigin?: string): boolean {
+    if (isSitePath(src)) return true;
+    if (!imageOrigin) return false;
+    try {
+        return new URL(src).origin === new URL(imageOrigin).origin;
+    } catch {
+        return false;
+    }
+}
+
+const isAllowedLink = (href: string) => isSitePath(href) || /^https:\/\/[^/\\]/i.test(href);
+
+const REQUIRED = ["title", "date", "description", "image", "imageAlt"] as const;
+
+/** Splits `---` frontmatter (key: value lines) from the body; throws on a missing or invalid field. */
+export function parseFrontmatter(source: string, options: RenderOptions = {}): { data: PostFrontmatter; body: string } {
     const match = source.match(/^---\r?\n([\s\S]*?)\r?\n---\r?\n?([\s\S]*)$/);
     if (!match) throw new Error("Post is missing its --- frontmatter block");
     const fields: Record<string, string> = {};
@@ -24,60 +37,50 @@ export function parseFrontmatter(source: string): { data: PostFrontmatter; body:
         const pair = line.match(/^(\w+):\s*(.*)$/);
         if (pair) fields[pair[1]] = pair[2].replace(/^["']|["']$/g, "").trim();
     }
-    for (const key of ["title", "date", "description"] as const) {
+    for (const key of REQUIRED) {
         if (!fields[key]) throw new Error(`Post frontmatter is missing "${key}"`);
     }
     if (!/^\d{4}-\d{2}-\d{2}$/.test(fields.date)) throw new Error("Post date must be YYYY-MM-DD");
-    return { data: { title: fields.title, date: fields.date, description: fields.description }, body: match[2] };
-}
-
-const inline = (text: string) =>
-    escapeHtml(text)
-        .replace(/`([^`]+)`/g, "<code>$1</code>")
-        .replace(/\*\*([^*]+)\*\*/g, "<strong>$1</strong>")
-        .replace(/\*([^*]+)\*/g, "<em>$1</em>")
-        // Only absolute https links and site paths; anything else (javascript:, data:) stays text.
-        .replace(/\[([^\]]+)\]\(((?:https:\/\/|\/)[^)\s]*)\)/g, '<a href="$2">$1</a>');
-
-export function renderMarkdown(body: string): string {
-    const html: string[] = [];
-    let paragraph: string[] = [];
-    let list: string[] = [];
-    const flush = () => {
-        if (paragraph.length) html.push(`<p>${inline(paragraph.join(" "))}</p>`);
-        if (list.length) html.push(`<ul>${list.map((item) => `<li>${inline(item)}</li>`).join("")}</ul>`);
-        paragraph = [];
-        list = [];
-    };
-    for (const raw of body.split(/\r?\n/)) {
-        const line = raw.trim();
-        const heading = line.match(/^(#{1,3})\s+(.*)$/);
-        const item = line.match(/^[-*]\s+(.*)$/);
-        if (!line) {
-            flush();
-        } else if (heading) {
-            flush();
-            const level = heading[1].length + 1; // the page title is the h1
-            html.push(`<h${level}>${inline(heading[2])}</h${level}>`);
-        } else if (item) {
-            if (paragraph.length) flush();
-            list.push(item[1]);
-        } else {
-            if (list.length) flush();
-            paragraph.push(line);
-        }
+    if (!isAllowedImage(fields.image, options.imageOrigin)) {
+        throw new Error(`Post image must be a site path (/blog/...) or on the image bucket: ${fields.image}`);
     }
-    flush();
-    return html.join("\n");
+    const data = Object.fromEntries(REQUIRED.map((key) => [key, fields[key]])) as unknown as PostFrontmatter;
+    return { data, body: match[2] };
 }
 
-/** Posts from `path → source` (as import.meta.glob returns them), newest first. */
-export function loadPosts(sources: Record<string, string>): Post[] {
-    return Object.entries(sources)
-        .map(([path, source]) => {
-            const { data, body } = parseFrontmatter(source);
-            const slug = path.split("/").pop()!.replace(/\.md$/, "");
-            return { ...data, slug, html: renderMarkdown(body) };
-        })
-        .sort((a, b) => b.date.localeCompare(a.date) || a.slug.localeCompare(b.slug));
+export function renderMarkdown(body: string, options: RenderOptions = {}): string {
+    const marked = new Marked({
+        gfm: true,
+        async: false,
+        renderer: {
+            html: ({ text }) => escapeHtml(text),
+            // The page title is the h1, so a post's headings start at h2.
+            heading({ tokens, depth }) {
+                const level = Math.min(depth + 1, 6);
+                return `<h${level}>${this.parser.parseInline(tokens)}</h${level}>\n`;
+            },
+            link({ href, title, tokens }: Tokens.Link) {
+                const text = this.parser.parseInline(tokens);
+                if (!isAllowedLink(href)) return text;
+                return `<a href="${escapeHtml(href)}"${title ? ` title="${escapeHtml(title)}"` : ""}>${text}</a>`;
+            },
+            image({ href, title, text }: Tokens.Image) {
+                if (!isAllowedImage(href, options.imageOrigin)) return escapeHtml(text);
+                const titleAttr = title ? ` title="${escapeHtml(title)}"` : "";
+                return `<img src="${escapeHtml(href)}" alt="${escapeHtml(text)}"${titleAttr} loading="lazy">`;
+            },
+        },
+    });
+    return (marked.parse(body) as string).trim();
+}
+
+/** Posts from `path → source` (the content/<kind>/*.md files), newest first. */
+export function loadPosts(sources: Record<string, string>, options: RenderOptions = {}): Post[] {
+    return newestFirst(Object.entries(sources).map(([path, source]) => loadPost(path, source, options)));
+}
+
+export function loadPost(path: string, source: string, options: RenderOptions = {}): Post {
+    const { data, body } = parseFrontmatter(source, options);
+    const slug = path.split("/").pop()!.replace(/\.md$/, "");
+    return { ...data, slug, html: renderMarkdown(body, options) };
 }
