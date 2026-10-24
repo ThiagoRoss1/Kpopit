@@ -8,6 +8,11 @@ load_dotenv()
 PUBLIC_PROFILE_ENABLED = os.getenv("PUBLIC_PROFILE_ENABLED", "false").lower() == "true"
 
 VISIBILITY_FIELDS = ("is_public", "show_match_history", "show_activity")
+# One fixed query per bias field: no table name is ever built into SQL.
+BIAS_EXISTS_SQL = {
+    "bias_idol_id": "SELECT 1 FROM idols WHERE id = %s AND is_published = TRUE",
+    "bias_group_id": "SELECT 1 FROM groups WHERE id = %s AND is_published = TRUE",
+}
 MATCH_HISTORY_LIMIT = 30
 ACTIVITY_DAYS = 365
 
@@ -41,14 +46,14 @@ class ProfileService:
                 if not isinstance(data[field], bool):
                     raise ProfileError(f"{field} must be true or false")
                 updates[field] = data[field]
-        for field, table in (("bias_idol_id", "idols"), ("bias_group_id", "groups")):
+        for field, exists_sql in BIAS_EXISTS_SQL.items():
             if field not in data:
                 continue
             value = data[field]
             if value is not None:
                 if not isinstance(value, int) or isinstance(value, bool):
                     raise ProfileError(f"{field} must be an id or null")
-                cursor.execute(f"SELECT 1 FROM {table} WHERE id = %s AND is_published = TRUE", (value,))
+                cursor.execute(exists_sql, (value,))
                 if not cursor.fetchone():
                     raise ProfileError(f"Unknown {field}")
             updates[field] = value
