@@ -7,9 +7,9 @@ load_dotenv()
 # Off by default: without the flag GET /api/profile/<username> isn't registered at all.
 PUBLIC_PROFILE_ENABLED = os.getenv("PUBLIC_PROFILE_ENABLED", "false").lower() == "true"
 
-VISIBILITY_FIELDS = ("is_public", "show_match_history", "show_calendar")
+VISIBILITY_FIELDS = ("is_public", "show_match_history", "show_activity")
 MATCH_HISTORY_LIMIT = 30
-CALENDAR_DAYS = 365
+ACTIVITY_DAYS = 365
 
 
 class ProfileError(Exception):
@@ -26,7 +26,7 @@ class ProfileService:
     def get_settings(self, cursor, user_id: int) -> dict:
         cursor.execute(
             """
-                SELECT bias_idol_id, bias_group_id, is_public, show_match_history, show_calendar
+                SELECT bias_idol_id, bias_group_id, is_public, show_match_history, show_activity
                 FROM user_profiles WHERE user_id = %s
             """, (user_id,)
         )
@@ -60,7 +60,7 @@ class ProfileService:
             f"""
                 UPDATE user_profiles SET {assignments}, updated_at = CURRENT_TIMESTAMP
                 WHERE user_id = %s
-                RETURNING bias_idol_id, bias_group_id, is_public, show_match_history, show_calendar
+                RETURNING bias_idol_id, bias_group_id, is_public, show_match_history, show_activity
             """, (*updates.values(), user_id)
         )
         row = cursor.fetchone()
@@ -72,7 +72,7 @@ class ProfileService:
         cursor.execute(
             """
                 SELECT u.id, u.username, u.created_at, p.display_name, p.avatar_url, p.bias_idol_id,
-                       p.bias_group_id, p.is_public, p.show_match_history, p.show_calendar
+                       p.bias_group_id, p.is_public, p.show_match_history, p.show_activity
                 FROM users u
                 JOIN user_profiles p ON p.user_id = u.id
                 WHERE LOWER(u.username) = LOWER(%s) AND u.is_authenticated = TRUE
@@ -97,12 +97,12 @@ class ProfileService:
             "bias_group": self._bias_group(cursor, owner["bias_group_id"]),
             "stats": self._stats(cursor, owner["id"]),
             "match_history": None,
-            "calendar": None,
+            "activity": None,
         }
         if owner["show_match_history"]:
             profile["match_history"] = self._match_history(cursor, owner["id"], today)
-        if owner["show_calendar"]:
-            profile["calendar"] = self._calendar(cursor, owner["id"], today)
+        if owner["show_activity"]:
+            profile["activity"] = self._activity(cursor, owner["id"], today)
         return profile
 
     def _bias_idol(self, cursor, idol_id):
@@ -140,7 +140,7 @@ class ProfileService:
         )
         return [{**row, "date": row["date"].isoformat()} for row in cursor.fetchall()]
 
-    def _calendar(self, cursor, user_id: int, today: date) -> list[dict]:
+    def _activity(self, cursor, user_id: int, today: date) -> list[dict]:
         """Activity heatmap: games and wins per day over the last year (backfill rows included)."""
         cursor.execute(
             """
@@ -148,6 +148,6 @@ class ProfileService:
                 FROM daily_user_history
                 WHERE user_id = %s AND date <= %s AND date > %s AND COALESCE(guesses_count, 0) > 0
                 GROUP BY date ORDER BY date
-            """, (user_id, today, today - timedelta(days=CALENDAR_DAYS))
+            """, (user_id, today, today - timedelta(days=ACTIVITY_DAYS))
         )
         return [{"date": row["date"].isoformat(), "games": row["games"], "wins": row["wins"]} for row in cursor.fetchall()]

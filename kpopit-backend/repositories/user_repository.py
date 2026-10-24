@@ -141,7 +141,7 @@ class UserRepository:
     def get_profile(self, cursor, user_id: int) -> dict | None:
         cursor.execute(
             "SELECT id, user_id, display_name, avatar_url, created_at, updated_at, bias_idol_id, bias_group_id, "
-            "is_public, show_match_history, show_calendar FROM user_profiles WHERE user_id = %s",
+            "is_public, show_match_history, show_activity FROM user_profiles WHERE user_id = %s",
             (user_id,)
         )
         return cursor.fetchone()
