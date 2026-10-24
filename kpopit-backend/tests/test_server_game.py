@@ -236,3 +236,32 @@ def test_restore_rejects_missing_and_unknown_tokens(client):
     assert client.get("/api/game/restore-session").status_code == 401
     unknown = client.get("/api/game/restore-session", headers={"Authorization": str(uuid.uuid4())})
     assert (unknown.status_code, unknown.get_json()) == (400, {"error": "Invalid user token"})
+
+
+def test_game_started_before_the_deploy_keeps_counting(client, db_conn, make_user, idol, pin):
+    """A row written before migration 027 has guessed_ids NULL but attempts already counted."""
+    user_id, token = make_user()
+    answer, wrong = idol("Answer"), idol("Wrong")
+    pin(answer)
+    with db_conn.cursor() as cur:
+        cur.execute(
+            """
+            INSERT INTO daily_user_history (user_id, date, gamemode_id, guesses_count, won, started_at,
+                                            guessed_ids, guesses_origin)
+            VALUES (%s, %s, 1, 2, FALSE, NOW(), NULL, NULL)
+            """,
+            (user_id, dates.get_today_date()),
+        )
+    db_conn.commit()
+
+    assert classic_guess(client, token, wrong).status_code == 200
+    row = day_row(db_conn, user_id)
+    assert (row["guessed_ids"], row["guesses_count"], row["guesses_origin"]) == ([wrong], 3, "live")
+
+    classic_guess(client, token, wrong)
+    assert (day_row(db_conn, user_id)["guesses_count"]) == 3
+
+    assert classic_guess(client, token, answer).get_json()["guess_correct"] is True
+    row = day_row(db_conn, user_id)
+    assert (row["guessed_ids"], row["guesses_count"], row["won"], row["one_shot_win"]) == ([wrong, answer], 4, True, False)
+    assert float(row["score"]) == pytest.approx(10 * round(2.718281828 ** -0.3, 3), abs=0.01)
