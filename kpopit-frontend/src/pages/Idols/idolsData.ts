@@ -24,6 +24,16 @@ async function load<T>(queryKey: QueryKey, snapshot: () => Promise<T>, fromApi: 
     const client = getQueryClient();
     const cached = client.getQueryData<T>(queryKey);
     if (cached !== undefined) return cached;
+    if (client.getQueryState(queryKey)?.fetchStatus === "fetching") {
+        // A link-intent prefetch (hover, focus, touch) is already asking the API. fetchQuery would
+        // just join it, so race it against the prerendered snapshot, which is usually faster.
+        const prefetch = client.fetchQuery<T>({ queryKey, staleTime: STALE_MS });
+        const fromSnapshot = snapshot().then((data) => {
+            if (client.getQueryData(queryKey) === undefined) client.setQueryData(queryKey, data);
+            return data;
+        });
+        return Promise.any([fromSnapshot, prefetch]);
+    }
     let fromSnapshot = false;
     const value = await client.fetchQuery({
         queryKey,

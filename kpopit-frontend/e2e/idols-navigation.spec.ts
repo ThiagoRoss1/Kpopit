@@ -160,6 +160,26 @@ test.describe('idols navigation @mobile', () => {
     await expectSmooth(page, since, loads, base);
   });
 
+  // The click focuses the link, and focus starts an API prefetch for the profile; the navigation must
+  // still open from the prerendered .data instead of waiting on that slower request.
+  test('a slow API prefetch in flight does not hold the page: it opens from the snapshot', async ({ page, isMobile }) => {
+    await page.goto(`${PREVIEW}/idols`);
+    await expect(page.locator('main a[href^="/idols/"]').first()).toBeVisible();
+    await page.route(/\/api\/idols-page\/\d+/, async (route) => {
+      await new Promise((r) => setTimeout(r, 1000));
+      await route.continue();
+    });
+    const target = idols[5];
+    const card = page.locator(`main a[href="${href(target)}"]`);
+    await card.scrollIntoViewIfNeeded();
+    await card.focus();
+    const since = await now(page);
+    await press(page, isMobile, card);
+    await expect(page.getByRole('img', { name: `${target.artist_name} photo` })).toBeVisible();
+    const after = (await frames(page)).filter((f) => f.t >= since);
+    expect(after.filter((f) => f.loader), 'loader frames').toEqual([]);
+  });
+
   test('slow data: the page switches at the hold, shows the loader for at least 500 ms', async ({ page, isMobile }) => {
     await page.goto(`${PREVIEW}/idols`);
     await expect(page.locator('main a[href^="/idols/"]').first()).toBeVisible();
