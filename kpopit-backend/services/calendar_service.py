@@ -1,5 +1,5 @@
 import os
-from datetime import date, timedelta
+from datetime import date
 from dotenv import load_dotenv
 from services.album_service import AlbumService
 from services.game_service import GameService
@@ -71,23 +71,25 @@ class CalendarService:
         return cursor.fetchone()
 
     def timeline(self, cursor, user_id: int) -> dict:
-        """Per mode, every challenge day from the first one to today, oldest first, with its status."""
+        """Per mode, every challenge day up to today, oldest first, with its status. Only days that have
+        a pick: a day nobody opened (no draw) has no challenge to play."""
         today = get_today_date()
         result = {}
         for name, gamemode_id in MODES.items():
-            first = self.first_day(cursor, gamemode_id)
-            if first is None:
-                result[name] = []
-                continue
             cursor.execute(
                 """
-                    SELECT date, guessed_ids, guesses_count, won, is_calendar FROM daily_user_history
-                    WHERE user_id = %s AND gamemode_id = %s AND date BETWEEN %s AND %s
-                """, (user_id, gamemode_id, first, today),
+                    SELECT dp.pick_date, h.guessed_ids, h.guesses_count, h.won, h.is_calendar
+                    FROM daily_picks dp
+                    LEFT JOIN daily_user_history h
+                        ON h.date = dp.pick_date AND h.gamemode_id = dp.gamemode_id AND h.user_id = %s
+                    WHERE dp.gamemode_id = %s AND dp.pick_date <= %s
+                    ORDER BY dp.pick_date
+                """, (user_id, gamemode_id, today),
             )
-            rows = {row["date"]: row for row in cursor.fetchall()}
-            days = [first + timedelta(days=n) for n in range((today - first).days + 1)]
-            result[name] = [{"date": day.isoformat(), "status": day_status(rows.get(day))} for day in days]
+            result[name] = [
+                {"date": row["pick_date"].isoformat(), "status": day_status(row if row["won"] is not None else None)}
+                for row in cursor.fetchall()
+            ]
         return result
 
     def day(self, cursor, user_id: int, mode: str, raw_day: str) -> dict:

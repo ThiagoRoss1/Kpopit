@@ -224,3 +224,16 @@ def test_yesterdays_answer_only_for_players_who_finished_it(client, make_user, w
 def test_yesterdays_answer_unchanged_with_the_calendar_off(client, make_user, week, monkeypatch):
     monkeypatch.setattr("routes.game_logic.CALENDAR_ENABLED", False)
     assert client.get("/api/store-yesterdays-idol?gamemode_id=1").get_json()["past_idol_id"] == week[-1]
+
+
+def test_days_without_a_pick_are_not_challenges(client, db_conn, make_user, week):
+    _, token = make_user()
+    with db_conn.cursor() as cur:
+        cur.execute("DELETE FROM daily_picks WHERE pick_date = %s AND gamemode_id = 1", (day(-2),))
+    db_conn.commit()
+    timeline = client.get("/api/calendar/timeline", headers={"Authorization": token}).get_json()
+    assert day(-2) not in [d["date"] for d in timeline["classic"]]
+    assert len(timeline["classic"]) == 4
+    gap = client.get(f"/api/calendar/classic/{day(-2)}", headers={"Authorization": token})
+    assert (gap.status_code, gap.get_json()) == (400, {"error": "Invalid challenge date"})
+    assert cal_guess(client, token, -2, week["wrong"]).get_json() == {"error": "Invalid challenge date"}
