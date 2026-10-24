@@ -158,3 +158,84 @@ def test_failure_answers_generically(client, purge_key, monkeypatch, caplog):
     res = purge(client)
     assert (res.status_code, res.get_json()) == (500, {"error": "Purge failed"})
     assert "secret detail" not in res.get_data(as_text=True)
+
+
+R2_SETTINGS = {
+    "R2_ENDPOINT_URL": "http://127.0.0.1:9", "R2_AVATARS_ACCESS_KEY_ID": "test", "R2_AVATARS_SECRET_ACCESS_KEY": "test",
+    "R2_AVATARS_BUCKET_NAME": "avatars-test", "R2_AVATARS_PREFIX": "avatars",
+}
+
+
+@pytest.fixture
+def r2_deletes(monkeypatch):
+    """Avatar bucket configured, with the storage call replaced by a recorder (nothing reaches R2)."""
+    from utils.r2 import R2Client
+
+    for name, value in R2_SETTINGS.items():
+        monkeypatch.setenv(name, value)
+    calls = []
+    monkeypatch.setattr(R2Client, "__init__", lambda self: None)
+    monkeypatch.setattr(R2Client, "delete_files", lambda self, keys: calls.append(list(keys)))
+    return calls
+
+
+def set_avatar(db_conn, user_id, avatar_url):
+    with db_conn.cursor() as cur:
+        cur.execute("UPDATE user_profiles SET avatar_url = %s WHERE user_id = %s", (avatar_url, user_id))
+    db_conn.commit()
+
+
+def test_purge_deletes_the_uploaded_avatar(client, db_conn, monkeypatch, purge_key, r2_deletes):
+    user_id, auth = register(client, "pictured")
+    set_avatar(db_conn, user_id, f"avatars/{user_id}.webp")
+    stayer_id, _ = register(client, "stays")
+    request_deletion(client, auth)
+    on_day(monkeypatch, 15)
+    assert purge(client).get_json()["purged"] == 1
+    assert r2_deletes == [[f"avatars/{user_id}.webp"]]
+    assert all(str(stayer_id) not in key for call in r2_deletes for key in call)
+
+
+def test_idol_photo_avatars_are_never_deleted(client, db_conn, monkeypatch, purge_key, r2_deletes):
+    user_id, auth = register(client, "idolpic")
+    set_avatar(db_conn, user_id, "/images/idols/karina.webp")
+    request_deletion(client, auth)
+    on_day(monkeypatch, 15)
+    purge(client)
+    assert r2_deletes == [[f"avatars/{user_id}.webp"]]
+
+
+def test_purge_skips_avatars_without_r2(client, db_conn, monkeypatch, purge_key, caplog):
+    import logging
+
+    from utils.r2 import R2Client
+
+    for name in R2_SETTINGS:
+        monkeypatch.delenv(name, raising=False)
+    monkeypatch.setattr(R2Client, "delete_files", lambda self, keys: pytest.fail("R2 must not be called"))
+    user_id, auth = register(client, "local")
+    request_deletion(client, auth)
+    on_day(monkeypatch, 15)
+    with caplog.at_level(logging.INFO, logger="services.account_deletion_service"):
+        assert purge(client).get_json()["purged"] == 1
+    assert "Avatar bucket not configured" in caplog.text
+    assert requested_at(db_conn, user_id) == "gone"
+
+
+def test_storage_failure_still_purges_the_account(client, db_conn, monkeypatch, purge_key, caplog):
+    from utils.r2 import R2Client
+
+    for name, value in R2_SETTINGS.items():
+        monkeypatch.setenv(name, value)
+    monkeypatch.setattr(R2Client, "__init__", lambda self: None)
+
+    def unreachable(self, keys):
+        raise ConnectionError("bucket down")
+
+    monkeypatch.setattr(R2Client, "delete_files", unreachable)
+    user_id, auth = register(client, "unlucky")
+    request_deletion(client, auth)
+    on_day(monkeypatch, 15)
+    assert purge(client).get_json()["purged"] == 1
+    assert requested_at(db_conn, user_id) == "gone"
+    assert "Could not delete avatar files" in caplog.text

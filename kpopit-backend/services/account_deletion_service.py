@@ -2,6 +2,7 @@ import logging
 from datetime import timedelta
 from repositories.user_repository import UserRepository
 from utils.dates import get_today_now
+from utils.r2 import R2Client
 
 logger = logging.getLogger(__name__)
 
@@ -48,7 +49,11 @@ class AccountDeletionService:
         """Delete every account whose grace period is over, with all its game and profile data.
         Profiles, sessions, email tokens and username reservations go with the users row (CASCADE)."""
         cursor.execute(
-            "SELECT id, token FROM users WHERE deletion_requested_at <= %s",
+            """
+                SELECT u.id, u.token, p.avatar_url FROM users u
+                LEFT JOIN user_profiles p ON p.user_id = u.id
+                WHERE u.deletion_requested_at <= %s
+            """,
             (deletion_clock() - DELETION_GRACE,),
         )
         due = cursor.fetchall()
@@ -61,4 +66,17 @@ class AccountDeletionService:
         if due:
             # Internal ids only: never usernames or emails.
             logger.info("Purged %s deleted account(s): %s", len(due), [user["id"] for user in due])
+            self._delete_avatar_files(due)
         return len(due)
+
+    def _delete_avatar_files(self, users) -> None:
+        """Best effort: the account data must go even if the bucket is unreachable; leftovers are logged."""
+        if not R2Client.avatars_configured():
+            logger.info("Avatar bucket not configured: skipped avatar deletion for %s account(s)", len(users))
+            return
+        keys = [key for user in users for key in R2Client.avatar_keys(user["id"], user["avatar_url"])]
+        try:
+            R2Client().delete_files(keys)
+        except Exception as error:
+            logger.error("Could not delete avatar files of purged accounts %s (%s)",
+                         [user["id"] for user in users], type(error).__name__)
