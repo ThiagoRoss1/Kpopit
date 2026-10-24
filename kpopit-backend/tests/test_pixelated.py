@@ -486,7 +486,10 @@ def test_post_win_guess_current_behavior(client, db_conn, make_user, make_group,
 # E. yesterday_picks — store-yesterdays-album / -idol
 # ===========================================================================
 
-def test_store_yesterdays_album_sets_past_album_id(client, db_conn, make_group, make_album, set_yesterday_album_pick):
+def test_store_yesterdays_album_sets_past_album_id(client, db_conn, make_group, make_album, set_yesterday_album_pick,
+                                                   monkeypatch):
+    # The calendar flag hides the answer from players who didn't finish that day (tests/test_calendar.py).
+    monkeypatch.setattr("routes.game_logic.CALENDAR_ENABLED", False)
     gid = make_group("Pixie")
     aid = make_album("Yesterday Album", gid)
     yesterday = set_yesterday_album_pick(aid, GM)

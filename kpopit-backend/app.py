@@ -22,11 +22,13 @@ from routes.auth import auth_bp
 from routes.email import email_bp
 from routes.collections.collections import collections_bp
 from routes.profile import profile_bp
+from routes.calendar import calendar_bp
 from utils.rate_limiter import limiter
 from utils.log_redaction import install_token_redaction
 from flask_limiter import RateLimitExceeded
 from services.collections_service import COLLECTION_ENABLED
 from services.profile_service import PUBLIC_PROFILE_ENABLED
+from services.calendar_service import CALENDAR_ENABLED
 load_dotenv()
 
 # Without this, logger.info/warning calls across the app are dropped (Python's default
@@ -143,6 +145,10 @@ if COLLECTION_ENABLED:
 # Public profile blueprint - /profile/<username>, off until PUBLIC_PROFILE_ENABLED
 if PUBLIC_PROFILE_ENABLED:
     app.register_blueprint(profile_bp, url_prefix="/api")
+
+# Calendar blueprint - past challenge days, off until CALENDAR_ENABLED
+if CALENDAR_ENABLED:
+    app.register_blueprint(calendar_bp, url_prefix="/api")
 
 
 if __name__ == "__main__":

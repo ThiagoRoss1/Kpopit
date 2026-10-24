@@ -56,6 +56,7 @@ os.environ["COLLECTION_ENABLED"] = "true"
 os.environ["ADMIN_ENABLED"] = "true"
 # Same for the public profile route, which is off by default.
 os.environ["PUBLIC_PROFILE_ENABLED"] = "true"
+os.environ["CALENDAR_ENABLED"] = "true"
 # No test may reach Resend: emails go to a per-test outbox (see the email_outbox fixture),
 # and the real key from .env is replaced before email_service reads it at import.
 os.environ["EMAIL_DELIVERY"] = "outbox"

@@ -57,7 +57,7 @@ class RestoreService:
         if not guessed_ids:
             return state or None
 
-        answer_id = GameService(self.db, self.repository).resolve_answer_id(cursor, gamemode_id)
+        answer_id = GameService(self.db, self.repository).resolve_answer_id(cursor, gamemode_id, today)
         won = bool(row.get("won"))
         screen = screen_state_only(state)
 

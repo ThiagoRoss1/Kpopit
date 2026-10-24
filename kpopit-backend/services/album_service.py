@@ -61,16 +61,18 @@ class AlbumService:
         guess_album_id: int,
         analytics_data: dict,
         gamemode_id: int = 3,
+        day: str | None = None,
+        is_calendar: bool = False,
     ) -> dict:
-        """Compare the guess with today's album and record it.
+        """Compare the guess with the album of `day` (default today) and record it.
         Persistence (upsert, score, streaks, double-count guard, commit) belongs to
         GameService.save_user_history; this only resolves both albums for it and the response."""
-        today = get_today_date_str()
+        today = day or get_today_date_str()
         current_timestamp = get_current_timestamp()
 
         try:
             game_service = GameService(connect, None)
-            correct_id = game_service.resolve_answer_id(cursor, gamemode_id)
+            correct_id = game_service.resolve_answer_id(cursor, gamemode_id, today)
             if correct_id is None:
                 return {"error": "No daily pick found"}
 
@@ -112,7 +114,7 @@ class AlbumService:
             # Pixelated never grants collection cards (for Album 1) (gamemode 3); discard card_granted.
             is_correct, _ = game_service.save_user_history(
                 connect, cursor, user_id, gamemode_id, guess_album_id, answer_data,
-                correct_id, today, current_timestamp, analytics_data,
+                correct_id, today, current_timestamp, analytics_data, is_calendar=is_calendar,
             )
 
         except Exception as e:

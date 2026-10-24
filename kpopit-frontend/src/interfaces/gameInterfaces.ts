@@ -96,7 +96,13 @@ export interface CompleteGuessTrafficRequest extends CompleteGuessRequest {
   referrer?: string;
 }
 
-export interface YesterdayIdol {
+// With the calendar on, a player who didn't finish yesterday gets only the date and these flags.
+interface YesterdayLock {
+  locked?: true;
+  play_in_calendar?: true;
+}
+
+export interface YesterdayIdol extends YesterdayLock {
   past_idol_id: number;
   yesterdays_pick_date: string;
   artist_name: string;
@@ -105,7 +111,7 @@ export interface YesterdayIdol {
   image_version: string;
 }
 
-export interface YesterdayAlbum {
+export interface YesterdayAlbum extends YesterdayLock {
   past_album_id: number;
   yesterdays_pick_date: string;
   album_name: string;

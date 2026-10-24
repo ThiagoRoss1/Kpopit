@@ -120,15 +120,23 @@ export const getAllIdols = async () => {
     return response.data;
 };
 
+// With the calendar on, yesterday's answer is only sent to players who finished that day, so the
+// request identifies the player (a logged-in Bearer token still wins).
+const anonymousAuthHeader = async () => {
+    const encrypted = localStorage.getItem('userToken');
+    const token = encrypted ? await decryptToken(encrypted) : null;
+    return token ? { 'Authorization': token } : {};
+};
+
 // Export yesterday's idol data
 export const getYesterdaysIdol = async () => {
-    const response = await api.get('/store-yesterdays-idol');
+    const response = await api.get('/store-yesterdays-idol', { headers: await anonymousAuthHeader() });
     return response.data;
 };
 
 // Export yesterday's album data
 export const getYesterdaysAlbum = async () => {
-    const response = await api.get('/store-yesterdays-album');
+    const response = await api.get('/store-yesterdays-album', { headers: await anonymousAuthHeader() });
     return response.data;
 }
 
