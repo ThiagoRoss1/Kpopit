@@ -1,0 +1,55 @@
+name: Purge deleted accounts
+
+# Daily call to POST /api/tasks/purge-deleted-accounts: deletes accounts whose 15-day deletion
+# grace period is over. Scheduled runs only fire from the default branch (main).
+
+on:
+  schedule:
+    - cron: '30 7 * * *' # 07:30 UTC daily, after the midnight EST reset and the 07:00 backup
+  workflow_dispatch:
+
+permissions: {}
+
+concurrency:
+  group: purge-deleted-accounts
+  cancel-in-progress: false
+
+jobs:
+  purge:
+    name: Trigger purge
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    env:
+      PURGE_URL: ${{ secrets.PURGE_URL }}
+      ACCOUNT_PURGE_AUTH_KEY: ${{ secrets.ACCOUNT_PURGE_AUTH_KEY }}
+    steps:
+      - name: Check secrets
+        id: secrets
+        run: |
+          if [ -z "$PURGE_URL" ] || [ -z "$ACCOUNT_PURGE_AUTH_KEY" ]; then
+            echo "::notice title=Purge skipped::PURGE_URL or ACCOUNT_PURGE_AUTH_KEY secret is not set."
+            echo "ready=false" >> "$GITHUB_OUTPUT"
+          else
+            echo "ready=true" >> "$GITHUB_OUTPUT"
+          fi
+
+      - name: POST /api/tasks/purge-deleted-accounts
+        if: steps.secrets.outputs.ready == 'true'
+        run: |
+          # One retry, 30 s apart; the route allows 3 calls per hour.
+          for attempt in 1 2; do
+            if curl --fail --silent --show-error \
+                 --max-time 120 \
+                 -X POST "$PURGE_URL" \
+                 -H "Authorization: Bearer $ACCOUNT_PURGE_AUTH_KEY" \
+                 -o /dev/null -w "HTTP %{http_code}\n"; then
+              echo "Purge succeeded on attempt $attempt."
+              exit 0
+            fi
+            if [ "$attempt" = 1 ]; then
+              echo "Attempt 1 failed; retrying in 30 s."
+              sleep 30
+            fi
+          done
+          echo "::error title=Purge failed::Both attempts failed. Check the backend logs on Railway."
+          exit 1

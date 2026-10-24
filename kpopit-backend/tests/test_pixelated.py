@@ -282,6 +282,7 @@ def test_guess_incorrect_writes_attempt_not_win(client, db_conn, make_user, make
     wrong_aid = make_album("Other Album", gid)
     set_daily_pick(correct_aid, GM)
 
+    # The body's current_attempt is ignored: the server counts this as attempt 1.
     resp = client.post(
         f"/api/game/pixelated/guess?gamemode_id={GM}",
         json={"album_id": wrong_aid, "current_attempt": 3, "game_date": today},
@@ -303,7 +304,7 @@ def test_guess_incorrect_writes_attempt_not_win(client, db_conn, make_user, make
         assert row is not None, "an attempt row should be written even on a miss"
         assert row["won"] is False
         assert row["one_shot_win"] is False
-        assert row["guesses_count"] == 3
+        assert row["guesses_count"] == 1
         assert row["won_at"] is None
         # score column defaults to 0 and is only updated on a win.
         assert row["score"] == 0
@@ -324,14 +325,16 @@ def test_guess_correct_populates_daily_user_history(client, db_conn, make_user, 
     user_id, token = make_user()
     gid = make_group("Pixie")
     aid = make_album("Cosmic Dream", gid)
+    wrong_aid = make_album("Other Album", gid)
     set_daily_pick(aid, GM)
 
-    resp = client.post(
-        f"/api/game/pixelated/guess?gamemode_id={GM}",
-        json={"album_id": aid, "current_attempt": 2, "game_date": today},
-        headers={"Authorization": token},
-    )
-    assert resp.status_code == 200
+    for album_id in (wrong_aid, aid):
+        resp = client.post(
+            f"/api/game/pixelated/guess?gamemode_id={GM}",
+            json={"album_id": album_id, "current_attempt": 1, "game_date": today},
+            headers={"Authorization": token},
+        )
+        assert resp.status_code == 200
     assert resp.get_json()["guess_correct"] is True
 
     with db_conn.cursor() as cur:
@@ -352,8 +355,8 @@ def test_guess_correct_populates_daily_user_history(client, db_conn, make_user, 
         expected = 10 * round(math.exp(-0.1 * (2 - 1)), 3)
         assert row["score"] == pytest.approx(expected, abs=1e-3)
         assert row["won_at"] is not None
-        # started_at is only stamped on attempt 1.
-        assert row["started_at"] is None
+        # started_at is stamped by the first guess of the day.
+        assert row["started_at"] is not None
 
 
 def test_guess_correct_one_shot_populates_all_tables(client, db_conn, make_user, make_group, make_album, set_daily_pick, today):
@@ -452,10 +455,8 @@ def test_no_null_in_required_columns(client, db_conn, make_user, make_group, mak
 
 
 def test_post_win_guess_current_behavior(client, db_conn, make_user, make_group, make_album, set_daily_pick, today):
-    """KNOWN DESIGN CHOICE: there is no server-side win-lock. A correct guess
-    submitted after the game is already won is still accepted (200,
-    guess_correct=True), but the `already_won_today` guard keeps aggregate
-    stats from being double-counted. This locks in CURRENT behavior."""
+    """A correct guess replayed after the win is still answered (200, guess_correct=True),
+    but the server records each id once and nothing after a win, so stats count it once."""
     user_id, token = make_user()
     gid = make_group("Pixie")
     aid = make_album("Cosmic Dream", gid)
@@ -466,7 +467,7 @@ def test_post_win_guess_current_behavior(client, db_conn, make_user, make_group,
     assert first.status_code == 200 and first.get_json()["guess_correct"] is True
 
     second = client.post(url, json={"album_id": aid, "current_attempt": 2, "game_date": today}, headers={"Authorization": token})
-    # Not rejected — current behavior accepts the post-win guess.
+    # Answered, not rejected; the replay changes nothing.
     assert second.status_code == 200
     assert second.get_json()["guess_correct"] is True
 
@@ -591,7 +592,7 @@ def test_guess_missing_album_id_returns_400(client, make_user, make_group, make_
     assert "album_id" in (resp.get_json().get("error") or "")
 
 
-def test_guess_missing_current_attempt_returns_400(client, make_user, make_group, make_album, set_daily_pick, today):
+def test_guess_without_current_attempt_is_counted_by_the_server(client, make_user, make_group, make_album, set_daily_pick, today):
     _, token = make_user()
     gid = make_group("Pixie")
     aid = make_album("Cosmic Dream", gid)
@@ -602,8 +603,8 @@ def test_guess_missing_current_attempt_returns_400(client, make_user, make_group
         json={"album_id": aid, "game_date": today},
         headers={"Authorization": token},
     )
-    assert resp.status_code == 400
-    assert "current_attempt" in (resp.get_json().get("error") or "")
+    assert resp.status_code == 200
+    assert resp.get_json()["guess_correct"] is True
 
 
 def test_guess_empty_body_returns_400(client, make_user):
@@ -673,7 +674,7 @@ def test_guess_invalid_anonymous_header_returns_400(client, make_group, make_alb
 # G3. Non-existent album_id guess
 # ===========================================================================
 
-def test_guess_nonexistent_album_id_returns_false_with_null_data(client, make_user, make_group, make_album, set_daily_pick, today):
+def test_guess_nonexistent_album_id_is_rejected_and_not_recorded(client, db_conn, make_user, make_group, make_album, set_daily_pick, today):
     _, token = make_user()
     gid = make_group("Pixie")
     aid = make_album("Cosmic Dream", gid)
@@ -685,11 +686,8 @@ def test_guess_nonexistent_album_id_returns_false_with_null_data(client, make_us
         json={"album_id": missing_id, "current_attempt": 1, "game_date": today},
         headers={"Authorization": token},
     )
-    assert resp.status_code == 200
-    body = resp.get_json()
-    assert body["guess_correct"] is False
-    data = body["guessed_album_data"]
-    assert data["album_id"] == missing_id
-    assert data["album_name"] is None
-    assert data["group_name"] is None
-    assert data["cover_path"] is None
+    assert resp.status_code == 400
+    assert resp.get_json() == {"error": "Album not found"}
+    with db_conn.cursor() as cur:
+        cur.execute("SELECT COUNT(*) AS n FROM daily_user_history")
+        assert cur.fetchone()["n"] == 0

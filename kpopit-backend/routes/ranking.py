@@ -1,4 +1,5 @@
-from flask import Blueprint, jsonify, g
+from flask import Blueprint, jsonify, g, request
+from utils.auth_helpers import user_token_from_header
 from services.get_db import get_db
 from services.ranking_service import RankingService
 
@@ -14,9 +15,13 @@ def get_daily_users_count():
     finally:
         cursor.close()
 
+@ranking_bp.route("/daily-rank", methods=["GET"])
 @ranking_bp.route("/daily-rank/<user_token>", methods=["GET"])
-def get_daily_rank(user_token):
-    """Return the user's rank for today's game"""
+def get_daily_rank(user_token=None):
+    """Return the X-User-Token user's rank for today's game"""
+    user_token = user_token_from_header(request, user_token)
+    if not user_token:
+        return jsonify({"error": "Missing user token"}), 400
     connect = get_db()
     cursor = connect.cursor()
     try:

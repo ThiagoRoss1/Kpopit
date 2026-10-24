@@ -10,8 +10,16 @@
       "autoPort": false
     },
     {
-      "name": "kpopit-backend",
+      "name": "kpopit-backend-windows",
       "runtimeExecutable": ".venv/Scripts/python.exe",
+      "runtimeArgs": ["app.py"],
+      "cwd": "kpopit-backend",
+      "port": 5000,
+      "autoPort": false
+    },
+    {
+      "name": "kpopit-backend-mac",
+      "runtimeExecutable": ".venv/bin/python",
       "runtimeArgs": ["app.py"],
       "cwd": "kpopit-backend",
       "port": 5000,

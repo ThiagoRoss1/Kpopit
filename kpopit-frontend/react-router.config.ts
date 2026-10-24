@@ -1,6 +1,9 @@
 import type { Config } from "@react-router/dev/config";
 import { buildIdolSlug } from "./src/utils/formatters";
+import { writeFile } from "node:fs/promises";
+import path from "node:path";
 import { fetchIdolsPage, LENIENT_PRERENDER, requirePrerenderApi } from "./app/prerender-api";
+import { buildSitemap } from "./app/sitemap";
 
 const STATIC_PATHS = ["/", "/classic", "/blurry", "/pixelated", "/idols", "/privacy-policy", "/contact"];
 
@@ -29,4 +32,9 @@ let paths: Promise<string[]> | undefined;
 export default {
   ssr: false,
   prerender: () => (paths ??= prerenderPaths()),
+  // The sitemap lists exactly what was prerendered, so it can't drift from the routes.
+  async buildEnd({ reactRouterConfig }) {
+    const xml = buildSitemap(await (paths ??= prerenderPaths()));
+    await writeFile(path.join(reactRouterConfig.buildDirectory, "client", "sitemap.xml"), xml);
+  },
 } satisfies Config;

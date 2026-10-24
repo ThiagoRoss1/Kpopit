@@ -54,6 +54,8 @@ os.environ.setdefault("FLASK_ENV", "development")
 os.environ["COLLECTION_ENABLED"] = "true"
 # Register the admin blueprint regardless of the local .env, so its auth rules are always tested.
 os.environ["ADMIN_ENABLED"] = "true"
+# Same for the public profile route, which is off by default.
+os.environ["PUBLIC_PROFILE_ENABLED"] = "true"
 # No test may reach Resend: emails go to a per-test outbox (see the email_outbox fixture),
 # and the real key from .env is replaced before email_service reads it at import.
 os.environ["EMAIL_DELIVERY"] = "outbox"

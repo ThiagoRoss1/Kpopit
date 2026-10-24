@@ -1,5 +1,5 @@
 import type { ReactNode } from "react";
-import { Helmet } from "react-helmet-async";
+import PageMeta from "../src/components/Seo/PageMeta";
 import ClientOnly from "../src/components/ClientOnly";
 import PageLoader from "../src/components/Loading/PageLoader";
 import GameDayProvider from "../src/components/GameDayProvider";
@@ -11,13 +11,7 @@ type GamePageProps = { title: string; description: string; path: string; childre
 export default function GamePage({ title, description, path, children }: GamePageProps) {
   return (
     <>
-      <Helmet>
-        <title>{title}</title>
-        <meta name="description" content={description} />
-        <link rel="canonical" href={`https://kpopit.net${path}`} />
-        <meta property="og:title" content={title} />
-        <meta property="og:description" content={description} />
-      </Helmet>
+      <PageMeta title={title} description={description} path={path} />
       <ClientOnly fallback={<PageLoader />}>
         <GameDayProvider>{children}</GameDayProvider>
       </ClientOnly>

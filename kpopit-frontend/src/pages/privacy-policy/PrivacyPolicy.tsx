@@ -1,16 +1,16 @@
 import "./PrivacyPolicy.css";
 import BackgroundStyle from "../../components/Background/BackgroundStyle";
 import { Link } from "react-router";
-import { Helmet } from "react-helmet-async";
+import PageMeta from "../../components/Seo/PageMeta";
 
 const PrivacyPolicy = () => {
     return (
         <>
-        <Helmet>
-            <title>KpopIt - Privacy Policy</title>
-            <meta name="description" content="How KpopIt collects, uses and protects your data." />
-            <link rel="canonical" href="https://kpopit.net/privacy-policy" />
-        </Helmet>
+        <PageMeta
+            title="KpopIt - Privacy Policy"
+            description="How KpopIt collects, uses and protects your data."
+            path="/privacy-policy"
+        />
         <BackgroundStyle />
         <div className="w-full h-full flex items-start justify-center">
             <div className="flex flex-col items-center justify-center">
@@ -22,7 +22,7 @@ const PrivacyPolicy = () => {
 
                     {/* Last Updated */}
                     <div className="items-start justify-center mt-8">
-                        <span className="text-lg px-8"><b>Last Updated:</b> November 25, 2025</span>
+                        <span className="text-lg px-8"><b>Last Updated:</b> October 23, 2026</span>
                     </div>
 
                     {/* Section 1 - Introduction / What Information We Collect */}
@@ -43,32 +43,38 @@ const PrivacyPolicy = () => {
 
                             <h3 className="text-xl font-bold mt-3">1.2. Game Data</h3>
                             <ul className="list-disc pl-6">
-                                <li className="text-base mt-1">We storage your guesses, wins, streaks</li>
+                                <li className="text-base mt-1">We store your guesses, wins and streaks</li>
                                 <li className="text-base">This data can be transferred between devices by using a transfer code</li>
                             </ul>
 
-                            <span className="text-base mt-3">⚠ We do not collect any personally identifiable information from our users</span>
+                            <h3 className="text-xl font-bold mt-3">1.3. Accounts (optional)</h3>
+                            <ul className="list-disc pl-6">
+                                <li className="text-base mt-1">You can play without an account</li>
+                                <li className="text-base">If you create one, we store your username, display name, avatar and a hashed password (never the password itself)</li>
+                                <li className="text-base">Your email is optional; if you add it, it is used only for account emails (verification, password reset, email changes)</li>
+                            </ul>
+                            {/* TODO(launch, Phase 4/5): public profile (bias idol/group, visibility toggles, activity calendar) and XP. */}
+
+                            <span className="text-base mt-3">⚠ Without an account we do not collect any personally identifiable information</span>
                         </div>
                     </div>
 
                     {/* Section 2 - Cookies and Tracking */}
                     <div  className="flex flex-col items-start justify-center px-8">
                         <div className="flex flex-col items-start justify-center mt-8 gap-3">
-                            <h2 className="text-2xl font-bold">2. Cookies and Tracking</h2>
+                            <h2 className="text-2xl font-bold">2. Cookies, Browser Storage and Tracking</h2>
 
-                            <span className="text-base font-semibold">We currently do not use cookies.</span>
-
-                            <span className="text-base font-semibold">In the future, we may add optional cookies for:</span>
-                            
+                            <span className="text-base font-semibold">We use your browser's storage only to make the game work:</span>
                         </div>
 
                         <div className="flex flex-col items-start justify-center">
                             <ul className="list-disc pl-6">
-                                <li className="text-base mt-1">User preferences</li>
-                                <li className="text-base">Analytics to improve the game</li>
+                                <li className="text-base mt-1">Local storage: your encrypted user token, today's game state, cached idol and album lists and your preferences</li>
+                                <li className="text-base">Session storage: whether you chose to stay logged in for this session only</li>
+                                <li className="text-base">One cookie, only when you log in: it keeps your session (it can't be read by scripts)</li>
                             </ul>
 
-                            <span className="text-base mt-3">⚠ If that happens, this Privacy Policy will be updated accordingly to inform our users.</span>
+                            <span className="text-base mt-3">⚠ We do not use advertising or tracking cookies. Fonts are served from our own site, so loading a page doesn't contact a font service.</span>
                         </div>
                     </div>
 
@@ -95,8 +101,19 @@ const PrivacyPolicy = () => {
                         <div className="flex flex-col items-start justify-center">
                             <ul className="list-disc pl-6">
                                 <li className="text-base mt-1">Sell your data</li>
-                                <li className="text-base">Share your data with third parties</li>
+                                <li className="text-base">Share your data with anyone except the services that run the game (below)</li>
                                 <li className="text-base">Track your activity outside the game</li>
+                            </ul>
+                        </div>
+
+                        <span className="text-base font-semibold mt-3">Services that process data for us:</span>
+
+                        <div className="flex flex-col items-start justify-center">
+                            <ul className="list-disc pl-6">
+                                <li className="text-base mt-1">Vercel: hosts the website and measures anonymous visits and page speed</li>
+                                <li className="text-base">Railway: hosts our server and the game database</li>
+                                <li className="text-base">Cloudflare: stores idol images, avatars and database backups, and provides anonymous traffic statistics (such as visitors per country)</li>
+                                <li className="text-base">Resend: sends account emails, only if you added an email</li>
                             </ul>
                         </div>
                     </div>
@@ -111,8 +128,10 @@ const PrivacyPolicy = () => {
                             <ul className="list-disc pl-6">
                                 <li className="text-base mt-1">Game data is stored on our backend database</li>
                                 <li className="text-base">Tokens are stored only on your device</li>
+                                <li className="text-base">Database backups are kept in private storage for 15 to 30 days, then deleted</li>
                                 <li className="text-base">Data is kept only as long as necessary for the game to function</li>
                             </ul>
+                            {/* TODO(launch, Phase 4): account deletion (request with password, 15-day grace period, cancelled by logging in) once the settings screen ships. */}
                         </div>
                     </div>
 

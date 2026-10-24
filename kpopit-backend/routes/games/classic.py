@@ -4,7 +4,7 @@ from services.daily_draw import ensure_daily_picks
 from services.game_service import GameService
 from services.user_service import UserService
 from utils.dates import get_today_date_str, get_current_timestamp
-from utils.game_feedback_logic import partial_feedback_function, numerical_feedback_function
+from services.idol_guess_service import IdolGuessService
 from utils.analytics import get_analytics_data, get_country_name
 from services.get_db import get_db, get_idol_repo
 from utils.auth_decorators import optional_auth
@@ -99,12 +99,11 @@ def get_daily_idol():
 def guess_idol():
     """Get idol guess and return comparison data as JSON"""
 
-    data = request.get_json()
+    # answer_id / current_attempt from the body are ignored: the server owns the answer and the count.
+    data = request.get_json() or {}
     guessed_idol_id = data.get("guessed_idol_id")
-    answer_id = data.get("answer_id")
-    current_attempt = data.get("current_attempt")
     game_date = data.get("game_date")
-    analytics_data = get_analytics_data()
+    analytics_data = get_analytics_data() or {}
     country_name, flag = get_country_name(analytics_data.get("country"))
     analytics_data['country'] = f"{country_name} {flag}"
 
@@ -118,8 +117,8 @@ def guess_idol():
         if game_date != today:
             return jsonify({"error": "Game date mismatch"}), 400
 
-        if not guessed_idol_id or not answer_id:
-            return jsonify({"error": "Missing guessed_idol_id or answer_id"}), 400
+        if not guessed_idol_id:
+            return jsonify({"error": "Missing guessed_idol_id"}), 400
 
         repository = get_idol_repo()
         game_service = GameService(connect, repository)
@@ -156,139 +155,25 @@ def guess_idol():
             
             user_id = user_row["id"]
 
-        # Fetch full data for guessed idol and answer idol
-        guessed_idol = dict(repository.fetch_full_idol_data(guessed_idol_id))
-        answer_data = dict(repository.fetch_full_idol_data(answer_id))
-
-        for idol in [guessed_idol, answer_data]:
-
-            idol_id = idol["idol_id"]
-            group_id = idol.get("group_id")
-
-            # Fetch careers and companies
-            idol["career"] = repository.fetch_full_idol_career(idol_id)
-            idol["companies"] = repository.fetch_idol_companies(idol_id)
-
-            if group_id:
-                idol["group_companies"] = repository.fetch_group_companies(group_id)
-            else:
-                idol["group_companies"] = []
-        
-            for field in ["nationality", "position"]:
-                if idol.get(field) and isinstance(idol[field], str):
-                    idol[field] = [item.strip() for item in idol[field].split(",")]
-                else:
-                    idol[field] = idol.get(field) or []
-
-        if not guessed_idol or not answer_data:         
+        answer_id = game_service.resolve_answer_id(cursor, 1)
+        if answer_id is None:
             return jsonify({"error": "Idol not found"}), 404
-        
-        # Compare data
-        feedback = {}
 
-        # Position
-        position_guess = set(position.strip() for position in (guessed_idol.get("position", [])))
-        position_answer = set(position.strip() for position in (answer_data.get("position", [])))
+        result = IdolGuessService(repository).classic_result(int(guessed_idol_id), answer_id)
+        if not result:
+            return jsonify({"error": "Idol not found"}), 404
 
-        feedback['position'] = partial_feedback_function(position_guess, position_answer, unknown_if_empty=True)
-
-        # Nationality
-        idol_nationality_guess = set(nationality.strip() for nationality in (guessed_idol.get("nationality", [])))
-        idol_nationality_answer = set(nationality.strip() for nationality in (answer_data.get("nationality", [])))
-
-        feedback["nationality"] = partial_feedback_function(idol_nationality_guess, idol_nationality_answer, unknown_if_empty=True)
-        
-        # Numbers - debut year, height, birth date, member count, generation...
-        numerical_fields = ["idol_debut_year", "height", "birth_date", "member_count"] # removed "generation"
-        numerical_feedback = numerical_feedback_function(guessed_idol, answer_data, numerical_fields)
-        feedback.update(numerical_feedback)
-
-        # Group
-        group_guess = set(group["group_name"] for group in guessed_idol["career"])
-        group_answer = set(group["group_name"] for group in answer_data["career"])
-
-        feedback["groups"] = partial_feedback_function(group_guess, group_answer)
-
-        # Companies
-        idol_companies_guess = set(company["name"] for company in guessed_idol["companies"])
-        group_companies_guess = set(company["name"] for company in guessed_idol["group_companies"])
-
-        companies_guess = idol_companies_guess.union(group_companies_guess) # == idol_companies | group_companies
-
-        idol_companies_answer = set(company["name"] for company in answer_data["companies"])
-        group_companies_answer = set(company["name"] for company in answer_data["group_companies"])
-
-        companies_answer = idol_companies_answer.union(group_companies_answer)
-
-        feedback["companies"] = partial_feedback_function(companies_guess, companies_answer)
-
-        """Unique Values - Feedback Check"""
-        unique_fields = ["artist_name", "gender"]
-
-        # Name and Gender
-        for field in unique_fields:
-            if guessed_idol.get(field) == answer_data.get(field):
-                feedback[field] = {
-                    "status": "correct",
-                    "correct_items": [guessed_idol.get(field)],
-                    "incorrect_items": []
-                }
-            else:
-                feedback[field] = {
-                    "status": "incorrect",
-                    "correct_items": [],
-                    "incorrect_items": [guessed_idol.get(field)]
-                }
-
-        # Final answer (correct or not)
-        current_timestamp = get_current_timestamp()
-        # today = get_server_date()
-
-        # Update user history
         try:
             is_correct, card_granted = game_service.save_user_history(
-                connect, cursor, user_id, 1, guessed_idol_id, answer_data,
-                answer_id, current_attempt, today, current_timestamp, analytics_data
+                connect, cursor, user_id, 1, guessed_idol_id, {}, answer_id,
+                today, get_current_timestamp(), analytics_data
             )
 
         except Exception:
             logger.exception("Error saving user history")
             return jsonify({"error": "Database error saving user history"}), 500
 
-        keys_for_display = [
-            "idol_id", "artist_name", "gender", "nationality", "idol_debut_year", 
-            "birth_date", "height", "position", "image_path", "member_count" # just this for now
-        ]
-
-        data_for_display = {key: guessed_idol.get(key) for key in keys_for_display}
-
-        """Extra datas"""
-
-        # Groups data
-        active_groups = [
-            group["group_name"] for group in guessed_idol["career"]
-                if group.get("is_active")
-        ]
-        # No active group: her most recent past group (see CURRENT_CAREER_CTE in idol_repository.py)
-        if not active_groups and guessed_idol.get("is_former_group"):
-            active_groups = [guessed_idol["group_name"]]
-        active_group_name = active_groups[0] if active_groups else None
-
-        data_for_display["groups"] = [group["group_name"] for group in guessed_idol["career"]]
-        data_for_display["active_group"] = active_group_name
-
-        # Companies data
-        idol_c = [company["name"] for company in guessed_idol["companies"]]
-        group_c = [company["name"] for company in guessed_idol["group_companies"]]
-        data_for_display["companies"] = idol_c + group_c
-
-        # Response data
-        response_data = {
-            "guess_correct": is_correct,
-            "feedback": feedback,
-            "guessed_idol_data": data_for_display,
-            "card_granted": card_granted
-        }
+        response_data = {**result, "guess_correct": is_correct, "card_granted": card_granted}
 
         return jsonify(response_data), 200
     

@@ -4,6 +4,9 @@ import os
 
 from flask import Blueprint, request, jsonify
 from services.backup_service import postgresql_backup_to_s3
+from services.account_deletion_service import AccountDeletionService
+from services.auth_service import AuthService
+from services.get_db import get_db
 from utils.rate_limiter import limiter
 
 tasks_bp = Blueprint('tasks', __name__)
@@ -11,6 +14,12 @@ tasks_bp = Blueprint('tasks', __name__)
 logger = logging.getLogger(__name__)
 
 BEARER_PREFIX = "Bearer "
+
+
+def _bearer_matches(expected_key: str) -> bool:
+    header = request.headers.get('Authorization') or ""
+    provided_key = header[len(BEARER_PREFIX):] if header.startswith(BEARER_PREFIX) else ""
+    return bool(provided_key) and hmac.compare_digest(provided_key.encode(), expected_key.encode())
 
 
 @tasks_bp.route('/tasks/backup', methods=['POST'])
@@ -25,12 +34,38 @@ def backup_database():
         logger.error("BACKUP_AUTH_KEY is not set: /tasks/backup rejects every request")
         return jsonify({"error": "Backup is not available"}), 500
 
-    header = request.headers.get('Authorization') or ""
-    provided_key = header[len(BEARER_PREFIX):] if header.startswith(BEARER_PREFIX) else ""
-    if not provided_key or not hmac.compare_digest(provided_key.encode(), expected_key.encode()):
+    if not _bearer_matches(expected_key):
         return jsonify({"error": "Unauthorized"}), 401
 
     success, filename = postgresql_backup_to_s3()
     if success:
         return jsonify({"message": "Backup successful", "file": filename}), 200
     return jsonify({"error": "Backup failed"}), 500
+
+
+@tasks_bp.route('/tasks/purge-deleted-accounts', methods=['POST'])
+@limiter.limit("3 per hour")
+def purge_deleted_accounts():
+    """Delete the accounts whose 15-day deletion grace period is over. Called daily by
+    .github/workflows/purge-accounts.yml with `Authorization: Bearer <ACCOUNT_PURGE_AUTH_KEY>`;
+    with the key unset or empty the route refuses every request."""
+    expected_key = os.getenv("ACCOUNT_PURGE_AUTH_KEY") or ""
+    if not expected_key:
+        logger.error("ACCOUNT_PURGE_AUTH_KEY is not set: /tasks/purge-deleted-accounts rejects every request")
+        return jsonify({"error": "Purge is not available"}), 500
+
+    if not _bearer_matches(expected_key):
+        return jsonify({"error": "Unauthorized"}), 401
+
+    connect = get_db()
+    cursor = connect.cursor()
+    try:
+        purged = AccountDeletionService(connect, AuthService(connect)).purge_due(cursor)
+        connect.commit()
+        return jsonify({"message": "Purge successful", "purged": purged}), 200
+    except Exception:
+        connect.rollback()
+        logger.exception("Account purge failed")
+        return jsonify({"error": "Purge failed"}), 500
+    finally:
+        cursor.close()

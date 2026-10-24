@@ -6,6 +6,7 @@ import bcrypt
 import jwt
 from dotenv import load_dotenv
 from repositories.user_repository import UserRepository
+from services.account_deletion_service import DELETION_GRACE, deletion_clock
 from utils.dates import utc_now
 
 load_dotenv()
@@ -81,7 +82,7 @@ class AuthService:
         # Hash first: every outcome pays the bcrypt cost, so a duplicate email isn't faster.
         password_hash = self.hash_password(password)
 
-        if self.user_repo.find_by_username(cursor, username):
+        if self.user_repo.check_username_exists(cursor, username):
             raise ValueError("username_taken")
         
         if email and self.user_repo.find_by_email(cursor, email):
@@ -127,6 +128,14 @@ class AuthService:
         if not self.verify_password(password, user["password_hash"]):
             raise ValueError("invalid_credentials")
 
+        deletion_cancelled = False
+        if user.get("deletion_requested_at"):
+            # Past the grace period the account is only waiting for the daily purge.
+            if deletion_clock() - user["deletion_requested_at"] >= DELETION_GRACE:
+                raise ValueError("invalid_credentials")
+            self.user_repo.cancel_deletion(cursor, user["id"])
+            deletion_cancelled = True
+
         self.user_repo.update_last_login(cursor, user["id"])
         tokens = self._build_token_pair(cursor, user, remember_me)
         self.db.commit()
@@ -140,7 +149,8 @@ class AuthService:
                 "email": user.get("email"),
                 "is_admin": bool(user.get("is_admin", False)),
                 "is_authenticated": True,
-                "user_token": user["token"]
+                "user_token": user["token"],
+                "deletion_cancelled": deletion_cancelled,
             }
         }
 
@@ -156,8 +166,7 @@ class AuthService:
         # Hash first: every outcome pays the bcrypt cost, so a duplicate email isn't faster.
         password_hash = self.hash_password(password)
 
-        conflict = self.user_repo.find_by_username(cursor, username)
-        if conflict and conflict["id"] != user["id"]:
+        if self.user_repo.check_username_exists(cursor, username, exclude_user_id=user["id"]):
             raise ValueError("username_taken")
         
         if email:

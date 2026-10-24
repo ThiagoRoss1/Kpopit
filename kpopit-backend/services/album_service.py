@@ -59,7 +59,6 @@ class AlbumService:
         connect,
         user_id: int,
         guess_album_id: int,
-        current_attempt: int,
         analytics_data: dict,
         gamemode_id: int = 3,
     ) -> dict:
@@ -70,18 +69,10 @@ class AlbumService:
         current_timestamp = get_current_timestamp()
 
         try:
-            cursor.execute(
-                """
-                    SELECT album_id FROM daily_picks
-                    WHERE pick_date = %s AND gamemode_id = %s
-                """,
-                (today, gamemode_id),
-            )
-            pick = cursor.fetchone()
-            if not pick:
+            game_service = GameService(connect, None)
+            correct_id = game_service.resolve_answer_id(cursor, gamemode_id)
+            if correct_id is None:
                 return {"error": "No daily pick found"}
-
-            correct_id = pick["album_id"]
 
             # Answer payload for save_user_history's victory log (album_name/group_name).
             cursor.execute(
@@ -114,12 +105,14 @@ class AlbumService:
                 """, (guess_album_id,)
             )
             guessed = cursor.fetchone()
+            if not guessed:
+                # Never record an id that isn't an album: guessed_ids feeds history and restore.
+                return {"error": "Album not found"}
 
-            game_service = GameService(connect, None)
             # Pixelated never grants collection cards (for Album 1) (gamemode 3); discard card_granted.
             is_correct, _ = game_service.save_user_history(
                 connect, cursor, user_id, gamemode_id, guess_album_id, answer_data,
-                correct_id, current_attempt, today, current_timestamp, analytics_data,
+                correct_id, today, current_timestamp, analytics_data,
             )
 
         except Exception as e:
@@ -135,6 +128,31 @@ class AlbumService:
                 "cover_path": guessed["cover_path"] if guessed else None,
             },
         }
+
+    def guess_details(self, cursor, album_ids: list[int], correct_id: int | None) -> list[dict]:
+        """Restore rows for recorded guesses, in guess order (the frontend's PixelatedGuessDetail)."""
+        if not album_ids:
+            return []
+        cursor.execute(
+            """
+                SELECT a.id, a.name, COALESCE(i.artist_name, g.name) AS group_name, a.cover_path
+                FROM albums a
+                LEFT JOIN groups g ON g.id = a.group_id
+                LEFT JOIN idols i ON i.id = a.soloist_id
+                WHERE a.id = ANY(%s)
+            """, (album_ids,)
+        )
+        by_id = {row["id"]: row for row in cursor.fetchall()}
+        return [
+            {
+                "album_id": album_id,
+                "album_name": by_id[album_id]["name"],
+                "group_name": by_id[album_id]["group_name"],
+                "cover_path": by_id[album_id]["cover_path"],
+                "guess_correct": album_id == correct_id,
+            }
+            for album_id in album_ids if album_id in by_id
+        ]
 
     def get_all_albums(self, cursor) -> list[dict]:
         """Return every published album for client-side search caching.

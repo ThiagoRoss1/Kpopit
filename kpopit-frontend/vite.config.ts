@@ -1,29 +1,9 @@
-import fs from 'node:fs'
-import path from 'node:path'
-import { defineConfig, type Plugin } from 'vite'
+import { defineConfig } from 'vite'
 import { reactRouter } from '@react-router/dev/vite'
 import tailwindcss from '@tailwindcss/vite'
 import { visualizer } from 'rollup-plugin-visualizer'
-
-// vite preview stand-in for the vercel.json rewrite: paths without a prerendered file get the SPA
-// fallback, never the prerendered home page that preview would otherwise serve. React Router's own
-// prerender also runs through a preview server: its requests must reach the renderer untouched.
-function spaFallbackPreview(): Plugin {
-  return {
-    name: 'kpopit-spa-fallback-preview',
-    configurePreviewServer(server) {
-      const root = path.resolve(server.config.root, 'build/client');
-      server.middlewares.use((req, _res, next) => {
-        if (process.env.IS_RR_BUILD_REQUEST === 'yes') return next();
-        const url = new URL(req.url ?? '/', 'http://preview');
-        if (req.method !== 'GET' || url.pathname.startsWith('/api') || path.extname(url.pathname)) return next();
-        const page = path.posix.join(url.pathname, 'index.html');
-        req.url = fs.existsSync(path.join(root, page)) ? page : '/__spa-fallback.html';
-        next();
-      });
-    },
-  }
-}
+import { spaFallbackPreview } from './vite-plugins/spaFallbackPreview.ts'
+import { markdownPosts } from './vite-plugins/markdownPosts.ts'
 
 // https://vite.dev/config/
 export default defineConfig(({ isSsrBuild }) => ({
@@ -32,6 +12,7 @@ export default defineConfig(({ isSsrBuild }) => ({
     reactRouter(),
     tailwindcss(),
     spaFallbackPreview(),
+    markdownPosts(),
     // ANALYZE=true npm run build → build/bundle-stats.html (client bundle only, gzip sizes).
     process.env.ANALYZE === 'true' && !isSsrBuild &&
       visualizer({ filename: 'build/bundle-stats.html', template: 'treemap', gzipSize: true }),

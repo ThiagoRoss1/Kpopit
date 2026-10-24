@@ -1,22 +1,28 @@
 import json
-from datetime import timezone
-from services.get_db import get_db
+from datetime import timedelta, timezone
+from services.get_db import get_db, get_idol_repo
+from services.restore_service import RestoreService, screen_state_only
 from utils.dates import get_current_timestamp, get_today_date_str, utc_now
 from flask import Blueprint, request, jsonify, g
 from utils.auth_decorators import require_auth
 from repositories.user_repository import UserRepository
-from utils.auth_helpers import validate_display_name, validate_username, validate_password
+from utils.auth_helpers import validate_display_name, validate_username, validate_password, user_token_from_header
 from utils.convert_to_webp import convert_to_webp_bytes
 from utils.r2 import R2Client
 from utils.rate_limiter import limiter
 from services.auth_service import AuthService
 from services.user_service import UserService
 from services.transfer_service import TransferError, TransferService
+from services.profile_service import ProfileError, ProfileService
+from services.account_deletion_service import AccountDeletionError, AccountDeletionService
 import logging
 
 user_bp = Blueprint('users', __name__)
 
 logger = logging.getLogger(__name__)
+
+MISSING_TOKEN = ({"error": "Missing user token"}, 400)
+USERNAME_RESERVATION = timedelta(days=15)
 
 # Generate a new user token and stores it in the database
 @user_bp.route("/user/init", methods=["POST"])
@@ -46,9 +52,13 @@ def generate_user_token():
         return jsonify({"token": token})
     return jsonify({"error": "Failed to generate unique token after 5 attempts"}), 500
 
+@user_bp.route("/stats", methods=["GET"])
 @user_bp.route("/stats/<user_token>", methods=["GET"])
-def get_user_stats(user_token):
-    """Return user stats based on the provided token"""
+def get_user_stats(user_token=None):
+    """Return user stats for the X-User-Token user"""
+    user_token = user_token_from_header(request, user_token)
+    if not user_token:
+        return MISSING_TOKEN
     gamemode_id = request.args.get("gamemode_id", default=1, type=int)
     connect = get_db()
     cursor = connect.cursor()
@@ -60,68 +70,56 @@ def get_user_stats(user_token):
         return jsonify({"error": "Invalid user token"}), 400
     return jsonify(stats)
 
+@user_bp.route("/game-state", methods=["GET", "POST"])
 @user_bp.route("/game-state/<user_token>", methods=["GET", "POST"])
-def get_game_state(user_token):
-    """Return the current game state for the user"""
+def get_game_state(user_token=None):
+    """GET: today's game in one mode, rebuilt by the server. POST: store the screen state
+    (hints, animations); guesses in the payload are dropped, the server records its own."""
+    user_token = user_token_from_header(request, user_token)
+    if not user_token:
+        return MISSING_TOKEN
     gamemode_id = request.args.get("gamemode_id", default=1, type=int)
-
     today = get_today_date_str()
 
-    # Start db connection
     connect = get_db()
     cursor = connect.cursor()
 
-    # Validate user token
-    cursor.execute("""
-            SELECT id FROM users
-            WHERE token = %s
-        """, (user_token,))
-    
-    user_row = cursor.fetchone()
-
-    if not user_row:
-        cursor.close()
-        return jsonify({"error": "Invalid user token"}), 400
-    
-    user_id = user_row["id"]
-
-    if request.method == "POST":
-        data = request.get_json()
-        game_state_json = json.dumps(data.get("game_state"))
-
+    try:
         cursor.execute("""
-                UPDATE daily_user_history
-                SET game_state = %s
-                WHERE user_id = %s AND date = %s AND gamemode_id = %s
-            """, (game_state_json, user_id, today, gamemode_id))
-        
+                SELECT id FROM users
+                WHERE token = %s
+            """, (user_token,))
+        user_row = cursor.fetchone()
+
+        if not user_row:
+            return jsonify({"error": "Invalid user token"}), 400
+
+        user_id = user_row["id"]
+
+        if request.method == "POST":
+            data = request.get_json() or {}
+            cursor.execute("""
+                    UPDATE daily_user_history
+                    SET game_state = %s
+                    WHERE user_id = %s AND date = %s AND gamemode_id = %s
+                """, (json.dumps(screen_state_only(data.get("game_state"))), user_id, today, gamemode_id))
+            connect.commit()
+            return jsonify({"message": "Game state updated successfully"}), 200
+
+        state = RestoreService(connect, get_idol_repo()).build_mode(cursor, user_id, today, gamemode_id)
         connect.commit()
+        return jsonify(state if state else {"game_state": None})
+
+    finally:
         cursor.close()
-
-        return jsonify({"message": "Game state updated successfully"}), 200
     
-    else:
-        cursor.execute("""
-                SELECT game_state FROM daily_user_history
-                WHERE user_id = %s AND date = %s AND gamemode_id = %s
-            """, (user_id, today, gamemode_id))
-        
-        result = cursor.fetchone()
-        cursor.close()
-
-        if result and result["game_state"]:
-            state = result["game_state"]
-
-            if isinstance(state, str):
-                return jsonify(json.loads(state))
-            
-            return jsonify(state)
-        
-        return jsonify({"game_state": None})
-    
+@user_bp.route("/generate-transfer-code", methods=["POST"])
 @user_bp.route("/generate-transfer-code/<user_token>", methods=["POST"])
-def generate_transfer_code(user_token):
+def generate_transfer_code(user_token=None):
     """Generate a transfer code for the user to transfer their data to another device"""
+    user_token = user_token_from_header(request, user_token)
+    if not user_token:
+        return MISSING_TOKEN
     connect = get_db()
     cursor = connect.cursor()
     try:
@@ -152,9 +150,13 @@ def transfer_data():
     finally:
         cursor.close()
 
+@user_bp.route("/get-active-transfer-code", methods=["GET"])
 @user_bp.route("/get-active-transfer-code/<user_token>", methods=["GET"])
-def get_active_transfer_code(user_token):
+def get_active_transfer_code(user_token=None):
     """Get active transfer code if exists"""
+    user_token = user_token_from_header(request, user_token)
+    if not user_token:
+        return MISSING_TOKEN
     connect = get_db()
     cursor = connect.cursor()
     try:
@@ -220,14 +222,19 @@ def update_display_name():
                 if days_since < 5:
                     return jsonify({"error": f"Username can only be changed once every 5 days. Please wait {5 - days_since} more day(s)."}), 400
 
-            if repository.check_username_exists(cursor, username):
+            if repository.check_username_exists(cursor, username, exclude_user_id=user_id):
                 return jsonify({"error": "Username already exists"}), 400
             
         if display_name:
             result["display_name"] = repository.update_display_name(cursor, user_id, display_name)
 
-        if username:    
+        if username:
+            old_username = repository.find_by_id(cursor, user_id)["username"]
+            repository.release_own_reservation(cursor, user_id, username)
             result["username"] = repository.update_username(cursor, user_id, username)
+            if old_username and old_username.lower() != username.lower():
+                # The old name stays this user's for 15 days: nobody can take it and links redirect.
+                repository.reserve_username(cursor, user_id, old_username, utc_now() + USERNAME_RESERVATION)
 
         connect.commit()
         return jsonify(result), 200
@@ -236,6 +243,39 @@ def update_display_name():
         connect.rollback()
         logger.exception("Failed to update profile")
         return jsonify({"error": "Failed to update profile"}), 500
+
+    finally:
+        cursor.close()
+
+@user_bp.route("/user/profile/settings", methods=["GET", "PATCH"])
+@require_auth
+@limiter.limit("30 per minute")
+def profile_settings():
+    """The caller's bias idol/group and visibility toggles (PATCH sends only the fields to change)."""
+    user_id = g.auth["user_id"]
+    connect = get_db()
+    cursor = connect.cursor()
+
+    try:
+        service = ProfileService(connect)
+        if request.method == "GET":
+            settings = service.get_settings(cursor, user_id)
+            if not settings:
+                return jsonify({"error": "Profile not found"}), 404
+            return jsonify(settings), 200
+
+        settings = service.update_settings(cursor, user_id, request.get_json() or {})
+        connect.commit()
+        return jsonify(settings), 200
+
+    except ProfileError as err:
+        connect.rollback()
+        return jsonify({"error": str(err)}), 400
+
+    except Exception:
+        connect.rollback()
+        logger.exception("Failed to update profile settings")
+        return jsonify({"error": "Failed to update profile settings"}), 500
 
     finally:
         cursor.close()
@@ -372,6 +412,40 @@ def change_password():
         connect.rollback()
         logger.exception("Failed to change password")
         return jsonify({"error": "Failed to change password"}), 500
+
+    finally:
+        cursor.close()
+@user_bp.route("/user/delete-account", methods=["POST"])
+@require_auth
+@limiter.limit("5 per hour")
+def request_account_deletion():
+    """Schedule the caller's account for deletion in 15 days (current password required).
+    Ends every session; logging in again within the 15 days cancels the request."""
+    data = request.get_json() or {}
+    current_password = data.get("current_password", "")
+    if not current_password:
+        return jsonify({"error": "Current password is required"}), 400
+
+    connect = get_db()
+    cursor = connect.cursor()
+
+    try:
+        service = AccountDeletionService(connect, AuthService(connect))
+        deletes_at = service.request(cursor, g.auth["user_id"], current_password)
+        connect.commit()
+        return jsonify({
+            "message": "Account scheduled for deletion. Log in again within 15 days to cancel.",
+            "deletion_scheduled_for": deletes_at.isoformat(),
+        }), 200
+
+    except AccountDeletionError as err:
+        connect.rollback()
+        return jsonify({"error": str(err)}), err.status
+
+    except Exception:
+        connect.rollback()
+        logger.exception("Failed to schedule account deletion")
+        return jsonify({"error": "Failed to schedule account deletion"}), 500
 
     finally:
         cursor.close()

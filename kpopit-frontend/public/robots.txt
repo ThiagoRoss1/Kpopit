@@ -1,4 +1,9 @@
 User-agent: *
 Allow: /
+# One-time email links carry a token; there is nothing to index there.
+Disallow: /verify-email
+Disallow: /reset-password
+Disallow: /confirm-email-change
+Disallow: /revert-email-change
 
 Sitemap: https://kpopit.net/sitemap.xml

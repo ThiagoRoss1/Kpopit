@@ -13,67 +13,6 @@ import { printEasterEgg } from "../src/utils/consoleEasterEgg";
 import { getQueryClient } from "../src/services/queryClient";
 import PageLoader from "../src/components/Loading/PageLoader";
 
-const WEB_APPLICATION_LD = {
-  "@context": "https://schema.org",
-  "@type": "WebApplication",
-  "name": "KpopIt",
-  "alternativeName": ["Kpopdle", "K-pop Wordle", "Kpop Wordle"],
-  "url": "https://kpopit.net",
-  "description": "Daily K-pop idol Wordle guessing game. Guess the idol based on clues about their group, company, career details, nationality and a lot more.",
-  "applicationCategory": "Game",
-  "keywords": "kpopdle, kpop wordle, kpop guessing game, daily kpop game, guess the idol, kpop quiz, kpop, game, wordle like, kpop idol guessing game",
-  "operatingSystem": "Web",
-  "offers": { "@type": "Offer", "price": "0", "priceCurrency": "USD" },
-  "author": { "@type": "Organization", "name": "KpopIt" },
-};
-
-const FAQ_LD = {
-  "@context": "https://schema.org",
-  "@type": "FAQPage",
-  "mainEntity": [
-    {
-      "@type": "Question",
-      "name": "What is KpopIt?",
-      "acceptedAnswer": {
-        "@type": "Answer",
-        "text": "KpopIt is a free daily K-pop idol guessing game inspired by Wordle. Every day, a new mystery K-pop idol is selected and players guess who it is using clues about their group, company... It features over 150 idols from groups like TWICE, BLACKPINK, NewJeans, IVE, aespa, LE SSERAFIM. It features two game modes: Classic and Blurry, and it keeps expanding with new idols and games.",
-      },
-    },
-    {
-      "@type": "Question",
-      "name": "How do you play KpopIt?",
-      "acceptedAnswer": {
-        "@type": "Answer",
-        "text": "Type the name of a K-pop idol in the search bar and submit your guess. The game gives you color-coded feedback on each category on Classic Mode, and for Blurry Mode, you guess the idol from a blurred photo that gets clearer with each attempt. Use the clues to narrow down and find the mystery idol in as few attempts as possible.",
-      },
-    },
-    {
-      "@type": "Question",
-      "name": "Is KpopIt the same as Kpopdle?",
-      "acceptedAnswer": {
-        "@type": "Answer",
-        "text": "KpopIt is a Kpopdle-style game - a daily K-pop Wordle where you guess K-pop idols. It features two game modes: Classic (guess using category clues) and Blurry (guess from a blurred idol photo that gets clearer with each attempt).",
-      },
-    },
-    {
-      "@type": "Question",
-      "name": "Is KpopIt free to play?",
-      "acceptedAnswer": {
-        "@type": "Answer",
-        "text": "Yes, KpopIt is completely free to play. A new idol is available to guess every day at midnight EST. No account or download required.",
-      },
-    },
-    {
-      "@type": "Question",
-      "name": "What game modes does KpopIt have?",
-      "acceptedAnswer": {
-        "@type": "Answer",
-        "text": "KpopIt has two game modes: Classic Mode, where you guess the idol using category-based clues like group, company nationality, and debut year; and Blurry Mode, where you guess the idol from a blurred photo that gradually becomes clearer with each wrong guess. Blurry Mode also features Hardcore and Grayscale options for extra challenge.",
-      },
-    },
-  ],
-};
-
 // Site-wide head only: each page sets its own title, description and og:title/og:description
 // (React hoists them here), so the document never carries two of them.
 export function Layout({ children }: { children: ReactNode }) {
@@ -94,10 +33,8 @@ export function Layout({ children }: { children: ReactNode }) {
         <meta name="author" content="KpopIt" />
         <meta name="robots" content="index, follow" />
         <meta property="og:type" content="website" />
-        <meta property="twitter:card" content="summary_large_image" />
-        <meta property="twitter:creator" content="@TgoRoss1" />
-        <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(WEB_APPLICATION_LD) }} />
-        <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(FAQ_LD) }} />
+        <meta name="twitter:card" content="summary_large_image" />
+        <meta name="twitter:creator" content="@TgoRoss1" />
         <meta httpEquiv="X-Content-Type-Options" content="nosniff" />
         <meta name="referrer" content="no-referrer-when-downgrade" />
         <link rel="manifest" href="/manifest.json" />

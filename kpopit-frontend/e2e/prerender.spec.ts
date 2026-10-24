@@ -71,6 +71,43 @@ test.describe('prerendered pages without JavaScript', () => {
     expect(html).not.toContain('role="status"');
   });
 
+  // One head per page: a duplicated title/description or broken JSON-LD silently hurts search results.
+  test('each prerendered page has one title, one description and valid JSON-LD', async ({ request }) => {
+    const pages = ['/', '/classic', '/blurry', '/pixelated', '/idols', '/privacy-policy', '/contact', `/idols/${idol.id}/${slug(idol)}`];
+    for (const p of pages) {
+      const html = await (await request.get(`${PREVIEW}${p}`)).text();
+      expect(html.match(/<title>/g), `${p} title`).toHaveLength(1);
+      expect(html.match(/<meta name="description"/g), `${p} description`).toHaveLength(1);
+      expect(html.match(/<link rel="canonical"/g), `${p} canonical`).toHaveLength(1);
+      expect(attr(html, /<link rel="canonical" href="([^"]*)"/), `${p} canonical`).toBe(`https://kpopit.net${p}`);
+      expect(meta(html, 'og:url'), `${p} og:url`).toBe(`https://kpopit.net${p}`);
+      expect(meta(html, 'og:image'), `${p} og:image`).toMatch(/^https?:\/\//);
+      expect(meta(html, 'twitter:title'), `${p} twitter:title`).toBeTruthy();
+      const blocks = [...html.matchAll(/<script type="application\/ld\+json"[^>]*>([\s\S]*?)<\/script>/g)].map((m) => m[1]);
+      const types = blocks.map((block) => {
+        const data = JSON.parse(block);
+        expect(data['@context'], `${p} @context`).toBe('https://schema.org');
+        return data['@type'];
+      });
+      // The app and FAQ data describe the home page only; a copy on every page competes with it.
+      if (p === '/') expect(types.sort(), `${p} JSON-LD`).toEqual(['FAQPage', 'WebApplication', 'WebSite']);
+      else expect(types.filter((t) => t === 'WebApplication' || t === 'FAQPage'), `${p} JSON-LD`).toEqual([]);
+      if (p.startsWith('/idols/')) expect(types).toContain('ProfilePage');
+    }
+  });
+
+  test('the build writes a sitemap of the prerendered pages', async ({ request }) => {
+    const sitemap = await (await request.get(`${PREVIEW}/sitemap.xml`)).text();
+    const locs = [...sitemap.matchAll(/<loc>([^<]*)<\/loc>/g)].map((m) => m[1]);
+    for (const p of ['/', '/classic', '/blurry', '/pixelated', '/idols', '/privacy-policy', '/contact']) {
+      expect(locs).toContain(`https://kpopit.net${p}`);
+    }
+    expect(locs).toContain(`https://kpopit.net/idols/${idol.id}/${slug(idol)}`);
+    expect(locs).toHaveLength(7 + idols.length);
+    const robots = await (await request.get(`${PREVIEW}/robots.txt`)).text();
+    expect(robots).toContain('Sitemap: https://kpopit.net/sitemap.xml');
+  });
+
   test.describe('in a browser', () => {
     test.use({ javaScriptEnabled: false });
 

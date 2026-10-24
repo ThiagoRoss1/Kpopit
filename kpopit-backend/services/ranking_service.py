@@ -2,7 +2,8 @@ from utils.dates import get_today_date_str
 
 
 class RankingService:
-    """Today's winner count and a player's place among today's winners, per gamemode."""
+    """Today's winner count and a player's place among today's winners, per gamemode.
+    Rows filled by the history backfill (guesses_origin = 'backfill') never rank."""
 
     def __init__(self, db):
         self.db = db
@@ -12,7 +13,7 @@ class RankingService:
         cursor.execute("""
                 SELECT COUNT(DISTINCT user_id) AS user_count
                 FROM daily_user_history
-                WHERE date = %s AND won = TRUE AND gamemode_id = %s
+                WHERE date = %s AND won = TRUE AND gamemode_id = %s AND guesses_origin IS DISTINCT FROM 'backfill'
             """, (get_today_date_str(), gamemode_id))
         result = cursor.fetchone()
         return result["user_count"] if result and result["user_count"] is not None else 0
@@ -32,6 +33,7 @@ class RankingService:
         cursor.execute("""
                 SELECT started_at, guesses_count, won_at FROM daily_user_history
                 WHERE user_id = %s AND date = %s AND won = TRUE AND gamemode_id = %s
+                  AND guesses_origin IS DISTINCT FROM 'backfill'
             """, (user_id, today, gamemode_id))
         result = cursor.fetchone()
         if not result or result["started_at"] is None or result["guesses_count"] is None or result["won_at"] is None:
@@ -44,6 +46,7 @@ class RankingService:
         cursor.execute("""
                 SELECT COUNT(*) + 1 AS position FROM daily_user_history
                 WHERE date = %s AND won = TRUE AND won_at < %s AND gamemode_id = %s
+                  AND guesses_origin IS DISTINCT FROM 'backfill'
             """, (today, won_at, gamemode_id))
         position_result = cursor.fetchone()
         position = position_result["position"] if position_result else None
@@ -51,6 +54,7 @@ class RankingService:
         cursor.execute("""
                 SELECT COUNT(*) + 1 AS rank FROM daily_user_history d
                 WHERE date = %s AND won = TRUE AND user_id != %s AND gamemode_id = %s
+                AND d.guesses_origin IS DISTINCT FROM 'backfill'
                 AND (
                     d.guesses_count < %s
                     OR (

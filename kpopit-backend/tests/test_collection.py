@@ -214,6 +214,19 @@ def test_album_member_image_and_no_bonus_fallbacks(db_conn, make_user, make_elig
 # Hook — through the real guess flow
 # ---------------------------------------------------------------------------
 
+def _pin_blurry(db_conn, idol_id, today):
+    """The server reads the answer from today's pick; the body's answer_id is ignored."""
+    with db_conn.cursor() as cur:
+        cur.execute(
+            """
+            INSERT INTO daily_picks (pick_date, idol_id, gamemode_id) VALUES (%s, %s, 2)
+            ON CONFLICT (pick_date, gamemode_id) DO UPDATE SET idol_id = EXCLUDED.idol_id
+            """,
+            (today, idol_id),
+        )
+    db_conn.commit()
+
+
 def _blurry_guess(client, token, idol_id, today, attempt=1):
     return client.post(
         "/api/game/blurry/guess?gamemode_id=2",
@@ -233,6 +246,7 @@ def test_blurry_win_grants_card_and_surfaces_card_granted(client, db_conn, make_
     user_id, token = make_user()
     page = collection_page(n_members=2)
 
+    _pin_blurry(db_conn, page["idol_ids"][0], today)
     resp = _blurry_guess(client, token, page["idol_ids"][0], today)
     assert resp.status_code == 200
     body = resp.get_json()
@@ -267,7 +281,7 @@ def test_classic_win_grants_via_service(db_conn, make_user, collection_page, tod
     with db_conn.cursor() as cur:
         is_correct, card_granted = game_service.save_user_history(
             db_conn, cur, user_id, 1, idol_id, {"artist_name": "X"},
-            idol_id, 1, today, WON_AT, {},
+            idol_id, today, WON_AT, {},
         )
     assert is_correct is True
     assert card_granted["card_id"] == page["card_ids"][0]
@@ -302,6 +316,7 @@ def test_flag_off_win_recorded_but_no_grant(client, db_conn, make_user, collecti
     user_id, token = make_user()
     page = collection_page(n_members=2)
 
+    _pin_blurry(db_conn, page["idol_ids"][0], today)
     resp = _blurry_guess(client, token, page["idol_ids"][0], today)
     assert resp.status_code == 200
     body = resp.get_json()
@@ -324,6 +339,7 @@ def test_losing_guess_grants_nothing(client, db_conn, make_user, collection_page
     wrong_idol = make_idol("Wrong Guess")
     make_career(wrong_idol, page["group_id"])
     make_card(idol_id=wrong_idol)
+    _pin_blurry(db_conn, page["idol_ids"][0], today)
 
     resp = client.post(
         "/api/game/blurry/guess?gamemode_id=2",

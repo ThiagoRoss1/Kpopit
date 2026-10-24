@@ -1,4 +1,5 @@
 import type { RestoreSessionResponse } from "../interfaces/gameInterfaces";
+import type { GameModeKey } from "./gameStorage";
 
 const writeBool = (key: string, value: boolean | undefined) => {
     if (value === undefined) return;
@@ -24,8 +25,12 @@ const mergeAnimatedIdols = (key: string, serverList: unknown) => {
     localStorage.setItem(key, JSON.stringify(merged));
 };
 
-export const applyRestoredSession = (payload: RestoreSessionResponse) => {
-    const { classic, blurry, pixelated } = payload;
+/** Writes the server's day into localStorage; `modes` limits it to those modes (default: all). */
+export const applyRestoredSession = (payload: RestoreSessionResponse, modes?: readonly GameModeKey[]) => {
+    const only = (mode: GameModeKey) => !modes || modes.includes(mode);
+    const classic = only("classic") ? payload.classic : null;
+    const blurry = only("blurry") ? payload.blurry : null;
+    const pixelated = only("pixelated") ? payload.pixelated : null;
 
     if (classic) {
         writeJson("todayGuessesDetails", classic.today_guesses_details);

@@ -30,6 +30,8 @@ def assert_generic(res, caplog):
 def test_guess_route_hides_exception_text(client, make_user, monkeypatch, caplog, module, mode, gm):
     _, token = make_user()
     monkeypatch.setattr(module, "get_idol_repo", lambda: Boom())
+    # The answer comes from today's pick; pin it so the request reaches the failing repository.
+    monkeypatch.setattr("services.game_service.GameService.resolve_answer_id", lambda self, cursor, gamemode_id: 1)
     with caplog.at_level(logging.ERROR):
         res = client.post(
             f"/api/game/{mode}/guess?gamemode_id={gm}",

@@ -35,6 +35,7 @@ import { WinnerExplosion } from "../../utils/confetti";
 import { useClearGameStorage } from "../../hooks/useClearGameStorage";
 import { areGuessesEqual } from "../../utils/areGuessesEqual";
 import { isNewGameDay, startFirstGameDay } from "../../utils/gameStorage";
+import { useServerDayRestore } from "../../hooks/useServerDayRestore";
 import { DAILY_REFETCH, useGameDay } from "../../contexts/game_day_context";
 import PageLoader from "../../components/Loading/PageLoader";
 import CardGrantedReveal from "../Collection/components/CardGrantedReveal";
@@ -153,6 +154,7 @@ const gameMode = useGameMode();
 
     // First visit: nothing to reset, just record today (while rendering, so the restore below runs now).
     if (serverDate) startFirstGameDay(localStorage, "blurry", serverDate);
+    useServerDayRestore("blurry", serverDate, initUser);
 
     // New day: drop yesterday's local state and remount on the new day (no page reload).
     useEffect(() => {
@@ -459,7 +461,8 @@ const gameMode = useGameMode();
                         priority
                         src={`${import.meta.env.VITE_IMAGE_BUCKET_URL}${blurryGameData.blur_image_path}?v=${blurryGameData.blur_image_version}`}
                         style={{filter: `${endGame ? "blur(0px)" : `blur(${currentBlur}px)`} ${endGame ? "grayscale(0%)" : `grayscale(${blurryToggleOptions.color ? 0 : 100}%)`}`}}
-                        alt={`Blurry image of ${artistName}`}
+                        // The name is the answer: screen readers and the DOM get it only once the game ends.
+                        alt={endGame ? `Blurry image of ${artistName}` : "Blurry image of today's idol"}
                         onLoad={() => setIsImageLoading(false)}
                         onError={() => setIsImageLoading(false)}
                         draggable={false}
