@@ -1,10 +1,10 @@
 # Seed the database with csv data
 import csv
 import os
-from dotenv import load_dotenv
+from utils.env import load_local_env
 from services.get_db import get_manual_db
 
-load_dotenv()
+load_local_env()
 DATA_FOLDER = os.getenv("DATA_FOLDER")
 
 # CSV files

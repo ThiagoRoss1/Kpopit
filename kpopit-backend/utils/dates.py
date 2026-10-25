@@ -1,9 +1,9 @@
 from datetime import datetime, timezone, timedelta, date
 from zoneinfo import ZoneInfo
 import os
-from dotenv import load_dotenv
+from utils.env import load_local_env
 
-load_dotenv()
+load_local_env()
 
 TIMEZONE_BRT = ZoneInfo('America/Sao_Paulo')
 TIMEZONE_EST = ZoneInfo("America/New_York")

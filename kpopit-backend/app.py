@@ -5,7 +5,7 @@ from flask_cors import CORS
 from werkzeug.middleware.proxy_fix import ProxyFix
 from routes.admin import admin_bp
 from routes.tasks import tasks_bp
-from dotenv import load_dotenv
+from utils.env import load_local_env, require_isolated_startup
 from services.get_db import init_app
 from routes.games.blurry import blurry_bp
 from routes.games.classic import classic_bp
@@ -31,7 +31,8 @@ from services.collections_service import COLLECTION_ENABLED
 from services.profile_service import PUBLIC_PROFILE_ENABLED
 from services.calendar_service import CALENDAR_ENABLED
 from services.xp_service import IDOL_XP_ENABLED
-load_dotenv()
+load_local_env()
+require_isolated_startup()
 
 # Without this, logger.info/warning calls across the app are dropped (Python's default
 # last-resort handler only prints WARNING+ without names or timestamps).
@@ -158,4 +159,4 @@ if IDOL_XP_ENABLED:
 
 
 if __name__ == "__main__":
-    app.run(debug=True)
+    app.run(debug=True, load_dotenv=False)  # .env comes only from load_local_env()

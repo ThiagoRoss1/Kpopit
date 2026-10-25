@@ -5,9 +5,12 @@ from pathlib import Path
 import sys
 
 import psycopg
-from dotenv import load_dotenv
 
-load_dotenv()
+# Run as `python migrations/migrations.py`: make the backend's utils importable.
+sys.path.insert(0, str(Path(__file__).resolve().parent.parent))
+from utils.env import load_local_env, require_isolated_startup
+
+load_local_env()
 DB_URL = os.getenv("DB_URL")
 logger = logging.getLogger(__name__)
 
@@ -29,6 +32,7 @@ def _log_failure(filename: str, error: Exception) -> None:
 
 
 def apply_migrations():
+    require_isolated_startup()
     with psycopg.connect(DB_URL) as conn, conn.cursor() as cursor:
         cursor.execute("""
             CREATE TABLE IF NOT EXISTS schema_migrations (

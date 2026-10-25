@@ -1,10 +1,10 @@
 import json
 import os
-from dotenv import load_dotenv
+from utils.env import load_local_env
 from services.get_db import get_manual_db, pool
 from utils.palette_extractor import extract_palette
 
-load_dotenv()
+load_local_env()
 
 R2_PUBLIC_URL = os.getenv("R2_PUBLIC_URL")
 

@@ -1,13 +1,13 @@
 import os
 from datetime import date
-from dotenv import load_dotenv
+from utils.env import load_local_env
 from services.album_service import AlbumService
 from services.game_service import GameService
 from services.idol_guess_service import IdolGuessService
 from services.restore_service import RestoreService
 from utils.dates import get_current_timestamp, get_today_date
 
-load_dotenv()
+load_local_env()
 
 # Off by default: without the flag the /api/calendar routes aren't registered and "yesterday's
 # answer" stays visible to everyone (there is no calendar to play it in).

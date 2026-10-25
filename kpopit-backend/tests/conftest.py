@@ -16,6 +16,7 @@ sys.path.insert(0, str(BACKEND_ROOT))
 
 # Test targets and secrets must be explicit; never load workstation .env files.
 os.environ["PYTHON_DOTENV_DISABLED"] = "1"
+os.environ["FLASK_SKIP_DOTENV"] = "1"
 
 
 def _resolve_test_db_url() -> str:
@@ -58,10 +59,17 @@ os.environ["ADMIN_ENABLED"] = "true"
 os.environ["PUBLIC_PROFILE_ENABLED"] = "true"
 os.environ["CALENDAR_ENABLED"] = "true"
 os.environ["IDOL_XP_ENABLED"] = "true"
-# No test may reach Resend: emails go to a per-test outbox (see the email_outbox fixture),
-# and the real key from .env is replaced before email_service reads it at import.
+# No test may reach Resend: emails go to a per-test outbox (see the email_outbox fixture).
 os.environ["EMAIL_DELIVERY"] = "outbox"
-os.environ["RESEND_API_KEY"] = "re_disabled_for_tests"
+os.environ["RESEND_API_KEY"] = ""
+# Every external service off, even if the shell exported a real value: R2 storage disabled,
+# task routes disabled. Tests that need one set it with monkeypatch.
+for _name in ("R2_ACCESS_KEY_ID", "R2_SECRET_ACCESS_KEY", "R2_BUCKET_NAME", "R2_BACKUP_BUCKET_NAME",
+              "R2_ENDPOINT_URL", "R2_AVATARS_ACCESS_KEY_ID", "R2_AVATARS_SECRET_ACCESS_KEY",
+              "R2_AVATARS_BUCKET_NAME", "R2_AVATARS_PREFIX", "BACKUP_AUTH_KEY", "ACCOUNT_PURGE_AUTH_KEY",
+              "BACKUP_DB_URL"):
+    os.environ[_name] = ""
+os.environ["MAINTENANCE_MODE"] = "false"
 
 # The app and every module that reads env vars at import are imported lazily, inside the
 # fixtures, so the environment above is always in place first.

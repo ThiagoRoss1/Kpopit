@@ -2,7 +2,7 @@ import os
 import logging
 import psycopg
 from flask import Blueprint, request, jsonify, make_response, g
-from dotenv import load_dotenv
+from utils.env import load_local_env
 from services.get_db import get_db
 from services.auth_service import AuthService
 from repositories.user_repository import UserRepository
@@ -10,7 +10,7 @@ from utils.auth_decorators import require_auth
 from utils.auth_helpers import detect_user, validate_username, validate_and_normalize_email, validate_password
 from utils.rate_limiter import limiter
 
-load_dotenv()
+load_local_env()
 
 logger = logging.getLogger(__name__)
 

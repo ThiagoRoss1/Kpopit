@@ -3,10 +3,13 @@ import csv
 import json
 import os
 import sys
-from dotenv import load_dotenv
+
+# Run as `python scripts/generate_group_features_csv.py`: make the backend's utils importable.
+sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), "..")))
+from utils.env import load_local_env
 from generate_group_palette import generate_group_palette
 
-load_dotenv()
+load_local_env()
 
 DATA_FOLDER = os.getenv("DATA_FOLDER") or "data"
 DATA_PATH = os.path.abspath(os.path.join(os.path.dirname(__file__), "..", DATA_FOLDER))

@@ -1,10 +1,10 @@
 # Seed the database with csv data
 import psycopg
 import os
-from dotenv import load_dotenv
+from utils.env import load_local_env
 
 # Database file
-load_dotenv()
+load_local_env()
 DB_URL = os.getenv("DB_URL")
 DATA_FOLDER = os.getenv("DATA_FOLDER")
 

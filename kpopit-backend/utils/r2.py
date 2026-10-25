@@ -1,8 +1,8 @@
 import boto3
 import os
-from dotenv import load_dotenv
+from utils.env import load_local_env
 
-load_dotenv()
+load_local_env()
 
 AVATAR_SETTINGS = ("R2_ENDPOINT_URL", "R2_AVATARS_ACCESS_KEY_ID", "R2_AVATARS_SECRET_ACCESS_KEY",
                    "R2_AVATARS_BUCKET_NAME", "R2_AVATARS_PREFIX")
@@ -25,6 +25,9 @@ class R2Client:
         return keys
 
     def __init__(self):
+        # Without every setting boto3 would fall back to AWS's default endpoint: storage stays off.
+        if not self.avatars_configured():
+            raise RuntimeError("Avatar storage is not configured")
         self._setup_s3_client()
 
     def _setup_s3_client(self):

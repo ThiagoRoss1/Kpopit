@@ -1,8 +1,8 @@
 import os
 from datetime import date, timedelta
-from dotenv import load_dotenv
+from utils.env import load_local_env
 
-load_dotenv()
+load_local_env()
 
 # Off by default: without the flag GET /api/profile/<username> isn't registered at all.
 PUBLIC_PROFILE_ENABLED = os.getenv("PUBLIC_PROFILE_ENABLED", "false").lower() == "true"

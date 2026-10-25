@@ -9,11 +9,11 @@ import argparse
 import json
 from collections import Counter
 
-from dotenv import load_dotenv
+from utils.env import load_local_env
 from services.get_db import get_manual_db, pool
 from utils.dates import get_today_date
 
-load_dotenv()
+load_local_env()
 
 DETAILS_KEY = {1: "today_guesses_details", 2: "blurry_guesses_details", 3: "pixelated_guesses_details"}
 
