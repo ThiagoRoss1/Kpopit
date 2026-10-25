@@ -115,14 +115,16 @@ function ClassicMode() {
     enabled: isInitialized,
   });
 
+  const yesterdayPick = yesterday.data?.locked ? undefined : yesterday.data;
+
   const yesterdayArtist = allIdolsData?.find(
-    (idol) => idol.id === yesterday.data?.past_idol_id
+    (idol) => idol.id === yesterdayPick?.past_idol_id
   )?.artist_name;
 
-  const yesterdayArtistGroup = yesterday.data?.groups ?? null;
+  const yesterdayArtistGroup = yesterdayPick?.groups ?? null;
 
-  const yesterdayIdolImage = yesterday.data?.image_path ?? null;
-  const yesterdayIdolImageVersion = yesterday.data?.image_version ?? null;
+  const yesterdayIdolImage = yesterdayPick?.image_path ?? null;
+  const yesterdayIdolImageVersion = yesterdayPick?.image_version ?? null;
 
   const serverDate = gameData?.server_date;
 
@@ -462,7 +464,7 @@ function ClassicMode() {
             guesses={guesses}
             attempts={attempts}
             nextReset={useResetTimer}
-            yesterdayIdolId={yesterday.data?.past_idol_id ?? 0}
+            yesterdayIdolId={yesterdayPick?.past_idol_id ?? 0}
             yesterdayIdol={yesterdayArtist || "Unknown"}
             yesterdayIdolGroup={yesterdayArtistGroup}
             yesterdayIdolImage={yesterdayIdolImage}
@@ -483,7 +485,7 @@ function ClassicMode() {
           <span className="text-white">
             Yesterday's idol was
           </span> <Link 
-                  to={`/idols/${yesterday.data?.past_idol_id}/${buildIdolSlug(yesterdayArtist, yesterdayArtistGroup[0])}`}>
+                  to={`/idols/${yesterdayPick?.past_idol_id}/${buildIdolSlug(yesterdayArtist, yesterdayArtistGroup[0])}`}>
               <span 
                   className="text-[#b43777] [text-shadow:1.2px_1.2px_4px_rgba(0,0,0,1.8),0_0_12px_rgba(180,55,119,1.0)] brightness-105 underline hover:brightness-125 transition-all duration-300">
                   {yesterdayArtist ? `${yesterdayArtist} (${yesterdayArtistGroup && yesterdayArtistGroup.length > 0 ? yesterdayArtistGroup : "Soloist"})` : "Unknown"}

@@ -111,9 +111,10 @@ function PixelatedMode() {
         refetchOnWindowFocus: false,
     });
 
-    const yesterdayAlbum = yesterdayAlbumData?.past_album_id ? yesterdayAlbumData.album_name : null;
-    const yesterdayAlbumCover = yesterdayAlbumData?.cover_path ?? null;
-    const yesterdayAlbumArtist = yesterdayAlbumData?.artist ?? null;
+    const yesterdayPick = yesterdayAlbumData?.locked ? undefined : yesterdayAlbumData;
+    const yesterdayAlbum = yesterdayPick?.past_album_id ? yesterdayPick.album_name : null;
+    const yesterdayAlbumCover = yesterdayPick?.cover_path ?? null;
+    const yesterdayAlbumArtist = yesterdayPick?.artist ?? null;
 
     const serverDate = pixelatedGameData?.server_date;
 

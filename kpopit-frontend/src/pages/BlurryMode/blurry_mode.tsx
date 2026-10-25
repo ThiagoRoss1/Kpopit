@@ -142,13 +142,15 @@ const gameMode = useGameMode();
         enabled: isInitialized
     });
 
+    const yesterdayPick = yesterdayIdol.data?.locked ? undefined : yesterdayIdol.data;
+
     const yesterdayArtist = allIdolsData?.find(
-        (idol) => idol.id === yesterdayIdol.data?.past_idol_id
+        (idol) => idol.id === yesterdayPick?.past_idol_id
     )?.artist_name;
 
-    const yesterdayIdolImage = yesterdayIdol.data?.image_path ?? null;
-    const yesterdayIdolImageVersion = yesterdayIdol.data?.image_version ?? null;
-    const yesterdayIdolGroup = yesterdayIdol.data?.groups ?? null; 
+    const yesterdayIdolImage = yesterdayPick?.image_path ?? null;
+    const yesterdayIdolImageVersion = yesterdayPick?.image_version ?? null;
+    const yesterdayIdolGroup = yesterdayPick?.groups ?? null; 
     
     const serverDate = blurryGameData?.server_date;
 
@@ -524,7 +526,7 @@ const gameMode = useGameMode();
                 <span className="text-white">
                     Yesterday's idol was
                 </span> <Link 
-                        to={`/idols/${yesterdayIdol.data?.past_idol_id}/${buildIdolSlug(yesterdayArtist, yesterdayIdolGroup?.[0])}`}>
+                        to={`/idols/${yesterdayPick?.past_idol_id}/${buildIdolSlug(yesterdayArtist, yesterdayIdolGroup?.[0])}`}>
                         <span className="text-[#b43777] [text-shadow:1.2px_1.2px_4px_rgba(0,0,0,1.8),0_0_12px_rgba(180,55,119,1.0)] brightness-105 underline hover:brightness-125 transition-all duration-300">
                             {yesterdayArtist ? `${yesterdayArtist}` : "Unknown"}
                         </span>
@@ -551,7 +553,7 @@ const gameMode = useGameMode();
                         attempts={attempts}
                         idol_blur_image={blurryGameData.blur_image_path}
                         idol_blur_image_version={blurryGameData.blur_image_version}
-                        yesterdayIdolId={yesterdayIdol.data?.past_idol_id || 0}
+                        yesterdayIdolId={yesterdayPick?.past_idol_id || 0}
                         yesterdayIdol={yesterdayArtist || "Unknown"}
                         yesterdayIdolGroup={yesterdayIdolGroup}
                         yesterdayIdolImage={yesterdayIdolImage}
