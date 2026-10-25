@@ -6,8 +6,6 @@ from flask import Blueprint, request, jsonify
 from services.backup_service import postgresql_backup_to_s3
 from services.account_deletion_service import AccountDeletionService
 from services.auth_service import AuthService
-from services import collections_service
-from services.collections_service import CollectionService
 from services.get_db import get_db
 from utils.rate_limiter import limiter
 
@@ -72,33 +70,3 @@ def purge_deleted_accounts():
     finally:
         cursor.close()
 
-
-@tasks_bp.route('/tasks/reconcile-cards', methods=['POST'])
-@limiter.limit("3 per hour")
-def reconcile_cards():
-    """Grant every Album 1 card a failed win grant left behind. Called daily by
-    .github/workflows/reconcile-cards.yml with `Authorization: Bearer <CARD_RECONCILE_AUTH_KEY>`;
-    with the key unset or empty the route refuses every request."""
-    expected_key = os.getenv("CARD_RECONCILE_AUTH_KEY") or ""
-    if not expected_key:
-        logger.error("CARD_RECONCILE_AUTH_KEY is not set: /tasks/reconcile-cards rejects every request")
-        return jsonify({"error": "Reconciliation is not available"}), 500
-
-    if not _bearer_matches(expected_key):
-        return jsonify({"error": "Unauthorized"}), 401
-
-    if not collections_service.COLLECTION_ENABLED:
-        return jsonify({"message": "Collection is disabled", "reconciled": 0}), 200
-
-    connect = get_db()
-    cursor = connect.cursor()
-    try:
-        granted = CollectionService(connect).reconcile_cards(cursor)
-        connect.commit()
-        return jsonify({"message": "Reconciliation successful", "reconciled": len(granted)}), 200
-    except Exception:
-        connect.rollback()
-        logger.exception("Card reconciliation failed")
-        return jsonify({"error": "Reconciliation failed"}), 500
-    finally:
-        cursor.close()

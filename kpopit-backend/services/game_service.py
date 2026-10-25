@@ -152,14 +152,14 @@ class GameService:
 
     def _retry_card_grant(self, collections, cursor, user_id, gamemode_id, today):
         """One reconciliation pass for the user after a failed grant, in its own savepoint so it can't
-        cost the win either. Returns this win's grant, or None (the daily task picks it up later)."""
+        cost the win either. Returns this win's grant, or None (the collections list retries it later)."""
         cursor.execute("SAVEPOINT collection_retry")
         try:
             granted = collections.reconcile_cards(cursor, user_id)
             cursor.execute("RELEASE SAVEPOINT collection_retry")
         except Exception:
             cursor.execute("ROLLBACK TO SAVEPOINT collection_retry")
-            logger.exception("Card reconciliation retry failed for user_id=%s; left for the daily task", user_id)
+            logger.exception("Card reconciliation retry failed for user_id=%s; left for the collections list", user_id)
             return None
         day = today if isinstance(today, date) else date.fromisoformat(today)
         return next((g["card_granted"] for g in granted

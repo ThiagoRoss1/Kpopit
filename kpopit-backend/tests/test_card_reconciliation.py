@@ -1,5 +1,5 @@
 """Album 1 grants run once per win (user_id, date, gamemode_id): a failed grant never costs the win,
-and the reconciliation (right after the failure, on the collections list, and the daily task) grants
+and the reconciliation (right after the failure and on the collections list) grants
 the missing card exactly once, live and calendar wins alike."""
 
 from datetime import datetime, timedelta, timezone
@@ -10,8 +10,6 @@ from services.collections_service import CollectionService
 from utils.dates import get_today_date
 
 WON_AT = datetime(2026, 1, 1, 12, 0, tzinfo=timezone.utc)
-URL = "/api/tasks/reconcile-cards"
-KEY = "test-reconcile-key-0123456789"
 
 
 def day(offset: int) -> str:
@@ -21,11 +19,6 @@ def day(offset: int) -> str:
 @pytest.fixture(autouse=True)
 def collection_on(monkeypatch):
     monkeypatch.setattr("services.game_service.COLLECTION_ENABLED", True)
-
-
-@pytest.fixture
-def reconcile_key(monkeypatch):
-    monkeypatch.setenv("CARD_RECONCILE_AUTH_KEY", KEY)
 
 
 @pytest.fixture
@@ -218,43 +211,6 @@ def test_collections_list_reconciles_the_viewer(client, db_conn, make_user, coll
     assert res.status_code == 200
     assert res.get_json()[0]["owned_cards"] == 1
     assert user_card(db_conn, user_id, page["card_ids"][0]) == {"level": 1, "times_won": 1}
-    # Only the viewer is reconciled here; the daily task settles everyone else.
+    # Only the viewer is reconciled here; the other user is settled on their own list load.
     assert user_card(db_conn, other_id, page["card_ids"][0]) is None
 
-
-def test_task_reconciles_every_user(client, db_conn, make_user, collection_page, pick, failing_grant, reconcile_key):
-    first, _ = make_user()
-    second, _ = make_user()
-    page = collection_page(n_members=2)
-    pick(page["idol_ids"][0], 0)
-
-    failing_grant()
-    win(db_conn, first, page["idol_ids"][0])
-    win(db_conn, second, page["idol_ids"][0])
-    failing_grant.disarm()
-
-    headers = {"Authorization": f"Bearer {KEY}"}
-    res = client.post(URL, headers=headers)
-    assert (res.status_code, res.get_json()) == (200, {"message": "Reconciliation successful", "reconciled": 2})
-    assert user_card(db_conn, first, page["card_ids"][0]) == {"level": 1, "times_won": 1}
-    assert user_card(db_conn, second, page["card_ids"][0]) == {"level": 1, "times_won": 1}
-
-    res = client.post(URL, headers=headers)
-    assert res.get_json()["reconciled"] == 0
-
-
-@pytest.mark.parametrize("value", [None, ""])
-def test_unset_key_disables_the_task(client, monkeypatch, value):
-    if value is None:
-        monkeypatch.delenv("CARD_RECONCILE_AUTH_KEY", raising=False)
-    else:
-        monkeypatch.setenv("CARD_RECONCILE_AUTH_KEY", value)
-    res = client.post(URL, headers={"Authorization": "Bearer anything"})
-    assert (res.status_code, res.get_json()) == (500, {"error": "Reconciliation is not available"})
-
-
-@pytest.mark.parametrize("header", [None, "Bearer ", "Bearer wrong-key", KEY, f"Basic {KEY}"])
-def test_task_rejects_missing_or_wrong_key(client, reconcile_key, header):
-    headers = {"Authorization": header} if header is not None else {}
-    res = client.post(URL, headers=headers)
-    assert (res.status_code, res.get_json()) == (401, {"error": "Unauthorized"})
