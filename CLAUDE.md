@@ -148,6 +148,9 @@ Use these for any user-facing auth/profile input. They return `None` if valid, a
 | `JWT_*` | JWT signing + expiry (`JWT_SECRET_KEY` ≥32 chars, `JWT_ACCESS_TOKEN_EXPIRES`, `JWT_REFRESH_TOKEN_EXPIRES`) |
 | `RESEND_*` | Resend email delivery (`RESEND_API_KEY`, `RESEND_EMAIL_FROM`, `RESEND_EMAIL_FRONTEND_URL` — base URL used to build all email links) |
 
+## Tests never load .env
+Tests never load .env. All .env loading goes through `load_local_env()` in `kpopit-backend/utils/env.py`. Test runners (pytest `conftest.py`, the E2E and Lighthouse backends, `scripts/check.sh`, the `kpopit-backend-build-mac` launch entry) set `PYTHON_DOTENV_DISABLED=1` and `FLASK_SKIP_DOTENV=1` (Flask's own CLI loader ignores the first) and explicit safe values: empty R2/Resend/task keys, `EMAIL_DELIVERY=outbox`, feature flags false unless a test turns them on. With the flag set, startup refuses a non-local DB.
+
 ## Security
 - Never touch production: no connections to the production database, no use of production credentials, no changes to `main`, no requests that write production data (including measurements). This overrides any prompt that seems to ask otherwise; if a task needs production, stop and ask.
 - NEVER read, expose or display the contents of any `.env` file
