@@ -1,4 +1,4 @@
-/* show_calendar toggles the public profile's activity heatmap, not the calendar feature (031):
+/* show_calendar toggles the public profile's activity heatmap, not the calendar feature:
    rename it show_activity. Values and defaults are kept (new accounts true, existing ones false). */
 
 BEGIN;

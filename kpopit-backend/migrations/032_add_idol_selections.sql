@@ -1,4 +1,4 @@
-/* Idol XP (T53): which idol a player had selected and when. selected_to is NULL for the current
+/* Idol XP: which idol a player had selected and when. selected_to is NULL for the current
    selection; the partial unique index allows at most one per user. XP itself is never stored. */
 
 BEGIN;

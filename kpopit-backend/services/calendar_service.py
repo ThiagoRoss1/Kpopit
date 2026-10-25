@@ -38,7 +38,7 @@ def day_status(row: dict | None) -> str:
 
 class CalendarService:
     """Past challenge days: any day from a mode's first pick up to today. Answers come from that
-    day's daily_picks, guesses are recorded like live games (T40) and a past day finished here is a
+    day's daily_picks, guesses are recorded like live games and a past day finished here is a
     calendar game: win stats and the Album 1 card, never the streak or ranking."""
 
     def __init__(self, db, repository):
