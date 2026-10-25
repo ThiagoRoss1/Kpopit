@@ -22,7 +22,7 @@ load_dotenv()
 EST = ZoneInfo("America/New_York")
 
 SOURCE_SQL = """
-    SELECT duh.user_id, duh.date, duh.won_at, dp.idol_id
+    SELECT duh.user_id, duh.date, duh.gamemode_id, duh.won_at, dp.idol_id
     FROM daily_user_history AS duh
     JOIN daily_picks AS dp
         ON dp.pick_date = duh.date AND dp.gamemode_id = duh.gamemode_id
@@ -54,6 +54,12 @@ def run_backfill(dry_run: bool = False, force: bool = False):
                     # Older rows predate won_at; fall back to midnight EST of the game day.
                     won_at = row["won_at"] or datetime.combine(row["date"], time.min, tzinfo=EST)
                     result = service.grant_card_for_win(cursor, row["user_id"], row["idol_id"], won_at)
+                    # Mark the win granted so the reconciliation never replays it.
+                    cursor.execute(
+                        "UPDATE daily_user_history SET card_granted_at = COALESCE(card_granted_at, NOW()) "
+                        "WHERE user_id = %s AND date = %s AND gamemode_id = %s",
+                        (row["user_id"], row["date"], row["gamemode_id"]),
+                    )
 
                     if result is None:
                         stats["skipped"] += 1

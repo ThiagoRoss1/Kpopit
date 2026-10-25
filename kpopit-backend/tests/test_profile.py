@@ -37,10 +37,10 @@ def test_new_accounts_are_public_with_match_history_private(client):
     _, auth = register(client, "newbie")
     assert client.get("/api/user/profile/settings", headers=auth).get_json() == {
         "bias_idol_id": None, "bias_group_id": None,
-        "is_public": True, "show_match_history": False, "show_calendar": True,
+        "is_public": True, "show_match_history": False, "show_activity": True,
     }
     me = client.get("/api/auth/me", headers=auth).get_json()["profile"]
-    assert me["visibility"] == {"is_public": True, "show_match_history": False, "show_calendar": True}
+    assert me["visibility"] == {"is_public": True, "show_match_history": False, "show_activity": True}
 
 
 def test_claimed_accounts_get_the_same_defaults(client, make_user):
@@ -49,10 +49,10 @@ def test_claimed_accounts_get_the_same_defaults(client, make_user):
                       headers={"Authorization": token})
     auth = {"Authorization": f"Bearer {res.get_json()['access_token']}"}
     body = client.get("/api/user/profile/settings", headers=auth).get_json()
-    assert (body["is_public"], body["show_match_history"], body["show_calendar"]) == (True, False, True)
+    assert (body["is_public"], body["show_match_history"], body["show_activity"]) == (True, False, True)
 
 
-def test_public_profile_shows_bias_stats_and_calendar(client, db_conn, make_idol, make_group):
+def test_public_profile_shows_bias_stats_and_activity(client, db_conn, make_idol, make_group):
     user_id, auth = register(client, "fanboy")
     idol, group = make_idol("Bias"), make_group("BiasGroup")
     assert settings(client, auth, bias_idol_id=idol, bias_group_id=group).status_code == 200
@@ -63,22 +63,22 @@ def test_public_profile_shows_bias_stats_and_calendar(client, db_conn, make_idol
     body = client.get("/api/profile/FANBOY").get_json()
     assert body["username"] == "fanboy" and body["is_private"] is False
     assert body["bias_idol"]["id"] == idol and body["bias_group"]["name"] == "BiasGroup"
-    assert [day["date"] for day in body["calendar"]] == [
+    assert [day["date"] for day in body["activity"]] == [
         (get_today_date() - timedelta(days=1)).isoformat(), get_today_date().isoformat()]
-    assert body["calendar"][0] == {"date": body["calendar"][0]["date"], "games": 1, "wins": 1}
+    assert body["activity"][0] == {"date": body["activity"][0]["date"], "games": 1, "wins": 1}
     assert body["match_history"] is None
 
 
-@pytest.mark.parametrize(("toggle", "section"), [("show_match_history", "match_history"), ("show_calendar", "calendar")])
+@pytest.mark.parametrize(("toggle", "section"), [("show_match_history", "match_history"), ("show_activity", "activity")])
 def test_each_toggle_hides_its_section(client, db_conn, toggle, section):
     user_id, auth = register(client, "toggler")
     played(db_conn, user_id, 1)
-    settings(client, auth, show_match_history=True, show_calendar=True)
+    settings(client, auth, show_match_history=True, show_activity=True)
     assert client.get("/api/profile/toggler").get_json()[section]
     settings(client, auth, **{toggle: False})
     body = client.get("/api/profile/toggler").get_json()
     assert body[section] is None
-    other = "calendar" if section == "match_history" else "match_history"
+    other = "activity" if section == "match_history" else "match_history"
     assert body[other]
 
 

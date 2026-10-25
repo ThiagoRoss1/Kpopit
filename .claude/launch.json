@@ -4,7 +4,10 @@
     {
       "name": "kpopit-frontend",
       "runtimeExecutable": "npm",
-      "runtimeArgs": ["run", "dev:host"],
+      "runtimeArgs": [
+        "run",
+        "dev:host"
+      ],
       "cwd": "kpopit-frontend",
       "port": 5173,
       "autoPort": false
@@ -12,7 +15,9 @@
     {
       "name": "kpopit-backend-windows",
       "runtimeExecutable": ".venv/Scripts/python.exe",
-      "runtimeArgs": ["app.py"],
+      "runtimeArgs": [
+        "app.py"
+      ],
       "cwd": "kpopit-backend",
       "port": 5000,
       "autoPort": false
@@ -20,7 +25,67 @@
     {
       "name": "kpopit-backend-mac",
       "runtimeExecutable": ".venv/bin/python",
-      "runtimeArgs": ["app.py"],
+      "runtimeArgs": [
+        "app.py"
+      ],
+      "cwd": "kpopit-backend",
+      "port": 5000,
+      "autoPort": false
+    },
+    {
+      "name": "kpopit-backend-build-mac",
+      "runtimeExecutable": "env",
+      "runtimeArgs": [
+        "PYTHON_DOTENV_DISABLED=1",
+        "DB_URL=postgresql://localhost/kpopit_build",
+        "DATA_FOLDER=data",
+        "FLASK_ENV=development",
+        "JWT_SECRET_KEY=local-dummy-jwt-secret-key-not-used-anywhere-else",
+        "EMAIL_DELIVERY=outbox",
+        "RESEND_API_KEY=re_disabled_for_tests",
+        "RESEND_EMAIL_FROM=test@example.com",
+        "FRONTEND_URL=http://localhost:5173",
+        "R2_ENDPOINT_URL=http://127.0.0.1:9",
+        "R2_ACCESS_KEY_ID=disabled-for-tests",
+        "R2_SECRET_ACCESS_KEY=disabled-for-tests",
+        "R2_BUCKET_NAME=disabled-for-tests",
+        "R2_BACKUP_BUCKET_NAME=disabled-for-tests",
+        "R2_AVATARS_ACCESS_KEY_ID=disabled-for-tests",
+        "R2_AVATARS_SECRET_ACCESS_KEY=disabled-for-tests",
+        "R2_AVATARS_BUCKET_NAME=disabled-for-tests",
+        "R2_AVATARS_PREFIX=disabled-for-tests",
+        ".venv/bin/python",
+        "app.py"
+      ],
+      "cwd": "kpopit-backend",
+      "port": 5000,
+      "autoPort": false
+    },
+    {
+      "name": "kpopit-backend-build-windows",
+      "runtimeExecutable": "env",
+      "runtimeArgs": [
+        "PYTHON_DOTENV_DISABLED=1",
+        "DB_URL=postgresql://postgres@127.0.0.1:55432/kpopit_build",
+        "DATA_FOLDER=data",
+        "FLASK_ENV=development",
+        "JWT_SECRET_KEY=local-dummy-jwt-secret-key-not-used-anywhere-else",
+        "EMAIL_DELIVERY=outbox",
+        "RESEND_API_KEY=re_disabled_for_tests",
+        "RESEND_EMAIL_FROM=test@example.com",
+        "FRONTEND_URL=http://localhost:5173",
+        "R2_ENDPOINT_URL=http://127.0.0.1:9",
+        "R2_ACCESS_KEY_ID=disabled-for-tests",
+        "R2_SECRET_ACCESS_KEY=disabled-for-tests",
+        "R2_BUCKET_NAME=disabled-for-tests",
+        "R2_BACKUP_BUCKET_NAME=disabled-for-tests",
+        "R2_AVATARS_ACCESS_KEY_ID=disabled-for-tests",
+        "R2_AVATARS_SECRET_ACCESS_KEY=disabled-for-tests",
+        "R2_AVATARS_BUCKET_NAME=disabled-for-tests",
+        "R2_AVATARS_PREFIX=disabled-for-tests",
+        ".venv/Scripts/python.exe",
+        "app.py"
+      ],
       "cwd": "kpopit-backend",
       "port": 5000,
       "autoPort": false

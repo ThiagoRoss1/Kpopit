@@ -32,7 +32,16 @@ def collections_list():
     cursor = db.cursor()
     try:
         service = CollectionService(db)
-        result = service.get_collections(cursor, resolve_user_id(cursor))
+        user_id = resolve_user_id(cursor)
+        if user_id is not None:
+            # Grant any card a failed win grant left behind before counting; never blocks the list.
+            try:
+                service.reconcile_cards(cursor, user_id)
+                db.commit()
+            except Exception:
+                db.rollback()
+                logger.exception("Card reconciliation on the collections list failed (user_id=%s)", user_id)
+        result = service.get_collections(cursor, user_id)
         return jsonify(result), 200
     except Exception:
         logger.exception("Error fetching collections list")

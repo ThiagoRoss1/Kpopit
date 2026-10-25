@@ -1,7 +1,7 @@
 import { useState, useEffect, useRef } from "react";
 import "./PixelatedVictory.css";
 import { resolveCdnUrl } from "../../utils/imageUrl";
-import type { YesterdayAlbum } from "../../interfaces/gameInterfaces";
+import type { YesterdayAlbumPick } from "../../interfaces/gameInterfaces";
 import { OtherGamemodes } from "../OtherGamemodes/OtherGamemodes";
 import { Copy } from "lucide-react";
 import TargetAttempt from "../../assets/icons/target.svg";
@@ -22,9 +22,9 @@ interface PixelatedVictoryProps {
     albumName: string;
     groupName: string;
     coverPath: string;
-    yesterdayAlbum?: YesterdayAlbum["album_name"] | null;
-    yesterdayAlbumCover?: YesterdayAlbum["cover_path"] | null;
-    yesterdayAlbumArtist?: YesterdayAlbum["artist"] | null;
+    yesterdayAlbum?: YesterdayAlbumPick["album_name"] | null;
+    yesterdayAlbumCover?: YesterdayAlbumPick["cover_path"] | null;
+    yesterdayAlbumArtist?: YesterdayAlbumPick["artist"] | null;
     attempts: number;
     position?: number | null;
     score?: number | null;

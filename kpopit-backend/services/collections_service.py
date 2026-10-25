@@ -1,10 +1,14 @@
-from datetime import datetime
+from datetime import datetime, time
+from zoneinfo import ZoneInfo
 import logging
 import os
+
+from utils.dates import utc_now
 
 COLLECTION_ENABLED = os.getenv("COLLECTION_ENABLED", "false").lower() == "true"
 COLLECTION_GAMEMODE_IDS = (1, 2)
 SOLOIST_GROUP_ID = 20  # Soloists' page closes the album
+EST = ZoneInfo("America/New_York")
 
 logger = logging.getLogger(__name__)
 
@@ -14,6 +18,58 @@ class CollectionService:
 
     def __init__(self, db):
         self.db = db
+
+    def grant_for_win(self, cursor, user_id: int, gamemode_id: int, day, idol_id: int, won_at: datetime) -> dict | None:
+        """Grant the card of one win (user_id, day, gamemode_id) at most once. The win's card_granted_at
+        marker is claimed in the grant's transaction: a failed grant rolls it back with the card, and
+        a second call for a granted win (retry, reconciliation) changes nothing and returns None."""
+        cursor.execute(
+            """
+                UPDATE daily_user_history SET card_granted_at = %s
+                WHERE user_id = %s AND date = %s AND gamemode_id = %s
+                    AND won = TRUE AND card_granted_at IS NULL
+                RETURNING 1
+            """, (utc_now(), user_id, day, gamemode_id)
+        )
+        if cursor.fetchone() is None:
+            return None
+        return self.grant_card_for_win(cursor, user_id, idol_id, won_at)
+
+    def reconcile_cards(self, cursor, user_id: int | None = None) -> list[dict]:
+        """Grant every card-eligible win (live or calendar) whose grant never ran, oldest first, for one
+        user or everyone. Each win runs in its own savepoint, so a failure only leaves that win for the
+        next run. Returns the grants made ({user_id, date, gamemode_id, card_granted}); the caller commits."""
+        cursor.execute(
+            """
+                SELECT duh.user_id, duh.date, duh.gamemode_id, duh.won_at, dp.idol_id
+                FROM daily_user_history AS duh
+                JOIN daily_picks AS dp
+                    ON dp.pick_date = duh.date AND dp.gamemode_id = duh.gamemode_id
+                WHERE duh.won = TRUE AND duh.card_granted_at IS NULL
+                    AND duh.gamemode_id = ANY(%s)
+                    AND dp.idol_id IS NOT NULL
+                    AND (%s::int IS NULL OR duh.user_id = %s)
+                ORDER BY duh.user_id, duh.date, duh.gamemode_id
+            """, (list(COLLECTION_GAMEMODE_IDS), user_id, user_id)
+        )
+        granted = []
+        for win in cursor.fetchall():
+            # Old rows predate won_at; fall back to midnight EST of the game day (as the backfill).
+            won_at = win["won_at"] or datetime.combine(win["date"], time.min, tzinfo=EST)
+            cursor.execute("SAVEPOINT reconcile_card")
+            try:
+                result = self.grant_for_win(cursor, win["user_id"], win["gamemode_id"], win["date"], win["idol_id"], won_at)
+                cursor.execute("RELEASE SAVEPOINT reconcile_card")
+            except Exception:
+                cursor.execute("ROLLBACK TO SAVEPOINT reconcile_card")
+                logger.exception(
+                    "Card reconciliation failed for user_id=%s gamemode_id=%s date=%s; left for the next run",
+                    win["user_id"], win["gamemode_id"], win["date"],
+                )
+                continue
+            granted.append({"user_id": win["user_id"], "date": win["date"], "gamemode_id": win["gamemode_id"],
+                            "card_granted": result})
+        return granted
 
     def grant_card_for_win(self, cursor, user_id: int, idol_id:int, won_at: datetime, collection_id=1) -> dict | None:
         """Grants a collection card to a user. If the user already has the card, it upgrades the level instead."""

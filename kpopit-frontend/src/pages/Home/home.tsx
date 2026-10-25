@@ -42,9 +42,6 @@ function Home() {
                         Pick a game and have fun!
                     </span>
 
-                    <p className="mt-2 px-4 text-center text-white/80 max-xxs:text-xs xxs:text-xs xs:text-sm sm:text-base [text-shadow:2px_2px_0px_rgba(0,0,0,1)]">
-                        A Kpopdle-style daily K-pop Wordle: guess the idol of the day.
-                    </p>
                 </div>
                 
                 <div className="flex w-fit h-fit items-center justify-center mb-15">

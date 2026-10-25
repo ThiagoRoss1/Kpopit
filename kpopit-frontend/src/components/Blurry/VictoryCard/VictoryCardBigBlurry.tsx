@@ -1,4 +1,4 @@
-import type { GuessedIdolData, YesterdayIdol } from "../../../interfaces/gameInterfaces";
+import type { GuessedIdolData, YesterdayIdolPick } from "../../../interfaces/gameInterfaces";
 import { Link } from "react-router";
 import TargetAttempt from "../../../assets/icons/target.svg";
 import RankPosition from "../../../assets/icons/ranking-fill.svg";
@@ -23,8 +23,8 @@ interface BlurryVictoryCardBigProps {
     yesterdayIdolId: number;
     yesterdayIdol: string;
     yesterdayIdolGroup?: string[] | null;
-    yesterdayIdolImage?: YesterdayIdol["image_path"];
-    yesterdayIdolImageVersion?: YesterdayIdol["image_version"];
+    yesterdayIdolImage?: YesterdayIdolPick["image_path"];
+    yesterdayIdolImageVersion?: YesterdayIdolPick["image_version"];
     userPosition?: number | null;
     userRank?: number | null;
     userScore?: number | null;

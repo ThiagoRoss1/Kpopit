@@ -15,7 +15,7 @@ class GameService:
     def streak_calculation(self, cursor, user_id, gamemode_id):
         cursor.execute("""
                 SELECT date, won FROM daily_user_history
-                WHERE user_id = %s AND won = TRUE AND gamemode_id = %s
+                WHERE user_id = %s AND won = TRUE AND gamemode_id = %s AND is_calendar = FALSE
                 ORDER BY date DESC
             """, (user_id, gamemode_id))
 
@@ -38,10 +38,17 @@ class GameService:
 
         return streak
     
-    def resolve_answer_id(self, cursor, gamemode_id: int) -> int | None:
-        """Today's answer for the mode, read from daily_picks (drawn first if missing). The client's
-        answer_id is never trusted."""
-        return ensure_daily_picks(cursor, gamemode_id)
+    def resolve_answer_id(self, cursor, gamemode_id: int, day: str | None = None) -> int | None:
+        """The mode's answer for `day` (default today), read from daily_picks. Today's is drawn first
+        if missing; a past day is never drawn. The client's answer_id is never trusted."""
+        if day is None or day == get_today_date().isoformat():
+            return ensure_daily_picks(cursor, gamemode_id)
+        cursor.execute(
+            "SELECT COALESCE(idol_id, album_id) AS answer_id FROM daily_picks WHERE pick_date = %s AND gamemode_id = %s",
+            (day, gamemode_id),
+        )
+        row = cursor.fetchone()
+        return row["answer_id"] if row else None
 
     def _append_guess(self, cursor, user_id, gamemode_id, guessed_id, today, current_timestamp):
         """Record the guess once, atomically. Returns (attempt, appended, recorded): the guess's 1-based
@@ -80,9 +87,11 @@ class GameService:
         existing = cursor.fetchone() or {}
         return existing.get("position"), False, existing.get("recorded")
 
-    def save_user_history(self, connect, cursor, user_id, gamemode_id, guessed_id, answer_data, answer_id, today, current_timestamp, analytics_data):
-        """Record one guess and, on the first correct one, the win (score, streak, stats, card).
-        The attempt number comes from the server's guess list; returns (is_correct, card_granted)."""
+    def save_user_history(self, connect, cursor, user_id, gamemode_id, guessed_id, answer_data, answer_id, today, current_timestamp, analytics_data, is_calendar=False):
+        """Record one guess for the challenge day `today` and, on the first correct one, the win (score,
+        stats, card; the streak only for live games). A calendar win (a past day finished through the
+        calendar) is marked is_calendar. Attempts come from the server's guess list; returns
+        (is_correct, card_granted)."""
         analytics_data = analytics_data or {}
         answer_data = answer_data or {}
         guessed_id = int(guessed_id)
@@ -105,29 +114,33 @@ class GameService:
 
                 cursor.execute("""
                         UPDATE daily_user_history
-                        SET won = TRUE, one_shot_win = %s, won_at = %s, score = %s
+                        SET won = TRUE, one_shot_win = %s, won_at = %s, score = %s, is_calendar = %s
                         WHERE user_id = %s AND date = %s AND gamemode_id = %s
-                    """, (one_shot_win, current_timestamp, score, user_id, today, gamemode_id))
+                    """, (one_shot_win, current_timestamp, score, is_calendar, user_id, today, gamemode_id))
 
-                streak = self.streak_calculation(cursor, user_id, gamemode_id)
-                self._update_user_history(cursor, user_id, gamemode_id, streak, attempt, one_shot_win, today)
+                if is_calendar:
+                    self._add_calendar_win(cursor, user_id, gamemode_id, attempt, one_shot_win)
+                else:
+                    streak = self.streak_calculation(cursor, user_id, gamemode_id)
+                    self._update_user_history(cursor, user_id, gamemode_id, streak, attempt, one_shot_win, today)
 
                 if COLLECTION_ENABLED and gamemode_id in COLLECTION_GAMEMODE_IDS:
                     # A collection failure must never cost the win: the savepoint confines it,
                     # since psycopg poisons the whole transaction after any failed statement.
+                    collections = CollectionService(self.db)
                     cursor.execute("SAVEPOINT collection_grant")
                     try:
-                        card_granted = CollectionService(self.db).grant_card_for_win(
-                            cursor, user_id, int(answer_id), current_timestamp
+                        card_granted = collections.grant_for_win(
+                            cursor, user_id, gamemode_id, today, int(answer_id), current_timestamp
                         )
                         cursor.execute("RELEASE SAVEPOINT collection_grant")
                     except Exception:
                         cursor.execute("ROLLBACK TO SAVEPOINT collection_grant")
-                        card_granted = None
                         logger.exception(
                             "Collection card grant failed for user_id=%s idol_id=%s gamemode_id=%s date=%s "
-                            "— win was saved, card was NOT granted. Manual backfill needed.", user_id, answer_id, gamemode_id, today
+                            "— win was saved; retrying through reconciliation", user_id, answer_id, gamemode_id, today
                         )
+                        card_granted = self._retry_card_grant(collections, cursor, user_id, gamemode_id, today)
 
             connect.commit()
             return is_correct, card_granted
@@ -136,6 +149,33 @@ class GameService:
             connect.rollback()
             logger.exception("Error updating user history")
             raise e
+
+    def _retry_card_grant(self, collections, cursor, user_id, gamemode_id, today):
+        """One reconciliation pass for the user after a failed grant, in its own savepoint so it can't
+        cost the win either. Returns this win's grant, or None (the collections list retries it later)."""
+        cursor.execute("SAVEPOINT collection_retry")
+        try:
+            granted = collections.reconcile_cards(cursor, user_id)
+            cursor.execute("RELEASE SAVEPOINT collection_retry")
+        except Exception:
+            cursor.execute("ROLLBACK TO SAVEPOINT collection_retry")
+            logger.exception("Card reconciliation retry failed for user_id=%s; left for the collections list", user_id)
+            return None
+        day = today if isinstance(today, date) else date.fromisoformat(today)
+        return next((g["card_granted"] for g in granted
+                     if g["date"] == day and g["gamemode_id"] == gamemode_id), None)
+
+    def _add_calendar_win(self, cursor, user_id, gamemode_id, attempt, one_shot_win):
+        """Win stats only: a calendar win never moves the streak or the last played day."""
+        cursor.execute("""
+            INSERT INTO user_history
+            (user_id, gamemode_id, current_streak, max_streak, wins_count, average_guesses, one_shot_wins)
+            VALUES (%s, %s, 0, 0, 1, %s, %s)
+            ON CONFLICT(user_id, gamemode_id) DO UPDATE SET
+                    wins_count = user_history.wins_count + 1,
+                    average_guesses = ROUND(((user_history.average_guesses * user_history.wins_count + EXCLUDED.average_guesses) / (user_history.wins_count + 1))::numeric, 2),
+                    one_shot_wins = user_history.one_shot_wins + EXCLUDED.one_shot_wins
+            """, (user_id, gamemode_id, float(attempt), 1 if one_shot_win else 0))
 
     def _update_user_history(self, cursor, user_id, gamemode_id, streak, current_attempt, one_shot_win, today):
 

@@ -69,3 +69,4 @@ def purge_deleted_accounts():
         return jsonify({"error": "Purge failed"}), 500
     finally:
         cursor.close()
+

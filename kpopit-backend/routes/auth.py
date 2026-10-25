@@ -253,7 +253,7 @@ def me():
                 "visibility": {
                     "is_public": bool(profile["is_public"]),
                     "show_match_history": bool(profile["show_match_history"]),
-                    "show_calendar": bool(profile["show_calendar"]),
+                    "show_activity": bool(profile["show_activity"]),
                 } if profile else None,
             }
         }), 200
