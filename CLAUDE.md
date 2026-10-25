@@ -36,7 +36,9 @@ gunicorn app:app      # Production server
 ```bash
 scripts/check.sh      # CI without E2E, in order, stops at the first failure: ruff, compileall, pytest, lint, tsc, npm test, build
 ```
-Needs `TEST_DB_URL` (local `kpopit_test`) and a local test backend for the build's prerender: `.claude/launch.json` `kpopit-backend-build-mac` serves a `scripts/bootstrap_db.py`-built `kpopit_build` with dotenv disabled and dummy secrets. Run it (it also works in Git Bash on Windows) and have it pass before reporting READY TO MERGE.
+Needs `TEST_DB_URL` (local `kpopit_test`) and a local test backend for the build's prerender: the `.claude/launch.json` build entry for your OS serves a `scripts/bootstrap_db.py`-built `kpopit_build` with dotenv disabled and dummy secrets. Run it and have it pass before reporting READY TO MERGE.
+- **macOS/Linux** — start `kpopit-backend-build-mac`, then `TEST_DB_URL=postgresql://localhost/kpopit_test scripts/check.sh`.
+- **Windows** — start the local passwordless test cluster on `127.0.0.1:55432` (`pg_ctl ... -o "-p 55432" start`, holding `kpopit_test` and a bootstrapped `kpopit_build`) and `kpopit-backend-build-windows` (needs `env` from Git for Windows/MSYS2 on `PATH`), then in Git Bash `TEST_DB_URL=postgresql://postgres@127.0.0.1:55432/kpopit_test scripts/check.sh`, or from PowerShell `$env:TEST_DB_URL = 'postgresql://postgres@127.0.0.1:55432/kpopit_test'; bash scripts/check.sh`. Stop the cluster afterwards.
 
 ## Architecture
 
