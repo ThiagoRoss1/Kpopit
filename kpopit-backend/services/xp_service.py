@@ -1,4 +1,5 @@
 import os
+from operator import itemgetter
 from dotenv import load_dotenv
 from utils.dates import utc_now
 
@@ -48,6 +49,12 @@ def add_xp(current: float, gained: float) -> float:
     room = max(level_threshold(MAX_LEVEL) - current, 0)
     full = min(gained, room)
     return current + full + (gained - full) * MAX_LEVEL_SHARE
+
+
+def _selected_idol_at(selections: list[dict], when) -> int | None:
+    """The idol selected at `when`, or None. A selection covers [selected_from, selected_to)."""
+    return next((s["idol_id"] for s in selections
+                 if s["selected_from"] <= when and (s["selected_to"] is None or when < s["selected_to"])), None)
 
 
 class XpError(Exception):
@@ -125,9 +132,7 @@ class XpService:
             xp = game_xp(game)
             idol = None
             if game["won_at"] is not None and game["guesses_origin"] != "backfill":
-                idol = next((s["idol_id"] for s in selections
-                             if s["selected_from"] <= game["won_at"]
-                             and (s["selected_to"] is None or game["won_at"] < s["selected_to"])), None)
+                idol = _selected_idol_at(selections, game["won_at"])
             if idol is None:
                 potion = min(potion + xp, POTION_CAP)
             else:
@@ -144,7 +149,7 @@ class XpService:
             cursor.execute("SELECT id, artist_name, image_path FROM idols WHERE id = ANY(%s)", (list(idol_xp),))
             names = {row["id"]: row for row in cursor.fetchall()}
         idols = []
-        for idol_id, xp in sorted(idol_xp.items(), key=lambda item: -item[1]):
+        for idol_id, xp in sorted(idol_xp.items(), key=itemgetter(1), reverse=True):
             level = level_for(xp)
             idols.append({
                 "idol_id": idol_id,
