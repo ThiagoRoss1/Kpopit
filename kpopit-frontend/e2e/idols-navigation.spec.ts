@@ -74,7 +74,7 @@ async function expectSmooth(page: Page, since: number, loads: { loads: number },
   return after;
 }
 
-const press = (page: Page, isMobile: boolean, locator: ReturnType<Page['locator']>) =>
+const press = (isMobile: boolean, locator: ReturnType<Page['locator']>) =>
   (isMobile ? locator.tap() : locator.click());
 
 // A screencast competes for the very frames the slow-data test times (~70 ms here); traces still
@@ -124,7 +124,7 @@ test.describe('idols navigation @mobile', () => {
     const leftAt = await page.evaluate(() => scrollY);
     expect(leftAt).toBeGreaterThan(500);
     let since = await now(page);
-    await press(page, isMobile, card);
+    await press(isMobile, card);
     await expect(page.locator('main img[alt$=" photo"]')).toBeVisible();
     let after = await expectSmooth(page, since, loads, base);
     expect(after.filter((f) => f.loader), 'loader frames').toEqual([]);
@@ -141,12 +141,12 @@ test.describe('idols navigation @mobile', () => {
 
     // Card → another idol from the profile's search → the in-app back link.
     const target = idols[3];
-    await press(page, isMobile, page.locator(`main a[href="${href(target)}"]`));
+    await press(isMobile, page.locator(`main a[href="${href(target)}"]`));
     await expect(page.getByRole('img', { name: `${target.artist_name} photo` })).toBeVisible();
     since = await now(page);
     const other = idols.find((i) => i.id !== target.id && /^[A-Za-z]{4,}$/.test(i.artist_name))!;
     await page.getByPlaceholder('Search for an Idol, Group, or Company...').fill(other.artist_name);
-    await press(page, isMobile, page.locator(`main a[href="${href(other)}"]`).first());
+    await press(isMobile, page.locator(`main a[href="${href(other)}"]`).first());
     await expect(page.getByRole('img', { name: `${other.artist_name} photo` })).toBeVisible();
     await expectSmooth(page, since, loads, base);
     // The search pushed one history entry: a single browser back returns to the previous idol.
@@ -154,7 +154,7 @@ test.describe('idols navigation @mobile', () => {
     await expect(page).toHaveURL(`${PREVIEW}${href(target)}`);
     await expect(page.getByRole('img', { name: `${target.artist_name} photo` })).toBeVisible();
     since = await now(page);
-    await press(page, isMobile, page.getByRole('link', { name: 'Back to the idols list' }));
+    await press(isMobile, page.getByRole('link', { name: 'Back to the idols list' }));
     await expect(page).toHaveURL(`${PREVIEW}/idols`);
     await expect(page.locator('main a[href^="/idols/"] img').first()).toBeVisible();
     await expectSmooth(page, since, loads, base);
@@ -174,7 +174,7 @@ test.describe('idols navigation @mobile', () => {
     await card.scrollIntoViewIfNeeded();
     await card.focus();
     const since = await now(page);
-    await press(page, isMobile, card);
+    await press(isMobile, card);
     await expect(page.getByRole('img', { name: `${target.artist_name} photo` })).toBeVisible();
     const after = (await frames(page)).filter((f) => f.t >= since);
     expect(after.filter((f) => f.loader), 'loader frames').toEqual([]);
@@ -198,7 +198,7 @@ test.describe('idols navigation @mobile', () => {
     if (isMobile) await card.dispatchEvent('touchstart');
     else await card.hover();
     await page.waitForTimeout(isMobile ? 120 : 300);
-    await press(page, isMobile, card);
+    await press(isMobile, card);
     await expect(page.getByRole('img', { name: `${target.artist_name} photo` })).toBeVisible({ timeout: 10_000 });
 
     const clicked = (await clickAt(page))!;
