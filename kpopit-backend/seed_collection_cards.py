@@ -1,8 +1,8 @@
 # Seed Album 1 collection cards
-from dotenv import load_dotenv
+from utils.env import load_local_env
 from services.get_db import get_manual_db
 
-load_dotenv()
+load_local_env()
 
 def seed_idol_cards(cursor, collection_id=1):
     """Creates collection cards for idols in the database."""

@@ -3,12 +3,13 @@ from psycopg.rows import dict_row
 from psycopg_pool import ConnectionPool
 from flask import g
 import os
-from dotenv import load_dotenv
+from utils.env import load_local_env, require_isolated_startup
 import logging
 from repositories.idol_repository import IdolRepository
 from contextlib import contextmanager
 
-load_dotenv()
+load_local_env()
+require_isolated_startup()
 
 DB_URL = os.getenv('DB_URL')
 if not DB_URL:

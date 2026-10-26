@@ -20,7 +20,7 @@ def migration_cli(db_conn, tmp_path):
     runner = tmp_path / "migrations.py"
     shutil.copyfile(Path(__file__).parents[1] / "migrations/migrations.py", runner)
     env = {**os.environ, "DB_URL": make_conninfo(os.environ["DB_URL"], options=f"-c search_path={schema}"),
-           "PYTHON_DOTENV_DISABLED": "1"}
+           "PYTHON_DOTENV_DISABLED": "1", "PYTHONPATH": str(Path(__file__).parents[1])}
 
     def run():
         return subprocess.run([sys.executable, str(runner)], env=env, capture_output=True, text=True, timeout=20)

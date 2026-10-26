@@ -39,25 +39,23 @@ Same commands as `.claude/launch.json`:
 - backend: `kpopit-backend/.venv/Scripts/python.exe app.py` → `http://127.0.0.1:5000`
 - frontend: `cd kpopit-frontend && npm run dev:host` → `http://localhost:5173` (Vite proxies `/api` to :5000)
 
-**Real services must be off.** `load_dotenv()` never overrides a variable that is already
-set, but it still loads every other key from `.env` — so a forgot-password or
-email-change call would send a real email through Resend. Always start the test
-backend with these set in the process environment — to **dummy, non-empty**
-values (on Windows an empty variable can vanish, and then `.env` fills in the real key):
+**Real services must be off.** Test backends never load `.env`: `utils/env.load_local_env()` is the
+only loader and does nothing under `PYTHON_DOTENV_DISABLED`, and `FLASK_SKIP_DOTENV=1` stops `flask run`
+loading it on its own (the app refuses to start under the flag without it, or with a non-local DB).
+Start a test backend with both set plus explicit safe values; empty is safe now that nothing fills it in:
 
 ```
-FLASK_ENV=development  COLLECTION_ENABLED=true  RESEND_API_KEY=re_disabled_for_tests
-EMAIL_DELIVERY=outbox  EMAIL_OUTBOX_DIR=<a gitignored folder>  RESEND_EMAIL_FRONTEND_URL=http://localhost:5173
-R2_ENDPOINT_URL=http://127.0.0.1:9   and every other R2_* name = disabled-for-tests
-(R2_ACCESS_KEY_ID R2_SECRET_ACCESS_KEY R2_BUCKET_NAME R2_BACKUP_BUCKET_NAME R2_AVATARS_ACCESS_KEY_ID
- R2_AVATARS_SECRET_ACCESS_KEY R2_AVATARS_BUCKET_NAME R2_AVATARS_PREFIX)
+PYTHON_DOTENV_DISABLED=1  FLASK_SKIP_DOTENV=1  FLASK_ENV=development  DB_URL=<local test DB>
+COLLECTION_ENABLED=true  CALENDAR_ENABLED=false  IDOL_XP_ENABLED=false  PUBLIC_PROFILE_ENABLED=false
+RESEND_API_KEY=  EMAIL_DELIVERY=outbox  EMAIL_OUTBOX_DIR=<a gitignored folder>  RESEND_EMAIL_FRONTEND_URL=http://localhost:5173
+BACKUP_AUTH_KEY=  ACCOUNT_PURGE_AUTH_KEY=  BACKUP_DB_URL=  and every R2_* name empty (storage off)
 ```
 
 With `EMAIL_DELIVERY=outbox` (honored only when `FLASK_ENV=development`), `EmailService._send`
 writes each email as JSON (`to`, `subject`, `html`, `link`) into `EMAIL_OUTBOX_DIR` instead of
-calling Resend; the dummy key is a second guard. E2E reads the links with
+calling Resend; the empty key is a second guard. E2E reads the links with
 `e2e/support/outbox.ts` (`latestLink`); pytest gets a per-test `email_outbox` fixture and fails
-any direct Resend call. Avatar uploads fail (R2 endpoint is a closed local port).
+any direct Resend call. Avatar uploads fail (R2 settings empty: storage is off).
 
 Playwright does this for you: export `E2E_DB_URL` and, for a seeded run, `E2E_DB_NAME=kpopit_e2e`.
 `npm run test:e2e` runs one spec file at a time, workers 1, with a fresh backend + Vite per worker.
@@ -70,19 +68,19 @@ mobile Safari runs `@mobile`. Browser requests to external services are stubbed 
 image tests use the local site logo, and no test calls production/CDN/email/bucket services.
 Test Vite uses `E2E_ISOLATED=true` to disable env-file loading.
 
-`npm run test:lighthouse` does the same through `lighthouse/serve.mjs`.
+`npm run test:lighthouse` does the same through `lighthouse/serve.mjs` (it also needs `E2E_DB_URL` pointing at a local DB).
 
 PowerShell, by hand:
 
 ```powershell
 cd kpopit-backend
-$env:FLASK_ENV='development'; $env:COLLECTION_ENABLED='true'; $env:RESEND_API_KEY='re_disabled_for_tests'
-'R2_ACCESS_KEY_ID','R2_SECRET_ACCESS_KEY','R2_BUCKET_NAME','R2_BACKUP_BUCKET_NAME','R2_AVATARS_ACCESS_KEY_ID','R2_AVATARS_SECRET_ACCESS_KEY','R2_AVATARS_BUCKET_NAME','R2_AVATARS_PREFIX' | % { Set-Item "env:$_" 'disabled-for-tests' }
-$env:R2_ENDPOINT_URL='http://127.0.0.1:9'
+$env:PYTHON_DOTENV_DISABLED='1'; $env:FLASK_SKIP_DOTENV='1'; $env:DB_URL='<local test DB>'
+$env:FLASK_ENV='development'; $env:COLLECTION_ENABLED='true'; $env:EMAIL_DELIVERY='outbox'
+$env:JWT_SECRET_KEY='local-dummy-jwt-secret-key-not-used-anywhere-else'
 .venv\Scripts\python.exe app.py
 ```
 
-(Never set them to `''` in PowerShell: that deletes the variable and `.env` wins.)
+(Leave every R2_*, RESEND_API_KEY and task key unset: with dotenv disabled nothing fills them in.)
 
 ## Date offset ("play tomorrow")
 

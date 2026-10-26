@@ -4,12 +4,12 @@ import uuid
 from datetime import timedelta, timezone
 import bcrypt
 import jwt
-from dotenv import load_dotenv
+from utils.env import load_local_env
 from repositories.user_repository import UserRepository
 from services.account_deletion_service import DELETION_GRACE, deletion_clock
 from utils.dates import utc_now
 
-load_dotenv()
+load_local_env()
 
 JWT_SECRET_KEY = os.getenv("JWT_SECRET_KEY")
 JWT_ACCESS_EXPIRES_SECONDS  = int(os.getenv("JWT_ACCESS_TOKEN_EXPIRES",  "3600"))

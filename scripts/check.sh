@@ -18,6 +18,9 @@ else
   exit 1
 fi
 
+# Test runs never load kpopit-backend/.env (see kpopit-backend/utils/env.py).
+export PYTHON_DOTENV_DISABLED=1 FLASK_SKIP_DOTENV=1
+
 step() { printf '\n==> %s\n' "$1"; }
 
 if [ -z "${TEST_DB_URL:-}" ]; then
@@ -38,7 +41,7 @@ step "compileall"
 (cd "$BACKEND" && "$PY" -m compileall -q . > /dev/null)
 
 step "pytest"
-(cd "$BACKEND" && PYTHON_DOTENV_DISABLED=1 "$PY" -m pytest -q)
+(cd "$BACKEND" && "$PY" -m pytest -q)
 
 step "frontend lint"
 (cd "$FRONTEND" && npm run lint)

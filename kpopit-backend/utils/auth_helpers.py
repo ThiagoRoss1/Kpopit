@@ -1,10 +1,10 @@
 import os
 import re
 import jwt
-from dotenv import load_dotenv
+from utils.env import load_local_env
 from email_validator import validate_email as validate_email_format, EmailNotValidError
 
-load_dotenv()
+load_local_env()
 
 JWT_SECRET_KEY = os.getenv("JWT_SECRET_KEY")
 if not JWT_SECRET_KEY or len(JWT_SECRET_KEY) < 32:

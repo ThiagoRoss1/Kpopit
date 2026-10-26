@@ -6,10 +6,10 @@ import tempfile
 
 import boto3
 from datetime import datetime
-from dotenv import load_dotenv
+from utils.env import load_local_env
 from psycopg.conninfo import conninfo_to_dict
 
-load_dotenv()
+load_local_env()
 
 logger = logging.getLogger(__name__)
 

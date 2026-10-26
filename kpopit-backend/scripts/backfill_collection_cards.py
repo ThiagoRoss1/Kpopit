@@ -13,11 +13,11 @@ import argparse
 from datetime import datetime, time
 from zoneinfo import ZoneInfo
 
-from dotenv import load_dotenv
+from utils.env import load_local_env
 from services.collections_service import CollectionService, COLLECTION_GAMEMODE_IDS
 from services.get_db import get_manual_db, pool
 
-load_dotenv()
+load_local_env()
 
 EST = ZoneInfo("America/New_York")
 

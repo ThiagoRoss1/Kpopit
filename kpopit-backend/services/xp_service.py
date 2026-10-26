@@ -1,9 +1,9 @@
 import os
 from operator import itemgetter
-from dotenv import load_dotenv
+from utils.env import load_local_env
 from utils.dates import utc_now
 
-load_dotenv()
+load_local_env()
 
 # Off by default: without the flag the /api/idol-xp routes aren't registered.
 IDOL_XP_ENABLED = os.getenv("IDOL_XP_ENABLED", "false").lower() == "true"
