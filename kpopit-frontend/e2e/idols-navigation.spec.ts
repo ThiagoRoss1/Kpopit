@@ -25,7 +25,7 @@ function monitor() {
   w.__cls = 0;
   w.__clickAt = null;
   new PerformanceObserver((list) => {
-    for (const e of list.getEntries() as PerformanceEntry[] & { value: number; hadRecentInput: boolean }[]) {
+    for (const e of list.getEntries() as (PerformanceEntry & { value: number; hadRecentInput: boolean })[]) {
       if (!e.hadRecentInput) w.__cls += e.value;
     }
   }).observe({ type: 'layout-shift', buffered: true });
