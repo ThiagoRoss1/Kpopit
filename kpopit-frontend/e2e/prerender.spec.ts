@@ -99,11 +99,13 @@ test.describe('prerendered pages without JavaScript', () => {
   test('the build writes a sitemap of the prerendered pages', async ({ request }) => {
     const sitemap = await (await request.get(`${PREVIEW}/sitemap.xml`)).text();
     const locs = [...sitemap.matchAll(/<loc>([^<]*)<\/loc>/g)].map((m) => m[1]);
-    for (const p of ['/', '/classic', '/blurry', '/pixelated', '/idols', '/privacy-policy', '/contact']) {
-      expect(locs).toContain(`https://kpopit.net${p}`);
-    }
+    const pages = ['/', '/classic', '/blurry', '/pixelated', '/idols', '/privacy-policy', '/contact', '/about', '/how-to-play', '/faq', '/blog', '/changelog'];
+    for (const p of pages) expect(locs).toContain(`https://kpopit.net${p}`);
     expect(locs).toContain(`https://kpopit.net/idols/${idol.id}/${slug(idol)}`);
-    expect(locs).toHaveLength(7 + idols.length);
+    expect(locs).toHaveLength(pages.length + idols.length);
+    for (const p of ['/idol-xp', '/profile', '/login', '/major-patch']) {
+      expect(locs.some((loc) => loc.startsWith(`https://kpopit.net${p}`))).toBe(false);
+    }
     const robots = await (await request.get(`${PREVIEW}/robots.txt`)).text();
     expect(robots).toContain('Sitemap: https://kpopit.net/sitemap.xml');
   });

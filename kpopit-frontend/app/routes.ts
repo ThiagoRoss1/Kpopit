@@ -30,11 +30,21 @@ export default [
     route("idols/:id/:slug", "routes/idol.tsx"),
     route("privacy-policy", "routes/privacy-policy.tsx"),
     route("contact", "routes/contact.tsx"),
-    layout("routes/protected.tsx", [
-      route("profile/:username", "routes/profile.tsx"),
-    ]),
+    route("about", "routes/about.tsx"),
+    route("how-to-play", "routes/how-to-play.tsx"),
+    route("faq", "routes/faq.tsx"),
+    route("blog", "routes/blog.tsx"),
+    route("blog/:slug", "routes/blog-post.tsx"),
+    route("changelog", "routes/changelog.tsx"),
+    route("albums", "routes/albums.tsx"),
+    route("albums/:id/:slug", "routes/album.tsx"),
+    // Flag-gated (calendar, idol_xp): the page itself shows the 404 when the flag is off.
+    route("calendar", "routes/calendar.tsx"),
+    route("idol-xp", "routes/idol-xp.tsx"),
+    route("profile/:username", "routes/profile.tsx"),
+    route("major-patch", "routes/major-patch.tsx"),
     ...(ADMIN_ROUTE ? [route(ADMIN_ROUTE, "routes/admin.tsx")] : []),
-    // Unknown paths go home.
+    // Unknown paths get the 404 page.
     route("*", "routes/catch-all.tsx"),
   ]),
 ] satisfies RouteConfig;

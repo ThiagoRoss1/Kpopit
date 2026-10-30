@@ -2,10 +2,13 @@ import type { Config } from "@react-router/dev/config";
 import { buildIdolSlug } from "./src/utils/formatters";
 import { writeFile } from "node:fs/promises";
 import path from "node:path";
-import { fetchIdolsPage, LENIENT_PRERENDER, requirePrerenderApi } from "./app/prerender-api";
+import { fetchFeatures, fetchIdolsPage, LENIENT_PRERENDER, requirePrerenderApi } from "./app/prerender-api";
 import { buildSitemap } from "./app/sitemap";
 
-const STATIC_PATHS = ["/", "/classic", "/blurry", "/pixelated", "/idols", "/privacy-policy", "/contact"];
+const STATIC_PATHS = [
+  "/", "/classic", "/blurry", "/pixelated", "/idols", "/privacy-policy", "/contact",
+  "/about", "/how-to-play", "/faq", "/blog", "/changelog",
+];
 
 requirePrerenderApi();
 
@@ -32,9 +35,11 @@ let paths: Promise<string[]> | undefined;
 export default {
   ssr: false,
   prerender: () => (paths ??= prerenderPaths()),
-  // The sitemap lists exactly what was prerendered, so it can't drift from the routes.
+  // The sitemap lists what was prerendered (so it can't drift from the routes), plus the
+  // client-side calendar while its flag is on at build time.
   async buildEnd({ reactRouterConfig }) {
-    const xml = buildSitemap(await (paths ??= prerenderPaths()));
+    const calendar = await fetchFeatures().then((f) => f.calendar, () => false);
+    const xml = buildSitemap([...(await (paths ??= prerenderPaths())), ...(calendar ? ["/calendar"] : [])]);
     await writeFile(path.join(reactRouterConfig.buildDirectory, "client", "sitemap.xml"), xml);
   },
 } satisfies Config;

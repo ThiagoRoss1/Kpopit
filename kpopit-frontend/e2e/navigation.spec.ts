@@ -74,9 +74,9 @@ test.describe('every route loads @mobile', () => {
     await expectCleanLoad(page, consoleErrors);
   });
 
-  test('the old /collection path is just an unknown route (goes home)', async ({ page }) => {
+  test('the old /collection path is just an unknown route (the 404)', async ({ page }) => {
     await page.goto('/collection');
-    await expect(page).toHaveURL(/\/$/);
+    await expect(page.getByRole('heading', { name: '404' })).toBeVisible();
   });
 
   test('/profile/:username loads for a logged-in user @smoke', async ({ page, consoleErrors }) => {
@@ -97,8 +97,12 @@ test.describe('every route loads @mobile', () => {
     await expect(page).toHaveURL(/\/login$/);
   });
 
-  test('unknown routes redirect home @smoke', async ({ page }) => {
+  test('unknown routes show the 404 page @smoke', async ({ page }) => {
     await page.goto('/this-route-does-not-exist');
+    await expect(page).toHaveURL(/\/this-route-does-not-exist$/);
+    await expect(page.getByRole('heading', { name: '404' })).toBeVisible();
+    await expect(page.locator('meta[name="robots"]')).toHaveAttribute('content', 'noindex');
+    await page.getByRole('link', { name: "Play today's game" }).click();
     await expect(page).toHaveURL(/\/$/);
   });
 
@@ -119,33 +123,40 @@ test.describe('navbar, footer and home modals', () => {
       ['Games', 'Classic', /\/classic$/],
       ['Games', 'Blurry', /\/blurry$/],
       ['Games', 'Pixelated', /\/pixelated$/],
-      ['Idols', 'All Idols', /\/idols$/],
+      ['Idols', 'All idols', /\/idols$/],
+      ['Idols', 'Albums', /\/albums$/],
+      ['About', 'About', /\/about$/],
+      ['About', 'How to play', /\/how-to-play$/],
+      ['About', 'Changelog', /\/changelog$/],
+      ['About', 'Blog', /\/blog$/],
+      ['About', 'FAQ', /\/faq$/],
+      ['About', 'Contact', /\/contact$/],
     ] as const) {
-      await nav.getByRole('button', { name: menu }).click();
-      await nav.getByRole('link', { name: item }).click();
+      await nav.getByRole('button', { name: menu, exact: true }).click();
+      await nav.getByRole('menuitem', { name: new RegExp(`^${item}`) }).click();
       await expect(page).toHaveURL(url);
     }
     await nav.getByRole('link', { name: 'Collections' }).click();
     await expect(page).toHaveURL(/\/collections$/);
-    await nav.getByRole('link', { name: 'Contact' }).click();
-    await expect(page).toHaveURL(/\/contact$/);
     await nav.getByRole('link', { name: 'Login' }).click();
     await expect(page).toHaveURL(/\/login$/);
-    await nav.getByRole('link', { name: /Kpopit logo/ }).click();
+    await nav.getByRole('link', { name: 'KpopIt home' }).click();
     await expect(page).toHaveURL(/\/$/);
   });
 
   test('mobile menu opens and navigates @mobile', async ({ page, isMobile }) => {
     test.skip(!isMobile, 'mobile-only menu');
     await page.goto('/');
-    await page.locator('#mobile-menu-button').click();
     const nav = page.locator('nav');
-    await nav.getByRole('button', { name: /^Games/ }).last().click();
-    await nav.getByRole('link', { name: /Classic/ }).last().click();
+    await nav.getByRole('button', { name: 'Open menu' }).click();
+    await nav.getByRole('button', { name: 'Games' }).click();
+    await nav.getByRole('link', { name: 'Classic' }).click();
     await expect(page).toHaveURL(/\/classic$/);
     await expect(searchInput(page, 'classic')).toBeVisible({ timeout: 30_000 });
-    await page.locator('#mobile-menu-button').click();
-    await nav.getByRole('link', { name: 'Contact' }).last().click();
+    await nav.getByRole('button', { name: 'Open menu' }).click();
+    // The current page's section (Games) opens by default; About is one tap away.
+    await nav.getByRole('button', { name: 'About' }).click();
+    await nav.getByRole('link', { name: 'Contact' }).click();
     await expect(page).toHaveURL(/\/contact$/);
   });
 
@@ -167,7 +178,7 @@ test.describe('navbar, footer and home modals', () => {
 
   test('About and Changelog modals open and close', async ({ page }) => {
     await page.goto('/');
-    await page.getByRole('button', { name: 'About' }).click();
+    await page.locator('main').getByRole('button', { name: 'About' }).click();
     await expect(page.getByRole('heading', { name: 'About...' })).toBeVisible();
     await closeModal(page, 'About...');
     await page.getByRole('button', { name: 'Changelog' }).click();
