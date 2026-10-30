@@ -1,8 +1,5 @@
-import ComingSoon from "../../src/pages/ComingSoon/ComingSoon";
+import Faq from "../../src/pages/Faq/Faq";
 
 export const handle = { puff: true };
 
-// Placeholder until the page ships in its phase of the redesign.
-export default function Route() {
-  return <ComingSoon title="FAQ" path="/faq" />;
-}
+export default Faq;
