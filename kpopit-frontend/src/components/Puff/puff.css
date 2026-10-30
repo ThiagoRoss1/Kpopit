@@ -1,0 +1,59 @@
+/* Press states the Tailwind classes can't order: press must beat hover (hence the repeated
+   :active), and hover only exists on devices that hover. */
+.pp-focus:focus-visible { outline: 3px solid #FF3399; outline-offset: 4px; }
+
+.pp-press {
+  box-shadow: 2px 3px 0 var(--ctl-off), var(--pp-in, var(--in));
+  transition: transform .45s var(--ease-bounce), box-shadow .4s var(--ease-settle), background-color .3s ease, color .3s ease;
+  backface-visibility: hidden;
+}
+@media (hover: hover) {
+  .pp-press:not(:disabled):not([aria-pressed="true"]):not([aria-current="page"]):hover {
+    transform: translate3d(0, -2px, 0);
+    box-shadow: 2.5px 3.5px 0 var(--ctl-off), var(--pp-in, var(--in));
+  }
+  .pp-press[data-hover="chip"]:not(:disabled):not([aria-pressed="true"]):hover { background-color: var(--chip-hover); }
+}
+.pp-press[aria-pressed="true"],
+.pp-press[aria-current="page"] {
+  transform: translate3d(2px, 3px, 0);
+  box-shadow: 0 0 0 var(--ctl-off), var(--pp-in, var(--in));
+}
+.pp-press:not(:disabled):active:active:active {
+  transform: translate3d(2px, 3px, 0);
+  box-shadow: 0 0 0 var(--ctl-off), var(--pp-in, var(--in));
+  transition-duration: .18s;
+}
+.pp-press:disabled { cursor: not-allowed; }
+
+/* Cards in lists tilt and straighten on hover. */
+.pp-tilt { transform: rotate(var(--pp-tilt, 0deg)); transition: transform .6s var(--ease-bounce); }
+@media (hover: hover) { .pp-tilt:hover { transform: rotate(0deg) translate3d(0, -4px, 0); } }
+
+/* Horizontal rows: edge fades only when the row overflows, following the scroll. */
+.pp-hscroll { scrollbar-width: none; overscroll-behavior-x: contain; }
+.pp-hscroll::-webkit-scrollbar { display: none; }
+.pp-hscroll[data-over="1"] {
+  -webkit-mask-image: linear-gradient(90deg, transparent 0, #000 var(--fl, 0px), #000 calc(100% - var(--fr, 0px)), transparent 100%);
+  mask-image: linear-gradient(90deg, transparent 0, #000 var(--fl, 0px), #000 calc(100% - var(--fr, 0px)), transparent 100%);
+  cursor: grab;
+}
+.pp-hscroll[data-drag="1"], .pp-hscroll[data-drag="1"] * { cursor: grabbing !important; }
+
+/* Accordion: rows animate 0fr → 1fr with the content kept mounted. */
+.pp-collapse { display: grid; grid-template-rows: 0fr; transition: grid-template-rows .45s var(--ease-settle); }
+.pp-collapse[data-open="1"] { grid-template-rows: 1fr; }
+.pp-collapse > div { min-height: 0; overflow: hidden; }
+.pp-collapse-in { opacity: 0; transform: translate3d(0, -8px, 0); transition: opacity .25s ease, transform .45s var(--ease-settle); }
+.pp-collapse[data-open="1"] .pp-collapse-in { opacity: 1; transform: translate3d(0, 0, 0); transition-delay: .06s; }
+.pp-collapse[data-open="0"] .pp-collapse-in { visibility: hidden; transition: opacity .2s ease, transform .3s ease, visibility 0s .45s; }
+
+.pp-toast { animation: puffIn .42s var(--ease-settle) both; }
+.pp-toast[data-out="1"] { animation: ppToastOut .3s cubic-bezier(.4, 0, 1, 1) forwards; }
+@keyframes ppToastOut { from { opacity: 1 } to { opacity: 0; transform: translate3d(0, 14px, 0) scale(.97) } }
+
+.pp-enter { animation: var(--pp-anim, puffIn) .7s var(--ease-settle) var(--pp-delay, 0ms) both; }
+
+@media (prefers-reduced-motion: reduce) {
+  .pp-root, .pp-root *, .pp-nav, .pp-nav * { animation: none !important; transition-duration: 0s !important; }
+}

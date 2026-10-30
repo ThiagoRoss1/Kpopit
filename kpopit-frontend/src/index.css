@@ -22,7 +22,94 @@
   --color-neon-pink: #FF3399;
   --color-cream: #FAF6F0;
   --color-ink: #0a0a0a;
+
+  --font-caveat: 'Caveat', cursive;
+  --font-mono-display: 'Major Mono Display', monospace;
+  --font-korean: 'Noto Sans KR', sans-serif;
 }
+
+/* Puff Pop (docs/design-system/tokens/puffpop.css). Day is the default; data-theme="night" on any
+   element switches its subtree. The theme script in app/root.tsx sets it on <html> before paint. */
+:root,
+[data-theme="day"] {
+  --ground: #FAF6F0;
+  --dot: rgba(26, 20, 24, .07);
+  --text: #1A1418;
+  --muted: #6B5F66;
+  --ink: #1A1418;
+  --chip: #FFFDFA;
+  --chip-ink: #1A1418;
+  --chip-hover: #FFE3F1;
+  --face: #FFFDFA;
+  --face-ink: #1A1418;
+  --panel: #FFF0F7;
+  --menu-bg: #FFFAF3;
+  --opt-hover: rgba(255, 138, 196, .24);
+  --ctl-off: #1A1418;
+  --side: #FF8AC4;
+  --tag: #FF70B8;
+  --sig: #E70A7D;
+  --group: #C62368;
+  --rule: rgba(26, 20, 24, .18);
+  --bar: #FFFDFA;
+  --bar-sh: 0 3px 0 rgba(26, 20, 24, .06);
+  --cur-bg: #FFE3F1;
+  --tile: #FFE3F1;
+  --tile-ink: #1A1418;
+  --tile-in: inset 0 2px 0 rgba(255, 255, 255, .7), inset 0 -3px 0 rgba(198, 35, 104, .14);
+  --in: inset 0 2px 0 #FFFFFF, inset 0 -3px 0 rgba(26, 20, 24, .07);
+  --in-pink: inset 0 2px 0 rgba(255, 255, 255, .55), inset 0 -3px 0 rgba(198, 35, 104, .28);
+  --card-depth: 5px 5px 0 0 #FF8AC4, 5px 5px 0 2px var(--ink);
+  --puff-title: -2.5px -2.5px 0 #1A1418,2.5px -2.5px 0 #1A1418,-2.5px 2.5px 0 #1A1418,2.5px 2.5px 0 #1A1418,0px 2.5px 0 #1A1418,0px -2.5px 0 #1A1418,2.5px 0px 0 #1A1418,-2.5px 0px 0 #1A1418,1.33px 1.83px 0 #FF8AC4,2.67px 3.67px 0 #FF8AC4,4.00px 5.50px 0 #FF8AC4,1.5px 3px 0 #1A1418,6.5px 3px 0 #1A1418,1.5px 8px 0 #1A1418,6.5px 8px 0 #1A1418,4px 8px 0 #1A1418,4px 3px 0 #1A1418,6.5px 5.5px 0 #1A1418,1.5px 5.5px 0 #1A1418;
+  --puff-xl: -3.2px -3.2px 0 #1A1418,3.2px -3.2px 0 #1A1418,-3.2px 3.2px 0 #1A1418,3.2px 3.2px 0 #1A1418,0px 3.2px 0 #1A1418,0px -3.2px 0 #1A1418,3.2px 0px 0 #1A1418,-3.2px 0px 0 #1A1418,1.67px 2.33px 0 #FF8AC4,3.33px 4.67px 0 #FF8AC4,5.00px 7.00px 0 #FF8AC4,1.8px 3.8px 0 #1A1418,8.2px 3.8px 0 #1A1418,1.8px 10.2px 0 #1A1418,8.2px 10.2px 0 #1A1418,5px 10.2px 0 #1A1418,5px 3.8px 0 #1A1418,8.2px 7px 0 #1A1418,1.8px 7px 0 #1A1418;
+  --puff-value: -2px -2px 0 #1A1418,2px -2px 0 #1A1418,-2px 2px 0 #1A1418,2px 2px 0 #1A1418,0px 2px 0 #1A1418,0px -2px 0 #1A1418,2px 0px 0 #1A1418,-2px 0px 0 #1A1418,1.00px 1.33px 0 #FF8AC4,2.00px 2.67px 0 #FF8AC4,3.00px 4.00px 0 #FF8AC4,1px 2px 0 #1A1418,5px 2px 0 #1A1418,1px 6px 0 #1A1418,5px 6px 0 #1A1418,3px 6px 0 #1A1418,3px 2px 0 #1A1418,5px 4px 0 #1A1418,1px 4px 0 #1A1418;
+  --puff-empty: -1.8px -1.8px 0 #1A1418,1.8px -1.8px 0 #1A1418,-1.8px 1.8px 0 #1A1418,1.8px 1.8px 0 #1A1418,0px 1.8px 0 #1A1418,0px -1.8px 0 #1A1418,1.8px 0px 0 #1A1418,-1.8px 0px 0 #1A1418,0.87px 1.13px 0 #FF8AC4,1.73px 2.27px 0 #FF8AC4,2.60px 3.40px 0 #FF8AC4,0.8px 1.6px 0 #1A1418,4.4px 1.6px 0 #1A1418,0.8px 5.2px 0 #1A1418,4.4px 5.2px 0 #1A1418,2.6px 5.2px 0 #1A1418,2.6px 1.6px 0 #1A1418,4.4px 3.4px 0 #1A1418,0.8px 3.4px 0 #1A1418;
+  --puff-wm: -1.6px -1.6px 0 #1A1418,1.6px -1.6px 0 #1A1418,-1.6px 1.6px 0 #1A1418,1.6px 1.6px 0 #1A1418,0px 1.6px 0 #1A1418,0px -1.6px 0 #1A1418,1.6px 0px 0 #1A1418,-1.6px 0px 0 #1A1418,0.80px 1.07px 0 #FF8AC4,1.60px 2.13px 0 #FF8AC4,2.40px 3.20px 0 #FF8AC4,0.8px 1.6px 0 #1A1418,4px 1.6px 0 #1A1418,0.8px 4.8px 0 #1A1418,4px 4.8px 0 #1A1418,2.4px 4.8px 0 #1A1418,2.4px 1.6px 0 #1A1418,4px 3.2px 0 #1A1418,0.8px 3.2px 0 #1A1418;
+  --puff-name: -1.1px -1.1px 0 #1A1418,1.1px -1.1px 0 #1A1418,-1.1px 1.1px 0 #1A1418,1.1px 1.1px 0 #1A1418,0px 1.1px 0 #1A1418,0px -1.1px 0 #1A1418,1.1px 0px 0 #1A1418,-1.1px 0px 0 #1A1418,0.53px 0.73px 0 #FF8AC4,1.07px 1.47px 0 #FF8AC4,1.60px 2.20px 0 #FF8AC4,0.5px 1.1px 0 #1A1418,2.7px 1.1px 0 #1A1418,0.5px 3.3px 0 #1A1418,2.7px 3.3px 0 #1A1418,1.6px 3.3px 0 #1A1418,1.6px 1.1px 0 #1A1418,2.7px 2.2px 0 #1A1418,0.5px 2.2px 0 #1A1418;
+  --tag-text: -0.8px -0.8px 0 #1A1418,0.8px -0.8px 0 #1A1418,-0.8px 0.8px 0 #1A1418,0.8px 0.8px 0 #1A1418,0px 0.8px 0 #1A1418,0px -0.8px 0 #1A1418,0.8px 0px 0 #1A1418,-0.8px 0px 0 #1A1418;
+  --cta-text: -1px -1px 0 #1A1418, 1px -1px 0 #1A1418, -1px 1px 0 #1A1418, 1px 1px 0 #1A1418, 0 1px 0 #1A1418, 0 -1px 0 #1A1418, 1px 0 0 #1A1418, -1px 0 0 #1A1418, 0 2px 0 #1A1418, 1px 2px 0 #1A1418, -1px 2px 0 #1A1418;
+  --ease-settle: cubic-bezier(.22, 1, .36, 1);
+  --ease-pop: cubic-bezier(.34, 1.56, .64, 1);
+  --ease-bounce: cubic-bezier(.34, 1.3, .64, 1);
+}
+
+[data-theme="night"] {
+  --ground: #1E1C1F;
+  --dot: rgba(255, 255, 255, .05);
+  --text: #FAF6F0;
+  --muted: #CFC5CB;
+  --ink: #0A0A0A;
+  --chip: #2F2B2F;
+  --chip-ink: #FAF6F0;
+  --chip-hover: #3B343A;
+  --face: #2F2B2F;
+  --face-ink: #FAF6F0;
+  --panel: #262226;
+  --menu-bg: #2F2B2F;
+  --opt-hover: rgba(255, 138, 196, .18);
+  --ctl-off: #FF8AC4;
+  --sig: #FF70B8;
+  --group: #FF8AC4;
+  --rule: rgba(250, 246, 240, .18);
+  --bar: #262226;
+  --bar-sh: 0 3px 0 #FF8AC4;
+  --cur-bg: #3B343A;
+  --tile: #3B343A;
+  --tile-ink: #FF8AC4;
+  --tile-in: inset 0 2px 0 rgba(255, 255, 255, .1);
+  --in: inset 0 2px 0 rgba(255, 255, 255, .12), inset 0 -3px 0 rgba(0, 0, 0, .24);
+  --puff-title: -2.5px -2.5px 0 #0A0A0A,2.5px -2.5px 0 #0A0A0A,-2.5px 2.5px 0 #0A0A0A,2.5px 2.5px 0 #0A0A0A,0px 2.5px 0 #0A0A0A,0px -2.5px 0 #0A0A0A,2.5px 0px 0 #0A0A0A,-2.5px 0px 0 #0A0A0A,1.33px 1.83px 0 #FF8AC4,2.67px 3.67px 0 #FF8AC4,4.00px 5.50px 0 #FF8AC4,1.5px 3px 0 #0A0A0A,6.5px 3px 0 #0A0A0A,1.5px 8px 0 #0A0A0A,6.5px 8px 0 #0A0A0A,4px 8px 0 #0A0A0A,4px 3px 0 #0A0A0A,6.5px 5.5px 0 #0A0A0A,1.5px 5.5px 0 #0A0A0A;
+  --puff-xl: -3.2px -3.2px 0 #0A0A0A,3.2px -3.2px 0 #0A0A0A,-3.2px 3.2px 0 #0A0A0A,3.2px 3.2px 0 #0A0A0A,0px 3.2px 0 #0A0A0A,0px -3.2px 0 #0A0A0A,3.2px 0px 0 #0A0A0A,-3.2px 0px 0 #0A0A0A,1.67px 2.33px 0 #FF8AC4,3.33px 4.67px 0 #FF8AC4,5.00px 7.00px 0 #FF8AC4,1.8px 3.8px 0 #0A0A0A,8.2px 3.8px 0 #0A0A0A,1.8px 10.2px 0 #0A0A0A,8.2px 10.2px 0 #0A0A0A,5px 10.2px 0 #0A0A0A,5px 3.8px 0 #0A0A0A,8.2px 7px 0 #0A0A0A,1.8px 7px 0 #0A0A0A;
+  --puff-value: -2px -2px 0 #0A0A0A,2px -2px 0 #0A0A0A,-2px 2px 0 #0A0A0A,2px 2px 0 #0A0A0A,0px 2px 0 #0A0A0A,0px -2px 0 #0A0A0A,2px 0px 0 #0A0A0A,-2px 0px 0 #0A0A0A,1.00px 1.33px 0 #FF8AC4,2.00px 2.67px 0 #FF8AC4,3.00px 4.00px 0 #FF8AC4,1px 2px 0 #0A0A0A,5px 2px 0 #0A0A0A,1px 6px 0 #0A0A0A,5px 6px 0 #0A0A0A,3px 6px 0 #0A0A0A,3px 2px 0 #0A0A0A,5px 4px 0 #0A0A0A,1px 4px 0 #0A0A0A;
+  --puff-empty: -1.8px -1.8px 0 #0A0A0A,1.8px -1.8px 0 #0A0A0A,-1.8px 1.8px 0 #0A0A0A,1.8px 1.8px 0 #0A0A0A,0px 1.8px 0 #0A0A0A,0px -1.8px 0 #0A0A0A,1.8px 0px 0 #0A0A0A,-1.8px 0px 0 #0A0A0A,0.87px 1.13px 0 #FF8AC4,1.73px 2.27px 0 #FF8AC4,2.60px 3.40px 0 #FF8AC4,0.8px 1.6px 0 #0A0A0A,4.4px 1.6px 0 #0A0A0A,0.8px 5.2px 0 #0A0A0A,4.4px 5.2px 0 #0A0A0A,2.6px 5.2px 0 #0A0A0A,2.6px 1.6px 0 #0A0A0A,4.4px 3.4px 0 #0A0A0A,0.8px 3.4px 0 #0A0A0A;
+  --puff-wm: -1.6px -1.6px 0 #0A0A0A,1.6px -1.6px 0 #0A0A0A,-1.6px 1.6px 0 #0A0A0A,1.6px 1.6px 0 #0A0A0A,0px 1.6px 0 #0A0A0A,0px -1.6px 0 #0A0A0A,1.6px 0px 0 #0A0A0A,-1.6px 0px 0 #0A0A0A,0.80px 1.07px 0 #FF8AC4,1.60px 2.13px 0 #FF8AC4,2.40px 3.20px 0 #FF8AC4,0.8px 1.6px 0 #0A0A0A,4px 1.6px 0 #0A0A0A,0.8px 4.8px 0 #0A0A0A,4px 4.8px 0 #0A0A0A,2.4px 4.8px 0 #0A0A0A,2.4px 1.6px 0 #0A0A0A,4px 3.2px 0 #0A0A0A,0.8px 3.2px 0 #0A0A0A;
+}
+
+/* Puff Pop entrances: transform and opacity only. */
+@keyframes puffIn { from { opacity: 0; transform: translate3d(0, 22px, 0) scale(.97) } 60% { opacity: 1 } to { opacity: 1; transform: translate3d(0, 0, 0) scale(1) } }
+@keyframes puffSide { from { opacity: 0; transform: translate3d(-18px, 0, 0) } to { opacity: 1; transform: translate3d(0, 0, 0) } }
+@keyframes puffDrop { from { opacity: 0; transform: translate3d(0, -14px, 0) } to { opacity: 1; transform: translate3d(0, 0, 0) } }
+@keyframes puffMenu { from { opacity: 0; transform: translate3d(0, -10px, 0) scale(.97) } to { opacity: 1; transform: translate3d(0, 0, 0) scale(1) } }
 
 html, body {
   overscroll-behavior-y: auto;
