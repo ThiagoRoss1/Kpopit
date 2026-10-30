@@ -287,6 +287,12 @@ export const getIdolsPage = async () => {
     return response.data;
 }
 
+// Optional features that are on (calendar, Idol XP, public profile, collection)
+export const getFeatures = async (): Promise<unknown> => {
+    const response = await api.get('/features');
+    return response.data;
+}
+
 // Get entire idol data for a specific idol
 export const getIdolInfo = async (idol_id: number) => {
     const response = await api.get(`/idols-page/${idol_id}`);

@@ -12,14 +12,28 @@ import MaintenancePage from "../src/pages/Maintenance/MaintenancePage";
 import { printEasterEgg } from "../src/utils/consoleEasterEgg";
 import { getQueryClient } from "../src/services/queryClient";
 import PageLoader from "../src/components/Loading/PageLoader";
+import { THEME_INIT_SCRIPT } from "../src/utils/theme";
+import { fetchFeatures, orNothing } from "./prerender-api";
+
+// Build time only: the feature flags the prerendered navbar and pages render with (useFeatures).
+export async function loader() {
+  return { features: await orNothing(fetchFeatures()) };
+}
+
+// There is no server to ask again: the build-time flags stay, and useFeatures refreshes them.
+export function shouldRevalidate() {
+  return false;
+}
 
 // Site-wide head only: each page sets its own title, description and og:title/og:description
 // (React hoists them here), so the document never carries two of them.
 export function Layout({ children }: { children: ReactNode }) {
   return (
-    <html lang="en">
+    <html lang="en" suppressHydrationWarning>
       <head>
         <meta charSet="UTF-8" />
+        {/* Applies the saved Day/Night before the first paint (the HTML ships Day). */}
+        <script dangerouslySetInnerHTML={{ __html: THEME_INIT_SCRIPT }} />
         <meta name="google-site-verification" content="nUFMUckTn3CptHY3LyumUH3r60ddG2RweN_l40TE6-M" />
         <link rel="icon" type="image/x-icon" href="/favicon.ico" />
         <link rel="icon" type="image/png" sizes="16x16" href="/favicon-16x16.png" />
@@ -31,7 +45,6 @@ export function Layout({ children }: { children: ReactNode }) {
         <meta name="viewport" content="width=device-width, initial-scale=1.0" />
         <meta name="keywords" content="kpop, kpopdle, kpop wordle, kpop game, idol, idol game, kpop quiz, daily game, guess the idol, kpop guessing game, wordle like, TWICE, NewJeans, BLACKPINK, ILLIT, LE SSERAFIM, LOONA" />
         <meta name="author" content="KpopIt" />
-        <meta name="robots" content="index, follow" />
         <meta property="og:type" content="website" />
         <meta name="twitter:card" content="summary_large_image" />
         <meta name="twitter:creator" content="@TgoRoss1" />
@@ -83,7 +96,7 @@ export default function App() {
 export function HydrateFallback() {
   return (
     <div className="min-h-screen bg-black">
-      <div aria-hidden className="sticky top-0 z-100 w-full h-12 sm:h-15 border-b border-neon-pink/40 bg-black/50" />
+      <div aria-hidden className="sticky top-0 z-100 w-full h-[70px] max-[760px]:h-16 border-b-2 border-[#0A0A0A] bg-[#262226] shadow-[0_3px_0_#FF8AC4]" />
       <PageLoader />
     </div>
   );
