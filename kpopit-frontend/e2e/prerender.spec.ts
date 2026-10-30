@@ -13,6 +13,7 @@ const PREVIEW = 'http://127.0.0.1:4173';
 
 type IdolRow = { id: number; artist_name: string; group_name: string | null };
 const slug = (i: IdolRow) => buildIdolSlug(i.artist_name, i.group_name);
+const BLOG_POST = `/blog/${fs.readdirSync(path.join(FRONTEND, 'content/blog')).find((f) => f.endsWith('.md'))!.replace(/\.md$/, '')}`;
 
 const attr = (html: string, selector: RegExp) => html.match(selector)?.[1];
 const meta = (html: string, key: string) =>
@@ -73,7 +74,8 @@ test.describe('prerendered pages without JavaScript', () => {
 
   // One head per page: a duplicated title/description or broken JSON-LD silently hurts search results.
   test('each prerendered page has one title, one description and valid JSON-LD', async ({ request }) => {
-    const pages = ['/', '/classic', '/blurry', '/pixelated', '/idols', '/privacy-policy', '/contact', `/idols/${idol.id}/${slug(idol)}`];
+    const pages = ['/', '/classic', '/blurry', '/pixelated', '/idols', '/privacy-policy', '/contact', '/about', '/how-to-play',
+      '/faq', '/blog', '/changelog', BLOG_POST, `/idols/${idol.id}/${slug(idol)}`];
     for (const p of pages) {
       const html = await (await request.get(`${PREVIEW}${p}`)).text();
       expect(html.match(/<title>/g), `${p} title`).toHaveLength(1);
@@ -89,9 +91,11 @@ test.describe('prerendered pages without JavaScript', () => {
         expect(data['@context'], `${p} @context`).toBe('https://schema.org');
         return data['@type'];
       });
-      // The app and FAQ data describe the home page only; a copy on every page competes with it.
-      if (p === '/') expect(types.sort(), `${p} JSON-LD`).toEqual(['FAQPage', 'WebApplication', 'WebSite']);
+      // WebApplication describes the home page only; FAQPage lives on /faq, next to the visible questions.
+      if (p === '/') expect(types.sort(), `${p} JSON-LD`).toEqual(['WebApplication', 'WebSite']);
+      else if (p === '/faq') expect(types, `${p} JSON-LD`).toEqual(['FAQPage']);
       else expect(types.filter((t) => t === 'WebApplication' || t === 'FAQPage'), `${p} JSON-LD`).toEqual([]);
+      if (p === BLOG_POST) expect(types).toContain('BlogPosting');
       if (p.startsWith('/idols/')) expect(types).toContain('ProfilePage');
     }
   });
@@ -99,7 +103,7 @@ test.describe('prerendered pages without JavaScript', () => {
   test('the build writes a sitemap of the prerendered pages', async ({ request }) => {
     const sitemap = await (await request.get(`${PREVIEW}/sitemap.xml`)).text();
     const locs = [...sitemap.matchAll(/<loc>([^<]*)<\/loc>/g)].map((m) => m[1]);
-    const pages = ['/', '/classic', '/blurry', '/pixelated', '/idols', '/privacy-policy', '/contact', '/about', '/how-to-play', '/faq', '/blog', '/changelog'];
+    const pages = ['/', '/classic', '/blurry', '/pixelated', '/idols', '/privacy-policy', '/contact', '/about', '/how-to-play', '/faq', '/blog', '/changelog', BLOG_POST];
     for (const p of pages) expect(locs).toContain(`https://kpopit.net${p}`);
     expect(locs).toContain(`https://kpopit.net/idols/${idol.id}/${slug(idol)}`);
     expect(locs).toHaveLength(pages.length + idols.length);
@@ -108,6 +112,18 @@ test.describe('prerendered pages without JavaScript', () => {
     }
     const robots = await (await request.get(`${PREVIEW}/robots.txt`)).text();
     expect(robots).toContain('Sitemap: https://kpopit.net/sitemap.xml');
+  });
+
+  test('content pages carry their text in the HTML and a post its own og:image', async ({ request }) => {
+    const text = async (p: string) => (await request.get(`${PREVIEW}${p}`)).text();
+    expect(await text('/faq')).toContain('Is KpopIt free to play?');
+    expect(await text('/changelog')).toContain('New game mode: Pixelated');
+    expect(await text('/privacy-policy')).toContain('IN SHORT');
+    expect(await text('/how-to-play')).toContain('HOW TO PLAY');
+    expect(await text('/about')).toContain('WHO MAKES IT');
+    const post = await text(BLOG_POST);
+    expect(meta(post, 'og:image')).toMatch(/^https:\/\/kpopit\.net\/blog\/.+\.(png|webp|jpg)$/);
+    expect(post).toContain('class="post-body"');
   });
 
   test.describe('in a browser', () => {
@@ -128,7 +144,8 @@ test.describe('prerendered pages without JavaScript', () => {
     await page.route('**/_vercel/**', (route) => route.fulfill({ status: 200, contentType: 'text/javascript', body: '' }));
     const failed: string[] = [];
     page.on('response', (r) => { if (r.status() >= 400) failed.push(`${r.status()} ${r.url()}`); });
-    for (const p of ['/', '/classic', '/blurry', '/pixelated', '/idols', `/idols/${idol.id}/${slug(idol)}`, '/privacy-policy', '/contact']) {
+    for (const p of ['/', '/classic', '/blurry', '/pixelated', '/idols', `/idols/${idol.id}/${slug(idol)}`, '/privacy-policy', '/contact',
+      '/about', '/how-to-play', '/faq', '/blog', '/changelog', BLOG_POST]) {
       await page.goto(`${PREVIEW}${p}`);
       await page.waitForLoadState('networkidle');
       expect(consoleErrors.list, `${p}: ${failed.join(', ')}`).toEqual([]);
