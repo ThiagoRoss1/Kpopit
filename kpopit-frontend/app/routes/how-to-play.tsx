@@ -1,8 +1,5 @@
-import ComingSoon from "../../src/pages/ComingSoon/ComingSoon";
+import HowToPlay from "../../src/pages/HowToPlay/HowToPlay";
 
 export const handle = { puff: true };
 
-// Placeholder until the page ships in its phase of the redesign.
-export default function Route() {
-  return <ComingSoon title="How to play" path="/how-to-play" />;
-}
+export default HowToPlay;

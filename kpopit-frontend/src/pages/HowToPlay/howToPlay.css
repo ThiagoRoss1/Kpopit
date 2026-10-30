@@ -1,0 +1,16 @@
+.htp-tile { animation: htpFlip .5s cubic-bezier(.34, 1.4, .64, 1) both; }
+@keyframes htpFlip { from { opacity: 0; transform: perspective(400px) rotateX(-80deg) } to { opacity: 1; transform: perspective(400px) rotateX(0deg) } }
+.htp-flip { transition: transform .8s cubic-bezier(.34, 1.35, .64, 1); }
+.htp-val, .htp-blur { transition: filter .55s var(--ease-settle); }
+.htp-disc, .htp-sleeve { transition: transform .6s cubic-bezier(.34, 1.4, .64, 1); }
+.htp-hint { transition: transform .45s var(--ease-bounce); }
+.htp-cat { transition: transform .45s var(--ease-bounce), box-shadow .4s ease; }
+.htp-ctile { transition: transform .5s var(--ease-pop); }
+@media (hover: hover) {
+  .htp-hint:hover { transform: translate3d(0, -3px, 0) rotate(0deg) !important; }
+  .htp-cat:hover { transform: translate3d(0, -2px, 0); box-shadow: 3px 4.5px 0 var(--ctl-off), var(--in); }
+  .htp-cat:hover .htp-ctile { transform: rotate(0deg) scale(1.06) !important; }
+}
+.htp-hint:active:active:active:active { transform: translate3d(2px, 3px, 0) !important; transition-duration: .15s; }
+.htp-scroll { scrollbar-width: thin; scrollbar-color: #FF8AC4 transparent; }
+.htp-clock { font-variant-numeric: tabular-nums; }
