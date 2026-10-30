@@ -1,8 +1,5 @@
-import ComingSoon from "../../src/pages/ComingSoon/ComingSoon";
+import About from "../../src/pages/About/About";
 
 export const handle = { puff: true };
 
-// Placeholder until the page ships in its phase of the redesign.
-export default function Route() {
-  return <ComingSoon title="About" path="/about" />;
-}
+export default About;
