@@ -1,8 +1,8 @@
-// Markdown for the repo's own posts (changelog / blog), rendered with `marked` at build time only.
+// Markdown for the repo's own blog posts, rendered with `marked` at build time only.
 // Raw HTML in a post is escaped; links must be https or site paths; images must come from the
 // site (/...) or the image bucket. Anything else is shown as plain text.
 import { Marked, type Tokens } from "marked";
-import { newestFirst, type Post, type PostFrontmatter } from "./posts.ts";
+import { newestFirst, POST_TAGS, type Post, type PostFrontmatter, type PostTag } from "./posts.ts";
 
 export interface RenderOptions {
     /** Image bucket origin (VITE_IMAGE_BUCKET_URL's), the only allowed absolute image source. */
@@ -26,7 +26,8 @@ export function isAllowedImage(src: string, imageOrigin?: string): boolean {
 
 const isAllowedLink = (href: string) => isSitePath(href) || /^https:\/\/[^/\\]/i.test(href);
 
-const REQUIRED = ["title", "date", "description", "image", "imageAlt"] as const;
+const REQUIRED = ["title", "date", "description", "image", "imageAlt", "tag"] as const;
+const WORDS_PER_MINUTE = 200;
 
 /** Splits `---` frontmatter (key: value lines) from the body; throws on a missing or invalid field. */
 export function parseFrontmatter(source: string, options: RenderOptions = {}): { data: PostFrontmatter; body: string } {
@@ -44,7 +45,14 @@ export function parseFrontmatter(source: string, options: RenderOptions = {}): {
     if (!isAllowedImage(fields.image, options.imageOrigin)) {
         throw new Error(`Post image must be a site path (/blog/...) or on the image bucket: ${fields.image}`);
     }
-    const data = Object.fromEntries(REQUIRED.map((key) => [key, fields[key]])) as unknown as PostFrontmatter;
+    if (!POST_TAGS.includes(fields.tag as PostTag)) throw new Error(`Post tag must be one of ${POST_TAGS.join(", ")}: ${fields.tag}`);
+    if (fields.pinned !== undefined && fields.pinned !== "true" && fields.pinned !== "false") {
+        throw new Error(`Post pinned must be true or false: ${fields.pinned}`);
+    }
+    const data = {
+        ...Object.fromEntries(REQUIRED.map((key) => [key, fields[key]])),
+        pinned: fields.pinned === "true",
+    } as unknown as PostFrontmatter;
     return { data, body: match[2] };
 }
 
@@ -74,7 +82,14 @@ export function renderMarkdown(body: string, options: RenderOptions = {}): strin
     return (marked.parse(body) as string).trim();
 }
 
-/** Posts from `path → source` (the content/<kind>/*.md files), newest first. */
+/** Reading time from the Markdown body: words (link targets and syntax left out) / 200, rounded up. */
+export function readMinutes(body: string): number {
+    const text = body.replace(/```[\s\S]*?```/g, " ").replace(/!?\[([^\]]*)\]\([^)]*\)/g, "$1").replace(/[#>*_`|-]/g, " ");
+    const words = text.split(/\s+/).filter(Boolean).length;
+    return Math.max(1, Math.ceil(words / WORDS_PER_MINUTE));
+}
+
+/** Posts from `path → source` (the content/blog/*.md files), newest first. */
 export function loadPosts(sources: Record<string, string>, options: RenderOptions = {}): Post[] {
     return newestFirst(Object.entries(sources).map(([path, source]) => loadPost(path, source, options)));
 }
@@ -82,5 +97,5 @@ export function loadPosts(sources: Record<string, string>, options: RenderOption
 export function loadPost(path: string, source: string, options: RenderOptions = {}): Post {
     const { data, body } = parseFrontmatter(source, options);
     const slug = path.split("/").pop()!.replace(/\.md$/, "");
-    return { ...data, slug, html: renderMarkdown(body, options) };
+    return { ...data, slug, html: renderMarkdown(body, options), readMinutes: readMinutes(body) };
 }
