@@ -1,0 +1,46 @@
+/* Blog cards: slow settle lift, a press that beats it, the cover zooming on its own GPU layer. */
+.bl-card { transition: transform .85s var(--ease-settle), box-shadow .85s var(--ease-settle); transform: rotate(var(--bl-tilt, 0deg)); backface-visibility: hidden; }
+.bl-card img { transform: translateZ(0); transition: transform 1s var(--ease-settle); }
+.bl-read { text-decoration: underline; text-decoration-thickness: 2px; text-underline-offset: 4px; text-decoration-color: var(--side); transition: text-decoration-color .3s ease; }
+.bl-arrow { transition: transform .4s var(--ease-pop); }
+@media (hover: hover) {
+  .bl-card:hover { transform: translate3d(0, -4px, 0) rotate(0deg); box-shadow: 4px 6px 0 var(--ctl-off), var(--in); }
+  .bl-card[data-feat]:hover { box-shadow: 6px 7px 0 0 #FF8AC4, 6px 7px 0 2px var(--ink); }
+  .bl-card:hover img { transform: translateZ(0) scale(1.05); }
+  .bl-card:hover .bl-read { text-decoration-color: currentColor; }
+  .bl-card:hover .bl-arrow { transform: translate3d(3px, 0, 0); }
+  .bl-card:hover .bl-cta { transform: translate3d(0, -2px, 0); box-shadow: 2.5px 3.5px 0 var(--ink), var(--in-pink); }
+}
+.bl-cta { transition: transform .6s var(--ease-settle), box-shadow .6s var(--ease-settle); }
+.bl-card:active:active:active:active { transform: translate3d(3px, 4px, 0) rotate(0deg); box-shadow: 0 0 0 var(--ctl-off), var(--in); transition-duration: .16s; }
+.bl-card[data-feat]:active:active:active:active { transform: translate3d(5px, 5px, 0); box-shadow: 0 0 0 0 #FF8AC4, 0 0 0 2px var(--ink); }
+
+/* A rendered post: the first paragraph is the lead, h2s get numbered chips, a blockquote is the
+   tip card, lists sit in a dashed box. */
+.post-body { counter-reset: post-h2; display: flex; flex-direction: column; gap: 18px; }
+.post-body > * { margin: 0; }
+.post-body > p { font-weight: 400; font-size: 16.5px; line-height: 1.75; text-wrap: pretty; }
+.post-body > p:first-child { font-weight: 500; font-size: 19px; line-height: 1.6; }
+.post-body h2 { counter-increment: post-h2; margin: 14px 0 -2px; display: flex; align-items: center; gap: 12px; font-weight: 700; font-size: 22px; line-height: 1.25; }
+.post-body h2::before {
+  content: counter(post-h2, decimal-leading-zero); flex: none; width: 30px; height: 30px; box-sizing: border-box; border-radius: 10px;
+  border: 2px solid #1A1418; background: #FF8AC4; color: #1A1418; display: grid; place-items: center; font-size: 12px;
+  box-shadow: inset 0 2px 0 rgba(255, 255, 255, .55), 2px 2.5px 0 #1A1418; transform: rotate(-4deg);
+}
+.post-body h3 { font-weight: 700; font-size: 18px; }
+.post-body ul, .post-body ol { padding: 14px 18px 14px 40px; display: flex; flex-direction: column; gap: 10px; border-radius: 16px; border: 2px dashed var(--rule); font-size: 16px; line-height: 1.6; }
+.post-body ul { list-style: none; padding-left: 18px; }
+.post-body ul > li { display: flex; gap: 12px; align-items: baseline; }
+.post-body ul > li::before { content: ""; flex: none; width: 10px; height: 10px; box-sizing: border-box; border-radius: 999px; border: 2px solid var(--ink); background: #FF8AC4; transform: translateY(-1px); }
+.post-body blockquote {
+  position: relative; margin: 8px 0; padding: 18px 22px 18px 54px; border-radius: 18px; border: 2px solid var(--ink); background: var(--panel);
+  font-family: var(--font-caveat); font-weight: 700; font-size: 26px; line-height: 1.2; color: var(--group); box-shadow: 2px 3px 0 var(--ctl-off); transform: rotate(-.6deg);
+}
+.post-body blockquote::before { content: "\201C"; position: absolute; left: 16px; top: 8px; font: 700 48px/1 'DynaPuff'; color: #FFFFFF; text-shadow: var(--puff-quote); }
+.post-body blockquote p { margin: 0; }
+.post-body a { color: var(--group); text-decoration: underline; text-decoration-thickness: 2px; text-underline-offset: 3px; }
+.post-body img { display: block; max-width: min(420px, 100%); margin: 8px auto; border-radius: 16px; border: 2.5px solid #1A1418; box-shadow: 4px 5px 0 var(--ctl-off); transform: rotate(1deg); }
+.post-body code { font-size: .9em; padding: 1px 6px; border-radius: 6px; background: var(--panel); }
+.post-body pre { overflow-x: auto; padding: 14px 16px; border-radius: 14px; background: var(--panel); border: 2px solid var(--rule); }
+.post-body table { border-collapse: collapse; font-size: 15px; }
+.post-body th, .post-body td { border: 2px solid var(--rule); padding: 6px 10px; text-align: left; }

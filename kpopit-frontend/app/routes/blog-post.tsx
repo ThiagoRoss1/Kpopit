@@ -1,8 +1,9 @@
-import ComingSoon from "../../src/pages/ComingSoon/ComingSoon";
+import { useParams } from "react-router";
+import BlogPost from "../../src/pages/Blog/BlogPost";
 
 export const handle = { puff: true };
 
-// Placeholder until the page ships in its phase of the redesign.
-export default function Route() {
-  return <ComingSoon title="Blog" path="/blog" />;
+export default function BlogPostRoute() {
+  const { slug = "" } = useParams();
+  return <BlogPost key={slug} slug={slug} />;
 }

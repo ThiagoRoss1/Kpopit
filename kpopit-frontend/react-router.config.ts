@@ -4,6 +4,7 @@ import { writeFile } from "node:fs/promises";
 import path from "node:path";
 import { fetchFeatures, fetchIdolsPage, LENIENT_PRERENDER, requirePrerenderApi } from "./app/prerender-api";
 import { buildSitemap } from "./app/sitemap";
+import { blogPaths } from "./app/blog-paths";
 
 const STATIC_PATHS = [
   "/", "/classic", "/blurry", "/pixelated", "/idols", "/privacy-policy", "/contact",
@@ -21,10 +22,10 @@ async function prerenderPaths() {
     console.warn(`${(err as Error).message} Preview build: the idol pages load client-side; set PRERENDER_API_URL to a running API to prerender them.`);
     // React Router needs one prerendered path per route with a build-time loader: /idols is kept
     // (its loader returns nothing) and a placeholder stands in for the idol pages.
-    return [...STATIC_PATHS, "/idols/0/preview"];
+    return [...STATIC_PATHS, ...blogPaths(), "/idols/0/preview"];
   }
   if (idols.length === 0) throw new Error("Prerender: the idol list is empty; check the build-time API database.");
-  return [...STATIC_PATHS, ...idols.map((idol) => `/idols/${idol.id}/${buildIdolSlug(idol.artist_name, idol.group_name)}`)];
+  return [...STATIC_PATHS, ...blogPaths(), ...idols.map((idol) => `/idols/${idol.id}/${buildIdolSlug(idol.artist_name, idol.group_name)}`)];
 }
 
 // The build asks for the paths more than once; one API read (and at most one warning) per build.
