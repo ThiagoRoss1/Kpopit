@@ -48,7 +48,7 @@ test.describe('page loading', () => {
     await holdApi(page, '/game/classic/daily-idol', 2_500);
     await page.goto('/classic');
     await expect(page.getByRole('status')).toHaveText('Loading Kpopit...', { timeout: 2_000 });
-    await expect(page.locator('nav').getByRole('link', { name: 'Contact' })).toBeVisible();
+    await expect(page.locator('nav').getByRole('link', { name: 'KpopIt home' })).toBeVisible();
     await expect(searchInput(page, 'classic')).toBeHidden();
     await expect(searchInput(page, 'classic')).toBeEnabled({ timeout: 20_000 });
     await expect(classicTitle(page)).toBeVisible();
@@ -61,7 +61,7 @@ test.describe('page loading', () => {
     await page.goto('/classic');
     const alert = page.getByRole('alert');
     await expect(alert).toContainText('Error loading Kpopit.', { timeout: 20_000 });
-    await expect(page.locator('nav').getByRole('link', { name: 'Contact' })).toBeVisible();
+    await expect(page.locator('nav').getByRole('link', { name: 'KpopIt home' })).toBeVisible();
 
     await page.unroute('**/api/game/classic/daily-idol*');
     await alert.getByRole('button', { name: 'Retry' }).click();
@@ -92,10 +92,10 @@ test.describe('page loading', () => {
     await failApi(page, '/idols-page');
     await page.route('**/idols.data*', (route) => route.fulfill({ status: 500, body: '' }));
     await page.locator('nav').getByRole('button', { name: 'Idols' }).click();
-    await page.locator('nav').getByRole('link', { name: 'All Idols' }).click();
+    await page.locator('nav').getByRole('menuitem', { name: 'All idols' }).click();
     await expect(page).toHaveURL(/\/idols$/);
     await expect(page.getByRole('alert')).toContainText('Error fetching idols data.', { timeout: 20_000 });
-    await expect(page.locator('nav').getByRole('link', { name: 'Contact' })).toBeVisible();
+    await expect(page.locator('nav').getByRole('link', { name: 'KpopIt home' })).toBeVisible();
   });
 });
 

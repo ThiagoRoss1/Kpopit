@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
-import { Outlet } from "react-router";
-import NavBar from "../NavBar/NavBar";
+import { Outlet, useMatches } from "react-router";
+import NavBarV2 from "../NavBarV2/NavBarV2";
 import Footer from "../Footer/Footer";
 import { Link } from "react-router";
 import { getUserAnalytics } from "../../services/api";
@@ -29,9 +29,13 @@ const MainLayout = () => {
         sessionStorage.setItem('kpopit_notice_closed', 'true');
     }
 
+    // Puff Pop pages (route handle { puff: true }) paint their own ground and follow the saved
+    // theme; the older pages keep their dark look with the navbar forced to night.
+    const puff = useMatches().some((match) => (match.handle as { puff?: boolean } | undefined)?.puff);
+
     return (
-        <div className="min-h-screen flex flex-col bg-transparent text-foreground selection:bg-pink-800">
-            <NavBar />
+        <div className={`min-h-screen flex flex-col text-foreground selection:bg-pink-800 ${puff ? "bg-(--ground)" : "bg-transparent"}`}>
+            <NavBarV2 forceNight={!puff} />
             
             {/* Notices */}
             {import.meta.env.VITE_GLOBAL_NOTICE === "true" && 
@@ -51,7 +55,7 @@ const MainLayout = () => {
                 </GlobalNotices>
             }
 
-            <main className="flex-1 w-full px-2 sm:px-4 lg:px-4">
+            <main className={puff ? "flex-1 w-full flex flex-col" : "flex-1 w-full px-2 sm:px-4 lg:px-4"}>
                 <Outlet />
             </main>
 

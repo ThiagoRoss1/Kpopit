@@ -15,7 +15,7 @@ export default function PageLoader({ message = "Loading Kpopit...", error = fals
         <div
             role={error ? "alert" : "status"}
             aria-busy={!error || undefined}
-            className="fixed inset-x-0 bottom-0 top-12 sm:top-15 z-90 flex flex-col w-full bg-black justify-center items-center gap-4"
+            className="fixed inset-x-0 bottom-0 top-16 min-[761px]:top-[70px] z-90 flex flex-col w-full bg-black justify-center items-center gap-4"
         >
             <span className={`text-white ${error ? "" : "animate-pulse"}`}>{error ? errorMessage : message}</span>
             {error && onRetry && (
