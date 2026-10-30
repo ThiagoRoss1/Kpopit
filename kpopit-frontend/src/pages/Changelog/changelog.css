@@ -1,0 +1,6 @@
+.cl-entry .cl-card { transform: rotate(var(--cl-tilt, 0deg)); transition: transform .45s var(--ease-bounce), box-shadow .4s var(--ease-settle); }
+.cl-entry .cl-dot { transition: transform .5s var(--ease-pop); }
+@media (hover: hover) {
+  .cl-entry:hover .cl-card { transform: translate3d(0, -3px, 0) rotate(0deg); }
+  .cl-entry:hover .cl-dot { transform: scale(1.25); }
+}

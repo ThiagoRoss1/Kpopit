@@ -1,3 +1,12 @@
+import { CHANGELOG } from "../../../data/changelog";
+
+const MONTHS = ["January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"];
+const longDate = (iso: string) => {
+    const [y, m, d] = iso.split("-");
+    return `${MONTHS[Number(m) - 1]} ${d}, ${y}`;
+};
+
+// The home page's changelog modal: same entries as /changelog (src/data/changelog.ts), old look.
 const ChangelogText = () => {
 
     const divClass = `flex flex-col justify-center items-center max-xxs:w-70 xxs:w-80 sm:w-100 gap-3 rounded-lg p-4
@@ -7,67 +16,15 @@ const ChangelogText = () => {
     return (
         <div className="w-full bg-transparent mt-5 mb-5">
             <div className="w-full flex flex-col justify-center items-center gap-y-4">
-
-                {/* Changelog 6 */}
-                <div className={`${divClass} bg-gray-900 border-2 border-white`}>
-                    <h3 className={textClass}>July 02, 2026</h3>
-                        <p className={`${textClass} text-center`}>
-                            New Game mode: Pixelated
-                        </p>
-                        <p className={`${textClass} text-center`}>
-                            Guess the daily K-pop album from its progressively de-pixelating cover art.
-                        </p>
-                </div>
-
-                {/* Changelog 5 */}
-                <div className={`${divClass} bg-gray-900 border-2 border-white`}>
-                    <h3 className={textClass}>May 18, 2026</h3>
-                        <p className={`${textClass} text-center`}>
-                            New Feature: Accounts
-                        </p>
-                        <p className={`${textClass} text-center`}>
-                            Login and Register to save your progress and stats across devices.
-                        </p>
-                </div>
-
-                {/* Changelog 4 */}
-                <div className={`${divClass} bg-gray-900 border-2 border-white`}>
-                    <h3 className={textClass}>April 08, 2026</h3>
-                        <p className={`${textClass} text-center`}>
-                            New Feature: Idols Page and Profiles
-                        </p>
-                        <p className={`${textClass} text-center`}>
-                            Added a dedicated page for idols with detailed information, including career, personal profiles and more.
-                        </p>
-                </div>
-
-                {/* Changelog 3 */}
-                <div className={`${divClass} bg-gray-900 border-2 border-white`}>
-                    <h3 className={textClass}>March 27, 2026</h3>
-                        <p className={`${textClass} text-center`}>
-                            Database Changed {`->`} PostgreSQL:
-                        </p>
-                        <p className={textClass}>
-                            Migrated from SQLite to PostgreSQL for better performance and long-term scalability.
-                        </p>
-                </div>
-
-                {/* Changelog 2 */}
-                <div className={`${divClass}  bg-gray-900 border-2 border-white`}>
-                    <h3 className={textClass}>February 09, 2026</h3>
-                        <p className={`${textClass} text-center`}>
-                            New Game mode: Blurry
-                        </p>
-                        <p className={`${textClass} text-center`}>
-                            Interface and Optimization Updates
-                        </p>
-                </div>
-
-                {/* Changelog 1 */}
-                <div className={`${divClass} bg-gray-900 border-2 border-white`}>
-                    <h3 className={textClass}>December 26, 2025</h3>
-                        <p className={`${textClass} text-center`}>Game Launch!</p>
-                </div>
+                {CHANGELOG.map((entry) => (
+                    <div key={entry.date} className={`${divClass} bg-gray-900 border-2 border-white`}>
+                        <h3 className={textClass}>{longDate(entry.date)}</h3>
+                        <p className={`${textClass} text-center`}>{entry.title}</p>
+                        {entry.items.map((item) => (
+                            <p key={item.text} className={`${textClass} text-center`}>{item.text}</p>
+                        ))}
+                    </div>
+                ))}
             </div>
         </div>
     )
