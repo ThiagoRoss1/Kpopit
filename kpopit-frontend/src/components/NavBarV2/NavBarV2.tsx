@@ -76,12 +76,12 @@ export default function NavBarV2({ forceNight = false }: { forceNight?: boolean 
                 aria-label="Main"
                 className="relative z-30 flex items-center gap-3.5 h-[70px] px-7 @max-[1100px]:px-5 @max-[760px]:h-16 @max-[760px]:px-3.5 bg-(--bar) border-b-2 border-(--ink) shadow-(--bar-sh) text-(--text)"
             >
-                <Link to="/" aria-label="KpopIt home" className="nb-logo pp-focus flex flex-none items-center gap-2 no-underline">
-                    <img src="/kpopit-icon-svg.svg" alt="" width={42} height={42} className="block w-[42px] h-[42px]" draggable={false} />
+                <Link to="/" aria-label="KpopIt home" className="nb-logo pp-focus flex min-w-0 items-center gap-2 no-underline">
+                    <img src="/kpopit-icon-svg.svg" alt="" width={42} height={42} className="block flex-none w-[42px] h-[42px]" draggable={false} />
                     {page && (
-                        <span className="flex items-center gap-[7px] -rotate-2 pt-0 pr-[5px] pb-[5px] pl-0.5 @max-[960px]:@min-[761px]:hidden @max-[374px]:hidden">
-                            <span aria-hidden className="w-2.5 h-2.5 rounded-full bg-[#FF3399] border-2 border-(--ink) shadow-[1.5px_2px_0_var(--ink)]" />
-                            <span className="font-bold text-[22px] @max-[1100px]:text-lg leading-none text-white whitespace-nowrap [text-shadow:var(--puff-wm)]">
+                        <span className="flex min-w-0 items-center gap-[7px] -rotate-2 pt-0 pr-[5px] pb-[5px] pl-0.5 @max-[960px]:@min-[761px]:hidden @max-[374px]:hidden">
+                            <span aria-hidden className="flex-none w-2.5 h-2.5 rounded-full bg-[#FF3399] border-2 border-(--ink) shadow-[1.5px_2px_0_var(--ink)]" />
+                            <span className="min-w-0 truncate pt-1 pb-1.5 font-bold text-[22px] @max-[1100px]:text-lg leading-none text-white whitespace-nowrap [text-shadow:var(--puff-wm)]">
                                 {PAGE_LABEL[page]}
                             </span>
                         </span>
