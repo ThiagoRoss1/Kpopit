@@ -38,9 +38,9 @@ export default function Contact() {
     };
 
     const channels = [
-        { ...CHANNELS.discord, title: "Discord", note: "Fastest reply · bugs and data", icon: <BrandIcon name="discord" className="w-5 h-5 [&_path]:fill-[#1A1418]" />, tile: "bg-[#FF8AC4]", highlight: true },
-        { ...CHANNELS.x, title: "X / Twitter", note: "@TgoRoss1 · news and new modes", icon: <BrandIcon name="x" className="w-5 h-5" />, tile: "bg-white", highlight: false },
-        { ...CHANNELS.email, title: "Email", note: CONTACT_EMAIL, icon: <Mail className="w-5 h-5 text-[#1A1418]" strokeWidth={2.6} />, tile: "bg-white", highlight: false },
+        { ...CHANNELS.discord, title: "Discord", note: "Fastest reply · bugs and data", icon: <BrandIcon name="discord" className="w-5 h-5 [&_path]:fill-[#1A1418]" />, tile: "bg-[#FF8AC4]" },
+        { ...CHANNELS.x, title: "X / Twitter", note: "@TgoRoss1 · news and new modes", icon: <BrandIcon name="x" className="w-5 h-5" />, tile: "bg-white" },
+        { ...CHANNELS.email, title: "Email", note: CONTACT_EMAIL, icon: <Mail className="w-5 h-5 text-[#1A1418]" strokeWidth={2.6} />, tile: "bg-white" },
     ];
 
     return (
@@ -60,10 +60,7 @@ export default function Contact() {
                                     key={c.title}
                                     href={c.href}
                                     {...(c.href.startsWith("mailto:") ? {} : { target: "_blank", rel: "noopener noreferrer" })}
-                                    className={cn(
-                                        "ct-channel pp-focus box-border min-w-0 flex items-center gap-3.5 py-3.5 pr-4 pl-3.5 rounded-[20px] border-2 border-(--ink) bg-(--face) text-(--face-ink) no-underline",
-                                        c.highlight ? "[box-shadow:4px_4px_0_0_#FF8AC4,4px_4px_0_2px_var(--ink)]" : "[box-shadow:2px_3px_0_var(--ctl-off),var(--in)]",
-                                    )}
+                                    className="ct-channel pp-focus box-border min-w-0 flex items-center gap-3.5 py-3.5 pr-4 pl-3.5 rounded-[20px] border-2 border-(--ink) bg-(--face) text-(--face-ink) no-underline"
                                     style={{ ["--ct-tilt" as string]: `${i % 2 ? 0.5 : -0.5}deg` }}
                                 >
                                     <span className={cn("flex-none grid place-items-center w-11 h-11 rounded-[13px] border-2 border-[#1A1418] [box-shadow:2px_2.5px_0_#1A1418]", c.tile)}>{c.icon}</span>

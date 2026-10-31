@@ -1,10 +1,10 @@
-.ct-channel { transform: rotate(var(--ct-tilt, 0deg)); transition: transform .45s var(--ease-bounce), box-shadow .4s var(--ease-settle), background-color .3s ease; }
+.ct-channel { box-shadow: 4px 4px 0 0 #FF8AC4, 4px 4px 0 2px var(--ink); transform: rotate(var(--ct-tilt, 0deg)); transition: transform .45s var(--ease-bounce), box-shadow .4s var(--ease-settle), background-color .3s ease; }
 .ct-arrow { transition: transform .4s var(--ease-pop); }
 @media (hover: hover) {
-  .ct-channel:hover { transform: translate3d(0, -2px, 0) rotate(0deg); background: var(--chip-hover); }
+  .ct-channel:hover { transform: translate3d(0, -2px, 0) rotate(0deg); background: var(--chip-hover); box-shadow: 5px 6px 0 0 #FF8AC4, 5px 6px 0 2px var(--ink); }
   .ct-channel:hover .ct-arrow { transform: translate3d(3px, -3px, 0); }
 }
-.ct-channel:active:active:active:active { transform: translate3d(2px, 3px, 0) rotate(0deg); box-shadow: 0 0 0 var(--ctl-off), var(--in); transition-duration: .18s; }
+.ct-channel:active:active:active:active { transform: translate3d(4px, 4px, 0) rotate(0deg); box-shadow: 0 0 0 0 #FF8AC4, 0 0 0 2px var(--ink); transition-duration: .18s; }
 .ct-field { transition: border-color .3s ease, box-shadow .3s ease; }
 .ct-field:focus { outline: none; border-color: #FF3399; box-shadow: 0 0 0 3px rgba(255, 51, 153, .18); }
 .ct-field::placeholder { color: var(--muted); opacity: .85; }
