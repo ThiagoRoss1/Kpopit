@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import { useNavigate, useParams, useSearchParams } from "react-router";
-import { useMutation, useQuery } from "@tanstack/react-query";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { isAxiosError } from "axios";
 import { Lock, Mail, Pencil, X } from "lucide-react";
 import PageShell from "../../components/Puff/PageShell";
@@ -88,6 +88,12 @@ function ProfileView({ profile, viewerKey }: { profile: VisibleProfile; viewerKe
     const tab: ProfileTab = tabs.some((t) => t.id === asked) ? asked : "overview";
     const [filter, setFilter] = useState<ModeFilter>("all");
     const [editOpen, setEditOpen] = useState(false);
+    const queryClient = useQueryClient();
+    const closeEdit = () => {
+        setEditOpen(false);
+        // Name, avatar, username or privacy may have changed.
+        void queryClient.invalidateQueries({ queryKey: ["publicProfile"] });
+    };
     const stats = useQuery({
         queryKey: ["profileStats", profile.username.toLowerCase(), viewerKey],
         queryFn: () => getProfileStats(profile.username),
@@ -180,7 +186,7 @@ function ProfileView({ profile, viewerKey }: { profile: VisibleProfile; viewerKe
                     <OverviewPane stats={stats.data} activity={profile.activity} today={profile.today} />
                 )}
             </div>
-            {profile.is_owner && <EditProfile isOpen={editOpen} onClose={() => setEditOpen(false)} />}
+            {profile.is_owner && <EditProfile isOpen={editOpen} onClose={closeEdit} />}
         </PageShell>
     );
 }

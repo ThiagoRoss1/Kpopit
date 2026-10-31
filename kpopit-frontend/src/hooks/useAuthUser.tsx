@@ -119,6 +119,14 @@ export const useAuthUser = () => {
         }
     }
 
+    // The server already ended every session (e.g. account deletion): drop the local one. The
+    // sticky kpopit_was_authenticated marker stays, so the next restore wipes the game token too.
+    const endLocalSession = () => {
+        clearAccessToken();
+        localStorage.removeItem('kpopit_session');
+        sessionStorage.removeItem('kpopit_session');
+    }
+
     const refresh = async () => {
         try {
             return await refreshToken();
@@ -131,6 +139,7 @@ export const useAuthUser = () => {
         register,
         login,
         logout,
+        endLocalSession,
         refresh
     }
 }

@@ -136,6 +136,9 @@ const UsernameModal = ({ isOpen, onClose, onBack }: UsernameModalProps) => {
                             {USERNAME_MIN_LENGTH} - {USERNAME_MAX_LENGTH} letters, numbers, _ or -
                         </span>
                     )}
+                    <span className="pl-1 text-xs font-bold text-white/50 leading-snug">
+                        Your old username stays reserved for you for 15 days, and links to it redirect to the new one.
+                    </span>
                 </div>
 
                 <div className="ep-field flex flex-col gap-2">

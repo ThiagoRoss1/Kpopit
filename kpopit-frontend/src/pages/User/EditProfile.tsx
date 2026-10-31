@@ -1,18 +1,30 @@
 import { useState } from "react";
 import { useMutation } from "@tanstack/react-query";
-import { Camera, Eye, EyeOff, Loader2, Lock, Mail, User } from "lucide-react";
+import { Camera, Eye, EyeOff, Heart, Loader2, Lock, Mail, User, Users } from "lucide-react";
+import type { ReactNode } from "react";
 import { useAuth } from "../../hooks/useAuth";
-import { updateProfile } from "../../services/api";
+import { updateProfile, updateProfileSettings } from "../../services/api";
+import type { ProfileSettings } from "../../interfaces/playerInterfaces";
 import { resolveAvatarUrl } from "../../utils/resolveAvatarUrl";
 import EditProfileModal from "./EditProfileModal";
 import AvatarModal from "./AvatarModal";
 import UsernameModal from "./UsernameModal";
 import PasswordModal from "./PasswordModal";
 import EmailModal from "./EmailModal";
+import BiasModal from "./BiasModal";
+import { useBiasOptions } from "./biasOptions";
+import DeleteAccountModal from "./DeleteAccountModal";
 import "./EditProfile.css";
 import Img from "../../components/Img";
 
-type SubModal = "none" | "avatar" | "username" | "password" | "email";
+type SubModal = "none" | "avatar" | "username" | "password" | "email" | "biasIdol" | "biasGroup" | "delete";
+type Visibility = Pick<ProfileSettings, "is_public" | "show_match_history" | "show_activity">;
+
+const PRIVACY: { field: keyof Visibility; label: string; meaning: string }[] = [
+    { field: "is_public", label: "Public profile", meaning: "Anyone can open your profile. Off: only you can." },
+    { field: "show_match_history", label: "Match history", meaning: "Visitors see your games, and only the answers of days they finished." },
+    { field: "show_activity", label: "Activity", meaning: "Visitors see your 18-week activity heatmap." },
+];
 
 interface EditProfileProps {
     isOpen: boolean;
@@ -61,6 +73,30 @@ const EditProfileContent = (props: EditProfileProps) => {
     const [saveError, setSaveError] = useState<string | null>(null);
 
     const DISPLAY_NAME_MAX_LENGTH = 30;
+
+    const biasOptions = useBiasOptions(true);
+    const biasIdolName = biasOptions.idols.find((i) => i.id === profile?.bias_idol_id)?.name;
+    const biasGroupName = biasOptions.groups.find((g) => g.id === profile?.bias_group_id)?.name;
+
+    // Switches save on their own; the shown value follows the click until the server answers.
+    const [visibility, setVisibility] = useState<Visibility | null>(profile?.visibility ?? null);
+    const privacyMutation = useMutation({
+        mutationFn: (change: Partial<Visibility>) => updateProfileSettings(change),
+        onSuccess: (saved) => {
+            setVisibility({ is_public: saved.is_public, show_match_history: saved.show_match_history, show_activity: saved.show_activity });
+            void refetchUser();
+        },
+        onError: (err) => {
+            setVisibility(profile?.visibility ?? null);
+            setSaveError(extractError(err) ?? "Could not save your privacy settings");
+        },
+    });
+    const toggle = (field: keyof Visibility) => {
+        if (!visibility) return;
+        setSaveError(null);
+        setVisibility({ ...visibility, [field]: !visibility[field] });
+        privacyMutation.mutate({ [field]: !visibility[field] });
+    };
 
     const saveMutation = useMutation({
         mutationFn: (name: string) => updateProfile({ display_name: name }),
@@ -246,9 +282,58 @@ const EditProfileContent = (props: EditProfileProps) => {
                         </div>
                     </div>
 
+                    <EditRow label="Bias Idol" icon={<Heart className="absolute left-4 top-1/2 w-4 h-4 -translate-y-1/2 text-neutral-500" />} onEdit={() => setSubModal("biasIdol")}>
+                        {biasIdolName ?? <span className="text-neutral-700">No bias idol yet</span>}
+                    </EditRow>
+                    <EditRow label="Bias Group" icon={<Users className="absolute left-4 top-1/2 w-4 h-4 -translate-y-1/2 text-neutral-500" />} onEdit={() => setSubModal("biasGroup")}>
+                        {biasGroupName ?? <span className="text-neutral-700">No bias group yet</span>}
+                    </EditRow>
+
+                    {/* Privacy */}
+                    {visibility && (
+                        <div className="ep-field flex flex-col gap-2">
+                            <span className="pl-1 text-[12px] font-black uppercase tracking-[0.15em] text-white/80">
+                                Privacy
+                            </span>
+                            {PRIVACY.map(({ field, label, meaning }) => (
+                                <div key={field} className="ep-input flex items-center justify-between gap-3 px-4 py-3 rounded-2xl bg-ink">
+                                    <span className="flex flex-col gap-0.5 min-w-0">
+                                        <span className="text-sm font-black text-white">{label}</span>
+                                        <span className="text-xs font-bold text-white/50 leading-snug">{meaning}</span>
+                                    </span>
+                                    <button
+                                        type="button"
+                                        role="switch"
+                                        aria-checked={visibility[field]}
+                                        aria-label={label}
+                                        onClick={() => toggle(field)}
+                                        className={`relative shrink-0 w-12 h-7 rounded-full border-2 transition-colors duration-200 hover:cursor-pointer
+                                            ${visibility[field] ? "bg-neon-pink border-neon-pink" : "bg-transparent border-white/25"}`}
+                                    >
+                                        <span
+                                            aria-hidden="true"
+                                            className={`absolute top-0.5 left-0.5 w-5 h-5 rounded-full bg-white transition-transform duration-200 transform-gpu
+                                                ${visibility[field] ? "translate-x-5" : "translate-x-0"}`}
+                                        />
+                                    </button>
+                                </div>
+                            ))}
+                        </div>
+                    )}
+
                     {saveError && (
                         <span className="ep-error text-center text-xs text-red-400 font-bold">{saveError}</span>
                     )}
+
+                    <button
+                        type="button"
+                        onClick={() => setSubModal("delete")}
+                        className="ep-field self-center px-4 py-2 rounded-xl text-[12px] font-black uppercase tracking-[0.18em]
+                            border-2 border-red-500/40 text-red-400
+                            hover:border-red-500 hover:text-red-300 hover:cursor-pointer transition-colors duration-200"
+                    >
+                        Delete account
+                    </button>
                 </div>
 
                 <footer className="flex items-center justify-center px-5 sxs:px-6 py-4 bg-transparent">
@@ -295,6 +380,21 @@ const EditProfileContent = (props: EditProfileProps) => {
                     onBack={() => setSubModal("none")}
                 />
             )}
+            {(subModal === "biasIdol" || subModal === "biasGroup") && (
+                <BiasModal
+                    kind={subModal === "biasIdol" ? "idol" : "group"}
+                    isOpen={isOpen}
+                    onClose={onClose}
+                    onBack={() => setSubModal("none")}
+                />
+            )}
+            {subModal === "delete" && (
+                <DeleteAccountModal
+                    isOpen={isOpen}
+                    onClose={onClose}
+                    onBack={() => setSubModal("none")}
+                />
+            )}
             {subModal === "email" && (
                 <EmailModal
                     isOpen={isOpen && subModal === "email"}
@@ -307,3 +407,32 @@ const EditProfileContent = (props: EditProfileProps) => {
 };
 
 export default EditProfile;
+
+function EditRow({ label, icon, onEdit, children }: { label: string; icon: ReactNode; onEdit: () => void; children: ReactNode }) {
+    return (
+        <div className="ep-field flex flex-col gap-2">
+            <span className="pl-1 text-[12px] font-black uppercase tracking-[0.15em] text-white/80">
+                {label}
+            </span>
+            <div className="flex flex-row items-stretch gap-2">
+                <div className="ep-input flex-1 min-w-0 relative h-13 rounded-2xl overflow-hidden bg-ink">
+                    {icon}
+                    <div className="flex items-center w-full h-full pl-11 pr-3 text-sm font-bold text-white/80 truncate">
+                        {children}
+                    </div>
+                </div>
+                <button
+                    type="button"
+                    onClick={onEdit}
+                    aria-label={`Edit ${label.toLowerCase()}`}
+                    className="shrink-0 px-4 self-stretch rounded-2xl text-[12px] font-black uppercase tracking-[0.2em]
+                        border-2 border-white/20 text-white/80
+                        hover:border-neon-pink hover:text-neon-pink hover:cursor-pointer
+                        transition-colors duration-200"
+                >
+                    Edit
+                </button>
+            </div>
+        </div>
+    );
+}
