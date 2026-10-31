@@ -132,3 +132,22 @@ export async function setUsernameChangedAt(userId: number, daysAgo: number): Pro
     [userId, daysAgo],
   );
 }
+
+// Only for users the test just created: a finished (won) game on `date`.
+export async function seedWin(userId: number, mode: ModeName, date: string, guesses = 3): Promise<void> {
+  await db().query(
+    `INSERT INTO daily_user_history (user_id, date, gamemode_id, guesses_count, won, won_at, guessed_ids)
+     VALUES ($1, $2, $3, $4, TRUE, ($2::date + TIME '12:00') AT TIME ZONE 'America/New_York', '{}')`,
+    [userId, date, GAMEMODE[mode], guesses],
+  );
+}
+
+export async function deletionRequested(userId: number): Promise<boolean> {
+  const { rows } = await db().query('SELECT deletion_requested_at IS NOT NULL AS requested FROM users WHERE id = $1', [userId]);
+  return rows[0].requested;
+}
+
+export async function idolName(idolId: number): Promise<string> {
+  const { rows } = await db().query('SELECT artist_name FROM idols WHERE id = $1', [idolId]);
+  return rows[0].artist_name;
+}
