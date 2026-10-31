@@ -96,7 +96,7 @@ export default function App() {
 export function HydrateFallback() {
   return (
     <div className="min-h-screen bg-black">
-      <div aria-hidden className="sticky top-0 z-100 w-full h-[70px] max-[760px]:h-16 border-b-2 border-[#0A0A0A] bg-[#262226] shadow-[0_3px_0_#FF8AC4]" />
+      <div aria-hidden className="sticky top-0 z-100 w-full h-[60px] max-[760px]:h-[54px] border-b-2 border-[#0A0A0A] bg-[#262226] shadow-[0_3px_0_#FF8AC4]" />
       <PageLoader />
     </div>
   );

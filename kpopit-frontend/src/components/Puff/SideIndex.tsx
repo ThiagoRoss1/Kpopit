@@ -12,7 +12,7 @@ const number = (i: number) => String(i + 1).padStart(2, "0");
 /** Sticky "On this page" list beside the content; above 900px only (pair with IndexChips). */
 export function SideIndex({ items, active, onPick }: { items: IndexItem[]; active: string; onPick: (id: string) => void }) {
     return (
-        <nav aria-label="On this page" className="pp-enter [--pp-anim:puffSide] [--pp-delay:160ms] sticky top-[90px] flex flex-col gap-1.5 @max-[900px]:hidden">
+        <nav aria-label="On this page" className="pp-enter [--pp-anim:puffSide] [--pp-delay:160ms] sticky top-[80px] flex flex-col gap-1.5 @max-[900px]:hidden">
             <span className="font-semibold text-[10px] tracking-[.14em] text-(--muted) px-1 pb-1.5">ON THIS PAGE</span>
             {items.map((item, i) => {
                 const on = item.id === active;

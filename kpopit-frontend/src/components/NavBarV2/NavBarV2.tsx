@@ -74,14 +74,14 @@ export default function NavBarV2({ forceNight = false }: { forceNight?: boolean 
         >
             <nav
                 aria-label="Main"
-                className="relative z-30 flex items-center gap-3.5 h-[70px] px-7 @max-[1100px]:px-5 @max-[760px]:h-16 @max-[760px]:px-3.5 bg-(--bar) border-b-2 border-(--ink) shadow-(--bar-sh) text-(--text)"
+                className="relative z-30 flex items-center gap-3.5 h-[60px] px-6 @max-[1100px]:px-5 @max-[760px]:h-[54px] @max-[760px]:px-3 bg-(--bar) border-b-2 border-(--ink) shadow-[var(--bar-sh)] text-(--text)"
             >
                 <Link to="/" aria-label="KpopIt home" className="nb-logo pp-focus flex min-w-0 items-center gap-2 no-underline">
-                    <img src="/kpopit-icon-svg.svg" alt="" width={42} height={42} className="block flex-none w-[42px] h-[42px]" draggable={false} />
+                    <img src="/kpopit-icon-svg.svg" alt="" width={36} height={36} className="block flex-none w-9 h-9" draggable={false} />
                     {page && (
                         <span className="flex min-w-0 items-center gap-[7px] -rotate-2 pt-0 pr-[5px] pb-[5px] pl-0.5 @max-[960px]:@min-[761px]:hidden @max-[374px]:hidden">
                             <span aria-hidden className="flex-none w-2.5 h-2.5 rounded-full bg-[#FF3399] border-2 border-(--ink) shadow-[1.5px_2px_0_var(--ink)]" />
-                            <span className="min-w-0 truncate pt-1 pb-1.5 font-bold text-[22px] @max-[1100px]:text-lg leading-none text-white whitespace-nowrap [text-shadow:var(--puff-wm)]">
+                            <span className="min-w-0 truncate pt-1 pr-2 pb-2 pl-0.5 -mb-1 font-bold text-[19px] @max-[1100px]:text-[17px] leading-none text-white whitespace-nowrap [text-shadow:var(--puff-wm)]">
                                 {PAGE_LABEL[page]}
                             </span>
                         </span>
@@ -90,13 +90,13 @@ export default function NavBarV2({ forceNight = false }: { forceNight?: boolean 
 
                 <span className="flex-1" />
 
-                <div className="flex items-center gap-2.5 mr-2 @max-[1100px]:gap-1 @max-[1100px]:mr-0.5 @max-[760px]:hidden">
+                <div className="flex items-center gap-2 mr-1.5 @max-[1100px]:gap-1 @max-[1100px]:mr-0.5 @max-[760px]:hidden">
                     {links.map((link) => {
                         const isCur = section === link.id;
                         const isOpen = open === link.id;
                         const st = isCur ? "cur" : isOpen ? "open" : "idle";
                         const look = cn(
-                            "nb-item pp-focus box-border inline-flex items-center h-[42px] rounded-full border-2 font-bold text-[15px] no-underline cursor-pointer",
+                            "nb-item pp-focus box-border inline-flex items-center h-9 rounded-full border-2 font-bold text-sm no-underline cursor-pointer",
                             isCur ? "bg-(--side) border-(--ink) text-[#1A1418] shadow-[2px_3px_0_var(--ctl-off),var(--in-pink)]"
                                 : isOpen ? "bg-(--chip) border-(--ink) text-(--text) shadow-[2px_3px_0_var(--ctl-off),var(--in)]"
                                     : "bg-transparent border-transparent text-(--muted)",
@@ -104,7 +104,7 @@ export default function NavBarV2({ forceNight = false }: { forceNight?: boolean 
                         if (link.to) {
                             const prefetch = PREFETCH[link.id as NavPage];
                             return (
-                                <IntentLink key={link.id} to={link.to} onIntent={prefetch} data-st={st} aria-current={isCur ? "page" : undefined} className={cn(look, "px-[15px]")}>
+                                <IntentLink key={link.id} to={link.to} onIntent={prefetch} data-st={st} aria-current={isCur ? "page" : undefined} className={cn(look, "px-3.5")}>
                                     {link.label}
                                 </IntentLink>
                             );
@@ -118,7 +118,7 @@ export default function NavBarV2({ forceNight = false }: { forceNight?: boolean 
                                     aria-expanded={isOpen}
                                     aria-haspopup="true"
                                     onClick={() => toggle(menu)}
-                                    className={cn(look, "gap-1.5 pr-3 pl-[15px]")}
+                                    className={cn(look, "gap-1.5 pr-2.5 pl-3.5")}
                                 >
                                     {link.label}
                                     <ChevronDown className="nb-chev w-3.5 h-3.5" strokeWidth={3} aria-hidden />
@@ -129,7 +129,7 @@ export default function NavBarV2({ forceNight = false }: { forceNight?: boolean 
                     })}
                 </div>
 
-                <div className="flex flex-none items-center gap-3.5 @max-[430px]:gap-2.5">
+                <div className="flex flex-none items-center gap-3 @max-[430px]:gap-2">
                     <button
                         type="button"
                         onClick={toggleTheme}
@@ -137,13 +137,13 @@ export default function NavBarV2({ forceNight = false }: { forceNight?: boolean 
                         aria-hidden={forceNight || undefined}
                         tabIndex={forceNight ? -1 : 0}
                         className={cn(
-                            "pp-press pp-focus flex-none grid place-items-center w-[38px] h-[38px] p-0 rounded-full border-2 border-(--ink) bg-(--chip) text-(--chip-ink) cursor-pointer",
+                            "pp-press pp-focus flex-none grid place-items-center w-[34px] h-[34px] p-0 rounded-full border-2 border-(--ink) bg-(--chip) text-(--chip-ink) cursor-pointer",
                             forceNight && "invisible",
                         )}
                     >
                         {!forceNight && theme === "night" ? <Sun className="w-4 h-4" strokeWidth={2.6} /> : <Moon className="w-4 h-4" strokeWidth={2.6} />}
                     </button>
-                    <span aria-hidden className="w-0.5 h-[30px] rounded-[2px] bg-[rgba(128,110,120,.3)] @max-[760px]:hidden" />
+                    <span aria-hidden className="w-0.5 h-[26px] rounded-[2px] bg-[rgba(128,110,120,.3)] @max-[760px]:hidden" />
                     <NavAuthSlot />
                 </div>
 
@@ -153,7 +153,7 @@ export default function NavBarV2({ forceNight = false }: { forceNight?: boolean 
                     aria-label={open === "sheet" ? "Close menu" : "Open menu"}
                     aria-expanded={open === "sheet"}
                     className={cn(
-                        "pp-press pp-focus hidden @max-[760px]:grid place-items-center flex-none w-[42px] h-[42px] p-0 rounded-full border-2 border-(--ink) cursor-pointer",
+                        "pp-press pp-focus hidden @max-[760px]:grid place-items-center flex-none w-[38px] h-[38px] p-0 rounded-full border-2 border-(--ink) cursor-pointer",
                         open === "sheet" ? "bg-[#FF8AC4] text-[#1A1418]" : "bg-(--chip) text-(--chip-ink)",
                     )}
                 >
@@ -179,7 +179,7 @@ function Tile({ row, size }: { row: NavRow; size: "lg" | "sm" }) {
     if (row.icon) {
         const Icon = row.icon;
         return (
-            <span className={cn("nb-tile flex-none grid place-items-center box-border border-2 border-[#1A1418] bg-(--tile) shadow-(--tile-in)", size === "lg" ? "w-11 h-11 rounded-[13px] shadow-[2px_2.5px_0_#1A1418,var(--tile-in)]" : "w-[34px] h-[34px] rounded-[11px]")}>
+            <span className={cn("nb-tile flex-none grid place-items-center box-border border-2 border-[#1A1418] bg-(--tile) shadow-[var(--tile-in)]", size === "lg" ? "w-11 h-11 rounded-[13px] shadow-[2px_2.5px_0_#1A1418,var(--tile-in)]" : "w-[34px] h-[34px] rounded-[11px]")}>
                 <Icon className={size === "lg" ? "w-5 h-5" : "w-[17px] h-[17px]"} stroke="var(--tile-ink)" strokeWidth={2.6} aria-hidden />
             </span>
         );
@@ -203,7 +203,7 @@ function DesktopMenu({ menu, rows, page }: { menu: NavMenu; rows: NavRow[]; page
         <div
             role="menu"
             className={cn(
-                "nb-menu absolute top-[calc(35px+26px)] z-40 box-border p-3 rounded-[24px] border-2 border-(--ink) bg-(--menu-bg) shadow-[5px_5px_0_0_#FF8AC4,5px_5px_0_2px_var(--ink)] grid grid-cols-2 gap-x-3 gap-y-[13px]",
+                "nb-menu absolute top-[53px] z-40 box-border p-3 rounded-[24px] border-2 border-(--ink) bg-(--menu-bg) shadow-[5px_5px_0_0_#FF8AC4,5px_5px_0_2px_var(--ink)] grid grid-cols-2 gap-x-3 gap-y-[13px]",
                 about ? "right-0 w-[470px] origin-[calc(100%-24px)_0]" : "-left-3 w-[420px] origin-[24px_0]",
             )}
         >
@@ -334,7 +334,7 @@ function MobileSheet({ page, section, rowsOf, calendar, collections }: {
     );
 
     return (
-        <div className="nb-menu absolute left-2.5 right-2.5 top-[calc(100%+10px)] z-40 box-border max-h-[calc(100dvh-64px-30px)] overflow-auto overscroll-contain pt-3.5 px-3.5 pb-4 rounded-[22px] border-2 border-(--ink) bg-(--menu-bg) shadow-[4px_5px_0_var(--ctl-off),var(--in)] flex flex-col gap-2.5 origin-[calc(100%-24px)_0]">
+        <div className="nb-menu absolute left-2.5 right-2.5 top-[calc(100%+10px)] z-40 box-border max-h-[calc(100dvh-54px-30px)] overflow-auto overscroll-contain pt-3.5 px-3.5 pb-4 rounded-[22px] border-2 border-(--ink) bg-(--menu-bg) shadow-[4px_5px_0_var(--ctl-off),var(--in)] flex flex-col gap-2.5 origin-[calc(100%-24px)_0]">
             {accordion("games", "Games")}
             {accordion("idols", "Idols")}
             {calendar && direct("calendar", "Calendar", "/calendar")}

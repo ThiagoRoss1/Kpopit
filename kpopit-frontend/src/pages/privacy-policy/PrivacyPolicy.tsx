@@ -21,7 +21,7 @@ export default function PrivacyPolicy() {
             />
             <PageShell header={{ title: "Privacy Policy", korean: "개인정보", koreanLength: "long", subtitle: "What I keep, why, and how to delete it." }}>
                 <div className="mt-[34px] grid grid-cols-[230px_minmax(0,1fr)] gap-8 items-start @max-[900px]:grid-cols-1 @max-[900px]:gap-4">
-                    <div className="flex flex-col gap-2.5 sticky top-[90px] @max-[900px]:static">
+                    <div className="flex flex-col gap-2.5 sticky top-[80px] @max-[900px]:static">
                         <SideIndex items={INDEX} active={active} onPick={jumpTo} />
                         <span className="px-1 font-medium text-xs text-(--muted) @max-[900px]:hidden">Last updated {UPDATED}</span>
                     </div>

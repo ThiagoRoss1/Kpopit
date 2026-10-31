@@ -36,13 +36,13 @@ export default function NavAuthSlot() {
         };
     }, [open]);
 
-    if (isLoading) return <span aria-hidden className="block w-[54px] h-[42px]" />;
+    if (isLoading) return <span aria-hidden className="block w-12 h-9" />;
 
     if (!isAuthenticated || !user) {
         return (
             <Link
                 to="/login"
-                className="pp-press pp-focus flex-none box-border h-11 px-5 inline-flex items-center rounded-full border-2 border-(--ink) bg-[#FF3399] text-[#1A1418] font-bold text-[15px] no-underline [--pp-in:var(--in-pink)] shadow-[2px_3px_0_var(--ink),var(--in-pink)]"
+                className="pp-press pp-focus flex-none box-border h-[38px] px-4 inline-flex items-center rounded-full border-2 border-(--ink) bg-[#FF3399] text-[#1A1418] font-bold text-sm no-underline [--pp-in:var(--in-pink)] shadow-[2px_3px_0_var(--ink),var(--in-pink)]"
             >
                 Login
             </Link>
@@ -63,13 +63,13 @@ export default function NavAuthSlot() {
     };
 
     return (
-        <div ref={boxRef} className="relative mx-1.5">
+        <div ref={boxRef} className="relative mx-1">
             <button
                 type="button"
                 aria-label="User menu"
                 aria-expanded={open}
                 onClick={() => setOpenOn(open ? null : pathname)}
-                className="nb-av pp-focus relative block flex-none w-[42px] h-[42px] box-border rounded-full overflow-hidden bg-(--ink) p-0 cursor-pointer"
+                className="nb-av pp-focus relative block flex-none w-9 h-9 box-border rounded-full overflow-hidden bg-(--ink) p-0 cursor-pointer"
             >
                 {avatar ? (
                     <img src={avatar} alt="" className="block w-full h-full object-cover" draggable={false} />

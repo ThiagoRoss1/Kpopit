@@ -344,7 +344,7 @@ export default function CollectionAlbum() {
 
                 <div
                     ref={rootRef}
-                    className={`collections-root -mx-2 sm:-mx-4 flex flex-col lg:h-[calc(100svh-70px)]
+                    className={`collections-root -mx-2 sm:-mx-4 flex flex-col lg:h-[calc(100svh-60px)]
                 lg:overflow-hidden transition-colors duration-300 ${night ? 'text-white' : 'text-[#3c2f38]'}`}
                     {...fxAttrs}
                     {...pagesAttr}
