@@ -23,6 +23,7 @@ from routes.email import email_bp
 from routes.collections.collections import collections_bp
 from routes.profile import profile_bp
 from routes.calendar import calendar_bp
+from routes.albums_page.albums_page import albums_page_bp
 from routes.idol_xp import idol_xp_bp
 from utils.rate_limiter import limiter
 from utils.log_redaction import install_token_redaction
@@ -134,6 +135,9 @@ app.register_blueprint(ranking_bp, url_prefix="/api")
 
 # Idols page blueprint - Register idols page route
 app.register_blueprint(idols_page_bp, url_prefix="/api")
+
+# Albums page blueprint - Albums list and album pages
+app.register_blueprint(albums_page_bp, url_prefix="/api")
 
 # Auth blueprint - Register, login, logout, refresh, me, claim routes
 app.register_blueprint(auth_bp, url_prefix="/api")
