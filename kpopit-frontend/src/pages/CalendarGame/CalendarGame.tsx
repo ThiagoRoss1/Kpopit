@@ -1,7 +1,7 @@
-import { useState } from "react";
+import { useState, type CSSProperties } from "react";
 import { Link } from "react-router";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { ArrowLeft, CalendarCheck } from "lucide-react";
+import { ArrowLeft, CalendarDays } from "lucide-react";
 import { useSharedGameData } from "../../hooks/useSharedGameData";
 import { getAllAlbums, getCalendarDay, postCalendarGuess } from "../../services/api";
 import type {
@@ -24,13 +24,47 @@ import GetBlurLevel from "../BlurryMode/blurLevels";
 import { GetPixelLevel, PIXEL_LEVELS } from "../../utils/pixelLevels";
 import { resolveCdnUrl } from "../../utils/imageUrl";
 import NotFound from "../NotFound/NotFound";
+import "../PixelatedMode/PixelatedMode.css";
 
 const NO_IDOLS: IdolListItem[] = [];
-const MONTHS = ["January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"];
-const longDate = (iso: string) => {
+const MON = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
+const shortDate = (iso: string) => {
     const [y, m, d] = iso.split("-").map(Number);
-    return `${MONTHS[m - 1]} ${d}, ${y}`;
+    return `${MON[m - 1]} ${d}, ${y}`;
 };
+const TITLES: Record<CalendarMode, [string, string]> = { classic: ["Kpop", "it"], blurry: ["Blur", "it"], pixelated: ["Pixel", "It"] };
+
+/** The mode's own title (same look as the live page) with the calendar day under it: back to that
+ *  day in the calendar, and a tag with Day N and the date. */
+function CalendarHeader({ mode, date, dayNumber }: { mode: CalendarMode; date: string; dayNumber: number | null }) {
+    const [kpop, it] = TITLES[mode];
+    const light = mode === "pixelated";
+    return (
+        <div className="flex flex-col items-center gap-4 text-center">
+            <Link to="/" className="inline-block bg-transparent border-0 p-0 cursor-pointer hover:scale-105 transition-all duration-500 transform-gpu" draggable={false}>
+                <h1
+                    className={`leading-tight font-bold text-center ${mode === "classic" ? "max-sxs:text-4xl sxs:text-5xl zm:text-6xl sm:text-7xl" : mode === "blurry" ? "max-xxs:text-3xl xxs:text-3xl xs:text-4xl sm:text-5xl" : "text-5xl text-neon-pink"}`}
+                >
+                    <span className="kpop-part" style={light ? ({ "--kpop-color": "var(--color-neon-pink)" } as CSSProperties) : undefined}>{kpop}</span>
+                    <span className="it-part" style={light ? ({ "--it-color": "var(--color-cream)" } as CSSProperties) : undefined}>{it}</span>
+                </h1>
+            </Link>
+            <div className="flex items-center justify-center flex-wrap gap-2.5">
+                <Link
+                    to={`/calendar?mode=${mode}&date=${date}`}
+                    className="pp-press pp-focus inline-flex items-center gap-1.5 h-9 pl-2.5 pr-3.5 rounded-full border-2 border-[#1A1418] bg-[#FFFDFA] text-[#1A1418] font-bold text-[13px] no-underline [--ctl-off:#1A1418] [--pp-in:inset_0_2px_0_#fff,inset_0_-3px_0_rgba(26,20,24,.07)]"
+                >
+                    <ArrowLeft className="w-4 h-4" strokeWidth={3} aria-hidden />
+                    Calendar
+                </Link>
+                <span className="inline-flex items-center gap-1.5 h-9 px-3.5 rounded-full border-2 border-[#1A1418] bg-[#FF8AC4] text-[#1A1418] font-bold text-[13px] shadow-[2px_3px_0_#1A1418,inset_0_2px_0_rgba(255,255,255,.55)] -rotate-2">
+                    <CalendarDays className="w-4 h-4" strokeWidth={2.6} aria-hidden />
+                    {dayNumber ? `Day ${dayNumber} · ${shortDate(date)}` : shortDate(date)}
+                </span>
+            </div>
+        </div>
+    );
+}
 
 type IdolGuess = GuessResponse<Partial<FeedbackData>> & { card_granted?: CardGranted };
 
@@ -96,100 +130,135 @@ export default function CalendarGame({ mode, date }: { mode: CalendarMode; date:
     const coverUrl = resolveCdnUrl(puzzle.cover_path ?? null) ?? undefined;
     const blurUrl = puzzle.blur_image_path ? `${resolveCdnUrl(puzzle.blur_image_path)}?v=${puzzle.blur_image_version}` : null;
 
+    const label = `Guess this day's ${mode === "pixelated" ? "album" : "idol"}...`;
+    const search = !won && (
+        <div className="w-full flex flex-col items-center mb-6">
+            <span className={`text-[14px] sm:text-[16px] mb-1 ${mode === "pixelated" ? "text-ink/70" : "drop-shadow-lg text-[#d7d7d7]/85"}`}>{label}</span>
+            <div className="relative w-full max-w-4xl px-4 mx-auto flex justify-center z-40">
+                {mode === "pixelated" ? (
+                    <PixelatedSearchBar
+                        allAlbums={albums.data ?? []}
+                        value={value}
+                        onAlbumSelect={setValue}
+                        onAlbumSelectId={(album) => setSelected(album.id)}
+                        onSubmit={submit}
+                        excludedAlbums={albumGuesses.map((g) => g.album_id)}
+                        disabled={guess.isPending}
+                    />
+                ) : (
+                    <SearchBar
+                        allIdols={mode === "blurry" ? blurIdols : allIdolsData ?? NO_IDOLS}
+                        value={value}
+                        onIdolSelect={setValue}
+                        onIdolSelectId={(idol) => setSelected(idol.id)}
+                        onSubmit={submit}
+                        excludedIdols={guessedIdolIds}
+                        disabled={guess.isPending}
+                        gameMode={mode}
+                    />
+                )}
+            </div>
+            {guess.isError && <p role="alert" className="mt-3 text-[#fd5c63] font-semibold">That guess didn't go through. Try again.</p>}
+        </div>
+    );
+    const result = won && (
+        <div className="w-full max-w-md px-4 mb-10 flex flex-col items-center gap-3 text-center" role="status">
+            <p className={`m-0 text-2xl font-bold ${mode === "pixelated" ? "text-ink" : "text-white"}`}>You found it!</p>
+            {day.data.answer && (
+                <p className={`m-0 font-semibold ${mode === "pixelated" ? "text-ink/70" : "text-white/85"}`}>{day.data.answer.artist_name ?? day.data.answer.album_name}</p>
+            )}
+            {day.data.xp !== null && <p className="m-0 text-neon-pink font-bold">{`+${day.data.xp} XP`}</p>}
+            {cardGranted && <CardGrantedReveal cardGranted={cardGranted} />}
+        </div>
+    );
+    const header = <CalendarHeader mode={mode} date={date} dayNumber={day.data.day_number} />;
+
+    if (mode === "pixelated") {
+        const blockSize = won ? PIXEL_LEVELS[PIXEL_LEVELS.length - 1] : GetPixelLevel(attempts);
+        return (
+            <div className="pixelmode min-h-full w-full">
+                <div className="pixelmode__bg" aria-hidden="true"><div className="pixelmode__margin" /></div>
+                <div className="mx-auto max-w-340 px-4 zm:px-6 sm:px-12 md:px-20 lg:px-10 py-4 lg:py-10">
+                    <div className="flex flex-col lg:flex-row gap-4 lg:gap-10 items-center lg:items-start">
+                        <div className="lg:hidden">{header}</div>
+                        <div className="flex flex-col w-full lg:w-1/2 xl:w-160">
+                            <div className="pixel-stage relative w-full h-70 xxs:h-75 xs:h-80 xm:h-85 zm:h-95 sm:h-100 md:h-110 xl:h-130 mx-auto select-none">
+                                <div className="absolute flex left-1/2 translate-x-[-35%] xs:translate-x-[-30%] top-5 w-55 zm:translate-x-[-30%] xxs:w-60 xs:w-65 xm:w-70 zm:w-76 sm:w-80 md:translate-x-[-25%] md:top-3 md:w-90 lg:translate-x-[-2%] lg:left-32 lg:w-90 xl:translate-x-[5%] xl:left-36 xl:w-110 aspect-square z-1">
+                                    <div className="pixel-vinyl">
+                                        <div className="pixel-vinyl__spin">
+                                            <div className="pixel-vinyl__label overflow-hidden">
+                                                <PixelatedCanvas imageUrl={coverUrl} blockSize={blockSize} alt="Pixelated album cover" className="w-full h-full object-cover block rounded-full" />
+                                            </div>
+                                        </div>
+                                        <div className="pixel-vinyl__light" />
+                                        <div className="pixel-vinyl__hole" />
+                                    </div>
+                                </div>
+                                <div className="pixel-sleeve absolute flex z-2 bg-ink border-2 border-cream -rotate-4 left-1/2 translate-x-[-55%] xs:translate-x-[-65%] top-[2%] w-55 h-65 xxs:w-60 xxs:h-70 xs:w-65 xs:h-75 xm:w-70 xm:h-80 zm:w-76 zm:h-86 shadow-[0_14px_30px_rgba(0,0,0,0.35),0_4px_10px_rgba(0,0,0,0.2)] rounded-2xl rounded-b-3xl sm:w-80 sm:h-90 md:translate-x-[-60%] md:w-90 md:h-100 lg:left-0 lg:translate-x-0 lg:w-90 lg:h-100 xl:w-110 xl:h-120">
+                                    <div className="relative flex items-center justify-center p-4 w-full h-fit">
+                                        <span className="pixel-washi absolute top-0 -left-6 w-[22%] h-5.5 z-4 rotate-[-34.8deg]" />
+                                        <span className="pixel-washi absolute top-0 -right-6 w-[22%] h-5.5 z-5 rotate-[34.8deg]" />
+                                        <div className="relative w-full aspect-square rounded-xl overflow-hidden flex flex-col bg-transparent">
+                                            <PixelatedCanvas imageUrl={coverUrl} blockSize={blockSize} alt="Pixelated album cover" className="w-full h-full object-cover block" />
+                                        </div>
+                                    </div>
+                                    <div className="absolute left-0 right-0 bottom-4 z-3 text-center text-white text-xl xs:text-2xl leading-none tracking-[0.02em] font-['Caveat',cursive] [text-shadow:0_2px_8px_rgba(0,0,0,0.6)]">
+                                        Guess the album
+                                    </div>
+                                </div>
+                            </div>
+                            {!won && (
+                                <div className="mt-2 lg:mt-6 flex items-center justify-center">
+                                    <PixelatedHints guessCount={attempts} releaseYear={puzzle.release_year ?? 0} artistName={puzzle.group_name ?? ""} persist={false} />
+                                </div>
+                            )}
+                        </div>
+                        <div className="flex-1 min-w-0 w-full flex flex-col items-center">
+                            <div className="hidden lg:block mb-6">{header}</div>
+                            {search}
+                            {result}
+                            <PixelatedGuessGrid guesses={albumGuesses} persist={false} />
+                        </div>
+                    </div>
+                </div>
+            </div>
+        );
+    }
+
     return (
         <>
             <BackgroundStyle attempts={attempts} />
-            <div className="min-h-full w-full flex flex-col items-center justify-start pb-24">
-                <div className="w-full max-w-3xl px-4 mt-8 mb-8 flex flex-col items-center gap-3 text-center">
-                    <Link to={`/calendar?mode=${mode}&date=${date}`} className="self-start inline-flex items-center gap-2 text-white/80 font-bold hover:text-neon-pink transition-colors">
-                        <ArrowLeft className="w-4 h-4" strokeWidth={3} aria-hidden />
-                        Calendar
-                    </Link>
-                    <h1 className="leading-tight text-4xl sm:text-5xl font-bold">
-                        <span className="kpop-part">{day.data.day_number ? `Day ${day.data.day_number}` : "Calendar"}</span>
-                    </h1>
-                    <p className="m-0 text-white/85 font-semibold">{`${mode[0].toUpperCase()}${mode.slice(1)} · ${longDate(date)}`}</p>
-                    <p className="m-0 inline-flex items-center gap-2 text-[#d7d7d7]/85 text-sm">
-                        <CalendarCheck className="w-4 h-4" aria-hidden />
-                        Calendar game: counts as a win, never for your streak.
-                    </p>
-                </div>
+            <div className={`min-h-full w-full flex flex-col items-center justify-start pb-24 ${mode === "classic" ? "mt-12" : "mt-4"}`}>
+                <div className="mb-10">{header}</div>
 
                 {mode === "classic" && (
-                    <div className="w-full flex flex-col items-center justify-center mb-10">
+                    <div className="w-full flex flex-col items-center justify-center mb-10.25">
                         <AnswerHintsBox memberCount={puzzle.member_count ?? null} groups={puzzle.groups ?? null} isFormerGroup={puzzle.is_former_group ?? false} attempts={attempts} gameEnded={won} persist={false} />
                     </div>
                 )}
 
                 {mode === "blurry" && blurUrl && (
-                    <div className="mb-10 rounded-[20px] overflow-hidden border border-white/20">
+                    <div className="relative flex items-center justify-center bg-black border-2 border-white max-xxs:w-55 max-xxs:h-80 xxs:w-60 xxs:h-88 xs:w-70 xs:h-98 xm:w-70 xm:h-98 zm:w-80 zm:h-108 sm:w-100 sm:h-128 rounded-[46px] overflow-hidden mb-4">
+                        {["top-5 left-5 border-l-3 border-t-3", "top-5 right-5 border-r-3 border-t-3", "bottom-5 left-5 border-l-3 border-b-3", "bottom-5 right-5 border-r-3 border-b-3"].map((corner) => (
+                            <div key={corner} className={`absolute max-xxs:w-4 max-xxs:h-4 xxs:w-4 xxs:h-4 xs:w-6 xs:h-6 z-10 border-white/20 ${corner}`} />
+                        ))}
                         <Img
                             priority
                             src={blurUrl}
                             alt={won ? "Blurry image, day finished" : "Blurry image of the day's idol"}
                             style={{ filter: won ? "none" : `blur(${GetBlurLevel(attempts)}px) grayscale(100%)` }}
                             draggable={false}
-                            className="max-xxs:w-55 max-xxs:h-80 xxs:w-60 xxs:h-88 xs:w-70 xs:h-98 zm:w-80 zm:h-108 sm:w-100 sm:h-128 object-cover select-none pointer-events-none transition-all duration-1000"
+                            className="w-full h-full object-cover select-none pointer-events-none transition-all duration-1000"
                         />
                     </div>
                 )}
 
-                {mode === "pixelated" && (
-                    <div className="w-full max-w-md px-4 mb-10 flex flex-col items-center gap-6">
-                        <div className="w-64 h-64 sm:w-80 sm:h-80 rounded-2xl overflow-hidden border-2 border-white/20">
-                            <PixelatedCanvas imageUrl={coverUrl} blockSize={won ? PIXEL_LEVELS[PIXEL_LEVELS.length - 1] : GetPixelLevel(attempts)} alt="Pixelated album cover" className="w-full h-full object-cover block" />
-                        </div>
-                        <PixelatedHints guessCount={attempts} releaseYear={puzzle.release_year ?? 0} artistName={puzzle.group_name ?? ""} persist={false} />
-                    </div>
-                )}
-
-                {!won && (
-                    <div className="w-full flex flex-col items-center mb-6">
-                        <span className="text-[14px] sm:text-[16px] text-[#d7d7d7]/85 mb-1">Guess this day's {mode === "pixelated" ? "album" : "idol"}...</span>
-                        <div className="relative w-full max-w-4xl px-4 mx-auto flex justify-center z-40">
-                            {mode === "pixelated" ? (
-                                <PixelatedSearchBar
-                                    allAlbums={albums.data ?? []}
-                                    value={value}
-                                    onAlbumSelect={setValue}
-                                    onAlbumSelectId={(album) => setSelected(album.id)}
-                                    onSubmit={submit}
-                                    excludedAlbums={albumGuesses.map((g) => g.album_id)}
-                                    disabled={guess.isPending}
-                                />
-                            ) : (
-                                <SearchBar
-                                    allIdols={mode === "blurry" ? blurIdols : allIdolsData ?? NO_IDOLS}
-                                    value={value}
-                                    onIdolSelect={setValue}
-                                    onIdolSelectId={(idol) => setSelected(idol.id)}
-                                    onSubmit={submit}
-                                    excludedIdols={guessedIdolIds}
-                                    disabled={guess.isPending}
-                                    gameMode={mode}
-                                />
-                            )}
-                        </div>
-                        {guess.isError && <p role="alert" className="mt-3 text-[#fd5c63] font-semibold">That guess didn't go through. Try again.</p>}
-                    </div>
-                )}
-
-                {won && (
-                    <div className="w-full max-w-md px-4 mb-10 flex flex-col items-center gap-3 text-center" role="status">
-                        <p className="m-0 text-2xl font-bold text-white">You found it!</p>
-                        {day.data.answer && (
-                            <p className="m-0 text-white/85 font-semibold">{day.data.answer.artist_name ?? day.data.answer.album_name}</p>
-                        )}
-                        {day.data.xp !== null && <p className="m-0 text-neon-pink font-bold">{`+${day.data.xp} XP`}</p>}
-                        <Link to={`/calendar?mode=${mode}&date=${date}`} className="mt-2 px-5 py-2.5 rounded-2xl bg-white text-black font-bold hover:brightness-90">Back to the calendar</Link>
-                        {cardGranted && <CardGrantedReveal cardGranted={cardGranted} />}
-                    </div>
-                )}
+                {search}
+                {result}
 
                 <div className="w-full flex items-center justify-center">
                     {mode === "classic" && <GuessesGrid guesses={idolGuesses as GuessResponse[]} allIdols={allIdolsData} onAllAnimationsComplete={() => {}} persist={false} />}
                     {mode === "blurry" && <BlurryGuessGrid guesses={idolGuesses} persist={false} />}
-                    {mode === "pixelated" && <PixelatedGuessGrid guesses={albumGuesses} persist={false} />}
                 </div>
             </div>
         </>

@@ -176,7 +176,8 @@ function ClassicMode() {
     }
 
     setDayChecked(true);
-    setConfetti(confettiShown);
+    // A game that was already over when the page opened never replays its confetti.
+    setConfetti(confettiShown || gameComplete === "true");
   }
 
   const guessMutation = useMutation({

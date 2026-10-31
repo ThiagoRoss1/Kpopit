@@ -80,7 +80,7 @@ test.describe('calendar @mobile', () => {
     expect((await response).ok()).toBeTruthy();
     await expect(page.getByText('You found it!')).toBeVisible();
 
-    await page.getByRole('link', { name: 'Back to the calendar' }).click();
+    await page.locator('main').getByRole('link', { name: 'Calendar', exact: true }).click();
     await expect(page.getByText(/^Played from the calendar · /).filter({ visible: true }).first()).toBeVisible();
   });
 });
