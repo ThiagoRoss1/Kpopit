@@ -44,7 +44,9 @@ function monitor() {
       nav: !!document.querySelector('nav'),
       cards: !!main?.querySelector('a[href^="/idols/"] img'),
       profile: photo ? photo.alt.replace(/ photo$/, '') : null,
-      animating: document.getAnimations().some((a) => (a as CSSAnimation).animationName === 'cardEntry' && a.playState === 'running'),
+      animating: document.getAnimations().some((a) => (a as CSSAnimation).animationName === 'puffIn' && a.playState === 'running'
+        && ((a as CSSAnimation).effect as KeyframeEffect | null)?.target instanceof Element
+        && (((a as CSSAnimation).effect as KeyframeEffect).target as Element).classList.contains('cg-card')),
       pending: !!document.querySelector('.link-pending'),
     });
     requestAnimationFrame(tick);
@@ -145,8 +147,8 @@ test.describe('idols navigation @mobile', () => {
     await expect(page.getByRole('img', { name: `${target.artist_name} photo` })).toBeVisible();
     since = await now(page);
     const other = idols.find((i) => i.id !== target.id && /^[A-Za-z]{4,}$/.test(i.artist_name))!;
-    await page.getByPlaceholder('Search idols, groups...').fill(other.artist_name);
-    await press(isMobile, page.locator(`main a[href="${href(other)}"]`).first());
+    await page.getByPlaceholder('Idol, group or company...').fill(other.artist_name);
+    await press(isMobile, page.getByRole('option', { name: new RegExp(`^${other.artist_name}`) }).first());
     await expect(page.getByRole('img', { name: `${other.artist_name} photo` })).toBeVisible();
     await expectSmooth(page, since, loads, base);
     // The search pushed one history entry: a single browser back returns to the previous idol.

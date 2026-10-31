@@ -66,18 +66,22 @@ export class LocalServer {
 
 // Restart one backend on the same port for every simulated day; tokens keep the real clock.
 export class OffsetBackend extends LocalServer {
+  /** Extra backend env (feature flags) on top of the safe test env; kept across restarts. */
+  flags: Record<string, string> = {};
+
   constructor(public offset = 0, port = 5000) {
     super(port, BACKEND_PYTHON, ['-m', 'flask', '--app', 'app', 'run', '--port', String(port), '--no-reload'],
       BACKEND_DIR, {}, '/api/gamemodes-count');
   }
 
   protected childEnv() {
-    return { ...process.env, ...testBackendEnv({ TEST_DATE_OFFSET: String(this.offset) }) };
+    return { ...process.env, ...testBackendEnv({ TEST_DATE_OFFSET: String(this.offset), ...this.flags }) };
   }
 
-  async restart(offset: number): Promise<void> {
+  async restart(offset: number, flags: Record<string, string> = this.flags): Promise<void> {
     await this.stop();
     this.offset = offset;
+    this.flags = flags;
     await this.start();
   }
 }
