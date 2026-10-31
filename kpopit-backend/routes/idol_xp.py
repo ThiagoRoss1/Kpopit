@@ -38,6 +38,29 @@ def select_idol():
         cursor.close()
 
 
+@idol_xp_bp.route("/idol-xp/pour", methods=["POST"])
+@require_auth
+@limiter.limit("30 per minute")
+def pour_potion():
+    """Pour the caller's potion into an idol (account only); returns the new XP state."""
+    data = request.get_json() or {}
+    connect = get_db()
+    cursor = connect.cursor()
+    try:
+        state = XpService(connect).pour(cursor, g.auth["user_id"], data.get("idol_id"))
+        connect.commit()
+        return jsonify(state), 200
+    except XpError as err:
+        connect.rollback()
+        return jsonify({"error": str(err)}), err.status
+    except Exception:
+        connect.rollback()
+        logger.exception("Failed to pour the potion")
+        return jsonify({"error": "Could not pour the potion"}), 500
+    finally:
+        cursor.close()
+
+
 @idol_xp_bp.route("/idol-xp/selection", methods=["GET"])
 @require_auth
 def current_selection():

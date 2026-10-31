@@ -66,10 +66,10 @@ class XpError(Exception):
 
 
 class XpService:
-    """Idol XP and the potion, computed from completed games (live + calendar) and the selection
-    history: a game's XP goes to the idol selected when it was completed, or to the potion (capped)
-    when none was. Backfilled games never give idol XP, only potion. Classic/Blurry/Pixelated (and a
-    future Classic GG/BG split) all count the same."""
+    """Idol XP and the potion, computed from completed games (live + calendar), the selection history
+    and pours: a game's XP goes to the idol selected when it was completed, or to the potion (capped)
+    when none was; a pour moves potion XP into an idol. Backfilled games never give idol XP, only
+    potion. Classic/Blurry/Pixelated all count the same."""
 
     def __init__(self, db):
         self.db = db
@@ -85,14 +85,17 @@ class XpService:
         row = cursor.fetchone()
         return {**row, "selected_from": row["selected_from"].isoformat()} if row else None
 
-    def select(self, cursor, user_id: int, idol_id) -> dict:
-        """Make `idol_id` the current idol: the current selection closes, a new one opens. XP already
-        earned stays with the idol that earned it. The caller commits."""
+    def _require_published_idol(self, cursor, idol_id) -> None:
         if not isinstance(idol_id, int) or isinstance(idol_id, bool):
             raise XpError("Unknown idol")
         cursor.execute("SELECT 1 FROM idols WHERE id = %s AND is_published = TRUE", (idol_id,))
         if not cursor.fetchone():
             raise XpError("Unknown idol")
+
+    def select(self, cursor, user_id: int, idol_id) -> dict | None:
+        """Make `idol_id` the current idol: the current selection closes, a new one opens. XP already
+        earned stays with the idol that earned it. The caller commits."""
+        self._require_published_idol(cursor, idol_id)
         # Locks the user's row so two selections at once can't both open a current one.
         cursor.execute("SELECT id FROM users WHERE id = %s FOR UPDATE", (user_id,))
         current = self.current_selection(cursor, user_id)
@@ -123,21 +126,50 @@ class XpService:
         )
         return cursor.fetchall()
 
+    def _pours(self, cursor, user_id: int) -> list[dict]:
+        cursor.execute(
+            "SELECT idol_id, amount, poured_at FROM potion_pours WHERE user_id = %s ORDER BY poured_at, id",
+            (user_id,),
+        )
+        return cursor.fetchall()
+
     def compute(self, cursor, user_id: int) -> tuple[dict[int, float], float]:
-        """({idol_id: xp}, potion) for the user, replaying games in completion order."""
+        """({idol_id: xp}, potion) for the user, replaying games and pours in time order. Games without
+        won_at come first; a pour empties part of the potion, so later games can fill it again."""
         selections = self._selections(cursor, user_id)
+        events = [((game["won_at"] is not None, game["won_at"]), 0, game) for game in self._completed_games(cursor, user_id)]
+        events += [((True, pour["poured_at"]), 1, pour) for pour in self._pours(cursor, user_id)]
+        events.sort(key=itemgetter(0, 1))
         idol_xp: dict[int, float] = {}
         potion = 0.0
-        for game in self._completed_games(cursor, user_id):
-            xp = game_xp(game)
+        for _, is_pour, event in events:
+            if is_pour:
+                potion = max(potion - event["amount"], 0.0)
+                idol_xp[event["idol_id"]] = add_xp(idol_xp.get(event["idol_id"], 0.0), event["amount"])
+                continue
+            xp = game_xp(event)
             idol = None
-            if game["won_at"] is not None and game["guesses_origin"] != "backfill":
-                idol = _selected_idol_at(selections, game["won_at"])
+            if event["won_at"] is not None and event["guesses_origin"] != "backfill":
+                idol = _selected_idol_at(selections, event["won_at"])
             if idol is None:
                 potion = min(potion + xp, POTION_CAP)
             else:
                 idol_xp[idol] = add_xp(idol_xp.get(idol, 0.0), xp)
         return idol_xp, potion
+
+    def pour(self, cursor, user_id: int, idol_id) -> dict:
+        """Pour the potion into `idol_id`, up to what the idol needs to reach max level. The user's row
+        lock serializes pours, so a double click spends the potion once. The caller commits."""
+        self._require_published_idol(cursor, idol_id)
+        cursor.execute("SELECT id FROM users WHERE id = %s FOR UPDATE", (user_id,))
+        idol_xp, potion = self.compute(cursor, user_id)
+        room = max(0, level_threshold(MAX_LEVEL) - idol_xp.get(idol_id, 0.0))
+        amount = int(min(potion, room))
+        if amount <= 0:
+            raise XpError("Idol is already at max level" if potion >= 1 else "Potion is empty", 409)
+        cursor.execute("INSERT INTO potion_pours (user_id, idol_id, amount, poured_at) VALUES (%s, %s, %s, %s)",
+                       (user_id, idol_id, amount, utc_now()))
+        return {**self.state(cursor, user_id), "poured": {"idol_id": idol_id, "amount": amount}}
 
     def potion(self, cursor, user_id: int) -> int:
         return int(self.compute(cursor, user_id)[1])
