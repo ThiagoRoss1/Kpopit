@@ -6,6 +6,8 @@ import { Link } from "react-router";
 import { getUserAnalytics } from "../../services/api";
 import GlobalNotices from "../GlobalNotices/GlobalNotices";
 import { useHydrated } from "../../hooks/useHydrated";
+import { useFeatures } from "../../hooks/useFeatures";
+import type { Features } from "../../utils/features";
 
 const MainLayout = () => {
     useEffect(() => {
@@ -29,9 +31,14 @@ const MainLayout = () => {
         sessionStorage.setItem('kpopit_notice_closed', 'true');
     }
 
-    // Puff Pop pages (route handle { puff: true }) paint their own ground and follow the saved
-    // theme; the older pages keep their dark look with the navbar forced to night.
-    const puff = useMatches().some((match) => (match.handle as { puff?: boolean } | undefined)?.puff);
+    // Puff Pop pages (route handle { puff: true }, or a feature flag's name for pages that are
+    // Puff Pop only while it is on) paint their own ground and follow the saved theme; the older
+    // pages keep their dark look with the navbar forced to night.
+    const { features } = useFeatures();
+    const puff = useMatches().some((match) => {
+        const flag = (match.handle as { puff?: boolean | keyof Features } | undefined)?.puff;
+        return flag === true || (typeof flag === "string" && features[flag]);
+    });
 
     return (
         <div className={`min-h-screen flex flex-col text-foreground selection:bg-pink-800 ${puff ? "bg-(--ground)" : "bg-transparent"}`}>

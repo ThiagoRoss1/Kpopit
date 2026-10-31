@@ -1,0 +1,42 @@
+/* Profile: entrance/chart motion and hover rules (hover only where it exists, press beats hover). */
+.up-root { --track: #EFE7DD; --heat-0: #EFE7DD; --heat-1: #FFD1E8; --heat-2: #FF8AC4; --heat-3: #FF3399; }
+[data-theme="night"] .up-root { --track: #3B343A; --heat-0: #2F2B2F; --heat-1: #5A3A4C; }
+
+.up-pane { animation: puffIn .55s var(--ease-settle) backwards; }
+.up-tab { transition: background-color .3s ease, border-color .3s ease, color .3s ease; }
+@media (hover: hover) { .up-tab[aria-selected="false"]:hover { background: var(--chip-hover); } }
+.up-tab:active:active:active { transform: translate3d(0, 1px, 0); }
+
+.up-tile { transform: rotate(var(--up-tilt, 0deg)); transition: transform .5s var(--ease-bounce); will-change: transform; backface-visibility: hidden; }
+@media (hover: hover) { .up-tile:hover { transform: translate3d(0, -3px, 0) rotate(0deg); } }
+.up-row { transition: transform .4s var(--ease-settle); }
+@media (hover: hover) { .up-row:hover { transform: translate3d(4px, 0, 0); } }
+
+.up-bar { transform-origin: left; animation: upGrow 1s var(--ease-settle) backwards; }
+.up-col { transform-origin: bottom; animation: upRise .9s var(--ease-bounce) var(--up-delay, 0ms) backwards; }
+.up-ring { animation: upPop .7s var(--ease-pop) var(--up-delay, 0ms) backwards; }
+@keyframes upGrow { from { transform: scaleX(0) } }
+@keyframes upRise { from { transform: scaleY(0) } }
+@keyframes upPop { from { transform: scale(.6) rotate(-40deg); opacity: 0 } }
+
+.up-photo { transform: rotate(-2deg); transition: transform .6s var(--ease-bounce); }
+@media (hover: hover) { .up-photo:hover { transform: rotate(0deg) translate3d(0, -3px, 0); } }
+
+.up-xp {
+  box-shadow: 3px 4px 0 0 #FF8AC4, 3px 4px 0 2px var(--ink);
+  transition: transform .5s var(--ease-bounce), box-shadow .45s var(--ease-settle), background-color .3s ease;
+  will-change: transform; backface-visibility: hidden;
+}
+@media (hover: hover) {
+  .up-xp:hover { transform: translate3d(0, -3px, 0); background: var(--chip-hover); box-shadow: 4px 6px 0 0 #FF8AC4, 4px 6px 0 2px var(--ink); }
+  .up-xp:hover .up-jar { animation: upWob .8s var(--ease-pop) both; }
+  .up-xp:hover .up-liquid { transform: scaleY(1.25); }
+  .up-xp:hover .up-fill { transform: scaleX(1.12); }
+}
+.up-xp:active:active:active { transform: translate3d(3px, 4px, 0); box-shadow: 0 0 0 0 #FF8AC4, 0 0 0 2px var(--ink); transition-duration: .16s; }
+.up-jar { transform-origin: 50% 90%; }
+@keyframes upWob { 0% { transform: rotate(0) } 30% { transform: rotate(-14deg) scale(1.12) } 60% { transform: rotate(9deg) scale(1.12) } 100% { transform: rotate(-5deg) scale(1.08) } }
+.up-liquid { transform-origin: bottom; transition: transform .6s cubic-bezier(.34, 1.4, .64, 1); }
+.up-fill { transform-origin: left; transition: transform .7s var(--ease-bounce); }
+.up-bubble { animation: upBub 2.6s ease-in infinite; }
+@keyframes upBub { 0% { transform: translate3d(0, 0, 0); opacity: 0 } 20% { opacity: 1 } 100% { transform: translate3d(0, -12px, 0); opacity: 0 } }

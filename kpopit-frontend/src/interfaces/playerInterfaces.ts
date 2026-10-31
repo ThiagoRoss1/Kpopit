@@ -46,6 +46,8 @@ export type PublicProfile =
         username: string;
         is_private: false;
         is_owner: boolean;
+        /** The game day (America/New_York), for the heatmap. */
+        today: string;
         display_name: string | null;
         avatar_url: string | null;
         member_since: string | null;
