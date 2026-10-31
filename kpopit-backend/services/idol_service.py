@@ -77,6 +77,7 @@ class IdolService:
             },
             "idol_career": {
                 "group_name": idol_data.get("group_name"),
+                "group_hangul": idol_data.get("group_hangul"),
                 "idol_debut_year": idol_data.get("idol_debut_year"),
                 "is_former_group": is_former_group,
                 "fandom_name": idol_data.get("fandom_name"),

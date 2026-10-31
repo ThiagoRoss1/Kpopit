@@ -1,0 +1,100 @@
+/* Idol page: a port of the handoff's IdolPagePersona14 (shape=puff, fx=final, tile=tab, rel=peek).
+   Layout switches are variables on .ip-inner, changed by the page's container width. */
+.ip-root { container-type: inline-size; }
+.ip-inner {
+  --pad-x: 48px; --p-photo: 520px; --hero-cols: minmax(0, 520px) minmax(0, 760px); --hero-gap: 56px; --tb-cols: var(--hero-cols);
+  --tb-bk-js: center; --tb-bk-w: min(100%, var(--p-photo)); --tb-gap: 16px 64px; --hero-align: left; --hero-items: flex-start;
+  --fv: 24px; --fk: 36px; --tab-fs: 22px; --lab-fs: 14px; --sub-fs: 15px; --chip-fs: 16px; --panel-pad: 24px; --band-top: 150px;
+  --rn: 58px; --fact-cols: repeat(6, minmax(0, 1fr)); --s-6: 6; --s-4: 4; --s-3: 3; --s-3n: 3; --s-2: 2; --s-2w: 2;
+  --rel-w: 240px; --kf-w: 42px; --kf-h: 28px; --sb-basis: 420px; --dd-l: 0px; --cap-t: 24px; --cap-b: 36px;
+  --ip-panel: #FFFDFA; --band: #1A1418; --tone: rgba(255, 51, 153, .11); --tab-o: #FFFDFA; --rb-in: inset 0 2px 0 rgba(255, 255, 255, .5);
+  --rb-l2: block; --speed: rgba(255, 255, 255, .06); --stripe: rgba(255, 51, 153, .13);
+  --ink-puff: -2px -2px 0 #1A1418,2px -2px 0 #1A1418,-2px 2px 0 #1A1418,2px 2px 0 #1A1418,0px 2px 0 #1A1418,0px -2px 0 #1A1418,2px 0px 0 #1A1418,-2px 0px 0 #1A1418,0.67px 1px 0 #1A1418,1.33px 2px 0 #1A1418,2px 3px 0 #1A1418,0px 1px 0 #1A1418,4px 1px 0 #1A1418,0px 5px 0 #1A1418,4px 5px 0 #1A1418,2px 5px 0 #1A1418,2px 1px 0 #1A1418,4px 3px 0 #1A1418,0px 3px 0 #1A1418;
+}
+[data-theme="night"] .ip-inner {
+  --ip-panel: #262226; --band: #3A3338; --tone: transparent; --tab-o: #1A1418; --rb-in: none; --rb-l2: none; --speed: rgba(255, 255, 255, .05); --stripe: transparent;
+}
+@container (max-width: 1280px) {
+  .ip-inner {
+    --hero-cols: minmax(0, 1fr); --hero-align: center; --hero-items: center; --p-photo: 420px; --tb-cols: auto minmax(0, 1fr); --tb-bk-js: start;
+    --tb-bk-w: auto; --tb-gap: 20px; --fv: 19px; --fk: 28px; --tab-fs: 18px; --band-top: 190px; --tab-o: #1A1418;
+  }
+  .ip-pane[aria-hidden="true"] { display: none !important; }
+  .ip-pane { grid-auto-rows: auto !important; align-content: start; row-gap: 32px !important; padding-top: 12px !important; --lab-l: 8px; }
+  .ip-fact { min-height: 112px; }
+}
+@container (max-width: 900px) { .ip-inner { --pad-x: 24px; } }
+@container (max-width: 860px) { .ip-inner { --rel-w: 210px; } }
+@container (max-width: 560px) {
+  .ip-inner {
+    --pad-x: 16px; --p-photo: 300px; --tab-fs: 16px; --fv: 16px; --fk: 22px; --lab-fs: 12px; --sub-fs: 13px; --chip-fs: 14px; --rn: 44px;
+    --panel-pad: 16px; --band-top: 160px; --fact-cols: repeat(2, minmax(0, 1fr)); --s-6: 2; --s-4: 2; --s-3: 1; --s-3n: 2; --s-2: 1; --s-2w: 2;
+    --rel-w: 170px; --kf-w: 24px; --kf-h: 16px; --sb-basis: 100%; --dd-l: -62px; --cap-t: 22px; --cap-b: 30px; --solo: 1 / -1;
+  }
+  .ip-lab { padding: 6px 9px 7px !important; letter-spacing: .06em !important; }
+  .ip-slash { display: none !important; }
+}
+@container (max-width: 359px) { .ip-inner { --p-photo: 262px; } }
+
+.ip-fact { min-height: 96px; container-type: inline-size; }
+/* Values fit their tile: the font shrinks with the tile width and the text length, up to the cap. */
+.ip-val { font-size: min(var(--fs-cap), calc((100cqi - 28px) * var(--fit-k, 1.5) / var(--len))); }
+.ip-name { container-type: inline-size; }
+.ip-letter { font-size: min(calc(var(--rn) * var(--ls)), calc(((100cqi + 36px) / var(--len) - 24px) / .78 * var(--lk))); }
+
+.ip-btn:focus-visible { outline: 3px solid #FF3399; outline-offset: 4px; }
+
+/* Back button: pink skewed sticker */
+.ip-back { transition: transform .3s var(--ease-pop), box-shadow .2s; }
+@media (hover: hover) { .ip-back:hover { transform: skewX(-7deg) rotate(-4deg) translate3d(-4px, 0, 0) !important; box-shadow: inset 0 3px 0 rgba(255, 255, 255, .5), 0 0 0 2px #1A1418, 8px 4px 0 2px #1A1418 !important; } }
+.ip-back:active:active:active:active { transform: skewX(-7deg) rotate(-4deg) translate3d(3px, 3px, 0) !important; box-shadow: inset 0 3px 0 rgba(255, 255, 255, .5), 0 0 0 2px #1A1418, 0 0 0 2px #1A1418 !important; }
+
+/* Search bar */
+.ip-sb { transition: box-shadow .3s, border-color .3s; }
+.ip-sb:focus-within { border-color: #1A1418 !important; box-shadow: 4px 5px 0 #FF8AC4 !important; }
+.ip-q { text-overflow: ellipsis; }
+.ip-opt { transition: background-color .25s, transform .3s var(--ease-settle); }
+.ip-opt[data-active="1"] { background: var(--chip-hover); transform: translate3d(4px, 0, 0); }
+@media (hover: hover) { .ip-opt:hover { background: var(--chip-hover); transform: translate3d(4px, 0, 0); } }
+
+/* Photo: the sweep and zoom run on hover */
+.ip-photo img { transition: transform .8s var(--ease-settle); }
+.ip-sweep { transform: translate3d(-30%, 0, 0); transition: transform .9s cubic-bezier(.25, 1, .5, 1); }
+@media (hover: hover) {
+  .ip-photo-wrap:hover .ip-photo img { transform: scale(1.04); }
+  .ip-photo-wrap:hover .ip-sweep { transform: translate3d(42%, 0, 0); transition-duration: 1.4s; }
+}
+
+/* Tabs */
+.ip-tab { transition: transform .38s var(--ease-settle), background-color .25s, color .25s, box-shadow .3s var(--ease-settle); }
+@media (hover: hover) { .ip-tab[data-on="false"]:hover { transform: translate3d(0, -2px, 0) rotate(0deg) !important; filter: brightness(1.03); } }
+.ip-tab:active:active:active:active:active { transform: translate3d(2px, 3px, 0) rotate(0deg) !important; box-shadow: 0 0 0 0 #FF8AC4, 0 0 0 0 #1A1418 !important; filter: none; transition-duration: .15s !important; }
+
+/* Related idols scroller: pink scrollbar on a full-width track */
+.ip-rel { scrollbar-width: auto; }
+.ip-rel::-webkit-scrollbar { height: 14px; }
+.ip-rel::-webkit-scrollbar-track { margin: 0 14px; border-radius: 999px; background: linear-gradient(var(--rule), var(--rule)) center / 100% 3px no-repeat; }
+.ip-rel::-webkit-scrollbar-thumb { background: #FF8AC4; border: 2px solid #1A1418; border-radius: 999px; box-shadow: inset 0 2px 0 rgba(255, 255, 255, .55); }
+.ip-rel::-webkit-scrollbar-thumb:hover { background: #FF70B8; }
+.ip-rel::-webkit-scrollbar-thumb:active { background: #FF3399; }
+@supports not selector(::-webkit-scrollbar) { .ip-rel { scrollbar-width: thin; scrollbar-color: #FF8AC4 transparent; } }
+.ip-rcard { transition: transform .38s var(--ease-settle), box-shadow .3s ease; }
+@media (hover: hover) { .ip-rcard:hover { transform: rotate(0deg) translate3d(0, -4px, 0) !important; } }
+.ip-rcard:active:active:active:active { transform: rotate(0deg) translate3d(3px, 4px, 0) !important; box-shadow: 2px 2px 0 var(--ctl-off), var(--in) !important; transition-duration: .15s !important; }
+
+.ip-cta { transition: transform .2s var(--ease-settle), box-shadow .2s; }
+@media (hover: hover) { .ip-cta:hover { transform: translate3d(0, -2px, 0); box-shadow: 0 6px 0 #1A1418, inset 0 2px 0 rgba(255, 255, 255, .4) !important; } }
+.ip-cta:active:active:active:active { transform: translate3d(0, 4px, 0); box-shadow: 0 0 0 #1A1418, inset 0 2px 0 rgba(255, 255, 255, .4) !important; }
+
+/* Entrances (backwards fill, so hover and press transforms still apply after them) */
+.ip-in-photo { animation: ipPhoto .7s var(--ease-settle) backwards; }
+.ip-in-side { animation: ipSide .5s var(--ease-settle) .2s backwards; }
+.ip-in-menu { animation: ipMenu .55s var(--ease-settle) backwards; }
+.ip-in-tile { animation: ipTile .45s cubic-bezier(.34, 1.4, .64, 1) backwards; }
+.ip-in-drop { animation: ipDrop .34s cubic-bezier(.34, 1.4, .64, 1) backwards; }
+@keyframes ipSide { from { opacity: 0; transform: translate3d(-24px, 0, 0) } }
+@keyframes ipPhoto { from { opacity: 0; transform: scale(1.12) } }
+@keyframes ipTile { from { opacity: 0; transform: translate3d(0, 10px, 0) scale(.96) } }
+@keyframes ipMenu { from { opacity: 0; transform: translate3d(90px, 0, 0) } }
+@keyframes ipDrop { from { opacity: 0; transform: translate3d(0, -8px, 0) scale(.97) } }
+@media (prefers-reduced-motion: reduce) { .ip-inner *, .ip-inner { animation: none !important; transition-duration: 0s !important; } }

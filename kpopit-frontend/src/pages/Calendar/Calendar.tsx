@@ -136,7 +136,7 @@ function CalendarView({ data }: { data: CalendarTimeline }) {
                     </header>
 
                     <div className="pp-enter [--pp-anim:puffDrop] [--pp-delay:70ms] flex items-center flex-wrap gap-(--head-gap) mb-[22px]">
-                        <div role="tablist" aria-label="Game mode" className="flex gap-(--mt-gap) flex-[1_1_auto] flex-wrap justify-(--mt-js)">
+                        <div role="tablist" aria-label="Game mode" className="flex gap-(--mt-gap) flex-[1_1_auto] flex-wrap [justify-content:var(--mt-js)]">
                             {MODES.map((m) => {
                                 const on = m.id === mode;
                                 return (
@@ -410,8 +410,8 @@ function TimelineView({ days, selected, mode, order, setOrder, extra, setExtra, 
 
     return (
         <>
-            <div className="flex [flex-direction:var(--tlh-dir)] items-center justify-(--tlh-js) gap-x-3 gap-y-2.5 flex-wrap">
-                <div className="flex items-center justify-(--tlh-js) gap-2.5 flex-wrap text-center">
+            <div className="flex [flex-direction:var(--tlh-dir)] items-center [justify-content:var(--tlh-js)] gap-x-3 gap-y-2.5 flex-wrap">
+                <div className="flex items-center [justify-content:var(--tlh-js)] gap-2.5 flex-wrap text-center">
                     <span className="font-medium text-[13px] text-(--muted)">{note}</span>
                     {expanded && (
                         <button type="button" className={gapButton} onClick={() => { setExtra(0); setTlMonth(null); setPicker(null); }}>

@@ -238,6 +238,7 @@ export interface IdolProfileData {
   idol_career: {
     fandom_name: string | null;
     group_name: string | null;
+    group_hangul?: string | null;
     is_former_group: boolean;
     idol_debut_year: number;
     group_companies: Company[];

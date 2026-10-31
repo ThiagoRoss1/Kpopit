@@ -7,6 +7,8 @@ import { holdForData } from "../../src/utils/holdNavigation";
 import type { IdolProfileData } from "../../src/interfaces/gameInterfaces";
 import { orNothing, fetchIdolProfile } from "../prerender-api";
 
+export const handle = { puff: true };
+
 // Build time only: each prerendered idol page gets its profile baked in.
 export async function loader({ params }: LoaderFunctionArgs) {
   return { profile: await orNothing(fetchIdolProfile(Number(params.id))) };

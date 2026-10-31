@@ -99,6 +99,7 @@ def test_idols_page_profile_flags_former_group(client, ex_member):
     assert career["group_name"] == "LATENCY"
     assert career["is_former_group"] is True
     assert career["fandom_name"] == "LTC"
+    assert "group_hangul" in career
     assert [c["name"] for c in career["group_companies"]] == ["LATENCY Label"]
     # Current/Past history is read separately and stays truthful.
     assert all(not stint["is_active"] for stint in career["idol_career"])

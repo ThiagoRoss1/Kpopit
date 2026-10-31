@@ -1,64 +1,46 @@
-import "./IdolProfile.css";
-import { useState, useMemo, useEffect } from "react";
+import "./idolPage.css";
+import { useEffect, useState, type CSSProperties } from "react";
 import { useQuery } from "@tanstack/react-query";
-import type { IdolProfileData } from "../../interfaces/gameInterfaces";
-import { Link, useParams, useNavigate } from "react-router";
-import { 
-    CircleChevronLeft, MicVocal, SquareUserRound, CalendarDays, 
-    Cake, Ruler, MapPinHouse, UserStar, Users, MessageSquareHeart, 
-    Building2, Disc3, Sparkles, Building, UsersRound, BadgeCheck
-} from "lucide-react";
-import { motion } from "motion/react";
-import InfoItem from "./InfoItem";
-import useCalculateAge from "../../hooks/useCalculateAge";
-import { getNationalityFlag } from "../../utils/getFlags";
-import { useDateLocale } from "../../hooks/useDateLocale";
-import IdolsProfileSearch from "../../components/IdolsSearchBar/IdolsProfileSearch";
+import { Link, useNavigate, useParams } from "react-router";
+import { ArrowLeft } from "lucide-react";
+import type { IdolProfileData, IdolsPageData } from "../../interfaces/gameInterfaces";
+import calculateAge from "../../hooks/useCalculateAge";
 import { useHydrated } from "../../hooks/useHydrated";
 import PageMeta, { SITE_URL } from "../../components/Seo/PageMeta";
-import { resolveCdnUrl } from "../../utils/imageUrl";
-import { buildIdolSlug, formatGroupName } from "../../utils/formatters";
 import PageLoader from "../../components/Loading/PageLoader";
-import Img from "../../components/Img";
 import IntentLink from "../../components/Links/IntentLink";
-import { idolProfileQuery, idolsListQuery, prefetchIdolsList } from "./idolsData";
+import { getNationalityFlag } from "../../utils/getFlags";
+import { resolveCdnUrl } from "../../utils/imageUrl";
+import { buildIdolSlug } from "../../utils/formatters";
+import { groupLabel, idolProfileQuery, idolsListQuery, prefetchIdolProfile, prefetchIdolsList } from "./idolsData";
+import { buildFacts, relatedIdols, type Fact, type FactChip, type TabKey } from "./idolFacts";
+import IdolSearch from "./IdolSearch";
+
+const TABS: [TabKey, string][] = [["profile", "Profile"], ["career", "Career"], ["status", "Status"]];
+const NO_IDOLS: IdolsPageData[] = [];
+
+// Ransom-note letters: five sticker looks cycled per letter, offset by the idol id.
+const LT = "inset 0 3px 0 rgba(255,255,255,.75),inset 0 -5px 0 rgba(26,20,24,.13),4px 4px 0 #1A1418";
+const DK = "inset 0 3px 0 rgba(255,255,255,.2),inset 0 -5px 0 rgba(0,0,0,.45),4px 4px 0 #1A1418";
+const PK = "inset 0 3px 0 rgba(255,255,255,.55),inset 0 -5px 0 rgba(198,35,104,.35),4px 4px 0 #1A1418";
+const LETTER = [
+    { bg: "#FFFFFF", fg: "#1A1418", sh: LT }, { bg: "#1A1418", fg: "#FFFFFF", sh: DK }, { bg: "#FF3399", fg: "#1A1418", sh: PK },
+    { bg: "#FAF6F0", fg: "#1A1418", sh: LT }, { bg: "#FF8AC4", fg: "#1A1418", sh: PK },
+];
+const ROT = [-6, 4, -3, 7, -5, 3, -7, 5];
+const DY = ["0px", "-5px", "3px", "-2px", "5px", "-4px"];
+const CHIP = [
+    { bg: "#FF8AC4", fg: "#1A1418", in: "inset 0 2px 0 rgba(255,255,255,.55),inset 0 -3px 0 rgba(198,35,104,.3)" },
+    { bg: "#FFFDFA", fg: "#1A1418", in: "inset 0 2px 0 #FFFFFF,inset 0 -3px 0 rgba(26,20,24,.08)" },
+    { bg: "#1A1418", fg: "#FFFFFF", in: "inset 0 2px 0 rgba(255,255,255,.2),inset 0 -3px 0 rgba(0,0,0,.4)" },
+];
 
 // initialProfile: build-time data for the prerendered page; stale at once, so it refetches.
-function IdolProfile({ initialProfile }: { initialProfile?: IdolProfileData }) {
-
-    const { formatBirthDate } = useDateLocale();
-
+export default function IdolProfile({ initialProfile }: { initialProfile?: IdolProfileData }) {
     const { id, slug } = useParams<{ id: string; slug: string }>();
     const navigate = useNavigate();
-
-    const [activeTab, setActiveTab] = useState<string>("Profile");
-    const [isFirstLoad, setIsFirstLoad] = useState(true);
-    const [searchTerm, setSearchTerm] = useState("");
-    // A new idol (picked from the search) starts with an empty search, set while rendering.
-    const [searchFor, setSearchFor] = useState(id);
-    if (searchFor !== id) {
-        setSearchFor(id);
-        setSearchTerm("");
-    }
-
-    useEffect(() => {
-        const time = setTimeout(() => setIsFirstLoad(false), 2000);
-        return () => clearTimeout(time);
-    }, []);
-    
-
-    const shouldStagger = activeTab === "Profile" && isFirstLoad;
-
-    const {
-        data: idolPageData,
-    } = useQuery({ ...idolsListQuery, refetchOnWindowFocus: false });
-
-    const {
-        data: idolProfileData,
-        isLoading: isLoadingIdolProfileData,
-        isError: isErrorIdolProfileData,
-        refetch: refetchIdolProfileData,
-    } = useQuery({
+    const { data: idols } = useQuery({ ...idolsListQuery, refetchOnWindowFocus: false });
+    const { data, isLoading, isError, refetch } = useQuery({
         ...idolProfileQuery(id ?? ""),
         initialData: initialProfile,
         initialDataUpdatedAt: 0,
@@ -66,393 +48,292 @@ function IdolProfile({ initialProfile }: { initialProfile?: IdolProfileData }) {
         enabled: !!id,
     });
 
-    const idolProfile = idolProfileData?.idol_profile;
-    const idolCareer = idolProfileData?.idol_career;
-
+    // Old or edited slugs redirect to the canonical one.
     useEffect(() => {
-        if (idolProfile) {
-            const correctSlug = buildIdolSlug(idolProfile.artist_name, idolCareer?.group_name);
+        if (!data) return;
+        const correct = buildIdolSlug(data.idol_profile.artist_name, data.idol_career.group_name);
+        if (slug !== correct) navigate(`/idols/${id}/${correct}`, { replace: true });
+    }, [data, id, slug, navigate]);
 
-            if (slug !== correctSlug) {
-                navigate(`/idols/${id}/${correctSlug}`, { replace: true });
-            }
-        }
-    }, [idolProfile, idolCareer, id, slug, navigate]);
+    if (!data) {
+        return <PageLoader message="Loading Idol Profile Data..." error={isError && !isLoading} errorMessage="Error fetching idol profile data." onRetry={() => refetch()} />;
+    }
+    return <IdolPage key={data.idol_profile.idol_id} data={data} idols={idols ?? NO_IDOLS} />;
+}
 
+function IdolPage({ data, idols }: { data: IdolProfileData; idols: IdolsPageData[] }) {
+    const [tab, setTab] = useState<TabKey>("profile");
     // Age depends on today's date, which can differ between the build and the visit.
     const hydrated = useHydrated();
-    const age = useCalculateAge(idolProfile?.birth_date || "");
+    const p = data.idol_profile;
+    const c = data.idol_career;
+    const facts = buildFacts(data, hydrated ? calculateAge(p.birth_date) : null);
+    const related = relatedIdols(idols, data);
 
-    const nationality = idolProfile?.nationality;
-    const nationalities = nationality ? nationality.split(",").map(nat => nat.trim()) : [];
-
-    const idolCompanies = idolCareer?.idol_companies.map(company => company.name).join(", ") || "N/A";
-    
-    const careerData = useMemo(() => {
-        const all = idolCareer?.idol_career || [];
-
-        return {
-            currentGroupName: all.filter(career => career.is_active).map(career => career.group_name).join(", ") || null,
-
-            pastGroups: all.filter(career => !career.is_active).map(career => `${career.group_name} (${career.start_year} - ${career.end_year})`).join(", ") || "N/A"
-        }
-    }, [idolCareer]);
-
-    const groupCompaniesData = useMemo(() => {
-        const companies = idolCareer?.group_companies || [];
-
-        return {
-            parentCompanies: companies.filter(company => company.role === "Parent Company").map(company => company.name).join(", ") || 
-            companies.filter(company => company.role !== "Parent Company" && company.parent_company_id === null).map(company => company.name).join(", ") || "N/A",
-
-            labelCompanies: companies.filter(company => company.role === "Label" || (company.parent_company_id !== null && company.role !== "Parent Company")).map(company => company.name).join(", ") || "N/A"
-        }
-    }, [idolCareer]);
-
-    const gameInfo = idolProfileData?.game_info;
-    const gameModesAvailable = gameInfo ? Object.keys(gameInfo.game_modes_available).filter(mode => gameInfo.game_modes_available[mode as keyof typeof gameInfo.game_modes_available]).map(mode => ({name: mode, path: `/${mode.toLowerCase()}`})) : "N/A";
-
-    const gameModeLinks = useMemo(() => {
-        if (!Array.isArray(gameModesAvailable)) return "N/A";
-        if (gameModesAvailable.length === 0) return "N/A";
-
-        return gameModesAvailable.map((mode, index) => (
-            <span key={index}>
-                <Link
-                    to={mode.path}
-                    className="hover:text-neon-pink transition-colors duration-300">
-                        {mode.name}
-                </Link>
-                {index < gameModesAvailable.length - 1 && ", "}
-            </span>
-        ));
-    }, [gameModesAvailable]);
-    
-    // The route hands the page its profile (prerendered or loaded before the switch); this only shows
-    // if the cache lost it.
-    if (!idolProfileData) {
-        return (
-            <PageLoader
-                message="Loading Idol Profile Data..."
-                error={isErrorIdolProfileData && !isLoadingIdolProfileData}
-                errorMessage="Error fetching idol profile data."
-                onRetry={() => refetchIdolProfileData()}
-            />
-        );
-    }
-
-    // Page meta (title, link previews, structured data)
-    const artistName = idolProfileData.idol_profile.artist_name;
-    const groupName = idolProfileData.idol_career.group_name;
-    // `groupName` is null when the idol has no active career row - keep the copy readable instead of printing "null".
+    const artistName = p.artist_name;
+    const groupName = c.group_name;
     const nameWithGroup = groupName ? `${artistName} (${groupName})` : artistName;
     const ofGroup = groupName ? `${artistName} of ${groupName}` : artistName;
-    const canonicalPath = `/idols/${idolProfileData.idol_profile.idol_id}/${buildIdolSlug(artistName, groupName)}`;
-    const cdnImage = resolveCdnUrl(idolProfileData.idol_profile.image_path, idolProfileData.idol_profile.image_version);
+    const canonicalPath = `/idols/${p.idol_id}/${buildIdolSlug(artistName, groupName)}`;
+    const cdnImage = resolveCdnUrl(p.image_path, p.image_version);
     // Link previews need an absolute URL; without a bucket URL in the build, keep the site image.
     const idolImage = cdnImage && /^https?:\/\//.test(cdnImage) ? cdnImage : undefined;
-    const idolJsonLd = {
+    const jsonLd = {
         "@context": "https://schema.org",
         "@type": "ProfilePage",
         "url": `${SITE_URL}${canonicalPath}`,
         "mainEntity": {
             "@type": "Person",
             "name": artistName,
-            ...(idolProfileData.idol_profile.real_name && { "alternateName": idolProfileData.idol_profile.real_name }),
+            ...(p.real_name && { "alternateName": p.real_name }),
             ...(groupName && { "memberOf": { "@type": "MusicGroup", "name": groupName } }),
             ...(idolImage && { "image": idolImage }),
         },
     };
-    const idolTitle = `${nameWithGroup} · Stats & Profile - KpopIt`;
-    const idolDescription = `Stats and profile for ${ofGroup} on KpopIt.`;
-    const ogTitle = `${nameWithGroup} · KpopIt`;
-    const ogDescription = `Stats, profile and career info for ${ofGroup}.`;
+
+    const letters = [...artistName.toUpperCase()];
+    const count = letters.filter((ch) => ch !== " ").length;
+    const scale = count <= 5 ? 1 : count <= 7 ? 0.86 : count <= 9 ? 0.74 : 0.64;
+    let letterIndex = -1;
 
     return (
-        <div className="w-full min-h-full bg-ink">
+        <div className="ip-root relative flex-1">
             <PageMeta
-                title={idolTitle}
-                description={idolDescription}
+                title={`${nameWithGroup} · Stats & Profile - KpopIt`}
+                description={`Stats and profile for ${ofGroup} on KpopIt.`}
                 path={canonicalPath}
                 image={idolImage}
-                social={{ title: ogTitle, description: ogDescription }}
-                jsonLd={idolJsonLd}
+                social={{ title: `${nameWithGroup} · KpopIt`, description: `Stats, profile and career info for ${ofGroup}.` }}
+                jsonLd={jsonLd}
             />
-            
-            <div className="flex flex-col relative max-w-7xl mx-auto">
-                <div className="flex flex-row w-full mt-7 justify-between items-center mb-8">
-                    <div className="flex flex-row w-full justify-center md:justify-start items-center gap-6">
+            <div className="ip-inner relative isolate overflow-hidden min-h-full bg-(--ground) text-(--text) px-(--pad-x) pb-9 transition-colors duration-300">
+                <div aria-hidden className="absolute inset-0 -z-2 pointer-events-none bg-[radial-gradient(circle,var(--dot)_1.4px,transparent_1.8px)] bg-size-[19px_19px]" />
+                <div aria-hidden className="absolute -left-[30%] -right-[30%] top-(--band-top) h-[300px] -z-1 bg-(--band) -rotate-9 pointer-events-none" />
+                <div aria-hidden className="absolute -left-[30%] -right-[30%] top-[calc(var(--band-top)+316px)] h-3 -z-1 bg-[#FF3399] opacity-45 -rotate-9 pointer-events-none" />
+                <div aria-hidden className="absolute -left-[30%] -right-[30%] top-[calc(var(--band-top)+334px)] h-1 -z-1 bg-(--band) opacity-45 -rotate-9 pointer-events-none" />
+
+                <div className="relative z-8 max-w-[1360px] mx-auto mt-[26px] grid grid-cols-(--tb-cols) justify-center items-center gap-(--tb-gap)">
+                    <div className="[justify-self:var(--tb-bk-js)] w-(--tb-bk-w) flex min-w-0">
                         <IntentLink
                             to="/idols"
                             onIntent={prefetchIdolsList}
                             aria-label="Back to the idols list"
-                            className="group w-14 h-14 sm:w-15 sm:h-15 rounded-full flex items-center justify-center hover:scale-105 transition-transform duration-300">
-                            <CircleChevronLeft className="text-white/50 group-hover:text-white w-15 h-15 transition-colors duration-300" size={24} />
+                            className="ip-back ip-btn grid place-items-center w-11 h-11 m-0.5 no-underline bg-[#FF8AC4] [box-shadow:inset_0_3px_0_rgba(255,255,255,.5),0_0_0_2px_#1A1418,4px_5px_0_2px_#1A1418] [transform:skewX(-7deg)_rotate(-4deg)] [backface-visibility:hidden]"
+                        >
+                            <ArrowLeft aria-hidden className="w-5 h-5 text-[#1A1418]" strokeWidth={3} />
                         </IntentLink>
-
-                        <IdolsProfileSearch
-                            idolsData={idolPageData || []} 
-                            searchTerm={searchTerm}
-                            onChange={(term) => setSearchTerm(term)}
-                            onChoose={() => {}}
-                            excludedIdols={id ? [Number(id)] : []}
-                        />
-
                     </div>
-
-                    <div className="max-[768px]:hidden flex flex-row w-full justify-end items-center gap-4">
-                        <span className="font-sans font-bold text-white text-lg sm:text-xl">
-                            Wrong info ?
-                        </span>
-
-                        <Link 
-                            to="/contact"
-                            className="font-sans text-white text-lg sm:text-xl font-bold bg-neon-pink px-2 py-1 rounded-xl hover:bg-neon-pink/80 transition-colors duration-300">
-                                Contact me
-                        </Link>
-                    </div>
+                    <IdolSearch idols={idols} currentId={p.idol_id} />
                 </div>
 
-                {/* Idol profile content */}
-                <div className="idol-profile-enter justify-center flex max-lg:items-center flex-col lg:flex-row w-full h-fit bg-white/0 max-lg:border-b-2 max-lg:border-t-2 lg:border-r-2 lg:border-b-2 border-neon-pink rounded-4xl">
-                    {/* Idol card */}
-                    <div className="group relative flex zm:w-100 zm:h-120 sm:w-120 sm:h-120 md:w-120 md:h-120 lg:w-90 lg:h-160 xl:w-114 xl:h-160 rounded-3xl shrink-0 overflow-hidden max-zm:border-b-2 zm:border-2 lg:border-0 lg:border-t-2 lg:border-r-2 border-neon-pink max-lg:mt-4">
-                        <Img
-                            priority
-                            src={`${import.meta.env.VITE_IMAGE_BUCKET_URL}${idolProfile?.image_path}?v=${idolProfile?.image_version}`}
-                            alt={`${idolProfile?.artist_name} photo`}
-                            className="idol-photo-enter w-full h-full object-cover group-hover:scale-105 transition-transform firefox:duration-500 duration-700 transform-gpu"
-                            draggable={false}                    
-                        />
-
-                        {/* Idol name and group */}
-                        <div className="absolute lg:top-115 bottom-0 left-0 bg-linear-to-t from-ink via-ink/60 to-transparent w-full">
-                            <div className="names-enter flex flex-col justify-center items-start w-full h-full px-4 py-5 xl:px-8 sm:py-5 gap-1.5 whitespace-nowrap">
-                                {idolCareer?.group_name && (
-                                <div 
-                                    className="names-enter px-2 bg-neon-pink rounded-2xl"
-                                    style={{ animationDelay: "0.8s" }}>
-                                    <span className="font-bold text-white text-base md:text-lg">
-                                        {formatGroupName(idolCareer.group_name, idolCareer.is_former_group)}
-                                    </span>
+                <section className="relative w-full max-w-[1360px] mx-auto mt-9 grid grid-cols-(--hero-cols) justify-center gap-y-11 gap-x-(--hero-gap) items-center">
+                    <div className="ip-photo-wrap relative isolate justify-self-center w-[min(100%,var(--p-photo))] mt-3.5 pb-[calc(var(--rn)*.8)]">
+                        <div aria-hidden className="absolute -left-[18%] -top-[14%] w-[136%] aspect-square -z-1 pointer-events-none bg-[radial-gradient(circle,var(--tone)_2.4px,transparent_2.8px)] bg-size-[11px_11px] [mask-image:radial-gradient(circle_at_55%_45%,#000_0%,rgba(0,0,0,.5)_32%,transparent_62%)]" />
+                        <div className="ip-in-photo relative">
+                            <div className="ip-photo relative -rotate-3 border-[3px] border-[#1A1418] rounded-[30px] bg-[#1A1418] shadow-[8px_8px_0_#FF8AC4,8px_8px_0_3px_#1A1418] aspect-[4/5]">
+                                <div className="absolute inset-0 overflow-hidden rounded-[27px] [clip-path:inset(0_round_27px)] isolate [transform:translateZ(0)]">
+                                    <img src={cdnImage ?? ""} alt={`${artistName} photo`} draggable={false} className="w-full h-full object-cover block" />
+                                    <div aria-hidden className="ip-sweep absolute top-0 bottom-0 -left-[60%] w-[220%] pointer-events-none bg-[linear-gradient(118deg,rgba(255,255,255,0)_40%,rgba(255,255,255,.13)_47%,rgba(255,255,255,.04)_51%,rgba(255,255,255,0)_57%)]" />
+                                    <div aria-hidden className="absolute inset-0 pointer-events-none mix-blend-screen bg-[radial-gradient(ellipse_85%_50%_at_82%_-4%,rgba(255,138,196,.24),rgba(255,138,196,0)_70%)]" />
                                 </div>
-                                )}
-
-                                <span 
-                                    className={`main-name-enter font-sans font-black text-white ${(idolProfile?.artist_name.length ?? 0) >= 10 
-                                    && (idolProfile?.artist_name.length ?? 0) < 12 ? 'text-4xl xxs:text-5xl xl:text-6xl' : 
-                                    (idolProfile?.artist_name.length ?? 0) >= 12 && (idolProfile?.artist_name.length ?? 0) <= 14 ? 'text-3xl sxs:text-4xl xl:text-5xl' :
-                                    (idolProfile?.artist_name.length ?? 0) > 14 ? 'text-3xl xxs:text-4xl' : 'text-5xl xxs:text-6xl xl:text-7xl'}
-                                    [text-shadow:4px_4px_2px_rgba(255,51,153,0.8)]`}
-                                    style={{ animationDelay: "1.0s" }}>
-                                        {idolProfile?.artist_name}
-                                </span>
-
-                                <span 
-                                    className="names-enter font-sans font-bold text-white text-base md:text-lg [text-shadow:2px_2px_2px_rgba(0,0,0,0.8),0px_0px_10px_rgba(255,255,255,0.6)]"
-                                    style={{ animationDelay: "1.4s" }}>
-                                        {idolProfile?.real_name}
-                                </span>
                             </div>
                         </div>
-                    </div>
-
-                    {/* Idols details - profile / career */}
-                    <div className="flex flex-col w-full justify-start items-center p-6 lg:py-6 lg:px-4 xl:p-6">
-                        {/* Tab selection */}
-                        <div className="flex flex-row w-full overflow-x-auto justify-start items-center gap-6 border-b border-white/20">
-                            {["Profile", "Career", "Status"].map((tab) => (
-                                <button
-                                    key={tab}
-                                    onClick={() => setActiveTab(tab)}
-                                    className={`relative text-lg font-semibold ${activeTab === tab ? "text-neon-pink" : "text-white/60 hover:text-white"} 
-                                    hover:cursor-pointer transition-colors duration-300`}
-                                >
-                                    {tab}
-                                    {activeTab === tab && (
-                                        <motion.div
-                                            layoutId="activeTab"
-                                            className="absolute bottom-0 left-0 right-0 h-0.5 bg-neon-pink shadow-[0_0_8px_#ff007f]" 
-                                        />
+                        <div className="ip-in-side absolute -left-[18px] -right-[18px] bottom-0 z-4 flex flex-col items-start gap-3">
+                            {groupName && (
+                                <span className="ml-2 inline-flex items-center gap-2 pt-[7px] px-[13px] pb-2 bg-[#FF3399] text-[#1A1418] border-[2.5px] border-[#1A1418] rounded-[12px] font-bold text-[15px] leading-none tracking-[.08em] -rotate-4 shadow-[3px_3px_0_#1A1418]">
+                                    <span>{groupName.toUpperCase()}</span>
+                                    {c.group_hangul && (
+                                        <>
+                                            <span className="w-1.5 h-1.5 rounded-full bg-[#1A1418]" />
+                                            <span lang="ko" className="font-korean font-bold text-[13px] tracking-normal">{c.group_hangul}</span>
+                                        </>
                                     )}
-                                </button>
-                            ))}
+                                </span>
+                            )}
+                            <div className="ip-name w-full">
+                                <div role="img" aria-label={artistName} className="flex flex-nowrap gap-[3px]">
+                                    {letters.map((ch, k) => {
+                                        if (ch === " ") return <span key={k} aria-hidden className="w-2.5 flex-none" />;
+                                        letterIndex++;
+                                        const look = LETTER[(letterIndex * 3 + p.idol_id) % 5];
+                                        const odd = letterIndex % 2 === 1;
+                                        return (
+                                            <span
+                                                key={k}
+                                                aria-hidden
+                                                className="ip-letter inline-block font-bold leading-none pt-1 px-2 pb-1.5 border-[2.5px] border-[#1A1418] rounded-[12px] [backface-visibility:hidden]"
+                                                style={{
+                                                    background: look.bg, color: look.fg, boxShadow: look.sh,
+                                                    transform: `rotate(${ROT[letterIndex % 8]}deg) translateY(${DY[letterIndex % 6]})`,
+                                                    "--ls": odd ? scale * 0.82 : scale, "--lk": odd ? 0.82 : 1, "--len": count,
+                                                } as CSSProperties}
+                                            >
+                                                {ch}
+                                            </span>
+                                        );
+                                    })}
+                                </div>
+                            </div>
                         </div>
-
-                        {/* Tab content */}
-                        {activeTab === "Profile" && (
-                            <div className="fill-mode-forwards grid grid-cols-1 md:grid-cols-2 w-full h-fit gap-5 mt-5">
-                                {/* Artist Name */}
-                                <InfoItem
-                                    index={1}
-                                    icon={MicVocal}
-                                    label="Artist Name"
-                                    value={idolProfile?.artist_name}
-                                    size="small"
-                                    shouldStagger={shouldStagger}
-                                />
-
-                                {/* Real Name */}
-                                <InfoItem
-                                    index={2}
-                                    icon={SquareUserRound}
-                                    label="Real Name"
-                                    value={idolProfile?.real_name} 
-                                    size="small"
-                                    shouldStagger={shouldStagger}
-                                />
-
-                                {/* Birth Date */}
-                                <InfoItem
-                                    index={3}
-                                    icon={CalendarDays}
-                                    label="Birth Date"
-                                    value={idolProfile?.birth_date ? formatBirthDate(idolProfile.birth_date) : "N/A"} 
-                                    size="small"
-                                    shouldStagger={shouldStagger}
-                                />
-
-                                {/* Age */}
-                                <InfoItem
-                                    index={4}
-                                    icon={Cake}
-                                    label="Age"
-                                    value={!hydrated ? "" : age !== 0 ? age.toString() : "N/A"} 
-                                    size="small"
-                                    shouldStagger={shouldStagger}
-                                />
-
-                                {/* Height */}
-                                <InfoItem
-                                    index={5}
-                                    icon={Ruler}
-                                    label="Height"
-                                    value={`${idolProfile?.height} cm`} 
-                                    size="small"
-                                    shouldStagger={shouldStagger}
-                                />
-
-                                {/* Nationality */}
-                                <InfoItem
-                                    index={6}
-                                    icon={MapPinHouse}
-                                    label={`${nationalities.length > 1 ? "Nationalities" : "Nationality"}`}
-                                    value={nationalities.map((nat, i) => {
-                                        const flag = getNationalityFlag(nat);
-                                        return flag ? (
-                                            <Img key={i} src={flag} alt={`${nat} flag`} className="w-10 h-7.5 rounded-sm inline-block" draggable={false} />
-                                        ) : nat })
-                                    }
-                                    size="small"
-                                    shouldStagger={shouldStagger}
-                                />
-
-                                {/* Positions */}
-                                <div className="flex md:col-span-2 h-full w-full">
-                                    <InfoItem
-                                        index={7}
-                                        icon={UserStar}
-                                        label={`${idolProfile?.position.includes(",") ? "Positions" : "Position"}`}
-                                        value={idolProfile?.position}
-                                        size="large" 
-                                        shouldStagger={shouldStagger}
-                                    />
-                                </div>
-                            </div>
-                        )}
-
-                        {activeTab === "Career" && (
-                            <div className="grid grid-cols-1 md:grid-cols-2 w-full h-fit gap-5 mt-5">
-                                {/* Current Group Name */}
-                                <InfoItem
-                                    icon={Users}
-                                    label={`${careerData.currentGroupName?.includes(",") ? "Current Groups" : "Current Group"}`}
-                                    value={careerData.currentGroupName || idolCareer?.group_name || "N/A"}
-                                    size="small" 
-                                />
-
-                                {/* Fandom Name */}
-                                <InfoItem
-                                    icon={MessageSquareHeart}
-                                    label="Fandom Name"
-                                    value={idolCareer?.fandom_name || "N/A"}
-                                    size="small" 
-                                />
-
-                                {/* Parent Companies */}
-                                <InfoItem
-                                    icon={Building2}
-                                    label={`${groupCompaniesData.parentCompanies?.includes(",") ? "Parent Companies" : "Parent Company"}`}
-                                    value={groupCompaniesData.parentCompanies}
-                                    size="small" 
-                                />
-
-                                {/* Label Companies */}
-                                <InfoItem
-                                    icon={Disc3}
-                                    label={`${groupCompaniesData.labelCompanies?.includes(",") ? "Labels" : "Label"}`}
-                                    value={groupCompaniesData.labelCompanies}
-                                    size="small" 
-                                />
-
-                                {/* Debut Year */}
-                                <InfoItem
-                                    icon={Sparkles}
-                                    label="Debut Year"
-                                    value={idolCareer?.idol_debut_year}
-                                    size="small" 
-                                />
-
-                                {/* Idol Companies */}
-                                <InfoItem
-                                    icon={Building}
-                                    label={`${idolCompanies.includes(",") ? "Idol Companies" : "Idol Company"}`}
-                                    value={idolCompanies}
-                                    size="small" 
-                                />
-
-                                {/* Past Groups */}
-                                <div className="flex md:col-span-2 h-full w-full ">
-                                    <InfoItem
-                                        icon={UsersRound}
-                                        label={`${careerData.pastGroups?.includes(",") ? "Past Groups" : "Past Group"}`}
-                                        value={careerData.pastGroups}
-                                        size="large" 
-                                    />
-                                </div>
-                            </div>
-                        )}
-
-                        {activeTab === "Status" && (
-                            <div className="grid grid-cols-1 md:grid-cols-2 w-full h-fit gap-5 mt-5">
-                                {/* Game modes Available */}
-                                <div className="flex md:col-span-2 h-full w-full ">
-                                    <InfoItem
-                                        icon={BadgeCheck}
-                                        label="Available in"
-                                        value={gameModeLinks}
-                                        size="large" 
-                                    />
-                                </div>
-                            </div>
-                        )}
                     </div>
-                </div>
-                
-                <div className="min-[769px]:hidden flex flex-row w-full justify-center items-center gap-4 mt-6">
-                        <span className="font-sans font-bold text-white text-lg sm:text-xl">
-                            Wrong info ?
-                        </span>
 
-                        <Link 
-                            to="/contact"
-                            className="font-sans text-white text-lg sm:text-xl font-bold bg-neon-pink px-2 py-1 rounded-xl hover:bg-neon-pink/80 transition-colors duration-300">
-                                Contact me
+                    <div className="ip-in-menu [animation-delay:.1s] flex flex-col gap-[18px] min-w-0 [align-items:var(--hero-items)] [text-align:var(--hero-align)]">
+                        <div className="w-full flex flex-col gap-[22px]">
+                            <div role="tablist" aria-label="Idol sections" className="flex flex-wrap [justify-content:var(--hero-items)] gap-3">
+                                {TABS.map(([key, label], k) => {
+                                    const on = tab === key;
+                                    return (
+                                        <div key={key} className="ip-in-menu" style={{ animationDelay: `${160 + k * 80}ms` }}>
+                                            <button
+                                                type="button"
+                                                role="tab"
+                                                id={`ip-tab-${key}`}
+                                                aria-selected={on}
+                                                aria-controls={`ip-pane-${key}`}
+                                                data-on={on ? "true" : "false"}
+                                                onClick={() => setTab(key)}
+                                                className="ip-tab ip-btn flex items-baseline gap-2.5 pt-[11px] px-6 pb-[13px] border-2 border-[#1A1418] rounded-[16px] font-bold text-(length:--tab-fs) leading-none uppercase whitespace-nowrap cursor-pointer will-change-transform"
+                                                style={{
+                                                    background: on ? "#FF8AC4" : "var(--ip-panel)",
+                                                    color: on ? "#FFFFFF" : "var(--text)",
+                                                    textShadow: on ? "var(--ink-puff)" : "none",
+                                                    boxShadow: on ? "3px 4px 0 0 var(--tab-o),3px 4px 0 0 var(--tab-o)" : "3px 4px 0 0 #FF8AC4,3px 4px 0 2px #1A1418",
+                                                    transform: on ? "translate3d(0,-3px,0) rotate(-2deg)" : `rotate(${k % 2 ? 1 : -1}deg)`,
+                                                }}
+                                            >
+                                                {label}
+                                            </button>
+                                        </div>
+                                    );
+                                })}
+                            </div>
+                            <div className="ip-in-tile box-border min-w-0 w-full flex flex-col bg-(--ip-panel) text-(--text) border-[3px] border-[#1A1418] rounded-[30px] shadow-[7px_7px_0_0_#FF8AC4,7px_7px_0_3px_#1A1418] p-(--panel-pad) text-left">
+                                <div className="flex-1 min-h-0 grid">
+                                    {TABS.map(([key]) => (
+                                        <div
+                                            key={key}
+                                            id={`ip-pane-${key}`}
+                                            role="tabpanel"
+                                            aria-labelledby={`ip-tab-${key}`}
+                                            aria-hidden={tab !== key}
+                                            className="ip-pane [grid-area:1/1] min-w-0 grid grid-cols-(--fact-cols) auto-rows-[minmax(min-content,1fr)] grid-flow-row-dense gap-x-3.5 gap-y-6 pt-1.5"
+                                            style={{ visibility: tab === key ? "visible" : "hidden" }}
+                                        >
+                                            {facts[key].map((f, k) => <FactTile key={f.label} f={f} delay={60 + k * 60} />)}
+                                        </div>
+                                    ))}
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </section>
+
+                {related.length > 0 && <Related idols={related} />}
+
+                <footer className="max-w-[1360px] mx-auto flex justify-between items-center flex-wrap gap-x-5 gap-y-3 mt-12 pt-4 border-t-[1.5px] border-(--rule)">
+                    <span className="font-medium text-xs text-(--muted)">KpopIt · Idol data from the KpopIt catalogue</span>
+                    <span className="flex items-center gap-3">
+                        <span className="font-semibold text-sm text-(--muted)">Wrong info?</span>
+                        <Link to="/contact" className="ip-cta ip-btn grid place-items-center h-11 px-[18px] rounded-full border-2 border-[#1A1418] bg-[#FF3399] text-[#1A1418] font-bold text-sm no-underline shadow-[0_4px_0_#1A1418,inset_0_2px_0_rgba(255,255,255,.4)]">
+                            Contact me
                         </Link>
-                    </div>
+                    </span>
+                </footer>
             </div>
         </div>
     );
-};
+}
 
-export default IdolProfile;
+function FactTile({ f, delay }: { f: Fact; delay: number }) {
+    const text = f.value ?? "";
+    // Numbers and short values may grow larger than text values.
+    const big = f.big || /^[\d\s.,%#/-]+$/.test(text) || text.length <= 4;
+    const flags = (f.flags ?? []).map((n) => ({ n, src: getNationalityFlag(n) })).filter((x) => x.src);
+    const cap = flags.length ? "20px" : big ? "var(--cap-b)" : "var(--cap-t)";
+    return (
+        <div
+            className="ip-fact ip-in-tile relative flex flex-col items-center justify-center gap-1.5 min-w-0 pt-[22px] px-3 pb-3 text-center bg-(--chip) text-(--chip-ink) border-[2.5px] border-[#1A1418] rounded-[20px] shadow-[4px_4px_0_var(--ctl-off),var(--in)]"
+            style={{ gridColumn: f.solo ? `var(--solo, span var(--s-${f.span}))` : `span var(--s-${f.span})`, animationDelay: `${delay}ms` }}
+        >
+            <span aria-hidden className="absolute top-0 right-0 w-16 h-16 bg-[repeating-linear-gradient(135deg,var(--stripe)_0_2.5px,transparent_2.5px_8px)] [clip-path:polygon(0_0,100%_0,100%_100%)] rounded-tr-[20px] pointer-events-none" />
+            <span className="ip-lab absolute -top-4 left-(--lab-l,14px) max-w-[calc(100%-4px)] box-border bg-[#1A1418] text-white border-[2.5px] border-[#1A1418] pt-[7px] px-3 pb-2 rounded-[12px] font-bold text-(length:--lab-fs) leading-none tracking-[.12em] whitespace-nowrap overflow-hidden text-ellipsis shadow-[3px_3px_0_#FF3399,3px_3px_0_2px_#1A1418,inset_0_2px_0_rgba(255,255,255,.18)] -rotate-2">
+                {f.label}
+            </span>
+            {f.chips ? (
+                <span className="flex flex-wrap justify-center gap-2.5 pt-1 pb-0.5">
+                    {f.chips.length ? f.chips.map((chip) => <ChipTag key={chip.label} chip={chip} />) : <span className="font-semibold text-(--muted)">N/A</span>}
+                </span>
+            ) : (
+                <span className="flex flex-col items-center gap-2.5 max-w-full w-full" style={{ paddingTop: flags.length ? 10 : 0 }}>
+                    {flags.length > 0 && (
+                        <span className="flex gap-2 justify-center">
+                            {flags.map((x) => (
+                                <img key={x.n} src={x.src!} alt={x.n} className="w-[calc(var(--kf-w)*1.1)] h-[calc(var(--kf-h)*1.1)] @max-[560px]:w-[calc(var(--kf-w)*1.2)] rounded-[5px] border-2 border-[#1A1418] object-cover shadow-[2px_2.5px_0_#1A1418] -rotate-3" />
+                            ))}
+                        </span>
+                    )}
+                    <span
+                        className="ip-val font-bold leading-[1.1] text-white [text-shadow:var(--puff-value)] pr-[5px] pb-[5px] whitespace-nowrap"
+                        style={{ "--fs-cap": cap, "--len": Math.max(text.length, 1), "--fit-k": big ? 1.6 : 1.45, letterSpacing: flags.length ? ".06em" : undefined } as CSSProperties}
+                    >
+                        {text}
+                    </span>
+                </span>
+            )}
+            {f.sub && <span className="font-semibold text-(length:--sub-fs) leading-[1.3] text-(--muted) [text-wrap:balance]">{f.sub}</span>}
+        </div>
+    );
+}
+
+function ChipTag({ chip }: { chip: FactChip }) {
+    const look = CHIP[chip.k % 3];
+    const className = cnChip(chip.big);
+    const style: CSSProperties = { background: look.bg, color: look.fg, transform: `rotate(${chip.k % 3 === 0 ? -2 : chip.k % 3 === 1 ? 2 : -1}deg)`, boxShadow: `3px 3px 0 #1A1418,${look.in}` };
+    const body = (
+        <>
+            {chip.label}
+            {chip.sub && <span className="font-semibold text-xs leading-none opacity-80">{chip.sub}</span>}
+        </>
+    );
+    return chip.to ? <Link to={chip.to} className={`${className} ip-cta ip-btn no-underline`} style={style}>{body}</Link> : <span className={className} style={style}>{body}</span>;
+}
+
+const cnChip = (big?: boolean) =>
+    big
+        ? "inline-flex items-center gap-1.5 pt-3.5 px-[26px] pb-4 border-[2.5px] border-[#1A1418] rounded-[16px] font-bold text-[calc(var(--chip-fs)*1.45)] leading-none"
+        : "inline-flex items-center gap-1.5 pt-2 px-[13px] pb-[9px] border-[2.5px] border-[#1A1418] rounded-[12px] font-bold text-(length:--chip-fs) leading-none";
+
+function Related({ idols }: { idols: IdolsPageData[] }) {
+    return (
+        <section aria-labelledby="ip-related" className="max-w-[1360px] mx-auto mt-14 pt-14">
+            <div className="relative h-[176px]">
+                <div aria-hidden className="absolute -left-[700px] -right-[700px] top-11 h-[108px] bg-(--band) bg-[repeating-linear-gradient(92deg,var(--speed)_0_2px,transparent_2px_26px),linear-gradient(180deg,rgba(255,255,255,.07),rgba(255,255,255,0)_40%)] -rotate-2" />
+                <div aria-hidden className="absolute -left-[700px] -right-[700px] top-[162px] h-3 box-border bg-[#FF8AC4] border-y-2 border-[#1A1418] [box-shadow:var(--rb-in)] -rotate-2" />
+                <div aria-hidden className="[display:var(--rb-l2)] absolute -left-[700px] -right-[700px] top-[182px] h-1 bg-(--band) -rotate-2" />
+                <div className="absolute left-0 right-0 top-11 h-[108px] px-2 flex items-center -rotate-2">
+                    <h2 id="ip-related" className="m-0 font-mono-display font-normal text-[clamp(30px,6.4cqi,60px)] leading-none tracking-[.02em] text-white whitespace-nowrap">related idols</h2>
+                </div>
+            </div>
+            <div className="ip-rel flex gap-6 overflow-x-auto overflow-y-hidden overscroll-x-contain pt-5 px-3.5 pb-[30px] mt-[30px] -mx-3.5">
+                {idols.map((idol, k) => (
+                    <IntentLink
+                        key={idol.id}
+                        to={`/idols/${idol.id}/${buildIdolSlug(idol.artist_name, idol.group_name)}`}
+                        onIntent={() => prefetchIdolProfile(idol.id)}
+                        aria-label={`${idol.artist_name} of ${groupLabel(idol)}`}
+                        className="ip-rcard ip-btn relative flex-none w-(--rel-w) flex flex-col gap-3 pt-2.5 px-2.5 pb-4 border-[3px] border-[#1A1418] rounded-[20px] bg-(--chip) text-(--chip-ink) no-underline text-left shadow-[6px_6px_0_var(--ctl-off),var(--in)] will-change-transform"
+                        style={{ transform: `rotate(${k % 2 ? 0.8 : -0.8}deg)` }}
+                    >
+                        <span className="block aspect-square border-[2.5px] border-[#1A1418] rounded-[12px] overflow-hidden bg-[#1A1418]">
+                            <img src={`${import.meta.env.VITE_IMAGE_BUCKET_URL}${idol.image_path}?v=${idol.image_version}`} alt="" loading="lazy" decoding="async" className="w-full h-full object-cover block" />
+                        </span>
+                        <span className="flex flex-col gap-[5px] px-1 min-w-0">
+                            <span className="block font-bold text-2xl leading-none text-white [text-shadow:var(--puff-value)] pr-1 pb-[5px] whitespace-nowrap overflow-hidden text-ellipsis">{idol.artist_name}</span>
+                            <span className="font-semibold text-[13px] leading-[1.25] text-(--muted) [text-wrap:balance]">{groupLabel(idol)}</span>
+                        </span>
+                    </IntentLink>
+                ))}
+            </div>
+        </section>
+    );
+}
