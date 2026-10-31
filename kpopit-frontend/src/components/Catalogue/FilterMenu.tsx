@@ -1,7 +1,6 @@
 import { useEffect, useRef, useState, type ReactNode } from "react";
-import { Check, ChevronDown } from "lucide-react";
+import { ChevronDown } from "lucide-react";
 import { cn } from "../../lib/utils";
-import "../Puff/puff.css";
 import "./catalogue.css";
 
 export interface FilterOption {
@@ -11,15 +10,17 @@ export interface FilterOption {
     count?: number;
 }
 
-/** A pill that opens a list of options (one choice). Pink while a value is picked. */
-export default function FilterMenu({ title, label, value, options, onPick, align = "left" }: {
-    /** Small heading above the options (e.g. "TYPE"). */
+/** A filter control: opens a menu of options (one choice); pink while a value is picked. */
+export default function FilterMenu({ title, label, value, options, onPick, minWidth, icon, align = "left" }: {
+    /** Menu heading (e.g. "TYPE"). */
     title: string;
-    /** The button text (the picked value's label, or the filter's name). */
+    /** The button text: the picked option, or the filter's name. */
     label: string;
     value: string;
     options: FilterOption[];
     onPick: (value: string) => void;
+    minWidth: string;
+    icon?: ReactNode;
     align?: "left" | "right";
 }) {
     const [open, setOpen] = useState(false);
@@ -38,53 +39,66 @@ export default function FilterMenu({ title, label, value, options, onPick, align
         };
     }, [open]);
 
+    const inset = active && !open ? "var(--in-pink)" : "var(--in)";
     return (
-        <div ref={box} className="relative flex-none @max-[580px]:flex-[1_1_calc(50%-4px)]">
+        <div ref={box} className="relative flex-(--cg-f-flex) min-w-0">
             <button
                 type="button"
                 aria-expanded={open}
-                aria-haspopup="listbox"
+                aria-haspopup="true"
+                data-open={open ? "1" : "0"}
+                data-on={active ? "1" : "0"}
                 onClick={() => setOpen(!open)}
-                data-hover={active ? undefined : "chip"}
-                className={cn(
-                    "pp-press pp-focus w-full h-10 pl-4 pr-3 inline-flex items-center justify-between gap-2 rounded-full border-2 border-(--ink) font-bold text-sm whitespace-nowrap cursor-pointer",
-                    active ? "bg-[#FF8AC4] text-[#1A1418] [--pp-in:var(--in-pink)]" : "bg-(--chip) text-(--chip-ink)",
-                )}
+                className="cg-ctl cg-focus relative flex items-center gap-2 w-(--cg-f-w) h-(--cg-ctl-h) pr-[38px] pl-3.5 rounded-[18px] border-2 border-(--ink) font-semibold text-[13px] leading-[1.2] whitespace-nowrap text-left cursor-pointer"
+                style={{
+                    minWidth,
+                    background: open ? "var(--chip-hover)" : active ? "var(--side)" : "var(--chip)",
+                    color: active ? "#1A1418" : "var(--chip-ink)",
+                    boxShadow: `${open ? "0 0 0 var(--ctl-off)" : "2px 3px 0 var(--ctl-off)"},${inset}`,
+                }}
             >
-                <span className="truncate">{label}</span>
-                <ChevronDown className="cg-chev w-3.5 h-3.5 flex-none" strokeWidth={3} aria-hidden />
+                {icon}
+                <span className="flex-1 min-w-0 overflow-hidden text-ellipsis">{label}</span>
+                <ChevronDown aria-hidden className="cg-chev absolute right-3 w-3.5 h-3.5" strokeWidth={3} style={{ transform: `rotate(${open ? 180 : 0}deg)` }} />
             </button>
             {open && (
                 <div
-                    role="listbox"
+                    role="menu"
                     aria-label={title}
-                    className={cn(
-                        "pp-enter [--pp-anim:puffMenu] absolute z-40 top-[calc(100%+10px)] w-[240px] max-h-[320px] overflow-auto cg-scroll p-2 rounded-[20px] border-2 border-(--ink) bg-(--menu-bg) shadow-[3px_4px_0_var(--ctl-off),var(--in)] flex flex-col gap-1",
-                        align === "right" ? "right-0" : "left-0",
-                    )}
+                    className={cn("cg-menu cg-gpu absolute top-[calc(var(--cg-ctl-h)+12px)] w-[248px] z-20 bg-(--menu-bg) text-(--chip-ink) border-2 border-(--ink) rounded-[20px] overflow-hidden shadow-[4px_5px_0_var(--ctl-off),0_16px_32px_rgba(var(--sh),.16),var(--in)]", align === "right" ? "right-0 origin-top-right" : "left-0 origin-top-left")}
                 >
-                    <span className="px-2.5 pt-1 pb-1.5 font-semibold text-[10px] tracking-[.14em] text-(--muted)">{title}</span>
-                    {options.map((o) => {
-                        const on = o.value === value;
-                        return (
-                            <button
-                                key={o.value || "all"}
-                                type="button"
-                                role="option"
-                                aria-selected={on}
-                                onClick={() => { onPick(o.value); setOpen(false); }}
-                                className={cn(
-                                    "cg-opt pp-focus flex items-center gap-2.5 h-10 px-2.5 rounded-[13px] border-2 text-left font-semibold text-sm cursor-pointer",
-                                    on ? "border-(--ink) bg-[#FF8AC4] text-[#1A1418]" : "border-transparent text-(--chip-ink)",
-                                )}
-                            >
-                                {o.icon}
-                                <span className="flex-1 truncate">{o.label}</span>
-                                {o.count !== undefined && <span className="font-bold text-[11px] text-(--muted)">{o.count}</span>}
-                                {on && <Check className="w-4 h-4" strokeWidth={3} aria-hidden />}
-                            </button>
-                        );
-                    })}
+                    <div className="flex items-center justify-between gap-2.5 pt-3 px-4 pb-2.5 border-b-[1.5px] border-dashed border-(--rule) font-bold text-[11px] leading-none tracking-[.12em] text-(--muted)">
+                        <span>{title}</span>
+                        <span className="tracking-normal font-medium">{`${options.length - 1} options`}</span>
+                    </div>
+                    <div className="cg-scroll max-h-[286px] overflow-y-auto overflow-x-hidden p-2 flex flex-col gap-1">
+                        {options.map((o) => {
+                            const on = o.value === value;
+                            return (
+                                <button
+                                    key={o.value || "all"}
+                                    type="button"
+                                    role="menuitemradio"
+                                    aria-checked={on}
+                                    onClick={() => { onPick(o.value); setOpen(false); }}
+                                    className="cg-opt cg-focus flex-none flex items-center gap-2.5 min-h-[42px] text-left border-2 rounded-[13px] text-[13px] leading-[1.2] pr-2.5 pl-3 cursor-pointer"
+                                    style={{
+                                        borderColor: on ? "var(--ink)" : "transparent",
+                                        background: on ? "var(--side)" : "transparent",
+                                        color: on ? "#1A1418" : "var(--chip-ink)",
+                                        boxShadow: on ? "2px 2.5px 0 var(--ink),var(--in-pink)" : "none",
+                                        fontWeight: on ? 700 : 500,
+                                    }}
+                                >
+                                    {o.icon}
+                                    <span className="flex-1 min-w-0 overflow-hidden text-ellipsis whitespace-nowrap">{o.label}</span>
+                                    {o.count !== undefined && (
+                                        <span className="flex-none min-w-6 h-5 px-[7px] inline-grid place-items-center rounded-full bg-white text-[#1A1418] border-[1.5px] border-[#1A1418] shadow-[1px_1.5px_0_#1A1418,inset_0_1.5px_0_rgba(255,255,255,.7)] font-bold text-[11px] leading-none">{o.count}</span>
+                                    )}
+                                </button>
+                            );
+                        })}
+                    </div>
                 </div>
             )}
         </div>

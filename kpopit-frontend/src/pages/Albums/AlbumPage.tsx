@@ -96,6 +96,7 @@ function Album({ album }: { album: AlbumPageData }) {
                 }}
             />
             <PageShell width="max-w-[1100px]" className="pt-4">
+                <div className="cg-inner">
                 <PressLink to="/albums" className="pp-enter [--pp-anim:puffSide] pl-2.5" aria-label="Back to all albums">
                     <ArrowLeft className="w-4 h-4" strokeWidth={3} aria-hidden />
                     All albums
@@ -125,7 +126,7 @@ function Album({ album }: { album: AlbumPageData }) {
                             {artist.hangul_name && <span lang="ko" className="font-korean font-bold text-sm text-(--muted)">{artist.hangul_name}</span>}
                         </div>
                         {era && <span className="font-caveat font-bold text-2xl text-(--muted) -rotate-2 -mt-1">{era}</span>}
-                        <div className="grid grid-cols-3 gap-3 @max-[580px]:grid-cols-1">
+                        <div className="grid grid-cols-[repeat(auto-fill,minmax(140px,1fr))] gap-3">
                             <Tile label="RELEASED" ko="발매일" value={`${MONTHS[m - 1]} ${d}, ${y}`} sub={years === null ? undefined : years > 0 ? `${years} ${years === 1 ? "year" : "years"} after debut` : "Debut year"} />
                             <Tile label="TYPE" ko="유형" value={album.type} sub={nth > 0 ? `${ordinal(nth)} ${shortType(album.type).toLowerCase()} ${album.type === "Single" ? "release" : "album"}` : undefined} />
                             <Tile label="LANGUAGE" ko="언어" value={album.language ?? "Unknown"} sub={album.language ? `${album.language} release` : undefined} flag={languageFlag(album.language)} />
@@ -164,13 +165,14 @@ function Album({ album }: { album: AlbumPageData }) {
                 {more.length > 0 && (
                     <section aria-labelledby="more-title" className="mt-12 flex flex-col gap-5">
                         <h2 id="more-title" className="m-0 font-mono-display text-[26px] lowercase">{`more from ${artist.name}`}</h2>
-                        <div className="grid grid-cols-[repeat(auto-fill,minmax(170px,1fr))] gap-x-6 gap-y-8 @max-[580px]:grid-cols-2 @max-[580px]:gap-x-3.5">
+                        <div className="grid grid-cols-[repeat(auto-fill,minmax(var(--cg-grid-min),1fr))] gap-(--cg-grid-gap) p-(--cg-grid-pad)">
                             {more.map((a, i) => (
                                 <AlbumCard key={a.id} index={i} album={{ ...a, artist_name: artist.name, group_id: artist.group_id, soloist_id: artist.soloist_id }} />
                             ))}
                         </div>
                     </section>
                 )}
+                </div>
             </PageShell>
         </>
     );

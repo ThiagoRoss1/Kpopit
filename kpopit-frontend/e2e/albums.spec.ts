@@ -10,15 +10,18 @@ test.describe('albums @mobile', () => {
 
     if (isMobile) await page.getByRole('button', { name: /Show filters/ }).click();
     await page.getByRole('button', { name: 'Language' }).click();
-    await page.getByRole('option', { name: /Korean/ }).click();
+    await page.getByRole('menuitemradio', { name: /Korean/ }).click();
     await expect(page).toHaveURL(/lang=Korean/);
-    await expect(page.getByRole('button', { name: 'Remove Korean' }).or(page.getByRole('button', { name: 'Korean' })).first()).toBeVisible();
+    if (isMobile) await page.getByRole('button', { name: /Hide filters/ }).click();
+    await expect(page.getByRole('button', { name: 'Remove Korean' })).toBeVisible();
 
-    await page.getByLabel('Search albums').fill('zzzz-no-such-album');
+    await page.getByLabel('Search albums or artists').fill('zzzz-no-such-album');
     await expect(page.getByText('No albums found...')).toBeVisible();
-    await page.getByRole('button', { name: 'Clear search' }).click();
+    await page.getByRole('button', { name: 'Clear search & filters' }).click();
+    await expect(page).toHaveURL(/\/albums$/);
 
     const first = page.locator('a[href^="/albums/"]').first();
+    await first.scrollIntoViewIfNeeded();
     const href = await first.getAttribute('href');
     await first.click();
     await expect(page).toHaveURL(new RegExp(`${href}$`));
