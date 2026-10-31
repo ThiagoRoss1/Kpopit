@@ -9,7 +9,8 @@ test.describe('content pages @mobile', () => {
     await expect(page.getByRole('heading', { name: 'Blog', level: 1 })).toBeVisible();
     await page.getByRole('button', { name: /^Dev log/ }).click();
     await expect(page).toHaveURL(/\?tag=dev-log$/);
-    await expect(page.getByText('No posts here yet.')).toBeVisible();
+    await expect(page.getByRole('heading', { name: 'Moving from SQLite to PostgreSQL' })).toBeVisible();
+    await expect(page.getByRole('heading', { name: 'Pixelated is here' })).toHaveCount(0);
     await page.getByRole('button', { name: /^All posts/ }).click();
     await expect(page).toHaveURL(/\/blog$/);
     await page.getByRole('link', { name: /Read the post/ }).first().click();

@@ -13,7 +13,8 @@ const PREVIEW = 'http://127.0.0.1:4173';
 
 type IdolRow = { id: number; artist_name: string; group_name: string | null };
 const slug = (i: IdolRow) => buildIdolSlug(i.artist_name, i.group_name);
-const BLOG_POST = `/blog/${fs.readdirSync(path.join(FRONTEND, 'content/blog')).find((f) => f.endsWith('.md'))!.replace(/\.md$/, '')}`;
+const BLOG_POSTS = fs.readdirSync(path.join(FRONTEND, 'content/blog')).filter((f) => f.endsWith('.md')).map((f) => `/blog/${f.replace(/\.md$/, '')}`);
+const BLOG_POST = BLOG_POSTS[0];
 
 const attr = (html: string, selector: RegExp) => html.match(selector)?.[1];
 const meta = (html: string, key: string) =>
@@ -103,7 +104,7 @@ test.describe('prerendered pages without JavaScript', () => {
   test('the build writes a sitemap of the prerendered pages', async ({ request }) => {
     const sitemap = await (await request.get(`${PREVIEW}/sitemap.xml`)).text();
     const locs = [...sitemap.matchAll(/<loc>([^<]*)<\/loc>/g)].map((m) => m[1]);
-    const pages = ['/', '/classic', '/blurry', '/pixelated', '/idols', '/privacy-policy', '/contact', '/about', '/how-to-play', '/faq', '/blog', '/changelog', BLOG_POST, '/albums'];
+    const pages = ['/', '/classic', '/blurry', '/pixelated', '/idols', '/privacy-policy', '/contact', '/about', '/how-to-play', '/faq', '/blog', '/changelog', ...BLOG_POSTS, '/albums'];
     for (const p of pages) expect(locs).toContain(`https://kpopit.net${p}`);
     expect(locs).toContain(`https://kpopit.net/idols/${idol.id}/${slug(idol)}`);
     const albums = (await (await fetch('http://127.0.0.1:5000/api/albums-page')).json()) as { id: number; name: string; artist_name: string }[];
