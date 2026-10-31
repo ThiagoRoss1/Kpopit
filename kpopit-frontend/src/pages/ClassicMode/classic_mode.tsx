@@ -3,6 +3,7 @@ import "./style.css";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { useSharedGameData } from "../../hooks/useSharedGameData.tsx";
 import { useState, useEffect, useCallback, useMemo, useRef } from "react";
+import YesterdayLockedPill from "../../components/YesterdayLockedPill";
 import { getDailyIdol, getGuessIdol, getYesterdaysIdol, getDailyUserCount, getUserPosition, saveGameState } from "../../services/api.ts";
 import type {
   GameData,
@@ -491,6 +492,16 @@ function ClassicMode() {
                   {yesterdayArtist ? `${yesterdayArtist} (${yesterdayArtistGroup && yesterdayArtistGroup.length > 0 ? yesterdayArtistGroup : "Soloist"})` : "Unknown"}
               </span>
           </Link>
+        </span>
+      </div>
+      )}
+
+      {!showVictoryCard && yesterday.data?.locked && (
+      <div className={`w-full flex flex-col items-center justify-center mt-10 mb-26`}>
+        <span className="font-semibold max-xxs:text-[14px] xxs:text-[15px] xs:text-base sm:text-[18px] leading-tight">
+          <span className="text-white">
+            Yesterday's idol was
+          </span> <YesterdayLockedPill mode="classic" date={yesterday.data.yesterdays_pick_date} dayNumber={yesterday.data.day_number} />
         </span>
       </div>
       )}

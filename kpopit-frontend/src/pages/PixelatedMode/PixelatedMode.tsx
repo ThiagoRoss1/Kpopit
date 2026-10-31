@@ -3,6 +3,7 @@ import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { useSharedGameData } from "../../hooks/useSharedGameData";
 import { useGameMode } from "../../hooks/useGameMode";
 import { useState, useEffect, useCallback, useMemo, useRef } from "react";
+import YesterdayLockedPill from "../../components/YesterdayLockedPill";
 import { getPixelatedDailyAlbum, getPixelatedGuessAlbum, getAllAlbums, getYesterdaysAlbum, getUserPosition, getDailyUserCount, saveGameState}  from "../../services/api";
 import type { PixelatedGameData, AlbumSearchResult, PixelatedGuessDetail, YesterdayAlbum } from "../../interfaces/gameInterfaces";
 import { decryptToken } from "../../utils/tokenEncryption";
@@ -524,6 +525,17 @@ function PixelatedMode() {
                                         <span className="text-neon-pink font-bold [text-shadow:1.2px_1.2px_2px_rgba(0,0,0,0.6),0_0_4px_rgba(255,51,153,1)]">
                                             {yesterdayAlbum}
                                         </span>
+                                    </span>
+                                </div>
+                            )}
+
+                            {!showVictory && yesterdayAlbumData?.locked && (
+                                <div className="w-full flex flex-col items-center justify-center mt-10 lg:mt-20">
+                                    <span className="font-['Caveat',cursive] text-xl sm:text-2xl leading-tight">
+                                        <span className="text-ink/70">
+                                            Yesterday's album was
+                                        </span>{" "}
+                                        <YesterdayLockedPill mode="pixelated" date={yesterdayAlbumData.yesterdays_pick_date} dayNumber={yesterdayAlbumData.day_number} />
                                     </span>
                                 </div>
                             )}

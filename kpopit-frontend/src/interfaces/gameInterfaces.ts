@@ -101,6 +101,8 @@ export interface YesterdayLocked {
   locked: true;
   play_in_calendar: true;
   yesterdays_pick_date: string;
+  /** Day N of the mode, for the calendar link. */
+  day_number: number | null;
 }
 
 export interface YesterdayIdolPick {
@@ -312,4 +314,48 @@ export interface RestoreSessionResponse {
   blurry: BlurryGameState | null;
   pixelated: PixelatedGameState | null;
   server_date: string;
+}
+
+// /albums and /albums/:id/:slug (published albums only).
+export interface AlbumsPageItem {
+  id: number;
+  name: string;
+  type: string;
+  language: string | null;
+  cover_path: string;
+  release_year: number;
+  group_id: number;
+  soloist_id: number | null;
+  artist_name: string;
+}
+
+export interface AlbumDiscographyItem {
+  id: number;
+  name: string;
+  type: string;
+  language: string | null;
+  cover_path: string;
+  release_year: number;
+}
+
+export interface AlbumPageData {
+  id: number;
+  name: string;
+  type: string;
+  language: string | null;
+  cover_path: string;
+  palette: unknown;
+  release_date: string;
+  artist: {
+    name: string;
+    group_id: number;
+    soloist_id: number | null;
+    is_soloist: boolean;
+    hangul_name: string | null;
+    debut_year: number | null;
+    generation: number | null;
+    member_count: number | null;
+    fandom_name: string | null;
+  };
+  discography: AlbumDiscographyItem[];
 }

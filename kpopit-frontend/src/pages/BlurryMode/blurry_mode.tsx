@@ -3,6 +3,7 @@ import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { useSharedGameData } from "../../hooks/useSharedGameData";
 import { useGameMode } from "../../hooks/useGameMode";
 import { useState, useEffect, useMemo, useCallback, useRef } from "react";
+import YesterdayLockedPill from "../../components/YesterdayLockedPill";
 import { getBlurryDailyIdol, getBlurryGuessIdol, getUserPosition, getYesterdaysIdol, getDailyUserCount, saveGameState } from "../../services/api";
 import type { 
     GuessResponse, 
@@ -534,6 +535,17 @@ const gameMode = useGameMode();
                 </span>
             </div>
             )}
+
+
+      {!showVictoryCard && yesterdayIdol.data?.locked && (
+      <div className={`w-full flex flex-col items-center justify-center mt-10 mb-10`}>
+        <span className="font-semibold max-xxs:text-[14px] xxs:text-[15px] xs:text-base sm:text-[18px] leading-tight">
+          <span className="text-white">
+            Yesterday's idol was
+          </span> <YesterdayLockedPill mode="blurry" date={yesterdayIdol.data.yesterdays_pick_date} dayNumber={yesterdayIdol.data.day_number} />
+        </span>
+      </div>
+      )}
 
             {endGame && isCorrect && !confetti && (
                 <WinnerExplosion onComplete={() => {
