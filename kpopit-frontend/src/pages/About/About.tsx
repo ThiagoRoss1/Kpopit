@@ -1,4 +1,4 @@
-import { Check, Code2, Database, Server, ArrowUpRight, ArrowRight } from "lucide-react";
+import { Atom, Braces, Check, Database, FlaskConical, SquareTerminal, Zap, ArrowUpRight, ArrowRight, type LucideIcon } from "lucide-react";
 import type { ReactNode } from "react";
 import PageShell from "../../components/Puff/PageShell";
 import { PressAnchor, PressLink } from "../../components/Puff/PressButton";
@@ -32,10 +32,10 @@ const TODO: [string, boolean][] = [
     ["And more!", false],
 ];
 
-const STACK = [
-    { label: "FRONTEND", Icon: Code2, items: ["React", "Vite", "TypeScript"] },
-    { label: "BACKEND", Icon: Server, items: ["Python", "Flask"] },
-    { label: "DATABASE", Icon: Database, items: ["PostgreSQL"] },
+const STACK: { label: string; items: [string, LucideIcon][] }[] = [
+    { label: "FRONTEND", items: [["React", Atom], ["Vite", Zap], ["TypeScript", Braces]] },
+    { label: "BACKEND", items: [["Python", SquareTerminal], ["Flask", FlaskConical]] },
+    { label: "DATABASE", items: [["PostgreSQL", Database]] },
 ];
 
 const P = "m-0 font-normal text-base leading-[1.65] [text-wrap:pretty]";
@@ -69,7 +69,8 @@ export default function About() {
                         <article className="pp-enter [--pp-delay:200ms] relative rounded-[23px] border-2 border-(--ink) bg-(--face) text-(--face-ink) [box-shadow:var(--card-depth)] pt-9 pr-11 pb-10 pl-16 @max-[580px]:pt-[22px] @max-[580px]:pr-[18px] @max-[580px]:pb-[26px] @max-[580px]:pl-[34px] flex flex-col gap-7">
                             <span aria-hidden className="absolute left-[38px] @max-[580px]:left-[18px] top-0 bottom-0 w-0.5 bg-[rgba(255,51,153,.45)]" />
 
-                            <Section id="what" n={1} title="What is KpopIt" className="grid grid-cols-[minmax(0,1fr)_210px] gap-7 items-start @max-[580px]:grid-cols-1">
+                            <div className="grid grid-cols-[minmax(0,1fr)_210px] gap-7 items-start @max-[580px]:grid-cols-1">
+                            <Section id="what" n={1} title="What is KpopIt">
                                 <div className="flex flex-col gap-3">
                                     <p className={P}>KpopIt is a <b>daily idol guessing game</b>. It's a Wordle-inspired project made for K-pop fans.</p>
                                     <p className={P}>Every day there's a new idol to find in Classic, a blurry photo in Blurry and a pixelated album cover in Pixelated. Everyone gets the same answer, and a new one arrives at midnight.</p>
@@ -82,6 +83,7 @@ export default function About() {
                                         ))}
                                     </div>
                                 </div>
+                            </Section>
                                 <figure className="ab-photo relative m-0 rotate-2 @max-[580px]:max-w-[220px] @max-[580px]:justify-self-center">
                                     <div className="aspect-square rounded-[18px] border-[2.5px] border-[#1A1418] overflow-hidden bg-[#DCD6D2] [box-shadow:4px_5px_0_var(--ctl-off)]">
                                         <img src={resolveCdnUrl("/images/idols/chaewon.webp") ?? ""} alt="A blurred idol photo, like in Blurry mode" className="block w-full h-full object-cover scale-[1.12] blur-[9px] grayscale-[.55]" />
@@ -89,7 +91,7 @@ export default function About() {
                                     <span aria-hidden className="absolute inset-0 grid place-items-center font-bold text-[92px] leading-none text-white [text-shadow:var(--puff-title)] pointer-events-none">?</span>
                                     <figcaption className="absolute left-1/2 -bottom-3.5 -translate-x-1/2 -rotate-3 whitespace-nowrap px-3 py-[5px] rounded-full border-2 border-[#1A1418] bg-[#FFFDFA] text-[#1A1418] [box-shadow:2px_3px_0_#1A1418] font-bold text-xs">Who is it?</figcaption>
                                 </figure>
-                            </Section>
+                            </div>
                             <Rule />
 
                             <Section id="who" n={2} title="Who makes it">
@@ -154,10 +156,10 @@ export default function About() {
                                         {STACK.map((s) => (
                                             <div key={s.label} className="pt-3 px-3.5 pb-3.5 rounded-[16px] border-2 border-(--ink) bg-(--chip) [box-shadow:2px_3px_0_var(--ctl-off),var(--in)] flex flex-col gap-2.5">
                                                 <span className="font-semibold text-[10px] tracking-[.14em] text-(--muted)">{s.label}</span>
-                                                {s.items.map((item) => (
+                                                {s.items.map(([item, Icon]) => (
                                                     <span key={item} className="ab-tech flex items-center gap-2.5 font-bold text-[14.5px]">
                                                         <span className="ab-ticon flex-none grid place-items-center w-[34px] h-[34px] rounded-[11px] border-2 border-[#1A1418] bg-white text-[#1A1418] [box-shadow:1.5px_2px_0_#1A1418]">
-                                                            <s.Icon className="w-[18px] h-[18px]" strokeWidth={2.4} aria-hidden />
+                                                            <Icon className="w-[18px] h-[18px]" strokeWidth={2.4} aria-hidden />
                                                         </span>
                                                         {item}
                                                     </span>
@@ -193,7 +195,7 @@ export default function About() {
                                 </p>
                                 <span className="flex items-center gap-2.5 -rotate-2">
                                     <span className="font-caveat font-bold text-[30px] leading-[1.1] text-(--group)">Thank you for playing KpopIt!</span>
-                                    <span aria-hidden className="ab-heart text-[26px] leading-none">💜</span>
+                                    <span aria-hidden className="text-[34px] leading-none">💜</span>
                                 </span>
                             </div>
                         </article>
