@@ -1,6 +1,6 @@
 import { useState, type ReactNode } from "react";
 import { useSearchParams } from "react-router";
-import { ArrowUp, ChevronLeft, ChevronRight, Lock } from "lucide-react";
+import { ArrowUp, ChevronLeft, ChevronRight, Lock, Search } from "lucide-react";
 import PageShell from "../../components/Puff/PageShell";
 import { Pill, PressButton, PressLink } from "../../components/Puff/PressButton";
 import PageMeta from "../../components/Seo/PageMeta";
@@ -15,12 +15,12 @@ import { CLASSIC_EXAMPLE, CATEGORIES, FEEDBACK, HINT_AT, MODES, parseMode, type 
 import "../../components/Puff/puff.css";
 import "./howToPlay.css";
 
-const CARD = "pp-enter rounded-[23px] border-2 border-(--ink) bg-(--face) text-(--face-ink) shadow-[3px_4px_0_var(--ctl-off),var(--in)] p-6 @max-[580px]:p-[18px] flex flex-col gap-4";
+const CARD = "htp-card rounded-[23px] border-2 border-(--ink) bg-(--face) text-(--face-ink) shadow-[5px_5px_0_0_#FF8AC4,5px_5px_0_2px_var(--ink)] p-[26px] @max-[580px]:p-[18px] flex flex-col gap-[18px]";
 
 function Heading({ n, children }: { n: number; children: ReactNode }) {
     return (
-        <h2 className="m-0 flex items-center gap-3 font-bold text-[13px] tracking-[.14em] text-(--group)">
-            <span aria-hidden className="grid place-items-center w-[30px] h-[30px] rounded-[10px] border-2 border-[#1A1418] bg-[#FF8AC4] text-[#1A1418] text-xs tracking-normal shadow-[inset_0_2px_0_rgba(255,255,255,.55),2px_2.5px_0_#1A1418] -rotate-4">
+        <h2 className="m-0 flex items-center gap-2.5 font-bold text-[13px] leading-none tracking-[.12em] text-(--face-ink)">
+            <span aria-hidden className="flex-none grid place-items-center w-8 h-8 rounded-[10px] border-2 border-[#1A1418] bg-[#FF8AC4] text-[#1A1418] font-bold text-[13px] leading-none tracking-normal shadow-[2px_2px_0_var(--ctl-off)] -rotate-4">
                 {String(n).padStart(2, "0")}
             </span>
             {children}
@@ -30,14 +30,45 @@ function Heading({ n, children }: { n: number; children: ReactNode }) {
 
 function Steps({ steps }: { steps: string[] }) {
     return (
-        <ol className="m-0 p-0 list-none flex flex-col gap-2.5">
+        <ol className="m-0 p-0 list-none flex flex-col gap-3">
             {steps.map((step, i) => (
-                <li key={step} className="flex gap-3 items-baseline font-normal text-[15px] leading-[1.55]">
-                    <span aria-hidden className="flex-none grid place-items-center w-6 h-6 rounded-full border-2 border-(--ink) bg-(--chip) text-(--chip-ink) font-bold text-xs translate-y-0.5">{i + 1}</span>
-                    {step}
+                <li key={step} className="flex gap-3 items-start">
+                    <span aria-hidden className="flex-none grid place-items-center w-[26px] h-[26px] rounded-full bg-(--chip-hover) text-(--group) font-bold text-[13px]">{i + 1}</span>
+                    <span className="font-normal text-[15px] leading-[1.55] pt-[3px] [text-wrap:pretty]">{step}</span>
                 </li>
             ))}
         </ol>
+    );
+}
+
+// The search bar as it looks while typing, with the first two matches (decorative).
+function SearchDemo() {
+    const rows = [
+        { name: "Kim Chaewon", group: "LE SSERAFIM", image: "/images/idols/chaewon.webp", active: true },
+        { name: "Chaeyoung", group: "TWICE", image: "/images/idols/chaeyoung.webp", active: false },
+    ];
+    return (
+        <div aria-hidden className="flex flex-col gap-2.5">
+            <div className="flex items-center gap-2 p-1.5 rounded-full border-2 border-(--ink) bg-(--chip) shadow-[3px_4px_0_var(--ctl-off),var(--in)]">
+                <span className="flex-1 min-w-0 h-10 flex items-center px-4 rounded-full border-[1.5px] border-(--ink) bg-(--ground) text-(--text) font-medium text-sm">
+                    chae<span className="htp-caret w-0.5 h-[18px] ml-0.5 bg-[#FF3399]" />
+                </span>
+                <span className="flex-none grid place-items-center w-11 h-11 rounded-full border-2 border-[#1A1418] bg-[#FF3399] text-[#1A1418] shadow-[2px_3px_0_#1A1418]">
+                    <Search className="w-[18px] h-[18px]" strokeWidth={3} />
+                </span>
+            </div>
+            <div className="p-1.5 rounded-[22px] border-2 border-(--ink) bg-(--menu-bg) text-(--chip-ink) shadow-[3px_4px_0_var(--ctl-off)] flex flex-col gap-[3px]">
+                {rows.map((r) => (
+                    <div key={r.name} className={cn("flex items-center gap-3 py-1.5 px-2.5 rounded-[16px] border-2", r.active ? "border-(--ink) bg-(--opt-hover)" : "border-transparent")}>
+                        <span className="relative flex-none w-10 h-10 rounded-full border-2 border-[#1A1418] overflow-hidden bg-[#FFE3F1] grid place-items-center font-bold text-[15px] text-[#1A1418]">
+                            {r.name[0]}
+                            <img src={resolveCdnUrl(r.image) ?? ""} alt="" className="absolute inset-0 w-full h-full object-cover" />
+                        </span>
+                        <span className="font-bold text-sm">{r.name} <span className="font-medium text-(--muted)">({r.group})</span></span>
+                    </div>
+                ))}
+            </div>
+        </div>
     );
 }
 
@@ -74,11 +105,16 @@ function ClassicGuide() {
     return (
         <>
             <section className={CARD}>
-                <Heading n={1}>HOW TO PLAY</Heading>
-                <Steps steps={["Type the name of a K-pop idol or group in the search bar.", "Press Enter or click the Guess button to submit.", "Each tile changes colour to show how close your guess is."]} />
-                <p className="m-0 font-normal text-sm leading-[1.6] text-(--muted)">
-                    Search by the idol's <b>name</b> or <b>group name</b>. For soloists, search <b>"Soloist"</b>. Matching results show in alphabetical order as you type.
-                </p>
+                <div className="grid grid-cols-[minmax(0,1fr)_minmax(0,340px)] gap-7 items-center @max-[760px]:grid-cols-1 @max-[760px]:gap-5">
+                    <div className="flex flex-col gap-3">
+                        <Heading n={1}>HOW TO PLAY</Heading>
+                        <Steps steps={["Type the name of a K-pop idol or group in the search bar.", "Press Enter or click the Guess button to submit.", "Each tile changes colour to show how close your guess is."]} />
+                        <p className="mt-0.5 mb-0 py-[11px] px-3.5 rounded-[14px] border-2 border-dashed border-(--rule) font-normal text-sm leading-[1.55] [text-wrap:pretty]">
+                            Search by the idol's <b>name</b> or <b>group name</b>. For soloists, search <b>"Soloist"</b>. Matching results show in alphabetical order as you type.
+                        </p>
+                    </div>
+                    <SearchDemo />
+                </div>
             </section>
 
             <section className={CARD}>
@@ -88,7 +124,7 @@ function ClassicGuide() {
                         <span className="text-sm text-(--muted)">The colour of each tile changes depending on your guess:</span>
                         {(["correct", "partial", "incorrect"] as const).map((tone) => (
                             <div key={tone} className="flex items-center gap-3 font-semibold text-sm">
-                                <span aria-hidden className="w-7 h-7 rounded-[9px] border-2 border-[#1A1418]" style={{ background: FEEDBACK[tone].bg, boxShadow: `inset 0 -3px 0 ${FEEDBACK[tone].edge}` }} />
+                                <span aria-hidden className="flex-none w-11 h-11 rounded-[12px] border-2 border-[#1A1418]" style={{ background: FEEDBACK[tone].bg, boxShadow: `0 3px 0 0 ${FEEDBACK[tone].edge},0 3px 0 2px #1A1418` }} />
                                 {FEEDBACK[tone].label}
                             </div>
                         ))}
@@ -97,8 +133,8 @@ function ClassicGuide() {
                         <span className="text-sm text-(--muted)">The arrows show whether <b>today's idol</b> is above or below your guess:</span>
                         {[{ up: true, k: "Up:", t: "today's idol is above. Younger, taller or debuted more recently." }, { up: false, k: "Down:", t: "today's idol is below. Older, shorter or debuted earlier." }].map((a) => (
                             <div key={a.k} className="flex items-start gap-3 text-sm">
-                                <span aria-hidden className="flex-none grid place-items-center w-7 h-7 rounded-[9px] border-2 border-[#1A1418] bg-(--chip)">
-                                    <ArrowUp className={cn("w-4 h-4", !a.up && "rotate-180")} strokeWidth={3} />
+                                <span aria-hidden className="flex-none grid place-items-center w-11 h-11 rounded-[12px] border-2 border-[#1A1418] bg-[#FD5C63] text-[#1A1418] shadow-[0_3px_0_0_#B91C1C,0_3px_0_2px_#1A1418]">
+                                    <ArrowUp className={cn("w-6 h-6", !a.up && "rotate-180")} strokeWidth={3} />
                                 </span>
                                 <span><b>{a.k}</b> {a.t}</span>
                             </div>
@@ -356,26 +392,26 @@ export default function HowToPlay() {
                 path="/how-to-play"
             />
             <PageShell header={{ title: "How to play", korean: "게임 방법", koreanLength: "long", subtitle: HOW_TO_PLAY[mode].intro }} width="max-w-[880px]">
-                <div className="pp-enter [--pp-delay:160ms] flex items-center justify-between gap-4 flex-wrap mt-[26px] mb-7 @max-[580px]:flex-col @max-[580px]:items-stretch">
-                    <div role="tablist" aria-label="Game mode" className="flex gap-2 @max-[359px]:gap-1.5 @max-[580px]:justify-center">
+                <div className="pp-enter [--pp-delay:140ms] flex flex-col items-center gap-4 mt-6 mb-[34px]">
+                    <div role="tablist" aria-label="Game mode" className="flex gap-2 justify-center @max-[359px]:gap-1.5">
                         {MODES.map((m) => (
-                            <Pill key={m} role="tab" aria-selected={mode === m} active={mode === m} onClick={() => pick(m)} className="@max-[359px]:px-[13px] @max-[359px]:text-sm">
+                            <Pill key={m} role="tab" aria-selected={mode === m} active={mode === m} onClick={() => pick(m)} className="h-11 px-5 text-[15px] font-bold @max-[359px]:px-[13px] @max-[359px]:text-sm">
                                 {m[0].toUpperCase() + m.slice(1)}
                             </Pill>
                         ))}
                     </div>
-                    <div className="flex flex-col items-end gap-0.5 @max-[580px]:items-center">
-                        <div className="flex items-center gap-2">
-                            <span className="font-semibold text-sm text-(--muted)">{mode === "pixelated" ? "Next album in" : "Next idol in"}</span>
-                            <span aria-label="Time left" className="htp-clock font-bold text-lg tabular-nums px-2.5 py-1 rounded-[10px] border-2 border-(--ink) bg-(--chip) shadow-[2px_3px_0_var(--ctl-off)]">
+                    <div className="flex flex-col items-center gap-[5px] pt-[9px] px-[22px] pb-2.5 rounded-[20px] border-2 border-dashed border-(--rule) text-(--muted) text-center">
+                        <div className="flex items-center gap-2.5 whitespace-nowrap">
+                            <span className="font-semibold text-[13px]">{mode === "pixelated" ? "Next album in" : "Next idol in"}</span>
+                            <span aria-label="Time left" className="htp-clock inline-flex font-bold text-[19px] leading-none text-(--text)">
                                 {timeRemaining === null ? "--:--:--" : formattedTime}
                             </span>
                         </div>
-                        <span className="font-medium text-xs text-(--muted)">Midnight at UTC-5 (EST)</span>
+                        <span className="font-medium text-xs whitespace-nowrap">Midnight at UTC-5 (EST)</span>
                     </div>
                 </div>
 
-                <div key={mode} className="flex flex-col gap-5">
+                <div key={mode} className="flex flex-col gap-[26px]">
                     {mode === "classic" && <ClassicGuide />}
                     {mode === "blurry" && <BlurryGuide />}
                     {mode === "pixelated" && <PixelatedGuide />}
