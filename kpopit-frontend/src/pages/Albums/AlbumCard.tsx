@@ -7,7 +7,7 @@ import "../../components/Catalogue/catalogue.css";
 // The record peeking out of the sleeve: grooves, a sheen that turns on hover, the cover as label.
 function Vinyl({ cover }: { cover: string }) {
     return (
-        <div aria-hidden className="cg-disc cg-gpu absolute top-[4%] right-1.5 w-[76%] aspect-square">
+        <div aria-hidden className="cg-disc absolute top-[4%] right-1.5 w-[76%] aspect-square">
             <svg viewBox="0 0 100 100" className="absolute inset-0 block w-full h-full overflow-visible">
                 <circle cx="51.6" cy="52.4" r="48.6" fill="#1A1418" />
                 <circle cx="50" cy="50" r="48.6" fill="#120610" />
@@ -19,7 +19,8 @@ function Vinyl({ cover }: { cover: string }) {
                 <circle cx="50" cy="50" r="46" fill="none" stroke="rgba(255,255,255,.06)" strokeWidth=".6" />
             </svg>
             <div className="cg-spin absolute inset-[1.4%] rounded-full pointer-events-none bg-[conic-gradient(from_20deg,rgba(255,255,255,0)_0deg,rgba(255,255,255,.16)_28deg,rgba(255,255,255,0)_64deg,rgba(255,255,255,0)_190deg,rgba(255,255,255,.09)_218deg,rgba(255,255,255,0)_250deg)]" />
-            <div className="cg-spin absolute inset-[31%] [clip-path:circle(50%_at_50%_50%)] bg-[#FF8AC4]">
+            {/* No fill and no clip-path layer: Safari could paint those before the card faded in. */}
+            <div className="cg-spin absolute inset-[31%] rounded-full overflow-hidden">
                 <img src={cover} alt="" loading="lazy" decoding="async" className="block w-full h-full object-cover" />
             </div>
             <svg viewBox="0 0 100 100" className="absolute inset-0 block w-full h-full overflow-visible pointer-events-none">

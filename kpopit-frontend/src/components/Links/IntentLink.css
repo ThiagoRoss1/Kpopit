@@ -1,7 +1,8 @@
 /* Pressed from the click until the page changes, while the navigation waits for data. `scale`
-   (not `transform`) so it also works on cards whose entrance animation holds a transform. */
+   (not `transform`) so it also works on cards whose entrance animation holds a transform; no
+   opacity, which let a card's pink depth layer show through its face. */
 .link-pending {
-    opacity: 0.75;
     scale: 0.97;
-    transition: opacity 120ms ease-out, scale 120ms ease-out;
+    filter: brightness(.97);
+    transition: scale 120ms ease-out, filter 120ms ease-out;
 }
