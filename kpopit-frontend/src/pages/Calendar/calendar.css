@@ -23,7 +23,7 @@
 @media (hover: hover) {
   .cal-cell[data-live="1"][data-sel="0"]:hover { transform: translate3d(0, -3px, 0); transition: transform .45s var(--ease-settle), box-shadow .45s var(--ease-settle), background-color .35s ease; }
   .cal-dot[data-live="1"][data-sel="0"]:hover { background-color: var(--chip-hover); }
-  .cal-btn:not(:disabled):hover { transform: translate3d(0, -2px, 0); box-shadow: 3px 5px 0 var(--ctl-off), var(--in) !important; }
+  .cal-btn:not(:disabled):hover { transform: translate3d(0, -2px, 0); box-shadow: 3px 5px 0 var(--ctl-off), var(--btn-in, var(--in)) !important; }
   .cal-cta:hover { transform: translate3d(0, -2px, 0); box-shadow: 0 6px 0 var(--ink) !important; filter: brightness(1.04); }
   .cal-row[data-sel="0"]:hover .cal-rowcard { transform: translate3d(4px, 0, 0); }
   .cal-gap:hover { border-color: var(--ink); color: var(--text); transform: translate3d(0, -2px, 0); }
@@ -31,7 +31,7 @@
 }
 .cal-cell[data-live="1"][data-sel="0"]:active:active:active:active { transform: translate3d(0, 1px, 0) scale(.98); transition: transform .2s var(--ease-settle); }
 .cal-btn { transition: transform .45s var(--ease-bounce), box-shadow .4s var(--ease-settle), background-color .35s ease; }
-.cal-btn:not(:disabled):active:active:active:active { transform: translate3d(2px, 3px, 0); box-shadow: 0 0 0 var(--ctl-off) !important; transition-duration: .18s; }
+.cal-btn:not(:disabled):active:active:active:active { transform: translate3d(2px, 3px, 0); box-shadow: 0 0 0 var(--ctl-off), var(--btn-in, var(--in)) !important; transition-duration: .18s; }
 .cal-cta { transition: transform .45s var(--ease-bounce), box-shadow .4s var(--ease-settle), filter .35s; }
 .cal-cta:active:active:active:active { transform: translate3d(0, 4px, 0); box-shadow: 0 0 0 var(--ink) !important; transition-duration: .18s; }
 .cal-rowcard { transition: transform .5s var(--ease-settle), box-shadow .45s var(--ease-settle), border-color .35s ease; }

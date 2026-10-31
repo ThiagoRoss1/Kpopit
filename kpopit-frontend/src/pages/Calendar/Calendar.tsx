@@ -147,7 +147,7 @@ function CalendarView({ data }: { data: CalendarTimeline }) {
                                         aria-selected={on}
                                         onClick={() => { setMonth(null); setTlMonth(null); setExtra(0); setPicker(null); setParams((p) => { p.set("mode", m.id); p.delete("date"); return p; }, { replace: true }); }}
                                         className="cal-btn cal-focus cursor-pointer h-(--mt-h) px-(--mt-px) flex items-center rounded-full border-2 border-(--ink) font-bold text-[13px]"
-                                        style={{ background: on ? "var(--side)" : "var(--chip)", color: on ? "#1A1418" : "var(--chip-ink)", boxShadow: on ? "2px 3px 0 var(--ink),var(--in-pink)" : "2px 3px 0 var(--ctl-off),var(--in)" }}
+                                        style={{ background: on ? "var(--side)" : "var(--chip)", color: on ? "#1A1418" : "var(--chip-ink)", boxShadow: on ? "2px 3px 0 var(--ink),var(--in-pink)" : "2px 3px 0 var(--ctl-off),var(--in)", ["--btn-in" as string]: on ? "var(--in-pink)" : undefined }}
                                     >
                                         {m.name}
                                     </button>

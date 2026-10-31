@@ -2,13 +2,14 @@
    from --nb-tilt so hover and press transforms can replace them. */
 .nb-item { transition: background-color .3s, color .3s, border-color .3s, box-shadow .3s, transform .35s cubic-bezier(.34, 1.4, .64, 1); }
 @media (hover: hover) {
-  .nb-item[data-st="idle"]:hover { background: var(--chip) !important; border-color: var(--ink) !important; color: var(--text) !important; box-shadow: 2px 3px 0 var(--ctl-off), var(--in) !important; transform: translate3d(0, -2px, 0); }
+  .nb-item[data-st="idle"]:hover { background: var(--chip) !important; border-color: var(--ink) !important; color: var(--text) !important; box-shadow: 2px 3px 0 var(--ctl-off), var(--btn-in, var(--in)) !important; transform: translate3d(0, -2px, 0); }
   .nb-item[data-st="cur"]:hover { transform: translate3d(0, -2px, 0); box-shadow: 2.5px 3.5px 0 var(--ctl-off), var(--in-pink) !important; }
-  .nb-item[data-st="open"]:hover { transform: translate3d(0, -2px, 0); box-shadow: 2.5px 3.5px 0 var(--ctl-off), var(--in) !important; }
+  .nb-item[data-st="open"]:hover { transform: translate3d(0, -2px, 0); box-shadow: 2.5px 3.5px 0 var(--ctl-off), var(--btn-in, var(--in)) !important; }
 }
-.nb-item:active:active:active:active { transform: translate3d(2px, 3px, 0) !important; box-shadow: 0 0 0 var(--ctl-off), var(--in) !important; transition-duration: .18s; }
+.nb-item:active:active:active:active { transform: translate3d(2px, 3px, 0) !important; box-shadow: 0 0 0 var(--ctl-off), var(--btn-in, var(--in)) !important; transition-duration: .18s; }
 .nb-item[data-st="cur"]:active:active:active:active { box-shadow: 0 0 0 var(--ctl-off), var(--in-pink) !important; }
 .nb-item[data-st="idle"]:active:active:active:active { background: var(--chip) !important; border-color: var(--ink) !important; }
+.nb-item[data-st="cur"] { --btn-in: var(--in-pink); }
 .nb-chev { transition: transform .4s cubic-bezier(.34, 1.56, .64, 1); }
 [aria-expanded="true"] > .nb-chev { transform: rotate(180deg); }
 
@@ -29,19 +30,22 @@
 .nb-row { transform: rotate(var(--nb-tilt, 0deg)); transition: background-color .3s ease, box-shadow .4s cubic-bezier(.22, 1, .36, 1), transform .45s cubic-bezier(.34, 1.4, .64, 1); }
 .nb-row .nb-tile { transition: transform .45s cubic-bezier(.34, 1.56, .64, 1); }
 @media (hover: hover) {
-  .nb-row[data-cur="0"]:not([data-wip="1"]):hover { background: var(--chip-hover) !important; transform: translate3d(0, -2px, 0) rotate(0deg); box-shadow: 3px 4.5px 0 var(--ctl-off), var(--in) !important; }
+  .nb-row[data-cur="0"]:not([data-wip="1"]):hover { background: var(--chip-hover) !important; transform: translate3d(0, -2px, 0) rotate(0deg); box-shadow: 3px 4.5px 0 var(--ctl-off), var(--btn-in, var(--in)) !important; }
   .nb-row[data-cur="1"]:hover { transform: translate3d(0, -2px, 0) rotate(0deg); }
   .nb-row:not([data-wip="1"]):hover .nb-tile { transform: rotate(-4deg) scale(1.03); }
 }
-.nb-row:not([data-wip="1"]):active:active:active:active { transform: translate3d(2px, 3px, 0) rotate(0deg); box-shadow: 0 0 0 var(--ctl-off), var(--in) !important; transition-duration: .18s; }
+.nb-row:not([data-wip="1"]):active:active:active:active { transform: translate3d(2px, 3px, 0) rotate(0deg); box-shadow: 0 0 0 var(--ctl-off), var(--btn-in, var(--in)) !important; transition-duration: .18s; }
 .nb-row[data-wip="1"] { cursor: default; }
+/* The current page's row has a pink depth (no inner shine): its hover and press move that depth. */
+@media (hover: hover) { .nb-row[data-cur="1"]:hover { box-shadow: 4px 5.5px 0 0 #FF8AC4, 4px 5.5px 0 2px var(--ink) !important; } }
+.nb-row[data-cur="1"]:active:active:active:active { box-shadow: 0 0 0 0 #FF8AC4, 0 0 0 2px var(--ink) !important; }
 
 /* Profile menu items: the same lift-and-press as the rows, softer */
 .nb-uitem { transition: background-color .3s ease, border-color .3s ease, box-shadow .4s cubic-bezier(.22, 1, .36, 1), transform .45s cubic-bezier(.34, 1.3, .64, 1); }
 @media (hover: hover) {
-  .nb-uitem:hover { background: var(--chip-hover); border-color: var(--ink); box-shadow: 2px 3px 0 var(--ctl-off), var(--in); transform: translate3d(0, -2px, 0); }
+  .nb-uitem:hover { background: var(--chip-hover); border-color: var(--ink); box-shadow: 2px 3px 0 var(--ctl-off), var(--btn-in, var(--in)); transform: translate3d(0, -2px, 0); }
 }
-.nb-uitem:active:active:active:active { transform: translate3d(2px, 3px, 0); box-shadow: 0 0 0 var(--ctl-off), var(--in); transition-duration: .18s; }
+.nb-uitem:active:active:active:active { transform: translate3d(2px, 3px, 0); box-shadow: 0 0 0 var(--ctl-off), var(--btn-in, var(--in)); transition-duration: .18s; }
 
 .nb-menu { animation: nbMenu .38s cubic-bezier(.22, 1, .36, 1) both; }
 @keyframes nbMenu { from { opacity: 0; transform: translate3d(0, -10px, 0) scale(.97) } }

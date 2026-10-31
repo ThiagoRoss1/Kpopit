@@ -37,30 +37,33 @@
 .cg-clear { transition: opacity .3s ease, transform .4s var(--ease-pop), background-color .3s; }
 .cg-clear:hover { background: var(--chip-hover); }
 
+/* Pink (active) controls keep their pink shine through hover and press. */
+.cg-ctl[data-on="1"], .cg-ft[data-on="1"] { --btn-in: var(--in-pink); }
+
 /* Mobile filters toggle */
 .cg-ft { transition: transform .45s var(--ease-bounce), box-shadow .4s var(--ease-settle), background-color .3s ease, color .3s ease; }
 @media (hover: hover) {
-  .cg-ft[data-open="0"]:hover { transform: translate3d(0, -2px, 0); box-shadow: 2.5px 3.5px 0 var(--ctl-off), var(--in) !important; background: var(--chip-hover) !important; }
+  .cg-ft[data-open="0"]:hover { transform: translate3d(0, -2px, 0); box-shadow: 2.5px 3.5px 0 var(--ctl-off), var(--btn-in, var(--in)) !important; background: var(--chip-hover) !important; }
   .cg-ft[data-open="0"][data-on="1"]:hover { box-shadow: 2.5px 3.5px 0 var(--ctl-off), var(--in-pink) !important; background: #FF9BCC !important; }
 }
 .cg-ft[data-open="1"] { transform: translate3d(2px, 3px, 0); }
-.cg-ft:active:active:active:active { transform: translate3d(2px, 3px, 0) !important; box-shadow: 0 0 0 var(--ctl-off), var(--in) !important; transition-duration: .18s; }
+.cg-ft:active:active:active:active { transform: translate3d(2px, 3px, 0) !important; box-shadow: 0 0 0 var(--ctl-off), var(--btn-in, var(--in)) !important; transition-duration: .18s; }
 .cg-fbadge { animation: puffMenu .35s var(--ease-pop) both; }
 
 /* Filter menus */
 .cg-ctl { transition: transform .45s var(--ease-bounce), box-shadow .4s var(--ease-settle), background-color .3s ease, color .3s ease; }
 .cg-ctl[data-open="1"] { transform: translate3d(2px, 3px, 0); }
 @media (hover: hover) {
-  .cg-ctl[data-open="0"]:hover { transform: translate3d(0, -2px, 0); box-shadow: 2.5px 3.5px 0 var(--ctl-off), var(--in) !important; }
+  .cg-ctl[data-open="0"]:hover { transform: translate3d(0, -2px, 0); box-shadow: 2.5px 3.5px 0 var(--ctl-off), var(--btn-in, var(--in)) !important; }
   .cg-ctl[data-open="0"][data-on="1"]:hover { box-shadow: 2.5px 3.5px 0 var(--ctl-off), var(--in-pink) !important; background: #FF9BCC !important; }
   .cg-ctl[data-open="0"][data-on="0"]:hover { background: var(--chip-hover) !important; }
 }
-.cg-ctl:active:active:active:active { transform: translate3d(2px, 3px, 0) !important; box-shadow: 0 0 0 var(--ctl-off), var(--in) !important; transition-duration: .18s; }
+.cg-ctl:active:active:active:active { transform: translate3d(2px, 3px, 0) !important; box-shadow: 0 0 0 var(--ctl-off), var(--btn-in, var(--in)) !important; transition-duration: .18s; }
 .cg-chev { transition: transform .4s var(--ease-pop); }
 .cg-menu { animation: puffMenu .38s var(--ease-settle) both; }
 .cg-opt { transition: transform .35s var(--ease-settle), background-color .3s ease, border-color .3s ease, box-shadow .3s ease; }
 @media (hover: hover) {
-  .cg-opt:hover { background-color: var(--opt-hover) !important; border-color: var(--ink) !important; box-shadow: 2px 2.5px 0 var(--ink), var(--in) !important; transform: translate3d(4px, 0, 0); }
+  .cg-opt:hover { background-color: var(--opt-hover) !important; border-color: var(--ink) !important; box-shadow: 2px 2.5px 0 var(--ink), var(--btn-in, var(--in)) !important; transform: translate3d(4px, 0, 0); }
   .cg-opt[aria-checked="true"]:hover { background-color: #FF9BCC !important; box-shadow: 2px 2.5px 0 var(--ink), var(--in-pink) !important; }
 }
 .cg-opt:active:active:active:active { transform: translate3d(6px, 2px, 0); box-shadow: 0 0 0 var(--ink) !important; }
@@ -71,8 +74,8 @@
 
 /* Applied filter chips */
 .cg-chip { animation: puffMenu .35s var(--ease-pop) both; transition: background-color .3s, transform .38s cubic-bezier(.34, 1.4, .64, 1), box-shadow .3s; }
-@media (hover: hover) { .cg-chip:hover { background: var(--chip-hover) !important; transform: translate3d(0, -2px, 0); box-shadow: 2px 3.5px 0 var(--ctl-off), var(--in) !important; } }
-.cg-chip:active:active:active:active { transform: translate3d(1.5px, 2px, 0); box-shadow: 0 0 0 var(--ctl-off), var(--in) !important; }
+@media (hover: hover) { .cg-chip:hover { background: var(--chip-hover) !important; transform: translate3d(0, -2px, 0); box-shadow: 2px 3.5px 0 var(--ctl-off), var(--btn-in, var(--in)) !important; } }
+.cg-chip:active:active:active:active { transform: translate3d(1.5px, 2px, 0); box-shadow: 0 0 0 var(--ctl-off), var(--btn-in, var(--in)) !important; }
 
 /* Cards: alternate tilt, the face lifts and presses into the pink depth layer behind it. */
 .cg-card { animation: puffIn .78s var(--ease-settle) backwards; }
