@@ -1,0 +1,23 @@
+.cg-search { transition: transform .4s cubic-bezier(.34, 1.4, .64, 1), box-shadow .35s ease; }
+.cg-search:focus-within { transform: translate3d(-1px, -2px, 0); box-shadow: 6px 7px 0 var(--ctl-off), var(--in); }
+.cg-search input::-webkit-search-cancel-button { display: none; -webkit-appearance: none; }
+.cg-opt { transition: transform .35s var(--ease-settle), background-color .3s ease, border-color .3s ease; }
+@media (hover: hover) { .cg-opt:hover { background-color: var(--opt-hover); border-color: var(--ink); transform: translate3d(4px, 0, 0); } }
+.cg-chev { transition: transform .4s var(--ease-pop); }
+[aria-expanded="true"] > .cg-chev { transform: rotate(180deg); }
+.cg-chip { animation: puffMenu .35s var(--ease-pop) both; }
+.cg-scroll { scrollbar-width: thin; scrollbar-color: #FF8AC4 transparent; }
+
+/* Catalogue cards: tilt alternates, straightens on hover; the face lifts and presses into its depth. */
+.cg-card { animation: puffIn .78s var(--ease-settle) both; }
+.cg-tilt { transition: transform .42s var(--ease-settle); transform: rotate(var(--cg-tilt, 0deg)); }
+.cg-face { transition: transform .38s var(--ease-settle), background-color .22s ease; }
+.cg-card img { transition: transform .75s var(--ease-settle); }
+.cg-disc { transition: transform .94s cubic-bezier(.25, 1, .5, 1); }
+@media (hover: hover) {
+  .cg-card:hover .cg-tilt { transform: rotate(0deg); }
+  .cg-card:hover .cg-face { transform: translate3d(-1px, -3px, 0); }
+  .cg-card:hover img { transform: scale(1.08); }
+  .cg-card:hover .cg-disc { transform: translate3d(14%, 0, 0) rotate(200deg); transition-duration: 1.3s; }
+}
+.cg-card:active .cg-face { transform: translate3d(var(--cg-depth, 5px), var(--cg-depth, 5px), 0); transition-duration: .12s; }
