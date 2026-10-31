@@ -8,6 +8,7 @@ import calculateAge from "../../hooks/useCalculateAge";
 import { useHydrated } from "../../hooks/useHydrated";
 import PageMeta, { SITE_URL } from "../../components/Seo/PageMeta";
 import PageLoader from "../../components/Loading/PageLoader";
+import HScrollRow from "../../components/Puff/HScrollRow";
 import IntentLink from "../../components/Links/IntentLink";
 import { getNationalityFlag } from "../../utils/getFlags";
 import { resolveCdnUrl } from "../../utils/imageUrl";
@@ -287,15 +288,21 @@ function FactTile({ f, delay }: { f: Fact; delay: number }) {
 
 function ChipTag({ chip }: { chip: FactChip }) {
     const look = CHIP[chip.k % 3];
-    const className = cnChip(chip.big);
-    const style: CSSProperties = { background: look.bg, color: look.fg, transform: `rotate(${chip.k % 3 === 0 ? -2 : chip.k % 3 === 1 ? 2 : -1}deg)`, boxShadow: `3px 3px 0 #1A1418,${look.in}` };
+    const style = {
+        background: look.bg,
+        color: look.fg,
+        "--tilt": `${chip.k % 3 === 0 ? -2 : chip.k % 3 === 1 ? 2 : -1}deg`,
+        "--chip-in": look.in,
+    } as CSSProperties;
     const body = (
         <>
             {chip.label}
             {chip.sub && <span className="font-semibold text-xs leading-none opacity-80">{chip.sub}</span>}
         </>
     );
-    return chip.to ? <Link to={chip.to} className={`${className} ip-cta ip-btn no-underline`} style={style}>{body}</Link> : <span className={className} style={style}>{body}</span>;
+    return chip.to
+        ? <Link to={chip.to} className={`${cnChip(chip.big)} ip-chip ip-chip-link ip-btn no-underline`} style={style}>{body}</Link>
+        : <span className={`${cnChip(chip.big)} ip-chip`} style={style}>{body}</span>;
 }
 
 const cnChip = (big?: boolean) =>
@@ -314,7 +321,7 @@ function Related({ idols }: { idols: IdolsPageData[] }) {
                     <h2 id="ip-related" className="m-0 font-mono-display font-normal text-[clamp(30px,6.4cqi,60px)] leading-none tracking-[.02em] text-white whitespace-nowrap">related idols</h2>
                 </div>
             </div>
-            <div className="ip-rel flex gap-6 overflow-x-auto overflow-y-hidden overscroll-x-contain pt-5 px-3.5 pb-[30px] mt-[30px] -mx-3.5">
+            <HScrollRow bar aria-label="Related idols" className="ip-rel gap-6 overflow-y-hidden pt-5 px-3.5 pb-[30px] mt-[30px] -mx-3.5">
                 {idols.map((idol, k) => (
                     <IntentLink
                         key={idol.id}
@@ -333,7 +340,7 @@ function Related({ idols }: { idols: IdolsPageData[] }) {
                         </span>
                     </IntentLink>
                 ))}
-            </div>
+            </HScrollRow>
         </section>
     );
 }

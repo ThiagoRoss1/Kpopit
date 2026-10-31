@@ -188,9 +188,8 @@ function Album({ album }: { album: AlbumPageData }) {
                             <span className="font-medium text-[13px] text-(--muted)">{`${all.length} ${all.length === 1 ? "release" : "releases"} · ${all[0].release_year}–${all[all.length - 1].release_year}`}</span>
                         </div>
                         <div className="[display:var(--disco-h)] mt-[18px]">
-                        <HScrollRow aria-label="Discography" className="ap-scroll overflow-y-hidden pt-1 px-1 pb-3.5">
+                        <HScrollRow bar aria-label="Discography" className="ap-scroll overflow-y-hidden pt-1 px-1 pb-3.5">
                             <div className="ap-track relative box-border flex flex-none gap-1.5 min-w-full w-max pt-[34px] px-7">
-                                <div aria-hidden className="absolute left-7 right-7 top-[52px] h-[3px] rounded-[3px] bg-(--rule)" />
                                 {all.map((a, i) => {
                                     const cur = a.id === album.id;
                                     const firstOfYear = i === 0 || all[i - 1].release_year !== a.release_year;
@@ -204,8 +203,8 @@ function Album({ album }: { album: AlbumPageData }) {
                                             className="ap-dc ap-focus relative flex-[1_0_92px] flex flex-col items-center gap-2.5 p-0 no-underline text-inherit"
                                             style={{ cursor: cur ? "default" : "pointer" }}
                                         >
-                                            <span className="absolute -top-[30px] font-bold text-[11px] leading-none text-(--muted)" style={{ visibility: firstOfYear ? "visible" : "hidden" }}>{a.release_year}</span>
-                                            <span aria-hidden className={`ap-dot rounded-full border-2 border-[#1A1418] ${cur ? "ap-in-pop" : ""}`} style={{ ...dot(a, cur, "26px", "16px"), marginTop: cur ? 0 : 5 }} />
+                                            <span className="absolute -top-[30px] z-1 font-bold text-[11px] leading-none text-(--muted)" style={{ visibility: firstOfYear ? "visible" : "hidden" }}>{a.release_year}</span>
+                                            <span aria-hidden className={`ap-dot relative z-1 rounded-full border-2 border-[#1A1418] ${cur ? "ap-in-pop" : ""}`} style={{ ...dot(a, cur, "26px", "16px"), marginTop: cur ? 0 : 5 }} />
                                             <span className="ap-dn w-full text-center text-[11.5px] leading-[1.3] overflow-hidden text-ellipsis whitespace-nowrap pb-px" style={{ fontWeight: cur ? 700 : 500, color: cur ? "var(--text)" : "var(--muted)" }}>{a.name}</span>
                                             <span className="font-medium text-[10.5px] leading-none text-(--muted)">{typeLabel(a.type)}</span>
                                         </IntentLink>

@@ -63,7 +63,7 @@ export function buildFacts(data: IdolProfileData, age: number | null): Record<Ta
     const positions = (p.position ?? "").split(",").map((s) => s.trim()).filter(Boolean);
 
     const profile: Fact[] = [
-        { label: "STAGE NAME", span: "3n", value: p.artist_name, big: true },
+        { label: "ARTIST NAME", span: "3n", value: p.artist_name, big: true },
         { label: "REAL NAME", span: "3n", value: p.real_name || "N/A" },
         { label: "AGE", span: "2", value: age ? String(age) : "–", sub: "years old", big: true },
         { label: "HEIGHT", span: "2", value: p.height ? String(p.height) : "–", sub: "cm", big: true },

@@ -42,15 +42,12 @@
 .ap-tile { transition: transform .45s cubic-bezier(.34, 1.3, .64, 1), box-shadow .4s var(--ease-settle), background-color .35s ease; }
 @media (hover: hover) { .ap-tile:hover { transform: translate3d(0, -2px, 0); box-shadow: 4px 5px 0 var(--ctl-off), var(--in) !important; } }
 
-/* Discography: the timeline fills the width and scrolls (drag, pink scrollbar) when it can't */
-.pp-hscroll.ap-scroll { scrollbar-width: thin; scrollbar-color: #FF8AC4 transparent; }
-.pp-hscroll.ap-scroll::-webkit-scrollbar { display: block; height: 14px; }
-.pp-hscroll.ap-scroll::-webkit-scrollbar-track { margin: 0 36px; border-radius: 999px; background: linear-gradient(var(--rule), var(--rule)) center / 100% 3px no-repeat; }
-.pp-hscroll.ap-scroll::-webkit-scrollbar-thumb { background: #FF8AC4; border: 2px solid var(--ink); border-radius: 999px; box-shadow: inset 0 2px 0 rgba(255, 255, 255, .55); }
-.pp-hscroll.ap-scroll::-webkit-scrollbar-thumb:hover { background: #FF70B8; }
-.pp-hscroll.ap-scroll::-webkit-scrollbar-thumb:active { background: #FF3399; }
-@supports selector(::-webkit-scrollbar) { .pp-hscroll.ap-scroll { scrollbar-width: auto; scrollbar-color: auto; } }
+/* Discography: the timeline fills the width and drag-scrolls (pink scrollbar) when it can't */
 .ap-track { user-select: none; -webkit-user-select: none; }
+/* Each release draws its piece of the line (centred on the dots), so it always spans every one */
+.ap-dc::before { content: ""; position: absolute; top: 11.5px; left: -3px; right: -3px; height: 3px; background: var(--rule); }
+.ap-dc:first-child::before { left: -28px; border-radius: 3px 0 0 3px; }
+.ap-dc:last-child::before { right: -28px; border-radius: 0 3px 3px 0; }
 .ap-dot { transition: transform .35s var(--ease-pop), background-color .3s ease; }
 .ap-dn { transition: color .25s ease; }
 @media (hover: hover) {
