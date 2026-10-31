@@ -53,6 +53,7 @@
   --rule: rgba(26, 20, 24, .18);
   --bar: #FFFDFA;
   --bar-sh: 0 3px 0 rgba(26, 20, 24, .06);
+  --bar-line: var(--ink);
   --cur-bg: #FFE3F1;
   --tile: #FFE3F1;
   --tile-ink: #1A1418;
@@ -98,7 +99,9 @@
   --group: #FF8AC4;
   --rule: rgba(250, 246, 240, .18);
   --bar: #262226;
-  --bar-sh: 0 3px 0 #FF8AC4;
+  /* Night: the pink line replaces the bar's ink border (same height as Day). */
+  --bar-sh: none;
+  --bar-line: #FF8AC4;
   --cur-bg: #3B343A;
   --tile: #3B343A;
   --tile-ink: #FF8AC4;

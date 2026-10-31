@@ -3,6 +3,9 @@ import CalendarGame from "../../src/pages/CalendarGame/CalendarGame";
 import { useCalendarDate } from "../../src/hooks/useCalendarDate";
 import PixelatedMode from "../../src/pages/PixelatedMode/PixelatedMode";
 
+// Pixelated's page is light: its navbar stays in Day.
+export const handle = { navTheme: "day" };
+
 export default function PixelatedRoute() {
   // ?date= plays a past day from the calendar with the same page look.
   const date = useCalendarDate();

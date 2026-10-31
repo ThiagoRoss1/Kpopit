@@ -1,5 +1,4 @@
-import { useEffect, useRef, useState } from "react";
-import { Link, useLocation, useNavigate } from "react-router";
+import { Link, useNavigate } from "react-router";
 import { LogOut, User } from "lucide-react";
 import { useAuth } from "../../hooks/useAuth";
 import { useAuthUser } from "../../hooks/useAuthUser";
@@ -9,32 +8,14 @@ import IntentLink from "../Links/IntentLink";
 
 const prefetchProfile = () => void loadProfileStats();
 
-const menuItem = "pp-focus flex items-center gap-3 h-11 px-3 rounded-[13px] border-2 border-transparent font-semibold text-[15px] text-(--chip-ink) no-underline cursor-pointer transition-[background-color,border-color,transform] duration-300 hover:bg-(--opt-hover) hover:border-(--ink) hover:translate-x-1";
+const menuItem = "nb-uitem pp-focus flex items-center gap-3 h-11 px-3 rounded-[13px] border-2 border-transparent font-semibold text-[15px] text-(--chip-ink) no-underline cursor-pointer";
 
 /** Login for guests; for members the avatar ring opens Profile + Logout. Same box while the
- *  session resolves, so the bar never shifts. */
-export default function NavAuthSlot() {
+ *  session resolves, so the bar never shifts. The navbar owns the open state (one menu at a time). */
+export default function NavAuthSlot({ open, onToggle }: { open: boolean; onToggle: () => void }) {
     const { isAuthenticated, isLoading, user, refreshAuth } = useAuth();
     const { logout } = useAuthUser();
     const navigate = useNavigate();
-    const { pathname } = useLocation();
-    const [openOn, setOpenOn] = useState<string | null>(null);
-    const open = openOn === pathname;
-    const boxRef = useRef<HTMLDivElement>(null);
-
-    useEffect(() => {
-        if (!open) return;
-        const onDown = (e: MouseEvent) => {
-            if (boxRef.current && !boxRef.current.contains(e.target as Node)) setOpenOn(null);
-        };
-        const onKey = (e: KeyboardEvent) => e.key === "Escape" && setOpenOn(null);
-        document.addEventListener("mousedown", onDown);
-        document.addEventListener("keydown", onKey);
-        return () => {
-            document.removeEventListener("mousedown", onDown);
-            document.removeEventListener("keydown", onKey);
-        };
-    }, [open]);
 
     if (isLoading) return <span aria-hidden className="block w-12 h-9" />;
 
@@ -63,12 +44,12 @@ export default function NavAuthSlot() {
     };
 
     return (
-        <div ref={boxRef} className="relative mx-1">
+        <div className="relative mx-1">
             <button
                 type="button"
                 aria-label="User menu"
                 aria-expanded={open}
-                onClick={() => setOpenOn(open ? null : pathname)}
+                onClick={onToggle}
                 className="nb-av pp-focus relative block flex-none w-9 h-9 box-border rounded-full overflow-hidden bg-(--ink) p-0 cursor-pointer"
             >
                 {avatar ? (
@@ -78,7 +59,7 @@ export default function NavAuthSlot() {
                 )}
             </button>
             {open && (
-                <div className="nb-menu absolute right-0 top-[calc(100%+14px)] z-40 w-60 box-border p-2 rounded-[20px] border-2 border-(--ink) bg-(--menu-bg) shadow-[3px_4px_0_var(--ctl-off),var(--in)] flex flex-col gap-0.5 origin-[calc(100%-20px)_0]">
+                <div className="nb-menu absolute right-0 top-[calc(100%+22px)] @max-[760px]:top-[calc(100%+19px)] z-40 w-60 box-border p-2 rounded-[20px] border-2 border-(--ink) bg-(--menu-bg) shadow-[3px_4px_0_var(--ctl-off),var(--in)] flex flex-col gap-0.5 origin-[calc(100%-20px)_0]">
                     <div className="px-3 pt-2 pb-2.5 mb-1 border-b-2 border-(--rule) min-w-0">
                         <p title={user.profile.display_name} className="m-0 font-bold text-base text-(--chip-ink) truncate">{user.profile.display_name}</p>
                         <p title={username} className="m-0 font-medium text-[13px] text-(--muted) truncate">@{username}</p>

@@ -35,14 +35,17 @@ const MainLayout = () => {
     // Puff Pop only while it is on) paint their own ground and follow the saved theme; the older
     // pages keep their dark look with the navbar forced to night.
     const { features } = useFeatures();
-    const puff = useMatches().some((match) => {
+    const matches = useMatches();
+    const puff = matches.some((match) => {
         const flag = (match.handle as { puff?: boolean | keyof Features } | undefined)?.puff;
         return flag === true || (typeof flag === "string" && features[flag]);
     });
+    // An old page with a light look (Pixelated) keeps the navbar in Day until it is redesigned.
+    const navTheme = matches.map((match) => (match.handle as { navTheme?: "day" } | undefined)?.navTheme).find(Boolean);
 
     return (
         <div className={`min-h-screen flex flex-col text-foreground selection:bg-pink-800 ${puff ? "bg-(--ground)" : "bg-transparent"}`}>
-            <NavBarV2 forceNight={!puff} />
+            <NavBarV2 forceTheme={puff ? undefined : navTheme ?? "night"} />
             
             {/* Notices */}
             {import.meta.env.VITE_GLOBAL_NOTICE === "true" && 

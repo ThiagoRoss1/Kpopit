@@ -16,7 +16,7 @@ import {
 import "../Puff/puff.css";
 import "./navbar.css";
 
-type Open = NavMenu | "sheet" | null;
+type Open = NavMenu | "sheet" | "user" | null;
 
 const PREFETCH: Partial<Record<NavPage, () => void>> = { idols: prefetchIdolsList, collections: prefetchCollectionsList };
 
@@ -24,9 +24,11 @@ const dot = (size: "sm" | "md" = "md") => (
     <span aria-hidden className={cn("flex-none rounded-full bg-[#FF3399] border-[#1A1418]", size === "md" ? "w-[9px] h-[9px] border-2" : "w-[7px] h-[7px] border-[1.5px]")} />
 );
 
-/** The site navbar on every page. Old pages pass `forceNight` (their dark look; the theme
- *  toggle is hidden but keeps its space so the bar doesn't shift between pages). */
-export default function NavBarV2({ forceNight = false }: { forceNight?: boolean }) {
+/** The site navbar on every page. Old pages pass `forceTheme` (night for the dark ones, day for
+ *  Pixelated's light page); the theme toggle is then hidden but keeps its space so the bar doesn't
+ *  shift between pages. */
+export default function NavBarV2({ forceTheme }: { forceTheme?: "night" | "day" }) {
+    const forced = forceTheme !== undefined;
     const { pathname } = useLocation();
     const page = pageOf(pathname);
     const section = menuOf(page);
@@ -38,7 +40,8 @@ export default function NavBarV2({ forceNight = false }: { forceNight?: boolean 
     const [openState, setOpenState] = useState<{ menu: Open; path: string }>({ menu: null, path: pathname });
     const open = openState.path === pathname ? openState.menu : null;
     const setOpen = (menu: Open) => setOpenState({ menu, path: pathname });
-    const toggle = (menu: NavMenu | "sheet") => setOpen(open === menu ? null : menu);
+    // One menu at a time: opening one (dropdown, sheet or the profile menu) closes the others.
+    const toggle = (menu: Exclude<Open, null>) => setOpen(open === menu ? null : menu);
 
     useEffect(() => {
         if (!open) return;
@@ -69,12 +72,12 @@ export default function NavBarV2({ forceNight = false }: { forceNight?: boolean 
     return (
         <div
             ref={rootRef}
-            data-theme={forceNight ? "night" : undefined}
+            data-theme={forceTheme}
             className="pp-nav @container sticky top-0 z-100 w-full font-[DynaPuff,system-ui,sans-serif]"
         >
             <nav
                 aria-label="Main"
-                className="relative z-30 flex items-center gap-3.5 h-[60px] px-6 @max-[1100px]:px-5 @max-[760px]:h-[54px] @max-[760px]:px-3 bg-(--bar) border-b-2 border-(--ink) shadow-[var(--bar-sh)] text-(--text)"
+                className="relative z-30 flex items-center gap-3.5 h-[60px] px-6 @max-[1100px]:px-5 @max-[760px]:h-[54px] @max-[760px]:px-3 bg-(--bar) border-b-2 border-(--bar-line) shadow-[var(--bar-sh)] text-(--text)"
             >
                 <Link to="/" aria-label="KpopIt home" className="nb-logo pp-focus flex min-w-0 items-center gap-2 no-underline">
                     <img src="/kpopit-icon-svg.svg" alt="" width={36} height={36} className="block flex-none w-9 h-9" draggable={false} />
@@ -134,17 +137,17 @@ export default function NavBarV2({ forceNight = false }: { forceNight?: boolean 
                         type="button"
                         onClick={toggleTheme}
                         aria-label="Switch day and night"
-                        aria-hidden={forceNight || undefined}
-                        tabIndex={forceNight ? -1 : 0}
+                        aria-hidden={forced || undefined}
+                        tabIndex={forced ? -1 : 0}
                         className={cn(
                             "pp-press pp-focus flex-none grid place-items-center w-[34px] h-[34px] p-0 rounded-full border-2 border-(--ink) bg-(--chip) text-(--chip-ink) cursor-pointer",
-                            forceNight && "invisible",
+                            forced && "invisible",
                         )}
                     >
-                        {!forceNight && theme === "night" ? <Sun className="w-4 h-4" strokeWidth={2.6} /> : <Moon className="w-4 h-4" strokeWidth={2.6} />}
+                        {!forced && theme === "night" ? <Sun className="w-4 h-4" strokeWidth={2.6} /> : <Moon className="w-4 h-4" strokeWidth={2.6} />}
                     </button>
                     <span aria-hidden className="w-0.5 h-[26px] rounded-[2px] bg-[rgba(128,110,120,.3)] @max-[760px]:hidden" />
-                    <NavAuthSlot />
+                    <NavAuthSlot open={open === "user"} onToggle={() => toggle("user")} />
                 </div>
 
                 <button
@@ -203,7 +206,7 @@ function DesktopMenu({ menu, rows, page }: { menu: NavMenu; rows: NavRow[]; page
         <div
             role="menu"
             className={cn(
-                "nb-menu absolute top-[53px] z-40 box-border p-3 rounded-[24px] border-2 border-(--ink) bg-(--menu-bg) shadow-[5px_5px_0_0_#FF8AC4,5px_5px_0_2px_var(--ink)] grid grid-cols-2 gap-x-3 gap-y-[13px]",
+                "nb-menu absolute top-[58px] z-40 box-border p-3 rounded-[24px] border-2 border-(--ink) bg-(--menu-bg) shadow-[5px_5px_0_0_#FF8AC4,5px_5px_0_2px_var(--ink)] grid grid-cols-2 gap-x-3 gap-y-[13px]",
                 about ? "right-0 w-[470px] origin-[calc(100%-24px)_0]" : "-left-3 w-[420px] origin-[24px_0]",
             )}
         >
@@ -216,7 +219,7 @@ function DesktopMenu({ menu, rows, page }: { menu: NavMenu; rows: NavRow[]; page
                         role="menuitem"
                         data-cur={cur ? "1" : "0"}
                         data-wip={row.wip ? "1" : undefined}
-                        style={{ transform: `rotate(${i % 2 ? 0.6 : -0.6}deg)` }}
+                        style={{ "--nb-tilt": `${i % 2 ? 0.6 : -0.6}deg` } as CSSProperties}
                         className={cn(
                             "nb-row pp-focus box-border flex items-center gap-3 overflow-hidden no-underline text-(--chip-ink) rounded-[16px] border-2 border-(--ink) pr-3 pl-2.5",
                             about ? "min-h-[70px] py-2.5" : "h-[70px]",
@@ -295,6 +298,7 @@ function MobileSheet({ page, section, rowsOf, calendar, collections }: {
                                     <RowLink
                                         key={row.id}
                                         row={row}
+                                        data-cur={row.id === page ? "1" : "0"}
                                         data-wip={row.wip ? "1" : undefined}
                                         className={cn(
                                             "nb-row pp-focus box-border min-h-[58px] py-1.5 pr-2.5 pl-1.5 rounded-[15px] border-2 border-(--ink) shadow-[2px_2.5px_0_var(--ctl-off)] flex items-center gap-2.5 overflow-hidden no-underline text-(--chip-ink)",
