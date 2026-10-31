@@ -52,7 +52,7 @@
 .pp-toast[data-out="1"] { animation: ppToastOut .3s cubic-bezier(.4, 0, 1, 1) forwards; }
 @keyframes ppToastOut { from { opacity: 1 } to { opacity: 0; transform: translate3d(0, 14px, 0) scale(.97) } }
 
-.pp-enter { animation: var(--pp-anim, puffIn) .7s var(--ease-settle) var(--pp-delay, 0ms) both; }
+.pp-enter { animation: var(--pp-anim, puffIn) .7s var(--ease-settle) var(--pp-delay, 0ms) backwards; }
 
 @media (prefers-reduced-motion: reduce) {
   .pp-root, .pp-root *, .pp-nav, .pp-nav * { animation: none !important; transition-duration: 0s !important; }

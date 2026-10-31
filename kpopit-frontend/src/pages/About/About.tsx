@@ -66,7 +66,7 @@ export default function About() {
                     <SideIndex items={SECTIONS} active={active} onPick={jumpTo} />
                     <div className="flex flex-col gap-4 min-w-0">
                         <IndexChips items={SECTIONS} active={active} onPick={jumpTo} />
-                        <article className="pp-enter [--pp-delay:200ms] relative rounded-[23px] border-2 border-(--ink) bg-(--face) text-(--face-ink) shadow-(--card-depth) pt-9 pr-11 pb-10 pl-16 @max-[580px]:pt-[22px] @max-[580px]:pr-[18px] @max-[580px]:pb-[26px] @max-[580px]:pl-[34px] flex flex-col gap-7">
+                        <article className="pp-enter [--pp-delay:200ms] relative rounded-[23px] border-2 border-(--ink) bg-(--face) text-(--face-ink) shadow-[var(--card-depth)] pt-9 pr-11 pb-10 pl-16 @max-[580px]:pt-[22px] @max-[580px]:pr-[18px] @max-[580px]:pb-[26px] @max-[580px]:pl-[34px] flex flex-col gap-7">
                             <span aria-hidden className="absolute left-[38px] @max-[580px]:left-[18px] top-0 bottom-0 w-0.5 bg-[rgba(255,51,153,.45)]" />
 
                             <Section id="what" n={1} title="What is KpopIt" className="grid grid-cols-[minmax(0,1fr)_210px] gap-7 items-start @max-[580px]:grid-cols-1">

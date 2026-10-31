@@ -84,7 +84,7 @@ export default function Blog() {
                             key={latest.slug}
                             to={`/blog/${latest.slug}`}
                             data-feat
-                            className="bl-card pp-focus pp-enter [--pp-delay:200ms] block no-underline text-(--face-ink) rounded-[23px] border-2 border-(--ink) bg-(--face) shadow-(--card-depth) p-[22px]"
+                            className="bl-card pp-focus pp-enter [--pp-delay:200ms] block no-underline text-(--face-ink) rounded-[23px] border-2 border-(--ink) bg-(--face) shadow-[var(--card-depth)] p-[22px]"
                         >
                             <div className="grid grid-cols-[minmax(0,1.1fr)_minmax(0,1fr)] gap-7 items-center @max-[760px]:grid-cols-1 @max-[760px]:gap-[18px]">
                                 <div className="relative -rotate-[1.2deg]">

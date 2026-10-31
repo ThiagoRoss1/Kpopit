@@ -85,7 +85,7 @@ export default function Contact() {
 
                     <form
                         onSubmit={send}
-                        className="pp-enter [--pp-delay:220ms] min-w-0 rounded-[23px] border-2 border-(--ink) bg-(--face) text-(--face-ink) shadow-(--card-depth) pt-7 px-[30px] pb-[30px] @max-[580px]:pt-[22px] @max-[580px]:px-[18px] @max-[580px]:pb-6 flex flex-col gap-5"
+                        className="pp-enter [--pp-delay:220ms] min-w-0 rounded-[23px] border-2 border-(--ink) bg-(--face) text-(--face-ink) shadow-[var(--card-depth)] pt-7 px-[30px] pb-[30px] @max-[580px]:pt-[22px] @max-[580px]:px-[18px] @max-[580px]:pb-6 flex flex-col gap-5"
                     >
                         <div className="flex flex-col gap-1">
                             <h2 className="m-0 font-bold text-[22px] leading-[1.15]">Send a message</h2>

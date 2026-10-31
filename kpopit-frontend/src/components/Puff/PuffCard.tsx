@@ -8,7 +8,7 @@ export default function PuffCard({ tilt, className, style, ...rest }: { tilt?: n
             {...rest}
             style={tilt === undefined ? style : { ...style, ["--pp-tilt" as string]: `${tilt % 2 ? 0.5 : -0.5}deg` }}
             className={cn(
-                "bg-(--face) text-(--face-ink) border-2 border-(--ink) rounded-[23px] shadow-(--card-depth)",
+                "bg-(--face) text-(--face-ink) border-2 border-(--ink) rounded-[23px] shadow-[var(--card-depth)]",
                 tilt !== undefined && "pp-tilt",
                 className,
             )}
