@@ -5,6 +5,7 @@ from services.album_service import AlbumService
 from services.game_service import GameService
 from services.idol_guess_service import IdolGuessService
 from services.restore_service import RestoreService
+from services.xp_service import game_xp
 from utils.dates import get_current_timestamp, get_today_date
 
 load_local_env()
@@ -50,6 +51,11 @@ class CalendarService:
         row = cursor.fetchone()
         return row["first_day"] if row else None
 
+    def day_number(self, cursor, gamemode_id: int, day: date) -> int | None:
+        """Day N of a mode: the mode's first challenge day is Day 1."""
+        first = self.first_day(cursor, gamemode_id)
+        return (day - first).days + 1 if first and day >= first else None
+
     def challenge_day(self, cursor, gamemode_id: int, raw: str) -> str:
         """The validated YYYY-MM-DD day; raises CalendarError for a malformed, future or too early day."""
         try:
@@ -64,7 +70,7 @@ class CalendarService:
     def _row(self, cursor, user_id: int, gamemode_id: int, day: str) -> dict | None:
         cursor.execute(
             """
-                SELECT guessed_ids, guesses_count, won, is_calendar FROM daily_user_history
+                SELECT guessed_ids, guesses_count, won, is_calendar, one_shot_win FROM daily_user_history
                 WHERE user_id = %s AND date = %s AND gamemode_id = %s
             """, (user_id, day, gamemode_id),
         )
@@ -101,17 +107,35 @@ class CalendarService:
             raise CalendarError("Invalid challenge date")
         row = self._row(cursor, user_id, gamemode_id, day)
         status = day_status(row)
-        finished = status in (WON_LIVE, WON_CALENDAR)
+        finished = row if status in (WON_LIVE, WON_CALENDAR) else None
         puzzle, answer = self._puzzle(cursor, gamemode_id, answer_id)
         return {
             "challenge_date": day,
+            "day_number": self.day_number(cursor, gamemode_id, date.fromisoformat(day)),
             "mode": mode,
             "status": status,
             "puzzle": puzzle,
             "game": RestoreService(self.db, self.repository).build_mode(cursor, user_id, day, gamemode_id),
-            # Same rule as live games: the answer only after the player finished the day.
+            # Same rule as live games: the answer, the guesses (named) and the XP only after the
+            # player finished the day.
             "answer": answer if finished else None,
+            "guesses": self._named_guesses(cursor, gamemode_id, finished["guessed_ids"] or [], answer_id) if finished else None,
+            "xp": game_xp(finished) if finished else None,
         }
+
+    def _named_guesses(self, cursor, gamemode_id: int, guessed_ids: list[int], answer_id: int) -> list[dict]:
+        """The guesses in order, each with its name and image (idols, or album covers in Pixelated)."""
+        if not guessed_ids:
+            return []
+        if gamemode_id == 3:
+            cursor.execute("SELECT id, name, cover_path AS image_path FROM albums WHERE id = ANY(%s)", (guessed_ids,))
+        else:
+            cursor.execute("SELECT id, artist_name AS name, image_path FROM idols WHERE id = ANY(%s)", (guessed_ids,))
+        by_id = {r["id"]: r for r in cursor.fetchall()}
+        return [
+            {"id": gid, "name": by_id[gid]["name"], "image_path": by_id[gid]["image_path"], "correct": gid == answer_id}
+            for gid in guessed_ids if gid in by_id
+        ]
 
     def _puzzle(self, cursor, gamemode_id: int, answer_id: int) -> tuple[dict, dict]:
         """(what the player needs to play, what would reveal the answer)."""

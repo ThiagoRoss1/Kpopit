@@ -236,7 +236,8 @@ def test_yesterdays_answer_only_for_players_who_finished_it(client, make_user, w
     shown = client.get("/api/store-yesterdays-idol?gamemode_id=1", headers={"Authorization": finisher}).get_json()
     assert shown["past_idol_id"] == week[-1]
     hidden = client.get("/api/store-yesterdays-idol?gamemode_id=1", headers={"Authorization": other}).get_json()
-    assert hidden == {"yesterdays_pick_date": day(-1), "locked": True, "play_in_calendar": True}
+    # Day N of the mode: the week's first pick (4 days ago) is Day 1, so yesterday is Day 4.
+    assert hidden == {"yesterdays_pick_date": day(-1), "day_number": 4, "locked": True, "play_in_calendar": True}
     assert client.get("/api/store-yesterdays-idol?gamemode_id=1").get_json()["locked"] is True
 
 
@@ -256,3 +257,36 @@ def test_days_without_a_pick_are_not_challenges(client, db_conn, make_user, week
     gap = client.get(f"/api/calendar/classic/{day(-2)}", headers={"Authorization": token})
     assert (gap.status_code, gap.get_json()) == (400, {"error": "Invalid challenge date"})
     assert cal_guess(client, token, -2, week["wrong"]).get_json() == {"error": "Invalid challenge date"}
+
+
+def test_guesses_and_xp_only_once_the_day_is_finished(client, make_user, week):
+    _, token = make_user()
+    url = f"/api/calendar/classic/{day(-2)}"
+    cal_guess(client, token, -2, week["wrong"])
+    mid = client.get(url, headers={"Authorization": token}).get_json()
+    assert mid["guesses"] is None and mid["xp"] is None and mid["answer"] is None
+    assert "Answer -2" not in str(mid)
+    cal_guess(client, token, -2, week[-2])
+    after = client.get(url, headers={"Authorization": token}).get_json()
+    assert [(g["id"], g["name"], g["correct"]) for g in after["guesses"]] == [
+        (week["wrong"], "Wrong", False), (week[-2], "Answer -2", True),
+    ]
+    assert all("image_path" in g for g in after["guesses"])
+    assert after["xp"] == 5  # a calendar win
+    assert after["day_number"] == 3
+
+
+def test_a_day_won_live_shows_the_live_xp(client, make_user, week):
+    _, token = make_user()
+    live_guess(client, token, week[0])  # one-shot live win: 10 + 3 + 1
+    today = client.get(f"/api/calendar/classic/{day(0)}", headers={"Authorization": token}).get_json()
+    assert today["status"] == "won_live" and today["xp"] == 14
+    assert [g["correct"] for g in today["guesses"]] == [True]
+
+
+def test_another_players_day_never_reveals_guesses(client, make_user, week):
+    _, finisher = make_user()
+    _, visitor = make_user()
+    cal_guess(client, finisher, -1, week[-1])
+    view = client.get(f"/api/calendar/classic/{day(-1)}", headers={"Authorization": visitor}).get_json()
+    assert view["guesses"] is None and view["answer"] is None and view["xp"] is None
