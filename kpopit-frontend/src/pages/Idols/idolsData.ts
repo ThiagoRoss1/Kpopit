@@ -20,7 +20,7 @@ export const idolProfileQuery = (id: string) => queryOptions<IdolProfileData>({
 
 // Cached data at once; otherwise the page's prerendered .data file (snapshot), falling back to the
 // API for pages added after the build. A snapshot is marked stale so the page refreshes it quietly.
-async function load<T>(queryKey: QueryKey, snapshot: () => Promise<T>, fromApi: () => Promise<T>): Promise<T> {
+export async function loadWithSnapshot<T>(queryKey: QueryKey, snapshot: () => Promise<T>, fromApi: () => Promise<T>): Promise<T> {
     const client = getQueryClient();
     const cached = client.getQueryData<T>(queryKey);
     if (cached !== undefined) return cached;
@@ -53,10 +53,10 @@ async function load<T>(queryKey: QueryKey, snapshot: () => Promise<T>, fromApi: 
 }
 
 export const loadIdolsList = (snapshot: () => Promise<IdolsPageData[]>) =>
-    load(idolsListQuery.queryKey, snapshot, getIdolsPage);
+    loadWithSnapshot(idolsListQuery.queryKey, snapshot, getIdolsPage);
 
 export const loadIdolProfile = (id: string, snapshot: () => Promise<IdolProfileData>) =>
-    load(idolProfileQuery(id).queryKey, snapshot, () => getIdolInfo(Number(id)));
+    loadWithSnapshot(idolProfileQuery(id).queryKey, snapshot, () => getIdolInfo(Number(id)));
 
 // Link intent (hover, focus, touch): start the request so it is usually done before the click ends.
 export const prefetchIdolsList = () => void getQueryClient().prefetchQuery(idolsListQuery);

@@ -1,5 +1,5 @@
 import axios from 'axios';
-import type { AddIdolRequest, CompleteGuessTrafficRequest, RestoreSessionResponse, PixelatedGameData, PixelatedGuessPayload, AlbumSearchResult } from '../interfaces/gameInterfaces';
+import type { AddIdolRequest, CompleteGuessTrafficRequest, RestoreSessionResponse, PixelatedGameData, PixelatedGuessPayload, AlbumSearchResult, AlbumsPageItem, AlbumPageData } from '../interfaces/gameInterfaces';
 import type { CollectionAlbumGroup, CollectionListItem } from '../interfaces/albumInterfaces';
 import type { MeResponse, UpdateProfilePayload } from '../interfaces/authInterfaces';
 import { decryptToken } from '../utils/tokenEncryption';
@@ -290,6 +290,18 @@ export const getIdolsPage = async () => {
 // Optional features that are on (calendar, Idol XP, public profile, collection)
 export const getFeatures = async (): Promise<unknown> => {
     const response = await api.get('/features');
+    return response.data;
+}
+
+// Every published album, for /albums
+export const getAlbumsPage = async (): Promise<AlbumsPageItem[]> => {
+    const response = await api.get('/albums-page');
+    return response.data;
+}
+
+// One album with its artist facts and the artist's other albums
+export const getAlbumInfo = async (albumId: number): Promise<AlbumPageData> => {
+    const response = await api.get(`/albums-page/${albumId}`);
     return response.data;
 }
 

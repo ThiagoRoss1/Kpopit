@@ -4,7 +4,7 @@ import { spawnSync } from 'node:child_process';
 import { fileURLToPath } from 'node:url';
 import { test, expect } from './support/fixtures';
 import { LocalServer } from './support/tomorrow';
-import { buildIdolSlug } from '../src/utils/formatters';
+import { buildAlbumSlug, buildIdolSlug } from '../src/utils/formatters';
 
 // Crawlers and link previews don't run JavaScript: the production build (prerendered from the test
 // backend on :5000) must already carry each page's meta and content in its HTML.
@@ -103,10 +103,12 @@ test.describe('prerendered pages without JavaScript', () => {
   test('the build writes a sitemap of the prerendered pages', async ({ request }) => {
     const sitemap = await (await request.get(`${PREVIEW}/sitemap.xml`)).text();
     const locs = [...sitemap.matchAll(/<loc>([^<]*)<\/loc>/g)].map((m) => m[1]);
-    const pages = ['/', '/classic', '/blurry', '/pixelated', '/idols', '/privacy-policy', '/contact', '/about', '/how-to-play', '/faq', '/blog', '/changelog', BLOG_POST];
+    const pages = ['/', '/classic', '/blurry', '/pixelated', '/idols', '/privacy-policy', '/contact', '/about', '/how-to-play', '/faq', '/blog', '/changelog', BLOG_POST, '/albums'];
     for (const p of pages) expect(locs).toContain(`https://kpopit.net${p}`);
     expect(locs).toContain(`https://kpopit.net/idols/${idol.id}/${slug(idol)}`);
-    expect(locs).toHaveLength(pages.length + idols.length);
+    const albums = (await (await fetch('http://127.0.0.1:5000/api/albums-page')).json()) as { id: number; name: string; artist_name: string }[];
+    expect(locs.filter((l) => l.includes('/albums/'))).toHaveLength(albums.length);
+    expect(locs).toHaveLength(pages.length + idols.length + albums.length);
     for (const p of ['/idol-xp', '/profile', '/login', '/major-patch']) {
       expect(locs.some((loc) => loc.startsWith(`https://kpopit.net${p}`))).toBe(false);
     }
@@ -124,6 +126,15 @@ test.describe('prerendered pages without JavaScript', () => {
     const post = await text(BLOG_POST);
     expect(meta(post, 'og:image')).toMatch(/^https:\/\/kpopit\.net\/blog\/.+\.(png|webp|jpg)$/);
     expect(post).toContain('class="post-body"');
+  });
+
+  test('an album page has its name, artist and MusicAlbum JSON-LD in the HTML', async ({ request }) => {
+    const [album] = (await (await fetch('http://127.0.0.1:5000/api/albums-page')).json()) as { id: number; name: string; artist_name: string }[];
+    const path = `/albums/${album.id}/${buildAlbumSlug(album.name, album.artist_name)}`;
+    const html = await (await request.get(`${PREVIEW}${path}`)).text();
+    expect(attr(html, /<link rel="canonical" href="([^"]*)"/)).toBe(`https://kpopit.net${path}`);
+    expect(attr(html, /<title>([^<]*)<\/title>/)).toContain(album.artist_name.replace(/&/g, '&amp;').replace(/'/g, '&#x27;'));
+    expect(html).toContain('"@type":"MusicAlbum"');
   });
 
   test.describe('in a browser', () => {

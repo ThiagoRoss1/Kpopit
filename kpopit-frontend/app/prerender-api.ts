@@ -1,5 +1,5 @@
 /// <reference types="node" />
-import type { IdolProfileData, IdolsPageData } from "../src/interfaces/gameInterfaces";
+import type { AlbumPageData, AlbumsPageItem, IdolProfileData, IdolsPageData } from "../src/interfaces/gameInterfaces";
 import { parseFeatures } from "../src/utils/features";
 
 // Build-time reads for the prerender (react-router.config.ts and route loaders). Defaults to the
@@ -41,3 +41,7 @@ export const fetchIdolsPage = () => get<IdolsPageData[]>("/idols-page");
 export const fetchIdolProfile = (id: number) => get<IdolProfileData>(`/idols-page/${id}`);
 
 export const fetchFeatures = async () => parseFeatures(await get<unknown>("/features"));
+
+export const fetchAlbumsPage = () => get<AlbumsPageItem[]>("/albums-page");
+
+export const fetchAlbum = (id: number) => get<AlbumPageData>(`/albums-page/${id}`);

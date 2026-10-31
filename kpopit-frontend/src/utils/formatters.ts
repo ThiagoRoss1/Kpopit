@@ -39,3 +39,7 @@ export const buildIdolSlug = (artistName: string, groupName?: string | null): st
         .replace(/[^a-z0-9_-]/g, "")
         .replace(/-{2,}/g, "-")
         .replace(/^-+|-+$/g, "") || "idol";
+
+/** Album page slug: album name and artist, same rules as idol slugs. */
+export const buildAlbumSlug = (albumName: string, artistName?: string | null): string =>
+    buildIdolSlug(albumName, artistName).replace(/^idol$/, "album");
