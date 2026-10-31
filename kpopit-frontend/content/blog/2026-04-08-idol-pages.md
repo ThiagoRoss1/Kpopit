@@ -7,6 +7,7 @@ image: /blog/2026-04-08-idol-pages/cover.png
 imageAlt: Kazuha of LE SSERAFIM
 tag: Update
 pinned: true
+ko: 아이돌
 ---
 
 KpopIt now has a dedicated Idols page that lists everyone in the game. You can search by name, group or company, and filter the list to find who you're looking for.

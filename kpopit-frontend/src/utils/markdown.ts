@@ -29,6 +29,8 @@ export function isAllowedImage(src: string, imageOrigin?: string): boolean {
 export const resolveImage = (src: string, imageOrigin?: string) =>
     src.startsWith("cdn:/") ? `${imageOrigin?.replace(/\/+$/, "") ?? ""}${src.slice(4)}` : src;
 
+const CTA_ARROW = '<svg aria-hidden="true" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M7 17 17 7M8 7h9v9"/></svg>';
+
 const isAllowedLink = (href: string) => isSitePath(href) || /^https:\/\/[^/\\]/i.test(href);
 
 const REQUIRED = ["title", "date", "description", "image", "imageAlt", "tag"] as const;
@@ -58,6 +60,7 @@ export function parseFrontmatter(source: string, options: RenderOptions = {}): {
     const data = {
         ...Object.fromEntries(REQUIRED.map((key) => [key, fields[key]])),
         pinned: fields.pinned === "true",
+        ...(fields.ko ? { ko: fields.ko } : {}),
     } as unknown as PostFrontmatter;
     return { data, body: match[2] };
 }
@@ -68,6 +71,20 @@ export function renderMarkdown(body: string, options: RenderOptions = {}): strin
         async: false,
         renderer: {
             html: ({ text }) => escapeHtml(text),
+            // A paragraph that is only a link is a button; one that is only an image, a figure whose
+            // caption is the alt text.
+            paragraph({ tokens }: Tokens.Paragraph) {
+                const only = tokens.length === 1 ? tokens[0] : null;
+                if (only?.type === "link" && isAllowedLink(only.href)) {
+                    return `<p class="post-cta"><a href="${escapeHtml(only.href)}">${this.parser.parseInline(only.tokens)}${CTA_ARROW}</a></p>\n`;
+                }
+                if (only?.type === "image") {
+                    const img = this.parser.parseInline(tokens);
+                    if (!img.startsWith("<img")) return `<p>${img}</p>\n`;
+                    return `<figure>${img}${only.text ? `<figcaption>${escapeHtml(only.text)}</figcaption>` : ""}</figure>\n`;
+                }
+                return `<p>${this.parser.parseInline(tokens)}</p>\n`;
+            },
             // The page title is the h1, so a post's headings start at h2.
             heading({ tokens, depth }) {
                 const level = Math.min(depth + 1, 6);

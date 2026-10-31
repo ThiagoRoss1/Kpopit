@@ -19,7 +19,7 @@ pinned: false
 ---
 ```
 
-All fields are required except `pinned` (default `false`). `tag` is one of `Update`, `Dev log`, `Thoughts`,
+All fields are required except `pinned` (default `false`) and `ko` (a Korean sticker under the post's title). `tag` is one of `Update`, `Dev log`, `Thoughts`,
 `News`. `pinned: true` puts the post in the blog's Pinned block (the latest post is always the big card).
 Read time is computed from the body (words / 200, rounded up).
 
@@ -38,6 +38,7 @@ Read time is computed from the body (words / 200, rounded up).
 
 Headings (`#` renders as h2: the page title is the h1), paragraphs, ordered/unordered lists, bold,
 italic, inline code and code blocks, links (`https://` or site paths only), images, blockquotes and
-tables. Raw HTML is escaped and shown as text.
+tables. Raw HTML is escaped and shown as text. A paragraph that is only a link renders as a button; one that is
+only an image renders as a figure captioned with its alt text.
 
 The `2026-10-23-your-day-follows-you` post is a **placeholder** with a sample thumbnail from the design references; replace both before publishing.

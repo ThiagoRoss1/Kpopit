@@ -7,6 +7,7 @@ image: /blog/2026-01-10-why-i-started/cover.png
 imageAlt: Sakura of LE SSERAFIM
 tag: Thoughts
 pinned: true
+ko: 이야기
 ---
 
 I initially drew inspiration from several word-guessing games and wanted to create something based on that concept. Then I thought: why not make a Wordle-like game for K-pop fans?

@@ -2,6 +2,7 @@ import { ArrowLeft, ArrowUpRight, Copy } from "lucide-react";
 import PageShell from "../../components/Puff/PageShell";
 import { PressButton, PressLink } from "../../components/Puff/PressButton";
 import { useToast } from "../../components/Puff/Toast";
+import { KoreanTag } from "../../components/Puff/PuffTitle";
 import PageMeta, { SITE_URL } from "../../components/Seo/PageMeta";
 import IntentLink from "../../components/Links/IntentLink";
 import { BLOG_POSTS } from "../../content/blog";
@@ -73,6 +74,7 @@ export default function BlogPost({ slug }: { slug: string }) {
                         <h1 className="m-0 max-w-[680px] font-bold text-[44px] @max-[580px]:text-[32px] leading-[1.1] text-white [text-shadow:var(--puff-post)] -rotate-1 px-1.5 pb-2 [text-wrap:balance]">
                             {post.title}
                         </h1>
+                        {post.ko && <KoreanTag>{post.ko}</KoreanTag>}
                     </header>
 
                     <figure className="pp-enter [--pp-delay:140ms] m-0 mx-auto w-full max-w-[640px] -rotate-1 transition-transform duration-500 ease-(--ease-bounce) hover:rotate-0">

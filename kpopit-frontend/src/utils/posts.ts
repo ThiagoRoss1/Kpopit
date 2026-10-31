@@ -15,6 +15,8 @@ export interface PostFrontmatter {
     tag: PostTag;
     /** Shown in the blog's Pinned block (never for the latest post). */
     pinned: boolean;
+    /** Optional Korean sticker under the post's title. */
+    ko?: string;
 }
 
 export interface Post extends PostFrontmatter {

@@ -7,6 +7,7 @@ image: cdn:/images/albums/summer_magic.webp
 imageAlt: The cover of Red Velvet's The ReVe Festival: Summer Magic
 tag: Update
 pinned: false
+ko: 픽셀
 ---
 
 Pixelated is the third daily mode in KpopIt. Instead of an idol, you guess today's album, and the only thing you get to start with is its cover art, broken down into big blocky pixels.

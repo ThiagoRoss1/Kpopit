@@ -7,6 +7,7 @@ image: /blog/2026-03-27-postgresql/cover.webp
 imageAlt: An album cover
 tag: Dev log
 pinned: false
+ko: 개발
 ---
 
 KpopIt started on SQLite. It's a great choice for a small project: one file, no server to run, nothing to configure. For the first months, it was all the game needed.
