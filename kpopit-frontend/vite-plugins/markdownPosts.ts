@@ -19,7 +19,8 @@ export function markdownPosts(): Plugin {
       if (query !== 'post' || !file.endsWith('.md')) return
       this.addWatchFile(file)
       const post = loadPost(file, fs.readFileSync(file, 'utf8'), { imageOrigin })
-      if (post.image.startsWith('/') && !fs.existsSync(path.join(publicDir, post.image))) {
+      // A cdn: image without a bucket URL (tests) stays a bucket path; only site images must exist.
+      if (post.image.startsWith('/') && !post.image.startsWith('/images/') && !fs.existsSync(path.join(publicDir, post.image))) {
         this.error(`${post.slug}: thumbnail ${post.image} is not in public/`)
       }
       return `export default ${JSON.stringify(post)}`

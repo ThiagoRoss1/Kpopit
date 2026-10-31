@@ -24,6 +24,11 @@ export function isAllowedImage(src: string, imageOrigin?: string): boolean {
     }
 }
 
+/** `cdn:/images/...` is a path on the image bucket (the album covers and idol photos the game uses):
+ *  it becomes an absolute bucket URL, or a site path when the build has no bucket URL (tests). */
+export const resolveImage = (src: string, imageOrigin?: string) =>
+    src.startsWith("cdn:/") ? `${imageOrigin?.replace(/\/+$/, "") ?? ""}${src.slice(4)}` : src;
+
 const isAllowedLink = (href: string) => isSitePath(href) || /^https:\/\/[^/\\]/i.test(href);
 
 const REQUIRED = ["title", "date", "description", "image", "imageAlt", "tag"] as const;
@@ -42,6 +47,7 @@ export function parseFrontmatter(source: string, options: RenderOptions = {}): {
         if (!fields[key]) throw new Error(`Post frontmatter is missing "${key}"`);
     }
     if (!/^\d{4}-\d{2}-\d{2}$/.test(fields.date)) throw new Error("Post date must be YYYY-MM-DD");
+    fields.image = resolveImage(fields.image, options.imageOrigin);
     if (!isAllowedImage(fields.image, options.imageOrigin)) {
         throw new Error(`Post image must be a site path (/blog/...) or on the image bucket: ${fields.image}`);
     }
@@ -72,7 +78,8 @@ export function renderMarkdown(body: string, options: RenderOptions = {}): strin
                 if (!isAllowedLink(href)) return text;
                 return `<a href="${escapeHtml(href)}"${title ? ` title="${escapeHtml(title)}"` : ""}>${text}</a>`;
             },
-            image({ href, title, text }: Tokens.Image) {
+            image({ href: raw, title, text }: Tokens.Image) {
+                const href = resolveImage(raw, options.imageOrigin);
                 if (!isAllowedImage(href, options.imageOrigin)) return escapeHtml(text);
                 const titleAttr = title ? ` title="${escapeHtml(title)}"` : "";
                 return `<img src="${escapeHtml(href)}" alt="${escapeHtml(text)}"${titleAttr} loading="lazy">`;

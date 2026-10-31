@@ -110,6 +110,16 @@ test('the blog posts in the repo parse and their thumbnails exist', () => {
     assert.ok(posts.length >= 1);
     for (const p of posts) {
         assert.ok(p.title && p.description && p.imageAlt && p.html.includes('<'));
-        assert.ok(fs.existsSync(path.join(FRONTEND, 'public', p.image)), p.image);
+        // Bucket images (cdn:) stay bucket paths without a bucket URL; site images must exist.
+        if (!p.image.startsWith('/images/')) assert.ok(fs.existsSync(path.join(FRONTEND, 'public', p.image)), p.image);
     }
+});
+
+test('cdn: images resolve to the image bucket, or stay bucket paths without one', () => {
+    const md = '---\ntitle: T\ndate: 2026-01-01\ndescription: D\nimage: cdn:/images/albums/a.webp\nimageAlt: A\ntag: Update\n---\n\n![x](cdn:/images/albums/b.webp)\n';
+    const withBucket = loadPost('/content/blog/2026-01-01-t.md', md, { imageOrigin: BUCKET });
+    assert.equal(withBucket.image, `${BUCKET}/images/albums/a.webp`);
+    assert.ok(withBucket.html.includes(`src="${BUCKET}/images/albums/b.webp"`));
+    const noBucket = loadPost('/content/blog/2026-01-01-t.md', md);
+    assert.equal(noBucket.image, '/images/albums/a.webp');
 });

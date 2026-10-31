@@ -30,8 +30,9 @@ Read time is computed from the body (words / 200, rounded up).
 
 - Put a post's images in `public/blog/<slug>/` and reference them as `/blog/<slug>/file.png`
   (the build fails if the thumbnail file is missing). A 1200×630 thumbnail suits link previews.
-- Images from the image bucket (`VITE_IMAGE_BUCKET_URL`) are also allowed; any other image source
-  is shown as its alt text.
+- Images from the image bucket (`VITE_IMAGE_BUCKET_URL`) are also allowed, written as `cdn:/images/...`
+  (e.g. `cdn:/images/albums/summer_magic.webp`, the same paths the game uses); any other image source is
+  shown as its alt text.
 
 ## Markdown
 

@@ -1,10 +1,10 @@
 ---
-# PLACEHOLDER post: copy and images from the design references, replace or delete before launch
+# PLACEHOLDER post: copy and images from the design references (the cover is on the image bucket), replace or delete before launch
 title: Pixelated is here
 date: 2026-07-02
 description: A third daily mode: guess the album from a cover that gets sharper with every wrong guess.
-image: /blog/2026-07-02-pixelated-is-here/cover.png
-imageAlt: A pixelated album cover
+image: cdn:/images/albums/summer_magic.webp
+imageAlt: The cover of Red Velvet's The ReVe Festival: Summer Magic
 tag: Update
 pinned: false
 ---
@@ -19,7 +19,7 @@ Like Classic and Blurry, there is one answer a day and it's the same for everyon
 - Each wrong guess removes one level of pixelation. There are 12 levels in total.
 - Type an album title to guess. The search suggests albums as you type.
 
-![Every album in the game can be today's answer.](/blog/2026-07-02-pixelated-is-here/image-1.png)
+![Every album in the game can be today's answer.](cdn:/images/albums/summer_magic.webp)
 
 # Hints along the way
 
