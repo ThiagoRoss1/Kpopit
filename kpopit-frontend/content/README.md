@@ -39,4 +39,4 @@ Headings (`#` renders as h2: the page title is the h1), paragraphs, ordered/unor
 italic, inline code and code blocks, links (`https://` or site paths only), images, blockquotes and
 tables. Raw HTML is escaped and shown as text.
 
-The `2026-10-23-your-day-follows-you` post uses a **sample** thumbnail; replace it before publishing.
+The `2026-10-23-your-day-follows-you` post is a **placeholder** with a sample thumbnail from the design references; replace both before publishing.
