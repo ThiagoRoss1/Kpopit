@@ -26,6 +26,9 @@ export interface UserProfile {
     email_verified: boolean;
     created_at: string;
     updated_at: string;
+    bias_idol_id: number | null;
+    bias_group_id: number | null;
+    visibility: { is_public: boolean; show_match_history: boolean; show_activity: boolean } | null;
 }
 
 export interface MeResponse {
