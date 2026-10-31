@@ -131,7 +131,7 @@ function IdolPage({ data, idols }: { data: IdolProfileData; idols: IdolsPageData
                     <div className="ip-photo-wrap relative isolate justify-self-center w-[min(100%,var(--p-photo))] mt-3.5 pb-[calc(var(--rn)*.8)]">
                         <div aria-hidden className="absolute -left-[18%] -top-[14%] w-[136%] aspect-square -z-1 pointer-events-none bg-[radial-gradient(circle,var(--tone)_2.4px,transparent_2.8px)] bg-size-[11px_11px] [mask-image:radial-gradient(circle_at_55%_45%,#000_0%,rgba(0,0,0,.5)_32%,transparent_62%)]" />
                         <div className="ip-in-photo relative">
-                            <div className="ip-photo relative -rotate-3 border-[3px] border-[#1A1418] rounded-[30px] bg-[#1A1418] shadow-[8px_8px_0_#FF8AC4,8px_8px_0_3px_#1A1418] aspect-[4/5]">
+                            <div className="ip-photo relative -rotate-3 border-[3px] border-[#1A1418] rounded-[30px] bg-[#1A1418] [box-shadow:8px_8px_0_#FF8AC4,8px_8px_0_3px_#1A1418] aspect-[4/5]">
                                 <div className="absolute inset-0 overflow-hidden rounded-[27px] [clip-path:inset(0_round_27px)] isolate [transform:translateZ(0)]">
                                     <img src={cdnImage ?? ""} alt={`${artistName} photo`} draggable={false} className="w-full h-full object-cover block" />
                                     <div aria-hidden className="ip-sweep absolute top-0 bottom-0 -left-[60%] w-[220%] pointer-events-none bg-[linear-gradient(118deg,rgba(255,255,255,0)_40%,rgba(255,255,255,.13)_47%,rgba(255,255,255,.04)_51%,rgba(255,255,255,0)_57%)]" />
@@ -141,7 +141,7 @@ function IdolPage({ data, idols }: { data: IdolProfileData; idols: IdolsPageData
                         </div>
                         <div className="ip-in-side absolute -left-[18px] -right-[18px] bottom-0 z-4 flex flex-col items-start gap-3">
                             {groupName && (
-                                <span className="ml-2 inline-flex items-center gap-2 pt-[7px] px-[13px] pb-2 bg-[#FF3399] text-[#1A1418] border-[2.5px] border-[#1A1418] rounded-[12px] font-bold text-[15px] leading-none tracking-[.08em] -rotate-4 shadow-[3px_3px_0_#1A1418]">
+                                <span className="ml-2 inline-flex items-center gap-2 pt-[7px] px-[13px] pb-2 bg-[#FF3399] text-[#1A1418] border-[2.5px] border-[#1A1418] rounded-[12px] font-bold text-[15px] leading-none tracking-[.08em] -rotate-4 [box-shadow:3px_3px_0_#1A1418]">
                                     <span>{groupName.toUpperCase()}</span>
                                     {c.group_hangul && (
                                         <>
@@ -208,7 +208,7 @@ function IdolPage({ data, idols }: { data: IdolProfileData; idols: IdolsPageData
                                     );
                                 })}
                             </div>
-                            <div className="ip-in-tile box-border min-w-0 w-full flex flex-col bg-(--ip-panel) text-(--text) border-[3px] border-[#1A1418] rounded-[30px] shadow-[7px_7px_0_0_#FF8AC4,7px_7px_0_3px_#1A1418] p-(--panel-pad) text-left">
+                            <div className="ip-in-tile box-border min-w-0 w-full flex flex-col bg-(--ip-panel) text-(--text) border-[3px] border-[#1A1418] rounded-[30px] [box-shadow:7px_7px_0_0_#FF8AC4,7px_7px_0_3px_#1A1418] p-(--panel-pad) text-left">
                                 <div className="flex-1 min-h-0 grid">
                                     {TABS.map(([key]) => (
                                         <div
@@ -235,7 +235,7 @@ function IdolPage({ data, idols }: { data: IdolProfileData; idols: IdolsPageData
                     <span className="font-medium text-xs text-(--muted)">KpopIt · Idol data from the KpopIt catalogue</span>
                     <span className="flex items-center gap-3">
                         <span className="font-semibold text-sm text-(--muted)">Wrong info?</span>
-                        <Link to="/contact" className="ip-cta ip-btn grid place-items-center h-11 px-[18px] rounded-full border-2 border-[#1A1418] bg-[#FF3399] text-[#1A1418] font-bold text-sm no-underline shadow-[0_4px_0_#1A1418,inset_0_2px_0_rgba(255,255,255,.4)]">
+                        <Link to="/contact" className="ip-cta ip-btn grid place-items-center h-11 px-[18px] rounded-full border-2 border-[#1A1418] bg-[#FF3399] text-[#1A1418] font-bold text-sm no-underline [box-shadow:0_4px_0_#1A1418,inset_0_2px_0_rgba(255,255,255,.4)]">
                             Contact me
                         </Link>
                     </span>
@@ -253,11 +253,11 @@ function FactTile({ f, delay }: { f: Fact; delay: number }) {
     const cap = flags.length ? "20px" : big ? "var(--cap-b)" : "var(--cap-t)";
     return (
         <div
-            className="ip-fact ip-in-tile relative flex flex-col items-center justify-center gap-1.5 min-w-0 pt-[22px] px-3 pb-3 text-center bg-(--chip) text-(--chip-ink) border-[2.5px] border-[#1A1418] rounded-[20px] shadow-[4px_4px_0_var(--ctl-off),var(--in)]"
+            className="ip-fact ip-in-tile relative flex flex-col items-center justify-center gap-1.5 min-w-0 pt-[22px] px-3 pb-3 text-center bg-(--chip) text-(--chip-ink) border-[2.5px] border-[#1A1418] rounded-[20px] [box-shadow:4px_4px_0_var(--ctl-off),var(--in)]"
             style={{ gridColumn: f.solo ? `var(--solo, span var(--s-${f.span}))` : `span var(--s-${f.span})`, animationDelay: `${delay}ms` }}
         >
             <span aria-hidden className="absolute top-0 right-0 w-16 h-16 bg-[repeating-linear-gradient(135deg,var(--stripe)_0_2.5px,transparent_2.5px_8px)] [clip-path:polygon(0_0,100%_0,100%_100%)] rounded-tr-[20px] pointer-events-none" />
-            <span className="ip-lab absolute -top-4 left-(--lab-l,14px) max-w-[calc(100%-4px)] box-border bg-[#1A1418] text-white border-[2.5px] border-[#1A1418] pt-[7px] px-3 pb-2 rounded-[12px] font-bold text-(length:--lab-fs) leading-none tracking-[.12em] whitespace-nowrap overflow-hidden text-ellipsis shadow-[3px_3px_0_#FF3399,3px_3px_0_2px_#1A1418,inset_0_2px_0_rgba(255,255,255,.18)] -rotate-2">
+            <span className="ip-lab absolute -top-4 left-(--lab-l,14px) max-w-[calc(100%-4px)] box-border bg-[#1A1418] text-white border-[2.5px] border-[#1A1418] pt-[7px] px-3 pb-2 rounded-[12px] font-bold text-(length:--lab-fs) leading-none tracking-[.12em] whitespace-nowrap overflow-hidden text-ellipsis [box-shadow:3px_3px_0_#FF3399,3px_3px_0_2px_#1A1418,inset_0_2px_0_rgba(255,255,255,.18)] -rotate-2">
                 {f.label}
             </span>
             {f.chips ? (
@@ -269,7 +269,7 @@ function FactTile({ f, delay }: { f: Fact; delay: number }) {
                     {flags.length > 0 && (
                         <span className="flex gap-2 justify-center">
                             {flags.map((x) => (
-                                <img key={x.n} src={x.src!} alt={x.n} className="w-[calc(var(--kf-w)*1.1)] h-[calc(var(--kf-h)*1.1)] @max-[560px]:w-[calc(var(--kf-w)*1.2)] rounded-[5px] border-2 border-[#1A1418] object-cover shadow-[2px_2.5px_0_#1A1418] -rotate-3" />
+                                <img key={x.n} src={x.src!} alt={x.n} className="w-[calc(var(--kf-w)*1.1)] h-[calc(var(--kf-h)*1.1)] @max-[560px]:w-[calc(var(--kf-w)*1.2)] rounded-[5px] border-2 border-[#1A1418] object-cover [box-shadow:2px_2.5px_0_#1A1418] -rotate-3" />
                             ))}
                         </span>
                     )}
@@ -328,7 +328,7 @@ function Related({ idols }: { idols: IdolsPageData[] }) {
                         to={`/idols/${idol.id}/${buildIdolSlug(idol.artist_name, idol.group_name)}`}
                         onIntent={() => prefetchIdolProfile(idol.id)}
                         aria-label={`${idol.artist_name} of ${groupLabel(idol)}`}
-                        className="ip-rcard ip-btn relative flex-none w-(--rel-w) flex flex-col gap-3 pt-2.5 px-2.5 pb-4 border-[3px] border-[#1A1418] rounded-[20px] bg-(--chip) text-(--chip-ink) no-underline text-left shadow-[6px_6px_0_var(--ctl-off),var(--in)] will-change-transform"
+                        className="ip-rcard ip-btn relative flex-none w-(--rel-w) flex flex-col gap-3 pt-2.5 px-2.5 pb-4 border-[3px] border-[#1A1418] rounded-[20px] bg-(--chip) text-(--chip-ink) no-underline text-left [box-shadow:6px_6px_0_var(--ctl-off),var(--in)] will-change-transform"
                         style={{ transform: `rotate(${k % 2 ? 0.8 : -0.8}deg)` }}
                     >
                         <span className="block aspect-square border-[2.5px] border-[#1A1418] rounded-[12px] overflow-hidden bg-[#1A1418]">

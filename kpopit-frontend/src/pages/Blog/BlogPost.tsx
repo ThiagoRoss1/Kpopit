@@ -76,12 +76,12 @@ export default function BlogPost({ slug }: { slug: string }) {
                     </header>
 
                     <figure className="pp-enter [--pp-delay:140ms] m-0 mx-auto w-full max-w-[640px] -rotate-1 transition-transform duration-500 ease-(--ease-bounce) hover:rotate-0">
-                        <div className="aspect-video rounded-[18px] border-[2.5px] border-[#1A1418] overflow-hidden bg-[#DCD6D2] shadow-[5px_5px_0_0_#FF8AC4,5px_5px_0_2px_#1A1418]">
+                        <div className="aspect-video rounded-[18px] border-[2.5px] border-[#1A1418] overflow-hidden bg-[#DCD6D2] [box-shadow:5px_5px_0_0_#FF8AC4,5px_5px_0_2px_#1A1418]">
                             <img src={post.image} alt={post.imageAlt} className="block w-full h-full object-cover" />
                         </div>
                     </figure>
 
-                    <article className="pp-enter [--pp-delay:200ms] relative rounded-[23px] border-2 border-(--ink) bg-(--face) text-(--face-ink) shadow-[3px_4px_0_var(--ctl-off),var(--in)] pt-9 px-11 pb-[34px] @max-[580px]:pt-6 @max-[580px]:px-[18px] @max-[580px]:pb-[22px] flex flex-col gap-[18px]">
+                    <article className="pp-enter [--pp-delay:200ms] relative rounded-[23px] border-2 border-(--ink) bg-(--face) text-(--face-ink) [box-shadow:3px_4px_0_var(--ctl-off),var(--in)] pt-9 px-11 pb-[34px] @max-[580px]:pt-6 @max-[580px]:px-[18px] @max-[580px]:pb-[22px] flex flex-col gap-[18px]">
                         <div className="post-body" dangerouslySetInnerHTML={{ __html: post.html }} />
                         <div aria-hidden className="h-0.5 mt-3 bg-(--rule)" />
                         <div className="flex items-center gap-x-5 gap-y-4 flex-wrap pt-1 pb-0.5">
@@ -112,7 +112,7 @@ export default function BlogPost({ slug }: { slug: string }) {
                                         key={p.slug}
                                         to={`/blog/${p.slug}`}
                                         style={{ ["--bl-tilt" as string]: NEXT_TILT[i] }}
-                                        className="bl-card pp-focus no-underline text-(--face-ink) flex flex-col gap-2.5 pt-2.5 px-2.5 pb-3.5 rounded-[20px] border-2 border-(--ink) bg-(--face) shadow-[3px_4px_0_var(--ctl-off),var(--in)]"
+                                        className="bl-card pp-focus no-underline text-(--face-ink) flex flex-col gap-2.5 pt-2.5 px-2.5 pb-3.5 rounded-[20px] border-2 border-(--ink) bg-(--face) [box-shadow:3px_4px_0_var(--ctl-off),var(--in)]"
                                     >
                                         <div className="aspect-video rounded-[13px] border-2 border-[#1A1418] overflow-hidden bg-[#DCD6D2]">
                                             <img src={p.image} alt="" loading="lazy" className="block w-full h-full object-cover" />

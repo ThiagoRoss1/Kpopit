@@ -17,7 +17,7 @@ export default function IdolCard({ idol, index, animate }: { idol: IdolsPageData
                     to={`/idols/${idol.id}/${buildIdolSlug(idol.artist_name, idol.group_name)}`}
                     onIntent={() => prefetchIdolProfile(idol.id)}
                     aria-label={`${idol.artist_name}, ${group}`}
-                    className="cg-face cg-gpu relative block no-underline cursor-pointer bg-(--face) text-(--face-ink) border-2 border-(--ink) rounded-(--cg-r) p-(--cg-card-pad) shadow-[var(--face-hl)]"
+                    className="cg-face cg-gpu relative block no-underline cursor-pointer bg-(--face) text-(--face-ink) border-2 border-(--ink) rounded-(--cg-r) p-(--cg-card-pad) [box-shadow:var(--face-hl)]"
                 >
                     <div className="relative aspect-[1/1.04]">
                         <div className="absolute inset-0 rounded-[calc(var(--cg-r)-7px)] border-[1.5px] border-(--ink) overflow-hidden bg-[#DCD6D2]">
@@ -33,7 +33,7 @@ export default function IdolCard({ idol, index, animate }: { idol: IdolsPageData
                                 <div className="absolute left-2 bottom-2 flex">
                                     {flags.map((f, j) => (
                                         <img key={f.n} src={f.src!} alt={f.n} title={f.n}
-                                            className="block w-[34px] h-6 rounded-[5px] border-2 border-[#1A1418] object-cover bg-[#1A1418] shadow-[1.5px_2px_0_#1A1418]"
+                                            className="block w-[34px] h-6 rounded-[5px] border-2 border-[#1A1418] object-cover bg-[#1A1418] [box-shadow:1.5px_2px_0_#1A1418]"
                                             style={{ marginLeft: j ? "-7px" : 0, transform: `rotate(${j ? 6 : -4}deg)` }} />
                                     ))}
                                 </div>

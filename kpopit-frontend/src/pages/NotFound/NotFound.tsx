@@ -36,7 +36,7 @@ export default function NotFound() {
                         </nav>
                     </div>
                     <div aria-hidden className="nf-card pp-enter [--pp-delay:200ms] relative w-full max-w-[380px] rotate-3 @max-[580px]:hidden">
-                        <div className="rounded-[24px] border-[2.5px] border-[#1A1418] bg-[#FFFDFA] shadow-[6px_6px_0_0_#FF8AC4,6px_6px_0_2.5px_#1A1418] p-3.5 flex flex-col gap-3">
+                        <div className="rounded-[24px] border-[2.5px] border-[#1A1418] bg-[#FFFDFA] [box-shadow:6px_6px_0_0_#FF8AC4,6px_6px_0_2.5px_#1A1418] p-3.5 flex flex-col gap-3">
                             <div className="aspect-square rounded-[16px] border-2 border-[#1A1418] overflow-hidden bg-[#FFE3F1] grid place-items-center">
                                 <span className="nf-q font-bold text-[150px] leading-none text-white [text-shadow:var(--puff-xl)]">?</span>
                             </div>

@@ -1,5 +1,8 @@
-/* Blog cards: slow settle lift, a press that beats it, the cover zooming on its own GPU layer. */
-.bl-card { transition: transform .85s var(--ease-settle), box-shadow .85s var(--ease-settle); transform: rotate(var(--bl-tilt, 0deg)); backface-visibility: hidden; }
+/* Blog cards: slow settle lift, a press that beats it, the cover zooming on its own GPU layer.
+   Rest shadows live here (not in Tailwind classes, whose five-layer box-shadow can't blend into
+   these), so hover and press move the depth smoothly. */
+.bl-card { transition: transform .85s var(--ease-settle), box-shadow .85s var(--ease-settle); transform: rotate(var(--bl-tilt, 0deg)); backface-visibility: hidden; box-shadow: 3px 4px 0 var(--ctl-off), var(--in); }
+.bl-card[data-feat] { box-shadow: 5px 5px 0 0 #FF8AC4, 5px 5px 0 2px var(--ink); }
 .bl-card img { transform: translateZ(0); transition: transform 1s var(--ease-settle); }
 .bl-read { text-decoration: underline; text-decoration-thickness: 2px; text-underline-offset: 4px; text-decoration-color: var(--side); transition: text-decoration-color .3s ease; }
 .bl-arrow { transition: transform .4s var(--ease-pop); }

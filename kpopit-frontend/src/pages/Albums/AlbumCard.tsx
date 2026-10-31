@@ -43,14 +43,14 @@ export default function AlbumCard({ album, index }: { album: AlbumsPageItem; ind
                 <IntentLink
                     to={albumPath(album, album.artist_name)}
                     aria-label={`${album.name} by ${album.artist_name}, ${album.release_year}`}
-                    className="cg-face cg-gpu relative block no-underline cursor-pointer bg-(--face) text-(--face-ink) border-2 border-(--ink) rounded-(--cg-r) p-(--cg-card-pad) shadow-[var(--face-hl)]"
+                    className="cg-face cg-gpu relative block no-underline cursor-pointer bg-(--face) text-(--face-ink) border-2 border-(--ink) rounded-(--cg-r) p-(--cg-card-pad) [box-shadow:var(--face-hl)]"
                 >
                     <div aria-hidden className="absolute inset-0 -z-1 rounded-[inherit] overflow-hidden pointer-events-none">
                         <div className="absolute -right-[46px] -bottom-[46px] w-[190px] h-[190px] bg-[radial-gradient(circle,var(--dots-c)_1.8px,transparent_2.2px)] bg-size-[9px_9px] [mask-image:radial-gradient(circle_at_100%_100%,#000_0%,rgba(0,0,0,.45)_34%,transparent_64%)]" />
                     </div>
                     <div className="relative aspect-[1/.86]">
                         <Vinyl cover={cover} />
-                        <div className="absolute left-0 top-0 w-[86%] aspect-square rounded-[calc(var(--cg-r)-10px)] border-[1.5px] border-(--ink) overflow-hidden bg-[#DCD6D2] shadow-[2px_3px_0_#1A1418]">
+                        <div className="absolute left-0 top-0 w-[86%] aspect-square rounded-[calc(var(--cg-r)-10px)] border-[1.5px] border-(--ink) overflow-hidden bg-[#DCD6D2] [box-shadow:2px_3px_0_#1A1418]">
                             <span aria-hidden className="absolute inset-0 grid place-items-center font-bold text-[34px] leading-none text-[rgba(26,20,24,.28)]">♪</span>
                             <img src={cover} alt={`${album.name} cover`} loading="lazy" decoding="async" className="cg-img relative block w-full h-full object-cover" />
                             <div aria-hidden className="cg-sweep absolute top-0 bottom-0 -left-[60%] w-[220%] pointer-events-none bg-[linear-gradient(118deg,rgba(255,255,255,0)_40%,rgba(255,255,255,.2)_47%,rgba(255,255,255,.06)_51%,rgba(255,255,255,0)_57%)]" />

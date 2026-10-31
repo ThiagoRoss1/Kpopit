@@ -73,19 +73,19 @@ export default function Changelog() {
                                 </div>
                                 <span
                                     aria-hidden
-                                    className={cn("cl-dot justify-self-center mt-[18px] w-4 h-4 rounded-full border-2 border-(--ink)", isLatest ? "bg-[#FF3399] shadow-[0_0_0_4px_rgba(255,51,153,.18)]" : "bg-(--face)")}
+                                    className={cn("cl-dot justify-self-center mt-[18px] w-4 h-4 rounded-full border-2 border-(--ink)", isLatest ? "bg-[#FF3399] [box-shadow:0_0_0_4px_rgba(255,51,153,.18)]" : "bg-(--face)")}
                                 />
                                 <div
                                     className={cn(
                                         "cl-card ml-2.5 rounded-[20px] border-2 border-(--ink) bg-(--face) text-(--face-ink) pt-4 px-5 pb-[18px] flex flex-col gap-2.5",
-                                        isLatest ? "shadow-[0_5px_0_0_#FF8AC4,0_5px_0_2px_var(--ink)]" : "shadow-[2px_3px_0_var(--ctl-off)]",
+                                        isLatest ? "[box-shadow:0_5px_0_0_#FF8AC4,0_5px_0_2px_var(--ink)]" : "[box-shadow:2px_3px_0_var(--ctl-off)]",
                                     )}
                                 >
                                     <div className="flex items-center gap-2.5 flex-wrap">
                                         <time dateTime={entry.date} className="hidden @max-[580px]:inline font-semibold text-xs text-(--muted)">{`${MONTHS[m - 1]} ${d}, ${y}`}</time>
                                         <h2 className="m-0 font-bold text-lg leading-[1.25] [text-wrap:pretty]">{entry.title}</h2>
                                         {isLatest && (
-                                            <span className="px-[9px] py-[3px] rounded-full border-[1.5px] border-[#1A1418] bg-[#FF70B8] font-bold text-[10px] tracking-[.08em] text-white [text-shadow:var(--tag-text)] shadow-[1.5px_2px_0_#1A1418] -rotate-3">LATEST</span>
+                                            <span className="px-[9px] py-[3px] rounded-full border-[1.5px] border-[#1A1418] bg-[#FF70B8] font-bold text-[10px] tracking-[.08em] text-white [text-shadow:var(--tag-text)] [box-shadow:1.5px_2px_0_#1A1418] -rotate-3">LATEST</span>
                                         )}
                                     </div>
                                     {entry.items.map((item) => {
@@ -93,7 +93,7 @@ export default function Changelog() {
                                         return (
                                             <div key={item.text} className="flex gap-2.5 items-baseline @max-[430px]:flex-col @max-[430px]:gap-1.5 @max-[430px]:items-start">
                                                 <span
-                                                    className="flex-none min-w-[82px] inline-flex items-center justify-center gap-[5px] px-[9px] py-[3px] rounded-full border-[1.5px] border-[#1A1418] text-[#1A1418] font-bold text-[10px] tracking-[.06em] shadow-[inset_0_2px_0_rgba(255,255,255,.6),inset_0_-2px_0_rgba(26,20,24,.12),2px_2.5px_0_#1A1418] -translate-y-px"
+                                                    className="flex-none min-w-[82px] inline-flex items-center justify-center gap-[5px] px-[9px] py-[3px] rounded-full border-[1.5px] border-[#1A1418] text-[#1A1418] font-bold text-[10px] tracking-[.06em] [box-shadow:inset_0_2px_0_rgba(255,255,255,.6),inset_0_-2px_0_rgba(26,20,24,.12),2px_2.5px_0_#1A1418] -translate-y-px"
                                                     style={{ background: look.bg }}
                                                 >
                                                     <look.Icon className="w-[11px] h-[11px]" fill={look.fill} stroke="#1A1418" strokeWidth={2.6} aria-hidden />

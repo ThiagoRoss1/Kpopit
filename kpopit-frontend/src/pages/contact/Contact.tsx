@@ -62,11 +62,11 @@ export default function Contact() {
                                     {...(c.href.startsWith("mailto:") ? {} : { target: "_blank", rel: "noopener noreferrer" })}
                                     className={cn(
                                         "ct-channel pp-focus box-border min-w-0 flex items-center gap-3.5 py-3.5 pr-4 pl-3.5 rounded-[20px] border-2 border-(--ink) bg-(--face) text-(--face-ink) no-underline",
-                                        c.highlight ? "shadow-[4px_4px_0_0_#FF8AC4,4px_4px_0_2px_var(--ink)]" : "shadow-[2px_3px_0_var(--ctl-off),var(--in)]",
+                                        c.highlight ? "[box-shadow:4px_4px_0_0_#FF8AC4,4px_4px_0_2px_var(--ink)]" : "[box-shadow:2px_3px_0_var(--ctl-off),var(--in)]",
                                     )}
                                     style={{ ["--ct-tilt" as string]: `${i % 2 ? 0.5 : -0.5}deg` }}
                                 >
-                                    <span className={cn("flex-none grid place-items-center w-11 h-11 rounded-[13px] border-2 border-[#1A1418] shadow-[2px_2.5px_0_#1A1418]", c.tile)}>{c.icon}</span>
+                                    <span className={cn("flex-none grid place-items-center w-11 h-11 rounded-[13px] border-2 border-[#1A1418] [box-shadow:2px_2.5px_0_#1A1418]", c.tile)}>{c.icon}</span>
                                     <span className="flex-1 min-w-0 flex flex-col gap-[3px]">
                                         <span className="font-bold text-base leading-[1.15]">{c.title}</span>
                                         <span className="font-medium text-[12.5px] leading-[1.35] text-(--muted) [overflow-wrap:anywhere]">{c.note}</span>
@@ -85,7 +85,7 @@ export default function Contact() {
 
                     <form
                         onSubmit={send}
-                        className="pp-enter [--pp-delay:220ms] min-w-0 rounded-[23px] border-2 border-(--ink) bg-(--face) text-(--face-ink) shadow-[var(--card-depth)] pt-7 px-[30px] pb-[30px] @max-[580px]:pt-[22px] @max-[580px]:px-[18px] @max-[580px]:pb-6 flex flex-col gap-5"
+                        className="pp-enter [--pp-delay:220ms] min-w-0 rounded-[23px] border-2 border-(--ink) bg-(--face) text-(--face-ink) [box-shadow:var(--card-depth)] pt-7 px-[30px] pb-[30px] @max-[580px]:pt-[22px] @max-[580px]:px-[18px] @max-[580px]:pb-6 flex flex-col gap-5"
                     >
                         <div className="flex flex-col gap-1">
                             <h2 className="m-0 font-bold text-[22px] leading-[1.15]">Send a message</h2>

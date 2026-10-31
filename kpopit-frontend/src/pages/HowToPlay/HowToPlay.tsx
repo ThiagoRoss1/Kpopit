@@ -15,12 +15,12 @@ import { CLASSIC_EXAMPLE, CATEGORIES, FEEDBACK, HINT_AT, MODES, parseMode, type 
 import "../../components/Puff/puff.css";
 import "./howToPlay.css";
 
-const CARD = "htp-card rounded-[23px] border-2 border-(--ink) bg-(--face) text-(--face-ink) shadow-[5px_5px_0_0_#FF8AC4,5px_5px_0_2px_var(--ink)] p-[26px] @max-[580px]:p-[18px] flex flex-col gap-[18px]";
+const CARD = "htp-card rounded-[23px] border-2 border-(--ink) bg-(--face) text-(--face-ink) [box-shadow:5px_5px_0_0_#FF8AC4,5px_5px_0_2px_var(--ink)] p-[26px] @max-[580px]:p-[18px] flex flex-col gap-[18px]";
 
 function Heading({ n, children }: { n: number; children: ReactNode }) {
     return (
         <h2 className="m-0 flex items-center gap-2.5 font-bold text-[13px] leading-none tracking-[.12em] text-(--face-ink)">
-            <span aria-hidden className="flex-none grid place-items-center w-8 h-8 rounded-[10px] border-2 border-[#1A1418] bg-[#FF8AC4] text-[#1A1418] font-bold text-[13px] leading-none tracking-normal shadow-[2px_2px_0_var(--ctl-off)] -rotate-4">
+            <span aria-hidden className="flex-none grid place-items-center w-8 h-8 rounded-[10px] border-2 border-[#1A1418] bg-[#FF8AC4] text-[#1A1418] font-bold text-[13px] leading-none tracking-normal [box-shadow:2px_2px_0_var(--ctl-off)] -rotate-4">
                 {String(n).padStart(2, "0")}
             </span>
             {children}
@@ -49,15 +49,15 @@ function SearchDemo() {
     ];
     return (
         <div aria-hidden className="flex flex-col gap-2.5">
-            <div className="flex items-center gap-2 p-1.5 rounded-full border-2 border-(--ink) bg-(--chip) shadow-[3px_4px_0_var(--ctl-off),var(--in)]">
+            <div className="flex items-center gap-2 p-1.5 rounded-full border-2 border-(--ink) bg-(--chip) [box-shadow:3px_4px_0_var(--ctl-off),var(--in)]">
                 <span className="flex-1 min-w-0 h-10 flex items-center px-4 rounded-full border-[1.5px] border-(--ink) bg-(--ground) text-(--text) font-medium text-sm">
                     chae<span className="htp-caret w-0.5 h-[18px] ml-0.5 bg-[#FF3399]" />
                 </span>
-                <span className="flex-none grid place-items-center w-11 h-11 rounded-full border-2 border-[#1A1418] bg-[#FF3399] text-[#1A1418] shadow-[2px_3px_0_#1A1418]">
+                <span className="flex-none grid place-items-center w-11 h-11 rounded-full border-2 border-[#1A1418] bg-[#FF3399] text-[#1A1418] [box-shadow:2px_3px_0_#1A1418]">
                     <Search className="w-[18px] h-[18px]" strokeWidth={3} />
                 </span>
             </div>
-            <div className="p-1.5 rounded-[22px] border-2 border-(--ink) bg-(--menu-bg) text-(--chip-ink) shadow-[3px_4px_0_var(--ctl-off)] flex flex-col gap-[3px]">
+            <div className="p-1.5 rounded-[22px] border-2 border-(--ink) bg-(--menu-bg) text-(--chip-ink) [box-shadow:3px_4px_0_var(--ctl-off)] flex flex-col gap-[3px]">
                 {rows.map((r) => (
                     <div key={r.name} className={cn("flex items-center gap-3 py-1.5 px-2.5 rounded-[16px] border-2", r.active ? "border-(--ink) bg-(--opt-hover)" : "border-transparent")}>
                         <span className="relative flex-none w-10 h-10 rounded-full border-2 border-[#1A1418] overflow-hidden bg-[#FFE3F1] grid place-items-center font-bold text-[15px] text-[#1A1418]">
@@ -133,7 +133,7 @@ function ClassicGuide() {
                         <span className="text-sm text-(--muted)">The arrows show whether <b>today's idol</b> is above or below your guess:</span>
                         {[{ up: true, k: "Up:", t: "today's idol is above. Younger, taller or debuted more recently." }, { up: false, k: "Down:", t: "today's idol is below. Older, shorter or debuted earlier." }].map((a) => (
                             <div key={a.k} className="flex items-start gap-3 text-sm">
-                                <span aria-hidden className="flex-none grid place-items-center w-11 h-11 rounded-[12px] border-2 border-[#1A1418] bg-[#FD5C63] text-[#1A1418] shadow-[0_3px_0_0_#B91C1C,0_3px_0_2px_#1A1418]">
+                                <span aria-hidden className="flex-none grid place-items-center w-11 h-11 rounded-[12px] border-2 border-[#1A1418] bg-[#FD5C63] text-[#1A1418] [box-shadow:0_3px_0_0_#B91C1C,0_3px_0_2px_#1A1418]">
                                     <ArrowUp className={cn("w-6 h-6", !a.up && "rotate-180")} strokeWidth={3} />
                                 </span>
                                 <span><b>{a.k}</b> {a.t}</span>
@@ -181,7 +181,7 @@ function ClassicGuide() {
                 <span className="text-sm text-(--muted)">What each column means:</span>
                 <div className="grid grid-cols-2 gap-3 @max-[580px]:grid-cols-1">
                     {CATEGORIES.map((c, i) => (
-                        <div key={c.name} className={cn("htp-cat flex gap-3 items-start p-3 rounded-[16px] border-2 border-(--ink) bg-(--chip) shadow-[2px_3px_0_var(--ctl-off),var(--in)]", c.wide && "col-span-2 @max-[580px]:col-span-1")}>
+                        <div key={c.name} className={cn("htp-cat flex gap-3 items-start p-3 rounded-[16px] border-2 border-(--ink) bg-(--chip) [box-shadow:2px_3px_0_var(--ctl-off),var(--in)]", c.wide && "col-span-2 @max-[580px]:col-span-1")}>
                             <span aria-hidden className="htp-ctile flex-none grid place-items-center w-12 h-12 rounded-[12px] border-2 border-[#1A1418] font-bold text-[10px] text-[#1A1418] text-center leading-tight whitespace-pre-line" style={{ background: FEEDBACK[c.tone].bg, transform: `rotate(${i % 2 ? 3 : -3}deg)` }}>
                                 {c.sample}
                             </span>
@@ -211,12 +211,12 @@ function ClassicGuide() {
                                 style={{ transform: `rotate(${i ? 1.5 : -1.5}deg)` }}
                             >
                                 <span className="htp-flip relative block w-full h-full [transform-style:preserve-3d]" style={{ transform: state ? "rotateY(180deg)" : "none" }}>
-                                    <span className="absolute inset-0 [backface-visibility:hidden] flex flex-col items-center justify-center gap-1 rounded-[18px] border-2 border-(--ink) bg-[#FF8AC4] text-[#1A1418] shadow-[3px_4px_0_var(--ctl-off)]">
+                                    <span className="absolute inset-0 [backface-visibility:hidden] flex flex-col items-center justify-center gap-1 rounded-[18px] border-2 border-(--ink) bg-[#FF8AC4] text-[#1A1418] [box-shadow:3px_4px_0_var(--ctl-off)]">
                                         <span className="font-bold text-[11px] tracking-[.14em]">HINT #{i + 1}</span>
                                         <span className="font-bold text-[40px] leading-none text-white [text-shadow:var(--puff-value)]">?</span>
                                         <span className="font-medium text-xs">Unlocks after {hint.at} guesses · tap to flip</span>
                                     </span>
-                                    <span className="absolute inset-0 [backface-visibility:hidden] [transform:rotateY(180deg)] flex flex-col items-center justify-center gap-1.5 rounded-[18px] border-2 border-(--ink) bg-(--chip) text-(--chip-ink) shadow-[3px_4px_0_var(--ctl-off)]">
+                                    <span className="absolute inset-0 [backface-visibility:hidden] [transform:rotateY(180deg)] flex flex-col items-center justify-center gap-1.5 rounded-[18px] border-2 border-(--ink) bg-(--chip) text-(--chip-ink) [box-shadow:3px_4px_0_var(--ctl-off)]">
                                         <span className="font-bold text-[11px] tracking-[.14em] text-(--muted)">{hint.cap}</span>
                                         <span className="htp-val font-bold text-2xl" style={{ filter: state === 1 ? "blur(7px)" : "none" }}>{hint.value}</span>
                                         <span className="font-medium text-xs text-(--muted)">{state === 1 ? "Tap to unblur" : "Tap to flip back"}</span>
@@ -267,7 +267,7 @@ function BlurryGuide() {
             <section className={CARD}>
                 <div className="grid grid-cols-[minmax(0,340px)_minmax(0,1fr)] gap-7 items-center @max-[760px]:grid-cols-1 @max-[760px]:gap-5">
                     <div className="flex flex-col gap-3.5">
-                        <div className="aspect-square rounded-[18px] border-[2.5px] border-[#1A1418] overflow-hidden bg-[#DCD6D2] shadow-[4px_5px_0_var(--ctl-off)]">
+                        <div className="aspect-square rounded-[18px] border-[2.5px] border-[#1A1418] overflow-hidden bg-[#DCD6D2] [box-shadow:4px_5px_0_var(--ctl-off)]">
                             <img src={resolveCdnUrl(CLASSIC_EXAMPLE.hit.image) ?? ""} alt="Blurred idol photo" className="htp-blur block w-full h-full object-cover scale-110" style={{ filter: `blur(${blur}px) grayscale(${color && colorOk ? 0 : 1})` }} />
                         </div>
                         <GuessStepper value={guesses} max={BLUR_LEVELS.length - 1} onChange={setGuesses} />
@@ -314,7 +314,7 @@ function PixelatedGuide() {
             <section className={CARD}>
                 <div className="grid grid-cols-[minmax(0,340px)_minmax(0,1fr)] gap-7 items-center @max-[760px]:grid-cols-1 @max-[760px]:gap-5">
                     <div className="flex flex-col gap-3.5">
-                        <div className="relative aspect-square rounded-[18px] border-[2.5px] border-[#1A1418] overflow-hidden bg-[#DCD6D2] shadow-[4px_5px_0_var(--ctl-off)] [container-type:size]">
+                        <div className="relative aspect-square rounded-[18px] border-[2.5px] border-[#1A1418] overflow-hidden bg-[#DCD6D2] [box-shadow:4px_5px_0_var(--ctl-off)] [container-type:size]">
                             <img
                                 src={resolveCdnUrl("/images/albums/after_like.webp") ?? ""}
                                 alt="Pixelated album cover"
@@ -349,7 +349,7 @@ function PixelatedGuide() {
                                     disabled={!ok}
                                     aria-label={ok ? `${s.label} hint` : `${s.label} hint, locked`}
                                     onClick={() => setOpen((o) => o.map((v, k) => (k === i ? !v : v)))}
-                                    className="htp-sleeve pp-focus absolute left-0 top-0 w-[96px] h-[96px] rounded-[10px] border-2 border-[#1A1418] flex flex-col justify-between p-2 text-left shadow-[3px_4px_0_var(--ctl-off)] disabled:cursor-default cursor-pointer"
+                                    className="htp-sleeve pp-focus absolute left-0 top-0 w-[96px] h-[96px] rounded-[10px] border-2 border-[#1A1418] flex flex-col justify-between p-2 text-left [box-shadow:3px_4px_0_var(--ctl-off)] disabled:cursor-default cursor-pointer"
                                     style={{ background: s.bg, color: s.ink, transform: isOpen ? "translate3d(-6px,0,0) rotate(-7deg)" : "rotate(-2deg)" }}
                                 >
                                     <span className="font-bold text-[9px] tracking-[.12em]">HINT #{i + 1}</span>

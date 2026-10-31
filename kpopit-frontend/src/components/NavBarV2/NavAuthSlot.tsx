@@ -23,7 +23,7 @@ export default function NavAuthSlot({ open, onToggle }: { open: boolean; onToggl
         return (
             <Link
                 to="/login"
-                className="pp-press pp-focus flex-none box-border h-[38px] px-4 inline-flex items-center rounded-full border-2 border-(--ink) bg-[#FF3399] text-[#1A1418] font-bold text-sm no-underline [--pp-in:var(--in-pink)] shadow-[2px_3px_0_var(--ink),var(--in-pink)]"
+                className="pp-press pp-focus flex-none box-border h-[38px] px-4 inline-flex items-center rounded-full border-2 border-(--ink) bg-[#FF3399] text-[#1A1418] font-bold text-sm no-underline [--pp-in:var(--in-pink)] [box-shadow:2px_3px_0_var(--ink),var(--in-pink)]"
             >
                 Login
             </Link>
@@ -59,7 +59,7 @@ export default function NavAuthSlot({ open, onToggle }: { open: boolean; onToggl
                 )}
             </button>
             {open && (
-                <div className="nb-menu absolute right-0 top-[calc(100%+22px)] @max-[760px]:top-[calc(100%+19px)] z-40 w-60 box-border p-2 rounded-[20px] border-2 border-(--ink) bg-(--menu-bg) shadow-[3px_4px_0_var(--ctl-off),var(--in)] flex flex-col gap-0.5 origin-[calc(100%-20px)_0]">
+                <div className="nb-menu absolute right-0 top-[calc(100%+22px)] @max-[760px]:top-[calc(100%+19px)] z-40 w-60 box-border p-2 rounded-[20px] border-2 border-(--ink) bg-(--menu-bg) [box-shadow:3px_4px_0_var(--ctl-off),var(--in)] flex flex-col gap-0.5 origin-[calc(100%-20px)_0]">
                     <div className="px-3 pt-2 pb-2.5 mb-1 border-b-2 border-(--rule) min-w-0">
                         <p title={user.profile.display_name} className="m-0 font-bold text-base text-(--chip-ink) truncate">{user.profile.display_name}</p>
                         <p title={username} className="m-0 font-medium text-[13px] text-(--muted) truncate">@{username}</p>

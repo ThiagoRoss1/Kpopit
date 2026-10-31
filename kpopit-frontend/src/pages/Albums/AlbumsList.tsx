@@ -71,7 +71,7 @@ function AlbumsCatalogue({ all }: { all: AlbumsPageItem[] }) {
                     <header className="cg-head pp-enter [--pp-anim:puffSide] [--pp-delay:80ms] flex items-end justify-between flex-wrap gap-(--cg-hd-gap) pt-(--cg-head-pt)">
                         <div className="flex items-center gap-4">
                             <PuffTitle className="text-(length:--cg-title-fs) tracking-[-.01em]">Albums</PuffTitle>
-                            <span lang="ko" className="cg-ko flex-none whitespace-nowrap font-korean font-bold text-sm leading-none text-(--chip-ink) bg-(--chip) border-2 border-(--ink) rounded-[10px] px-[9px] py-1.5 shadow-[2px_3px_0_var(--ctl-off)] rotate-3">앨범</span>
+                            <span lang="ko" className="cg-ko flex-none whitespace-nowrap font-korean font-bold text-sm leading-none text-(--chip-ink) bg-(--chip) border-2 border-(--ink) rounded-[10px] px-[9px] py-1.5 [box-shadow:2px_3px_0_var(--ctl-off)] rotate-3">앨범</span>
                         </div>
                         <span className="font-medium text-[13px] text-(--muted) pb-(--cg-cnt-pb)">{`${all.length} albums · ${artists.length} artists`}</span>
                     </header>
@@ -94,7 +94,7 @@ function AlbumsCatalogue({ all }: { all: AlbumsPageItem[] }) {
                         >
                             <SlidersHorizontal className="w-[18px] h-[18px]" strokeWidth={2.6} aria-hidden />
                             {activeCount > 0 && (
-                                <span aria-hidden className="cg-fbadge absolute -top-2 -right-2 min-w-[22px] h-[22px] px-1.5 grid place-items-center rounded-full bg-[#FF3399] text-[#1A1418] border-2 border-[#1A1418] shadow-[1px_1.5px_0_#1A1418] font-bold text-[11px] leading-none">{activeCount}</span>
+                                <span aria-hidden className="cg-fbadge absolute -top-2 -right-2 min-w-[22px] h-[22px] px-1.5 grid place-items-center rounded-full bg-[#FF3399] text-[#1A1418] border-2 border-[#1A1418] [box-shadow:1px_1.5px_0_#1A1418] font-bold text-[11px] leading-none">{activeCount}</span>
                             )}
                         </button>
                         <div className="cg-fpanel">
@@ -124,7 +124,7 @@ function AlbumsCatalogue({ all }: { all: AlbumsPageItem[] }) {
                         <div className="pp-enter min-h-[340px] grid place-content-center justify-items-center text-center gap-3.5">
                             <div className="font-bold text-[34px] leading-[1.15] text-white [text-shadow:var(--puff-empty)] -rotate-[1.5deg] pt-0 pr-1.5 pb-2 pl-1">No albums found...</div>
                             <div className="font-medium text-sm text-(--muted)">{f.q ? `No matches for "${f.q}" with these filters.` : "No matches with these filters."}</div>
-                            <button type="button" onClick={reset} className="cg-press cg-focus mt-2 h-[46px] px-[22px] rounded-full border-2 border-(--ink) bg-(--tag) text-white [text-shadow:var(--tag-text)] font-bold text-sm cursor-pointer shadow-[3px_4px_0_var(--ink),var(--in-pink)]">
+                            <button type="button" onClick={reset} className="cg-press cg-focus mt-2 h-[46px] px-[22px] rounded-full border-2 border-(--ink) bg-(--tag) text-white [text-shadow:var(--tag-text)] font-bold text-sm cursor-pointer [box-shadow:3px_4px_0_var(--ink),var(--in-pink)]">
                                 Clear search & filters
                             </button>
                         </div>

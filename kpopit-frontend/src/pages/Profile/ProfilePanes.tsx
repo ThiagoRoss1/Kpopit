@@ -8,7 +8,7 @@ import {
     modeName, type ModeFilter,
 } from "./profileData";
 
-const TILE_DEPTH = "shadow-[4px_4px_0_0_#FF8AC4,4px_4px_0_2px_var(--ink)]";
+const TILE_DEPTH = "[box-shadow:4px_4px_0_0_#FF8AC4,4px_4px_0_2px_var(--ink)]";
 const Y_LINES = [25, 50, 75, 100];
 
 interface Tile {
@@ -37,7 +37,7 @@ function Tiles({ tiles }: { tiles: Tile[] }) {
 
 function Section({ title, aside, children, className }: { title: string; aside?: ReactNode; children: ReactNode; className?: string }) {
     return (
-        <section className={cn("bg-(--face) text-(--face-ink) border-2 border-(--ink) rounded-[23px] shadow-[var(--card-depth)] py-5 px-[22px] flex flex-col gap-3.5 min-w-0", className)}>
+        <section className={cn("bg-(--face) text-(--face-ink) border-2 border-(--ink) rounded-[23px] [box-shadow:var(--card-depth)] py-5 px-[22px] flex flex-col gap-3.5 min-w-0", className)}>
             <div className="flex items-baseline gap-2 flex-wrap">
                 <h2 className="m-0 font-bold text-lg leading-[1.2]">{title}</h2>
                 {aside && <span className="ml-auto font-medium text-xs text-(--muted)">{aside}</span>}
@@ -90,7 +90,7 @@ export function OverviewPane({ stats, activity, today }: { stats: ProfileStats; 
                         {MODES.map((mode) => {
                             const s = stats[mode.id];
                             return (
-                                <div key={mode.id} className="grid grid-cols-[minmax(0,1fr)_auto] gap-3 items-center py-2.5 px-3.5 rounded-2xl border-2 border-(--ink) bg-(--chip) shadow-[2px_3px_0_var(--ctl-off),var(--in)]">
+                                <div key={mode.id} className="grid grid-cols-[minmax(0,1fr)_auto] gap-3 items-center py-2.5 px-3.5 rounded-2xl border-2 border-(--ink) bg-(--chip) [box-shadow:2px_3px_0_var(--ctl-off),var(--in)]">
                                     <span className="flex flex-col gap-[3px] min-w-0">
                                         <span className="flex items-center gap-2 font-bold text-[15px]">
                                             <ModeDot color={mode.color} />{mode.name}
@@ -133,7 +133,7 @@ export function StatsPane({ stats, filter }: { stats: ProfileStats; filter: Mode
                             return (
                                 <div key={mode.id} className="flex flex-col items-center gap-2.5 transition-opacity duration-300" style={{ opacity: filter === "all" || filter === mode.id ? 1 : 0.35 }}>
                                     <div
-                                        className="up-ring w-[92px] h-[92px] max-w-full aspect-square box-border rounded-full border-2 border-(--ink) grid place-items-center shadow-[2px_3px_0_var(--ctl-off)]"
+                                        className="up-ring w-[92px] h-[92px] max-w-full aspect-square box-border rounded-full border-2 border-(--ink) grid place-items-center [box-shadow:2px_3px_0_var(--ctl-off)]"
                                         style={{ background: `conic-gradient(${mode.color} 0 ${p}%,var(--track) ${p}% 100%)`, ["--up-delay" as string]: `${i * 90}ms` }}
                                     >
                                         <span className="w-16 h-16 box-border rounded-full border-2 border-(--ink) bg-(--face) grid place-items-center font-bold text-[15px] whitespace-nowrap">{p}%</span>
@@ -165,7 +165,7 @@ function Distribution({ stats, label }: { stats: ModeStats; label: string }) {
                     <div key={i} className="flex flex-col items-center gap-1.5 h-full justify-end">
                         <span className="font-bold text-xs">{value}</span>
                         <span
-                            className="up-col w-full min-h-1.5 box-border rounded-[9px_9px_4px_4px] border-2 border-(--ink) shadow-[inset_0_2px_0_rgba(255,255,255,.5)]"
+                            className="up-col w-full min-h-1.5 box-border rounded-[9px_9px_4px_4px] border-2 border-(--ink) [box-shadow:inset_0_2px_0_rgba(255,255,255,.5)]"
                             style={{
                                 height: `${peakValue ? Math.round((value / peakValue) * 100) : 0}%`,
                                 background: peakValue && i + 1 === peak ? "#FF3399" : "#FF8AC4",
@@ -280,7 +280,7 @@ function GroupsPie({ groups }: { groups: ModeStats["groups"] }) {
     return (
         <Section title="Groups you guess" aside="Share of guesses">
             <div className="flex items-center gap-[22px] flex-wrap flex-1">
-                <div className="up-ring flex-none w-[150px] h-[150px] box-border rounded-full border-2 border-(--ink) grid place-items-center shadow-[3px_4px_0_var(--ctl-off)] mx-auto" style={{ background: pie }}>
+                <div className="up-ring flex-none w-[150px] h-[150px] box-border rounded-full border-2 border-(--ink) grid place-items-center [box-shadow:3px_4px_0_var(--ctl-off)] mx-auto" style={{ background: pie }}>
                     <span className="w-[52%] aspect-square box-border rounded-full border-2 border-(--ink) bg-(--face) flex flex-col items-center justify-center gap-px">
                         <span className="font-bold text-lg leading-none">{shares[0] ? `${shares[0].share}%` : "—"}</span>
                         <span className="font-semibold text-[10px] text-(--muted) max-w-[70px] truncate">{shares[0]?.name ?? ""}</span>

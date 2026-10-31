@@ -46,7 +46,7 @@ export default function IdolSearch({ idols, currentId }: { idols: IdolsPageData[
         <div className="relative min-w-0 w-full">
             <div className="overflow-hidden pt-1 pr-2.5 pb-2.5 pl-2 -mt-1 -mr-2.5 -mb-2.5 -ml-2 flex">
                 <label
-                    className="ip-sb flex items-center box-border h-12 ml-auto overflow-hidden bg-(--chip) border-[2.5px] border-[#FF8AC4] shadow-[4px_5px_0_#1A1418] -skew-x-6 [backface-visibility:hidden]"
+                    className="ip-sb flex items-center box-border h-12 ml-auto overflow-hidden bg-(--chip) border-[2.5px] border-[#FF8AC4] [box-shadow:4px_5px_0_#1A1418] -skew-x-6 [backface-visibility:hidden]"
                     style={{ width: show ? "100%" : "min(100%, 420px)" }}
                 >
                     <span className="grid place-items-center w-[50px] self-stretch bg-[#1A1418]">
@@ -77,12 +77,12 @@ export default function IdolSearch({ idols, currentId }: { idols: IdolsPageData[
                         aria-autocomplete="list"
                         className="ip-q flex-1 min-w-0 h-full border-0 outline-0 bg-transparent pr-3.5 pl-4 font-semibold text-[15px] text-(--chip-ink) skew-x-6"
                     />
-                    <span aria-hidden className="ip-slash flex-none mr-3 skew-x-6 -rotate-4 grid place-items-center min-w-[26px] h-[26px] px-1.5 rounded-[7px] border-2 border-[#1A1418] bg-[#FFE3F1] text-[#1A1418] font-bold text-[13px] leading-none shadow-[1.5px_2px_0_#1A1418]">/</span>
+                    <span aria-hidden className="ip-slash flex-none mr-3 skew-x-6 -rotate-4 grid place-items-center min-w-[26px] h-[26px] px-1.5 rounded-[7px] border-2 border-[#1A1418] bg-[#FFE3F1] text-[#1A1418] font-bold text-[13px] leading-none [box-shadow:1.5px_2px_0_#1A1418]">/</span>
                 </label>
             </div>
             {show && (
                 <div id="ip-results" role="listbox" aria-label="Idols"
-                    className="ip-in-drop absolute z-40 top-[calc(100%+14px)] left-(--dd-l) right-0 flex flex-col gap-0.5 p-1.5 bg-(--menu-bg) border-2 border-[#1A1418] shadow-[5px_5px_0_#FF8AC4,0_18px_40px_rgba(26,20,24,.18)] overflow-hidden origin-top">
+                    className="ip-in-drop absolute z-40 top-[calc(100%+14px)] left-(--dd-l) right-0 flex flex-col gap-0.5 p-1.5 bg-(--menu-bg) border-2 border-[#1A1418] [box-shadow:5px_5px_0_#FF8AC4,0_18px_40px_rgba(26,20,24,.18)] overflow-hidden origin-top">
                     {results.map((idol, k) => (
                         <button
                             key={idol.id}
@@ -94,7 +94,7 @@ export default function IdolSearch({ idols, currentId }: { idols: IdolsPageData[
                             onMouseEnter={() => { setActive(k); prefetchIdolProfile(idol.id); }}
                             className="ip-opt flex items-center gap-3 w-full py-[7px] pr-3 pl-2 border-0 bg-transparent text-left cursor-pointer"
                         >
-                            <img src={`${import.meta.env.VITE_IMAGE_BUCKET_URL}${idol.image_path}?v=${idol.image_version}`} alt="" className="flex-none w-10 h-10 object-cover shadow-[2px_2px_0_#1A1418]" />
+                            <img src={`${import.meta.env.VITE_IMAGE_BUCKET_URL}${idol.image_path}?v=${idol.image_version}`} alt="" className="flex-none w-10 h-10 object-cover [box-shadow:2px_2px_0_#1A1418]" />
                             <span className="flex-1 flex flex-col gap-1 min-w-0">
                                 <span className="font-bold text-[15px] leading-[1.1] text-(--text) whitespace-nowrap overflow-hidden text-ellipsis">{idol.artist_name}</span>
                                 <span className="font-semibold text-xs leading-[1.2] text-(--muted) whitespace-nowrap overflow-hidden text-ellipsis">{groupLabel(idol)}</span>

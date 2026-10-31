@@ -18,7 +18,7 @@ export default function AppliedChips({ result, chips, onClearAll, filtersOpen }:
                     type="button"
                     onClick={c.onRemove}
                     aria-label={`Remove ${c.label}`}
-                    className="cg-chip cg-focus inline-flex items-center gap-1.5 h-[30px] pr-[9px] pl-3 border-[1.5px] border-(--ink) rounded-full bg-(--chip) text-(--chip-ink) font-semibold text-xs cursor-pointer shadow-[1.5px_2px_0_var(--ctl-off),var(--in)]"
+                    className="cg-chip cg-focus inline-flex items-center gap-1.5 h-[30px] pr-[9px] pl-3 border-[1.5px] border-(--ink) rounded-full bg-(--chip) text-(--chip-ink) font-semibold text-xs cursor-pointer [box-shadow:1.5px_2px_0_var(--ctl-off),var(--in)]"
                 >
                     <span>{c.label}</span>
                     <X className="w-3 h-3" strokeWidth={3} aria-hidden />

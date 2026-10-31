@@ -66,7 +66,7 @@ export default function About() {
                     <SideIndex items={SECTIONS} active={active} onPick={jumpTo} />
                     <div className="flex flex-col gap-4 min-w-0">
                         <IndexChips items={SECTIONS} active={active} onPick={jumpTo} />
-                        <article className="pp-enter [--pp-delay:200ms] relative rounded-[23px] border-2 border-(--ink) bg-(--face) text-(--face-ink) shadow-[var(--card-depth)] pt-9 pr-11 pb-10 pl-16 @max-[580px]:pt-[22px] @max-[580px]:pr-[18px] @max-[580px]:pb-[26px] @max-[580px]:pl-[34px] flex flex-col gap-7">
+                        <article className="pp-enter [--pp-delay:200ms] relative rounded-[23px] border-2 border-(--ink) bg-(--face) text-(--face-ink) [box-shadow:var(--card-depth)] pt-9 pr-11 pb-10 pl-16 @max-[580px]:pt-[22px] @max-[580px]:pr-[18px] @max-[580px]:pb-[26px] @max-[580px]:pl-[34px] flex flex-col gap-7">
                             <span aria-hidden className="absolute left-[38px] @max-[580px]:left-[18px] top-0 bottom-0 w-0.5 bg-[rgba(255,51,153,.45)]" />
 
                             <Section id="what" n={1} title="What is KpopIt" className="grid grid-cols-[minmax(0,1fr)_210px] gap-7 items-start @max-[580px]:grid-cols-1">
@@ -83,11 +83,11 @@ export default function About() {
                                     </div>
                                 </div>
                                 <figure className="ab-photo relative m-0 rotate-2 @max-[580px]:max-w-[220px] @max-[580px]:justify-self-center">
-                                    <div className="aspect-square rounded-[18px] border-[2.5px] border-[#1A1418] overflow-hidden bg-[#DCD6D2] shadow-[4px_5px_0_var(--ctl-off)]">
+                                    <div className="aspect-square rounded-[18px] border-[2.5px] border-[#1A1418] overflow-hidden bg-[#DCD6D2] [box-shadow:4px_5px_0_var(--ctl-off)]">
                                         <img src={resolveCdnUrl("/images/idols/chaewon.webp") ?? ""} alt="A blurred idol photo, like in Blurry mode" className="block w-full h-full object-cover scale-[1.12] blur-[9px] grayscale-[.55]" />
                                     </div>
                                     <span aria-hidden className="absolute inset-0 grid place-items-center font-bold text-[92px] leading-none text-white [text-shadow:var(--puff-title)] pointer-events-none">?</span>
-                                    <figcaption className="absolute left-1/2 -bottom-3.5 -translate-x-1/2 -rotate-3 whitespace-nowrap px-3 py-[5px] rounded-full border-2 border-[#1A1418] bg-[#FFFDFA] text-[#1A1418] shadow-[2px_3px_0_#1A1418] font-bold text-xs">Who is it?</figcaption>
+                                    <figcaption className="absolute left-1/2 -bottom-3.5 -translate-x-1/2 -rotate-3 whitespace-nowrap px-3 py-[5px] rounded-full border-2 border-[#1A1418] bg-[#FFFDFA] text-[#1A1418] [box-shadow:2px_3px_0_#1A1418] font-bold text-xs">Who is it?</figcaption>
                                 </figure>
                             </Section>
                             <Rule />
@@ -105,7 +105,7 @@ export default function About() {
                                 <div className="grid grid-cols-[repeat(auto-fit,minmax(200px,1fr))] gap-3">
                                     {DATA_LINKS.map((d) => (
                                         <PressLink key={d.label} to={d.to} className="h-auto justify-start gap-3.5 py-3 pr-4 pl-3 rounded-[18px]">
-                                            <span aria-hidden className="ab-fade relative flex-none w-[60px] h-[60px] rounded-[15px] border-2 border-[#1A1418] overflow-hidden shadow-[2px_3px_0_#1A1418] -rotate-3" style={{ background: d.bg }}>
+                                            <span aria-hidden className="ab-fade relative flex-none w-[60px] h-[60px] rounded-[15px] border-2 border-[#1A1418] overflow-hidden [box-shadow:2px_3px_0_#1A1418] -rotate-3" style={{ background: d.bg }}>
                                                 {d.images.map((src, i) => <img key={i} src={resolveCdnUrl(src) ?? ""} alt="" loading="lazy" className="absolute inset-0 w-full h-full object-cover" />)}
                                             </span>
                                             <span className="flex-1 flex flex-col gap-0.5 text-left">
@@ -152,11 +152,11 @@ export default function About() {
                                     <span className="font-semibold text-[10px] tracking-[.14em] text-(--muted)">BUILT WITH</span>
                                     <div className="grid grid-cols-[repeat(auto-fit,minmax(180px,1fr))] gap-2.5">
                                         {STACK.map((s) => (
-                                            <div key={s.label} className="pt-3 px-3.5 pb-3.5 rounded-[16px] border-2 border-(--ink) bg-(--chip) shadow-[2px_3px_0_var(--ctl-off),var(--in)] flex flex-col gap-2.5">
+                                            <div key={s.label} className="pt-3 px-3.5 pb-3.5 rounded-[16px] border-2 border-(--ink) bg-(--chip) [box-shadow:2px_3px_0_var(--ctl-off),var(--in)] flex flex-col gap-2.5">
                                                 <span className="font-semibold text-[10px] tracking-[.14em] text-(--muted)">{s.label}</span>
                                                 {s.items.map((item) => (
                                                     <span key={item} className="ab-tech flex items-center gap-2.5 font-bold text-[14.5px]">
-                                                        <span className="ab-ticon flex-none grid place-items-center w-[34px] h-[34px] rounded-[11px] border-2 border-[#1A1418] bg-white text-[#1A1418] shadow-[1.5px_2px_0_#1A1418]">
+                                                        <span className="ab-ticon flex-none grid place-items-center w-[34px] h-[34px] rounded-[11px] border-2 border-[#1A1418] bg-white text-[#1A1418] [box-shadow:1.5px_2px_0_#1A1418]">
                                                             <s.Icon className="w-[18px] h-[18px]" strokeWidth={2.4} aria-hidden />
                                                         </span>
                                                         {item}

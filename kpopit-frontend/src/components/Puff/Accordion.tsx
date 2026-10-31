@@ -23,7 +23,7 @@ export function AccordionItem({ id, title, open, onToggle, children }: {
     children: ReactNode;
 }) {
     return (
-        <div className="rounded-[18px] border-2 border-(--ink) bg-(--face) text-(--face-ink) shadow-[2px_3px_0_var(--ctl-off),var(--in)]">
+        <div className="rounded-[18px] border-2 border-(--ink) bg-(--face) text-(--face-ink) [box-shadow:2px_3px_0_var(--ctl-off),var(--in)]">
             <button
                 type="button"
                 aria-expanded={open}

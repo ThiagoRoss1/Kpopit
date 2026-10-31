@@ -25,7 +25,7 @@ const COLLAPSED_ROWS = 5;
 
 function Tile({ label, ko, value, sub, flag }: { label: string; ko: string; value: string; sub?: string; flag?: string | null }) {
     return (
-        <div className="ap-tile ap-in-rise ap-gpu flex flex-col gap-2 min-w-0 pt-(--tile-pad) px-(--tile-pad) pb-[13px] rounded-[20px] border-2 border-(--ink) bg-(--chip) text-(--chip-ink) shadow-[3px_4px_0_var(--ctl-off),var(--in)]">
+        <div className="ap-tile ap-in-rise ap-gpu flex flex-col gap-2 min-w-0 pt-(--tile-pad) px-(--tile-pad) pb-[13px] rounded-[20px] border-2 border-(--ink) bg-(--chip) text-(--chip-ink) [box-shadow:3px_4px_0_var(--ctl-off),var(--in)]">
             <span className="flex items-baseline flex-wrap gap-x-2 gap-y-1">
                 <span className="font-semibold text-[11px] leading-none tracking-[.12em] text-(--muted)">{label}</span>
                 <span lang="ko" className="font-korean font-medium text-[10px] leading-none text-(--muted)">{ko}</span>
@@ -150,7 +150,7 @@ function Album({ album }: { album: AlbumPageData }) {
                     <section key={album.id} className="ap-in grid grid-cols-(--hero-cols) gap-(--hero-gap) items-center mt-7">
                         <div className="ap-hero ap-in-fade relative aspect-[1/0.8] w-full max-w-(--hero-w) justify-self-center">
                             <Record cover={cover} />
-                            <div className="ap-in-dropt ap-gpu absolute left-0 top-0 w-[80%] aspect-square rounded-[18px] border-[2.5px] border-[#1A1418] overflow-hidden bg-[#DCD6D2] shadow-[5px_7px_0_var(--side),5px_7px_0_2.5px_#1A1418]">
+                            <div className="ap-in-dropt ap-gpu absolute left-0 top-0 w-[80%] aspect-square rounded-[18px] border-[2.5px] border-[#1A1418] overflow-hidden bg-[#DCD6D2] [box-shadow:5px_7px_0_var(--side),5px_7px_0_2.5px_#1A1418]">
                                 <span aria-hidden className="absolute inset-0 grid place-items-center font-bold text-[64px] leading-none text-[rgba(26,20,24,.28)]">♪</span>
                                 <img src={cover} alt={`${album.name} cover`} className="ap-cimg relative block w-full h-full object-cover" />
                                 <div aria-hidden className="ap-sweep absolute top-0 bottom-0 -left-[60%] w-[220%] pointer-events-none bg-[linear-gradient(118deg,rgba(255,255,255,0)_40%,rgba(255,255,255,.2)_47%,rgba(255,255,255,.06)_51%,rgba(255,255,255,0)_57%)]" />
@@ -161,14 +161,14 @@ function Album({ album }: { album: AlbumPageData }) {
                         <div className="flex flex-col [align-items:var(--info-align)] [text-align:var(--info-text)] gap-4 min-w-0">
                             {foreign && (
                                 <div className="flex [justify-content:var(--info-align)]">
-                                    <span className="ap-in-drop inline-block bg-[#FF70B8] text-white border-2 border-[#1A1418] rounded-[8px] py-[5px] px-[7px] font-bold text-[10px] leading-none [text-shadow:var(--tag-text)] shadow-[2px_3px_0_#1A1418,inset_0_1.5px_0_rgba(255,255,255,.6)] -rotate-4">
+                                    <span className="ap-in-drop inline-block bg-[#FF70B8] text-white border-2 border-[#1A1418] rounded-[8px] py-[5px] px-[7px] font-bold text-[10px] leading-none [text-shadow:var(--tag-text)] [box-shadow:2px_3px_0_#1A1418,inset_0_1.5px_0_rgba(255,255,255,.6)] -rotate-4">
                                         {album.language === "Japanese" ? "JP release" : "EN release"}
                                     </span>
                                 </div>
                             )}
                             <h1 className="ap-in-drop [animation-delay:.06s] m-0 font-bold text-(length:--title-fs) leading-[1.1] tracking-[-.01em] text-white [text-shadow:var(--puff-title)] pt-0 pr-2 pb-3 pl-1 [text-wrap:balance] [overflow-wrap:anywhere]">{album.name}</h1>
                             <div className="flex items-center [justify-content:var(--info-align)] flex-wrap gap-x-3 gap-y-2.5">
-                                <Link to={`/albums?artist=${encodeURIComponent(artist.name)}`} className="ap-btn ap-focus inline-flex items-center gap-2 h-10 px-4 rounded-full border-2 border-(--ink) bg-(--chip) text-(--chip-ink) font-bold text-[15px] no-underline shadow-[2px_3px_0_var(--ctl-off),var(--in)]">
+                                <Link to={`/albums?artist=${encodeURIComponent(artist.name)}`} className="ap-btn ap-focus inline-flex items-center gap-2 h-10 px-4 rounded-full border-2 border-(--ink) bg-(--chip) text-(--chip-ink) font-bold text-[15px] no-underline [box-shadow:2px_3px_0_var(--ctl-off),var(--in)]">
                                     {artist.name}
                                 </Link>
                                 {artist.hangul_name && <span lang="ko" className="font-korean font-bold text-base leading-none text-(--muted)">{artist.hangul_name}</span>}
@@ -244,7 +244,7 @@ function Album({ album }: { album: AlbumPageData }) {
                             {all.length > COLLAPSED_ROWS && (
                                 <div className="flex justify-center mt-3.5">
                                     <button type="button" aria-expanded={expanded} onClick={() => setExpanded(!expanded)}
-                                        className="ap-btn ap-focus inline-flex items-center gap-2 h-11 px-[18px] rounded-full border-2 border-(--ink) bg-(--chip) text-(--chip-ink) font-semibold text-[13px] cursor-pointer shadow-[2px_3px_0_var(--ctl-off),var(--in)]">
+                                        className="ap-btn ap-focus inline-flex items-center gap-2 h-11 px-[18px] rounded-full border-2 border-(--ink) bg-(--chip) text-(--chip-ink) font-semibold text-[13px] cursor-pointer [box-shadow:2px_3px_0_var(--ctl-off),var(--in)]">
                                         {expanded ? "Show less" : `Show all ${all.length} releases`}
                                         <ChevronDown aria-hidden className="w-3.5 h-3.5 transition-transform duration-300" strokeWidth={2.5} style={{ transform: expanded ? "rotate(180deg)" : "none" }} />
                                     </button>
@@ -262,7 +262,7 @@ function Album({ album }: { album: AlbumPageData }) {
                                         <div className="ap-cw relative">
                                             <div aria-hidden className="absolute inset-0 rounded-[20px] bg-(--side) border-2 border-(--ink) translate-x-1 translate-y-[5px]" />
                                             <IntentLink to={albumPath(a, artist.name)} aria-label={`${a.name}, ${a.release_year}`}
-                                                className="ap-face ap-focus ap-gpu relative block w-full text-left no-underline bg-(--face) text-(--text) border-2 border-(--ink) rounded-[20px] pt-1.5 px-1.5 pb-[11px] shadow-[var(--face-hl)]">
+                                                className="ap-face ap-focus ap-gpu relative block w-full text-left no-underline bg-(--face) text-(--text) border-2 border-(--ink) rounded-[20px] pt-1.5 px-1.5 pb-[11px] [box-shadow:var(--face-hl)]">
                                                 <div className="relative aspect-square rounded-[14px] border-[1.5px] border-(--ink) overflow-hidden bg-[#DCD6D2]">
                                                     <span aria-hidden className="absolute inset-0 grid place-items-center font-bold text-[32px] leading-none text-[rgba(26,20,24,.28)]">♪</span>
                                                     <img src={resolveCdnUrl(a.cover_path) ?? ""} alt="" loading="lazy" decoding="async" className="ap-mimg relative block w-full h-full object-cover" />
@@ -277,7 +277,7 @@ function Album({ album }: { album: AlbumPageData }) {
                                     <div className="ap-card ap-in-card ap-gpu">
                                         <div className="ap-cw relative h-full">
                                             <Link to="/albums" className="ap-face ap-focus relative box-border flex flex-col items-center justify-center gap-2.5 w-full h-full min-h-40 p-3 no-underline text-center text-(--text) bg-transparent border-2 border-dashed border-(--rule) rounded-[20px]">
-                                                <span className="w-11 h-11 rounded-full border-2 border-(--ink) bg-(--chip) text-(--chip-ink) grid place-items-center shadow-[2px_3px_0_var(--ctl-off),var(--in)]">
+                                                <span className="w-11 h-11 rounded-full border-2 border-(--ink) bg-(--chip) text-(--chip-ink) grid place-items-center [box-shadow:2px_3px_0_var(--ctl-off),var(--in)]">
                                                     <ArrowRight aria-hidden className="w-[18px] h-[18px]" strokeWidth={2.6} />
                                                 </span>
                                                 <span className="font-bold text-[13px] leading-[1.3]">All albums</span>
@@ -303,7 +303,7 @@ function Album({ album }: { album: AlbumPageData }) {
 function PressBack() {
     return (
         <Link to="/albums" aria-label="Back to all albums"
-            className="ap-btn ap-focus w-max box-border inline-flex items-center gap-2 h-9 pr-3.5 pl-2.5 rounded-full border-2 border-(--ink) bg-(--chip) text-(--chip-ink) font-semibold text-[13px] no-underline shadow-[2px_3px_0_var(--ctl-off),var(--in)]">
+            className="ap-btn ap-focus w-max box-border inline-flex items-center gap-2 h-9 pr-3.5 pl-2.5 rounded-full border-2 border-(--ink) bg-(--chip) text-(--chip-ink) font-semibold text-[13px] no-underline [box-shadow:2px_3px_0_var(--ctl-off),var(--in)]">
             <ChevronLeft aria-hidden className="ap-back w-4 h-4" strokeWidth={2.6} />
             All albums
         </Link>

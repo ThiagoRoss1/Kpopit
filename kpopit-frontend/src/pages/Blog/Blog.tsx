@@ -63,7 +63,7 @@ export default function Blog() {
                 <HScrollRow
                     role="group"
                     aria-label="Filter posts"
-                    className="pp-enter [--pp-delay:160ms] flex-wrap justify-center gap-2 mt-[26px] mb-[34px] @max-[580px]:flex-nowrap @max-[580px]:justify-start @max-[580px]:-mx-4 @max-[580px]:px-4 @max-[580px]:pt-0.5 @max-[580px]:pb-2"
+                    className="pp-enter [--pp-delay:160ms] flex-wrap justify-center gap-2 mt-[22px] mb-[30px] pt-1 pb-2 px-1 @min-[581px]:overflow-visible @max-[580px]:flex-nowrap @max-[580px]:justify-start @max-[580px]:-mx-4 @max-[580px]:px-4 @max-[580px]:pt-0.5 @max-[580px]:pb-2"
                 >
                     {[null, ...POST_TAGS].map((t) => {
                         const n = t ? BLOG_POSTS.filter((p) => p.tag === t).length : BLOG_POSTS.length;
@@ -84,11 +84,11 @@ export default function Blog() {
                             key={latest.slug}
                             to={`/blog/${latest.slug}`}
                             data-feat
-                            className="bl-card pp-focus pp-enter [--pp-delay:200ms] block no-underline text-(--face-ink) rounded-[23px] border-2 border-(--ink) bg-(--face) shadow-[var(--card-depth)] p-[22px]"
+                            className="bl-card pp-focus pp-enter [--pp-delay:200ms] block no-underline text-(--face-ink) rounded-[23px] border-2 border-(--ink) bg-(--face) p-[22px]"
                         >
                             <div className="grid grid-cols-[minmax(0,1.1fr)_minmax(0,1fr)] gap-7 items-center @max-[760px]:grid-cols-1 @max-[760px]:gap-[18px]">
                                 <div className="relative -rotate-[1.2deg]">
-                                    <Cover post={latest} className="rounded-[16px] border-[2.5px] shadow-[4px_5px_0_#1A1418]" />
+                                    <Cover post={latest} className="rounded-[16px] border-[2.5px] [box-shadow:4px_5px_0_#1A1418]" />
                                     <span className="absolute z-2 -top-3 -left-2.5 flex gap-1.5">
                                         <Sticker tone="pink" className="text-[11px] px-[11px] py-[5px] -rotate-6">LATEST</Sticker>
                                         {isNew(latest) && <Sticker tone="butter" className="text-[11px] px-[11px] py-[5px] rotate-4 translate-y-[3px]">NEW</Sticker>}
@@ -101,7 +101,7 @@ export default function Blog() {
                                     </div>
                                     <h2 className="m-0 font-bold text-[30px] leading-[1.15] [text-wrap:balance]">{latest.title}</h2>
                                     <p className="m-0 font-normal text-[15.5px] leading-[1.6] text-(--muted) [text-wrap:pretty]">{latest.description}</p>
-                                    <span className="bl-cta mt-1 h-11 px-5 inline-flex items-center gap-2 rounded-full border-2 border-(--ink) bg-[#FF8AC4] text-[#1A1418] font-bold text-sm shadow-[2px_3px_0_var(--ink),var(--in-pink)]">
+                                    <span className="bl-cta mt-1 h-11 px-5 inline-flex items-center gap-2 rounded-full border-2 border-(--ink) bg-[#FF8AC4] text-[#1A1418] font-bold text-sm [box-shadow:2px_3px_0_var(--ink),var(--in-pink)]">
                                         Read the post
                                         <ArrowRight className="bl-arrow w-3.5 h-3.5" strokeWidth={3} aria-hidden />
                                     </span>
@@ -124,9 +124,9 @@ export default function Blog() {
                                             key={post.slug}
                                             to={`/blog/${post.slug}`}
                                             style={{ ["--bl-tilt" as string]: `${i % 2 ? 1 : -1}deg`, ["--pp-delay" as string]: cardDelay(i) }}
-                                            className="bl-card pp-focus pp-enter relative no-underline text-(--face-ink) flex flex-col gap-3 pt-3 px-3 pb-4 rounded-[20px] border-2 border-(--ink) bg-(--face) shadow-[3px_4px_0_var(--ctl-off),var(--in)]"
+                                            className="bl-card pp-focus pp-enter relative no-underline text-(--face-ink) flex flex-col gap-3 pt-3 px-3 pb-4 rounded-[20px] border-2 border-(--ink) bg-(--face)"
                                         >
-                                            <span aria-hidden className="absolute z-2 -top-[13px] right-4 w-[30px] h-[30px] rounded-full border-2 border-[#1A1418] bg-[#FF70B8] grid place-items-center shadow-[2px_3px_0_#1A1418,inset_0_2px_0_rgba(255,255,255,.55)] rotate-[18deg]">
+                                            <span aria-hidden className="absolute z-2 -top-[13px] right-4 w-[30px] h-[30px] rounded-full border-2 border-[#1A1418] bg-[#FF70B8] grid place-items-center [box-shadow:2px_3px_0_#1A1418,inset_0_2px_0_rgba(255,255,255,.55)] rotate-[18deg]">
                                                 <Pin className="w-[15px] h-[15px]" fill="#FFFFFF" stroke="#1A1418" strokeWidth={2.2} />
                                             </span>
                                             <Cover post={post} ratio="aspect-[16/8]" className="rounded-[13px]" />
@@ -150,11 +150,11 @@ export default function Blog() {
                                     key={post.slug}
                                     to={`/blog/${post.slug}`}
                                     style={{ ["--bl-tilt" as string]: `${i % 2 ? 0.5 : -0.5}deg`, ["--pp-delay" as string]: cardDelay(i) }}
-                                    className="bl-card pp-focus pp-enter no-underline text-(--face-ink) rounded-[22px] border-2 border-(--ink) bg-(--face) shadow-[3px_4px_0_var(--ctl-off),var(--in)] p-4"
+                                    className="bl-card pp-focus pp-enter no-underline text-(--face-ink) rounded-[22px] border-2 border-(--ink) bg-(--face) p-4"
                                 >
                                     <div className="grid grid-cols-2 gap-6 items-center @max-[760px]:grid-cols-1 @max-[760px]:gap-4">
                                         <div className="relative">
-                                            <Cover post={post} className="rounded-[14px] shadow-[3px_4px_0_#1A1418]" />
+                                            <Cover post={post} className="rounded-[14px] [box-shadow:3px_4px_0_#1A1418]" />
                                             {isNew(post) && <Sticker tone="butter" className="absolute z-2 -top-2.5 -left-2 -rotate-6">NEW</Sticker>}
                                         </div>
                                         <div className="flex flex-col gap-2.5 items-start min-w-0">
@@ -174,7 +174,7 @@ export default function Blog() {
                             ))}
                             {years.map((group) => (
                                 <div key={group.year} className="flex flex-col gap-3.5">
-                                    <span className="self-start mt-1.5 mb-0.5 px-3 py-1 rounded-[10px] border-2 border-[#1A1418] bg-[#FF8AC4] text-[#1A1418] font-bold text-[15px] leading-none shadow-[2px_3px_0_#1A1418,inset_0_2px_0_rgba(255,255,255,.5)] -rotate-3">
+                                    <span className="self-start mt-1.5 mb-0.5 px-3 py-1 rounded-[10px] border-2 border-[#1A1418] bg-[#FF8AC4] text-[#1A1418] font-bold text-[15px] leading-none [box-shadow:2px_3px_0_#1A1418,inset_0_2px_0_rgba(255,255,255,.5)] -rotate-3">
                                         {group.year}
                                     </span>
                                     {group.posts.map((post, i) => (
@@ -182,7 +182,7 @@ export default function Blog() {
                                             key={post.slug}
                                             to={`/blog/${post.slug}`}
                                             style={{ ["--bl-tilt" as string]: `${i % 2 ? 0.35 : -0.35}deg`, ["--pp-delay" as string]: cardDelay(i + 2) }}
-                                            className="bl-card pp-focus pp-enter no-underline text-(--face-ink) grid grid-cols-[176px_minmax(0,1fr)_auto] gap-5 items-center p-3 rounded-[20px] border-2 border-(--ink) bg-(--face) shadow-[3px_4px_0_var(--ctl-off),var(--in)] @max-[580px]:grid-cols-[92px_minmax(0,1fr)] @max-[580px]:gap-3.5"
+                                            className="bl-card pp-focus pp-enter no-underline text-(--face-ink) grid grid-cols-[176px_minmax(0,1fr)_auto] gap-5 items-center p-3 rounded-[20px] border-2 border-(--ink) bg-(--face) [box-shadow:3px_4px_0_var(--ctl-off),var(--in)] @max-[580px]:grid-cols-[92px_minmax(0,1fr)] @max-[580px]:gap-3.5"
                                         >
                                             <div className="relative">
                                                 <Cover post={post} className="rounded-[13px] @max-[580px]:aspect-square" />
@@ -196,7 +196,7 @@ export default function Blog() {
                                                 <h3 className="m-0 font-bold text-[19px] @max-[580px]:text-base leading-[1.25] [text-wrap:pretty]">{post.title}</h3>
                                                 <p className="m-0 line-clamp-2 font-normal text-[13.5px] leading-[1.55] text-(--muted) @max-[580px]:hidden">{post.description}</p>
                                             </div>
-                                            <span aria-hidden className="grid place-items-center w-10 h-10 mr-1.5 rounded-full border-2 border-(--ink) bg-(--chip) text-(--chip-ink) shadow-[2px_3px_0_var(--ctl-off),var(--in)] @max-[580px]:hidden">
+                                            <span aria-hidden className="grid place-items-center w-10 h-10 mr-1.5 rounded-full border-2 border-(--ink) bg-(--chip) text-(--chip-ink) [box-shadow:2px_3px_0_var(--ctl-off),var(--in)] @max-[580px]:hidden">
                                                 <ArrowRight className="bl-arrow w-[15px] h-[15px]" strokeWidth={3} />
                                             </span>
                                         </IntentLink>

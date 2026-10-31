@@ -7,9 +7,9 @@ import { resolveCdnUrl } from "../../utils/imageUrl";
 import type { HistoryEntry } from "../../interfaces/playerInterfaces";
 import { modeById, modeName, relativeDay, type ModeFilter } from "./profileData";
 
-const ROW = "up-row grid grid-cols-[44px_minmax(0,1fr)_auto] gap-3 items-center py-2 px-2.5 rounded-2xl border-2 border-(--ink) bg-(--chip) shadow-[2px_3px_0_var(--ctl-off),var(--in)]";
+const ROW = "up-row grid grid-cols-[44px_minmax(0,1fr)_auto] gap-3 items-center py-2 px-2.5 rounded-2xl border-2 border-(--ink) bg-(--chip) [box-shadow:2px_3px_0_var(--ctl-off),var(--in)]";
 const THUMB = "w-11 h-11 box-border rounded-xl border-2 border-[#1A1418] overflow-hidden bg-[#FFE3F1] grid place-items-center font-bold text-lg text-[#1A1418]";
-const RESULT = "py-1 px-2.5 rounded-full border-[1.5px] border-[#1A1418] text-[#1A1418] font-bold text-[11px] whitespace-nowrap shadow-[inset_0_2px_0_rgba(255,255,255,.6),2px_2.5px_0_#1A1418] no-underline";
+const RESULT = "py-1 px-2.5 rounded-full border-[1.5px] border-[#1A1418] text-[#1A1418] font-bold text-[11px] whitespace-nowrap [box-shadow:inset_0_2px_0_rgba(255,255,255,.6),2px_2.5px_0_#1A1418] no-underline";
 
 export default function ProfileHistory({ username, viewerKey, filter, isOwner, hiddenFromVisitors, today }: {
     username: string;
@@ -34,7 +34,7 @@ export default function ProfileHistory({ username, viewerKey, filter, isOwner, h
         : "You only see the answers of days you finished. Locked days wait for you in the calendar.";
 
     return (
-        <section className="up-pane bg-(--face) text-(--face-ink) border-2 border-(--ink) rounded-[23px] shadow-[var(--card-depth)] py-5 px-[22px] flex flex-col gap-3.5 min-w-0">
+        <section className="up-pane bg-(--face) text-(--face-ink) border-2 border-(--ink) rounded-[23px] [box-shadow:var(--card-depth)] py-5 px-[22px] flex flex-col gap-3.5 min-w-0">
             <div className="flex items-baseline gap-2 flex-wrap">
                 <h2 className="m-0 font-bold text-lg leading-[1.2]">Game history</h2>
                 <span className="ml-auto font-medium text-xs text-(--muted)">{modeName(filter)}</span>

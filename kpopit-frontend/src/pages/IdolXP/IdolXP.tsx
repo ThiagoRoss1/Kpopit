@@ -23,8 +23,8 @@ import {
 import "./idolXp.css";
 
 const LABEL = "font-semibold text-[11px] tracking-[.14em]";
-const CARD_SHADOW = "shadow-[2px_3px_0_var(--ctl-off),var(--in)]";
-const PICKED_SHADOW = "shadow-[4px_5px_0_0_#FF8AC4,4px_5px_0_2px_var(--ink),var(--in)]";
+const CARD_SHADOW = "[box-shadow:2px_3px_0_var(--ctl-off),var(--in)]";
+const PICKED_SHADOW = "[box-shadow:4px_5px_0_0_#FF8AC4,4px_5px_0_2px_var(--ink),var(--in)]";
 const imageOf = (idol: Pick<XpIdol, "imagePath" | "imageVersion">) => resolveCdnUrl(idol.imagePath, idol.imageVersion) ?? "";
 
 export default function IdolXP() {
@@ -84,7 +84,7 @@ function GuestView({ potion }: { potion: IdolXpState["potion"] }) {
             <PuffCard className="pp-enter [--pp-delay:140ms] grid grid-cols-[240px_minmax(0,1fr)] gap-9 items-center px-10 py-[34px] @max-[760px]:grid-cols-1 @max-[760px]:gap-6 @max-[760px]:px-5 @max-[760px]:py-6">
                 <div className="flex flex-col items-center gap-4">
                     <PotionJar fill={filled ? potion.xp / potion.cap : 0} className="block w-[130px] h-auto" />
-                    <span className="px-3 py-[5px] rounded-full border-2 border-[#1A1418] bg-[#FFE3F1] text-[#1A1418] font-bold text-[13px] shadow-[2px_3px_0_#1A1418] -rotate-2">
+                    <span className="px-3 py-[5px] rounded-full border-2 border-[#1A1418] bg-[#FFE3F1] text-[#1A1418] font-bold text-[13px] [box-shadow:2px_3px_0_#1A1418] -rotate-2">
                         {potion.xp} / {potion.cap} XP
                     </span>
                 </div>
@@ -153,7 +153,7 @@ function HowXpWorks() {
                 How XP works
             </PressButton>
             {open && (
-                <div role="dialog" aria-label="How XP works" className="xp-pop absolute top-[calc(100%+12px)] left-1/2 -ml-40 w-80 box-border rounded-[23px] border-2 border-(--ink) bg-(--menu-bg) text-(--chip-ink) shadow-[var(--card-depth)] p-4 flex flex-col gap-3 origin-top">
+                <div role="dialog" aria-label="How XP works" className="xp-pop absolute top-[calc(100%+12px)] left-1/2 -ml-40 w-80 box-border rounded-[23px] border-2 border-(--ink) bg-(--menu-bg) text-(--chip-ink) [box-shadow:var(--card-depth)] p-4 flex flex-col gap-3 origin-top">
                     <div className="flex items-center justify-between gap-3">
                         <span className="font-bold text-lg">How XP works</span>
                         <PressButton aria-label="Close" className="w-9 h-9 p-0" onClick={() => setOpen(false)}><X size={14} strokeWidth={3} /></PressButton>
@@ -267,13 +267,13 @@ function MemberView({ state, stateKey, idols: list, username }: {
                     <div className="flex items-center gap-5 @max-[580px]:gap-4">
                         <div className="relative flex-none w-[130px] -rotate-2 @max-[580px]:w-[92px]">
                             {current ? (
-                                <img src={imageOf(current)} alt={current.name} className="block w-[130px] h-[130px] object-cover rounded-[18px] border-[2.5px] border-[#1A1418] shadow-[4px_5px_0_#1A1418] @max-[580px]:w-[92px] @max-[580px]:h-[92px]" />
+                                <img src={imageOf(current)} alt={current.name} className="block w-[130px] h-[130px] object-cover rounded-[18px] border-[2.5px] border-[#1A1418] [box-shadow:4px_5px_0_#1A1418] @max-[580px]:w-[92px] @max-[580px]:h-[92px]" />
                             ) : (
                                 <div className="w-[130px] h-[130px] rounded-[18px] border-[2.5px] border-dashed border-(--rule) bg-(--panel) @max-[580px]:w-[92px] @max-[580px]:h-[92px]" />
                             )}
-                            {current && <LevelBadge idol={current} className="absolute -right-3 -bottom-2.5 px-2.5 py-1 text-[13px] shadow-[2px_3px_0_#1A1418] -rotate-3" />}
+                            {current && <LevelBadge idol={current} className="absolute -right-3 -bottom-2.5 px-2.5 py-1 text-[13px] [box-shadow:2px_3px_0_#1A1418] -rotate-3" />}
                             {levelUp > 0 && (
-                                <span key={levelUp} className="xp-levelup absolute -left-3.5 -top-3.5 px-[11px] py-[5px] rounded-full border-2 border-[#1A1418] bg-[#FF70B8] text-white [text-shadow:var(--tag-text)] font-bold text-xs shadow-[2px_3px_0_#1A1418]">
+                                <span key={levelUp} className="xp-levelup absolute -left-3.5 -top-3.5 px-[11px] py-[5px] rounded-full border-2 border-[#1A1418] bg-[#FF70B8] text-white [text-shadow:var(--tag-text)] font-bold text-xs [box-shadow:2px_3px_0_#1A1418]">
                                     LEVEL UP!
                                 </span>
                             )}
@@ -307,7 +307,7 @@ function MemberView({ state, stateKey, idols: list, username }: {
                     </div>
                 </PuffCard>
 
-                <div className="rounded-[23px] border-2 border-(--ink) bg-(--face) text-(--face-ink) shadow-[3px_4px_0_var(--ctl-off),var(--in)] px-5 py-[18px] flex flex-col items-center gap-3 text-center @max-[580px]:grid @max-[580px]:grid-cols-[64px_minmax(0,1fr)] @max-[580px]:items-center @max-[580px]:text-left @max-[580px]:gap-x-3.5">
+                <div className="rounded-[23px] border-2 border-(--ink) bg-(--face) text-(--face-ink) [box-shadow:3px_4px_0_var(--ctl-off),var(--in)] px-5 py-[18px] flex flex-col items-center gap-3 text-center @max-[580px]:grid @max-[580px]:grid-cols-[64px_minmax(0,1fr)] @max-[580px]:items-center @max-[580px]:text-left @max-[580px]:gap-x-3.5">
                     <span className={cn(LABEL, "self-stretch flex justify-between text-(--muted) @max-[580px]:col-span-full")}>
                         POTION<span className="text-(--group)">{potion.xp} / {potion.cap}</span>
                     </span>
@@ -352,7 +352,7 @@ function MemberView({ state, stateKey, idols: list, username }: {
                         <ArrowUpDown size={16} strokeWidth={2.8} />
                         <span>{sort === "level" && <span className="@max-[580px]:hidden">By </span>}{sort === "az" ? "A–Z" : "Level"}</span>
                     </PressButton>
-                    <label className="xp-search box-border flex-none w-[260px] max-w-full h-11 flex items-center gap-2.5 pl-3.5 pr-1.5 rounded-[14px] bg-(--chip) text-(--chip-ink) border-2 border-(--ink) shadow-[3px_4px_0_var(--ctl-off),var(--in)] @max-[580px]:flex-1 @max-[580px]:w-auto @max-[580px]:min-w-0">
+                    <label className="xp-search box-border flex-none w-[260px] max-w-full h-11 flex items-center gap-2.5 pl-3.5 pr-1.5 rounded-[14px] bg-(--chip) text-(--chip-ink) border-2 border-(--ink) [box-shadow:3px_4px_0_var(--ctl-off),var(--in)] @max-[580px]:flex-1 @max-[580px]:w-auto @max-[580px]:min-w-0">
                         <Search size={18} strokeWidth={2.6} className="shrink-0" />
                         <input
                             type="search"
@@ -395,7 +395,7 @@ function MemberView({ state, stateKey, idols: list, username }: {
 
             {pendingIdol && (
                 <div className="fixed inset-x-0 bottom-[22px] z-55 flex justify-center px-4 pointer-events-none">
-                    <div role="dialog" aria-label="Switch idol" className="xp-pop pointer-events-auto flex items-center gap-3.5 flex-wrap justify-center py-2.5 pr-2.5 pl-3 rounded-full border-2 border-(--ink) bg-(--menu-bg) text-(--chip-ink) shadow-[3px_4px_0_var(--ctl-off),var(--in)]">
+                    <div role="dialog" aria-label="Switch idol" className="xp-pop pointer-events-auto flex items-center gap-3.5 flex-wrap justify-center py-2.5 pr-2.5 pl-3 rounded-full border-2 border-(--ink) bg-(--menu-bg) text-(--chip-ink) [box-shadow:3px_4px_0_var(--ctl-off),var(--in)]">
                         <img src={imageOf(pendingIdol)} alt="" className="w-10 h-10 rounded-full border-2 border-[#1A1418] object-cover" />
                         <span className="flex flex-col">
                             <span className="font-bold text-sm">Level up {pendingIdol.name}?</span>
@@ -494,7 +494,7 @@ function XpCard({ idol, index, isCurrent, isPending, favourite, filled, onPick, 
                 <span className="xp-bar block h-full bg-[#FF8AC4]" style={{ transform: `scaleX(${filled ? idol.progress : 0})` }} />
             </span>
             {isCurrent && (
-                <span className="absolute right-3 -top-[9px] pt-[3px] pb-1 px-2.5 rounded-full border-2 border-[#1A1418] bg-[#FF70B8] text-white [text-shadow:var(--tag-text)] font-bold text-[10px] tracking-[.06em] shadow-[inset_0_2px_0_rgba(255,255,255,.55),inset_0_-2px_0_rgba(198,35,104,.3),2px_2.5px_0_#1A1418] rotate-3">
+                <span className="absolute right-3 -top-[9px] pt-[3px] pb-1 px-2.5 rounded-full border-2 border-[#1A1418] bg-[#FF70B8] text-white [text-shadow:var(--tag-text)] font-bold text-[10px] tracking-[.06em] [box-shadow:inset_0_2px_0_rgba(255,255,255,.55),inset_0_-2px_0_rgba(198,35,104,.3),2px_2.5px_0_#1A1418] rotate-3">
                     NOW
                 </span>
             )}

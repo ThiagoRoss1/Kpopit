@@ -125,12 +125,12 @@ function CalendarView({ data }: { data: CalendarTimeline }) {
                     <header className="pp-enter [--pp-anim:puffDrop] flex flex-col items-center gap-2.5 pt-1 pb-[30px] text-center">
                         <div className="flex items-center gap-3">
                             <PuffTitle className="text-(length:--title-fs) leading-none pb-0">Calendar</PuffTitle>
-                            <span lang="ko" className="cal-ko flex-none whitespace-nowrap px-[9px] py-0.5 rounded-[8px] border-2 border-(--ink) bg-(--face) text-(--face-ink) font-korean font-semibold text-xs rotate-4 shadow-[2px_3px_0_var(--ctl-off)]">달력</span>
+                            <span lang="ko" className="cal-ko flex-none whitespace-nowrap px-[9px] py-0.5 rounded-[8px] border-2 border-(--ink) bg-(--face) text-(--face-ink) font-korean font-semibold text-xs rotate-4 [box-shadow:2px_3px_0_var(--ctl-off)]">달력</span>
                         </div>
                         <span className="font-medium text-sm leading-[1.4] text-(--muted) [text-wrap:pretty]">
                             {`${doneCount} of ${total} ${modeInfo.name.toLowerCase()} days guessed, back to Day 1 on ${formatLong(first)}`}
                         </span>
-                        <div role="progressbar" aria-label="Days guessed" aria-valuenow={pct} aria-valuemin={0} aria-valuemax={100} className="relative w-[min(280px,100%)] h-3 rounded-full border-2 border-(--ink) bg-(--panel) overflow-hidden shadow-[var(--in)]">
+                        <div role="progressbar" aria-label="Days guessed" aria-valuenow={pct} aria-valuemin={0} aria-valuemax={100} className="relative w-[min(280px,100%)] h-3 rounded-full border-2 border-(--ink) bg-(--panel) overflow-hidden [box-shadow:var(--in)]">
                             <div className="cal-fill cal-fill-in absolute inset-0 rounded-full bg-(--side)" style={{ transform: `translate3d(${pct - 100}%,0,0)` }} />
                         </div>
                     </header>
@@ -154,8 +154,8 @@ function CalendarView({ data }: { data: CalendarTimeline }) {
                                 );
                             })}
                         </div>
-                        <div role="tablist" aria-label="View" className="relative flex-(--sw-flex) grid grid-cols-2 p-(--sw-p) rounded-full border-2 border-(--ink) bg-(--chip) shadow-[2px_3px_0_var(--ctl-off),var(--in)]">
-                            <span aria-hidden className="cal-slide cal-gpu absolute top-(--sw-p) bottom-(--sw-p) left-(--sw-p) w-[calc(50%-var(--sw-p))] rounded-full bg-(--side) border-2 border-(--ink) shadow-[var(--in-pink)]" style={{ transform: `translate3d(${view === "timeline" ? "100%" : "0%"},0,0)` }} />
+                        <div role="tablist" aria-label="View" className="relative flex-(--sw-flex) grid grid-cols-2 p-(--sw-p) rounded-full border-2 border-(--ink) bg-(--chip) [box-shadow:2px_3px_0_var(--ctl-off),var(--in)]">
+                            <span aria-hidden className="cal-slide cal-gpu absolute top-(--sw-p) bottom-(--sw-p) left-(--sw-p) w-[calc(50%-var(--sw-p))] rounded-full bg-(--side) border-2 border-(--ink) [box-shadow:var(--in-pink)]" style={{ transform: `translate3d(${view === "timeline" ? "100%" : "0%"},0,0)` }} />
                             {([["month", "Month", CalendarDays], ["timeline", "Timeline", List]] as const).map(([v, label, Icon]) => (
                                 <button key={v} type="button" role="tab" aria-selected={view === v} onClick={() => { setView(v); setPicker(null); }}
                                     className="cal-focus relative z-1 cursor-pointer h-(--sw-h) rounded-full flex items-center justify-center gap-[7px] font-bold text-[13px] transition-colors duration-300"
@@ -172,7 +172,7 @@ function CalendarView({ data }: { data: CalendarTimeline }) {
                             {view === "month" ? (
                                 <>
                                     <div className="flex items-center gap-3">
-                                        <button type="button" className="cal-btn cal-focus flex-none grid place-items-center w-10 h-10 p-0 rounded-full border-2 border-(--ink) bg-(--chip) text-(--chip-ink) shadow-[2px_3px_0_var(--ctl-off),var(--in)] cursor-pointer disabled:opacity-35 disabled:cursor-default"
+                                        <button type="button" className="cal-btn cal-focus flex-none grid place-items-center w-10 h-10 p-0 rounded-full border-2 border-(--ink) bg-(--chip) text-(--chip-ink) [box-shadow:2px_3px_0_var(--ctl-off),var(--in)] cursor-pointer disabled:opacity-35 disabled:cursor-default"
                                             onClick={() => goMonth(mi - 1)} disabled={mi <= firstMi} aria-label="Previous month">
                                             <ChevronLeft className="w-[18px] h-[18px]" strokeWidth={3} />
                                         </button>
@@ -182,7 +182,7 @@ function CalendarView({ data }: { data: CalendarTimeline }) {
                                             <ChevronDown className="cal-chev w-4 h-4" strokeWidth={3} aria-hidden />
                                             <span className="[display:var(--mcount)] ml-auto font-medium text-[13px] text-(--muted) whitespace-nowrap">{`${played} guessed · ${open} open`}</span>
                                         </button>
-                                        <button type="button" className="cal-btn cal-focus flex-none grid place-items-center w-10 h-10 p-0 rounded-full border-2 border-(--ink) bg-(--chip) text-(--chip-ink) shadow-[2px_3px_0_var(--ctl-off),var(--in)] cursor-pointer disabled:opacity-35 disabled:cursor-default"
+                                        <button type="button" className="cal-btn cal-focus flex-none grid place-items-center w-10 h-10 p-0 rounded-full border-2 border-(--ink) bg-(--chip) text-(--chip-ink) [box-shadow:2px_3px_0_var(--ctl-off),var(--in)] cursor-pointer disabled:opacity-35 disabled:cursor-default"
                                             onClick={() => goMonth(mi + 1)} disabled={mi >= lastMi} aria-label="Next month">
                                             <ChevronRight className="w-[18px] h-[18px]" strokeWidth={3} />
                                         </button>
@@ -201,7 +201,7 @@ function CalendarView({ data }: { data: CalendarTimeline }) {
                                         {monthDays.map((d, i) => <DayCell key={d.date} d={d} index={i} selected={d.date === selected} mode={mode} onPick={select} />)}
                                     </div>
                                     <div role="grid" aria-label={`${MONTHS[mi % 12]} ${Math.floor(mi / 12)}`} onKeyDown={onGridKey}
-                                        className="[display:var(--dotg)] grid-cols-[repeat(7,minmax(0,1fr))] gap-1 rounded-[23px] border-2 border-(--ink) bg-(--face) shadow-[4px_4px_0_0_var(--side),4px_4px_0_2px_var(--ink)] py-3 px-2.5">
+                                        className="[display:var(--dotg)] grid-cols-[repeat(7,minmax(0,1fr))] gap-1 rounded-[23px] border-2 border-(--ink) bg-(--face) [box-shadow:4px_4px_0_0_var(--side),4px_4px_0_2px_var(--ink)] py-3 px-2.5">
                                         {WEEKDAYS_SHORT.map((w, i) => <span key={i} className="text-center font-semibold text-[11px] text-(--muted) pb-1">{w}</span>)}
                                         {Array.from({ length: lead }, (_, i) => <span key={`lead-${i}`} aria-hidden />)}
                                         {monthDays.map((d) => <DotCell key={d.date} d={d} selected={d.date === selected} today={today} mode={mode} onPick={select} />)}
@@ -419,8 +419,8 @@ function TimelineView({ days, selected, mode, order, setOrder, extra, setExtra, 
                         </button>
                     )}
                 </div>
-                <div className="relative w-(--ord-w) grid grid-cols-2 p-[3px] rounded-full border-2 border-(--ink) bg-(--chip) shadow-[2px_3px_0_var(--ctl-off),var(--in)]">
-                    <span aria-hidden className="cal-slide cal-gpu absolute top-[3px] bottom-[3px] left-[3px] w-[calc(50%-3px)] rounded-full bg-(--side) border-2 border-(--ink) shadow-[var(--in-pink)]" style={{ transform: `translate3d(${order === "old" ? "100%" : "0%"},0,0)` }} />
+                <div className="relative w-(--ord-w) grid grid-cols-2 p-[3px] rounded-full border-2 border-(--ink) bg-(--chip) [box-shadow:2px_3px_0_var(--ctl-off),var(--in)]">
+                    <span aria-hidden className="cal-slide cal-gpu absolute top-[3px] bottom-[3px] left-[3px] w-[calc(50%-3px)] rounded-full bg-(--side) border-2 border-(--ink) [box-shadow:var(--in-pink)]" style={{ transform: `translate3d(${order === "old" ? "100%" : "0%"},0,0)` }} />
                     {([["new", "Newest first"], ["old", "From Day 1"]] as const).map(([k, label]) => (
                         <button key={k} type="button" aria-pressed={order === k} onClick={() => setOrder(k)}
                             className="cal-focus relative z-1 cursor-pointer h-(--ord-h) px-3.5 rounded-full flex items-center justify-center whitespace-nowrap font-bold text-xs transition-colors duration-300"
@@ -541,14 +541,14 @@ function DayPanel({ d, mode }: { d: CalendarDay; mode: CalendarMode }) {
             style={{ filter: g.correct ? "none" : "grayscale(1) contrast(.9)", boxShadow: g.correct ? "0 0 0 3px #22C55E" : "none", animationDelay: `${140 + i * 70}ms` }} />
     ));
     const ctaButton = cta && (
-        <Link to={cta.to} className="cal-cta cal-focus h-12 rounded-full border-2 border-(--ink) shadow-[0_4px_0_var(--ink)] flex items-center justify-center font-bold text-base text-[#1A1418] no-underline" style={{ background: cta.bg }}>
+        <Link to={cta.to} className="cal-cta cal-focus h-12 rounded-full border-2 border-(--ink) [box-shadow:0_4px_0_var(--ink)] flex items-center justify-center font-bold text-base text-[#1A1418] no-underline" style={{ background: cta.bg }}>
             {cta.label}
         </Link>
     );
 
     return (
         <>
-            <aside aria-live="polite" aria-label={`${dayLabel}, ${formatLong(d.date)}`} className="[display:var(--big)] flex-col sticky top-[80px] rounded-[23px] border-2 border-(--ink) bg-(--face) text-(--face-ink) shadow-[5px_5px_0_0_var(--side),5px_5px_0_2px_var(--ink)] p-5">
+            <aside aria-live="polite" aria-label={`${dayLabel}, ${formatLong(d.date)}`} className="[display:var(--big)] flex-col sticky top-[80px] rounded-[23px] border-2 border-(--ink) bg-(--face) text-(--face-ink) [box-shadow:5px_5px_0_0_var(--side),5px_5px_0_2px_var(--ink)] p-5">
                 <div className="cal-pbody flex flex-col gap-4">
                     <div className="flex items-center gap-2">
                         <span className="py-[3px] px-2.5 rounded-full bg-(--tag) border-2 border-(--ink) font-bold text-xs text-white [text-shadow:var(--tag-text)]">{dayLabel}</span>
@@ -601,7 +601,7 @@ function DayPanel({ d, mode }: { d: CalendarDay; mode: CalendarMode }) {
                 </div>
             </aside>
 
-            <aside aria-live="polite" aria-label={`${dayLabel}, ${formatShort(d.date)}`} className="[display:var(--compact)] flex-col rounded-[23px] border-2 border-(--ink) bg-(--face) text-(--face-ink) shadow-[4px_5px_0_var(--ctl-off)] p-3.5">
+            <aside aria-live="polite" aria-label={`${dayLabel}, ${formatShort(d.date)}`} className="[display:var(--compact)] flex-col rounded-[23px] border-2 border-(--ink) bg-(--face) text-(--face-ink) [box-shadow:4px_5px_0_var(--ctl-off)] p-3.5">
                 <div className="cal-pbody flex flex-col gap-3">
                     <div className="flex gap-3 items-center">
                         <div className="relative w-[84px] h-[84px] flex-none rounded-[16px] border-2 border-(--ink) overflow-hidden grid place-items-center" style={{ background: done ? "var(--panel)" : "var(--chip-hover)" }}>

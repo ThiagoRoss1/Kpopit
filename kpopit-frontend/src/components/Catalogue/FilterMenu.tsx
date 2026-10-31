@@ -65,7 +65,7 @@ export default function FilterMenu({ title, label, value, options, onPick, minWi
                 <div
                     role="menu"
                     aria-label={title}
-                    className={cn("cg-menu cg-gpu absolute top-[calc(var(--cg-ctl-h)+12px)] w-[248px] z-20 bg-(--menu-bg) text-(--chip-ink) border-2 border-(--ink) rounded-[20px] overflow-hidden shadow-[4px_5px_0_var(--ctl-off),0_16px_32px_rgba(var(--sh),.16),var(--in)]", align === "right" ? "right-0 origin-top-right" : "left-0 origin-top-left")}
+                    className={cn("cg-menu cg-gpu absolute top-[calc(var(--cg-ctl-h)+12px)] w-[248px] z-20 bg-(--menu-bg) text-(--chip-ink) border-2 border-(--ink) rounded-[20px] overflow-hidden [box-shadow:4px_5px_0_var(--ctl-off),0_16px_32px_rgba(var(--sh),.16),var(--in)]", align === "right" ? "right-0 origin-top-right" : "left-0 origin-top-left")}
                 >
                     <div className="flex items-center justify-between gap-2.5 pt-3 px-4 pb-2.5 border-b-[1.5px] border-dashed border-(--rule) font-bold text-[11px] leading-none tracking-[.12em] text-(--muted)">
                         <span>{title}</span>
@@ -93,7 +93,7 @@ export default function FilterMenu({ title, label, value, options, onPick, minWi
                                     {o.icon}
                                     <span className="flex-1 min-w-0 overflow-hidden text-ellipsis whitespace-nowrap">{o.label}</span>
                                     {o.count !== undefined && (
-                                        <span className="flex-none min-w-6 h-5 px-[7px] inline-grid place-items-center rounded-full bg-white text-[#1A1418] border-[1.5px] border-[#1A1418] shadow-[1px_1.5px_0_#1A1418,inset_0_1.5px_0_rgba(255,255,255,.7)] font-bold text-[11px] leading-none">{o.count}</span>
+                                        <span className="flex-none min-w-6 h-5 px-[7px] inline-grid place-items-center rounded-full bg-white text-[#1A1418] border-[1.5px] border-[#1A1418] [box-shadow:1px_1.5px_0_#1A1418,inset_0_1.5px_0_rgba(255,255,255,.7)] font-bold text-[11px] leading-none">{o.count}</span>
                                     )}
                                 </button>
                             );

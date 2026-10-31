@@ -5,7 +5,7 @@ import { TAG_BG } from "./blogData";
 export function TagChip({ tag, className }: { tag: PostTag; className?: string }) {
     return (
         <span
-            className={cn("inline-flex px-2.5 py-[3px] rounded-full border-[1.5px] border-[#1A1418] text-[#1A1418] font-bold text-[10px] tracking-[.08em] shadow-[inset_0_2px_0_rgba(255,255,255,.6),2px_2.5px_0_#1A1418]", className)}
+            className={cn("inline-flex px-2.5 py-[3px] rounded-full border-[1.5px] border-[#1A1418] text-[#1A1418] font-bold text-[10px] tracking-[.08em] [box-shadow:inset_0_2px_0_rgba(255,255,255,.6),2px_2.5px_0_#1A1418]", className)}
             style={{ background: TAG_BG[tag] }}
         >
             {tag.toUpperCase()}
@@ -17,7 +17,7 @@ export function Sticker({ children, tone, className }: { children: string; tone:
     return (
         <span
             className={cn(
-                "px-2.5 py-1 rounded-full border-2 border-[#1A1418] font-bold text-[10.5px] tracking-[.08em] shadow-[inset_0_2px_0_rgba(255,255,255,.55),2px_3px_0_#1A1418]",
+                "px-2.5 py-1 rounded-full border-2 border-[#1A1418] font-bold text-[10.5px] tracking-[.08em] [box-shadow:inset_0_2px_0_rgba(255,255,255,.55),2px_3px_0_#1A1418]",
                 tone === "pink" ? "bg-[#FF70B8] text-white [text-shadow:var(--tag-text)]" : "bg-[#FFD64F] text-[#1A1418]",
                 className,
             )}

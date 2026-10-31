@@ -77,13 +77,13 @@ export default function NavBarV2({ forceTheme }: { forceTheme?: "night" | "day" 
         >
             <nav
                 aria-label="Main"
-                className="relative z-30 flex items-center gap-3.5 h-[60px] px-6 @max-[1100px]:px-5 @max-[760px]:h-[54px] @max-[760px]:px-3 bg-(--bar) border-b-2 border-(--bar-line) shadow-[var(--bar-sh)] text-(--text)"
+                className="relative z-30 flex items-center gap-3.5 h-[60px] px-6 @max-[1100px]:px-5 @max-[760px]:h-[54px] @max-[760px]:px-3 bg-(--bar) border-b-2 border-(--bar-line) [box-shadow:var(--bar-sh)] text-(--text)"
             >
                 <Link to="/" aria-label="KpopIt home" className="nb-logo pp-focus flex min-w-0 items-center gap-2 no-underline">
                     <img src="/kpopit-icon-svg.svg" alt="" width={36} height={36} className="block flex-none w-9 h-9" draggable={false} />
                     {page && (
                         <span className="flex min-w-0 items-center gap-[7px] -rotate-2 pt-0 pr-[5px] pb-[5px] pl-0.5 @max-[960px]:@min-[761px]:hidden @max-[374px]:hidden">
-                            <span aria-hidden className="flex-none w-2.5 h-2.5 rounded-full bg-[#FF3399] border-2 border-(--ink) shadow-[1.5px_2px_0_var(--ink)]" />
+                            <span aria-hidden className="flex-none w-2.5 h-2.5 rounded-full bg-[#FF3399] border-2 border-(--ink) [box-shadow:1.5px_2px_0_var(--ink)]" />
                             <span className="min-w-0 truncate pt-1 pr-2 pb-2 pl-0.5 -mb-1 font-bold text-[19px] @max-[1100px]:text-[17px] leading-none text-white whitespace-nowrap [text-shadow:var(--puff-wm)]">
                                 {PAGE_LABEL[page]}
                             </span>
@@ -100,8 +100,8 @@ export default function NavBarV2({ forceTheme }: { forceTheme?: "night" | "day" 
                         const st = isCur ? "cur" : isOpen ? "open" : "idle";
                         const look = cn(
                             "nb-item pp-focus box-border inline-flex items-center h-9 rounded-full border-2 font-bold text-sm no-underline cursor-pointer",
-                            isCur ? "bg-(--side) border-(--ink) text-[#1A1418] shadow-[2px_3px_0_var(--ctl-off),var(--in-pink)]"
-                                : isOpen ? "bg-(--chip) border-(--ink) text-(--text) shadow-[2px_3px_0_var(--ctl-off),var(--in)]"
+                            isCur ? "bg-(--side) border-(--ink) text-[#1A1418] [box-shadow:2px_3px_0_var(--ctl-off),var(--in-pink)]"
+                                : isOpen ? "bg-(--chip) border-(--ink) text-(--text) [box-shadow:2px_3px_0_var(--ctl-off),var(--in)]"
                                     : "bg-transparent border-transparent text-(--muted)",
                         );
                         if (link.to) {
@@ -182,13 +182,13 @@ function Tile({ row, size }: { row: NavRow; size: "lg" | "sm" }) {
     if (row.icon) {
         const Icon = row.icon;
         return (
-            <span className={cn("nb-tile flex-none grid place-items-center box-border border-2 border-[#1A1418] bg-(--tile) shadow-[var(--tile-in)]", size === "lg" ? "w-11 h-11 rounded-[13px] shadow-[2px_2.5px_0_#1A1418,var(--tile-in)]" : "w-[34px] h-[34px] rounded-[11px]")}>
+            <span className={cn("nb-tile flex-none grid place-items-center box-border border-2 border-[#1A1418] bg-(--tile) [box-shadow:var(--tile-in)]", size === "lg" ? "w-11 h-11 rounded-[13px] [box-shadow:2px_2.5px_0_#1A1418,var(--tile-in)]" : "w-[34px] h-[34px] rounded-[11px]")}>
                 <Icon className={size === "lg" ? "w-5 h-5" : "w-[17px] h-[17px]"} stroke="var(--tile-ink)" strokeWidth={2.6} aria-hidden />
             </span>
         );
     }
     return (
-        <span className={cn("nb-tile flex-none box-border overflow-hidden rounded-[13px] border-2 border-[#1A1418] bg-[#DCD6D2]", box, size === "lg" && "shadow-[2px_2px_0_#1A1418]")}>
+        <span className={cn("nb-tile flex-none box-border overflow-hidden rounded-[13px] border-2 border-[#1A1418] bg-[#DCD6D2]", box, size === "lg" && "[box-shadow:2px_2px_0_#1A1418]")}>
             <img src={resolveCdnUrl(row.img ?? null) ?? ""} alt="" loading="lazy" className={cn("block w-full h-full object-cover", row.imgClass)} draggable={false} />
         </span>
     );
@@ -206,7 +206,7 @@ function DesktopMenu({ menu, rows, page }: { menu: NavMenu; rows: NavRow[]; page
         <div
             role="menu"
             className={cn(
-                "nb-menu absolute top-[58px] z-40 box-border p-3 rounded-[24px] border-2 border-(--ink) bg-(--menu-bg) shadow-[5px_5px_0_0_#FF8AC4,5px_5px_0_2px_var(--ink)] grid grid-cols-2 gap-x-3 gap-y-[13px]",
+                "nb-menu absolute top-[58px] z-40 box-border p-3 rounded-[24px] border-2 border-(--ink) bg-(--menu-bg) [box-shadow:5px_5px_0_0_#FF8AC4,5px_5px_0_2px_var(--ink)] grid grid-cols-2 gap-x-3 gap-y-[13px]",
                 about ? "right-0 w-[470px] origin-[calc(100%-24px)_0]" : "-left-3 w-[420px] origin-[24px_0]",
             )}
         >
@@ -223,7 +223,7 @@ function DesktopMenu({ menu, rows, page }: { menu: NavMenu; rows: NavRow[]; page
                         className={cn(
                             "nb-row pp-focus box-border flex items-center gap-3 overflow-hidden no-underline text-(--chip-ink) rounded-[16px] border-2 border-(--ink) pr-3 pl-2.5",
                             about ? "min-h-[70px] py-2.5" : "h-[70px]",
-                            cur ? "bg-(--cur-bg) shadow-[3px_4px_0_0_#FF8AC4,3px_4px_0_2px_var(--ink)]" : "bg-(--chip) shadow-[2px_3px_0_var(--ctl-off),var(--in)]",
+                            cur ? "bg-(--cur-bg) [box-shadow:3px_4px_0_0_#FF8AC4,3px_4px_0_2px_var(--ink)]" : "bg-(--chip) [box-shadow:2px_3px_0_var(--ctl-off),var(--in)]",
                             row.wip && "opacity-60",
                         )}
                     >
@@ -243,7 +243,7 @@ function DesktopMenu({ menu, rows, page }: { menu: NavMenu; rows: NavRow[]; page
                 <Link
                     to={MAJOR_PATCH.href}
                     role="menuitem"
-                    className="nb-row pp-focus col-span-2 mt-[3px] box-border flex items-center gap-3 h-[60px] pr-3.5 pl-2.5 rounded-[16px] border-2 border-[#1A1418] bg-[#FF8AC4] text-[#1A1418] no-underline shadow-[2px_3px_0_#1A1418,inset_0_2px_0_rgba(255,255,255,.55),inset_0_-3px_0_rgba(198,35,104,.22)]"
+                    className="nb-row pp-focus col-span-2 mt-[3px] box-border flex items-center gap-3 h-[60px] pr-3.5 pl-2.5 rounded-[16px] border-2 border-[#1A1418] bg-[#FF8AC4] text-[#1A1418] no-underline [box-shadow:2px_3px_0_#1A1418,inset_0_2px_0_rgba(255,255,255,.55),inset_0_-3px_0_rgba(198,35,104,.22)]"
                 >
                     <span className="nb-tile flex-none grid place-items-center w-10 h-10 rounded-[12px] border-2 border-[#1A1418] bg-[#FFFDFA]">
                         <Sparkles className="w-5 h-5" fill="#FF3399" stroke="#1A1418" strokeWidth={2} aria-hidden />
@@ -261,7 +261,7 @@ function DesktopMenu({ menu, rows, page }: { menu: NavMenu; rows: NavRow[]; page
 
 function SoonTag() {
     return (
-        <span className="flex-none px-[9px] py-[3px] rounded-full border-[1.5px] border-[#1A1418] bg-[#FFD64F] text-[#1A1418] font-bold text-[10px] tracking-[.08em] shadow-[inset_0_2px_0_rgba(255,255,255,.6),1.5px_2px_0_#1A1418] rotate-4">
+        <span className="flex-none px-[9px] py-[3px] rounded-full border-[1.5px] border-[#1A1418] bg-[#FFD64F] text-[#1A1418] font-bold text-[10px] tracking-[.08em] [box-shadow:inset_0_2px_0_rgba(255,255,255,.6),1.5px_2px_0_#1A1418] rotate-4">
             SOON
         </span>
     );
@@ -301,7 +301,7 @@ function MobileSheet({ page, section, rowsOf, calendar, collections }: {
                                         data-cur={row.id === page ? "1" : "0"}
                                         data-wip={row.wip ? "1" : undefined}
                                         className={cn(
-                                            "nb-row pp-focus box-border min-h-[58px] py-1.5 pr-2.5 pl-1.5 rounded-[15px] border-2 border-(--ink) shadow-[2px_2.5px_0_var(--ctl-off)] flex items-center gap-2.5 overflow-hidden no-underline text-(--chip-ink)",
+                                            "nb-row pp-focus box-border min-h-[58px] py-1.5 pr-2.5 pl-1.5 rounded-[15px] border-2 border-(--ink) [box-shadow:2px_2.5px_0_var(--ctl-off)] flex items-center gap-2.5 overflow-hidden no-underline text-(--chip-ink)",
                                             row.id === page ? "bg-(--chip-hover)" : "bg-(--chip)",
                                             row.wip && "opacity-60",
                                         )}
@@ -317,7 +317,7 @@ function MobileSheet({ page, section, rowsOf, calendar, collections }: {
                                     </RowLink>
                                 ))}
                                 {menu === "about" && MAJOR_PATCH.show && (
-                                    <Link to={MAJOR_PATCH.href} className="nb-row pp-focus col-span-2 box-border h-[52px] pr-3 pl-2 rounded-[15px] border-2 border-[#1A1418] bg-[#FF8AC4] text-[#1A1418] no-underline flex items-center gap-2.5 overflow-hidden shadow-[2px_2.5px_0_var(--ctl-off),inset_0_2px_0_rgba(255,255,255,.55)]">
+                                    <Link to={MAJOR_PATCH.href} className="nb-row pp-focus col-span-2 box-border h-[52px] pr-3 pl-2 rounded-[15px] border-2 border-[#1A1418] bg-[#FF8AC4] text-[#1A1418] no-underline flex items-center gap-2.5 overflow-hidden [box-shadow:2px_2.5px_0_var(--ctl-off),inset_0_2px_0_rgba(255,255,255,.55)]">
                                         <Sparkles className="flex-none w-[17px] h-[17px]" fill="#FF3399" stroke="#1A1418" strokeWidth={2} aria-hidden />
                                         <span className="flex-1 min-w-0 font-bold text-sm truncate">{`${MAJOR_PATCH.name} is here`}</span>
                                     </Link>
@@ -338,7 +338,7 @@ function MobileSheet({ page, section, rowsOf, calendar, collections }: {
     );
 
     return (
-        <div className="nb-menu absolute left-2.5 right-2.5 top-[calc(100%+10px)] z-40 box-border max-h-[calc(100dvh-54px-30px)] overflow-auto overscroll-contain pt-3.5 px-3.5 pb-4 rounded-[22px] border-2 border-(--ink) bg-(--menu-bg) shadow-[4px_5px_0_var(--ctl-off),var(--in)] flex flex-col gap-2.5 origin-[calc(100%-24px)_0]">
+        <div className="nb-menu absolute left-2.5 right-2.5 top-[calc(100%+10px)] z-40 box-border max-h-[calc(100dvh-54px-30px)] overflow-auto overscroll-contain pt-3.5 px-3.5 pb-4 rounded-[22px] border-2 border-(--ink) bg-(--menu-bg) [box-shadow:4px_5px_0_var(--ctl-off),var(--in)] flex flex-col gap-2.5 origin-[calc(100%-24px)_0]">
             {accordion("games", "Games")}
             {accordion("idols", "Idols")}
             {calendar && direct("calendar", "Calendar", "/calendar")}

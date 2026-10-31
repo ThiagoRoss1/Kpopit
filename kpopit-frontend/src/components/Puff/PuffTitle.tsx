@@ -16,7 +16,7 @@ export function KoreanTag({ children, length = "short" }: { children: ReactNode;
         <span
             lang="ko"
             className={cn(
-                "flex-none whitespace-nowrap font-korean font-bold text-sm leading-none text-(--chip-ink) bg-(--chip) border-2 border-(--ink) rounded-[10px] px-[9px] py-1.5 shadow-[2px_3px_0_var(--ctl-off)] rotate-4",
+                "flex-none whitespace-nowrap font-korean font-bold text-sm leading-none text-(--chip-ink) bg-(--chip) border-2 border-(--ink) rounded-[10px] px-[9px] py-1.5 [box-shadow:2px_3px_0_var(--ctl-off)] rotate-4",
                 "@max-[359px]:hidden",
                 length === "mid" && "@max-[389px]:hidden",
                 length === "long" && "@max-[419px]:hidden",

@@ -57,7 +57,7 @@ function CalendarHeader({ mode, date, dayNumber }: { mode: CalendarMode; date: s
                     <ArrowLeft className="w-4 h-4" strokeWidth={3} aria-hidden />
                     Calendar
                 </Link>
-                <span className="inline-flex items-center gap-1.5 h-9 px-3.5 rounded-full border-2 border-[#1A1418] bg-[#FF8AC4] text-[#1A1418] font-bold text-[13px] shadow-[2px_3px_0_#1A1418,inset_0_2px_0_rgba(255,255,255,.55)] -rotate-2">
+                <span className="inline-flex items-center gap-1.5 h-9 px-3.5 rounded-full border-2 border-[#1A1418] bg-[#FF8AC4] text-[#1A1418] font-bold text-[13px] [box-shadow:2px_3px_0_#1A1418,inset_0_2px_0_rgba(255,255,255,.55)] -rotate-2">
                     <CalendarDays className="w-4 h-4" strokeWidth={2.6} aria-hidden />
                     {dayNumber ? `Day ${dayNumber} · ${shortDate(date)}` : shortDate(date)}
                 </span>
@@ -194,7 +194,7 @@ export default function CalendarGame({ mode, date }: { mode: CalendarMode; date:
                                         <div className="pixel-vinyl__hole" />
                                     </div>
                                 </div>
-                                <div className="pixel-sleeve absolute flex z-2 bg-ink border-2 border-cream -rotate-4 left-1/2 translate-x-[-55%] xs:translate-x-[-65%] top-[2%] w-55 h-65 xxs:w-60 xxs:h-70 xs:w-65 xs:h-75 xm:w-70 xm:h-80 zm:w-76 zm:h-86 shadow-[0_14px_30px_rgba(0,0,0,0.35),0_4px_10px_rgba(0,0,0,0.2)] rounded-2xl rounded-b-3xl sm:w-80 sm:h-90 md:translate-x-[-60%] md:w-90 md:h-100 lg:left-0 lg:translate-x-0 lg:w-90 lg:h-100 xl:w-110 xl:h-120">
+                                <div className="pixel-sleeve absolute flex z-2 bg-ink border-2 border-cream -rotate-4 left-1/2 translate-x-[-55%] xs:translate-x-[-65%] top-[2%] w-55 h-65 xxs:w-60 xxs:h-70 xs:w-65 xs:h-75 xm:w-70 xm:h-80 zm:w-76 zm:h-86 [box-shadow:0_14px_30px_rgba(0,0,0,0.35),0_4px_10px_rgba(0,0,0,0.2)] rounded-2xl rounded-b-3xl sm:w-80 sm:h-90 md:translate-x-[-60%] md:w-90 md:h-100 lg:left-0 lg:translate-x-0 lg:w-90 lg:h-100 xl:w-110 xl:h-120">
                                     <div className="relative flex items-center justify-center p-4 w-full h-fit">
                                         <span className="pixel-washi absolute top-0 -left-6 w-[22%] h-5.5 z-4 rotate-[-34.8deg]" />
                                         <span className="pixel-washi absolute top-0 -right-6 w-[22%] h-5.5 z-5 rotate-[34.8deg]" />

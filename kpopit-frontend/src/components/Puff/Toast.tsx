@@ -30,7 +30,7 @@ export function useToast() {
                 <div
                     role="status"
                     data-out={toast.out ? "1" : "0"}
-                    className="pp-toast rounded-full border-2 border-(--ink) bg-(--menu-bg) text-(--chip-ink) px-5 py-3 font-semibold text-sm shadow-[3px_4px_0_var(--ctl-off),var(--in)]"
+                    className="pp-toast rounded-full border-2 border-(--ink) bg-(--menu-bg) text-(--chip-ink) px-5 py-3 font-semibold text-sm [box-shadow:3px_4px_0_var(--ctl-off),var(--in)]"
                 >
                     {toast.message}
                 </div>

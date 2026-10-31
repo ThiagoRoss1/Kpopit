@@ -11,7 +11,7 @@ export default function SearchField({ value, onChange, placeholder, label, class
     className?: string;
 }) {
     return (
-        <label className={cn("cg-search flex-[1_1_var(--cg-search-basis)] max-w-(--cg-search-max) min-w-[min(240px,100%)] mb-[var(--cg-search-mb,0px)] flex items-center gap-2.5 h-(--cg-search-h) pr-1.5 pl-4 rounded-[18px] bg-(--chip) text-(--chip-ink) border-2 border-(--ink) shadow-[4px_5px_0_var(--ctl-off),var(--in)]", className)}>
+        <label className={cn("cg-search flex-[1_1_var(--cg-search-basis)] max-w-(--cg-search-max) min-w-[min(240px,100%)] mb-[var(--cg-search-mb,0px)] flex items-center gap-2.5 h-(--cg-search-h) pr-1.5 pl-4 rounded-[18px] bg-(--chip) text-(--chip-ink) border-2 border-(--ink) [box-shadow:4px_5px_0_var(--ctl-off),var(--in)]", className)}>
             <Search aria-hidden className="cg-sicon flex-none w-[18px] h-[18px]" strokeWidth={2.6} />
             <input
                 type="search"

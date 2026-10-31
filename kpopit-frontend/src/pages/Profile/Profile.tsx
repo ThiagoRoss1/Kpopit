@@ -65,8 +65,8 @@ function PrivateProfile({ username }: { username: string }) {
     return (
         <PageShell width="max-w-[1040px]">
             <ProfileMeta username={username} name={username} />
-            <div className="pp-enter mt-16 mx-auto max-w-[460px] flex flex-col items-center gap-4 text-center rounded-[23px] border-2 border-(--ink) bg-(--face) text-(--face-ink) shadow-[var(--card-depth)] py-9 px-7">
-                <span className="w-14 h-14 rounded-2xl border-2 border-[#1A1418] bg-[#FF8AC4] grid place-items-center shadow-[var(--in-pink)] -rotate-[4deg]">
+            <div className="pp-enter mt-16 mx-auto max-w-[460px] flex flex-col items-center gap-4 text-center rounded-[23px] border-2 border-(--ink) bg-(--face) text-(--face-ink) [box-shadow:var(--card-depth)] py-9 px-7">
+                <span className="w-14 h-14 rounded-2xl border-2 border-[#1A1418] bg-[#FF8AC4] grid place-items-center [box-shadow:var(--in-pink)] -rotate-[4deg]">
                     <Lock size={24} strokeWidth={2.6} color="#1A1418" />
                 </span>
                 <h1 className="m-0 font-bold text-2xl">This profile is private</h1>
@@ -131,7 +131,7 @@ function ProfileView({ profile, viewerKey }: { profile: VisibleProfile; viewerKe
                 </header>
 
                 <div className="sticky top-[70px] max-[760px]:top-[64px] z-15 flex justify-center">
-                    <div role="tablist" aria-label="Profile sections" className="flex gap-1 p-[5px] box-border rounded-full border-2 border-(--ink) bg-(--menu-bg) shadow-[3px_4px_0_var(--ctl-off),var(--in)] @max-[580px]:w-full">
+                    <div role="tablist" aria-label="Profile sections" className="flex gap-1 p-[5px] box-border rounded-full border-2 border-(--ink) bg-(--menu-bg) [box-shadow:3px_4px_0_var(--ctl-off),var(--in)] @max-[580px]:w-full">
                         {tabs.map(({ id, label }) => {
                             const on = tab === id;
                             return (
@@ -144,7 +144,7 @@ function ProfileView({ profile, viewerKey }: { profile: VisibleProfile; viewerKe
                                     className={cn(
                                         "up-tab pp-focus flex-none min-w-[124px] h-10 box-border px-[18px] flex items-center justify-center gap-[7px] rounded-full border-2 font-bold text-sm cursor-pointer",
                                         "@max-[580px]:flex-1 @max-[580px]:min-w-0 @max-[580px]:px-2",
-                                        on ? "border-(--ink) bg-(--side) text-[#1A1418] shadow-[var(--in-pink)]" : "border-transparent bg-transparent text-(--chip-ink)",
+                                        on ? "border-(--ink) bg-(--side) text-[#1A1418] [box-shadow:var(--in-pink)]" : "border-transparent bg-transparent text-(--chip-ink)",
                                     )}
                                 >
                                     {label}
@@ -193,7 +193,7 @@ function ProfileView({ profile, viewerKey }: { profile: VisibleProfile; viewerKe
 
 function Polaroid({ src }: { src: string | null }) {
     return (
-        <div className="up-photo relative flex-none pt-[9px] px-[9px] pb-8 bg-[#FFFDFA] border-2 border-[#1A1418] rounded-lg shadow-[4px_5px_0_var(--ctl-off)]">
+        <div className="up-photo relative flex-none pt-[9px] px-[9px] pb-8 bg-[#FFFDFA] border-2 border-[#1A1418] rounded-lg [box-shadow:4px_5px_0_var(--ctl-off)]">
             {src ? (
                 <img src={src} alt="Avatar" className="block w-[150px] h-[150px] object-cover border-2 border-[#1A1418] rounded-[4px]" />
             ) : (
@@ -241,8 +241,8 @@ function EmailBanner() {
     if (dismissed || !user?.user_credentials.email || user.profile.email_verified) return null;
     const sent = resend.isSuccess;
     return (
-        <div role="status" className="pp-enter [--pp-anim:puffDrop] flex items-center gap-3.5 flex-wrap p-3 rounded-[23px] border-2 border-(--ink) bg-(--face) text-(--face-ink) shadow-[4px_4px_0_0_#FF8AC4,4px_4px_0_2px_var(--ink)] @max-[580px]:items-start @max-[580px]:flex-nowrap">
-            <span aria-hidden className="flex-none w-11 h-11 box-border rounded-[14px] border-2 border-[#1A1418] bg-[#FF8AC4] grid place-items-center shadow-[var(--in-pink)] -rotate-[4deg]">
+        <div role="status" className="pp-enter [--pp-anim:puffDrop] flex items-center gap-3.5 flex-wrap p-3 rounded-[23px] border-2 border-(--ink) bg-(--face) text-(--face-ink) [box-shadow:4px_4px_0_0_#FF8AC4,4px_4px_0_2px_var(--ink)] @max-[580px]:items-start @max-[580px]:flex-nowrap">
+            <span aria-hidden className="flex-none w-11 h-11 box-border rounded-[14px] border-2 border-[#1A1418] bg-[#FF8AC4] grid place-items-center [box-shadow:var(--in-pink)] -rotate-[4deg]">
                 <Mail size={20} strokeWidth={2.4} fill="#FFFDFA" color="#1A1418" />
             </span>
             <span className="flex-1 min-w-[200px] flex flex-col gap-0.5 @max-[580px]:min-w-0">

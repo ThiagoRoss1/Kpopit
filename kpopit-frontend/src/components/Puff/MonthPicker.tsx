@@ -30,7 +30,7 @@ export default function MonthPicker({ min, max, value, onPick, onClose, note, ti
         <div
             role="dialog"
             aria-label={title}
-            className="pp-enter [--pp-anim:puffMenu] w-[min(360px,100%)] rounded-[20px] border-2 border-(--ink) bg-(--menu-bg) text-(--face-ink) shadow-[4px_5px_0_var(--ctl-off),var(--in)] p-4 flex flex-col gap-3.5"
+            className="pp-enter [--pp-anim:puffMenu] w-[min(360px,100%)] rounded-[20px] border-2 border-(--ink) bg-(--menu-bg) text-(--face-ink) [box-shadow:4px_5px_0_var(--ctl-off),var(--in)] p-4 flex flex-col gap-3.5"
         >
             <div className="flex items-center justify-between gap-2.5">
                 <span className="font-bold text-base">{title}</span>
@@ -62,7 +62,7 @@ export default function MonthPicker({ min, max, value, onPick, onClose, note, ti
                                     className={cn(
                                         "pp-focus h-[46px] rounded-[13px] border-2 flex flex-col items-center justify-center gap-0.5 transition-colors duration-300",
                                         off && "opacity-40 cursor-default border-transparent",
-                                        !off && !current && "border-(--ink) bg-(--chip) cursor-pointer shadow-[2px_3px_0_var(--ctl-off)] hover:bg-(--chip-hover)",
+                                        !off && !current && "border-(--ink) bg-(--chip) cursor-pointer [box-shadow:2px_3px_0_var(--ctl-off)] hover:bg-(--chip-hover)",
                                         current && "border-(--ink) bg-[#FF8AC4] text-[#1A1418] cursor-pointer",
                                     )}
                                 >

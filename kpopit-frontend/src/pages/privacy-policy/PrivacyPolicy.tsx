@@ -27,7 +27,7 @@ export default function PrivacyPolicy() {
                     </div>
                     <div className="flex flex-col gap-4 min-w-0">
                         <IndexChips items={INDEX} active={active} onPick={jumpTo} />
-                        <article className="pp-enter [--pp-delay:200ms] min-w-0 max-w-[720px] rounded-[23px] border-2 border-(--ink) bg-(--face) text-(--face-ink) shadow-[2px_3px_0_var(--ctl-off),var(--in)] pt-9 px-11 pb-10 @max-[580px]:pt-6 @max-[580px]:px-[18px] @max-[580px]:pb-7 flex flex-col gap-[34px]">
+                        <article className="pp-enter [--pp-delay:200ms] min-w-0 max-w-[720px] rounded-[23px] border-2 border-(--ink) bg-(--face) text-(--face-ink) [box-shadow:2px_3px_0_var(--ctl-off),var(--in)] pt-9 px-11 pb-10 @max-[580px]:pt-6 @max-[580px]:px-[18px] @max-[580px]:pb-7 flex flex-col gap-[34px]">
                             <p className="m-0 font-medium text-[15.5px] leading-[1.65] [text-wrap:pretty]">
                                 {PRIVACY_INTRO} <span className="text-(--muted)">Last updated {UPDATED}.</span>
                             </p>

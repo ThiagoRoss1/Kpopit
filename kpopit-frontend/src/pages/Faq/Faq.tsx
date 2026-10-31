@@ -59,7 +59,7 @@ export default function Faq() {
                             onChange={(e) => { setQuery(e.target.value); setOpen(null); }}
                             placeholder="Search questions..."
                             aria-label="Search questions"
-                            className="box-border w-full h-[52px] pr-[18px] pl-12 rounded-full border-2 border-(--ink) bg-(--chip) text-(--chip-ink) font-medium text-[15px] shadow-[2px_3px_0_var(--ctl-off),var(--in)] outline-none transition-[border-color] duration-300 focus:border-[#FF3399] placeholder:text-(--muted)"
+                            className="box-border w-full h-[52px] pr-[18px] pl-12 rounded-full border-2 border-(--ink) bg-(--chip) text-(--chip-ink) font-medium text-[15px] [box-shadow:2px_3px_0_var(--ctl-off),var(--in)] outline-none transition-[border-color] duration-300 focus:border-[#FF3399] placeholder:text-(--muted)"
                         />
                     </label>
 
@@ -78,7 +78,7 @@ export default function Faq() {
                                         key={item.question}
                                         className={cn(
                                             "rounded-[18px] border-2 border-(--ink) bg-(--face) text-(--face-ink) overflow-hidden transition-shadow duration-400",
-                                            isOpen ? "shadow-[4px_4px_0_0_#FF8AC4,4px_4px_0_2px_var(--ink)]" : "shadow-[2px_3px_0_var(--ctl-off),var(--in)]",
+                                            isOpen ? "[box-shadow:4px_4px_0_0_#FF8AC4,4px_4px_0_2px_var(--ink)]" : "[box-shadow:2px_3px_0_var(--ctl-off),var(--in)]",
                                         )}
                                     >
                                         <button

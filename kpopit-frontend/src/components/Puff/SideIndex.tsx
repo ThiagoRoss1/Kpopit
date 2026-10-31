@@ -24,7 +24,7 @@ export function SideIndex({ items, active, onPick }: { items: IndexItem[]; activ
                         onClick={(e) => { e.preventDefault(); onPick(item.id); }}
                         className={cn(
                             "pp-focus flex items-center gap-2.5 px-3 py-2 rounded-[14px] border-2 no-underline text-(--text) font-semibold text-sm transition-[background-color,border-color,transform] duration-300 active:translate-x-0.5 active:translate-y-0.5",
-                            on ? "border-(--ink) bg-(--chip) shadow-[2px_3px_0_var(--ctl-off),var(--in)]" : "border-transparent hover:bg-(--chip) hover:border-(--ink) hover:translate-x-1",
+                            on ? "border-(--ink) bg-(--chip) [box-shadow:2px_3px_0_var(--ctl-off),var(--in)]" : "border-transparent hover:bg-(--chip) hover:border-(--ink) hover:translate-x-1",
                         )}
                     >
                         <span className="font-bold text-[11px] text-(--group)">{number(i)}</span>
