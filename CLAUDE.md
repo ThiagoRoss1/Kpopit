@@ -137,6 +137,8 @@ Details: `kpopit-backend/tests/README.md`. Run each new test right after writing
 - **Feature flags** — `GET /api/features` (`services/features.py`, one line per flag) → `hooks/useFeatures.ts`. The root `loader` reads it at build time (prerendered nav/pages match), `shouldRevalidate` keeps it, a fresh read follows; any failure = all off. Flag-gated pages wrap in `components/FeatureGate.tsx` (off → the 404 page).
 - **Blog** — Markdown posts in `content/blog/*.md` (frontmatter: title, date, description, image, imageAlt, `tag` ∈ Update/Dev log/Thoughts/News, optional `pinned`; see `content/README.md`). `vite-plugins/markdownPosts.ts` renders them at build time (`src/utils/markdown.ts`; `marked` never ships to the browser; read time = ceil(words/200)); `src/content/blog.ts` lists them; `app/blog-paths.ts` prerenders one page per post. `#` in a post is an h2 (numbered chip).
 - **Content data** — typed modules, one source per page and its structured data: `src/data/changelog.ts` (changelog, `?type=`), `src/data/faq.ts` (FAQ + its FAQPage JSON-LD, feature-gated questions), `src/data/privacy.ts` (policy text + `UPDATED`), `src/data/contact.ts` (channels, `contactMailto`). Change the privacy text only to match real data handling. FAQPage JSON-LD lives only on `/faq`; WebApplication/WebSite only on home.
+- **Catalogue + detail pages** — `/idols`, `/albums` share `components/Catalogue/` (SearchField, FilterMenu, AppliedChips, `catalogue.css`); filters live in the URL. `/idols/:id/:slug` (`pages/Idols/IdolProfile.tsx`, facts in `idolFacts.ts`) and `/albums/:id/:slug` load through route `clientLoader`s with the prerendered `.data` snapshot + intent prefetch (`loadWithSnapshot`, `holdForData`).
+- **Calendar** — `/calendar` (flag `calendar`, `pages/Calendar/`): month/timeline views, mode + day in `?mode=&date=`. Past days play at `/<mode>?date=YYYY-MM-DD` (`useCalendarDate` → `pages/CalendarGame/`, the live components with `persist={false}`, server feedback only, no localStorage).
 - **URL state on prerendered pages** — `?tag=`, `?type=`, `?mode=` apply after hydration (`useHydrated`), so the HTML always matches the first render.
 
 ### State management
@@ -154,6 +156,8 @@ Details: `kpopit-backend/tests/README.md`. Run each new test right after writing
 - **Selective localStorage removal, never a blind wipe** — per-mode key lists in `useClearGameStorage`. The one deliberate `localStorage.clear()` (invalid-token reset in `api.ts`) re-preserves `kpopit_session` + `kpopit_was_authenticated`.
 - **Debug logs behind `import.meta.env.DEV`** (`PixelatedMode.tsx` still logs raw — the current exception).
 - **Dates** — game-day helpers vs real-time helpers (see Dates); never `datetime.now()` in game logic.
+- **Tailwind 4 `(--var)` shorthands** — `bg-(--x)`, `w-(--x)`, `gap-(--x)` work, but `shadow-(--x)` emits no shadow and `justify-(--x)` / `items-(--x)` / `text-(--x)` (as alignment) don't set what they look like: use `shadow-[var(--x)]`, `[justify-content:var(--x)]`, `[align-items:var(--x)]`, `[text-align:var(--x)]`.
+- **Entrance animations use `backwards` fill** (never `both`/`forwards` on elements that move on hover/press): a filled transform overrides the hover and press transforms.
 - **macOS**: AirPlay Receiver holds port 5000; free it before starting the backend.
 
 ## Code conventions
