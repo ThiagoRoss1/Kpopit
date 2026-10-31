@@ -109,7 +109,7 @@ function ProfileView({ profile, viewerKey }: { profile: VisibleProfile; viewerKe
     return (
         <PageShell width="max-w-[1040px]" className="up-root">
             <ProfileMeta username={profile.username} name={name} />
-            <div className="flex flex-col gap-7 @container">
+            <div className="flex flex-col gap-7 pt-[18px] @container">
                 {profile.is_owner && <EmailBanner />}
                 <header className="pp-enter [--pp-anim:puffSide] [--pp-delay:80ms] flex items-center gap-[34px] @max-[640px]:flex-col @max-[640px]:text-center @max-[640px]:gap-[18px]">
                     <Polaroid src={resolveAvatarUrl(profile.avatar_url)} />
