@@ -195,6 +195,8 @@ export interface IdolsPageData extends Pick<IdolListItem,
     "is_former_group": boolean;
     "is_published": boolean;
     "all_groups": string;
+    /** Comma-separated, e.g. "South Korean, American". */
+    "nationality": string | null;
   }
   
 export interface IdolsPageIdolInfo extends Pick<IdolListItem,

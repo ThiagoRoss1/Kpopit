@@ -145,7 +145,7 @@ test.describe('idols navigation @mobile', () => {
     await expect(page.getByRole('img', { name: `${target.artist_name} photo` })).toBeVisible();
     since = await now(page);
     const other = idols.find((i) => i.id !== target.id && /^[A-Za-z]{4,}$/.test(i.artist_name))!;
-    await page.getByPlaceholder('Search for an Idol, Group, or Company...').fill(other.artist_name);
+    await page.getByPlaceholder('Search idols, groups...').fill(other.artist_name);
     await press(isMobile, page.locator(`main a[href="${href(other)}"]`).first());
     await expect(page.getByRole('img', { name: `${other.artist_name} photo` })).toBeVisible();
     await expectSmooth(page, since, loads, base);

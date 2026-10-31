@@ -7,6 +7,8 @@ import { holdForData } from "../../src/utils/holdNavigation";
 import type { IdolsPageData } from "../../src/interfaces/gameInterfaces";
 import { orNothing, fetchIdolsPage } from "../prerender-api";
 
+export const handle = { puff: true };
+
 // Build time only: the list is baked into the prerendered page.
 export async function loader() {
   return { idols: await orNothing(fetchIdolsPage()) };

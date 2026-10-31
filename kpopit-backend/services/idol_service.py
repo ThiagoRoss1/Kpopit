@@ -16,6 +16,7 @@ class IdolService:
                 i.artist_name,
                 i.image_path,
                 i.image_version,
+                i.nationality,
                 i.is_published,
                 g.id AS group_id,
                 g.name AS group_name,

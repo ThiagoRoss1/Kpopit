@@ -106,3 +106,5 @@
 .cg-press:active:active:active:active { transform: translate3d(3px, 4px, 0); box-shadow: 0 0 0 var(--ink), var(--in-pink) !important; transition-duration: .15s; }
 
 @media (prefers-reduced-motion: reduce) { .cg-inner *, .cg-inner { animation: none !important; transition-duration: 0s !important; } }
+/* Coming back to a list shows it as it was left: no entrance. */
+.cg-card.cg-card-still { animation: none; }

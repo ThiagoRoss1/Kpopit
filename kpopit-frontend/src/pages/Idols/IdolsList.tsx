@@ -1,142 +1,151 @@
-import "./IdolsList.css";
-import { useState, useEffect, useMemo } from "react";
+import { useEffect, useState } from "react";
 import { useQuery } from "@tanstack/react-query";
-import PageMeta from "../../components/Seo/PageMeta";
-import type { IdolsPageData } from "../../interfaces/gameInterfaces";
-import IdolsSearchBar from "../../components/IdolsSearchBar/IdolsSearchBar";
-import IdolsCards from "../../components/IdolsPageCards/IdolsCards";
-import { formatCompanyName, formatGroupName, buildIdolSlug } from "../../utils/formatters";
+import { useSearchParams } from "react-router";
+import { SlidersHorizontal } from "lucide-react";
+import PageShell from "../../components/Puff/PageShell";
+import PuffTitle from "../../components/Puff/PuffTitle";
 import PageLoader from "../../components/Loading/PageLoader";
-import IntentLink from "../../components/Links/IntentLink";
-import { idolsListQuery, prefetchIdolProfile } from "./idolsData";
+import SearchField from "../../components/Catalogue/SearchField";
+import FilterMenu from "../../components/Catalogue/FilterMenu";
+import AppliedChips, { type AppliedChip } from "../../components/Catalogue/AppliedChips";
+import PageMeta from "../../components/Seo/PageMeta";
+import { useHydrated } from "../../hooks/useHydrated";
+import { getNationalityFlag } from "../../utils/getFlags";
+import type { IdolsPageData } from "../../interfaces/gameInterfaces";
+import { IDOL_SORTS, SOLOIST, filterIdols, groupLabel, idolsListQuery, nationalities, readIdolFilters, type IdolFilters } from "./idolsData";
+import IdolCard from "./IdolCard";
 
-// Only the first cards (about one screen) animate in; a delay per card for the whole list made the
-// last ones wait seconds.
-const ANIMATED_CARDS = 24;
+const NO_FILTERS: IdolFilters = { q: "", group: "", nat: "", company: "", sort: "" };
 
 // The entrance plays once per visit: coming back to the list shows it as it was left.
 let cardsIntroPlayed = false;
 
+const Flag = ({ nationality, small }: { nationality: string; small?: boolean }) => {
+    const src = getNationalityFlag(nationality);
+    return src ? <img src={src} alt="" className={small ? "w-[21px] h-[15px] flex-none rounded-[3px] border-[1.5px] border-[#1A1418] object-cover bg-[#1A1418]" : "w-6 h-[17px] flex-none rounded-[3px] border-[1.5px] border-[#1A1418] object-cover bg-[#1A1418]"} /> : null;
+};
+
 // initialIdols: build-time data for the prerendered page; stale at once, so it refetches.
-function IdolsList({ initialIdols }: { initialIdols?: IdolsPageData[] }) {
-    const [searchTerm, setSearchTerm] = useState("");
-    const [animateCards] = useState(() => !cardsIntroPlayed);
+export default function IdolsList({ initialIdols }: { initialIdols?: IdolsPageData[] }) {
+    const { data, isError, refetch } = useQuery({ ...idolsListQuery, initialData: initialIdols, initialDataUpdatedAt: 0, refetchOnWindowFocus: false });
+    // The route hands the page its list; this only shows if the cache lost it.
+    if (!data) return <PageLoader message="Loading Idols Data..." error={isError} errorMessage="Error fetching idols data." onRetry={() => refetch()} />;
+    return <IdolsCatalogue all={data} />;
+}
+
+function IdolsCatalogue({ all }: { all: IdolsPageData[] }) {
+    const hydrated = useHydrated();
+    const [params, setParams] = useSearchParams();
+    const [filtersOpen, setFiltersOpen] = useState(false);
+    const [animate] = useState(() => !cardsIntroPlayed);
     useEffect(() => {
         cardsIntroPlayed = true;
     }, []);
+    // The prerendered list is unfiltered; the URL's filters apply once the page is live.
+    const f = hydrated ? readIdolFilters(params) : NO_FILTERS;
+    const idols = filterIdols(all, f);
 
-    const {
-        data: idolsData,
-        isError: isErrorIdolsData,
-        refetch: refetchIdolsData,
-    } = useQuery({
-        ...idolsListQuery,
-        initialData: initialIdols,
-        initialDataUpdatedAt: 0,
-        refetchOnWindowFocus: false,
-    });
+    const set = (patch: Partial<IdolFilters>) =>
+        setParams((p) => {
+            for (const [k, v] of Object.entries(patch)) {
+                if (v) p.set(k, v);
+                else p.delete(k);
+            }
+            return p;
+        }, { replace: true, preventScrollReset: true });
+    const reset = () => set(NO_FILTERS);
 
-    // Idol filtering
-    const filteredIdols = useMemo(() => {
-        const term = searchTerm.toLowerCase();
-        if (!term) return idolsData;
+    const groups = [...new Set(all.map(groupLabel))].sort((a, b) => (a === SOLOIST ? 1 : b === SOLOIST ? -1 : a.localeCompare(b)));
+    const nats = [...new Set(all.flatMap(nationalities))].sort((a, b) => a.localeCompare(b));
+    const companies = [...new Set(all.map((i) => i.company_name).filter((c): c is string => !!c))].sort((a, b) => a.localeCompare(b));
+    // Counts as if that option were picked: the other filters and the search still apply.
+    const countWith = (patch: Partial<IdolFilters>) => filterIdols(all, { ...f, ...patch, sort: "" }).length;
+    const activeCount = [f.group, f.nat, f.company, f.sort].filter(Boolean).length;
 
-        return idolsData?.filter(idol =>
-            idol.artist_name.toLowerCase().includes(term) || 
-            idol.group_name?.toLowerCase().includes(term) ||
-            idol.company_name?.toLowerCase().includes(term) || 
-            idol.all_groups?.toLowerCase().includes(term)
-        ).sort((a, b) => {
-            const aName = a.artist_name.toLowerCase();
-            const bName = b.artist_name.toLowerCase();
-
-            const getPriority = (name: string) => {
-                if (name.startsWith(term)) return 1;
-                if (name.includes(term)) return 2;
-                return 3;
-            };
-
-            const aPriority = getPriority(aName);
-            const bPriority = getPriority(bName);
-
-            return aPriority !== bPriority ? aPriority - bPriority : aName.localeCompare(bName);
-        })
-    }, [searchTerm, idolsData]); 
-
-    // The route hands the page its list (prerendered or loaded before the switch); this only shows if
-    // the cache lost it. A failed background refetch keeps the list it already has.
-    if (!idolsData) {
-        return <PageLoader message="Loading Idols Data..." error={isErrorIdolsData} errorMessage="Error fetching idols data." onRetry={() => refetchIdolsData()} />;
-    }
+    const chips: AppliedChip[] = [];
+    if (f.group) chips.push({ key: "group", label: f.group, onRemove: () => set({ group: "" }) });
+    if (f.nat) chips.push({ key: "nat", label: f.nat, onRemove: () => set({ nat: "" }) });
+    if (f.company) chips.push({ key: "company", label: f.company, onRemove: () => set({ company: "" }) });
+    if (f.sort) chips.push({ key: "sort", label: `Sort: ${IDOL_SORTS[f.sort]}`, onRemove: () => set({ sort: "" }) });
+    if (f.q) chips.push({ key: "q", label: `"${f.q}"`, onRemove: () => set({ q: "" }) });
 
     return (
-        <div className="w-full min-h-full bg-ink">
+        <>
             <PageMeta
-                title="KpopIt - Idols List"
-                description="Browse every K-pop idol featured in KpopIt's daily guessing game."
+                title="K-pop idols in KpopIt: every idol in the daily game"
+                description={`Browse all ${all.length} K-pop idols in KpopIt's daily guessing game by group, nationality and company, with profiles and careers.`}
                 path="/idols"
             />
-            
-            <div className="flex flex-col w-full h-full justify-start items-center">
-                {/* Title */}
-                <div className="flex items-center justify-center w-full h-fit mt-10 mb-5">
-                    <h1 className="text-4xl xs:text-5xl [text-shadow:3px_3px_4px_rgba(255,51,153,1)] 
-                    font-bold text-center text-white">
-                        Kpopit Idols
-                    </h1>
-                </div>
-                
-                {/* Search Bar */}
-                <div className="w-full h-fit flex justify-center items-center mb-19">
-                    <IdolsSearchBar
-                        idolsData={idolsData ?? []}
-                        onIdolSelect={setSearchTerm}
-                        value={searchTerm}
+            <PageShell width="max-w-[1180px]">
+                <div className="cg-inner">
+                    <header className="cg-head pp-enter [--pp-anim:puffSide] [--pp-delay:80ms] flex items-end justify-between flex-wrap gap-(--cg-hd-gap) pt-(--cg-head-pt)">
+                        <div className="flex items-center gap-4">
+                            <PuffTitle className="text-(length:--cg-title-fs) tracking-[-.01em]">Idols</PuffTitle>
+                            <span lang="ko" className="cg-ko flex-none whitespace-nowrap font-korean font-bold text-sm leading-none text-(--chip-ink) bg-(--chip) border-2 border-(--ink) rounded-[10px] px-[9px] py-1.5 shadow-[2px_3px_0_var(--ctl-off)] rotate-3">아이돌</span>
+                        </div>
+                        <span className="font-medium text-[13px] text-(--muted) pb-(--cg-cnt-pb)">{`${all.length} idols · ${groups.filter((g) => g !== SOLOIST).length} groups + soloists`}</span>
+                    </header>
+
+                    <div className="cg-ctls pp-enter [--pp-delay:160ms] relative z-10 flex items-center flex-wrap gap-(--cg-ctl-gap) mt-(--cg-ctl-mt)" data-fopen={filtersOpen ? "1" : "0"}>
+                        <SearchField value={f.q} onChange={(q) => set({ q })} placeholder="Search idols, groups..." label="Search idols, groups or companies" />
+                        <button
+                            type="button"
+                            className="cg-ft cg-focus hidden place-items-center relative flex-[0_0_46px] w-[46px] h-(--cg-search-h) mb-[var(--cg-search-mb,0px)] p-0 rounded-[16px] border-2 border-(--ink) cursor-pointer"
+                            data-open={filtersOpen ? "1" : "0"}
+                            data-on={activeCount ? "1" : "0"}
+                            aria-expanded={filtersOpen}
+                            aria-label={filtersOpen ? "Hide filters" : activeCount ? `Show filters, ${activeCount} active` : "Show filters"}
+                            onClick={() => setFiltersOpen(!filtersOpen)}
+                            style={{
+                                background: filtersOpen ? "var(--chip-hover)" : activeCount ? "var(--side)" : "var(--chip)",
+                                color: activeCount && !filtersOpen ? "#1A1418" : "var(--chip-ink)",
+                                boxShadow: `${filtersOpen ? "0 0 0 var(--ctl-off)" : "2px 3px 0 var(--ctl-off)"},${activeCount && !filtersOpen ? "var(--in-pink)" : "var(--in)"}`,
+                            }}
+                        >
+                            <SlidersHorizontal className="w-[18px] h-[18px]" strokeWidth={2.6} aria-hidden />
+                            {activeCount > 0 && (
+                                <span aria-hidden className="cg-fbadge absolute -top-2 -right-2 min-w-[22px] h-[22px] px-1.5 grid place-items-center rounded-full bg-[#FF3399] text-[#1A1418] border-2 border-[#1A1418] shadow-[1px_1.5px_0_#1A1418] font-bold text-[11px] leading-none">{activeCount}</span>
+                            )}
+                        </button>
+                        <div className="cg-fpanel">
+                            <FilterMenu title="GROUP" minWidth="104px" label={f.group || "Group"} value={f.group} onPick={(group) => set({ group })}
+                                options={[{ value: "", label: "All groups", count: countWith({ group: "" }) }, ...groups.map((g) => ({ value: g, label: g, count: countWith({ group: g }) }))]} />
+                            <FilterMenu title="NATIONALITY" minWidth="142px" label={f.nat || "Nationality"} value={f.nat} icon={f.nat ? <Flag nationality={f.nat} small /> : undefined} onPick={(nat) => set({ nat })}
+                                options={[{ value: "", label: "Anywhere", count: countWith({ nat: "" }) }, ...nats.map((n) => ({ value: n, label: n, icon: <Flag nationality={n} />, count: countWith({ nat: n }) }))]} />
+                            <FilterMenu title="COMPANY" minWidth="128px" label={f.company || "Company"} value={f.company} onPick={(company) => set({ company })}
+                                options={[{ value: "", label: "All companies", count: countWith({ company: "" }) }, ...companies.map((c) => ({ value: c, label: c, count: countWith({ company: c }) }))]} />
+                            <FilterMenu title="SORT BY" minWidth="92px" align="right" label={f.sort ? `Sort: ${IDOL_SORTS[f.sort]}` : "Sort"} value={f.sort} onPick={(sort) => set({ sort: sort as IdolFilters["sort"] })}
+                                options={Object.entries(IDOL_SORTS).map(([value, label]) => ({ value, label }))} />
+                        </div>
+                    </div>
+
+                    <AppliedChips
+                        filtersOpen={filtersOpen}
+                        result={`${idols.length === all.length ? "All " : ""}${idols.length} ${idols.length === 1 ? "idol" : "idols"}`}
+                        chips={chips}
+                        onClearAll={reset}
                     />
-                </div>
 
-                <div className="w-full h-fit flex flex-col justify-center items-start text-center mb-4 
-                max-xxs:px-2 xs:px-4 md:px-6 lg:px-14 xl:px-20 2xl:px-60 gap-4">
-                    <span className="text-white max-xxs:text-4xl xxs:text-4xl sm:text-5xl lg:text-6xl font-sans font-black">
-                        List of <span className="text-neon-pink [text-shadow:0px_0px_10px_rgba(255,51,153,0.5),0px_0px_20px_rgba(255,51,153,0.3)]">Idols</span>
-                    </span>
-                    
-                    <span className="text-white text-xl font-sans font-semibold opacity-60 [text-shadow:1px_1px_10px_rgba(255,255,255,0.6)]">
-                        {`Showing ${filteredIdols?.length || 0} ${filteredIdols?.length === 1 ? 'idol' : 'idols'}`}
-                    </span>
-                </div>
+                    {idols.length > 0 ? (
+                        <section aria-label="Idols catalogue" className="grid grid-cols-[repeat(auto-fill,minmax(var(--cg-grid-min),1fr))] gap-(--cg-grid-gap) p-(--cg-grid-pad)">
+                            {idols.map((idol, i) => <IdolCard key={idol.id} idol={idol} index={i} animate={animate} />)}
+                        </section>
+                    ) : (
+                        <div className="pp-enter min-h-[340px] grid place-content-center justify-items-center text-center gap-3.5">
+                            <div className="font-bold text-[34px] leading-[1.15] text-white [text-shadow:var(--puff-empty)] -rotate-[1.5deg] pt-0 pr-1.5 pb-2 pl-1">No idols found...</div>
+                            <div className="font-medium text-sm text-(--muted)">{f.q ? `No matches for "${f.q}" with these filters.` : "No matches with these filters."}</div>
+                            <button type="button" onClick={reset} className="cg-press cg-focus mt-2 h-[46px] px-[22px] rounded-full border-2 border-(--ink) bg-(--tag) text-white [text-shadow:var(--tag-text)] font-bold text-sm cursor-pointer shadow-[3px_4px_0_var(--ink),var(--in-pink)]">
+                                Clear search & filters
+                            </button>
+                        </div>
+                    )}
 
-                <div className="grid w-full h-fit gap-6 mb-6 max-xxs:px-2 xs:px-4 md:px-6 lg:px-14 xl:px-20 2xl:px-60
-                grid-cols-[repeat(auto-fill,minmax(150px,1fr))] sm:grid-cols-[repeat(auto-fill,minmax(150px,1fr))] lg:grid-cols-[repeat(auto-fill,minmax(200px,1fr))]">
-                    {filteredIdols?.map((idol, i) => (
-                        <IntentLink
-                            key={idol.id}
-                            to={`/idols/${idol.id}/${buildIdolSlug(idol.artist_name, idol.group_name)}`}
-                            onIntent={() => prefetchIdolProfile(idol.id)}
-                            className={animateCards && i < ANIMATED_CARDS ? "idol-card-enter" : undefined}
-                            style={animateCards && i < ANIMATED_CARDS ? { animationDelay: `${i * 0.02}s` } : undefined}>
-                        <IdolsCards
-                            idolImage={`${import.meta.env.VITE_IMAGE_BUCKET_URL}${idol.image_path}?v=${idol.image_version}`}
-                            artistName={idol.artist_name}
-                            groupName={idol.group_name && formatGroupName(idol.group_name, idol.is_former_group)}
-                            companyName={idol.company_name ? formatCompanyName(idol.company_name) : idol.company_name}
-                        />
-                        </IntentLink>
-                    ))}
+                    <footer className="flex justify-between flex-wrap gap-x-5 gap-y-2 mt-2.5 pt-4 border-t-[1.5px] border-(--rule) font-medium text-[11px] text-(--muted)">
+                        <span>KpopIt</span>
+                        <span>{`${all.length} idols from the KpopIt catalogue`}</span>
+                    </footer>
                 </div>
-
-                {filteredIdols?.length === 0 && (
-                <div className="w-full flex justify-center items-center">
-                    <span className="text-white font-semibold text-xl [text-shadow:1px_1px_10px_rgba(255,255,255,0.6)]">
-                        No idols found
-                    </span>
-                </div>
-                )}
-            </div>            
-        </div>
-    )
+            </PageShell>
+        </>
+    );
 }
-
-export default IdolsList;
-
-

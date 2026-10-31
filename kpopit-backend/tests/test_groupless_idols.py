@@ -87,6 +87,8 @@ def test_idols_page_list_flags_former_group(client, ex_member):
     assert idol["group_name"] == "LATENCY"
     assert idol["is_former_group"] is True
     assert idol["company_name"] == "LATENCY Label"
+    # The /idols nationality filter reads it from the list.
+    assert "nationality" in idol
 
 
 def test_idols_page_profile_flags_former_group(client, ex_member):
