@@ -121,7 +121,8 @@ def test_hidden_match_history_is_owner_only(client, owner_games):
 def test_history_filters_by_mode_and_pages(client, owner_games, game, db_conn):
     owner_id, owner_auth = owner_games
     game(owner_id, 3, mode=3)
-    assert [e["gamemode_id"] for e in history(client, owner_auth, mode="pixelated").get_json()["entries"]] == [3]
+    pixelated = history(client, owner_auth, mode="pixelated").get_json()["entries"]
+    assert [(e["gamemode_id"], e["day_number"]) for e in pixelated] == [(3, None)]  # no Pixelated pick: no Day N
     for n in range(4, 40):
         game(owner_id, n)
     first = history(client, owner_auth).get_json()

@@ -110,6 +110,7 @@ class ProfileService:
             "username": owner["username"],
             "is_private": False,
             "is_owner": is_owner,
+            "today": today.isoformat(),
             "display_name": owner["display_name"],
             "avatar_url": owner["avatar_url"],
             "member_since": owner["created_at"].date().isoformat() if owner.get("created_at") else None,
@@ -155,7 +156,7 @@ class ProfileService:
             """
                 SELECT h.date, h.gamemode_id, h.won, h.guesses_count, h.is_calendar,
                        (v.id IS NOT NULL) AS viewer_finished,
-                       (h.date - first.first_day + 1) AS day_number,
+                       CASE WHEN h.date >= first.first_day THEN h.date - first.first_day + 1 END AS day_number,
                        COALESCE(al.name, i.artist_name) AS answer_name,
                        COALESCE(al.cover_path, i.image_path) AS answer_image
                 FROM daily_user_history h

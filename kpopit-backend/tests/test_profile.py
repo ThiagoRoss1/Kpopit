@@ -82,7 +82,7 @@ def test_public_profile_shows_bias_and_activity(client, db_conn, make_idol, make
         {"date": (get_today_date() - timedelta(days=1)).isoformat(), "modes": 2},
         {"date": get_today_date().isoformat(), "modes": 1},
     ]
-    assert body["history_visible"] is True
+    assert body["history_visible"] is True and body["today"] == get_today_date().isoformat()
     assert client.get("/api/profile/fanboy", headers=auth).get_json()["is_owner"] is True
 
 
