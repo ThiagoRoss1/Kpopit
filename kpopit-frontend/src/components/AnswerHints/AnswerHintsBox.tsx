@@ -13,10 +13,13 @@ interface AnswerHintsBoxProps {
     isFormerGroup?: boolean;
     attempts: number;
     gameEnded: boolean;
+    /** Keep the revealed hints in localStorage (today's game). A calendar day keeps them in memory. */
+    persist?: boolean;
 }
 
 const AnswerHintsBox = (props: AnswerHintsBoxProps) => {
-    const {memberCount, groups, isFormerGroup, attempts, gameEnded} = props;
+    const {memberCount, groups, isFormerGroup, attempts, gameEnded, persist = true} = props;
+    const stored = (key: string) => persist && localStorage.getItem(key) === "true";
 
     const memberCountDisplay = memberCount ?? "Soloist"; // == memberCount !== null ? memberCount : "Soloist"; As i'm returning Null
     const groupsDisplay = groups && groups.length > 0
@@ -28,41 +31,43 @@ const AnswerHintsBox = (props: AnswerHintsBoxProps) => {
     const CARD2 = 8;
 
     const [isFlipped1, setIsFlipped1] = useState(() => {
-        return localStorage.getItem("hint1Revealed") === "true";
+        return stored("hint1Revealed");
     });
 
     const [isFlipped2, setIsFlipped2] = useState(() => {
-        return localStorage.getItem("hint2Revealed") === "true";
+        return stored("hint2Revealed");
     });
 
     const canFlipCard1 = attempts >= CARD1 || gameEnded;
     const canFlipCard2 = attempts >= CARD2 || gameEnded;
 
     const [showHint1, setShowHint1] = useState(() => {
-        return localStorage.getItem("showHint1") === "true";
+        return stored("showHint1");
     });
     const [showHint2, setShowHint2] = useState(() => {
-        return localStorage.getItem("showHint2") === "true";
+        return stored("showHint2");
     });
 
     const [colorize1, setColorize1] = useState(() => {
-        return localStorage.getItem("colorize1") === "true";
+        return stored("colorize1");
     });
     const [colorize2, setColorize2] = useState(() => {
-        return localStorage.getItem("colorize2") === "true";
+        return stored("colorize2");
     });
 
     useEffect(() => {
+        if (!persist) return;
         if (isFlipped1) localStorage.setItem("hint1Revealed", "true");
         if (showHint1) localStorage.setItem("showHint1", "true");
         if (colorize1) localStorage.setItem("colorize1", "true");
-    }, [isFlipped1, showHint1, colorize1]);
+    }, [persist, isFlipped1, showHint1, colorize1]);
 
     useEffect(() => {
+        if (!persist) return;
         if (isFlipped2) localStorage.setItem("hint2Revealed", "true");
         if (showHint2) localStorage.setItem("showHint2", "true");
         if (colorize2) localStorage.setItem("colorize2", "true");
-    }, [isFlipped2, showHint2, colorize2]);
+    }, [persist, isFlipped2, showHint2, colorize2]);
 
     const getHintText = (attempts: number, cardThreshold: number) => {
         const remaining = cardThreshold - attempts;

@@ -5,6 +5,8 @@ import GuessRow from "./GuessRow";
 interface GuessGridProps {
     guesses: GuessResponse<Partial<FeedbackData>>[];
     onAnimationComplete?: () => void;
+    /** Remember animated rows in localStorage (today's game). A calendar day keeps them in memory. */
+    persist?: boolean;
 }
 
 const getStoredAnimatedIdols = (): Set<number> => {
@@ -20,9 +22,9 @@ const getStoredAnimatedIdols = (): Set<number> => {
 }
 
 const GuessGrid = (props: GuessGridProps) => {
-    const { guesses, onAnimationComplete } = props;
+    const { guesses, onAnimationComplete , persist = true } = props;
 
-    const [animatedIdols, setAnimatedIdols] = useState<Set<number>>(getStoredAnimatedIdols());
+    const [animatedIdols, setAnimatedIdols] = useState<Set<number>>(() => (persist ? getStoredAnimatedIdols() : new Set()));
 
     const handleIdolAnimated = (idolId: number) => {
         setAnimatedIdols(prev => {
@@ -30,7 +32,7 @@ const GuessGrid = (props: GuessGridProps) => {
 
             const updated = new Set(prev);
             updated.add(idolId);
-            localStorage.setItem("blurryAnimatedIdols", JSON.stringify(Array.from(updated)));
+            if (persist) localStorage.setItem("blurryAnimatedIdols", JSON.stringify(Array.from(updated)));
 
             return updated;
         });

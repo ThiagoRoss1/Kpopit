@@ -5,6 +5,8 @@ import PixelatedGuessRow from "./PixelatedGuessRow";
 interface PixelatedGuessGridProps {
     guesses: PixelatedGuessDetail[];
     onAnimationComplete?: () => void;
+    /** Remember animated rows in localStorage (today's game). A calendar day keeps them in memory. */
+    persist?: boolean;
 }
 
 const getStoredAnimatedAlbums = (): Set<number> => {
@@ -20,9 +22,9 @@ const getStoredAnimatedAlbums = (): Set<number> => {
 };
 
 const PixelatedGuessGrid = (props: PixelatedGuessGridProps) => {
-    const { guesses, onAnimationComplete } = props;
+    const { guesses, onAnimationComplete , persist = true } = props;
 
-    const [animatedAlbums, setAnimatedAlbums] = useState<Set<number>>(getStoredAnimatedAlbums());
+    const [animatedAlbums, setAnimatedAlbums] = useState<Set<number>>(() => (persist ? getStoredAnimatedAlbums() : new Set()));
 
     const handleAlbumAnimated = (albumId: number) => {
         setAnimatedAlbums(prev => {
@@ -30,7 +32,7 @@ const PixelatedGuessGrid = (props: PixelatedGuessGridProps) => {
 
             const updated = new Set(prev);
             updated.add(albumId);
-            localStorage.setItem("pixelatedAnimatedAlbums", JSON.stringify(Array.from(updated)));
+            if (persist) localStorage.setItem("pixelatedAnimatedAlbums", JSON.stringify(Array.from(updated)));
 
             return updated;
         });

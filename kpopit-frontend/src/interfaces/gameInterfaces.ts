@@ -359,3 +359,57 @@ export interface AlbumPageData {
   };
   discography: AlbumDiscographyItem[];
 }
+
+// The calendar (/api/calendar/*): past challenge days per mode.
+export type CalendarMode = "classic" | "blurry" | "pixelated";
+export type CalendarStatus = "not_played" | "in_progress" | "won_live" | "won_calendar";
+
+export interface CalendarTimelineDay {
+  date: string;
+  status: CalendarStatus;
+  /** Guesses made that day. */
+  guesses: number;
+  /** The answer (picture, name) and the game's XP, only on days the caller finished. */
+  image_path: string | null;
+  answer_name: string | null;
+  xp: number | null;
+}
+
+export type CalendarTimeline = Record<CalendarMode, CalendarTimelineDay[]>;
+
+export interface CalendarGuessSummary {
+  id: number;
+  name: string;
+  image_path: string | null;
+  correct: boolean;
+}
+
+export interface CalendarDayData {
+  challenge_date: string;
+  day_number: number | null;
+  mode: CalendarMode;
+  status: CalendarStatus;
+  /** What the day needs to be played (hints, blurred photo or pixelated cover). */
+  puzzle: {
+    member_count?: number | null;
+    groups?: string[];
+    is_former_group?: boolean;
+    blur_image_path?: string | null;
+    blur_image_version?: string | null;
+    cover_path?: string;
+    release_year?: number;
+    group_name?: string;
+    type?: string;
+  };
+  /** The caller's game so far, in the live pages' restore shape. */
+  game: {
+    today_guesses_details?: GuessResponse[];
+    blurry_guesses_details?: GuessResponse<Partial<FeedbackData>>[];
+    pixelated_guesses_details?: PixelatedGuessDetail[];
+    game_complete?: boolean;
+  } | null;
+  /** Only once the caller finished the day. */
+  answer: { idol_id?: number; artist_name?: string; image_path?: string | null; album_id?: number; album_name?: string } | null;
+  guesses: CalendarGuessSummary[] | null;
+  xp: number | null;
+}

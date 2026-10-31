@@ -1,5 +1,5 @@
 import axios from 'axios';
-import type { AddIdolRequest, CompleteGuessTrafficRequest, RestoreSessionResponse, PixelatedGameData, PixelatedGuessPayload, AlbumSearchResult, AlbumsPageItem, AlbumPageData } from '../interfaces/gameInterfaces';
+import type { AddIdolRequest, CompleteGuessTrafficRequest, RestoreSessionResponse, PixelatedGameData, PixelatedGuessPayload, AlbumSearchResult, AlbumsPageItem, AlbumPageData, CalendarDayData, CalendarMode, CalendarTimeline } from '../interfaces/gameInterfaces';
 import type { CollectionAlbumGroup, CollectionListItem } from '../interfaces/albumInterfaces';
 import type { MeResponse, UpdateProfilePayload } from '../interfaces/authInterfaces';
 import { decryptToken } from '../utils/tokenEncryption';
@@ -304,6 +304,29 @@ export const getAlbumInfo = async (albumId: number): Promise<AlbumPageData> => {
     const response = await api.get(`/albums-page/${albumId}`);
     return response.data;
 }
+
+// The calendar answers for the player's own token (anonymous players included), like the daily routes.
+const playerHeaders = async (): Promise<Record<string, string>> => {
+    const encrypted = localStorage.getItem('userToken');
+    const token = encrypted ? await decryptToken(encrypted) : null;
+    return token ? { 'Authorization': token } : {};
+};
+
+export const getCalendarTimeline = async (): Promise<CalendarTimeline> => {
+    const response = await api.get('/calendar/timeline', { headers: await playerHeaders() });
+    return response.data;
+};
+
+export const getCalendarDay = async (mode: CalendarMode, date: string): Promise<CalendarDayData> => {
+    const response = await api.get(`/calendar/${mode}/${date}`, { headers: await playerHeaders() });
+    return response.data;
+};
+
+export const postCalendarGuess = async (mode: CalendarMode, date: string, guessedId: number) => {
+    const body = mode === "pixelated" ? { guessed_album_id: guessedId } : { guessed_idol_id: guessedId };
+    const response = await api.post(`/calendar/${mode}/${date}/guess`, body, { headers: await playerHeaders() });
+    return response.data;
+};
 
 // Get entire idol data for a specific idol
 export const getIdolInfo = async (idol_id: number) => {

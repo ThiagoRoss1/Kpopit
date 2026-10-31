@@ -10,6 +10,8 @@ interface GuessesGridProps {
   guesses: GuessResponse[];
   allIdols: IdolListItem[];
   onAllAnimationsComplete: () => void;
+  /** Remember animated rows in localStorage (today's game). A calendar day keeps them in memory. */
+  persist?: boolean;
 }
 
 const headers = [
@@ -36,9 +38,9 @@ const getStoredAnimatedIdols = (): Set<number> => {
 }
 
 const GuessesGrid = React.memo((props: GuessesGridProps) => {
-  const { guesses, onAllAnimationsComplete } = props; 
+  const { guesses, onAllAnimationsComplete , persist = true } = props; 
 
-  const [animatedIdols, setAnimatedIdols] = useState<Set<number>>(getStoredAnimatedIdols());
+  const [animatedIdols, setAnimatedIdols] = useState<Set<number>>(() => (persist ? getStoredAnimatedIdols() : new Set()));
 
   const handleIdolAnimated = (idolId: number) => {
     setAnimatedIdols(prev => {
@@ -46,7 +48,7 @@ const GuessesGrid = React.memo((props: GuessesGridProps) => {
       
       const updated = new Set(prev);
       updated.add(idolId);
-      localStorage.setItem("animatedIdols", JSON.stringify(Array.from(updated)));
+      if (persist) localStorage.setItem("animatedIdols", JSON.stringify(Array.from(updated)));
       return updated;
     });
   };
