@@ -55,6 +55,8 @@ test.describe('every route loads @mobile', () => {
 
   test('an idol page loads from the idols list @smoke', async ({ page, consoleErrors }) => {
     await page.goto('/idols');
+    // Let the list's requests finish: WebKit reports requests cut by a navigation as errors.
+    await page.waitForLoadState('networkidle');
     const first = page.locator('a[href^="/idols/"]').first();
     const href = await first.getAttribute('href');
     expect(href).toMatch(/^\/idols\/\d+\/[\w-]+$/);
@@ -66,6 +68,8 @@ test.describe('every route loads @mobile', () => {
 
   test('an album page loads from the collections list @smoke', async ({ page, consoleErrors }) => {
     await page.goto('/collections');
+    // Let the list's requests finish: WebKit reports requests cut by a navigation as errors.
+    await page.waitForLoadState('networkidle');
     const link = page.locator('a[href^="/collections/"]').first();
     const href = await link.getAttribute('href');
     expect(href).toMatch(/^\/collections\/\d+\/[\w-]+$/);
@@ -135,6 +139,10 @@ test.describe('navbar, footer and home modals', () => {
       await nav.getByRole('button', { name: menu, exact: true }).click();
       await nav.getByRole('menuitem', { name: new RegExp(`^${item}`) }).click();
       await expect(page).toHaveURL(url);
+      // The URL changes before a heavy page (e.g. 300 album cards) commits, and a menu opened in
+      // between belongs to the old page: wait for the navbar's page label of the new one.
+      const label = item === 'All idols' ? 'idols' : item.toLowerCase();
+      await expect(nav.getByRole('link', { name: 'KpopIt home' })).toContainText(label);
     }
     await nav.getByRole('link', { name: 'Collections' }).click();
     await expect(page).toHaveURL(/\/collections$/);

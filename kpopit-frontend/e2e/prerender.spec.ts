@@ -50,10 +50,10 @@ test.describe('prerendered pages without JavaScript', () => {
 
   test('/idols has its meta and the idol list in the HTML', async ({ request }) => {
     const html = await (await request.get(`${PREVIEW}/idols`)).text();
-    expect(attr(html, /<title>([^<]*)<\/title>/)).toBe('KpopIt - Idols List');
+    expect(attr(html, /<title>([^<]*)<\/title>/)).toBe('K-pop idols in KpopIt: every idol in the daily game');
     expect(html.match(/<title>/g)).toHaveLength(1);
     expect(meta(html, 'description')).toContain('K-pop idol');
-    expect(meta(html, 'og:title')).toBe('KpopIt - Idols List');
+    expect(meta(html, 'og:title')).toBe('K-pop idols in KpopIt: every idol in the daily game');
     expect(meta(html, 'og:description')).toBeTruthy();
     expect(html).toContain(idol.artist_name);
     expect(html).toContain(`/idols/${idol.id}/${slug(idol)}`);

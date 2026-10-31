@@ -200,7 +200,9 @@ test.describe('idols navigation @mobile', () => {
     if (isMobile) await card.dispatchEvent('touchstart');
     else await card.hover();
     await page.waitForTimeout(isMobile ? 120 : 300);
-    await press(isMobile, card);
+    // The hovered card lifts and untilts: a plain click would first wait ~1 s for it to settle.
+    if (isMobile) await press(isMobile, card);
+    else await card.click({ force: true });
     await expect(page.getByRole('img', { name: `${target.artist_name} photo` })).toBeVisible({ timeout: 10_000 });
 
     const clicked = (await clickAt(page))!;

@@ -2,8 +2,9 @@
 // stays, so a late answer never flashes it for a frame.
 export const NAVIGATION_HOLD_MS = 200;
 export const MIN_LOADER_MS = 500;
-// The loading screen paints a frame or two after the route loader returns; the minimum counts from the paint.
-const PAINT_MARGIN_MS = 50;
+// The loading screen paints a few frames after the route loader returns (unmounting a long list
+// takes ~100 ms on a phone); the minimum counts from the paint.
+const PAINT_MARGIN_MS = 120;
 
 const sleep = (ms: number) => new Promise<void>((resolve) => setTimeout(resolve, ms));
 
