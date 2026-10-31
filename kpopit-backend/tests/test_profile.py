@@ -33,14 +33,26 @@ def played(db_conn, user_id, days_ago, won=True, gamemode_id=1):
     db_conn.commit()
 
 
-def test_new_accounts_are_public_with_match_history_private(client):
+def test_new_accounts_are_public_with_match_history_shown(client):
     _, auth = register(client, "newbie")
     assert client.get("/api/user/profile/settings", headers=auth).get_json() == {
         "bias_idol_id": None, "bias_group_id": None,
-        "is_public": True, "show_match_history": False, "show_activity": True,
+        "is_public": True, "show_match_history": True, "show_activity": True,
     }
     me = client.get("/api/auth/me", headers=auth).get_json()["profile"]
-    assert me["visibility"] == {"is_public": True, "show_match_history": False, "show_activity": True}
+    assert me["visibility"] == {"is_public": True, "show_match_history": True, "show_activity": True}
+
+
+def test_match_history_default_applies_to_new_rows_only(client, db_conn):
+    user_id, auth = register(client, "veteran")
+    settings(client, auth, show_match_history=False)
+    with db_conn.cursor() as cur:
+        cur.execute("SELECT column_default FROM information_schema.columns "
+                    "WHERE table_name = 'user_profiles' AND column_name = 'show_match_history'")
+        assert cur.fetchone()["column_default"] == "true"
+    # Logging in again (no new profile row) keeps the owner's choice.
+    client.post("/api/auth/login", json={"username": "veteran", "password": PASSWORD})
+    assert client.get("/api/user/profile/settings", headers=auth).get_json()["show_match_history"] is False
 
 
 def test_claimed_accounts_get_the_same_defaults(client, make_user):
@@ -49,7 +61,7 @@ def test_claimed_accounts_get_the_same_defaults(client, make_user):
                       headers={"Authorization": token})
     auth = {"Authorization": f"Bearer {res.get_json()['access_token']}"}
     body = client.get("/api/user/profile/settings", headers=auth).get_json()
-    assert (body["is_public"], body["show_match_history"], body["show_activity"]) == (True, False, True)
+    assert (body["is_public"], body["show_match_history"], body["show_activity"]) == (True, True, True)
 
 
 def test_public_profile_shows_bias_stats_and_activity(client, db_conn, make_idol, make_group):
@@ -66,7 +78,7 @@ def test_public_profile_shows_bias_stats_and_activity(client, db_conn, make_idol
     assert [day["date"] for day in body["activity"]] == [
         (get_today_date() - timedelta(days=1)).isoformat(), get_today_date().isoformat()]
     assert body["activity"][0] == {"date": body["activity"][0]["date"], "games": 1, "wins": 1}
-    assert body["match_history"] is None
+    assert len(body["match_history"]) == 2  # shown by default since 035
 
 
 @pytest.mark.parametrize(("toggle", "section"), [("show_match_history", "match_history"), ("show_activity", "activity")])
