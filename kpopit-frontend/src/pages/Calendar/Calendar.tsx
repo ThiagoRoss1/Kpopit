@@ -273,7 +273,7 @@ function DayCell({ d, index, selected, mode, onPick }: { d: CalendarDay; index: 
                 className="relative flex-1 rounded-[10px] overflow-hidden grid place-items-center"
                 style={{
                     border: done ? "2px solid var(--ink)" : 0,
-                    background: done ? "var(--panel)" : d.kind === "today" ? "rgba(255,51,153,.12)" : d.kind === "started" ? "var(--face)" : off ? "transparent" : "var(--opt-hover)",
+                    backgroundColor: done ? "var(--panel)" : d.kind === "today" ? "rgba(255,51,153,.12)" : d.kind === "started" ? "var(--face)" : off ? "transparent" : "var(--opt-hover)",
                     backgroundImage: d.kind === "started" ? STRIPES : "none",
                 }}
             >
@@ -323,7 +323,7 @@ function DotCell({ d, selected, today, mode, onPick }: { d: CalendarDay; selecte
             <div className="relative w-8 h-8 rounded-full overflow-hidden grid place-items-center"
                 style={{
                     border: done || d.kind === "started" ? "2px solid var(--ink)" : d.kind === "unplayed" || d.kind === "today" ? "2px solid var(--rule)" : "2px solid transparent",
-                    background: done ? "var(--panel)" : d.kind === "today" ? "rgba(255,51,153,.12)" : off ? "transparent" : "var(--face)",
+                    backgroundColor: done ? "var(--panel)" : d.kind === "today" ? "rgba(255,51,153,.12)" : off ? "transparent" : "var(--face)",
                     backgroundImage: d.kind === "started" ? STRIPES_SMALL : "none",
                 }}>
                 {done && d.entry?.image_path && <img src={img(d.entry.image_path)} alt="" loading="lazy" className="absolute inset-0 w-full h-full object-cover" />}
@@ -356,7 +356,7 @@ function Legend() {
             </div>
             <div className="[display:var(--lgm)] flex-wrap justify-center gap-x-3.5 gap-y-2 pt-1.5">
                 {[["Guessed live", "2px solid var(--ink)", "var(--panel)", "none"], ["Started", "2px solid var(--ink)", "var(--face)", STRIPES_SMALL], ["Not played", "2px solid var(--rule)", "var(--face)", "none"]].map(([k, ring, bg, bi]) => (
-                    <span key={k} className="flex items-center gap-1.5 font-medium text-xs text-(--muted)"><span className="w-3.5 h-3.5 rounded-full" style={{ border: ring, background: bg, backgroundImage: bi }} />{k}</span>
+                    <span key={k} className="flex items-center gap-1.5 font-medium text-xs text-(--muted)"><span className="w-3.5 h-3.5 rounded-full" style={{ border: ring, backgroundColor: bg, backgroundImage: bi }} />{k}</span>
                 ))}
                 <span className="flex items-center gap-1.5 font-medium text-xs text-(--muted)"><CalendarCheck className="w-3 h-3" strokeWidth={3} aria-hidden />From the calendar</span>
                 <span className="flex items-center gap-1.5 font-medium text-xs text-(--muted)"><span className="w-2 h-2 rounded-full bg-[#FF3399]" />Today</span>
