@@ -84,18 +84,31 @@ class CalendarService:
         for name, gamemode_id in MODES.items():
             cursor.execute(
                 """
-                    SELECT dp.pick_date, h.guessed_ids, h.guesses_count, h.won, h.is_calendar
+                    SELECT dp.pick_date, h.guessed_ids, h.guesses_count, h.won, h.is_calendar, h.one_shot_win,
+                        COALESCE(al.cover_path, i.image_path) AS answer_image,
+                        COALESCE(al.name, i.artist_name) AS answer_name
                     FROM daily_picks dp
                     LEFT JOIN daily_user_history h
                         ON h.date = dp.pick_date AND h.gamemode_id = dp.gamemode_id AND h.user_id = %s
+                    LEFT JOIN idols i ON i.id = dp.idol_id
+                    LEFT JOIN albums al ON al.id = dp.album_id
                     WHERE dp.gamemode_id = %s AND dp.pick_date <= %s
                     ORDER BY dp.pick_date
                 """, (user_id, gamemode_id, today),
             )
-            result[name] = [
-                {"date": row["pick_date"].isoformat(), "status": day_status(row if row["won"] is not None else None)}
-                for row in cursor.fetchall()
-            ]
+            result[name] = []
+            for row in cursor.fetchall():
+                status = day_status(row if row["won"] is not None else None)
+                # The answer (picture, name) and the game's XP only for days the caller finished.
+                finished = status in (WON_LIVE, WON_CALENDAR)
+                result[name].append({
+                    "date": row["pick_date"].isoformat(),
+                    "status": status,
+                    "image_path": row["answer_image"] if finished else None,
+                    "answer_name": row["answer_name"] if finished else None,
+                    "guesses": len(row["guessed_ids"] or []) or row["guesses_count"] or 0,
+                    "xp": game_xp(row) if finished else None,
+                })
         return result
 
     def day(self, cursor, user_id: int, mode: str, raw_day: str) -> dict:

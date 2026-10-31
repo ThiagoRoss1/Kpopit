@@ -201,12 +201,20 @@ def test_anonymous_players_can_play_and_need_a_token(client, make_user, week):
     assert client.post(f"/api/calendar/classic/{day(-1)}/guess", json={"guessed_idol_id": week[-1]}).status_code == 400
 
 
-def test_timeline_statuses(client, make_user, week):
+def test_timeline_statuses(client, db_conn, make_user, week):
     _, token = make_user()
+    with db_conn.cursor() as cur:
+        cur.execute("UPDATE idols SET image_path = '/images/idols/' || id || '.webp'")
+    db_conn.commit()
     live_guess(client, token, week[0])
     cal_guess(client, token, -1, week[-1])
     cal_guess(client, token, -3, week["wrong"])
     timeline = client.get("/api/calendar/timeline", headers={"Authorization": token}).get_json()
+    # The answer's picture only on finished days.
+    assert [bool(d["image_path"]) for d in timeline["classic"]] == [False, False, False, True, True]
+    assert [d["answer_name"] for d in timeline["classic"]] == [None, None, None, "Answer -1", "Answer 0"]
+    assert [d["xp"] for d in timeline["classic"]] == [None, None, None, 5, 14]
+    assert timeline["classic"][1]["guesses"] == 1  # started, the wrong guess
     assert [(d["date"], d["status"]) for d in timeline["classic"]] == [
         (day(-4), "not_played"), (day(-3), "in_progress"), (day(-2), "not_played"),
         (day(-1), "won_calendar"), (day(0), "won_live"),
