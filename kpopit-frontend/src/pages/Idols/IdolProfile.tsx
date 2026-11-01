@@ -107,8 +107,7 @@ function IdolPage({ data, idols }: { data: IdolProfileData; idols: IdolsPageData
                 social={{ title: `${nameWithGroup} · KpopIt`, description: `Stats, profile and career info for ${ofGroup}.` }}
                 jsonLd={jsonLd}
             />
-            <div className="ip-inner relative isolate overflow-clip min-h-full bg-(--ground) text-(--text) px-(--pad-x) pb-9 transition-colors duration-300">
-                <div aria-hidden className="absolute inset-0 -z-2 pointer-events-none bg-[radial-gradient(circle,var(--dot)_1.4px,transparent_1.8px)] bg-size-[19px_19px]" />
+            <div className="ip-inner relative isolate overflow-clip min-h-full text-(--text) px-(--pad-x) pb-9 transition-colors duration-300">
                 <div aria-hidden className="absolute -left-[30%] -right-[30%] top-(--band-top) h-[300px] -z-1 bg-(--band) -rotate-9 pointer-events-none" />
                 <div aria-hidden className="absolute -left-[30%] -right-[30%] top-[calc(var(--band-top)+316px)] h-3 -z-1 bg-[#FF3399] opacity-45 -rotate-9 pointer-events-none" />
                 <div aria-hidden className="absolute -left-[30%] -right-[30%] top-[calc(var(--band-top)+334px)] h-1 -z-1 bg-(--band) opacity-45 -rotate-9 pointer-events-none" />

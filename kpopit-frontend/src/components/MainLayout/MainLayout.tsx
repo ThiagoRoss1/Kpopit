@@ -44,7 +44,10 @@ const MainLayout = () => {
     const navTheme = matches.map((match) => (match.handle as { navTheme?: "day" } | undefined)?.navTheme).find(Boolean);
 
     return (
-        <div className={`min-h-screen flex flex-col text-foreground selection:bg-pink-800 ${puff ? "bg-(--ground)" : "bg-transparent"}`}>
+        // The page ground (and its dots) is painted once here, so it runs under the navbar and the
+        // footer too; pages draw on top of it instead of painting their own.
+        <div className={`relative isolate min-h-screen flex flex-col text-foreground selection:bg-pink-800 ${puff ? "bg-(--ground) transition-colors duration-300" : "bg-transparent"}`}>
+            {puff && <div aria-hidden className="absolute inset-0 -z-10 pointer-events-none bg-[radial-gradient(circle,var(--dot)_1.4px,transparent_1.8px)] bg-size-[19px_19px]" />}
             <NavBarV2 forceTheme={puff ? undefined : navTheme ?? "night"} />
             
             {/* Notices */}
