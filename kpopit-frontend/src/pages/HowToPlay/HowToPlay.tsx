@@ -9,6 +9,7 @@ import useResetTimer from "../../hooks/useResetTimer";
 import { HOW_TO_PLAY } from "../../content/howToPlay";
 import { BLUR_LEVELS } from "../BlurryMode/blurLevels";
 import { PIXEL_LEVELS } from "../../utils/pixelLevels";
+import PixelatedCanvas from "../../components/Pixelated/PixelatedCanvas";
 import { resolveCdnUrl } from "../../utils/imageUrl";
 import { cn } from "../../lib/utils";
 import { CLASSIC_EXAMPLE, CATEGORIES, FEEDBACK, HINT_AT, MODES, parseMode, type HowToMode } from "./howToPlayData";
@@ -91,8 +92,8 @@ function GuessStepper({ value, max, onChange }: { value: number; max: number; on
 
 function Tile({ tone, children, arrow }: { tone: keyof typeof FEEDBACK; children: ReactNode; arrow?: boolean }) {
     return (
-        <span className="htp-tile relative grid place-items-center min-h-14 px-1.5 rounded-[12px] border-2 border-[#1A1418] text-[#1A1418] font-bold text-[11.5px] leading-tight text-center whitespace-pre-line" style={{ background: FEEDBACK[tone].bg, boxShadow: `inset 0 -3px 0 ${FEEDBACK[tone].edge}` }}>
-            {arrow && <ArrowUp aria-hidden className="absolute inset-0 m-auto w-9 h-9 opacity-25" strokeWidth={3} />}
+        <span className="htp-tile relative grid place-items-center aspect-square px-1.5 rounded-[14px] border-2 border-[#1A1418] text-[#1A1418] font-bold text-[12.5px] leading-tight text-center whitespace-pre-line" style={{ background: FEEDBACK[tone].bg, boxShadow: `inset 0 -3px 0 ${FEEDBACK[tone].edge}` }}>
+            {arrow && <ArrowUp aria-hidden className="absolute inset-0 m-auto w-12 h-12 opacity-25" strokeWidth={3} />}
             <span className="relative">{children}</span>
         </span>
     );
@@ -156,14 +157,14 @@ function ClassicGuide() {
                     </PressButton>
                 </div>
                 <div className="htp-scroll overflow-x-auto pb-2">
-                    <div className="grid grid-cols-[repeat(8,minmax(82px,1fr))] gap-1.5 min-w-[700px]">
+                    <div className="grid grid-cols-[repeat(8,minmax(76px,112px))] justify-center gap-2 min-w-[660px]">
                         {CLASSIC_EXAMPLE.columns.map((c) => (
                             <span key={c} className="text-center font-semibold text-[11px] tracking-[.06em] text-(--muted) pb-1 border-b-2 border-(--rule)">{c}</span>
                         ))}
                         {rows.flatMap((row) => [
-                            <span key={`${row.name}-idol`} className="htp-tile relative rounded-[12px] border-2 border-[#1A1418] overflow-hidden min-h-14 bg-[#FFE3F1]">
+                            <span key={`${row.name}-idol`} className="htp-tile relative aspect-square rounded-[14px] border-2 border-[#1A1418] overflow-hidden bg-[#FFE3F1]">
                                 <img src={resolveCdnUrl(row.image) ?? ""} alt="" className="absolute inset-0 w-full h-full object-cover" />
-                                <span className="absolute inset-x-0 bottom-0 bg-[#1A1418]/70 text-white font-bold text-[10px] leading-tight px-1 py-0.5 truncate">{row.name}</span>
+                                <span className="absolute inset-x-0 bottom-0 bg-[#1A1418]/70 text-white font-bold text-[11px] leading-tight px-1 py-1 truncate text-center">{row.name}</span>
                             </span>,
                             ...row.cells.map((cell, i) => (
                                 <Tile key={`${row.name}-${i}`} tone={cell.tone} arrow={cell.arrow}>{cell.value}</Tile>
@@ -302,9 +303,6 @@ function BlurryGuide() {
 function PixelatedGuide() {
     const [guesses, setGuesses] = useState(0);
     const [open, setOpen] = useState([false, false]);
-    // A tiny render scaled up with pixelated sampling: the same blocky look as the game, no canvas.
-    const grid = Math.max(4, Math.round(1000 / PIXEL_LEVELS[Math.min(guesses, PIXEL_LEVELS.length - 1)]));
-    const sharp = guesses >= PIXEL_LEVELS.length - 1;
     const sleeves = [
         { label: "Release Year", ko: "발매년도", value: "2022", at: HINT_AT.pixelated[0], bg: "#E4E4E4", ink: "#72401A" },
         { label: "Artist", ko: "가수", value: "IVE", at: HINT_AT.pixelated[1], bg: "#FFD1E8", ink: "#5A1A48" },
@@ -314,14 +312,13 @@ function PixelatedGuide() {
             <section className={CARD}>
                 <div className="grid grid-cols-[minmax(0,340px)_minmax(0,1fr)] gap-7 items-center @max-[760px]:grid-cols-1 @max-[760px]:gap-5">
                     <div className="flex flex-col gap-3.5">
-                        <div className="relative aspect-square rounded-[18px] border-[2.5px] border-[#1A1418] overflow-hidden bg-[#DCD6D2] [box-shadow:4px_5px_0_var(--ctl-off)] [container-type:size]">
-                            <img
-                                src={resolveCdnUrl("/images/albums/after_like.webp") ?? ""}
+                        <div className="relative aspect-square rounded-[18px] border-[2.5px] border-[#1A1418] overflow-hidden bg-[#DCD6D2] [box-shadow:4px_5px_0_var(--ctl-off)]">
+                            {/* The game's own mosaic canvas, so each step looks exactly like that attempt in Pixelated. */}
+                            <PixelatedCanvas
+                                imageUrl={resolveCdnUrl("/images/albums/after_like.webp") ?? undefined}
+                                blockSize={PIXEL_LEVELS[Math.min(guesses, PIXEL_LEVELS.length - 1)]}
                                 alt="Pixelated album cover"
-                                width={sharp ? undefined : grid}
-                                height={sharp ? undefined : grid}
-                                className={cn("absolute top-0 left-0 origin-top-left", sharp ? "w-full h-full object-cover" : "[image-rendering:pixelated]")}
-                                style={sharp ? undefined : { width: grid, height: grid, transform: `scale(calc(100cqw / ${grid}px))` }}
+                                className="absolute inset-0 w-full h-full"
                             />
                         </div>
                         <GuessStepper value={guesses} max={PIXEL_LEVELS.length - 1} onChange={setGuesses} />
