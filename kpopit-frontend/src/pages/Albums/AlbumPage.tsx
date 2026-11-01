@@ -13,6 +13,7 @@ import { buildAlbumSlug } from "../../utils/formatters";
 import type { AlbumDiscographyItem, AlbumPageData } from "../../interfaces/gameInterfaces";
 import { albumPath, albumQuery, languageFlag, shortType } from "./albumsData";
 import "./albumPage.css";
+import FadeImg from "../../components/FadeImg";
 
 const MONTHS = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
 const ordinal = (n: number) => {
@@ -152,7 +153,7 @@ function Album({ album }: { album: AlbumPageData }) {
                             <Record cover={cover} />
                             <div className="ap-in-dropt absolute left-0 top-0 w-[80%] aspect-square rounded-[18px] border-[2.5px] border-[#1A1418] overflow-hidden bg-[#DCD6D2] [box-shadow:5px_7px_0_var(--side),5px_7px_0_2.5px_#1A1418]">
                                 <span aria-hidden className="absolute inset-0 grid place-items-center font-bold text-[64px] leading-none text-[rgba(26,20,24,.28)]">♪</span>
-                                <img src={cover} alt={`${album.name} cover`} className="ap-cimg relative block w-full h-full object-cover" />
+                                <FadeImg src={cover} alt={`${album.name} cover`} className="ap-cimg relative block w-full h-full object-cover" />
                                 <div aria-hidden className="ap-sweep absolute top-0 bottom-0 -left-[60%] w-[220%] pointer-events-none bg-[linear-gradient(118deg,rgba(255,255,255,0)_40%,rgba(255,255,255,.2)_47%,rgba(255,255,255,.06)_51%,rgba(255,255,255,0)_57%)]" />
                                 <div aria-hidden className="absolute -right-[30px] -bottom-[30px] w-[150px] h-[150px] pointer-events-none bg-[radial-gradient(circle,rgba(255,253,250,.85)_2px,transparent_2.4px)] bg-size-[9px_9px] [mask-image:radial-gradient(circle_at_100%_100%,#000_0%,transparent_62%)]" />
                             </div>
@@ -265,7 +266,7 @@ function Album({ album }: { album: AlbumPageData }) {
                                                 className="ap-face ap-focus relative block w-full text-left no-underline bg-(--face) text-(--text) border-2 border-(--ink) rounded-[20px] pt-1.5 px-1.5 pb-[11px] [box-shadow:var(--face-hl)]">
                                                 <div className="relative aspect-square rounded-[14px] border-[1.5px] border-(--ink) overflow-hidden bg-[#DCD6D2]">
                                                     <span aria-hidden className="absolute inset-0 grid place-items-center font-bold text-[32px] leading-none text-[rgba(26,20,24,.28)]">♪</span>
-                                                    <img src={resolveCdnUrl(a.cover_path) ?? ""} alt="" loading="lazy" decoding="async" className="ap-mimg relative block w-full h-full object-cover" />
+                                                    <FadeImg src={resolveCdnUrl(a.cover_path) ?? ""} alt="" loading="lazy" decoding="async" className="ap-mimg relative block w-full h-full object-cover" />
                                                 </div>
                                                 <div className="mt-2 px-1 pb-px font-bold text-[13px] leading-[1.3] overflow-hidden text-ellipsis whitespace-nowrap">{a.name}</div>
                                                 <div className="pt-[3px] px-1 font-semibold text-[11px] leading-[1.3] text-(--muted)">{`${typeLabel(a.type)} · ${a.release_year}`}</div>

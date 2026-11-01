@@ -16,6 +16,7 @@ import { buildIdolSlug } from "../../utils/formatters";
 import { groupLabel, idolProfileQuery, idolsListQuery, prefetchIdolProfile, prefetchIdolsList } from "./idolsData";
 import { buildFacts, relatedIdols, type Fact, type FactChip, type TabKey } from "./idolFacts";
 import IdolSearch from "./IdolSearch";
+import FadeImg from "../../components/FadeImg";
 
 const TABS: [TabKey, string][] = [["profile", "Profile"], ["career", "Career"], ["status", "Status"]];
 const NO_IDOLS: IdolsPageData[] = [];
@@ -132,7 +133,7 @@ function IdolPage({ data, idols }: { data: IdolProfileData; idols: IdolsPageData
                         <div className="ip-in-photo relative">
                             <div className="ip-photo relative -rotate-3 border-[3px] border-[#1A1418] rounded-[30px] bg-[#1A1418] [box-shadow:8px_8px_0_#FF8AC4,8px_8px_0_3px_#1A1418] aspect-[4/5]">
                                 <div className="absolute inset-0 overflow-hidden rounded-[27px] [clip-path:inset(0_round_27px)] isolate">
-                                    <img src={cdnImage ?? ""} alt={`${artistName} photo`} draggable={false} className="w-full h-full object-cover block" />
+                                    <FadeImg src={cdnImage ?? ""} alt={`${artistName} photo`} draggable={false} className="w-full h-full object-cover block" />
                                     <div aria-hidden className="ip-sweep absolute top-0 bottom-0 -left-[60%] w-[220%] pointer-events-none bg-[linear-gradient(118deg,rgba(255,255,255,0)_40%,rgba(255,255,255,.13)_47%,rgba(255,255,255,.04)_51%,rgba(255,255,255,0)_57%)]" />
                                     <div aria-hidden className="absolute inset-0 pointer-events-none mix-blend-screen bg-[radial-gradient(ellipse_85%_50%_at_82%_-4%,rgba(255,138,196,.24),rgba(255,138,196,0)_70%)]" />
                                 </div>
@@ -332,7 +333,7 @@ function Related({ idols }: { idols: IdolsPageData[] }) {
                         style={{ transform: `rotate(${k % 2 ? 0.8 : -0.8}deg)` }}
                     >
                         <span className="block aspect-square border-[2.5px] border-[#1A1418] rounded-[12px] overflow-hidden bg-[#1A1418]">
-                            <img src={`${import.meta.env.VITE_IMAGE_BUCKET_URL}${idol.image_path}?v=${idol.image_version}`} alt="" loading="lazy" decoding="async" className="w-full h-full object-cover block" />
+                            <FadeImg src={`${import.meta.env.VITE_IMAGE_BUCKET_URL}${idol.image_path}?v=${idol.image_version}`} alt="" loading="lazy" decoding="async" className="w-full h-full object-cover block" />
                         </span>
                         <span className="flex flex-col gap-[5px] px-1 min-w-0">
                             <span className="block font-bold text-2xl leading-none text-white [text-shadow:var(--puff-value)] puff-ink pr-1 pb-[5px] whitespace-nowrap overflow-hidden text-ellipsis">{idol.artist_name}</span>

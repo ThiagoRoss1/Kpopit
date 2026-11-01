@@ -4,6 +4,7 @@ import { getNationalityFlag } from "../../utils/getFlags";
 import type { IdolsPageData } from "../../interfaces/gameInterfaces";
 import { groupLabel, nationalities, prefetchIdolProfile } from "./idolsData";
 import "../../components/Catalogue/catalogue.css";
+import FadeImg from "../../components/FadeImg";
 
 /** A photo card: tilted, lifts on hover and presses into its pink depth; flags on the photo. */
 export default function IdolCard({ idol, index, animate }: { idol: IdolsPageData; index: number; animate: boolean }) {
@@ -22,7 +23,7 @@ export default function IdolCard({ idol, index, animate }: { idol: IdolsPageData
                     <div className="relative aspect-[1/1.04]">
                         <div className="absolute inset-0 rounded-[calc(var(--cg-r)-7px)] border-[1.5px] border-(--ink) overflow-hidden bg-[#DCD6D2]">
                             <span aria-hidden className="absolute inset-0 grid place-items-center font-bold text-[40px] leading-none text-[rgba(26,20,24,.28)]">{idol.artist_name[0]}</span>
-                            <img
+                            <FadeImg
                                 src={`${import.meta.env.VITE_IMAGE_BUCKET_URL}${idol.image_path}?v=${idol.image_version}`}
                                 alt={idol.artist_name}
                                 loading="lazy"
