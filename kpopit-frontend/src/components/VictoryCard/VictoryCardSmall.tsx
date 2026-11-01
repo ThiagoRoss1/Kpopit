@@ -116,8 +116,8 @@ const VictoryCardSmall = <T = FeedbackData, >(props: VictoryCardSmallProps<T>) =
                 {/* Icons Container */}
                 <div className="relative w-full h-25 sm:h-25 mb-2">
                     <div className="absolute flex items-center justify-center top-0 right-4 w-10 h-10 sm:w-10 sm:h-10 rounded-full bg-transparent mt-2.5">
-                        <button className="flex items-center justify-center hover:scale-115 w-full h-full transform duration-500 hover:brightness-110 transform-gpu hover:cursor-pointer" onClick={onClose}>
-                            <X size={20} color="white" strokeWidth={3} absoluteStrokeWidth className="w-5 h-5 sm:w-5 sm:h-5 opacity-50 hover:opacity-100 transform duration-500 transform-gpu" />
+                        <button className="flex items-center justify-center hover:scale-115 w-full h-full transform duration-500 hover:brightness-110 hover:cursor-pointer" onClick={onClose}>
+                            <X size={20} color="white" strokeWidth={3} absoluteStrokeWidth className="w-5 h-5 sm:w-5 sm:h-5 opacity-50 hover:opacity-100 transform duration-500" />
                         </button>
                     </div>
                     
@@ -154,22 +154,22 @@ const VictoryCardSmall = <T = FeedbackData, >(props: VictoryCardSmallProps<T>) =
                     {/* Idol Container */}
                     <div className="flex w-full items-center justify-center h-25 sm:h-25 mb-4">
                         <div className={`relative flex items-center justify-center ${isOnMobile ? "bg-black/80" : "bg-black/70"} max-xxs:w-75 max-xxs:h-24 xxs:w-80 xxs:h-24 p-5 sm:w-80 sm:h-24 sm:p-5 rounded-[20px]
-                        hover:scale-105 hover:bg-black hover:brightness-110 hover:cursor-default transform duration-300 transform-gpu`}> {/* Maybe shadow-2xl or lg */}
+                        hover:scale-105 hover:bg-black hover:brightness-110 hover:cursor-default transform duration-300`}> {/* Maybe shadow-2xl or lg */}
 
-                            <div className="absolute left-5 flex items-center justify-center h-20 w-20 sm:h-20 sm:w-20 bg-transparent rounded-[20px] hover:scale-110 hover:rotate-4 transition-transform duration-500 will-change-transform transform-gpu">
+                            <div className="absolute left-5 flex items-center justify-center h-20 w-20 sm:h-20 sm:w-20 bg-transparent rounded-[20px] hover:scale-110 hover:rotate-4 transition-transform duration-500">
                                 <Link
                                     to={`/idols/${cardInfo.idol_id}/${buildIdolSlug(cardInfo.artist_name, cardInfo.active_group)}`}>
                                     <Img 
                                         src={`${import.meta.env.VITE_IMAGE_BUCKET_URL}${cardInfo.image_path}?v=${cardInfo.image_version}`} 
                                         alt="Idol" 
-                                        className="w-20 h-20 sm:w-full sm:h-full rounded-[20px] object-cover object-top transform-gpu" 
+                                        className="w-20 h-20 sm:w-full sm:h-full rounded-[20px] object-cover object-top" 
                                         draggable={false} 
                                     />
                                 </Link>
                             </div>
 
                             <div className="ml-20 flex flex-col text-center items-center justify-center w-full gap-0.5">
-                                <p className="font-bold text-[20px] sm:text-[22px] bg-linear-to-b from-[#b43777] to-[#ce757a] shadow-2xl drop-shadow-2xl text-transparent bg-clip-text transform-gpu backface-visibility-hidden">
+                                <p className="font-bold text-[20px] sm:text-[22px] bg-linear-to-b from-[#b43777] to-[#ce757a] shadow-2xl drop-shadow-2xl text-transparent bg-clip-text backface-visibility-hidden">
                                     {cardInfo.artist_name}
                                 </p>
                                 <p className="text-base sm:text-[16px] leading-tight bg-linear-to-b from-[#ce757a] to-white brightness-105 text-transparent bg-clip-text">
@@ -183,7 +183,7 @@ const VictoryCardSmall = <T = FeedbackData, >(props: VictoryCardSmallProps<T>) =
                     <div className="flex w-full items-center justify-center h-20 sm:h-20 mb-4">
                         <div className="flex flex-row items-center justify-between max-xxs:px-3 xxs:px-0 w-80 h-20 sm:w-80 sm:h-20">
                             <div className={`relative flex items-center justify-center text-center ${isOnMobile ? "bg-black/80" : "bg-black/70"} max-xxs:w-30 max-xxs:h-20 xxs:w-36 xxs:h-20 sm:w-36 sm:h-20 rounded-[20px] 
-                            hover:scale-105 hover:bg-black hover:brightness-110 hover:cursor-default transform duration-300 shadow-2xl transform-gpu`}>
+                            hover:scale-105 hover:bg-black hover:brightness-110 hover:cursor-default transform duration-300 shadow-2xl`}>
                                 <div className="flex flex-col items-center justify-center text-center gap-0.5">
                                     <p className="font-bold text-base sm:text-[18px] text-[#ce757a] brightness-105">
                                         {attempts}
@@ -196,7 +196,7 @@ const VictoryCardSmall = <T = FeedbackData, >(props: VictoryCardSmallProps<T>) =
                             </div>
 
                             <div className={`relative flex items-center justify-center text-center ${isOnMobile ? "bg-black/80" : "bg-black/70"} max-xxs:w-30 max-xxs:h-20 xxs:w-36 xxs:h-20 sm:w-36 sm:h-20 rounded-[20px] 
-                            hover:scale-105 hover:bg-black hover:brightness-110 hover:cursor-default transform duration-300 shadow-2xl transform-gpu`}>
+                            hover:scale-105 hover:bg-black hover:brightness-110 hover:cursor-default transform duration-300 shadow-2xl`}>
                                 <div className="flex flex-col items-center justify-center text-center gap-0.5">
                                     <span className="font-bold text-base sm:text-[18px] text-[#ce757a] brightness-105">
                                         {stats?.current_streak}
@@ -214,11 +214,11 @@ const VictoryCardSmall = <T = FeedbackData, >(props: VictoryCardSmallProps<T>) =
                     <div className="flex w-full items-center justify-center h-29 sm:h-29 mb-5">
                         <div className="flex flex-col items-center w-80 h-29 sm:w-80 sm:h-29">
                             <button className="relative top-0 flex items-center justify-center text-center bg-black max-xxs:w-75 max-xxs:h-13 xxs:w-80 xxs:h-13 sm:w-80 sm:h-13 rounded-2xl mb-4
-                            hover:scale-105 hover:brightness-110 hover:bg-black/0 transform duration-300 shadow-2xl hover:shadow-[0px] hover:cursor-pointer transform-gpu" 
+                            hover:scale-105 hover:brightness-110 hover:bg-black/0 transform duration-300 shadow-2xl hover:shadow-[0px] hover:cursor-pointer" 
                             onClick={() => handleCopy()}>
                                 <div className="flex items-center justify-center text-center">
                                     <span className="text-[18px] font-bold sm:text-[20px] leading-tight bg-linear-to-r from-[#b43777] to-[#ce757a] brightness-105
-                                    text-transparent bg-clip-text transform-gpu">
+                                    text-transparent bg-clip-text">
                                         Copy Results
                                     </span>
                                 </div>
@@ -245,7 +245,7 @@ const VictoryCardSmall = <T = FeedbackData, >(props: VictoryCardSmallProps<T>) =
 
                             <div className="flex flex-row items-center justify-center text-center w-80 h-12 sm:w-80 sm:h-12 gap-6">
                                 <button className={`relative left-0 items-center text-center bg-linear-to-r ${isOnMobile ? "from-black/90 to-black/50" : "from-black/90 to-black/30"} w-12 h-12 sm:w-12 sm:h-12 rounded-[20px] 
-                                hover:scale-110 hover:brightness-110 hover:cursor-pointer hover:rotate-3 hover:bg-black transform duration-300 transform-gpu`}
+                                hover:scale-110 hover:brightness-110 hover:cursor-pointer hover:rotate-3 hover:bg-black transform duration-300`}
                                 onClick={() => shareOnTwitter(attempts, stats, userRank, userScore)}>
                                     <div className="flex w-full h-full items-center justify-center text-center brightness-100 hover:brightness-110 transform duration-300">
                                         <Img src={XLogo} alt="X" className="w-8 h-8 sm:w-9 sm:h-9" draggable={false} />
@@ -253,7 +253,7 @@ const VictoryCardSmall = <T = FeedbackData, >(props: VictoryCardSmallProps<T>) =
                                 </button>
 
                                 <button className={`relative right-0 items-center text-center bg-linear-to-r ${isOnMobile ? "from-black/90 to-black/50" : "from-black/30 to-black/90"} w-12 h-12 sm:w-12 sm:h-12 rounded-[20px]
-                                hover:scale-110 hover:brightness-110 hover:cursor-pointer hover:-rotate-3 hover:bg-black transform duration-300 transform-gpu`}>
+                                hover:scale-110 hover:brightness-110 hover:cursor-pointer hover:-rotate-3 hover:bg-black transform duration-300`}>
                                     <div className="flex w-full h-full items-center justify-center text-center brightness-100 hover:brightness-110"
                                     onClick={() => handleWip()}>
                                         <Download size={30} color="#ce757a" className="w-8 h-8 sm:w-9 sm:h-9" />
@@ -319,7 +319,7 @@ return (
             xChannel="R"
             yChannel="G"
             mixBlendMode="normal" 
-            className="mb-10 sm:w-0.5 will-change-transform"   
+            className="mb-10 sm:w-0.5"   
         >
             {content}   
         </GlassSurface>

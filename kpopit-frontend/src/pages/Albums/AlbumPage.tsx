@@ -1,4 +1,4 @@
-import { useEffect, useId, useState } from "react";
+import { useEffect, useId, useState, type CSSProperties } from "react";
 import { useQuery } from "@tanstack/react-query";
 import PageLoader from "../../components/Loading/PageLoader";
 import NotFound from "../NotFound/NotFound";
@@ -25,7 +25,7 @@ const COLLAPSED_ROWS = 5;
 
 function Tile({ label, ko, value, sub, flag }: { label: string; ko: string; value: string; sub?: string; flag?: string | null }) {
     return (
-        <div className="ap-tile ap-in-rise ap-gpu flex flex-col gap-2 min-w-0 pt-(--tile-pad) px-(--tile-pad) pb-[13px] rounded-[20px] border-2 border-(--ink) bg-(--chip) text-(--chip-ink) [box-shadow:3px_4px_0_var(--ctl-off),var(--in)]">
+        <div className="ap-tile ap-in-rise flex flex-col gap-2 min-w-0 pt-(--tile-pad) px-(--tile-pad) pb-[13px] rounded-[20px] border-2 border-(--ink) bg-(--chip) text-(--chip-ink) [box-shadow:3px_4px_0_var(--ctl-off),var(--in)]">
             <span className="flex items-baseline flex-wrap gap-x-2 gap-y-1">
                 <span className="font-semibold text-[11px] leading-none tracking-[.12em] text-(--muted)">{label}</span>
                 <span lang="ko" className="font-korean font-medium text-[10px] leading-none text-(--muted)">{ko}</span>
@@ -44,8 +44,8 @@ function Record({ cover }: { cover: string }) {
     const clip = useId();
     const grooves = [21.5, 23.5, 25.8, 28, 30.4, 32.6, 36.2, 38.4, 40.8, 43, 45.2, 47];
     return (
-        <div aria-hidden className="ap-in-disc ap-gpu absolute top-[5%] right-0 w-[72%] aspect-square">
-            <div className="ap-disc ap-gpu absolute inset-0">
+        <div aria-hidden className="ap-in-disc absolute top-[5%] right-0 w-[72%] aspect-square">
+            <div className="ap-disc absolute inset-0">
                 <svg viewBox="0 0 100 100" className="absolute inset-0 block w-full h-full overflow-visible">
                     <circle cx="51.3" cy="51.9" r="49.2" fill="#1A1418" />
                     <circle cx="50" cy="50" r="49.2" fill="#120610" />
@@ -54,7 +54,7 @@ function Record({ cover }: { cover: string }) {
                         <circle key={r} cx="50" cy="50" r={r} fill="none" stroke={i % 3 === 1 ? "rgba(255,255,255,.09)" : "rgba(255,255,255,.05)"} strokeWidth={i % 2 ? ".35" : ".5"} />
                     ))}
                 </svg>
-                <div className="ap-sheen ap-in-spin ap-gpu absolute inset-[1%] rounded-full pointer-events-none bg-[conic-gradient(from_20deg,rgba(255,255,255,0)_0deg,rgba(255,255,255,.16)_28deg,rgba(255,255,255,0)_64deg,rgba(255,255,255,0)_190deg,rgba(255,255,255,.09)_218deg,rgba(255,255,255,0)_250deg)]" />
+                <div className="ap-sheen ap-in-spin absolute inset-[1%] rounded-full pointer-events-none bg-[conic-gradient(from_20deg,rgba(255,255,255,0)_0deg,rgba(255,255,255,.16)_28deg,rgba(255,255,255,0)_64deg,rgba(255,255,255,0)_190deg,rgba(255,255,255,.09)_218deg,rgba(255,255,255,0)_250deg)]" />
                 <svg viewBox="0 0 100 100" className="absolute inset-0 block w-full h-full overflow-visible">
                     <defs><clipPath id={clip}><circle cx="50" cy="50" r="19" /></clipPath></defs>
                     <g className="ap-label ap-in-spin [transform-box:view-box] origin-center">
@@ -150,7 +150,7 @@ function Album({ album }: { album: AlbumPageData }) {
                     <section key={album.id} className="ap-in grid grid-cols-(--hero-cols) gap-(--hero-gap) items-center mt-7">
                         <div className="ap-hero ap-in-fade relative aspect-[1/0.8] w-full max-w-(--hero-w) justify-self-center">
                             <Record cover={cover} />
-                            <div className="ap-in-dropt ap-gpu absolute left-0 top-0 w-[80%] aspect-square rounded-[18px] border-[2.5px] border-[#1A1418] overflow-hidden bg-[#DCD6D2] [box-shadow:5px_7px_0_var(--side),5px_7px_0_2.5px_#1A1418]">
+                            <div className="ap-in-dropt absolute left-0 top-0 w-[80%] aspect-square rounded-[18px] border-[2.5px] border-[#1A1418] overflow-hidden bg-[#DCD6D2] [box-shadow:5px_7px_0_var(--side),5px_7px_0_2.5px_#1A1418]">
                                 <span aria-hidden className="absolute inset-0 grid place-items-center font-bold text-[64px] leading-none text-[rgba(26,20,24,.28)]">♪</span>
                                 <img src={cover} alt={`${album.name} cover`} className="ap-cimg relative block w-full h-full object-cover" />
                                 <div aria-hidden className="ap-sweep absolute top-0 bottom-0 -left-[60%] w-[220%] pointer-events-none bg-[linear-gradient(118deg,rgba(255,255,255,0)_40%,rgba(255,255,255,.2)_47%,rgba(255,255,255,.06)_51%,rgba(255,255,255,0)_57%)]" />
@@ -246,7 +246,7 @@ function Album({ album }: { album: AlbumPageData }) {
                                     <button type="button" aria-expanded={expanded} onClick={() => setExpanded(!expanded)}
                                         className="ap-btn ap-focus inline-flex items-center gap-2 h-11 px-[18px] rounded-full border-2 border-(--ink) bg-(--chip) text-(--chip-ink) font-semibold text-[13px] cursor-pointer [box-shadow:2px_3px_0_var(--ctl-off),var(--in)]">
                                         {expanded ? "Show less" : `Show all ${all.length} releases`}
-                                        <ChevronDown aria-hidden className="w-3.5 h-3.5 transition-transform duration-300" strokeWidth={2.5} style={{ transform: expanded ? "rotate(180deg)" : "none" }} />
+                                        <ChevronDown aria-hidden className="w-3.5 h-3.5 pm duration-300" strokeWidth={2.5} style={{ "--mr": expanded ? "180deg" : "0deg" } as CSSProperties} />
                                     </button>
                                 </div>
                             )}
@@ -258,11 +258,11 @@ function Album({ album }: { album: AlbumPageData }) {
                             <h2 id="more-title" className="m-0 font-mono-display font-normal text-[26px] leading-none tracking-[.02em]">{`more from ${artist.name.toLowerCase()}`}</h2>
                             <div className="grid grid-cols-(--more) gap-x-[22px] gap-y-7 mt-[22px] pt-1 pr-2 pb-2.5 pl-0.5">
                                 {more.map((a) => (
-                                    <div key={a.id} className="ap-card ap-in-card ap-gpu">
+                                    <div key={a.id} className="ap-card ap-in-card">
                                         <div className="ap-cw relative">
                                             <div aria-hidden className="absolute inset-0 rounded-[20px] bg-(--side) border-2 border-(--ink) translate-x-1 translate-y-[5px]" />
                                             <IntentLink to={albumPath(a, artist.name)} aria-label={`${a.name}, ${a.release_year}`}
-                                                className="ap-face ap-focus ap-gpu relative block w-full text-left no-underline bg-(--face) text-(--text) border-2 border-(--ink) rounded-[20px] pt-1.5 px-1.5 pb-[11px] [box-shadow:var(--face-hl)]">
+                                                className="ap-face ap-focus relative block w-full text-left no-underline bg-(--face) text-(--text) border-2 border-(--ink) rounded-[20px] pt-1.5 px-1.5 pb-[11px] [box-shadow:var(--face-hl)]">
                                                 <div className="relative aspect-square rounded-[14px] border-[1.5px] border-(--ink) overflow-hidden bg-[#DCD6D2]">
                                                     <span aria-hidden className="absolute inset-0 grid place-items-center font-bold text-[32px] leading-none text-[rgba(26,20,24,.28)]">♪</span>
                                                     <img src={resolveCdnUrl(a.cover_path) ?? ""} alt="" loading="lazy" decoding="async" className="ap-mimg relative block w-full h-full object-cover" />
@@ -274,7 +274,7 @@ function Album({ album }: { album: AlbumPageData }) {
                                     </div>
                                 ))}
                                 {more.length < 6 && (
-                                    <div className="ap-card ap-in-card ap-gpu">
+                                    <div className="ap-card ap-in-card">
                                         <div className="ap-cw relative h-full">
                                             <Link to="/albums" className="ap-face ap-focus relative box-border flex flex-col items-center justify-center gap-2.5 w-full h-full min-h-40 p-3 no-underline text-center text-(--text) bg-transparent border-2 border-dashed border-(--rule) rounded-[20px]">
                                                 <span className="w-11 h-11 rounded-full border-2 border-(--ink) bg-(--chip) text-(--chip-ink) grid place-items-center [box-shadow:2px_3px_0_var(--ctl-off),var(--in)]">

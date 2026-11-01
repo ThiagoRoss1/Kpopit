@@ -63,7 +63,7 @@ const DeleteAccountModal = ({ isOpen, onClose, onBack }: { isOpen: boolean; onCl
                         className="flex justify-center items-center gap-2 px-8 py-4 rounded-xl text-[12px] font-black uppercase tracking-[0.18em]
                             bg-red-500 text-white [text-shadow:1.5px_1.5px_2px_rgba(0,0,0,0.9)] shadow-[3px_3px_0px_rgba(255,255,255,1)]
                             hover:translate-x-1 hover:translate-y-1 hover:shadow-[1px_1px_0px_rgba(0,0,0,1)]
-                            hover:cursor-pointer transition-all duration-300 transform-gpu
+                            hover:cursor-pointer transition-all duration-300
                             disabled:opacity-50 disabled:cursor-not-allowed disabled:shadow-none
                             disabled:hover:translate-x-0 disabled:hover:translate-y-0"
                     >

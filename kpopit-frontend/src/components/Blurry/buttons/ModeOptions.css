@@ -1,34 +1,44 @@
+/* Moving parts animate --mx/--my/--mr/--ms (registered in index.css): Chrome paints them each frame instead of on a GPU layer, so borders and images stay sharp. */
+
+.mode-options-hint-box, .text-hint-fade-in {
+    transform: translate(var(--mx), var(--my)) rotate(var(--mr)) scale(var(--ms));
+}
+
 @keyframes cardFadeIn {
     0% {
-        opacity: 0;
-        transform: translateY(-20px);
+        --mo: 0;
+        --my: -20px;
     }
 
     40% {
-        opacity: 0;
+        --mo: 0;
     }
 
     100% {
-        opacity: 1;
-        transform: translateY(0px);
+        --mo: 1;
+        --my: 0px;
     }
 }
 
 .mode-options-hint-box {
     animation: cardFadeIn 1s ease-in-out forwards;
+    transform: translate(var(--mx), var(--my)) rotate(var(--mr)) scale(var(--ms));
+    opacity: var(--mo);
 }
 
 @keyframes textHintFadeIn {
     0% {
-        opacity: 0;
+        --mo: 0;
     }
 
     100% {
-        opacity: 1;
+        --mo: 1;
     }
 }
 
 .text-hint-fade-in {
     animation: textHintFadeIn 2s ease-in-out forwards;
+    transform: translate(var(--mx), var(--my)) rotate(var(--mr)) scale(var(--ms));
+    opacity: var(--mo);
 }
 

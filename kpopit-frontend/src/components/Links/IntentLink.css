@@ -1,7 +1,7 @@
-/* Pressed from the click until the page changes, while the navigation waits for data. `scale`
-   (not `transform`) so it also works on cards whose entrance animation holds a transform; no
-   opacity or filter, which re-rendered the control (and its depth layer) on a separate surface. */
+/* Pressed from the click until the page changes, while the navigation waits for data. It eases the
+   shared --ms (see index.css), so the control keeps its own tilt and lift and stays crisp. */
 .link-pending {
-    scale: 0.97;
-    transition: scale 120ms ease-out;
+    --ms: 0.97;
+    transform: translate(var(--mx), var(--my)) rotate(var(--mr)) scale(var(--ms));
+    transition: --ms 120ms ease-out;
 }

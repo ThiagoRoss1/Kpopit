@@ -10,14 +10,14 @@ export default function IdolCard({ idol, index, animate }: { idol: IdolsPageData
     const group = idol.group_name ? formatGroupName(idol.group_name, idol.is_former_group) : groupLabel(idol);
     const flags = nationalities(idol).map((n) => ({ n, src: getNationalityFlag(n) })).filter((f) => f.src);
     return (
-        <div className={animate ? "cg-card cg-gpu" : "cg-card cg-card-still cg-gpu"} style={animate ? { animationDelay: `${Math.min(260 + index * 45, 900)}ms` } : undefined}>
+        <div className={animate ? "cg-card" : "cg-card cg-card-still"} style={animate ? { animationDelay: `${Math.min(260 + index * 45, 900)}ms` } : undefined}>
             <div className="cg-tilt relative">
-                <div aria-hidden className="absolute inset-0 rounded-(--cg-r) bg-(--side) border-2 border-(--ink)" style={{ transform: "translate3d(var(--cg-depth),calc(var(--cg-depth) + 1px),0)" }} />
+                <div aria-hidden className="absolute inset-0 rounded-(--cg-r) bg-(--side) border-2 border-(--ink)" style={{ transform: "translate(var(--cg-depth), calc(var(--cg-depth) + 1px))" }} />
                 <IntentLink
                     to={`/idols/${idol.id}/${buildIdolSlug(idol.artist_name, idol.group_name)}`}
                     onIntent={() => prefetchIdolProfile(idol.id)}
                     aria-label={`${idol.artist_name}, ${group}`}
-                    className="cg-face cg-gpu relative block no-underline cursor-pointer bg-(--face) text-(--face-ink) border-2 border-(--ink) rounded-(--cg-r) p-(--cg-card-pad) [box-shadow:var(--face-hl)]"
+                    className="cg-face relative block no-underline cursor-pointer bg-(--face) text-(--face-ink) border-2 border-(--ink) rounded-(--cg-r) p-(--cg-card-pad) [box-shadow:var(--face-hl)]"
                 >
                     <div className="relative aspect-[1/1.04]">
                         <div className="absolute inset-0 rounded-[calc(var(--cg-r)-7px)] border-[1.5px] border-(--ink) overflow-hidden bg-[#DCD6D2]">

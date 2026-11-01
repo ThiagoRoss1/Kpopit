@@ -35,8 +35,8 @@ export function AccordionItem({ id, title, open, onToggle, children }: {
                 <span
                     aria-hidden
                     className={cn(
-                        "flex-none grid place-items-center w-8 h-8 rounded-full border-2 border-(--ink) transition-transform duration-500 ease-(--ease-pop)",
-                        open ? "rotate-45 bg-[#FF8AC4] text-[#1A1418]" : "bg-(--chip) text-(--chip-ink)",
+                        "flex-none grid place-items-center w-8 h-8 rounded-full border-2 border-(--ink) pm duration-500 ease-(--ease-pop)",
+                        open ? "[--mr:45deg] bg-[#FF8AC4] text-[#1A1418]" : "bg-(--chip) text-(--chip-ink)",
                     )}
                 >
                     <Plus className="w-4 h-4" strokeWidth={3} />

@@ -119,7 +119,7 @@ function IdolPage({ data, idols }: { data: IdolProfileData; idols: IdolsPageData
                             to="/idols"
                             onIntent={prefetchIdolsList}
                             aria-label="Back to the idols list"
-                            className="ip-back ip-btn grid place-items-center w-11 h-11 m-0.5 no-underline bg-[#FF8AC4] [box-shadow:inset_0_3px_0_rgba(255,255,255,.5),0_0_0_2px_#1A1418,4px_5px_0_2px_#1A1418] [transform:skewX(-7deg)_rotate(-4deg)] [backface-visibility:hidden]"
+                            className="ip-back ip-btn grid place-items-center w-11 h-11 m-0.5 no-underline bg-[#FF8AC4] [box-shadow:inset_0_3px_0_rgba(255,255,255,.5),0_0_0_2px_#1A1418,4px_5px_0_2px_#1A1418]"
                         >
                             <ArrowLeft aria-hidden className="w-5 h-5 text-[#1A1418]" strokeWidth={3} />
                         </IntentLink>
@@ -132,7 +132,7 @@ function IdolPage({ data, idols }: { data: IdolProfileData; idols: IdolsPageData
                         <div aria-hidden className="absolute -left-[18%] -top-[14%] w-[136%] aspect-square -z-1 pointer-events-none bg-[radial-gradient(circle,var(--tone)_2.4px,transparent_2.8px)] bg-size-[11px_11px] [mask-image:radial-gradient(circle_at_55%_45%,#000_0%,rgba(0,0,0,.5)_32%,transparent_62%)]" />
                         <div className="ip-in-photo relative">
                             <div className="ip-photo relative -rotate-3 border-[3px] border-[#1A1418] rounded-[30px] bg-[#1A1418] [box-shadow:8px_8px_0_#FF8AC4,8px_8px_0_3px_#1A1418] aspect-[4/5]">
-                                <div className="absolute inset-0 overflow-hidden rounded-[27px] [clip-path:inset(0_round_27px)] isolate [transform:translateZ(0)]">
+                                <div className="absolute inset-0 overflow-hidden rounded-[27px] [clip-path:inset(0_round_27px)] isolate">
                                     <img src={cdnImage ?? ""} alt={`${artistName} photo`} draggable={false} className="w-full h-full object-cover block" />
                                     <div aria-hidden className="ip-sweep absolute top-0 bottom-0 -left-[60%] w-[220%] pointer-events-none bg-[linear-gradient(118deg,rgba(255,255,255,0)_40%,rgba(255,255,255,.13)_47%,rgba(255,255,255,.04)_51%,rgba(255,255,255,0)_57%)]" />
                                     <div aria-hidden className="absolute inset-0 pointer-events-none mix-blend-screen bg-[radial-gradient(ellipse_85%_50%_at_82%_-4%,rgba(255,138,196,.24),rgba(255,138,196,0)_70%)]" />
@@ -162,7 +162,7 @@ function IdolPage({ data, idols }: { data: IdolProfileData; idols: IdolsPageData
                                             <span
                                                 key={k}
                                                 aria-hidden
-                                                className="ip-letter inline-block font-bold leading-none pt-1 px-2 pb-1.5 border-[2.5px] border-[#1A1418] rounded-[12px] [backface-visibility:hidden]"
+                                                className="ip-letter inline-block font-bold leading-none pt-1 px-2 pb-1.5 border-[2.5px] border-[#1A1418] rounded-[12px]"
                                                 style={{
                                                     background: look.bg, color: look.fg, boxShadow: look.sh,
                                                     transform: `rotate(${ROT[letterIndex % 8]}deg) translateY(${DY[letterIndex % 6]})`,
@@ -193,14 +193,15 @@ function IdolPage({ data, idols }: { data: IdolProfileData; idols: IdolsPageData
                                                 aria-controls={`ip-pane-${key}`}
                                                 data-on={on ? "true" : "false"}
                                                 onClick={() => setTab(key)}
-                                                className="ip-tab ip-btn flex items-baseline gap-2.5 pt-[11px] px-6 pb-[13px] border-2 border-[#1A1418] rounded-[16px] font-bold text-(length:--tab-fs) leading-none uppercase whitespace-nowrap cursor-pointer will-change-transform"
+                                                className="ip-tab ip-btn flex items-baseline gap-2.5 pt-[11px] px-6 pb-[13px] border-2 border-[#1A1418] rounded-[16px] font-bold text-(length:--tab-fs) leading-none uppercase whitespace-nowrap cursor-pointer"
                                                 style={{
                                                     background: on ? "#FF8AC4" : "var(--ip-panel)",
                                                     color: on ? "#FFFFFF" : "var(--text)",
                                                     textShadow: on ? "var(--ink-puff)" : "none",
                                                     boxShadow: on ? "3px 4px 0 0 var(--tab-o),3px 4px 0 0 var(--tab-o)" : "3px 4px 0 0 #FF8AC4,3px 4px 0 2px #1A1418",
-                                                    transform: on ? "translate3d(0,-3px,0) rotate(-2deg)" : `rotate(${k % 2 ? 1 : -1}deg)`,
-                                                }}
+                                                    "--my": on ? "-3px" : "0px",
+                                                    "--mr": on ? "-2deg" : `${k % 2 ? 1 : -1}deg`,
+                                                } as CSSProperties}
                                             >
                                                 {label}
                                             </button>
@@ -328,7 +329,7 @@ function Related({ idols }: { idols: IdolsPageData[] }) {
                         to={`/idols/${idol.id}/${buildIdolSlug(idol.artist_name, idol.group_name)}`}
                         onIntent={() => prefetchIdolProfile(idol.id)}
                         aria-label={`${idol.artist_name} of ${groupLabel(idol)}`}
-                        className="ip-rcard ip-btn relative flex-none w-(--rel-w) flex flex-col gap-3 pt-2.5 px-2.5 pb-4 border-[3px] border-[#1A1418] rounded-[20px] bg-(--chip) text-(--chip-ink) no-underline text-left [box-shadow:6px_6px_0_var(--ctl-off),var(--in)] will-change-transform"
+                        className="ip-rcard ip-btn relative flex-none w-(--rel-w) flex flex-col gap-3 pt-2.5 px-2.5 pb-4 border-[3px] border-[#1A1418] rounded-[20px] bg-(--chip) text-(--chip-ink) no-underline text-left [box-shadow:6px_6px_0_var(--ctl-off),var(--in)]"
                         style={{ transform: `rotate(${k % 2 ? 0.8 : -0.8}deg)` }}
                     >
                         <span className="block aspect-square border-[2.5px] border-[#1A1418] rounded-[12px] overflow-hidden bg-[#1A1418]">

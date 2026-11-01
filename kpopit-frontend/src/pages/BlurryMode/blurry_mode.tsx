@@ -405,7 +405,7 @@ const gameMode = useGameMode();
             <Link 
                 to="/"
                 className="flex items-center justify-center text-center w-fit sm:w-3xs h-fit sm:h-14 mb-4
-                hover:scale-105 hover:cursor-pointer transition-all duration-300 transform-gpu">
+                hover:scale-105 hover:cursor-pointer transition-all duration-300">
                 <h1 className="leading-tight max-xxs:text-3xl xxs:text-3xl xs:text-4xl sm:text-5xl font-bold text-center">
                     <span className="kpop-part">Blur</span>
                     <span className="it-part">it</span>
@@ -441,7 +441,7 @@ const gameMode = useGameMode();
                 <div className={`relative flex items-center justify-center bg-transparent border-2 border-white
                 max-xxs:w-55 max-xxs:h-80 xxs:w-60 xxs:h-88 xs:w-70 xs:h-98 xm:w-70 xm:h-98 zm:w-80 zm:h-108 sm:w-100 sm:h-128 rounded-[46px] overflow-hidden mb-4
                 ${isImageLoading ? 'bg-gray-600' : 'bg-black'}
-                ${isTouched ? 'scale-110 z-50' : 'scale-100'} transition-all duration-300 transform-gpu`}
+                ${isTouched ? 'scale-110 z-50' : 'scale-100'} transition-all duration-300`}
                     onTouchEnd={(e) => {
                         if (window.matchMedia("(orientation: portrait)").matches) {
                             setIsTouched(!isTouched)

@@ -362,7 +362,7 @@ function ClassicMode() {
         <Link 
           to="/"
           className="inline-block bg-transparent border-0 p-0 cursor-pointer hover:scale-105
-          transition-all duration-500 transform-gpu"
+          transition-all duration-500"
           draggable={false}>
           <h1 className="leading-tight max-sxs:text-4xl sxs:text-5xl zm:text-6xl sm:text-7xl font-bold text-center">
             <span className="kpop-part">Kpop</span>

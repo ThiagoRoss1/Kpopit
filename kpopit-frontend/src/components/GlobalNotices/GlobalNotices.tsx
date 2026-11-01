@@ -23,7 +23,7 @@ const GlobalNotices = (props: GlobalNoticeProps) => {
                 </span>
                 <button 
                     className="flex items-center justify-center rounded-full bg-white/20 shrink w-6 h-6 sm:w-8 sm:h-8
-                    hover:scale-105 hover:brightness-110 hover:cursor-pointer shadow-[0_2px_4px_rgba(0,0,0,0.3)] transition-all duration-200 transform-gpu"
+                    hover:scale-105 hover:brightness-110 hover:cursor-pointer shadow-[0_2px_4px_rgba(0,0,0,0.3)] transition-all duration-200"
                     onClick={onClose}
                 >
                     <X size={16} color="white" className="sm:5 h:5" />

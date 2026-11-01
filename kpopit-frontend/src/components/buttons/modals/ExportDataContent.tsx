@@ -53,13 +53,13 @@ const ExportDataText = (props: ExportDataTextProps) => {
                         }}
                         className="group w-full h-20 sm:h-20 rounded-2xl border border-white bg-transparent
                         backface-hidden shadow-[0_0_10px_1px_rgba(255,255,255,0.10),0_0_10px_1px_rgba(255,255,255,0.10)] backdrop-blur-lg 
-                        hover:bg-black/40 hover:brightness-110 hover:cursor-pointer transition-all duration-500 transform-gpu">
+                        hover:bg-black/40 hover:brightness-110 hover:cursor-pointer transition-all duration-500">
                             <div className="w-full flex flex-row items-center justify-center">
                                 <span className="text-3xl [text-shadow:1.2px_1.2px_4px_rgba(0,0,0,0.8),0_0_12px_rgba(255,255,255,0.35)]">
                                     {isFetching ? "Loading..." : (showLoading ? "Generating..." : generatedCodes)}
                                 </span>
 
-                                <Copy className="opacity-0 group-hover:opacity-80 w-10 h-10 absolute right-4 top-1/2 -translate-y-1/2 transition-all duration-500 transform-gpu"/>
+                                <Copy className="opacity-0 group-hover:opacity-80 w-10 h-10 absolute right-4 top-1/2 -translate-y-1/2 transition-all duration-500"/>
                             </div>
                         </button>
                         <AnimatePresence>

@@ -77,7 +77,7 @@ export default function BlogPost({ slug }: { slug: string }) {
                         {post.ko && <KoreanTag>{post.ko}</KoreanTag>}
                     </header>
 
-                    <figure className="pp-enter [--pp-delay:140ms] m-0 mx-auto w-full max-w-[640px] -rotate-1 transition-transform duration-500 ease-(--ease-bounce) hover:rotate-0">
+                    <figure className="pp-enter [--pp-delay:140ms] m-0 mx-auto w-full max-w-[640px] pm [--mr:-1deg] duration-500 ease-(--ease-bounce) hover:[--mr:0deg]">
                         <div className="aspect-video rounded-[18px] border-[2.5px] border-[#1A1418] overflow-hidden bg-[#DCD6D2] [box-shadow:5px_5px_0_0_#FF8AC4,5px_5px_0_2px_#1A1418]">
                             <img src={post.image} alt={post.imageAlt} className="block w-full h-full object-cover" />
                         </div>

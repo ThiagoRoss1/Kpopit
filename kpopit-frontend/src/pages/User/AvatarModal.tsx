@@ -292,7 +292,7 @@ const AvatarModal = ({ isOpen, onClose, onBack, avatarUrl }: AvatarModalProps) =
                 <div className="flex justify-center">
                     <div
                         className="grid place-items-center w-24 h-24 sxs:w-28 sxs:h-28 rounded-full overflow-hidden
-                            border-2 border-neon-pink transform-gpu"
+                            border-2 border-neon-pink"
                     >
                         {croppedPreviewUrl ? (
                             <Img src={croppedPreviewUrl} alt="Cropped preview" className="w-full h-full object-cover" draggable={false} />
@@ -420,7 +420,7 @@ const AvatarModal = ({ isOpen, onClose, onBack, avatarUrl }: AvatarModalProps) =
                                         className="flex flex-col items-center gap-1.5 hover:cursor-pointer group"
                                     >
                                         <div
-                                            className={`relative w-full aspect-square rounded-full overflow-hidden border-2 transition-all duration-300 transform-gpu
+                                            className={`relative w-full aspect-square rounded-full overflow-hidden border-2 transition-all duration-300
                                                 ${isSelected
                                                     ? "border-neon-pink shadow-[2px_2px_0px_rgba(255,51,153,1)]"
                                                     : "border-white/25 group-hover:border-neon-pink/70"}`}
@@ -459,7 +459,7 @@ const AvatarModal = ({ isOpen, onClose, onBack, avatarUrl }: AvatarModalProps) =
                         className={`flex justify-center items-center gap-2 px-8 py-4 rounded-xl text-[12px] font-black uppercase tracking-[0.18em]
                             bg-neon-pink text-white [text-shadow:1.5px_1.5px_2px_rgba(0,0,0,0.9)] ${canSave ? "shadow-[3px_3px_0px_rgba(255,255,255,1)]" : ""}
                             hover:translate-x-1 hover:translate-y-1 hover:shadow-[1px_1px_0px_rgba(0,0,0,1)]
-                            hover:cursor-pointer transition-all duration-300 transform-gpu
+                            hover:cursor-pointer transition-all duration-300
                             disabled:opacity-50 disabled:cursor-not-allowed
                             disabled:hover:translate-x-0 disabled:hover:translate-y-0`}
                     >

@@ -14,7 +14,7 @@ const Switch = (props: SwitchButtonProps) => {
                 ${isActive ? "bg-neon-pink" : "bg-gray-700"} ${disabled ? "select-none cursor-default opacity-50" : "cursor-pointer"}`}
         >
             <div
-                className={`w-4 h-4 sm:w-4 sm:h-4 bg-white rounded-full transition-transform duration-300 transform-gpu
+                className={`w-4 h-4 sm:w-4 sm:h-4 bg-white rounded-full transition-transform duration-300
                     ${isActive ? "translate-x-6 scale-120" : "translate-x-0"}`}
             />
         </div>

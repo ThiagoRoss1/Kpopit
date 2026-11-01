@@ -107,7 +107,7 @@ export default function About() {
                                 <div className="grid grid-cols-[repeat(auto-fit,minmax(200px,1fr))] gap-3">
                                     {DATA_LINKS.map((d) => (
                                         <PressLink key={d.label} to={d.to} className="ab-link h-auto justify-start gap-3.5 py-3 pr-4 pl-3 rounded-[18px]">
-                                            <span aria-hidden className="ab-fade relative flex-none w-[60px] h-[60px] rounded-[15px] border-2 border-[#1A1418] overflow-hidden [box-shadow:2px_3px_0_#1A1418] -rotate-3" style={{ background: d.bg }}>
+                                            <span aria-hidden className="ab-fade relative flex-none w-[60px] h-[60px] rounded-[15px] border-2 border-[#1A1418] overflow-hidden [box-shadow:2px_3px_0_#1A1418]" style={{ background: d.bg }}>
                                                 {d.images.map((src, i) => <img key={i} src={resolveCdnUrl(src) ?? ""} alt="" loading="lazy" className="absolute inset-0 w-full h-full object-cover" />)}
                                             </span>
                                             <span className="flex-1 flex flex-col gap-0.5 text-left">

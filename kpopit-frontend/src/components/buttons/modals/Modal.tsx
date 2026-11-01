@@ -51,7 +51,7 @@ const Modal = (props: ModalProps) => {
                     <div className={`w-full flex items-center ${isTransferDataSubPages ? "justify-start gap-1 px-2" : "justify-between px-4"} py-2 bg-white/10 border-b border-white/20`}>
                         {isTransferDataSubPages ? (
                             <button className="group bg-white/0 w-10 h-10 flex items-center justify-center
-                            hover:scale-110 hover:brightness-110 hover:cursor-pointer transition-all duration-200 transform-gpu"
+                            hover:scale-110 hover:brightness-110 hover:cursor-pointer transition-all duration-200"
                             onClick={returnPage}>
                                 <div>
                                     <ChevronLeft className="opacity-50 group-hover:opacity-100 sm:w-10 sm:h-10 text-white"/>
@@ -64,7 +64,7 @@ const Modal = (props: ModalProps) => {
                             <div className={`${isTransferDataSubPages ? "justify-end flex-1 px-2" : "justify-center"} items-center flex`}>
                             <button className="flex items-center justify-center rounded-full shrink-0 w-9 h-9 sm:w-10 sm:h-10 text-center
                             bg-linear-to-b from-[#b43777]/0 to-[#ec4850]/0 shadow-lg hover:brightness-115 hover:scale-105
-                            hover:cursor-pointer hover:bg-linear-to-b hover:from-[#b43777] hover:to-[#ec4850] transition-all transform-gpu duration-500" onClick={onClose}>
+                            hover:cursor-pointer hover:bg-linear-to-b hover:from-[#b43777] hover:to-[#ec4850] transition-all duration-500" onClick={onClose}>
                                 <X size={20} color="white" strokeWidth={3} absoluteStrokeWidth className="sm:w-5 sm:h-5" />
                             </button>
                             </div>

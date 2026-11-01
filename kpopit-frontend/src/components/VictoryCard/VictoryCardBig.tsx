@@ -58,14 +58,14 @@ return (
         {/* Idol Container */}
         <div className="relative w-full h-60 sm:h-62.5 mt-0 max-xxs:mb-0 xxs:mb-0 xs:mb-2 sm:mb-5 rounded-t-3xl sm:rounded-t-3xl flex items-center justify-center bg-transparent">
             <div className="absolute flex items-center justify-center max-xxs:w-24 max-xxs:h-24 xxs:w-27 xxs:h-27 xs:w-30 xs:h-30 sm:w-35 sm:h-35 rounded-[48px] sm:rounded-[50px] top-5 border-2 border-white/80 
-            hover:border-white hover:scale-120 hover:rotate-6 transform duration-1000 will-change-transform 
+            hover:border-white hover:scale-120 hover:rotate-6 transform duration-1000 
             shadow-[0_0_20px_4px_rgba(255,255,255,0.1),0_0_40px_10px_rgba(255,255,255,0.1)]">
                 <Link 
                     to={`/idols/${cardInfo.idol_id}/${buildIdolSlug(cardInfo.artist_name, cardInfo.active_group)}`}>
                     <Img 
                         src={`${import.meta.env.VITE_IMAGE_BUCKET_URL}${cardInfo.image_path}?v=${cardInfo.image_version}`} 
                         alt="Idol" 
-                        className="max-xxs:w-23 max-xxs:h-23 xxs:w-26 xxs:h-26 xs:w-29 xs:h-29 sm:w-34 sm:h-34 rounded-[48px] sm:rounded-[50px] object-cover object-top transform-gpu" 
+                        className="max-xxs:w-23 max-xxs:h-23 xxs:w-26 xxs:h-26 xs:w-29 xs:h-29 sm:w-34 sm:h-34 rounded-[48px] sm:rounded-[50px] object-cover object-top" 
                         draggable={false} 
                     />
                 </Link>
@@ -131,7 +131,7 @@ return (
         <div className="relative w-full h-fit sm:h-50 mb-5 px-4 sm:px-6">
             <div className="relative w-full h-full items-center justify-center sm:text-center bg-linear-to-r from-gray-600 to-gray-900 
             shadow-[0_0_4px_2px_rgba(0,0,0,0.2),inset_2px_2px_4px_2px_rgba(0,0,0,0.2)] border border-white/35 py-4 rounded-[20px] overflow-hidden
-            hover:scale-102 hover:brightness-110 hover:bg-linear-to-r transition-all duration-500 transform-gpu">
+            hover:scale-102 hover:brightness-110 hover:bg-linear-to-r transition-all duration-500">
                 <div className="relative w-full h-full flex flex-col items-center justify-between gap-1">
                     <span className="max-xxs:text-lg xxs:text-lg xs:text-xl sm:text-2xl font-bold select-none">
                         Yesterday's idol was
@@ -143,12 +143,12 @@ return (
                             <Img 
                                 src={`${import.meta.env.VITE_IMAGE_BUCKET_URL}${yesterdayIdolImage}${yesterdayImageVersion}`} 
                                 alt="Idol" className="max-xxs:w-16 max-xxs:h-16 xxs:w-20 xxs:h-20 xs:w-22 xs:h-22 sm:w-28 sm:h-28 rounded-full sm:rounded-full object-cover object-center hover:scale-105 
-                                select-none transition-transform duration-500 will-change-transform transform-gpu" 
+                                select-none transition-transform duration-500" 
                                 draggable={false} 
                             />
                         </Link>
 
-                        <div className="max-xxs:text-[15px] xxs:text-base xs:text-[18px] xm:text-xl sm:text-2xl font-semibold select-none transform-gpu ml-4 sm:ml-0">
+                        <div className="max-xxs:text-[15px] xxs:text-base xs:text-[18px] xm:text-xl sm:text-2xl font-semibold select-none ml-4 sm:ml-0">
                             <span className="bg-linear-to-r from-[#db3189] via-[#e44d86] to-[#ec5e65] text-transparent bg-clip-text brightness-105">
                                 {yesterdayIdol}
                             </span> <span className="bg-linear-to-r from-[#ec5e65] via-[#e44d86] to-[#db3189] text-transparent bg-clip-text brightness-105 whitespace-nowrap">
@@ -171,7 +171,7 @@ return (
         <div className="relative w-full h-12 sm:h-14 mb-5 px-4 sm:px-6">
             <button 
                 className="relative w-full h-full items-center justify-center text-center bg-linear-to-b from-transparent to-transparent border border-white/60 
-                rounded-xl hover:bg-black hover:brightness-105 hover:scale-105 hover:cursor-pointer transition-transform duration-500 transform-gpu" 
+                rounded-xl hover:bg-black hover:brightness-105 hover:scale-105 hover:cursor-pointer transition-transform duration-500" 
                 onClick={() => onShareClick?.()}
             >
                 <div className="relative flex flex-row w-full h-full items-center justify-center text-center gap-3">
@@ -194,7 +194,7 @@ return (
                                     <div 
                                         className={`flex w-20 h-16 mt-2 mb-2 rounded-2xl items-center justify-center 
                                         text-center border border-r-4 border-b-4 border-white/30
-                                        hover:scale-105 hover:cursor-pointer active:scale-95 ease-[cubic-bezier(0.34,1.56,0.64,1)] transition-all duration-500 transform-gpu
+                                        hover:scale-105 hover:cursor-pointer active:scale-95 ease-[cubic-bezier(0.34,1.56,0.64,1)] transition-all duration-500
                                         ${mode.won ? "opacity-50" : "opacity-100"}`}
                                     >
                                         <Img

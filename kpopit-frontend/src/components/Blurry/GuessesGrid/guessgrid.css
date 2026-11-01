@@ -1,16 +1,22 @@
+/* Moving parts animate --mx/--my/--mr/--ms (registered in index.css): Chrome paints them each frame instead of on a GPU layer, so borders and images stay sharp. */
+
+.guess-card-color-fade, .guess-photo-enter, .name-container, .name-reveal {
+    transform: translate(var(--mx), var(--my)) rotate(var(--mr)) scale(var(--ms));
+}
+
 @keyframes cardColorFade {
     0% {
-        opacity: 0;
+        --mo: 0;
         background-color: transparent;
     }
 
     40% {
-        opacity: 1;
+        --mo: 1;
         background-color: transparent;
     }
 
     100% {
-        opacity: 1;
+        --mo: 1;
         background-color: rgba(var(--status-bg-color));
     }
 }
@@ -18,6 +24,8 @@
 .guess-card-color-fade {
     animation: cardColorFade 2.5s forwards;
     will-change: background-color, opacity;
+    transform: translate(var(--mx), var(--my)) rotate(var(--mr)) scale(var(--ms));
+    opacity: var(--mo);
 }
 
 .guess-card-color-container {
@@ -26,31 +34,35 @@
 
 @keyframes photoEntry {
     0% {
-        opacity: 0;
+        --mo: 0;
         left: 50%;
-        transform: translateX(-50%) scale(0);
+        --mx: -50%;
+        --ms: 0;
         animation-timing-function: cubic-bezier(0.68, -0.55, 0.27, 1.55);
         border-radius: 0%;
         border-color: transparent;
     }
 
     35% {
-        opacity: 1;
+        --mo: 1;
         left: 50%;
-        transform: translateX(-50%) scale(1.1);
+        --mx: -50%;
+        --ms: 1.1;
         animation-timing-function: ease-in-out;
     }
 
     40% {
         left: 50%;
-        transform: translateX(-50%) scale(1);
+        --mx: -50%;
+        --ms: 1;
         animation-timing-function: cubic-bezier(0.28, 1, 0.25, 1);
     }
 
     100% {
         left: 0;
-        opacity: 1;
-        transform: translateX(0) scale(1);
+        --mo: 1;
+        --mx: 0px;
+        --ms: 1;
         border-radius: 20px;
         border-color: rgba(0, 0, 0, 0.3);
         animation-timing-function: ease-out;
@@ -60,34 +72,41 @@
 .guess-photo-enter {
     position: relative;
     animation: photoEntry 2s forwards;
-    will-change: transform, opacity;
+    transform: translate(var(--mx), var(--my)) rotate(var(--mr)) scale(var(--ms));
+    opacity: var(--mo);
 }
 
 
 @keyframes nameEntry {
     0%, 50% {
-        opacity: 0;
+        --mo: 0;
         left: 50%;
-        transform: translateX(-50%) scale(0.8);
+        --mx: -50%;
+        --ms: 0.8;
     }
 
     100% {
-        opacity: 1;
+        --mo: 1;
         left: 50%;
-        transform: translateX(-50%) scale(1);
+        --mx: -50%;
+        --ms: 1;
     }  
 }
 
 .name-container {
     position: absolute;
     left: 50%;
-    transform: translateX(-50%);
+    --mx: -50%;
+    --my: 0px;
+    --mr: 0deg;
+    --ms: 1;
+    transform: translate(var(--mx), var(--my)) rotate(var(--mr)) scale(var(--ms));
 }
 
 .name-reveal {
     opacity: 0;
     animation: nameEntry 2s forwards;
-    will-change: transform, opacity;
+    transform: translate(var(--mx), var(--my)) rotate(var(--mr)) scale(var(--ms));
 }
 
 @keyframes nameBorderB {

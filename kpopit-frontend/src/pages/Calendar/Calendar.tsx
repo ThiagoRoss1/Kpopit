@@ -1,4 +1,4 @@
-import { useMemo, useRef, useState, type KeyboardEvent } from "react";
+import { useMemo, useRef, useState, type CSSProperties, type KeyboardEvent } from "react";
 import { Link, useSearchParams } from "react-router";
 import { useQuery } from "@tanstack/react-query";
 import { CalendarCheck, CalendarDays, ChevronDown, ChevronLeft, ChevronRight, ChevronUp, List, Lock, Plus } from "lucide-react";
@@ -131,7 +131,7 @@ function CalendarView({ data }: { data: CalendarTimeline }) {
                             {`${doneCount} of ${total} ${modeInfo.name.toLowerCase()} days guessed, back to Day 1 on ${formatLong(first)}`}
                         </span>
                         <div role="progressbar" aria-label="Days guessed" aria-valuenow={pct} aria-valuemin={0} aria-valuemax={100} className="relative w-[min(280px,100%)] h-3 rounded-full border-2 border-(--ink) bg-(--panel) overflow-hidden [box-shadow:var(--in)]">
-                            <div className="cal-fill cal-fill-in absolute inset-0 rounded-full bg-(--side)" style={{ transform: `translate3d(${pct - 100}%,0,0)` }} />
+                            <div className="cal-fill cal-fill-in absolute inset-0 rounded-full bg-(--side)" style={{ transform: `translate(${pct - 100}%)` }} />
                         </div>
                     </header>
 
@@ -155,7 +155,7 @@ function CalendarView({ data }: { data: CalendarTimeline }) {
                             })}
                         </div>
                         <div role="tablist" aria-label="View" className="relative flex-(--sw-flex) grid grid-cols-2 p-(--sw-p) rounded-full border-2 border-(--ink) bg-(--chip) [box-shadow:2px_3px_0_var(--ctl-off),var(--in)]">
-                            <span aria-hidden className="cal-slide cal-gpu absolute top-(--sw-p) bottom-(--sw-p) left-(--sw-p) w-[calc(50%-var(--sw-p))] rounded-full bg-(--side) border-2 border-(--ink) [box-shadow:var(--in-pink)]" style={{ transform: `translate3d(${view === "timeline" ? "100%" : "0%"},0,0)` }} />
+                            <span aria-hidden className="cal-slide absolute top-(--sw-p) bottom-(--sw-p) left-(--sw-p) w-[calc(50%-var(--sw-p))] rounded-full bg-(--side) border-2 border-(--ink) [box-shadow:var(--in-pink)]" style={{ "--mx": view === "timeline" ? "100%" : "0%" } as CSSProperties} />
                             {([["month", "Month", CalendarDays], ["timeline", "Timeline", List]] as const).map(([v, label, Icon]) => (
                                 <button key={v} type="button" role="tab" aria-selected={view === v} onClick={() => { setView(v); setPicker(null); }}
                                     className="cal-focus relative z-1 cursor-pointer h-(--sw-h) rounded-full flex items-center justify-center gap-[7px] font-bold text-[13px] transition-colors duration-300"
@@ -255,15 +255,16 @@ function DayCell({ d, index, selected, mode, onPick }: { d: CalendarDay; index: 
             aria-pressed={selected}
             aria-label={off ? `${formatShort(d.date)}, ${d.kind === "future" ? "locked" : "no challenge"}` : `${formatShort(d.date)}, Day ${d.no}, ${KIND_WORD[d.kind]}${done && d.entry?.answer_name ? `, ${d.entry.answer_name}` : ""}`}
             onClick={() => onPick(d.date, mode)}
-            className="cal-cell cal-focus cal-in cal-gpu relative aspect-[1/1.08] rounded-[16px] flex flex-col p-[7px] gap-[5px] text-(--face-ink) disabled:cursor-default cursor-pointer"
+            className="cal-cell cal-focus cal-in relative aspect-[1/1.08] rounded-[16px] flex flex-col p-[7px] gap-[5px] text-(--face-ink) disabled:cursor-default cursor-pointer"
             style={{
                 border: selected ? "2.5px solid var(--ink)" : look.bd,
                 background: look.bg,
                 boxShadow: selected ? "3px 5px 0 var(--ctl-off)" : look.sh,
                 opacity: d.kind === "pre" ? 0.35 : 1,
-                transform: selected ? `translate3d(0,-4px,0) rotate(${n % 2 ? "-" : ""}1.6deg)` : undefined,
+                "--my": selected ? "-4px" : undefined,
+                "--mr": selected ? `${n % 2 ? "-" : ""}1.6deg` : undefined,
                 animationDelay: `${Math.min(260 + index * 18, 900)}ms`,
-            }}
+            } as CSSProperties}
         >
             <div className="flex items-center justify-between">
                 <span className="font-bold text-sm leading-none">{n}</span>
@@ -317,8 +318,8 @@ function DotCell({ d, selected, today, mode, onPick }: { d: CalendarDay; selecte
                 background: selected ? "var(--chip-hover)" : "transparent",
                 border: selected ? "2px solid var(--ink)" : isToday ? "2px solid #FF3399" : "2px solid transparent",
                 boxShadow: selected ? "2px 3px 0 var(--ctl-off)" : "none",
-                transform: selected ? "translate3d(0,-2px,0)" : undefined,
-            }}
+                "--my": selected ? "-2px" : undefined,
+            } as CSSProperties}
         >
             <div className="relative w-8 h-8 rounded-full overflow-hidden grid place-items-center"
                 style={{
@@ -420,7 +421,7 @@ function TimelineView({ days, selected, mode, order, setOrder, extra, setExtra, 
                     )}
                 </div>
                 <div className="relative w-(--ord-w) grid grid-cols-2 p-[3px] rounded-full border-2 border-(--ink) bg-(--chip) [box-shadow:2px_3px_0_var(--ctl-off),var(--in)]">
-                    <span aria-hidden className="cal-slide cal-gpu absolute top-[3px] bottom-[3px] left-[3px] w-[calc(50%-3px)] rounded-full bg-(--side) border-2 border-(--ink) [box-shadow:var(--in-pink)]" style={{ transform: `translate3d(${order === "old" ? "100%" : "0%"},0,0)` }} />
+                    <span aria-hidden className="cal-slide absolute top-[3px] bottom-[3px] left-[3px] w-[calc(50%-3px)] rounded-full bg-(--side) border-2 border-(--ink) [box-shadow:var(--in-pink)]" style={{ "--mx": order === "old" ? "100%" : "0%" } as CSSProperties} />
                     {([["new", "Newest first"], ["old", "From Day 1"]] as const).map(([k, label]) => (
                         <button key={k} type="button" aria-pressed={order === k} onClick={() => setOrder(k)}
                             className="cal-focus relative z-1 cursor-pointer h-(--ord-h) px-3.5 rounded-full flex items-center justify-center whitespace-nowrap font-bold text-xs transition-colors duration-300"
@@ -493,7 +494,7 @@ function TimelineRow({ d, selected, mode, onPick }: { d: CalendarDay; selected: 
             <span className="[display:var(--tl-side)] justify-self-center w-4 h-4 rounded-full border-2 border-(--ink)"
                 style={{ background: done ? "var(--side)" : d.kind === "today" ? "#FF3399" : d.kind === "started" ? "var(--chip-hover)" : "var(--face)", boxShadow: d.kind === "today" ? "2px 2px 0 #FF3399" : "none" }} />
             <div className="cal-rowcard ml-(--tl-ml) min-w-0 flex items-center gap-3 py-2.5 pr-3.5 pl-2.5 rounded-[18px] bg-(--face) text-(--face-ink)"
-                style={{ border: selected ? "2.5px solid var(--ink)" : look.bd, boxShadow: selected ? "4px 5px 0 var(--ctl-off)" : done ? SIDE_DEPTH : look.sh, transform: selected ? "translate3d(4px,0,0)" : undefined }}>
+                style={{ border: selected ? "2.5px solid var(--ink)" : look.bd, boxShadow: selected ? "4px 5px 0 var(--ctl-off)" : done ? SIDE_DEPTH : look.sh, "--mx": selected ? "4px" : undefined } as CSSProperties}>
                 <div className="relative w-[52px] h-[52px] flex-none rounded-[12px] border-2 border-(--ink) overflow-hidden grid place-items-center"
                     style={{ background: done ? "var(--panel)" : d.kind === "today" ? "#FF3399" : "var(--chip-hover)" }}>
                     {done && d.entry?.image_path ? <img src={img(d.entry.image_path)} alt="" loading="lazy" className="absolute inset-0 w-full h-full object-cover" /> : <span className="font-bold text-[22px] leading-none text-white [text-shadow:var(--puff-empty)]">?</span>}

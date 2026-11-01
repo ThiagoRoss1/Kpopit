@@ -4,8 +4,6 @@
   max-height: 100lvh;
   transform: translateZ(0);
   -webkit-transform: translateZ(0);
-  backface-visibility: hidden;
-  -webkit-backface-visibility: hidden;
 }
 
 /* Modal layering */

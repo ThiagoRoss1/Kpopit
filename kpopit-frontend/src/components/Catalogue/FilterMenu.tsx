@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState, type ReactNode } from "react";
+import { useEffect, useRef, useState, type CSSProperties, type ReactNode } from "react";
 import { ChevronDown } from "lucide-react";
 import { cn } from "../../lib/utils";
 import "./catalogue.css";
@@ -59,13 +59,13 @@ export default function FilterMenu({ title, label, value, options, onPick, minWi
             >
                 {icon}
                 <span className="flex-1 min-w-0 overflow-hidden text-ellipsis">{label}</span>
-                <ChevronDown aria-hidden className="cg-chev absolute right-3 w-3.5 h-3.5" strokeWidth={3} style={{ transform: `rotate(${open ? 180 : 0}deg)` }} />
+                <ChevronDown aria-hidden className="cg-chev absolute right-3 w-3.5 h-3.5" strokeWidth={3} style={{ "--mr": open ? "180deg" : "0deg" } as CSSProperties} />
             </button>
             {open && (
                 <div
                     role="menu"
                     aria-label={title}
-                    className={cn("cg-menu cg-gpu absolute top-[calc(var(--cg-ctl-h)+12px)] w-[248px] z-20 bg-(--menu-bg) text-(--chip-ink) border-2 border-(--ink) rounded-[20px] overflow-hidden [box-shadow:4px_5px_0_var(--ctl-off),0_16px_32px_rgba(var(--sh),.16),var(--in)]", align === "right" ? "right-0 origin-top-right" : "left-0 origin-top-left")}
+                    className={cn("cg-menu absolute top-[calc(var(--cg-ctl-h)+12px)] w-[248px] z-20 bg-(--menu-bg) text-(--chip-ink) border-2 border-(--ink) rounded-[20px] overflow-hidden [box-shadow:4px_5px_0_var(--ctl-off),0_16px_32px_rgba(var(--sh),.16),var(--in)]", align === "right" ? "right-0 origin-top-right" : "left-0 origin-top-left")}
                 >
                     <div className="flex items-center justify-between gap-2.5 pt-3 px-4 pb-2.5 border-b-[1.5px] border-dashed border-(--rule) font-bold text-[11px] leading-none tracking-[.12em] text-(--muted)">
                         <span>{title}</span>

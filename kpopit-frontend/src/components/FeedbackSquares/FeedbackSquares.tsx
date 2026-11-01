@@ -74,7 +74,7 @@ const FeedbackSquares = (props: FeedbackSquaresProps) => {
               >
               <div className={`${isTouched ? "opacity-100" : "opacity-0"} sm:opacity-0 sm:group-hover:opacity-100 absolute -top-1 rounded-lg right-2 w-5 h-5 mt-2 pointer-events-auto`}>
                 <button className="flex items-center justify-center w-full h-full
-                hover:scale-105 hover:brightness-110 hover:cursor-pointer transition-all duration-300 transform-gpu" onClick={onClose}>
+                hover:scale-105 hover:brightness-110 hover:cursor-pointer transition-all duration-300" onClick={onClose}>
                   <X color="white" className="w-5 h-5 sm:w-5 sm:h-5" />
                 </button>
               </div>

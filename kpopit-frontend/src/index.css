@@ -119,12 +119,29 @@
   --puff-post: -2.2px -2.2px 0 #0A0A0A,2.2px -2.2px 0 #0A0A0A,-2.2px 2.2px 0 #0A0A0A,2.2px 2.2px 0 #0A0A0A,0px 2.2px 0 #0A0A0A,0px -2.2px 0 #0A0A0A,2.2px 0px 0 #0A0A0A,-2.2px 0px 0 #0A0A0A,1.13px 1.53px 0 #FF8AC4,2.27px 3.07px 0 #FF8AC4,3.40px 4.60px 0 #FF8AC4,1.2px 2.4px 0 #0A0A0A,5.6px 2.4px 0 #0A0A0A,1.2px 6.8px 0 #0A0A0A,5.6px 6.8px 0 #0A0A0A,3.4px 6.8px 0 #0A0A0A,3.4px 2.4px 0 #0A0A0A,5.6px 4.6px 0 #0A0A0A,1.2px 4.6px 0 #0A0A0A;
 }
 
-/* Puff Pop entrances: transform and opacity only. No `to` transform, so they end on the element's
-   own one (its tilt) instead of jumping to it when the animation stops. */
-@keyframes puffIn { from { opacity: 0; transform: translate3d(0, 22px, 0) scale(.97) } 60% { opacity: 1 } }
-@keyframes puffSide { from { opacity: 0; transform: translate3d(-18px, 0, 0) } }
-@keyframes puffDrop { from { opacity: 0; transform: translate3d(0, -14px, 0) } }
-@keyframes puffMenu { from { opacity: 0; transform: translate3d(0, -10px, 0) scale(.97) } }
+/* Motion runs through these typed properties, read by `transform: translate(var(--mx), var(--my))
+   rotate(var(--mr)) scale(var(--ms))` and `opacity: var(--mo)`. Chrome animates them on the main
+   thread and repaints each frame, so nothing moves onto a GPU layer: no blurred borders at 125%
+   or 150% scaling, no flick when a layer is dropped, no pixelated images while they zoom. */
+@property --mx { syntax: '<length-percentage>'; inherits: false; initial-value: 0px; }
+@property --my { syntax: '<length-percentage>'; inherits: false; initial-value: 0px; }
+@property --mr { syntax: '<angle>'; inherits: false; initial-value: 0deg; }
+@property --ms { syntax: '<number>'; inherits: false; initial-value: 1; }
+@property --mo { syntax: '<number>'; inherits: false; initial-value: 1; }
+
+/* The same motion for Tailwind markup: `pm` with `[--mr:45deg]`-style values, duration-* and ease-*. */
+@utility pm {
+  transform: translate(var(--mx), var(--my)) rotate(var(--mr)) scale(var(--ms));
+  transition-property: --mx, --my, --mr, --ms;
+  transition-duration: var(--tw-duration, .3s);
+  transition-timing-function: var(--tw-ease, var(--ease-settle));
+}
+
+/* Puff Pop entrances: only the moved values, so they end on the element's own (its tilt). */
+@keyframes puffIn { from { --mo: 0; --my: 22px; --ms: .97 } 60% { --mo: 1 } }
+@keyframes puffSide { from { --mo: 0; --mx: -18px} }
+@keyframes puffDrop { from { --mo: 0; --my: -14px} }
+@keyframes puffMenu { from { --mo: 0; --my: -10px; --ms: .97 } }
 
 /* Puff lettering draws its outline above tall glyphs, past the line box; this headroom keeps it
    inside the element so GPU layers and overflow clipping don't slice the tops off. */
@@ -378,27 +395,4 @@ html {
     }
 }
 
-/* Avoid blur on images when hovering/scaling.
-   These two properties together break any <img> rendered inside a
-   3D-rotated face. 
-   Firefox culls it as back-facing. AlbumOfCol.css opts the
-   flip-book out via `.album-book img`. */
-img {
-  -webkit-backface-visibility: hidden;
-  backface-visibility: hidden;
-  -webkit-transform: translateZ(0);
-  transform: translateZ(0);
-  image-rendering: auto;
-}
-
-/* Speed up animations with GPU */
-.transform-gpu {
-  transform: translateZ(0);
-  will-change: transform;
-}
-
 /* Guarantee that GlassSurface loads instantly */
-canvas {
-  will-change: transform, opacity;
-  backface-visibility: hidden;
-}

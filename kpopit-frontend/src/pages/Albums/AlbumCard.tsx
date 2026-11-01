@@ -37,13 +37,13 @@ export default function AlbumCard({ album, index }: { album: AlbumsPageItem; ind
     const cover = resolveCdnUrl(album.cover_path) ?? "";
     const foreign = !!album.language && album.language !== "Korean";
     return (
-        <div className="cg-card cg-gpu" style={{ animationDelay: `${Math.min(260 + index * 45, 900)}ms` }}>
+        <div className="cg-card" style={{ animationDelay: `${Math.min(260 + index * 45, 900)}ms` }}>
             <div className="cg-tilt relative">
-                <div aria-hidden className="absolute inset-0 rounded-(--cg-r) bg-(--side) border-2 border-(--ink)" style={{ transform: "translate3d(var(--cg-depth),calc(var(--cg-depth) + 1px),0)" }} />
+                <div aria-hidden className="absolute inset-0 rounded-(--cg-r) bg-(--side) border-2 border-(--ink)" style={{ transform: "translate(var(--cg-depth), calc(var(--cg-depth) + 1px))" }} />
                 <IntentLink
                     to={albumPath(album, album.artist_name)}
                     aria-label={`${album.name} by ${album.artist_name}, ${album.release_year}`}
-                    className="cg-face cg-gpu relative block no-underline cursor-pointer bg-(--face) text-(--face-ink) border-2 border-(--ink) rounded-(--cg-r) p-(--cg-card-pad) [box-shadow:var(--face-hl)]"
+                    className="cg-face relative block no-underline cursor-pointer bg-(--face) text-(--face-ink) border-2 border-(--ink) rounded-(--cg-r) p-(--cg-card-pad) [box-shadow:var(--face-hl)]"
                 >
                     <div aria-hidden className="absolute inset-0 -z-1 rounded-[inherit] overflow-hidden pointer-events-none">
                         <div className="absolute -right-[46px] -bottom-[46px] w-[190px] h-[190px] bg-[radial-gradient(circle,var(--dots-c)_1.8px,transparent_2.2px)] bg-size-[9px_9px] [mask-image:radial-gradient(circle_at_100%_100%,#000_0%,rgba(0,0,0,.45)_34%,transparent_64%)]" />
@@ -64,7 +64,7 @@ export default function AlbumCard({ album, index }: { album: AlbumsPageItem; ind
                         <span className="shrink-0 font-semibold text-(length:--cg-meta-fs) leading-[1.4] text-(--muted) pr-0.5">{`· ${shortType(album.type)} · ${album.release_year}`}</span>
                     </div>
                     {foreign && (
-                        <span className="cg-tag cg-gpu absolute z-3 top-(--cg-tag-in) right-(--cg-tag-in) pointer-events-none bg-(--tag) text-white border-2 border-[#1A1418] rounded-[8px] font-bold text-(length:--cg-tag-fs) leading-none p-(--cg-tag-pad) whitespace-nowrap [text-shadow:var(--tag-text)]">
+                        <span className="cg-tag absolute z-3 top-(--cg-tag-in) right-(--cg-tag-in) pointer-events-none bg-(--tag) text-white border-2 border-[#1A1418] rounded-[8px] font-bold text-(length:--cg-tag-fs) leading-none p-(--cg-tag-pad) whitespace-nowrap [text-shadow:var(--tag-text)]">
                             {album.language === "Japanese" ? "JP release" : "EN release"}
                         </span>
                     )}

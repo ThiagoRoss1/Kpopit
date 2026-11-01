@@ -173,7 +173,7 @@ const UserProfile = () => {
             {/* Background layer */}
             <div className="profile-bg-glow fixed inset-0 -z-10 bg-ink pointer-events-none" />
 
-            <main className="relative w-full min-h-full flex justify-center items-start md:items-center py-8 transform-gpu">
+            <main className="relative w-full min-h-full flex justify-center items-start md:items-center py-8">
                 <div className="w-full max-w-7xl px-4 sxs:px-5 sm:px-6 md:px-8 mt-20">
                     {showEmailBanner && (
                         <div
@@ -204,7 +204,7 @@ const UserProfile = () => {
                                     className={`shrink-0 px-3.5 py-2 rounded-lg text-[12px] sxs:text-sm font-black
                                     bg-neon-pink text-white [text-shadow:1.5px_1.5px_2px_rgba(0,0,0,0.9)] shadow-[3px_3px_0px_rgba(255,255,255,1)] 
                                     hover:translate-x-1 hover:translate-y-1 hover:shadow-[0px_0px_0px_#000]
-                                    hover:cursor-pointer transition-all duration-150 transform-gpu
+                                    hover:cursor-pointer transition-all duration-150
                                     ${resendMutation.isPending ? "opacity-70" : ""}`}
                                 >
                                     {resendMutation.isPending ? "Sending…" : "Resend Email"}
@@ -229,7 +229,7 @@ const UserProfile = () => {
 
                         {/* Left Profile card */}
                         <aside
-                            className="profile-entry relative flex rounded-2xl p-1.5 transform-gpu
+                            className="profile-entry relative flex rounded-2xl p-1.5
                             shadow-[4px_4px_0px_rgba(255,53,151,1.0)] border-t-2 border-r border-b border-l-0 border-neon-pink"
                             aria-label="Identity"
                         >
@@ -238,16 +238,16 @@ const UserProfile = () => {
 
                                 {/* Polaroid avatar */}
                                 <div className="relative flex h-fit px-2 pt-2 pb-7 mt-1.5 mb-1 rounded-sm bg-[#f4f0e8]
-                                    shadow-[4px_4px_0px_#ff3399] rotate-[-1.5deg] transform-gpu">
+                                    shadow-[4px_4px_0px_#ff3399] rotate-[-1.5deg]">
 
                                     {/* Washi tape ribbons */}
                                     <span aria-hidden="true"
-                                        className="absolute z-10 -top-2 -left-2.5 w-14 h-4.5 -rotate-30 transform-gpu
+                                        className="absolute z-10 -top-2 -left-2.5 w-14 h-4.5 -rotate-30
                                         bg-neon-pink/35 border border-neon-pink/60
                                         shadow-[1px_1px_0px_rgba(0,0,0,0.4)]" />
 
                                     <span aria-hidden="true"
-                                        className="absolute z-10 -top-2 -right-2.5 w-14 h-4.5 rotate-30 transform-gpu
+                                        className="absolute z-10 -top-2 -right-2.5 w-14 h-4.5 rotate-30
                                         bg-neon-pink/35 border border-neon-pink/60
                                         shadow-[1px_1px_0px_rgba(0,0,0,0.4)]" />
 
@@ -304,7 +304,7 @@ const UserProfile = () => {
                                     shadow-[3px_3px_0px_#ffffff]
                                     hover:bg-neon-pink hover:translate-x-1 hover:translate-y-1 hover:shadow-[4px_4px_0px_#000]
                                     active:translate-x-0.5 active:translate-y-0.5 active:shadow-[1px_1px_0px_#000]
-                                    hover:cursor-pointer transition-all duration-300 transform-gpu"
+                                    hover:cursor-pointer transition-all duration-300"
                                 >
                                     Edit Profile
                                 </button>
@@ -322,7 +322,7 @@ const UserProfile = () => {
                         </aside>
 
                         {/* Right Stats */}
-                        <section className="profile-entry flex flex-col gap-4 sm:gap-5 min-w-0 transform-gpu">
+                        <section className="profile-entry flex flex-col gap-4 sm:gap-5 min-w-0">
 
                             {/* Stats row */}
                             <div className="grid grid-cols-1 max-xxs:grid-cols-1 sm:grid-cols-3 gap-2.5 sm:gap-3.5"
@@ -387,7 +387,7 @@ const UserProfile = () => {
                                                 onClick={() => setFilter(mode)}
                                                 aria-pressed={active}
                                                 className={`font-sans text-[10px] font-bold uppercase tracking-[1.2px]
-                                                px-3 py-1.25 rounded-full transform-gpu
+                                                px-3 py-1.25 rounded-full
                                                 transition-colors duration-150 hover:cursor-pointer
                                                 ${active
                                                         ? "bg-neon-pink text-black shadow-[2px_2px_0px_#000]"
@@ -456,7 +456,7 @@ const UserProfile = () => {
                                         src={isGif ? HaerinGif : HaerinWebp}
                                         alt="Coming soon"
                                         className="relative z-10 w-full h-full object-cover opacity-90 drop-shadow-[0_0_10px_rgba(255,51,153,0.35)] 
-                                        hover:cursor-pointer hover:scale-105 transition-transform duration-500 transform-gpu"
+                                        hover:cursor-pointer hover:scale-105 transition-transform duration-500"
                                         draggable={false}
                                         onClick={() => setIsGif(!isGif)}
                                         

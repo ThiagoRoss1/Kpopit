@@ -86,7 +86,7 @@ const ModeOptions = (props: ModeOptionsProps) => {
                 ) : (
                     <div className="flex flex-row w-50 h-14 sm:w-60 sm:h-16 justify-center items-center
                     bg-black border border-white rounded-2xl gap-0 p-1 sm:gap-4 sm:p-2
-                    transition-colors duration-2000 transform-gpu">
+                    transition-colors duration-2000">
                         <span className={`justify-center items-center ${(!isHintRevealed && isHintClicked ? "text-hint-fade-in" : "")}
                         text-white text-lg [text-shadow:1.2px_1.6px_2.0px_rgba(255,51,153,1)]`}>
                             {groupsDisplay.join(", ")}

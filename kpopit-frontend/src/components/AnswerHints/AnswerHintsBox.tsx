@@ -138,7 +138,7 @@ const AnswerHintsBox = (props: AnswerHintsBoxProps) => {
                     onClick={() => {
                         if (!isFlipped1 && canFlipCard1) setIsFlipped1(true);
                     }}
-                    className={`transform-3d transform-gpu ${canFlipCard1 && !isFlipped1 ? "hover:cursor-pointer" : "hover:cursor-default"}`}
+                    className={`transform-3d ${canFlipCard1 && !isFlipped1 ? "hover:cursor-pointer" : "hover:cursor-default"}`}
                 >
                     {/* Box 1 Back */}
                     <motion.div 
@@ -146,7 +146,7 @@ const AnswerHintsBox = (props: AnswerHintsBoxProps) => {
                         animate={canFlipCard1 ? { scale: 1 } : { scale: 0.9 }}
                         transition={{ duration: 0.4, ease: "easeInOut" }}
                         className="relative max-xxs:w-full max-sxs:w-full max-sxs:h-22 sxs:w-40 sxs:h-24 xxs:w-42 xxs:h-24 xs:w-48 zm:w-54 xs:h-26 sm:w-60 sm:h-30 border-2 border-white/50 rounded-2xl backdrop-blur-md flex items-center justify-center text-center 
-                        backface-hidden shadow-[4px_4px_4px_1px_rgba(0,0,0,0.15),inset_0_4px_4px_0_rgba(0,0,0,0.15)] transform-3d transform-gpu">
+                        backface-hidden shadow-[4px_4px_4px_1px_rgba(0,0,0,0.15),inset_0_4px_4px_0_rgba(0,0,0,0.15)] transform-3d">
                             <div className="flex flex-col z-10 gap-1 sm:gap-2 [text-shadow:1.2px_1.2px_4px_rgba(0,0,0,0.8)]">     
                                 <h3 className="relative font-bold max-xxs:text-base xxs:text-base xs:text-[18px] sm:text-[20px] text-[#ce757a] drop-shadow-lg">
                                     Hint 1
@@ -179,7 +179,7 @@ const AnswerHintsBox = (props: AnswerHintsBoxProps) => {
                                     scale: { duration: 0.3, ease: "easeInOut" },
                                 }}
                                 className={`text-white max-xxs:text-2xl xxs:text-2xl xs:text-2xl sm:text-3xl 
-                                [text-shadow:1.2px_1.2px_4px_rgba(0,0,0,0.8),0_0_12px_rgba(180,55,119,0.25)] ${!showHint1 ? "cursor-pointer select-none transform-gpu": ""}`}>
+                                [text-shadow:1.2px_1.2px_4px_rgba(0,0,0,0.8),0_0_12px_rgba(180,55,119,0.25)] ${!showHint1 ? "cursor-pointer select-none": ""}`}>
                                     {memberCountDisplay}
                             </motion.span>
                         </div>
@@ -196,7 +196,7 @@ const AnswerHintsBox = (props: AnswerHintsBoxProps) => {
                     onClick={() => {
                         if (!isFlipped2 && canFlipCard2) setIsFlipped2(true);
                     }}
-                    className={`transform-3d transform-gpu ${canFlipCard2 && !isFlipped2 ? "hover:cursor-pointer" : "hover:cursor-default"}`}
+                    className={`transform-3d ${canFlipCard2 && !isFlipped2 ? "hover:cursor-pointer" : "hover:cursor-default"}`}
                 >
                     {/* Box 2 Back */}
                     <motion.div 
@@ -204,7 +204,7 @@ const AnswerHintsBox = (props: AnswerHintsBoxProps) => {
                         animate={canFlipCard2 ? { scale: 1 } : { scale: 0.9 }}
                         transition={{ duration: 0.4, ease: "easeInOut" }}
                         className="relative max-sxs:w-full max-sxs:h-22 sxs:w-40 sxs:h-24 xxs:w-42 xxs:h-24 xs:w-48 zm:w-54 xs:h-26 sm:w-60 sm:h-30 border-2 border-white/50 rounded-2xl backdrop-blur-md flex items-center justify-center text-center 
-                        backface-hidden shadow-[4px_4px_4px_1px_rgba(0,0,0,0.15),inset_0_4px_4px_0_rgba(0,0,0,0.15)] transform-3d transform-gpu">
+                        backface-hidden shadow-[4px_4px_4px_1px_rgba(0,0,0,0.15),inset_0_4px_4px_0_rgba(0,0,0,0.15)] transform-3d">
                             <div className="flex flex-col gap-1 sm:gap-2 [text-shadow:1.2px_1.2px_4px_rgba(0,0,0,0.8)]">
                                 <h3 className="relative font-bold max-xxs:text-base xxs:text-base xs:text-[18px] sm:text-[20px] text-[#ce757a] drop-shadow-lg">
                                     Hint 2
@@ -237,7 +237,7 @@ const AnswerHintsBox = (props: AnswerHintsBoxProps) => {
                                     scale: { duration: 0.3, ease: "easeInOut" },
                                 }}
                                 className={`block w-full wrap-break-word text-white max-xxs:text-lg xxs:text-xl xs:text-xl sm:text-2xl font-semibold 
-                                [text-shadow:1.2px_1.2px_4px_rgba(0,0,0,0.8),0_0_12px_rgba(180,55,119,0.25)] ${!showHint2 ? "cursor-pointer select-none transform-gpu" : ""}`}>
+                                [text-shadow:1.2px_1.2px_4px_rgba(0,0,0,0.8),0_0_12px_rgba(180,55,119,0.25)] ${!showHint2 ? "cursor-pointer select-none" : ""}`}>
                                     {groupsDisplay.join(", ")}
                             </motion.span>
                         </div>

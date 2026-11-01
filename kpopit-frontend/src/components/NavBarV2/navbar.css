@@ -1,53 +1,54 @@
 /* NavBarV2: the reference's rules (press beats hover; hover only on hover devices). Row tilts come
    from --nb-tilt so hover and press transforms can replace them. */
-.nb-item { transition: background-color .3s, color .3s, border-color .3s, box-shadow .3s, transform .35s var(--lift, var(--ease-settle)); }
+/* Moving parts animate --mx/--my/--mr/--ms (registered in index.css): Chrome paints them each frame instead of on a GPU layer, so borders and images stay sharp. */
+.nb-item, .nb-chev, .nb-logo, .nb-av, .nb-row, .nb-tile, .nb-uitem, .nb-menu { transform: translate(var(--mx), var(--my)) rotate(var(--mr)) scale(var(--ms)); }
+.nb-item { transition: background-color .3s, color .3s, border-color .3s, box-shadow .3s, --mx .35s var(--lift, var(--ease-settle)), --my .35s var(--lift, var(--ease-settle)), --mr .35s var(--lift, var(--ease-settle)), --ms .35s var(--lift, var(--ease-settle)); }
 @media (hover: hover) {
-  .nb-item[data-st="idle"]:hover { background: var(--chip) !important; border-color: var(--ink) !important; color: var(--text) !important; box-shadow: 2px 3px 0 var(--ctl-off), var(--btn-in, var(--in)) !important; transform: translate3d(0, -2px, 0); --lift: cubic-bezier(.34, 1.4, .64, 1); }
-  .nb-item[data-st="cur"]:hover { --lift: cubic-bezier(.34, 1.4, .64, 1); transform: translate3d(0, -2px, 0); box-shadow: 2.5px 3.5px 0 var(--ctl-off), var(--in-pink) !important; }
-  .nb-item[data-st="open"]:hover { --lift: cubic-bezier(.34, 1.4, .64, 1); transform: translate3d(0, -2px, 0); box-shadow: 2.5px 3.5px 0 var(--ctl-off), var(--btn-in, var(--in)) !important; }
+  .nb-item[data-st="idle"]:hover { background: var(--chip) !important; border-color: var(--ink) !important; color: var(--text) !important; box-shadow: 2px 3px 0 var(--ctl-off), var(--btn-in, var(--in)) !important; --mx: 0px; --my: -2px; --mr: 0deg; --ms: 1; transform: translate(var(--mx), var(--my)) rotate(var(--mr)) scale(var(--ms)); --lift: cubic-bezier(.34, 1.4, .64, 1); }
+  .nb-item[data-st="cur"]:hover { --lift: cubic-bezier(.34, 1.4, .64, 1); --mx: 0px; --my: -2px; --mr: 0deg; --ms: 1; transform: translate(var(--mx), var(--my)) rotate(var(--mr)) scale(var(--ms)); box-shadow: 2.5px 3.5px 0 var(--ctl-off), var(--in-pink) !important; }
+  .nb-item[data-st="open"]:hover { --lift: cubic-bezier(.34, 1.4, .64, 1); --mx: 0px; --my: -2px; --mr: 0deg; --ms: 1; transform: translate(var(--mx), var(--my)) rotate(var(--mr)) scale(var(--ms)); box-shadow: 2.5px 3.5px 0 var(--ctl-off), var(--btn-in, var(--in)) !important; }
 }
-.nb-item:active:active:active:active { transform: translate3d(2px, 3px, 0) !important; box-shadow: 0 0 0 var(--ctl-off), var(--btn-in, var(--in)) !important; transition-duration: .18s; }
+.nb-item:active:active:active:active { --mx: 2px !important; --my: 3px !important; --mr: 0deg !important; --ms: 1 !important; transform: translate(var(--mx), var(--my)) rotate(var(--mr)) scale(var(--ms)) !important; box-shadow: 0 0 0 var(--ctl-off), var(--btn-in, var(--in)) !important; transition-duration: .18s; }
 .nb-item[data-st="cur"]:active:active:active:active { box-shadow: 0 0 0 var(--ctl-off), var(--in-pink) !important; }
 .nb-item[data-st="idle"]:active:active:active:active { background: var(--chip) !important; border-color: var(--ink) !important; }
 .nb-item[data-st="cur"] { --btn-in: var(--in-pink); }
-.nb-chev { transition: transform .4s cubic-bezier(.34, 1.56, .64, 1); }
-[aria-expanded="true"] > .nb-chev { transform: rotate(180deg); }
+.nb-chev { transition: --mx .4s cubic-bezier(.34, 1.56, .64, 1), --my .4s cubic-bezier(.34, 1.56, .64, 1), --mr .4s cubic-bezier(.34, 1.56, .64, 1), --ms .4s cubic-bezier(.34, 1.56, .64, 1); }
+[aria-expanded="true"] > .nb-chev { --mx: 0px; --my: 0px; --mr: 180deg; --ms: 1; transform: translate(var(--mx), var(--my)) rotate(var(--mr)) scale(var(--ms)); }
 
-.nb-logo { transition: transform .3s var(--ease-settle); }
-@media (hover: hover) { .nb-logo:hover { transform: scale(1.04); } }
-.nb-logo:active:active:active:active { transform: scale(.98); transition-duration: .12s; }
+.nb-logo { transition: --mx .3s var(--ease-settle), --my .3s var(--ease-settle), --mr .3s var(--ease-settle), --ms .3s var(--ease-settle); }
+@media (hover: hover) { .nb-logo:hover { --mx: 0px; --my: 0px; --mr: 0deg; --ms: 1.04; transform: translate(var(--mx), var(--my)) rotate(var(--mr)) scale(var(--ms)); } }
+.nb-logo:active:active:active:active { --mx: 0px; --my: 0px; --mr: 0deg; --ms: .98; transform: translate(var(--mx), var(--my)) rotate(var(--mr)) scale(var(--ms)); transition-duration: .12s; }
 
 /* Avatar: the ring widens and the photo zooms a little */
-.nb-av { box-shadow: 0 0 0 2px var(--ink), 0 0 0 4.5px #FF8AC4, 0 0 0 6.5px var(--ink); transition: transform .45s var(--lift, var(--ease-settle)), box-shadow .4s cubic-bezier(.22, 1, .36, 1); }
-.nb-av img { transition: transform .5s cubic-bezier(.34, 1.56, .64, 1); }
+.nb-av { box-shadow: 0 0 0 2px var(--ink), 0 0 0 4.5px #FF8AC4, 0 0 0 6.5px var(--ink); transition: --mx .45s var(--lift, var(--ease-settle)), --my .45s var(--lift, var(--ease-settle)), --mr .45s var(--lift, var(--ease-settle)), --ms .45s var(--lift, var(--ease-settle)), box-shadow .4s cubic-bezier(.22, 1, .36, 1); }
+.nb-av img { transition: --mx .5s cubic-bezier(.34, 1.56, .64, 1), --my .5s cubic-bezier(.34, 1.56, .64, 1), --mr .5s cubic-bezier(.34, 1.56, .64, 1), --ms .5s cubic-bezier(.34, 1.56, .64, 1); }
 @media (hover: hover) {
-  .nb-av:hover { --lift: var(--ease-bounce); transform: scale(1.04); box-shadow: 0 0 0 2px var(--ink), 0 0 0 5px #FF8AC4, 0 0 0 7px var(--ink); }
-  .nb-av:hover img { transform: scale(1.08); }
+  .nb-av:hover { --lift: var(--ease-bounce); --mx: 0px; --my: 0px; --mr: 0deg; --ms: 1.04; transform: translate(var(--mx), var(--my)) rotate(var(--mr)) scale(var(--ms)); box-shadow: 0 0 0 2px var(--ink), 0 0 0 5px #FF8AC4, 0 0 0 7px var(--ink); }
+  .nb-av:hover img { --mx: 0px; --my: 0px; --mr: 0deg; --ms: 1.08; transform: translate(var(--mx), var(--my)) rotate(var(--mr)) scale(var(--ms)); }
 }
-.nb-av:active:active:active:active, .nb-av[aria-expanded="true"] { transform: scale(.95); transition-duration: .18s; }
+.nb-av:active:active:active:active, .nb-av[aria-expanded="true"] { --mx: 0px; --my: 0px; --mr: 0deg; --ms: .95; transform: translate(var(--mx), var(--my)) rotate(var(--mr)) scale(var(--ms)); transition-duration: .18s; }
 
 /* Dropdown rows: tilted at rest, straighten and lift on hover, press into their shadow */
-.nb-row { transform: rotate(var(--nb-tilt, 0deg)); transition: background-color .3s ease, box-shadow .4s var(--ease-settle), transform .45s var(--lift, var(--ease-settle)); }
-.nb-row .nb-tile { transition: transform .45s cubic-bezier(.34, 1.56, .64, 1); }
+.nb-row { --mx: 0px; --my: 0px; --mr: var(--nb-tilt, 0deg); --ms: 1; transform: translate(var(--mx), var(--my)) rotate(var(--mr)) scale(var(--ms)); transition: background-color .3s ease, box-shadow .4s var(--ease-settle), --mx .45s var(--lift, var(--ease-settle)), --my .45s var(--lift, var(--ease-settle)), --mr .45s var(--lift, var(--ease-settle)), --ms .45s var(--lift, var(--ease-settle)); }
+.nb-row .nb-tile { transition: --mx .45s cubic-bezier(.34, 1.56, .64, 1), --my .45s cubic-bezier(.34, 1.56, .64, 1), --mr .45s cubic-bezier(.34, 1.56, .64, 1), --ms .45s cubic-bezier(.34, 1.56, .64, 1); }
 @media (hover: hover) {
-  .nb-row[data-cur="0"]:not([data-wip="1"]):hover { --lift: cubic-bezier(.34, 1.4, .64, 1); background: var(--chip-hover) !important; transform: translate3d(0, -2px, 0) rotate(0deg); box-shadow: 3px 4.5px 0 var(--ctl-off), var(--btn-in, var(--in)) !important; }
-  .nb-row[data-cur="1"]:hover { --lift: cubic-bezier(.34, 1.4, .64, 1); transform: translate3d(0, -2px, 0) rotate(0deg); }
-  .nb-row:not([data-wip="1"]):hover .nb-tile { transform: rotate(-4deg) scale(1.03); }
+  .nb-row[data-cur="0"]:not([data-wip="1"]):hover { --lift: cubic-bezier(.34, 1.4, .64, 1); background: var(--chip-hover) !important; --mx: 0px; --my: -2px; --mr: 0deg; --ms: 1; transform: translate(var(--mx), var(--my)) rotate(var(--mr)) scale(var(--ms)); box-shadow: 3px 4.5px 0 var(--ctl-off), var(--btn-in, var(--in)) !important; }
+  .nb-row[data-cur="1"]:hover { --lift: cubic-bezier(.34, 1.4, .64, 1); --mx: 0px; --my: -2px; --mr: 0deg; --ms: 1; transform: translate(var(--mx), var(--my)) rotate(var(--mr)) scale(var(--ms)); }
+  .nb-row:not([data-wip="1"]):hover .nb-tile { --mx: 0px; --my: 0px; --mr: -4deg; --ms: 1.03; transform: translate(var(--mx), var(--my)) rotate(var(--mr)) scale(var(--ms)); }
 }
-.nb-row:not([data-wip="1"]):active:active:active:active { transform: translate3d(2px, 3px, 0) rotate(0deg); box-shadow: 0 0 0 var(--ctl-off), var(--btn-in, var(--in)) !important; transition-duration: .18s; }
+.nb-row:not([data-wip="1"]):active:active:active:active { --mx: 2px; --my: 3px; --mr: 0deg; --ms: 1; transform: translate(var(--mx), var(--my)) rotate(var(--mr)) scale(var(--ms)); box-shadow: 0 0 0 var(--ctl-off), var(--btn-in, var(--in)) !important; transition-duration: .18s; }
 .nb-row[data-wip="1"] { cursor: default; }
 /* The current page's row has a pink depth (no inner shine): its hover and press move that depth. */
 @media (hover: hover) { .nb-row[data-cur="1"]:hover { box-shadow: 4px 5.5px 0 0 #FF8AC4, 4px 5.5px 0 2px var(--ink) !important; } }
 .nb-row[data-cur="1"]:active:active:active:active { box-shadow: 0 0 0 0 #FF8AC4, 0 0 0 2px var(--ink) !important; }
 
 /* Profile menu items: the same lift-and-press as the rows, softer */
-.nb-uitem { transition: background-color .3s ease, border-color .3s ease, box-shadow .4s var(--ease-settle), transform .45s var(--lift, var(--ease-settle)); }
+.nb-uitem { transition: background-color .3s ease, border-color .3s ease, box-shadow .4s var(--ease-settle), --mx .45s var(--lift, var(--ease-settle)), --my .45s var(--lift, var(--ease-settle)), --mr .45s var(--lift, var(--ease-settle)), --ms .45s var(--lift, var(--ease-settle)); }
 @media (hover: hover) {
-  .nb-uitem:hover { --lift: var(--ease-bounce); background: var(--chip-hover); border-color: var(--ink); box-shadow: 2px 3px 0 var(--ctl-off), var(--btn-in, var(--in)); transform: translate3d(0, -2px, 0); }
+  .nb-uitem:hover { --lift: var(--ease-bounce); background: var(--chip-hover); border-color: var(--ink); box-shadow: 2px 3px 0 var(--ctl-off), var(--btn-in, var(--in)); --mx: 0px; --my: -2px; --mr: 0deg; --ms: 1; transform: translate(var(--mx), var(--my)) rotate(var(--mr)) scale(var(--ms)); }
 }
-.nb-uitem:active:active:active:active { transform: translate3d(2px, 3px, 0); box-shadow: 0 0 0 var(--ctl-off), var(--btn-in, var(--in)); transition-duration: .18s; }
+.nb-uitem:active:active:active:active { --mx: 2px; --my: 3px; --mr: 0deg; --ms: 1; transform: translate(var(--mx), var(--my)) rotate(var(--mr)) scale(var(--ms)); box-shadow: 0 0 0 var(--ctl-off), var(--btn-in, var(--in)); transition-duration: .18s; }
 
-.nb-menu { animation: nbMenu .38s cubic-bezier(.22, 1, .36, 1) both; }
-@keyframes nbMenu { from { opacity: 0; transform: translate3d(0, -10px, 0) scale(.97) } }
-.nb-item, .nb-row, .nb-tile, .nb-menu, .nb-logo, .nb-chev, .nb-uitem { backface-visibility: hidden; will-change: transform; }
+.nb-menu { animation: nbMenu .38s cubic-bezier(.22, 1, .36, 1) both; transform: translate(var(--mx), var(--my)) rotate(var(--mr)) scale(var(--ms)); opacity: var(--mo); }
+@keyframes nbMenu { from { --mo: 0; --my: -10px; --ms: .97 } }
 @media (prefers-reduced-motion: reduce) { .pp-nav * { animation: none !important; transition-duration: 0s !important; } }

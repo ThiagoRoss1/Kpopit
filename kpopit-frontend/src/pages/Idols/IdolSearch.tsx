@@ -46,7 +46,7 @@ export default function IdolSearch({ idols, currentId }: { idols: IdolsPageData[
         <div className="relative min-w-0 w-full">
             <div className="overflow-hidden pt-1 pr-2.5 pb-2.5 pl-2 -mt-1 -mr-2.5 -mb-2.5 -ml-2 flex">
                 <label
-                    className="ip-sb flex items-center box-border h-12 ml-auto overflow-hidden bg-(--chip) border-[2.5px] border-[#FF8AC4] [box-shadow:4px_5px_0_#1A1418] -skew-x-6 [backface-visibility:hidden]"
+                    className="ip-sb flex items-center box-border h-12 ml-auto overflow-hidden bg-(--chip) border-[2.5px] border-[#FF8AC4] [box-shadow:4px_5px_0_#1A1418] -skew-x-6"
                     style={{ width: show ? "100%" : "min(100%, 420px)" }}
                 >
                     <span className="grid place-items-center w-[50px] self-stretch bg-[#1A1418]">

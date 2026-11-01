@@ -1,4 +1,4 @@
-import { useState, type ReactNode } from "react";
+import { useState, type CSSProperties, type ReactNode } from "react";
 import { useSearchParams } from "react-router";
 import { ArrowUp, ChevronLeft, ChevronRight, Lock, Search } from "lucide-react";
 import PageShell from "../../components/Puff/PageShell";
@@ -183,7 +183,7 @@ function ClassicGuide() {
                 <div className="grid grid-cols-2 gap-3 @max-[580px]:grid-cols-1">
                     {CATEGORIES.map((c, i) => (
                         <div key={c.name} className={cn("htp-cat flex gap-3 items-start p-3 rounded-[16px] border-2 border-(--ink) bg-(--chip) [box-shadow:2px_3px_0_var(--ctl-off),var(--in)]", c.wide && "col-span-2 @max-[580px]:col-span-1")}>
-                            <span aria-hidden className="htp-ctile flex-none grid place-items-center w-12 h-12 rounded-[12px] border-2 border-[#1A1418] font-bold text-[10px] text-[#1A1418] text-center leading-tight whitespace-pre-line" style={{ background: FEEDBACK[c.tone].bg, transform: `rotate(${i % 2 ? 3 : -3}deg)` }}>
+                            <span aria-hidden className="htp-ctile flex-none grid place-items-center w-12 h-12 rounded-[12px] border-2 border-[#1A1418] font-bold text-[10px] text-[#1A1418] text-center leading-tight whitespace-pre-line" style={{ background: FEEDBACK[c.tone].bg, "--mr": `${i % 2 ? 3 : -3}deg` } as CSSProperties}>
                                 {c.sample}
                             </span>
                             <span className="flex flex-col gap-1 min-w-0">
@@ -249,7 +249,7 @@ function Switch({ label, on, locked, lockText, onToggle }: { label: string; on: 
                 onClick={onToggle}
                 className={cn("pp-focus relative w-[52px] h-[30px] rounded-full border-2 border-(--ink) transition-colors duration-300", on ? "bg-[#FF8AC4]" : "bg-(--chip-hover)", locked ? "cursor-default" : "cursor-pointer")}
             >
-                <span className="absolute top-[3px] left-[3px] w-5 h-5 rounded-full border-2 border-[#1A1418] bg-white transition-transform duration-400 ease-(--ease-pop)" style={{ transform: on ? "translate3d(22px,0,0)" : "none" }} />
+                <span className="absolute top-[3px] left-[3px] w-5 h-5 rounded-full border-2 border-[#1A1418] bg-white pm duration-400 ease-(--ease-pop)" style={{ "--mx": on ? "22px" : "0px" } as CSSProperties} />
             </button>
         </div>
     );
@@ -338,7 +338,7 @@ function PixelatedGuide() {
                         const isOpen = ok && open[i];
                         return (
                             <div key={s.label} className="relative h-[96px]">
-                                <div aria-hidden className="htp-disc absolute left-2 top-2 w-20 h-20 rounded-full bg-[#0D0008] border-2 border-[#1A1418] grid place-items-center" style={{ transform: isOpen ? "translate3d(82px,0,0) rotate(360deg)" : "none" }}>
+                                <div aria-hidden className="htp-disc absolute left-2 top-2 w-20 h-20 rounded-full bg-[#0D0008] border-2 border-[#1A1418] grid place-items-center" style={{ "--mx": isOpen ? "82px" : "0px", "--mr": isOpen ? "360deg" : "0deg" } as CSSProperties}>
                                     <span className="w-10 h-10 rounded-full grid place-items-center font-bold text-xs" style={{ background: s.bg, color: s.ink }}>{s.value}</span>
                                 </div>
                                 <button
@@ -347,7 +347,7 @@ function PixelatedGuide() {
                                     aria-label={ok ? `${s.label} hint` : `${s.label} hint, locked`}
                                     onClick={() => setOpen((o) => o.map((v, k) => (k === i ? !v : v)))}
                                     className="htp-sleeve pp-focus absolute left-0 top-0 w-[96px] h-[96px] rounded-[10px] border-2 border-[#1A1418] flex flex-col justify-between p-2 text-left [box-shadow:3px_4px_0_var(--ctl-off)] disabled:cursor-default cursor-pointer"
-                                    style={{ background: s.bg, color: s.ink, transform: isOpen ? "translate3d(-6px,0,0) rotate(-7deg)" : "rotate(-2deg)" }}
+                                    style={{ background: s.bg, color: s.ink, "--mx": isOpen ? "-6px" : "0px", "--mr": isOpen ? "-7deg" : "-2deg" } as CSSProperties}
                                 >
                                     <span className="font-bold text-[9px] tracking-[.12em]">HINT #{i + 1}</span>
                                     <span className="font-bold text-[13px] leading-tight">{s.label}<br /><span lang="ko" className="font-korean text-[10px]">{s.ko}</span></span>

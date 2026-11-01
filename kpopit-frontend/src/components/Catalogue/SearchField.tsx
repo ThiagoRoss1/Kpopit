@@ -1,3 +1,4 @@
+import type { CSSProperties } from "react";
 import { Search, X } from "lucide-react";
 import { cn } from "../../lib/utils";
 import "./catalogue.css";
@@ -27,7 +28,7 @@ export default function SearchField({ value, onChange, placeholder, label, class
                 aria-label="Clear search"
                 tabIndex={value ? 0 : -1}
                 className="cg-clear cg-focus flex-none grid place-items-center w-9 h-9 border-0 bg-transparent text-inherit rounded-[12px] cursor-pointer"
-                style={{ opacity: value ? 1 : 0, pointerEvents: value ? "auto" : "none", transform: value ? "rotate(0deg) scale(1)" : "rotate(-90deg) scale(.5)" }}
+                style={{ opacity: value ? 1 : 0, pointerEvents: value ? "auto" : "none", "--mr": value ? "0deg" : "-90deg", "--ms": value ? 1 : .5 } as CSSProperties}
             >
                 <X className="w-4 h-4" strokeWidth={3} />
             </button>

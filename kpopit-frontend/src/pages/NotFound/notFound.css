@@ -1,6 +1,8 @@
-.nf-card { transition: transform .6s var(--lift, var(--ease-settle)); will-change: transform; }
-@media (hover: hover) { .nf-card:hover { --lift: var(--ease-bounce); transform: rotate(0deg) translate3d(0, -4px, 0); } }
-.nf-tile { animation: nfPop .5s var(--ease-pop) both; }
-@keyframes nfPop { from { opacity: 0; transform: scale(.4) } to { opacity: 1; transform: none } }
+/* Moving parts animate --mx/--my/--mr/--ms (registered in index.css): Chrome paints them each frame instead of on a GPU layer, so borders and images stay sharp. */
+.nf-card, .nf-tile { transform: translate(var(--mx), var(--my)) rotate(var(--mr)) scale(var(--ms)); }
+.nf-card { transition: --mx .6s var(--lift, var(--ease-settle)), --my .6s var(--lift, var(--ease-settle)), --mr .6s var(--lift, var(--ease-settle)), --ms .6s var(--lift, var(--ease-settle)); }
+@media (hover: hover) { .nf-card:hover { --lift: var(--ease-bounce); --mx: 0px; --my: -4px; --mr: 0deg; --ms: 1; transform: translate(var(--mx), var(--my)) rotate(var(--mr)) scale(var(--ms)); } }
+.nf-tile { animation: nfPop .5s var(--ease-pop) both; transform: translate(var(--mx), var(--my)) rotate(var(--mr)) scale(var(--ms)); opacity: var(--mo); }
+@keyframes nfPop { from { --mo: 0; --ms: .4 } to { --mo: 1; --ms: 1 } }
 .nf-q { display: inline-block; animation: nfWob 3.2s ease-in-out infinite; }
 @keyframes nfWob { 0%, 100% { transform: rotate(-4deg) } 50% { transform: rotate(4deg) translate3d(0, -6px, 0) } }

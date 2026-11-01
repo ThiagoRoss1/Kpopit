@@ -233,7 +233,7 @@ const SearchBar = (props: SearchBarProps) => {
               transition={LIST_SPRING}
               className={`relative w-full rounded-3xl
               ${suggestions.length === 1 ? "overflow-hidden" : "overflow-y-auto overflow-x-hidden"} searchbar-scroll border border-white bg-linear-to-r from-black/5 via-[#b43777]/0 to-black/5
-              shadow-lg drop-shadow-md max-h-50 sm:max-h-60 transform-gpu will-change-transform`}
+              shadow-lg drop-shadow-md max-h-50 sm:max-h-60`}
               // liquid glass if possible but using gradient for now (bg-linear-to-r from-[#000]/65 via-[#b43777]/80 to-[#000]/65)
             >
               {suggestions.map((suggestion) => {
@@ -279,7 +279,7 @@ const SearchBar = (props: SearchBarProps) => {
                     ${isTouched === suggestion.id ?
                       "bg-linear-to-r from-[#8a0449] via-[#0d0314] to-[#000000]/0 bg-size-[200%_100%] bg-left animate-[moveGradient_0.3s_linear_forwards]" : ""}
                     flex grow gap-4 items-center text-white drop-shadow-md
-                    border border-white/20 transform-gpu will-change-transform
+                    border border-white/20
                     group-hover:shadow-[2px_2px_12px_8px_rgba(0,0,0,0.35)]`} // had to remove backdrop-blur-md due "white corner glitch / artifact"
                 >
                   {suggestion.image_path && (

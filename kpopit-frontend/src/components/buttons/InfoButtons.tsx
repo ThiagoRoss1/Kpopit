@@ -15,7 +15,7 @@ const InfoButtons = (props: InfoProps) => {
     const buttonTextStyle = "inline-flex h-full w-full items-center justify-center rounded-2xl sm:rounded-2xl max-xxs:text-[14px] xxs:text-[14px] xs:text-base sm:text-[20px] text-white font-semibold text-shadow-[2px_2px_4px_rgba(0,0,0,0.5)]";
 
     // Hover //
-    const hoverEffect = "hover:brightness-125 hover:scale-105 hover:cursor-pointer hover:bg-black/80 transition-transform transform-gpu firefox:transition-all firefox:will-change-transform duration-500";    
+    const hoverEffect = "hover:brightness-125 hover:scale-105 hover:cursor-pointer hover:bg-black/80 transition-transform firefox:transition-all duration-500";    
     // Previous styles //
     // const pastCenterButtonCardStyle = "flex-1 min-w-0 h-10 flex items-center justify-center text-center rounded-[12px] px-2 py-1 sm:w-[148px] sm:h-[50px] sm:px-[10px] sm:py-[10px] backdrop-blur-md shadow-[4px_4px_4px_1px_rgba(0,0,0,0.25),inset_0_4px_4px_0_rgba(0,0,0,0.25)] bg-gradient-to-b from-black to-black/10";
     // const pastCenterButtonTextStyle = "inline-flex h-full items-center justify-center rounded-full backdrop-blur-3xl w-full text-sm sm:text-[20px] text-center bg-gradient-to-b from-[#b43777] to-[#ce757a] text-transparent bg-clip-text";

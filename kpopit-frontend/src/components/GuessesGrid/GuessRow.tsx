@@ -132,7 +132,7 @@ const GuessRow = (props: GuessRowProps) => {
                     transition: { duration: 0.35, ease: [0.34, 1.56, 0.64, 1] }
                 } : {})}      
                     className={`relative bg-[#ffffff] shadow-[0_0_10px_2px_rgba(255,255,255,0.1),0_0_10px_2px_rgba(255,255,255,0.1)] w-20 h-20 sm:h-28 sm:w-28 rounded-2xl sm:rounded-[18px] 
-                    flex flex-col items-center justify-center text-center border-2 border-white transform-gpu overflow-hidden
+                    flex flex-col items-center justify-center text-center border-2 border-white overflow-hidden
                     ${isStatic ? `hover:brightness-110 hover:cursor-default transition-transform duration-300 ${isPressed ? "scale-105 brightness-110": "hover:scale-105"}` : ""}`}
                     onTouchStart={handleTouchStart}
                     onTouchEnd={handleTouchEnd}   
@@ -159,7 +159,7 @@ const GuessRow = (props: GuessRowProps) => {
             <MotionTag
                 {...getMotionProps(1, 2)}
                 className={`${getStatusColor(guess.feedback.groups?.status)} relative w-20 h-20 sm:h-28 sm:w-28 flex flex-col items-center justify-center 
-                text-center rounded-2xl sm:rounded-[18px] inset-shadow-sm border-2 border-white hover:brightness-110 hover:cursor-default transform-3d perspective-[1000px] transform-gpu`}>
+                text-center rounded-2xl sm:rounded-[18px] inset-shadow-sm border-2 border-white hover:brightness-110 hover:cursor-default transform-3d perspective-[1000px]`}>
                     <span className="text-white text-[10px] sm:text-[14px] font-light [text-shadow:1.6px_1.6px_3px_rgba(26,26,26,0.8),1px_1px_2px_rgba(26,26,26,0.5)]">
                     {Array.isArray(guess.guessed_idol_data.groups)
                         ? guess.guessed_idol_data.groups.map((groups, index) => (
@@ -177,7 +177,7 @@ const GuessRow = (props: GuessRowProps) => {
             <MotionTag
                 {...getMotionProps(2, 3)}
                 className={`${getStatusColor(guess.feedback.companies?.status)} relative w-20 h-20 sm:h-28 sm:w-28 flex flex-col items-center justify-center 
-                text-center rounded-2xl sm:rounded-[18px] inset-shadow-sm border-2 border-white hover:brightness-110 hover:cursor-default transform-3d perspective-[1000px] transform-gpu`}>
+                text-center rounded-2xl sm:rounded-[18px] inset-shadow-sm border-2 border-white hover:brightness-110 hover:cursor-default transform-3d perspective-[1000px]`}>
                     <span className="text-white text-[10px] sm:text-[14px] font-light [text-shadow:1.6px_1.6px_3px_rgba(26,26,26,0.8),1px_1px_2px_rgba(26,26,26,0.5)]">
                     {Array.isArray(guess.guessed_idol_data.companies)
                         ? guess.guessed_idol_data.companies.map((companies, index) => (
@@ -197,7 +197,7 @@ const GuessRow = (props: GuessRowProps) => {
             <MotionTag
                 {...getMotionProps(3, 4)}
                 className={`${getStatusColor(guess.feedback.nationality?.status)} relative w-20 h-20 sm:h-28 sm:w-28 ${guess.guessed_idol_data.nationality.length >= 3 ? "flex flex-row flex-wrap content-center" : "flex flex-col"} items-center justify-center 
-                text-center rounded-2xl sm:rounded-[18px] inset-shadow-sm border-2 border-white hover:brightness-110 hover:cursor-default transform-3d perspective-[1000px] transform-gpu`}>
+                text-center rounded-2xl sm:rounded-[18px] inset-shadow-sm border-2 border-white hover:brightness-110 hover:cursor-default transform-3d perspective-[1000px]`}>
                     <div className={`${guess.guessed_idol_data.nationality.length >= 3 ? "flex flex-row flex-wrap content-center gap-1.5 sm:gap-2" : "flex flex-col gap-2 sm:gap-3"} items-center justify-center`}>
                     {Array.isArray(guess.guessed_idol_data.nationality)
                         ? guess.guessed_idol_data.nationality.map(
@@ -236,7 +236,7 @@ const GuessRow = (props: GuessRowProps) => {
             <MotionTag
             {...getMotionProps(4, 5)}
             className={`${getStatusColor(guess.feedback.birth_date?.status)} relative w-20 h-20 sm:h-28 sm:w-28 flex flex-col items-center justify-center 
-            text-center rounded-2xl sm:rounded-[18px] inset-shadow-sm border-2 border-white hover:brightness-110 hover:cursor-default transform-3d perspective-[1000px] transform-gpu firefox:isolate`}>
+            text-center rounded-2xl sm:rounded-[18px] inset-shadow-sm border-2 border-white hover:brightness-110 hover:cursor-default transform-3d perspective-[1000px] firefox:isolate`}>
                 {guess.feedback.birth_date?.status !== "correct" && (
                 <Img src={getStatusIcon(guess.feedback.birth_date?.status)}
                 alt="Birth Date"
@@ -251,7 +251,7 @@ const GuessRow = (props: GuessRowProps) => {
             <MotionTag
             {...getMotionProps(5, 6)}
             className={`${getStatusColor(guess.feedback.idol_debut_year?.status)} relative w-20 h-20 sm:h-28 sm:w-28 flex flex-col items-center justify-center 
-            text-center rounded-2xl sm:rounded-[18px] inset-shadow-sm border-2 border-white hover:brightness-110 hover:cursor-default transform-3d perspective-[1000px] transform-gpu firefox:isolate`}>
+            text-center rounded-2xl sm:rounded-[18px] inset-shadow-sm border-2 border-white hover:brightness-110 hover:cursor-default transform-3d perspective-[1000px] firefox:isolate`}>
                 {guess.feedback.idol_debut_year?.status !== "correct" && (
                 <Img src={getStatusIcon(guess.feedback.idol_debut_year?.status)}
                 alt="Debut" 
@@ -266,7 +266,7 @@ const GuessRow = (props: GuessRowProps) => {
             <MotionTag
             {...getMotionProps(6, 7)}
             className={`${getStatusColor(guess.feedback.height?.status)} relative w-20 h-20 sm:h-28 sm:w-28 flex flex-col items-center justify-center 
-            text-center rounded-2xl sm:rounded-[18px] inset-shadow-sm border-2 border-white hover:brightness-110 hover:cursor-default transform-3d perspective-[1000px] transform-gpu firefox:isolate`}>
+            text-center rounded-2xl sm:rounded-[18px] inset-shadow-sm border-2 border-white hover:brightness-110 hover:cursor-default transform-3d perspective-[1000px] firefox:isolate`}>
                 {guess.feedback.height?.status !== "correct" && (
                 <Img src={getStatusIcon(guess.feedback.height?.status)}
                 alt="Height"
@@ -281,7 +281,7 @@ const GuessRow = (props: GuessRowProps) => {
             <MotionTag
             {...getMotionProps(7)}
             className={`${getStatusColor(guess.feedback.position?.status)} relative w-20 h-20 sm:h-28 sm:w-28 flex flex-col items-center justify-center 
-            text-center rounded-2xl sm:rounded-[18px] inset-shadow-sm border-2 border-white hover:brightness-110 hover:cursor-default transform-3d perspective-[1000px] transform-gpu`}>
+            text-center rounded-2xl sm:rounded-[18px] inset-shadow-sm border-2 border-white hover:brightness-110 hover:cursor-default transform-3d perspective-[1000px]`}>
                 <span className={`text-white ${guess.guessed_idol_data.position.length >= 6 ? "text-[8px] sm:text-[12px]" : "text-[10px] sm:text-[14px]" } font-light [text-shadow:1.6px_1.6px_3px_rgba(26,26,26,0.8),1px_1px_2px_rgba(26,26,26,0.5)]`}>
                 {Array.isArray(guess.guessed_idol_data.position)
                     ? guess.guessed_idol_data.position.map((position, index) => (
