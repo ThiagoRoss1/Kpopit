@@ -3,7 +3,7 @@
 title: Why I started KpopIt
 date: 2026-01-10
 description: It started as a simple guessing game. Then I got more and more excited about it.
-image: /blog/2026-01-10-why-i-started/cover.png
+image: cdn:/images/idols/sakura.webp
 imageAlt: Sakura of LE SSERAFIM
 tag: Thoughts
 pinned: true

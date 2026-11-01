@@ -3,7 +3,7 @@
 title: Meet the idol pages
 date: 2026-04-08
 description: Every idol now has a page with career, personal profile and more.
-image: /blog/2026-04-08-idol-pages/cover.png
+image: cdn:/images/idols/kazuha.webp
 imageAlt: Kazuha of LE SSERAFIM
 tag: Update
 pinned: true
@@ -20,7 +20,7 @@ Each idol has a profile split into three parts:
 - Career: group, debut, company and positions.
 - Status: which daily modes they appear in, and when they were last the answer.
 
-![Profiles open straight from the Idols list.](/blog/2026-04-08-idol-pages/image-1.png)
+![Profiles open straight from the Idols list.](cdn:/images/idols/kazuha.webp)
 
 # Related idols
 

@@ -12,7 +12,7 @@ The file name minus `.md` is the slug. Posts are rendered at build time (`marked
 title: Your daily game now follows you
 date: 2026-10-23
 description: One or two sentences for the list and link previews.
-image: /blog/2026-10-23-your-day-follows-you/thumbnail.png
+image: cdn:/images/albums/summer_magic.webp
 imageAlt: What the thumbnail shows
 tag: Update
 pinned: false
@@ -28,11 +28,12 @@ Read time is computed from the body (words / 200, rounded up).
 
 ## Images
 
-- Put a post's images in `public/blog/<slug>/` and reference them as `/blog/<slug>/file.png`
+- Prefer the image bucket (`VITE_IMAGE_BUCKET_URL`): write `cdn:/images/...`, the same paths the game
+  uses (e.g. `cdn:/images/albums/summer_magic.webp`, `cdn:/images/idols/winter.webp`), so nothing is
+  copied into the repo.
+- An image that isn't on the bucket can go in `public/blog/<slug>/`, referenced as `/blog/<slug>/file.png`
   (the build fails if the thumbnail file is missing). A 1200×630 thumbnail suits link previews.
-- Images from the image bucket (`VITE_IMAGE_BUCKET_URL`) are also allowed, written as `cdn:/images/...`
-  (e.g. `cdn:/images/albums/summer_magic.webp`, the same paths the game uses); any other image source is
-  shown as its alt text.
+- Any other image source is shown as its alt text.
 
 ## Markdown
 

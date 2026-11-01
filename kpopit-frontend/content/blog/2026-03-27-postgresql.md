@@ -3,7 +3,7 @@
 title: Moving from SQLite to PostgreSQL
 date: 2026-03-27
 description: Why the database changed, and what it means for the game.
-image: /blog/2026-03-27-postgresql/cover.webp
+image: cdn:/images/albums/ad_mare.webp
 imageAlt: An album cover
 tag: Dev log
 pinned: false
