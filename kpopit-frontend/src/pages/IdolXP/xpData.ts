@@ -4,6 +4,7 @@ import type { IdolXpState } from "../../interfaces/playerInterfaces";
 export const MAX_LEVEL = 10;
 export const MAX_XP = 3 * MAX_LEVEL * MAX_LEVEL;
 export const LIST_LIMIT = 30;
+const XP_SEEN_KEY = "kpopit-xp-seen";
 export const FAVOURITES_KEY = "kpopit-xp-favs";
 
 /** Same values as the backend's xp_service constants. */
@@ -83,5 +84,28 @@ export function saveFavourites(ids: number[]) {
         localStorage.setItem(FAVOURITES_KEY, JSON.stringify(ids));
     } catch {
         // Private mode or full storage: favourites just won't persist.
+    }
+}
+
+function readXpSeen(): Record<string, number> {
+    try {
+        const seen: unknown = JSON.parse(localStorage.getItem(XP_SEEN_KEY) ?? "{}");
+        return seen && typeof seen === "object" ? seen as Record<string, number> : {};
+    } catch {
+        return {};
+    }
+}
+
+/** True when the idol has more XP than this browser last saw (a pour or finished games). */
+export function xpGained(idolId: number, xp: number): boolean {
+    const before = readXpSeen()[idolId];
+    return typeof before === "number" && xp > before;
+}
+
+export function rememberXp(idolId: number, xp: number) {
+    try {
+        localStorage.setItem(XP_SEEN_KEY, JSON.stringify({ ...readXpSeen(), [idolId]: xp }));
+    } catch {
+        // Private mode or full storage: the bar just won't shine for gains.
     }
 }

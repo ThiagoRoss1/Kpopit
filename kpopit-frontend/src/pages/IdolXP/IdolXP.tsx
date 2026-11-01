@@ -17,7 +17,7 @@ import { cn } from "../../lib/utils";
 import type { IdolXpState } from "../../interfaces/playerInterfaces";
 import PotionJar from "./PotionJar";
 import {
-    FILTERS, LIST_LIMIT, MAX_LEVEL, RULES, buildIdols, levelOf, readFavourites, saveFavourites,
+    FILTERS, LIST_LIMIT, MAX_LEVEL, RULES, buildIdols, levelOf, readFavourites, rememberXp, saveFavourites, xpGained,
     type XpFilter, type XpIdol,
 } from "./xpData";
 import "./idolXp.css";
@@ -188,6 +188,7 @@ function MemberView({ state, stateKey, idols: list, username }: {
     const [favourites, setFavourites] = useState<number[]>(readFavourites);
     const [extra, setExtra] = useState(0);
     const [levelUp, setLevelUp] = useState(0);
+    const [shine, setShine] = useState(0);
 
     const all = useMemo(() => buildIdols(list, state), [list, state]);
     const current = state.current ? all.find((i) => i.id === state.current!.idol_id) ?? null : null;
@@ -218,6 +219,18 @@ function MemberView({ state, stateKey, idols: list, username }: {
             toast.show("Nothing poured. Try again.");
         },
     });
+    // The bar shines once when the idol gained XP (a pour, or games since the last visit).
+    const currentId = current?.id;
+    const currentXp = current?.xp;
+    useEffect(() => {
+        if (currentId === undefined || currentXp === undefined) return;
+        const gained = xpGained(currentId, currentXp);
+        const timer = window.setTimeout(() => {
+            rememberXp(currentId, currentXp);
+            if (gained) setShine((n) => n + 1);
+        }, 0);
+        return () => clearTimeout(timer);
+    }, [currentId, currentXp]);
     useEffect(() => {
         if (!levelUp) return;
         const timer = window.setTimeout(() => setLevelUp(0), 2400);
@@ -280,7 +293,7 @@ function MemberView({ state, stateKey, idols: list, username }: {
                         </div>
                         <div className="flex-1 min-w-0 flex flex-col gap-1.5">
                             <span className={cn(LABEL, "text-(--group)")}>{current ? "LEVELING NOW" : "NO IDOL PICKED"}</span>
-                            <span className="font-bold text-[40px] leading-none text-white [text-shadow:var(--puff-value)] pt-0.5 pb-1.5 truncate @max-[580px]:text-[30px]">
+                            <span className="font-bold text-[40px] leading-none text-white [text-shadow:var(--puff-value)] puff-ink pb-1.5 truncate @max-[580px]:text-[30px]">
                                 {current?.name ?? "Pick one below"}
                             </span>
                             <span className="font-semibold text-sm text-(--group)">{current?.group ?? "Your finished games fill the potion meanwhile."}</span>
@@ -295,7 +308,7 @@ function MemberView({ state, stateKey, idols: list, username }: {
                         </div>
                         <div className="relative h-4 rounded-full border-2 border-(--ink) bg-(--panel) overflow-hidden">
                             <div className="xp-bar absolute inset-0 bg-[#FF8AC4]" style={{ transform: `scaleX(${filled && current ? current.progress : 0})` }} />
-                            <div aria-hidden className="xp-shine absolute inset-y-0 w-[30%] bg-[linear-gradient(90deg,transparent,rgba(255,255,255,.55),transparent)]" />
+                            {shine > 0 && <div key={shine} aria-hidden onAnimationEnd={() => setShine(0)} className="xp-shine absolute inset-y-0 w-[30%] bg-[linear-gradient(90deg,transparent,rgba(255,255,255,.55),transparent)]" />}
                         </div>
                         <div aria-label="Levels" className="grid grid-cols-10 gap-1">
                             {Array.from({ length: MAX_LEVEL }, (_, n) => (
