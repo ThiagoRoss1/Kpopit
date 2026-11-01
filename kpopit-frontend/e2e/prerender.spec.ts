@@ -125,7 +125,8 @@ test.describe('prerendered pages without JavaScript', () => {
     expect(await text('/how-to-play')).toContain('HOW TO PLAY');
     expect(await text('/about')).toContain('WHO MAKES IT');
     const post = await text(BLOG_POST);
-    expect(meta(post, 'og:image')).toMatch(/^https:\/\/kpopit\.net\/blog\/.+\.(png|webp|jpg)$/);
+    // A site image (/blog/...) or a bucket one (/images/..., on the site origin when the build has no bucket URL).
+    expect(meta(post, 'og:image')).toMatch(/^https:\/\/\S+\/(blog|images)\/.+\.(png|webp|jpg)$/);
     expect(post).toContain('class="post-body"');
   });
 

@@ -29,6 +29,8 @@ test.describe('calendar @mobile', () => {
     // Today's panel sends the player to the live game.
     await expect(page.getByRole('link', { name: 'Go to Classic' }).first()).toHaveAttribute('href', '/classic');
 
+    // On the 1st of a month yesterday sits in the previous month's grid.
+    if (yesterday.slice(0, 7) !== today.slice(0, 7)) await page.locator('button[aria-label="Previous month"]:visible').first().click();
     await page.locator(`button[data-date="${yesterday}"]:visible`).click();
     await expect(page).toHaveURL(new RegExp(`mode=classic&date=${yesterday}`));
     const play = page.getByRole('link', { name: /^Play Day \d+$/ }).first();
