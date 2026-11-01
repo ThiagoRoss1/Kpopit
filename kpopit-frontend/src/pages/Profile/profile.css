@@ -1,44 +1,42 @@
 /* Profile: entrance/chart motion and hover rules (hover only where it exists, press beats hover). */
-/* Moving parts animate --mx/--my/--mr/--ms (registered in index.css): Chrome paints them each frame instead of on a GPU layer, so borders and images stay sharp. */
-.up-tab, .up-tile, .up-row, .up-ring, .up-photo, .up-xp.up-xp.up-xp.up-xp.up-xp, .up-jar { transform: translate(var(--mx), var(--my)) rotate(var(--mr)) scale(var(--ms)); }
 .up-root { --track: #EFE7DD; --heat-0: #EFE7DD; --heat-1: #FFD1E8; --heat-2: #FF8AC4; --heat-3: #FF3399; }
 [data-theme="night"] .up-root { --track: #3B343A; --heat-0: #2F2B2F; --heat-1: #5A3A4C; }
 
 .up-pane { animation: puffIn .55s var(--ease-settle) backwards; }
 .up-tab { transition: background-color .3s ease, border-color .3s ease, color .3s ease; }
 @media (hover: hover) { .up-tab[aria-selected="false"]:hover { background: var(--chip-hover); } }
-.up-tab:active:active:active { --mx: 0px; --my: 1px; --mr: 0deg; --ms: 1; transform: translate(var(--mx), var(--my)) rotate(var(--mr)) scale(var(--ms)); }
+.up-tab:active:active:active { translate: 0px 1px; rotate: 0deg; scale: 1; }
 
-.up-tile { --mx: 0px; --my: 0px; --mr: var(--up-tilt, 0deg); --ms: 1; transform: translate(var(--mx), var(--my)) rotate(var(--mr)) scale(var(--ms)); transition: --mx .5s var(--lift, var(--ease-settle)), --my .5s var(--lift, var(--ease-settle)), --mr .5s var(--lift, var(--ease-settle)), --ms .5s var(--lift, var(--ease-settle)); }
-@media (hover: hover) { .up-tile:hover { --lift: var(--ease-bounce); --mx: 0px; --my: -3px; --mr: 0deg; --ms: 1; transform: translate(var(--mx), var(--my)) rotate(var(--mr)) scale(var(--ms)); } }
-.up-row { transition: --mx .4s var(--ease-settle), --my .4s var(--ease-settle), --mr .4s var(--ease-settle), --ms .4s var(--ease-settle); }
-@media (hover: hover) { .up-row:hover { --mx: 4px; --my: 0px; --mr: 0deg; --ms: 1; transform: translate(var(--mx), var(--my)) rotate(var(--mr)) scale(var(--ms)); } }
+.up-tile { translate: 0px 0px; rotate: var(--up-tilt, 0deg); scale: 1; transition: translate .5s var(--lift, var(--ease-settle)), rotate .5s var(--lift, var(--ease-settle)), scale .5s var(--lift, var(--ease-settle)); }
+@media (hover: hover) { .up-tile:hover { --lift: var(--ease-bounce); translate: 0px -3px; rotate: 0deg; scale: 1; } }
+.up-row { transition: translate .4s var(--ease-settle), rotate .4s var(--ease-settle), scale .4s var(--ease-settle); }
+@media (hover: hover) { .up-row:hover { translate: 4px 0px; rotate: 0deg; scale: 1; } }
 
 .up-bar { transform-origin: left; animation: upGrow 1s var(--ease-settle) backwards; }
 .up-col { transform-origin: bottom; animation: upRise .9s var(--ease-bounce) var(--up-delay, 0ms) backwards; }
-.up-ring { animation: upPop .7s var(--ease-pop) var(--up-delay, 0ms) backwards; transform: translate(var(--mx), var(--my)) rotate(var(--mr)) scale(var(--ms)); opacity: var(--mo); }
+.up-ring { animation: upPop .7s var(--ease-pop) var(--up-delay, 0ms) backwards; }
 @keyframes upGrow { from { transform: scaleX(0) } }
 @keyframes upRise { from { transform: scaleY(0) } }
-@keyframes upPop { from { --mr: -40deg; --ms: .6; --mo: 0 } }
+@keyframes upPop { from { rotate: -40deg; scale: .6; opacity: 0 } }
 
-.up-photo { --mx: 0px; --my: 0px; --mr: -2deg; --ms: 1; transform: translate(var(--mx), var(--my)) rotate(var(--mr)) scale(var(--ms)); transition: --mx .6s var(--lift, var(--ease-settle)), --my .6s var(--lift, var(--ease-settle)), --mr .6s var(--lift, var(--ease-settle)), --ms .6s var(--lift, var(--ease-settle)); }
-@media (hover: hover) { .up-photo:hover { --lift: var(--ease-bounce); --mx: 0px; --my: -3px; --mr: 0deg; --ms: 1; transform: translate(var(--mx), var(--my)) rotate(var(--mr)) scale(var(--ms)); } }
+.up-photo { translate: 0px 0px; rotate: -2deg; scale: 1; transition: translate .6s var(--lift, var(--ease-settle)), rotate .6s var(--lift, var(--ease-settle)), scale .6s var(--lift, var(--ease-settle)); }
+@media (hover: hover) { .up-photo:hover { --lift: var(--ease-bounce); translate: 0px -3px; rotate: 0deg; scale: 1; } }
 
 /* Idol XP button: a press control with a pink depth; the repeated class outranks .pp-press's
    own hover and press rules, which would swap the depth for the plain black one. */
 .up-xp.up-xp {
   box-shadow: 3px 4px 0 0 #FF8AC4, 3px 4px 0 2px var(--ink);
-  transition: --mx .5s var(--lift, var(--ease-settle)), --my .5s var(--lift, var(--ease-settle)), --mr .5s var(--lift, var(--ease-settle)), --ms .5s var(--lift, var(--ease-settle)), box-shadow .45s var(--ease-settle), background-color .3s ease;
+  transition: translate .5s var(--lift, var(--ease-settle)), rotate .5s var(--lift, var(--ease-settle)), scale .5s var(--lift, var(--ease-settle)), box-shadow .45s var(--ease-settle), background-color .3s ease;
 }
 @media (hover: hover) {
-  .up-xp.up-xp.up-xp.up-xp.up-xp:hover { --lift: var(--ease-bounce); --mx: 0px; --my: -3px; --mr: 0deg; --ms: 1; transform: translate(var(--mx), var(--my)) rotate(var(--mr)) scale(var(--ms)); background: var(--chip-hover); box-shadow: 4px 6px 0 0 #FF8AC4, 4px 6px 0 2px var(--ink); }
-  .up-xp:hover .up-jar { animation: upWob .8s var(--ease-pop) both; transform: translate(var(--mx), var(--my)) rotate(var(--mr)) scale(var(--ms)); }
+  .up-xp.up-xp.up-xp.up-xp.up-xp:hover { --lift: var(--ease-bounce); translate: 0px -3px; rotate: 0deg; scale: 1; background: var(--chip-hover); }
+  .up-xp:hover .up-jar { animation: upWob .8s var(--ease-pop) both; }
   .up-xp:hover .up-liquid { transform: scaleY(1.25); }
   .up-xp:hover .up-fill { transform: scaleX(1.12); }
 }
-.up-xp.up-xp.up-xp.up-xp.up-xp:active { --mx: 3px; --my: 4px; --mr: 0deg; --ms: 1; transform: translate(var(--mx), var(--my)) rotate(var(--mr)) scale(var(--ms)); box-shadow: 0 0 0 0 #FF8AC4, 0 0 0 2px var(--ink); transition-duration: .16s; }
+.up-xp.up-xp.up-xp.up-xp.up-xp:active { translate: 3px 4px; rotate: 0deg; scale: 1; box-shadow: 0 0 0 0 #FF8AC4, 0 0 0 2px var(--ink); transition-duration: .16s; }
 .up-jar { transform-origin: 50% 90%; }
-@keyframes upWob { 0% { --mr: 0deg; --ms: 1 } 30% { --mr: -14deg; --ms: 1.12 } 60% { --mr: 9deg; --ms: 1.12 } 100% { --mr: -5deg; --ms: 1.08 } }
+@keyframes upWob { 0% { rotate: 0deg; scale: 1 } 30% { rotate: -14deg; scale: 1.12 } 60% { rotate: 9deg; scale: 1.12 } 100% { rotate: -5deg; scale: 1.08 } }
 .up-liquid { transform-origin: bottom; transition: transform .6s cubic-bezier(.34, 1.4, .64, 1); }
 .up-fill { transform-origin: left; transition: transform .7s var(--ease-bounce); }
 .up-bubble { animation: upBub 2.6s ease-in infinite; }

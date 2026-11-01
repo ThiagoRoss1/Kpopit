@@ -1,9 +1,5 @@
 /* Calendar page: a port of the handoff's rules. Layout switches are variables on .cal-root,
    changed by the page shell's container width. */
-/* Moving parts animate --mx/--my/--mr/--ms (registered in index.css): Chrome paints them each frame instead of on a GPU layer, so borders and images stay sharp. */
-.cal-cell, .cal-slide, .cal-btn, .cal-cta, .cal-rowcard, .cal-gap, .cal-chev, .cal-from-left, .cal-from-right, .cal-guess, .cal-fill-in {
-  transform: translate(var(--mx), var(--my)) rotate(var(--mr)) scale(var(--ms));
-}
 .cal-root {
   --lgd: flex; --lgm: none; --title-fs: 60px; --cols: minmax(0, 1fr) 340px; --big: flex; --compact: none; --tile: grid; --dotg: none;
   --tl-side: grid; --tl-mdate: none; --tl-cols: 96px 32px minmax(0, 1fr); --tl-ml: 12px; --tl-indent: 140px; --sw-flex: 0 0 260px;
@@ -22,38 +18,40 @@
 
 .cal-focus:focus-visible { outline: 3px solid #FF3399; outline-offset: 3px; }
 
-.cal-cell { transition: --mx .55s var(--ease-settle), --my .55s var(--ease-settle), --mr .55s var(--ease-settle), --ms .55s var(--ease-settle), box-shadow .45s var(--ease-settle), background-color .35s ease, border-color .35s ease; }
+.cal-cell { transition: translate .55s var(--ease-settle), rotate .55s var(--ease-settle), scale .55s var(--ease-settle), box-shadow .45s var(--ease-settle), background-color .35s ease, border-color .35s ease; }
 @media (hover: hover) {
-  .cal-cell[data-live="1"][data-sel="0"]:hover { --mx: 0px; --my: -3px; --mr: 0deg; --ms: 1; transform: translate(var(--mx), var(--my)) rotate(var(--mr)) scale(var(--ms)); transition: --mx .45s var(--ease-settle), --my .45s var(--ease-settle), --mr .45s var(--ease-settle), --ms .45s var(--ease-settle), box-shadow .45s var(--ease-settle), background-color .35s ease; }
+  .cal-cell[data-live="1"][data-sel="0"]:hover { translate: 0px -3px; rotate: 0deg; scale: 1; transition: translate .45s var(--ease-settle), rotate .45s var(--ease-settle), scale .45s var(--ease-settle), box-shadow .45s var(--ease-settle), background-color .35s ease; }
   .cal-dot[data-live="1"][data-sel="0"]:hover { background-color: var(--chip-hover); }
-  .cal-btn:not(:disabled):hover { --lift: var(--ease-bounce); --mx: 0px; --my: -2px; --mr: 0deg; --ms: 1; transform: translate(var(--mx), var(--my)) rotate(var(--mr)) scale(var(--ms)); box-shadow: 3px 5px 0 var(--ctl-off), var(--btn-in, var(--in)) !important; }
-  .cal-cta:hover { --lift: var(--ease-bounce); --mx: 0px; --my: -2px; --mr: 0deg; --ms: 1; transform: translate(var(--mx), var(--my)) rotate(var(--mr)) scale(var(--ms)); box-shadow: 0 6px 0 var(--ink) !important; }
-  .cal-row[data-sel="0"]:hover .cal-rowcard { --mx: 4px; --my: 0px; --mr: 0deg; --ms: 1; transform: translate(var(--mx), var(--my)) rotate(var(--mr)) scale(var(--ms)); }
-  .cal-gap:hover { --lift: var(--ease-bounce); border-color: var(--ink); color: var(--text); --mx: 0px; --my: -2px; --mr: 0deg; --ms: 1; transform: translate(var(--mx), var(--my)) rotate(var(--mr)) scale(var(--ms)); }
-  .cal-label:hover .cal-chev { --mx: 0px; --my: 2px; --mr: 0deg; --ms: 1; transform: translate(var(--mx), var(--my)) rotate(var(--mr)) scale(var(--ms)); }
+  .cal-btn:not(:disabled):hover { --lift: var(--ease-bounce); translate: 0px -2px; rotate: 0deg; scale: 1; }
+  .cal-cta:hover { --lift: var(--ease-bounce); translate: 0px -2px; rotate: 0deg; scale: 1; }
+  .cal-row[data-sel="0"]:hover .cal-rowcard { translate: 4px 0px; rotate: 0deg; scale: 1; }
+  .cal-gap:hover { --lift: var(--ease-bounce); border-color: var(--ink); color: var(--text); translate: 0px -2px; rotate: 0deg; scale: 1; }
+  .cal-label:hover .cal-chev { translate: 0px 2px; rotate: 0deg; scale: 1; }
 }
-.cal-cell[data-live="1"][data-sel="0"]:active:active:active:active { --mx: 0px; --my: 1px; --mr: 0deg; --ms: .98; transform: translate(var(--mx), var(--my)) rotate(var(--mr)) scale(var(--ms)); transition: --mx .2s var(--ease-settle), --my .2s var(--ease-settle), --mr .2s var(--ease-settle), --ms .2s var(--ease-settle); }
-.cal-btn { transition: --mx .45s var(--lift, var(--ease-settle)), --my .45s var(--lift, var(--ease-settle)), --mr .45s var(--lift, var(--ease-settle)), --ms .45s var(--lift, var(--ease-settle)), box-shadow .4s var(--ease-settle), background-color .35s ease; }
-.cal-btn:not(:disabled):active:active:active:active { --mx: 2px; --my: 3px; --mr: 0deg; --ms: 1; transform: translate(var(--mx), var(--my)) rotate(var(--mr)) scale(var(--ms)); box-shadow: 0 0 0 var(--ctl-off), var(--btn-in, var(--in)) !important; transition-duration: .18s; }
-.cal-cta { transition: --mx .45s var(--lift, var(--ease-settle)), --my .45s var(--lift, var(--ease-settle)), --mr .45s var(--lift, var(--ease-settle)), --ms .45s var(--lift, var(--ease-settle)), box-shadow .4s var(--ease-settle); }
-.cal-cta:active:active:active:active { --mx: 0px; --my: 4px; --mr: 0deg; --ms: 1; transform: translate(var(--mx), var(--my)) rotate(var(--mr)) scale(var(--ms)); box-shadow: 0 0 0 var(--ink) !important; transition-duration: .18s; }
-.cal-rowcard { transition: --mx .5s var(--ease-settle), --my .5s var(--ease-settle), --mr .5s var(--ease-settle), --ms .5s var(--ease-settle), box-shadow .45s var(--ease-settle), border-color .35s ease; }
-.cal-row[data-sel="0"]:active .cal-rowcard { --mx: 6px; --my: 2px; --mr: 0deg; --ms: 1; transform: translate(var(--mx), var(--my)) rotate(var(--mr)) scale(var(--ms)); transition-duration: .18s; }
-.cal-gap { transition: border-color .3s ease, color .3s ease, --mx .45s var(--lift, var(--ease-settle)), --my .45s var(--lift, var(--ease-settle)), --mr .45s var(--lift, var(--ease-settle)), --ms .45s var(--lift, var(--ease-settle)); }
-.cal-chev { transition: --mx .4s var(--ease-pop), --my .4s var(--ease-pop), --mr .4s var(--ease-pop), --ms .4s var(--ease-pop); }
+.cal-cell[data-live="1"][data-sel="0"]:active:active:active:active { translate: 1px 2px; rotate: 0deg; transition: translate .2s var(--ease-settle), rotate .2s var(--ease-settle), scale .2s var(--ease-settle); }
+.cal-btn { transition: translate .45s var(--lift, var(--ease-settle)), rotate .45s var(--lift, var(--ease-settle)), scale .45s var(--lift, var(--ease-settle)), box-shadow .4s var(--ease-settle), background-color .35s ease; }
+.cal-btn:not(:disabled):active:active:active:active { translate: 2px 3px; rotate: 0deg; scale: 1; box-shadow: 0 0 0 var(--ctl-off), var(--btn-in, var(--in)) !important; transition-duration: .18s; }
+.cal-cta { transition: translate .45s var(--lift, var(--ease-settle)), rotate .45s var(--lift, var(--ease-settle)), scale .45s var(--lift, var(--ease-settle)), box-shadow .4s var(--ease-settle); }
+.cal-cta:active:active:active:active { translate: 0px 4px; rotate: 0deg; scale: 1; box-shadow: 0 0 0 var(--ink) !important; transition-duration: .18s; }
+.cal-rowcard { transition: translate .5s var(--ease-settle), rotate .5s var(--ease-settle), scale .5s var(--ease-settle), box-shadow .45s var(--ease-settle), border-color .35s ease; }
+.cal-row[data-sel="0"]:active .cal-rowcard { translate: 6px 2px; rotate: 0deg; scale: 1; transition-duration: .18s; }
+.cal-gap { transition: border-color .3s ease, color .3s ease, translate .45s var(--lift, var(--ease-settle)), rotate .45s var(--lift, var(--ease-settle)), scale .45s var(--lift, var(--ease-settle)); }
+.cal-chev { transition: translate .4s var(--ease-pop), rotate .4s var(--ease-pop), scale .4s var(--ease-pop); }
 .cal-fill { transition: transform .9s var(--ease-settle); }
-.cal-slide { transition: --mx .5s var(--ease-settle), --my .5s var(--ease-settle), --mr .5s var(--ease-settle), --ms .5s var(--ease-settle); }
+.cal-slide { transition: translate .5s var(--ease-settle), rotate .5s var(--ease-settle), scale .5s var(--ease-settle); }
 
 /* Entrances: cells and rows rise in; the grid slides from the arrow's side; the panel body and guesses pop. */
 .cal-in { animation: puffIn .55s var(--ease-settle) backwards; }
-.cal-from-left { animation: calFromLeft .45s var(--ease-settle) backwards; transform: translate(var(--mx), var(--my)) rotate(var(--mr)) scale(var(--ms)); opacity: var(--mo); }
-.cal-from-right { animation: calFromRight .45s var(--ease-settle) backwards; transform: translate(var(--mx), var(--my)) rotate(var(--mr)) scale(var(--ms)); opacity: var(--mo); }
-@keyframes calFromLeft { from { --mo: 0; --mx: -28px} }
-@keyframes calFromRight { from { --mo: 0; --mx: 28px} }
+.cal-from-left { animation: calFromLeft .45s var(--ease-settle) backwards; }
+.cal-from-right { animation: calFromRight .45s var(--ease-settle) backwards; }
+@keyframes calFromLeft { from { translate: -28px 0px; opacity: 0} }
+@keyframes calFromRight { from { translate: 28px 0px; opacity: 0} }
 .cal-pbody { animation: puffDrop .45s var(--ease-settle) backwards; }
-.cal-guess { animation: calPop .45s var(--ease-pop) backwards; transform: translate(var(--mx), var(--my)) rotate(var(--mr)) scale(var(--ms)); opacity: var(--mo); }
-@keyframes calPop { from { --mo: 0; --ms: .6 } }
-.cal-fill-in { animation: calFill 1.2s var(--ease-settle) .35s backwards; transform: translate(var(--mx), var(--my)) rotate(var(--mr)) scale(var(--ms)); }
-@keyframes calFill { from { --mx: -100%} }
+.cal-guess { animation: calPop .45s var(--ease-pop) backwards; }
+@keyframes calPop { from { scale: .6 ; opacity: 0} }
+.cal-fill-in { animation: calFill 1.2s var(--ease-settle) .35s backwards; }
+@keyframes calFill { from { translate: -100% 0px} }
 
 @media (prefers-reduced-motion: reduce) { .cal-root *, .cal-root { transition-duration: 0s !important; animation: none !important; } }
+/* Small controls keep their compositor layer, so it is never created or dropped mid-hover. */
+.cal-btn, .cal-cta, .cal-gap, .cal-chev, .cal-slide { will-change: transform; }

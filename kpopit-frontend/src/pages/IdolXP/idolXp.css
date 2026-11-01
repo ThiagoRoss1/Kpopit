@@ -1,40 +1,36 @@
 /* Idol XP: motion and the press states Tailwind can't order (press beats hover). */
-/* Moving parts animate --mx/--my/--mr/--ms (registered in index.css): Chrome paints them each frame instead of on a GPU layer, so borders and images stay sharp. */
-.xp-shine, .xp-levelup, .xp-card, .xp-fav, .xp-search { transform: translate(var(--mx), var(--my)) rotate(var(--mr)) scale(var(--ms)); }
 .xp-bar { transform-origin: left; transition: transform 1.1s var(--ease-settle); }
 .xp-liquid { transform-box: fill-box; transform-origin: bottom; transition: transform 1s cubic-bezier(.34, 1.3, .64, 1); }
 .xp-bubble { transform-box: fill-box; transform-origin: center; animation: xpBub 2.4s ease-in infinite; }
 @keyframes xpBub { 0% { opacity: 0; transform: translate3d(0, 0, 0) scale(.6) } 20% { opacity: 1 } 100% { opacity: 0; transform: translate3d(0, -46px, 0) scale(1) } }
 /* The light sweep runs twice when XP lands, after the bar has grown to its new width. */
-.xp-shine { animation: xpShine 1.1s ease-in-out .7s 2 backwards; transform: translate(var(--mx), var(--my)) rotate(var(--mr)) scale(var(--ms)); }
-@keyframes xpShine { from { --mx: -120%} to { --mx: 340%} }
-.xp-levelup { animation: xpUp .9s var(--ease-pop) backwards; --mx: 0px; --my: 0px; --mr: -3deg; --ms: 1; transform: translate(var(--mx), var(--my)) rotate(var(--mr)) scale(var(--ms)); opacity: var(--mo); }
-@keyframes xpUp { 0% { --mo: 0; --mr: -10deg; --ms: .4 } 60% { --mo: 1; --mr: 4deg; --ms: 1.15 } 100% { --mr: -3deg; --ms: 1 } }
+.xp-shine { animation: xpShine 1.1s ease-in-out .7s 2 backwards; }
+@keyframes xpShine { from { translate: -120% 0px} to { translate: 340% 0px} }
+.xp-levelup { animation: xpUp .9s var(--ease-pop) backwards; translate: 0px 0px; rotate: -3deg; scale: 1; }
+@keyframes xpUp { 0% { rotate: -10deg; scale: .4 ; opacity: 0} 60% { rotate: 4deg; scale: 1.15 ; opacity: 1} 100% { rotate: -3deg; scale: 1 } }
 
 .xp-card {
-  --mx: 0px;
-  --my: 0px;
-  --mr: var(--xp-tilt, 0deg);
-  --ms: 1;
-  transform: translate(var(--mx), var(--my)) rotate(var(--mr)) scale(var(--ms));
-  transition: --mx .42s var(--ease-settle), --my .42s var(--ease-settle), --mr .42s var(--ease-settle), --ms .42s var(--ease-settle), box-shadow .35s var(--ease-settle), background-color .3s ease;
+  translate: 0px 0px;
+  rotate: var(--xp-tilt, 0deg);
+  scale: 1;
+  transition: translate .42s var(--ease-settle), rotate .42s var(--ease-settle), scale .42s var(--ease-settle), box-shadow .35s var(--ease-settle), background-color .3s ease;
   animation: puffIn .6s var(--ease-settle) var(--xp-delay, 0ms) backwards;
 }
-@media (hover: hover) { .xp-card:hover { --mx: 0px; --my: -3px; --mr: 0deg; --ms: 1; transform: translate(var(--mx), var(--my)) rotate(var(--mr)) scale(var(--ms)); } }
-.xp-card:active:active:active { --mx: 1px; --my: 2px; --mr: 0deg; --ms: 1; transform: translate(var(--mx), var(--my)) rotate(var(--mr)) scale(var(--ms)); transition-duration: .15s; }
+@media (hover: hover) { .xp-card:hover { translate: 0px -3px; rotate: 0deg; scale: 1; } }
+.xp-card:active:active:active { translate: 1px 2px; rotate: 0deg; scale: 1; transition-duration: .15s; }
 @container (max-width: 580px) {
-  .xp-card { --mx: 0px; --my: 0px; --mr: 0deg; --ms: 1; transform: translate(var(--mx), var(--my)) rotate(var(--mr)) scale(var(--ms)); }
-  @media (hover: hover) { .xp-card:hover { --mx: 0px; --my: -1px; --mr: 0deg; --ms: 1; transform: translate(var(--mx), var(--my)) rotate(var(--mr)) scale(var(--ms)); } }
+  .xp-card { translate: 0px 0px; rotate: 0deg; scale: 1; }
+  @media (hover: hover) { .xp-card:hover { translate: 0px -1px; rotate: 0deg; scale: 1; } }
 }
 
-.xp-fav { transition: --mx .4s var(--lift, var(--ease-settle)), --my .4s var(--lift, var(--ease-settle)), --mr .4s var(--lift, var(--ease-settle)), --ms .4s var(--lift, var(--ease-settle)); }
-@media (hover: hover) { .xp-fav:hover { --lift: var(--ease-pop); --mx: 0px; --my: 0px; --mr: -8deg; --ms: 1.15; transform: translate(var(--mx), var(--my)) rotate(var(--mr)) scale(var(--ms)); } }
-.xp-fav:active:active:active { --mx: 0px; --my: 0px; --mr: 0deg; --ms: .9; transform: translate(var(--mx), var(--my)) rotate(var(--mr)) scale(var(--ms)); }
+.xp-fav { transition: translate .4s var(--lift, var(--ease-settle)), rotate .4s var(--lift, var(--ease-settle)), scale .4s var(--lift, var(--ease-settle)); }
+@media (hover: hover) { .xp-fav:hover { --lift: var(--ease-pop); translate: 0px 0px; rotate: -8deg; scale: 1.15; } }
+.xp-fav:active:active:active { translate: 0px 0px; rotate: 0deg; scale: .9; }
 
-.xp-search { transition: --mx .4s cubic-bezier(.34, 1.4, .64, 1), --my .4s cubic-bezier(.34, 1.4, .64, 1), --mr .4s cubic-bezier(.34, 1.4, .64, 1), --ms .4s cubic-bezier(.34, 1.4, .64, 1), box-shadow .35s ease; }
-.xp-search:focus-within { --mx: -1px; --my: -2px; --mr: 0deg; --ms: 1; transform: translate(var(--mx), var(--my)) rotate(var(--mr)) scale(var(--ms)); box-shadow: 5px 6px 0 var(--ctl-off), var(--in); }
-.xp-search svg { transition: --mx .45s var(--ease-pop), --my .45s var(--ease-pop), --mr .45s var(--ease-pop), --ms .45s var(--ease-pop); }
-.xp-search:focus-within svg:first-child { --mx: 0px; --my: 0px; --mr: -12deg; --ms: 1.1; transform: translate(var(--mx), var(--my)) rotate(var(--mr)) scale(var(--ms)); }
+.xp-search { transition: translate .4s cubic-bezier(.34, 1.4, .64, 1), rotate .4s cubic-bezier(.34, 1.4, .64, 1), scale .4s cubic-bezier(.34, 1.4, .64, 1), box-shadow .35s ease; }
+.xp-search:focus-within { translate: -1px -2px; rotate: 0deg; scale: 1; box-shadow: 5px 6px 0 var(--ctl-off), var(--in); }
+.xp-search svg { transition: translate .45s var(--ease-pop), rotate .45s var(--ease-pop), scale .45s var(--ease-pop); }
+.xp-search:focus-within svg:first-child { translate: 0px 0px; rotate: -12deg; scale: 1.1; }
 .xp-search input::-webkit-search-decoration, .xp-search input::-webkit-search-cancel-button { display: none; -webkit-appearance: none; }
 
 .xp-pop { animation: puffIn .4s var(--ease-settle) backwards; }

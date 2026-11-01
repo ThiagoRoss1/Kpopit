@@ -1,9 +1,5 @@
 /* Catalogue pages (Albums, Idols): a port of the handoff's list rules. Sizes are variables on
    .cg-inner, switched by the page shell's container width. */
-/* Moving parts animate --mx/--my/--mr/--ms (registered in index.css): Chrome paints them each frame instead of on a GPU layer, so borders and images stay sharp. */
-.cg-search, .cg-clear, .cg-chev, .cg-sicon, .cg-ft, .cg-ctl, .cg-opt, .cg-chip, .cg-tilt, .cg-tag, .cg-face, .cg-disc, .cg-spin, .cg-img, .cg-sweep, .cg-press {
-  transform: translate(var(--mx), var(--my)) rotate(var(--mr)) scale(var(--ms));
-}
 .cg-inner {
   --cg-search-basis: 0%; --cg-search-max: 400px; --cg-grid-min: 190px; --cg-grid-gap: 36px 28px;
   --cg-f-flex: 0 0 auto; --cg-f-w: auto; --cg-ctl-h: 40px; --cg-r: 23px; --cg-depth: 5px; --cg-ctl-gap: 12px 10px;
@@ -32,44 +28,44 @@
 .cg-focus:focus-visible { outline: 3px solid #FF3399; outline-offset: 4px; }
 
 /* Search */
-.cg-search { transition: --mx .4s cubic-bezier(.34, 1.4, .64, 1), --my .4s cubic-bezier(.34, 1.4, .64, 1), --mr .4s cubic-bezier(.34, 1.4, .64, 1), --ms .4s cubic-bezier(.34, 1.4, .64, 1), box-shadow .35s ease; }
-.cg-search:focus-within { --mx: -1px; --my: -2px; --mr: 0deg; --ms: 1; transform: translate(var(--mx), var(--my)) rotate(var(--mr)) scale(var(--ms)); box-shadow: 6px 7px 0 var(--ctl-off), var(--in) !important; }
-.cg-sicon { transition: --mx .45s var(--ease-pop), --my .45s var(--ease-pop), --mr .45s var(--ease-pop), --ms .45s var(--ease-pop); }
-.cg-search:focus-within .cg-sicon { --mx: 0px; --my: 0px; --mr: -12deg; --ms: 1.1; transform: translate(var(--mx), var(--my)) rotate(var(--mr)) scale(var(--ms)); }
+.cg-search { transition: translate .4s cubic-bezier(.34, 1.4, .64, 1), rotate .4s cubic-bezier(.34, 1.4, .64, 1), scale .4s cubic-bezier(.34, 1.4, .64, 1), box-shadow .35s ease; }
+.cg-search:focus-within { translate: -1px -2px; rotate: 0deg; scale: 1; box-shadow: 6px 7px 0 var(--ctl-off), var(--in) !important; }
+.cg-sicon { transition: translate .45s var(--ease-pop), rotate .45s var(--ease-pop), scale .45s var(--ease-pop); }
+.cg-search:focus-within .cg-sicon { translate: 0px 0px; rotate: -12deg; scale: 1.1; }
 .cg-search input::-webkit-search-decoration, .cg-search input::-webkit-search-cancel-button { display: none; -webkit-appearance: none; }
-.cg-clear { transition: opacity .3s ease, --mx .4s var(--ease-pop), --my .4s var(--ease-pop), --mr .4s var(--ease-pop), --ms .4s var(--ease-pop), background-color .3s; }
+.cg-clear { transition: opacity .3s ease, translate .4s var(--ease-pop), rotate .4s var(--ease-pop), scale .4s var(--ease-pop), background-color .3s; }
 .cg-clear:hover { background: var(--chip-hover); }
 
 /* Pink (active) controls keep their pink shine through hover and press. */
 .cg-ctl[data-on="1"], .cg-ft[data-on="1"] { --btn-in: var(--in-pink); }
 
 /* Mobile filters toggle */
-.cg-ft { transition: --mx .45s var(--lift, var(--ease-settle)), --my .45s var(--lift, var(--ease-settle)), --mr .45s var(--lift, var(--ease-settle)), --ms .45s var(--lift, var(--ease-settle)), box-shadow .4s var(--ease-settle), background-color .3s ease, color .3s ease; }
+.cg-ft { transition: translate .45s var(--lift, var(--ease-settle)), rotate .45s var(--lift, var(--ease-settle)), scale .45s var(--lift, var(--ease-settle)), box-shadow .4s var(--ease-settle), background-color .3s ease, color .3s ease; }
 @media (hover: hover) {
-  .cg-ft[data-open="0"]:hover { --lift: var(--ease-bounce); --mx: 0px; --my: -2px; --mr: 0deg; --ms: 1; transform: translate(var(--mx), var(--my)) rotate(var(--mr)) scale(var(--ms)); box-shadow: 2.5px 3.5px 0 var(--ctl-off), var(--btn-in, var(--in)) !important; background: var(--chip-hover) !important; }
-  .cg-ft[data-open="0"][data-on="1"]:hover { box-shadow: 2.5px 3.5px 0 var(--ctl-off), var(--in-pink) !important; background: #FF9BCC !important; }
+  .cg-ft[data-open="0"]:hover { --lift: var(--ease-bounce); translate: 0px -2px; rotate: 0deg; scale: 1; background: var(--chip-hover) !important; }
+  .cg-ft[data-open="0"][data-on="1"]:hover { background: #FF9BCC !important; }
 }
-.cg-ft[data-open="1"] { --mx: 2px; --my: 3px; --mr: 0deg; --ms: 1; transform: translate(var(--mx), var(--my)) rotate(var(--mr)) scale(var(--ms)); }
-.cg-ft:active:active:active:active { --mx: 2px !important; --my: 3px !important; --mr: 0deg !important; --ms: 1 !important; transform: translate(var(--mx), var(--my)) rotate(var(--mr)) scale(var(--ms)) !important; box-shadow: 0 0 0 var(--ctl-off), var(--btn-in, var(--in)) !important; transition-duration: .18s; }
+.cg-ft[data-open="1"] { translate: 2px 3px; rotate: 0deg; scale: 1; }
+.cg-ft:active:active:active:active { translate: 2px 3px !important; rotate: 0deg !important; scale: 1 !important; box-shadow: 0 0 0 var(--ctl-off), var(--btn-in, var(--in)) !important; transition-duration: .18s; }
 .cg-fbadge { animation: puffMenu .35s var(--ease-pop) both; }
 
 /* Filter menus */
-.cg-ctl { transition: --mx .45s var(--lift, var(--ease-settle)), --my .45s var(--lift, var(--ease-settle)), --mr .45s var(--lift, var(--ease-settle)), --ms .45s var(--lift, var(--ease-settle)), box-shadow .4s var(--ease-settle), background-color .3s ease, color .3s ease; }
-.cg-ctl[data-open="1"] { --mx: 2px; --my: 3px; --mr: 0deg; --ms: 1; transform: translate(var(--mx), var(--my)) rotate(var(--mr)) scale(var(--ms)); }
+.cg-ctl { transition: translate .45s var(--lift, var(--ease-settle)), rotate .45s var(--lift, var(--ease-settle)), scale .45s var(--lift, var(--ease-settle)), box-shadow .4s var(--ease-settle), background-color .3s ease, color .3s ease; }
+.cg-ctl[data-open="1"] { translate: 2px 3px; rotate: 0deg; scale: 1; }
 @media (hover: hover) {
-  .cg-ctl[data-open="0"]:hover { --lift: var(--ease-bounce); --mx: 0px; --my: -2px; --mr: 0deg; --ms: 1; transform: translate(var(--mx), var(--my)) rotate(var(--mr)) scale(var(--ms)); box-shadow: 2.5px 3.5px 0 var(--ctl-off), var(--btn-in, var(--in)) !important; }
-  .cg-ctl[data-open="0"][data-on="1"]:hover { box-shadow: 2.5px 3.5px 0 var(--ctl-off), var(--in-pink) !important; background: #FF9BCC !important; }
+  .cg-ctl[data-open="0"]:hover { --lift: var(--ease-bounce); translate: 0px -2px; rotate: 0deg; scale: 1; }
+  .cg-ctl[data-open="0"][data-on="1"]:hover { background: #FF9BCC !important; }
   .cg-ctl[data-open="0"][data-on="0"]:hover { background: var(--chip-hover) !important; }
 }
-.cg-ctl:active:active:active:active { --mx: 2px !important; --my: 3px !important; --mr: 0deg !important; --ms: 1 !important; transform: translate(var(--mx), var(--my)) rotate(var(--mr)) scale(var(--ms)) !important; box-shadow: 0 0 0 var(--ctl-off), var(--btn-in, var(--in)) !important; transition-duration: .18s; }
-.cg-chev { transition: --mx .4s var(--ease-pop), --my .4s var(--ease-pop), --mr .4s var(--ease-pop), --ms .4s var(--ease-pop); }
+.cg-ctl:active:active:active:active { translate: 2px 3px !important; rotate: 0deg !important; scale: 1 !important; box-shadow: 0 0 0 var(--ctl-off), var(--btn-in, var(--in)) !important; transition-duration: .18s; }
+.cg-chev { transition: translate .4s var(--ease-pop), rotate .4s var(--ease-pop), scale .4s var(--ease-pop); }
 .cg-menu { animation: puffMenu .38s var(--ease-settle) both; }
-.cg-opt { transition: --mx .35s var(--ease-settle), --my .35s var(--ease-settle), --mr .35s var(--ease-settle), --ms .35s var(--ease-settle), background-color .3s ease, border-color .3s ease, box-shadow .3s ease; }
+.cg-opt { transition: translate .35s var(--ease-settle), rotate .35s var(--ease-settle), scale .35s var(--ease-settle), background-color .3s ease, border-color .3s ease, box-shadow .3s ease; }
 @media (hover: hover) {
-  .cg-opt:hover { background-color: var(--opt-hover) !important; border-color: var(--ink) !important; box-shadow: 2px 2.5px 0 var(--ink), var(--btn-in, var(--in)) !important; --mx: 4px; --my: 0px; --mr: 0deg; --ms: 1; transform: translate(var(--mx), var(--my)) rotate(var(--mr)) scale(var(--ms)); }
+  .cg-opt:hover { background-color: var(--opt-hover) !important; border-color: var(--ink) !important; box-shadow: 2px 2.5px 0 var(--ink), var(--btn-in, var(--in)) !important; translate: 4px 0px; rotate: 0deg; scale: 1; }
   .cg-opt[aria-checked="true"]:hover { background-color: #FF9BCC !important; box-shadow: 2px 2.5px 0 var(--ink), var(--in-pink) !important; }
 }
-.cg-opt:active:active:active:active { --mx: 6px; --my: 2px; --mr: 0deg; --ms: 1; transform: translate(var(--mx), var(--my)) rotate(var(--mr)) scale(var(--ms)); box-shadow: 0 0 0 var(--ink) !important; }
+.cg-opt:active:active:active:active { translate: 6px 2px; rotate: 0deg; scale: 1; box-shadow: 0 0 0 var(--ink) !important; }
 .cg-scroll::-webkit-scrollbar { width: 12px; background: transparent; }
 .cg-scroll::-webkit-scrollbar-track { background: transparent; box-shadow: none; margin: 6px 0; }
 .cg-scroll::-webkit-scrollbar-thumb { background: #FF8AC4; border: 4px solid transparent; background-clip: padding-box; border-radius: 999px; box-shadow: none; }
@@ -77,41 +73,43 @@
 @supports not selector(::-webkit-scrollbar) { .cg-scroll { scrollbar-width: thin; scrollbar-color: #FF8AC4 transparent; } }
 
 /* Applied filter chips */
-.cg-chip { animation: puffMenu .35s var(--ease-pop) both; transition: background-color .3s, --mx .38s var(--lift, var(--ease-settle)), --my .38s var(--lift, var(--ease-settle)), --mr .38s var(--lift, var(--ease-settle)), --ms .38s var(--lift, var(--ease-settle)), box-shadow .3s; }
-@media (hover: hover) { .cg-chip:hover { --lift: cubic-bezier(.34, 1.4, .64, 1); background: var(--chip-hover) !important; --mx: 0px; --my: -2px; --mr: 0deg; --ms: 1; transform: translate(var(--mx), var(--my)) rotate(var(--mr)) scale(var(--ms)); box-shadow: 2px 3.5px 0 var(--ctl-off), var(--btn-in, var(--in)) !important; } }
-.cg-chip:active:active:active:active { --mx: 1.5px; --my: 2px; --mr: 0deg; --ms: 1; transform: translate(var(--mx), var(--my)) rotate(var(--mr)) scale(var(--ms)); box-shadow: 0 0 0 var(--ctl-off), var(--btn-in, var(--in)) !important; }
+.cg-chip { animation: puffMenu .35s var(--ease-pop) both; transition: background-color .3s, translate .38s var(--lift, var(--ease-settle)), rotate .38s var(--lift, var(--ease-settle)), scale .38s var(--lift, var(--ease-settle)), box-shadow .3s; }
+@media (hover: hover) { .cg-chip:hover { --lift: cubic-bezier(.34, 1.4, .64, 1); background: var(--chip-hover) !important; translate: 0px -2px; rotate: 0deg; scale: 1; } }
+.cg-chip:active:active:active:active { translate: 1.5px 2px; rotate: 0deg; scale: 1; box-shadow: 0 0 0 var(--ctl-off), var(--btn-in, var(--in)) !important; }
 
 /* Cards: alternate tilt, the face lifts and presses into the pink depth layer behind it. */
 .cg-card { animation: puffIn .78s var(--ease-settle) backwards; }
-.cg-tilt { transition: --mx .42s var(--ease-settle), --my .42s var(--ease-settle), --mr .42s var(--ease-settle), --ms .42s var(--ease-settle); }
-.cg-card:nth-child(odd) .cg-tilt { --mx: 0px; --my: 0px; --mr: -.5deg; --ms: 1; transform: translate(var(--mx), var(--my)) rotate(var(--mr)) scale(var(--ms)); }
-.cg-card:nth-child(even) .cg-tilt { --mx: 0px; --my: 0px; --mr: .5deg; --ms: 1; transform: translate(var(--mx), var(--my)) rotate(var(--mr)) scale(var(--ms)); }
-.cg-face { transition: --mx .38s var(--ease-settle), --my .38s var(--ease-settle), --mr .38s var(--ease-settle), --ms .38s var(--ease-settle), background-color .22s ease; }
+.cg-tilt { transition: translate .42s var(--ease-settle), rotate .42s var(--ease-settle), scale .42s var(--ease-settle); }
+.cg-card:nth-child(odd) .cg-tilt { translate: 0px 0px; rotate: -.5deg; scale: 1; }
+.cg-card:nth-child(even) .cg-tilt { translate: 0px 0px; rotate: .5deg; scale: 1; }
+.cg-face { transition: translate .38s var(--ease-settle), rotate .38s var(--ease-settle), scale .38s var(--ease-settle), background-color .22s ease; }
 .cg-face:focus-visible { outline: 3px solid #FF3399; outline-offset: 5px; }
-.cg-disc, .cg-spin { transition: --mx .94s cubic-bezier(.25, 1, .5, 1), --my .94s cubic-bezier(.25, 1, .5, 1), --mr .94s cubic-bezier(.25, 1, .5, 1), --ms .94s cubic-bezier(.25, 1, .5, 1); }
-.cg-img { transition: --mx .75s var(--ease-settle), --my .75s var(--ease-settle), --mr .75s var(--ease-settle), --ms .75s var(--ease-settle), opacity .3s ease; }
-.cg-sweep { transition: --mx .88s cubic-bezier(.25, 1, .5, 1), --my .88s cubic-bezier(.25, 1, .5, 1), --mr .88s cubic-bezier(.25, 1, .5, 1), --ms .88s cubic-bezier(.25, 1, .5, 1); }
+.cg-disc, .cg-spin { transition: translate .94s cubic-bezier(.25, 1, .5, 1), rotate .94s cubic-bezier(.25, 1, .5, 1), scale .94s cubic-bezier(.25, 1, .5, 1); }
+.cg-img { transition: translate .75s var(--ease-settle), rotate .75s var(--ease-settle), scale .75s var(--ease-settle), opacity .3s ease; }
+.cg-sweep { transition: translate .88s cubic-bezier(.25, 1, .5, 1), rotate .88s cubic-bezier(.25, 1, .5, 1), scale .88s cubic-bezier(.25, 1, .5, 1); }
 .cg-card:nth-child(odd) .cg-tag { --tr: 4deg; --trh: 9deg; }
 .cg-card:nth-child(even) .cg-tag { --tr: -4deg; --trh: -9deg; }
-.cg-tag { --mx: 0px; --my: 0px; --mr: var(--tr); --ms: 1; transform: translate(var(--mx), var(--my)) rotate(var(--mr)) scale(var(--ms)); box-shadow: 2px 3px 0 #1A1418, inset 0 1.5px 0 rgba(255, 255, 255, .6); transition: --mx .52s var(--ease-pop), --my .52s var(--ease-pop), --mr .52s var(--ease-pop), --ms .52s var(--ease-pop), box-shadow .16s ease; }
+.cg-tag { translate: 0px 0px; rotate: var(--tr); scale: 1; box-shadow: 2px 3px 0 #1A1418, inset 0 1.5px 0 rgba(255, 255, 255, .6); transition: translate .52s var(--ease-pop), rotate .52s var(--ease-pop), scale .52s var(--ease-pop), box-shadow .16s ease; }
 @media (hover: hover) {
-  .cg-card:hover .cg-tilt { --mx: 0px; --my: 0px; --mr: 0deg; --ms: 1; transform: translate(var(--mx), var(--my)) rotate(var(--mr)) scale(var(--ms)); }
-  .cg-card:hover .cg-face { --mx: -1px; --my: -3px; --mr: 0deg; --ms: 1; transform: translate(var(--mx), var(--my)) rotate(var(--mr)) scale(var(--ms)); background-color: var(--face-hover); }
-  .cg-card:hover .cg-disc { --mx: 3.5%; --my: 0px; --mr: 0deg; --ms: 1; transform: translate(var(--mx), var(--my)) rotate(var(--mr)) scale(var(--ms)); transition-duration: 1.3s; }
-  .cg-card:hover .cg-spin { --mx: 0px; --my: 0px; --mr: 200deg; --ms: 1; transform: translate(var(--mx), var(--my)) rotate(var(--mr)) scale(var(--ms)); transition-duration: 1.3s; }
-  .cg-card:hover .cg-img { --mx: 0px; --my: 0px; --mr: 0deg; --ms: 1.08; transform: translate(var(--mx), var(--my)) rotate(var(--mr)) scale(var(--ms)); }
-  .cg-card:hover .cg-sweep { --mx: 42%; --my: 0px; --mr: 0deg; --ms: 1; transform: translate(var(--mx), var(--my)) rotate(var(--mr)) scale(var(--ms)); transition-duration: 1.38s; }
-  .cg-card:hover .cg-tag { --mx: 1px; --my: -4px; --mr: var(--trh); --ms: 1.06; transform: translate(var(--mx), var(--my)) rotate(var(--mr)) scale(var(--ms)); box-shadow: 3px 5px 0 #1A1418, inset 0 1.5px 0 rgba(255, 255, 255, .6); }
+  .cg-card:hover .cg-tilt { translate: 0px 0px; rotate: 0deg; scale: 1; }
+  .cg-card:hover .cg-face { translate: -1px -3px; rotate: 0deg; scale: 1; background-color: var(--face-hover); }
+  .cg-card:hover .cg-disc { translate: 3.5% 0px; rotate: 0deg; scale: 1; transition-duration: 1.3s; }
+  .cg-card:hover .cg-spin { translate: 0px 0px; rotate: 200deg; scale: 1; transition-duration: 1.3s; }
+  .cg-card:hover .cg-img { translate: 0px 0px; rotate: 0deg; scale: 1.08; }
+  .cg-card:hover .cg-sweep { translate: 42% 0px; rotate: 0deg; scale: 1; transition-duration: 1.38s; }
+  .cg-card:hover .cg-tag { translate: 1px -4px; rotate: var(--trh); }
 }
-.cg-card:active .cg-face { --mx: var(--cg-depth); --my: var(--cg-depth); --mr: 0deg; --ms: 1; transform: translate(var(--mx), var(--my)) rotate(var(--mr)) scale(var(--ms)); transition-duration: .12s; }
-.cg-card:active .cg-disc { --mx: 2%; --my: 0px; --mr: 0deg; --ms: 1; transform: translate(var(--mx), var(--my)) rotate(var(--mr)) scale(var(--ms)); transition-duration: .2s; }
-.cg-card:active .cg-tag { --mx: 2px; --my: 3px; --mr: var(--tr); --ms: 1; transform: translate(var(--mx), var(--my)) rotate(var(--mr)) scale(var(--ms)); box-shadow: 0 0 0 #1A1418, inset 0 1.5px 0 rgba(255, 255, 255, .6); transition-duration: .12s; }
+.cg-card:active .cg-face { translate: var(--cg-depth) var(--cg-depth); rotate: 0deg; scale: 1; transition-duration: .12s; }
+.cg-card:active .cg-disc { translate: 2% 0px; rotate: 0deg; scale: 1; transition-duration: .2s; }
+.cg-card:active .cg-tag { translate: 2px 3px; rotate: var(--tr); scale: 1; box-shadow: 0 0 0 #1A1418, inset 0 1.5px 0 rgba(255, 255, 255, .6); transition-duration: .12s; }
 .cg-name { text-shadow: var(--puff-name); }
 
-.cg-press { transition: --mx .35s var(--lift, var(--ease-settle)), --my .35s var(--lift, var(--ease-settle)), --mr .35s var(--lift, var(--ease-settle)), --ms .35s var(--lift, var(--ease-settle)), box-shadow .3s ease; }
-@media (hover: hover) { .cg-press:hover { --lift: cubic-bezier(.34, 1.4, .64, 1); --mx: 0px; --my: -2px; --mr: 0deg; --ms: 1; transform: translate(var(--mx), var(--my)) rotate(var(--mr)) scale(var(--ms)); box-shadow: 4px 6px 0 var(--ink), var(--in-pink) !important; } }
-.cg-press:active:active:active:active { --mx: 3px; --my: 4px; --mr: 0deg; --ms: 1; transform: translate(var(--mx), var(--my)) rotate(var(--mr)) scale(var(--ms)); box-shadow: 0 0 0 var(--ink), var(--in-pink) !important; transition-duration: .15s; }
+.cg-press { transition: translate .35s var(--lift, var(--ease-settle)), rotate .35s var(--lift, var(--ease-settle)), scale .35s var(--lift, var(--ease-settle)), box-shadow .3s ease; }
+@media (hover: hover) { .cg-press:hover { --lift: cubic-bezier(.34, 1.4, .64, 1); translate: 0px -2px; rotate: 0deg; scale: 1; } }
+.cg-press:active:active:active:active { translate: 3px 4px; rotate: 0deg; scale: 1; box-shadow: 0 0 0 var(--ink), var(--in-pink) !important; transition-duration: .15s; }
 
 @media (prefers-reduced-motion: reduce) { .cg-inner *, .cg-inner { animation: none !important; transition-duration: 0s !important; } }
 /* Coming back to a list shows it as it was left: no entrance. */
 .cg-card.cg-card-still { animation: none; }
+/* Small controls keep their compositor layer, so it is never created or dropped mid-hover. */
+.cg-ft, .cg-ctl, .cg-chip, .cg-opt, .cg-press, .cg-clear, .cg-chev { will-change: transform; }

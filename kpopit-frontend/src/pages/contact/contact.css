@@ -1,13 +1,13 @@
-/* Moving parts animate --mx/--my/--mr/--ms (registered in index.css): Chrome paints them each frame instead of on a GPU layer, so borders and images stay sharp. */
-.ct-channel, .ct-arrow { transform: translate(var(--mx), var(--my)) rotate(var(--mr)) scale(var(--ms)); }
-.ct-channel { box-shadow: 4px 4px 0 0 #FF8AC4, 4px 4px 0 2px var(--ink); --mx: 0px; --my: 0px; --mr: var(--ct-tilt, 0deg); --ms: 1; transform: translate(var(--mx), var(--my)) rotate(var(--mr)) scale(var(--ms)); transition: --mx .45s var(--lift, var(--ease-settle)), --my .45s var(--lift, var(--ease-settle)), --mr .45s var(--lift, var(--ease-settle)), --ms .45s var(--lift, var(--ease-settle)), box-shadow .4s var(--ease-settle), background-color .3s ease; }
-.ct-arrow { transition: --mx .4s var(--lift, var(--ease-settle)), --my .4s var(--lift, var(--ease-settle)), --mr .4s var(--lift, var(--ease-settle)), --ms .4s var(--lift, var(--ease-settle)); }
+.ct-channel { box-shadow: 4px 4px 0 0 #FF8AC4, 4px 4px 0 2px var(--ink); translate: 0px 0px; rotate: var(--ct-tilt, 0deg); scale: 1; transition: translate .45s var(--lift, var(--ease-settle)), rotate .45s var(--lift, var(--ease-settle)), scale .45s var(--lift, var(--ease-settle)), box-shadow .4s var(--ease-settle), background-color .3s ease; }
+.ct-arrow { transition: translate .4s var(--lift, var(--ease-settle)), rotate .4s var(--lift, var(--ease-settle)), scale .4s var(--lift, var(--ease-settle)); }
 @media (hover: hover) {
-  .ct-channel:hover { --lift: var(--ease-bounce); --mx: 0px; --my: -2px; --mr: 0deg; --ms: 1; transform: translate(var(--mx), var(--my)) rotate(var(--mr)) scale(var(--ms)); background: var(--chip-hover); box-shadow: 5px 6px 0 0 #FF8AC4, 5px 6px 0 2px var(--ink); }
-  .ct-channel:hover .ct-arrow { --mx: 3px; --my: -3px; --mr: 0deg; --ms: 1; transform: translate(var(--mx), var(--my)) rotate(var(--mr)) scale(var(--ms)); }
+  .ct-channel:hover { --lift: var(--ease-bounce); translate: 0px -2px; rotate: 0deg; scale: 1; background: var(--chip-hover); }
+  .ct-channel:hover .ct-arrow { translate: 3px -3px; rotate: 0deg; scale: 1; }
 }
-.ct-channel:active:active:active:active { --mx: 4px; --my: 4px; --mr: 0deg; --ms: 1; transform: translate(var(--mx), var(--my)) rotate(var(--mr)) scale(var(--ms)); box-shadow: 0 0 0 0 #FF8AC4, 0 0 0 2px var(--ink); transition-duration: .18s; }
+.ct-channel:active:active:active:active { translate: 4px 4px; rotate: 0deg; scale: 1; box-shadow: 0 0 0 0 #FF8AC4, 0 0 0 2px var(--ink); transition-duration: .18s; }
 .ct-field { transition: border-color .3s ease, box-shadow .3s ease; }
 .ct-field:focus { outline: none; border-color: #FF3399; box-shadow: 0 0 0 3px rgba(255, 51, 153, .18); }
 .ct-field::placeholder { color: var(--muted); opacity: .85; }
 .ct-swap { animation: puffDrop .4s var(--ease-settle) both; }
+/* Small controls keep their compositor layer, so it is never created or dropped mid-hover. */
+.ct-channel { will-change: transform; }

@@ -1,7 +1,6 @@
-/* Pressed from the click until the page changes, while the navigation waits for data. It eases the
-   shared --ms (see index.css), so the control keeps its own tilt and lift and stays crisp. */
+/* Pressed from the click until the page changes, while the navigation waits for data: a small
+   press down (translate, on the compositor), never a scale, which would blur the control's text. */
 .link-pending {
-    --ms: 0.97;
-    transform: translate(var(--mx), var(--my)) rotate(var(--mr)) scale(var(--ms));
-    transition: --ms 120ms ease-out;
+    translate: 0 2px;
+    transition: translate 120ms ease-out;
 }

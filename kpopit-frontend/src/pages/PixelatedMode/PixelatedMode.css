@@ -1,9 +1,3 @@
-/* Moving parts animate --mx/--my/--mr/--ms (registered in index.css): Chrome paints them each frame instead of on a GPU layer, so borders and images stay sharp. */
-
-.kp-tilt-l, .kp-tilt-r, .pixel-vinyl__hole, .pixel-zoom-backdrop-in, .pixel-zoom-backdrop-out {
-    transform: translate(var(--mx), var(--my)) rotate(var(--mr)) scale(var(--ms));
-}
-
 .pixelmode {
     --kp-pink: #ff3399;
     --kp-ink: #0a0a0a;
@@ -53,8 +47,8 @@
 }
 
 /* Tilt helpers */
-.kp-tilt-l { --mx: 0px; --my: 0px; --mr: calc(-1deg * var(--kp-chaos)); --ms: 1; transform: translate(var(--mx), var(--my)) rotate(var(--mr)) scale(var(--ms)); }
-.kp-tilt-r { --mx: 0px; --my: 0px; --mr: calc(1deg * var(--kp-chaos)); --ms: 1; transform: translate(var(--mx), var(--my)) rotate(var(--mr)) scale(var(--ms)); }
+.kp-tilt-l { translate: 0px 0px; rotate: calc(-1deg * var(--kp-chaos)); scale: 1; }
+.kp-tilt-r { translate: 0px 0px; rotate: calc(1deg * var(--kp-chaos)); scale: 1; }
 
 .pixel-vinyl {
     position: relative;
@@ -105,11 +99,9 @@
     position: absolute;
     left: 50%;
     top: 50%;
-    --mx: -50%;
-    --my: -50%;
-    --mr: 0deg;
-    --ms: 1;
-    transform: translate(var(--mx), var(--my)) rotate(var(--mr)) scale(var(--ms));
+    translate: -50% -50%;
+    rotate: 0deg;
+    scale: 1;
     width: 8px;
     height: 8px;
     border-radius: 50%;
@@ -141,10 +133,10 @@
 .pixel-sleeve-zoom-in  { animation: pixelSleeveZoomIn 0.42s cubic-bezier(0.34, 1.4, 0.64, 1) forwards; }
 .pixel-sleeve-zoom-out { animation: pixelSleeveZoomOut 0.3s cubic-bezier(0.4, 0, 0.2, 1) forwards; }
 
-@keyframes pixelZoomBackdropIn { from { --mo: 0; } to { --mo: 1; } }
-@keyframes pixelZoomBackdropOut { from { --mo: 1; } to { --mo: 0; } }
-.pixel-zoom-backdrop-in  { animation: pixelZoomBackdropIn 0.28s ease forwards; transform: translate(var(--mx), var(--my)) rotate(var(--mr)) scale(var(--ms)); opacity: var(--mo); }
-.pixel-zoom-backdrop-out { animation: pixelZoomBackdropOut 0.28s ease forwards; transform: translate(var(--mx), var(--my)) rotate(var(--mr)) scale(var(--ms)); opacity: var(--mo); }
+@keyframes pixelZoomBackdropIn { from { opacity: 0; } to { opacity: 1; } }
+@keyframes pixelZoomBackdropOut { from { opacity: 1; } to { opacity: 0; } }
+.pixel-zoom-backdrop-in  { animation: pixelZoomBackdropIn 0.28s ease forwards; }
+.pixel-zoom-backdrop-out { animation: pixelZoomBackdropOut 0.28s ease forwards; }
 
 @media (prefers-reduced-motion: reduce) {
     .pixel-vinyl__spin { animation: none; }

@@ -1,21 +1,15 @@
-/* Moving parts animate --mx/--my/--mr/--ms (registered in index.css): Chrome paints them each frame instead of on a GPU layer, so borders and images stay sharp. */
-
-.bigCardEntry, .background-fade-in, .cardEntry {
-    transform: translate(var(--mx), var(--my)) rotate(var(--mr)) scale(var(--ms));
-}
-
 @keyframes bigCardEntry {
     0% {
-        --mo: 0;
-        --my: 20px;
-        --ms: 0.95;
+        translate: 0px 20px;
+        scale: 0.95;
+        opacity: 0;
         transform-origin: center bottom;
     }
 
     100% {
-        --mo: 1;
-        --my: 0px;
-        --ms: 1;
+        translate: 0px 0px;
+        scale: 1;
+        opacity: 1;
         transform-origin: center bottom;
     }
 }
@@ -23,39 +17,33 @@
 .bigCardEntry {
     animation-delay: 0.2s;
     animation: bigCardEntry 0.6s ease-out;
-    transform: translate(var(--mx), var(--my)) rotate(var(--mr)) scale(var(--ms));
-    opacity: var(--mo);
 }
 
 @keyframes backgroundFade {
-    from { --mo: 0; }
-    to { --mo: 1; }
+    from { opacity: 0; }
+    to { opacity: 1; }
 }
 
 .background-fade-in {
     animation: backgroundFade 0.3s ease-out;
-    transform: translate(var(--mx), var(--my)) rotate(var(--mr)) scale(var(--ms));
-    opacity: var(--mo);
 }
 
 @keyframes cardEntry {
     0% {
-        --mo: 0;
-        --my: 90px;
-        --ms: 0.8;
+        translate: 0px 90px;
+        scale: 0.8;
+        opacity: 0;
         transform-origin: center bottom;
     }
 
     100% {
-        --mo: 1;
-        --my: 0px;
-        --ms: 1;
+        translate: 0px 0px;
+        scale: 1;
+        opacity: 1;
         transform-origin: center bottom;
     }
 }
 
 .cardEntry {
     animation: cardEntry 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
-    transform: translate(var(--mx), var(--my)) rotate(var(--mr)) scale(var(--ms));
-    opacity: var(--mo);
 }

@@ -1,14 +1,12 @@
-/* Moving parts animate --mx/--my/--mr/--ms (registered in index.css): Chrome paints them each frame instead of on a GPU layer, so borders and images stay sharp. */
-.ab-photo, .ab-ticon, .ab-arrow, .ab-up { transform: translate(var(--mx), var(--my)) rotate(var(--mr)) scale(var(--ms)); }
-.ab-photo { transition: --mx .55s var(--lift, var(--ease-settle)), --my .55s var(--lift, var(--ease-settle)), --mr .55s var(--lift, var(--ease-settle)), --ms .55s var(--lift, var(--ease-settle)); }
+.ab-photo { transition: translate .55s var(--lift, var(--ease-settle)), rotate .55s var(--lift, var(--ease-settle)), scale .55s var(--lift, var(--ease-settle)); }
 .ab-photo img { transition: filter .6s var(--ease-settle); }
 @media (hover: hover) {
-  .ab-photo:hover { --lift: var(--ease-bounce); --mx: 0px; --my: -3px; --mr: 0deg; --ms: 1; transform: translate(var(--mx), var(--my)) rotate(var(--mr)) scale(var(--ms)); }
+  .ab-photo:hover { --lift: var(--ease-bounce); translate: 0px -3px; rotate: 0deg; scale: 1; }
   .ab-photo:hover img { filter: blur(5px) grayscale(.3); }
   .ab-tech:hover { --lift: var(--ease-pop); }
-  .ab-tech:hover .ab-ticon { --mx: 0px; --my: 0px; --mr: -8deg; --ms: 1.1; transform: translate(var(--mx), var(--my)) rotate(var(--mr)) scale(var(--ms)); }
+  .ab-tech:hover .ab-ticon { translate: 0px 0px; rotate: -8deg; scale: 1.1; }
 }
-.ab-ticon { transition: --mx .45s var(--lift, var(--ease-settle)), --my .45s var(--lift, var(--ease-settle)), --mr .45s var(--lift, var(--ease-settle)), --ms .45s var(--lift, var(--ease-settle)); }
+.ab-ticon { transition: translate .45s var(--lift, var(--ease-settle)), rotate .45s var(--lift, var(--ease-settle)), scale .45s var(--lift, var(--ease-settle)); }
 .ab-fade img { opacity: 0; animation: abFade 12s ease-in-out infinite; }
 .ab-fade img:nth-child(2) { animation-delay: 3s; }
 .ab-fade img:nth-child(3) { animation-delay: 6s; }
@@ -17,13 +15,13 @@
 @media (prefers-reduced-motion: reduce) { .ab-fade img:first-child { opacity: 1 !important; } }
 
 /* Link buttons: the arrow nudges out and the data tiles straighten on hover (the reference's). */
-.ab-fade { --mr: -3deg; transform: translate(var(--mx), var(--my)) rotate(var(--mr)) scale(var(--ms)); }
-.ab-arrow, .ab-fade { transition: --mx .4s var(--lift, var(--ease-settle)), --my .4s var(--lift, var(--ease-settle)), --mr .4s var(--lift, var(--ease-settle)), --ms .4s var(--lift, var(--ease-settle)); }
+.ab-fade { rotate: -3deg; }
+.ab-arrow, .ab-fade { transition: translate .4s var(--lift, var(--ease-settle)), rotate .4s var(--lift, var(--ease-settle)), scale .4s var(--lift, var(--ease-settle)); }
 @media (hover: hover) {
   .ab-link:hover { --lift: var(--ease-pop); }
-  .ab-link:hover .ab-arrow { --mx: 3px; --my: 0px; --mr: 0deg; --ms: 1; transform: translate(var(--mx), var(--my)) rotate(var(--mr)) scale(var(--ms)); }
-  .ab-link:hover .ab-up { --mx: 2px; --my: -2px; --mr: 0deg; --ms: 1; transform: translate(var(--mx), var(--my)) rotate(var(--mr)) scale(var(--ms)); }
-  .ab-link:hover .ab-fade { --mr: 0deg; --ms: 1.05; }
+  .ab-link:hover .ab-arrow { translate: 3px 0px; rotate: 0deg; scale: 1; }
+  .ab-link:hover .ab-up { translate: 2px -2px; rotate: 0deg; scale: 1; }
+  .ab-link:hover .ab-fade { rotate: 0deg; scale: 1.05; }
 }
 /* Text links: a pink underline that fills in on hover. */
 .ab-text { text-decoration: underline; text-decoration-thickness: 2px; text-underline-offset: 4px; text-decoration-color: var(--side); transition: color .3s ease, text-decoration-color .3s ease; }

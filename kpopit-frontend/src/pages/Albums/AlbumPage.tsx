@@ -1,4 +1,4 @@
-import { useEffect, useId, useState, type CSSProperties } from "react";
+import { useEffect, useId, useState } from "react";
 import { useQuery } from "@tanstack/react-query";
 import PageLoader from "../../components/Loading/PageLoader";
 import NotFound from "../NotFound/NotFound";
@@ -246,7 +246,7 @@ function Album({ album }: { album: AlbumPageData }) {
                                     <button type="button" aria-expanded={expanded} onClick={() => setExpanded(!expanded)}
                                         className="ap-btn ap-focus inline-flex items-center gap-2 h-11 px-[18px] rounded-full border-2 border-(--ink) bg-(--chip) text-(--chip-ink) font-semibold text-[13px] cursor-pointer [box-shadow:2px_3px_0_var(--ctl-off),var(--in)]">
                                         {expanded ? "Show less" : `Show all ${all.length} releases`}
-                                        <ChevronDown aria-hidden className="w-3.5 h-3.5 pm duration-300" strokeWidth={2.5} style={{ "--mr": expanded ? "180deg" : "0deg" } as CSSProperties} />
+                                        <ChevronDown aria-hidden className="w-3.5 h-3.5 transition-transform duration-300" strokeWidth={2.5} style={{ rotate: expanded ? "180deg" : "0deg" }} />
                                     </button>
                                 </div>
                             )}

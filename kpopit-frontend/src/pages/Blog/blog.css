@@ -1,24 +1,21 @@
 /* Blog cards: slow settle lift, a press that beats it, the cover zooming in.
    Rest shadows live here (not in Tailwind classes, whose five-layer box-shadow can't blend into
-   these), so hover and press move the depth smoothly. */
-/* Moving parts animate --mx/--my/--mr/--ms (registered in index.css): Chrome paints them each frame instead of on a GPU layer, so borders and images stay sharp. */
-.bl-card, .bl-arrow, .bl-cta, .bl-card img { transform: translate(var(--mx), var(--my)) rotate(var(--mr)) scale(var(--ms)); }
-.bl-card { transition: --mx .85s var(--ease-settle), --my .85s var(--ease-settle), --mr .85s var(--ease-settle), --ms .85s var(--ease-settle), box-shadow .85s var(--ease-settle); --mx: 0px; --my: 0px; --mr: var(--bl-tilt, 0deg); --ms: 1; transform: translate(var(--mx), var(--my)) rotate(var(--mr)) scale(var(--ms)); box-shadow: 3px 4px 0 var(--ctl-off), var(--in); }
+   these), so a press can sink into the depth smoothly. */
+.bl-card { transition: translate .85s var(--ease-settle), rotate .85s var(--ease-settle), scale .85s var(--ease-settle), box-shadow .85s var(--ease-settle); translate: 0px 0px; rotate: var(--bl-tilt, 0deg); scale: 1; box-shadow: 3px 4px 0 var(--ctl-off), var(--in); }
 .bl-card[data-feat] { box-shadow: 5px 5px 0 0 #FF8AC4, 5px 5px 0 2px var(--ink); }
-.bl-card img { transition: --mx 1s var(--ease-settle), --my 1s var(--ease-settle), --mr 1s var(--ease-settle), --ms 1s var(--ease-settle); }
+.bl-card img { transition: translate 1s var(--ease-settle), rotate 1s var(--ease-settle), scale 1s var(--ease-settle); }
 .bl-read { text-decoration: underline; text-decoration-thickness: 2px; text-underline-offset: 4px; text-decoration-color: var(--side); transition: text-decoration-color .3s ease; }
-.bl-arrow { transition: --mx .4s var(--lift, var(--ease-settle)), --my .4s var(--lift, var(--ease-settle)), --mr .4s var(--lift, var(--ease-settle)), --ms .4s var(--lift, var(--ease-settle)); }
+.bl-arrow { transition: translate .4s var(--lift, var(--ease-settle)), rotate .4s var(--lift, var(--ease-settle)), scale .4s var(--lift, var(--ease-settle)); }
 @media (hover: hover) {
-  .bl-card:hover { --lift: var(--ease-pop); --mx: 0px; --my: -4px; --mr: 0deg; --ms: 1; transform: translate(var(--mx), var(--my)) rotate(var(--mr)) scale(var(--ms)); box-shadow: 4px 6px 0 var(--ctl-off), var(--in); }
-  .bl-card[data-feat]:hover { box-shadow: 6px 7px 0 0 #FF8AC4, 6px 7px 0 2px var(--ink); }
-  .bl-card:hover img { --ms: 1.05; }
+  .bl-card:hover { --lift: var(--ease-pop); translate: 0px -4px; rotate: 0deg; scale: 1; }
+.bl-card:hover img { scale: 1.05; }
   .bl-card:hover .bl-read { text-decoration-color: currentColor; }
-  .bl-card:hover .bl-arrow { --mx: 3px; --my: 0px; --mr: 0deg; --ms: 1; transform: translate(var(--mx), var(--my)) rotate(var(--mr)) scale(var(--ms)); }
-  .bl-card:hover .bl-cta { --mx: 0px; --my: -2px; --mr: 0deg; --ms: 1; transform: translate(var(--mx), var(--my)) rotate(var(--mr)) scale(var(--ms)); box-shadow: 2.5px 3.5px 0 var(--ink), var(--in-pink); }
+  .bl-card:hover .bl-arrow { translate: 3px 0px; rotate: 0deg; scale: 1; }
+  .bl-card:hover .bl-cta { translate: 0px -2px; rotate: 0deg; scale: 1; }
 }
-.bl-cta { transition: --mx .6s var(--ease-settle), --my .6s var(--ease-settle), --mr .6s var(--ease-settle), --ms .6s var(--ease-settle), box-shadow .6s var(--ease-settle); }
-.bl-card:active:active:active:active { --mx: 3px; --my: 4px; --mr: 0deg; --ms: 1; transform: translate(var(--mx), var(--my)) rotate(var(--mr)) scale(var(--ms)); box-shadow: 0 0 0 var(--ctl-off), var(--in); transition-duration: .16s; }
-.bl-card[data-feat]:active:active:active:active { --mx: 5px; --my: 5px; --mr: 0deg; --ms: 1; transform: translate(var(--mx), var(--my)) rotate(var(--mr)) scale(var(--ms)); box-shadow: 0 0 0 0 #FF8AC4, 0 0 0 2px var(--ink); }
+.bl-cta { transition: translate .6s var(--ease-settle), rotate .6s var(--ease-settle), scale .6s var(--ease-settle), box-shadow .6s var(--ease-settle); }
+.bl-card:active:active:active:active { translate: 3px 4px; rotate: 0deg; scale: 1; box-shadow: 0 0 0 var(--ctl-off), var(--in); transition-duration: .16s; }
+.bl-card[data-feat]:active:active:active:active { translate: 5px 5px; rotate: 0deg; scale: 1; box-shadow: 0 0 0 0 #FF8AC4, 0 0 0 2px var(--ink); }
 
 /* A rendered post: the first paragraph is the lead, h2s get numbered chips, a blockquote is the
    tip card, lists sit in a dashed box. */
@@ -30,16 +27,16 @@
 .post-body h2::before {
   content: counter(post-h2, decimal-leading-zero); flex: none; width: 30px; height: 30px; box-sizing: border-box; border-radius: 10px;
   border: 2px solid #1A1418; background: #FF8AC4; color: #1A1418; display: grid; place-items: center; font-size: 12px;
-  box-shadow: inset 0 2px 0 rgba(255, 255, 255, .55), 2px 2.5px 0 #1A1418; --mx: 0px; --my: 0px; --mr: -4deg; --ms: 1; transform: translate(var(--mx), var(--my)) rotate(var(--mr)) scale(var(--ms));
+  box-shadow: inset 0 2px 0 rgba(255, 255, 255, .55), 2px 2.5px 0 #1A1418; translate: 0px 0px; rotate: -4deg; scale: 1;
 }
 .post-body h3 { font-weight: 700; font-size: 18px; }
 .post-body ul, .post-body ol { padding: 14px 18px 14px 40px; display: flex; flex-direction: column; gap: 10px; border-radius: 16px; border: 2px dashed var(--rule); font-size: 16px; line-height: 1.6; }
 .post-body ul { list-style: none; padding-left: 18px; }
 .post-body ul > li { display: flex; gap: 12px; align-items: baseline; }
-.post-body ul > li::before { content: ""; flex: none; width: 10px; height: 10px; box-sizing: border-box; border-radius: 999px; border: 2px solid var(--ink); background: #FF8AC4; --mx: 0px; --my: -1px; --mr: 0deg; --ms: 1; transform: translate(var(--mx), var(--my)) rotate(var(--mr)) scale(var(--ms)); }
+.post-body ul > li::before { content: ""; flex: none; width: 10px; height: 10px; box-sizing: border-box; border-radius: 999px; border: 2px solid var(--ink); background: #FF8AC4; translate: 0px -1px; rotate: 0deg; scale: 1; }
 .post-body blockquote {
   position: relative; margin: 8px 0; padding: 18px 22px 18px 54px; border-radius: 18px; border: 2px solid var(--ink); background: var(--panel);
-  font-family: var(--font-caveat); font-weight: 700; font-size: 26px; line-height: 1.2; color: var(--group); box-shadow: 2px 3px 0 var(--ctl-off); --mx: 0px; --my: 0px; --mr: -.6deg; --ms: 1; transform: translate(var(--mx), var(--my)) rotate(var(--mr)) scale(var(--ms));
+  font-family: var(--font-caveat); font-weight: 700; font-size: 26px; line-height: 1.2; color: var(--group); box-shadow: 2px 3px 0 var(--ctl-off); translate: 0px 0px; rotate: -.6deg; scale: 1;
 }
 .post-body blockquote::before { content: "\201C"; position: absolute; left: 16px; top: 8px; font: 700 48px/1 'DynaPuff'; color: #FFFFFF; text-shadow: var(--puff-quote); }
 .post-body blockquote p { margin: 0; }
@@ -49,17 +46,19 @@
 .post-body .post-cta a {
   align-self: flex-start; height: 44px; padding: 0 18px; display: inline-flex; align-items: center; gap: 8px; border-radius: 999px; border: 2px solid var(--ink);
   background: var(--chip); color: var(--chip-ink); box-shadow: 2px 3px 0 var(--ctl-off), var(--in); text-decoration: none; font-weight: 700; font-size: 14px;
-  transition: --mx .45s var(--lift, var(--ease-settle)), --my .45s var(--lift, var(--ease-settle)), --mr .45s var(--lift, var(--ease-settle)), --ms .45s var(--lift, var(--ease-settle)), box-shadow .4s var(--ease-settle), background-color .3s ease;
+  transition: translate .45s var(--lift, var(--ease-settle)), rotate .45s var(--lift, var(--ease-settle)), scale .45s var(--lift, var(--ease-settle)), box-shadow .4s var(--ease-settle), background-color .3s ease;
 }
-.post-body .post-cta a svg { transition: --mx .4s var(--lift, var(--ease-settle)), --my .4s var(--lift, var(--ease-settle)), --mr .4s var(--lift, var(--ease-settle)), --ms .4s var(--lift, var(--ease-settle)); }
+.post-body .post-cta a svg { transition: translate .4s var(--lift, var(--ease-settle)), rotate .4s var(--lift, var(--ease-settle)), scale .4s var(--lift, var(--ease-settle)); }
 @media (hover: hover) {
-  .post-body .post-cta a:hover { --lift: var(--ease-bounce); --mx: 0px; --my: -2px; --mr: 0deg; --ms: 1; transform: translate(var(--mx), var(--my)) rotate(var(--mr)) scale(var(--ms)); background: var(--chip-hover); box-shadow: 2.5px 3.5px 0 var(--ctl-off), var(--in); }
-  .post-body .post-cta a:hover svg { --mx: 2px; --my: -2px; --mr: 0deg; --ms: 1; transform: translate(var(--mx), var(--my)) rotate(var(--mr)) scale(var(--ms)); }
+  .post-body .post-cta a:hover { --lift: var(--ease-bounce); translate: 0px -2px; rotate: 0deg; scale: 1; background: var(--chip-hover); }
+  .post-body .post-cta a:hover svg { translate: 2px -2px; rotate: 0deg; scale: 1; }
 }
-.post-body .post-cta a:active:active:active:active { --mx: 2px; --my: 3px; --mr: 0deg; --ms: 1; transform: translate(var(--mx), var(--my)) rotate(var(--mr)) scale(var(--ms)); box-shadow: 0 0 0 var(--ctl-off), var(--in); transition-duration: .18s; }
+.post-body .post-cta a:active:active:active:active { translate: 2px 3px; rotate: 0deg; scale: 1; box-shadow: 0 0 0 var(--ctl-off), var(--in); transition-duration: .18s; }
 .post-body a { color: var(--group); text-decoration: underline; text-decoration-thickness: 2px; text-underline-offset: 3px; }
-.post-body img { display: block; max-width: min(420px, 100%); margin: 8px auto; border-radius: 16px; border: 2.5px solid #1A1418; box-shadow: 4px 5px 0 var(--ctl-off); --mx: 0px; --my: 0px; --mr: 1deg; --ms: 1; transform: translate(var(--mx), var(--my)) rotate(var(--mr)) scale(var(--ms)); }
+.post-body img { display: block; max-width: min(420px, 100%); margin: 8px auto; border-radius: 16px; border: 2.5px solid #1A1418; box-shadow: 4px 5px 0 var(--ctl-off); translate: 0px 0px; rotate: 1deg; scale: 1; }
 .post-body code { font-size: .9em; padding: 1px 6px; border-radius: 6px; background: var(--panel); }
 .post-body pre { overflow-x: auto; padding: 14px 16px; border-radius: 14px; background: var(--panel); border: 2px solid var(--rule); }
 .post-body table { border-collapse: collapse; font-size: 15px; }
 .post-body th, .post-body td { border: 2px solid var(--rule); padding: 6px 10px; text-align: left; }
+/* Small controls keep their compositor layer, so it is never created or dropped mid-hover. */
+.bl-cta, .post-body .post-cta a { will-change: transform; }

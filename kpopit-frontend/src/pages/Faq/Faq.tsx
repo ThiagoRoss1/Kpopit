@@ -89,7 +89,7 @@ export default function Faq() {
                                             className="pp-focus box-border w-full flex items-center gap-3.5 py-[18px] pr-[18px] pl-[22px] @max-[580px]:py-4 @max-[580px]:pr-4 @max-[580px]:pl-[18px] border-0 bg-transparent text-inherit text-left cursor-pointer transition-colors duration-300 hover:bg-(--chip-hover)"
                                         >
                                             <span className="flex-1 min-w-0 font-bold text-base leading-[1.35] [text-wrap:pretty]">{item.question}</span>
-                                            <span aria-hidden className={cn("flex-none grid place-items-center w-8 h-8 rounded-full border-2 border-[#1A1418] text-[#1A1418] pm duration-500 ease-(--ease-pop)", isOpen ? "[--mr:45deg] bg-[#FF8AC4]" : "bg-[#FFFDFA]")}>
+                                            <span aria-hidden className={cn("flex-none grid place-items-center w-8 h-8 rounded-full border-2 border-[#1A1418] text-[#1A1418] transition-transform will-change-transform duration-500 ease-(--ease-pop)", isOpen ? "rotate-45 bg-[#FF8AC4]" : "bg-[#FFFDFA]")}>
                                                 <Plus className="w-4 h-4" strokeWidth={3} />
                                             </span>
                                         </button>

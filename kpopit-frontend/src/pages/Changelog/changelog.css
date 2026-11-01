@@ -1,9 +1,7 @@
-/* Moving parts animate --mx/--my/--mr/--ms (registered in index.css): Chrome paints them each frame instead of on a GPU layer, so borders and images stay sharp. */
-.cl-card, .cl-dot { transform: translate(var(--mx), var(--my)) rotate(var(--mr)) scale(var(--ms)); }
-.cl-entry .cl-card { --mx: 0px; --my: 0px; --mr: var(--cl-tilt, 0deg); --ms: 1; transform: translate(var(--mx), var(--my)) rotate(var(--mr)) scale(var(--ms)); transition: --mx .45s var(--lift, var(--ease-settle)), --my .45s var(--lift, var(--ease-settle)), --mr .45s var(--lift, var(--ease-settle)), --ms .45s var(--lift, var(--ease-settle)), box-shadow .4s var(--ease-settle); }
-.cl-entry .cl-dot { transition: --mx .5s var(--lift, var(--ease-settle)), --my .5s var(--lift, var(--ease-settle)), --mr .5s var(--lift, var(--ease-settle)), --ms .5s var(--lift, var(--ease-settle)); }
+.cl-entry .cl-card { translate: 0px 0px; rotate: var(--cl-tilt, 0deg); scale: 1; transition: translate .45s var(--lift, var(--ease-settle)), rotate .45s var(--lift, var(--ease-settle)), scale .45s var(--lift, var(--ease-settle)), box-shadow .4s var(--ease-settle); }
+.cl-entry .cl-dot { transition: translate .5s var(--lift, var(--ease-settle)), rotate .5s var(--lift, var(--ease-settle)), scale .5s var(--lift, var(--ease-settle)); }
 @media (hover: hover) {
   .cl-entry:hover { --lift: var(--ease-bounce); }
-  .cl-entry:hover .cl-card { --mx: 0px; --my: -3px; --mr: 0deg; --ms: 1; transform: translate(var(--mx), var(--my)) rotate(var(--mr)) scale(var(--ms)); }
-  .cl-entry:hover .cl-dot { --mx: 0px; --my: 0px; --mr: 0deg; --ms: 1.25; transform: translate(var(--mx), var(--my)) rotate(var(--mr)) scale(var(--ms)); }
+  .cl-entry:hover .cl-card { translate: 0px -3px; rotate: 0deg; scale: 1; }
+  .cl-entry:hover .cl-dot { translate: 0px 0px; rotate: 0deg; scale: 1.25; }
 }

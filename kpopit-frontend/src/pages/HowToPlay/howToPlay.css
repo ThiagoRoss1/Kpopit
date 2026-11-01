@@ -1,19 +1,17 @@
-/* Moving parts animate --mx/--my/--mr/--ms (registered in index.css): Chrome paints them each frame instead of on a GPU layer, so borders and images stay sharp. */
-.htp-tile, .htp-hint, .htp-cat, .htp-ctile, .htp-disc, .htp-sleeve { transform: translate(var(--mx), var(--my)) rotate(var(--mr)) scale(var(--ms)); }
-.htp-tile { animation: htpFlip .5s cubic-bezier(.34, 1.4, .64, 1) backwards; transform: translate(var(--mx), var(--my)) rotate(var(--mr)) scale(var(--ms)); opacity: var(--mo); }
-@keyframes htpFlip { from { --mo: 0; transform: perspective(400px) rotateX(-80deg) } to { --mo: 1; transform: perspective(400px) rotateX(0deg) } }
+.htp-tile { animation: htpFlip .5s cubic-bezier(.34, 1.4, .64, 1) backwards; }
+@keyframes htpFlip { from { opacity: 0; transform: perspective(400px) rotateX(-80deg) } to { opacity: 1; transform: perspective(400px) rotateX(0deg) } }
 .htp-flip { transition: transform .8s cubic-bezier(.34, 1.35, .64, 1); }
 .htp-val, .htp-blur { transition: filter .55s var(--ease-settle); }
-.htp-disc, .htp-sleeve { transition: --mx .6s cubic-bezier(.34, 1.4, .64, 1), --my .6s cubic-bezier(.34, 1.4, .64, 1), --mr .6s cubic-bezier(.34, 1.4, .64, 1), --ms .6s cubic-bezier(.34, 1.4, .64, 1); }
-.htp-hint { transition: --mx .45s var(--lift, var(--ease-settle)), --my .45s var(--lift, var(--ease-settle)), --mr .45s var(--lift, var(--ease-settle)), --ms .45s var(--lift, var(--ease-settle)); }
-.htp-cat { transition: --mx .45s var(--lift, var(--ease-settle)), --my .45s var(--lift, var(--ease-settle)), --mr .45s var(--lift, var(--ease-settle)), --ms .45s var(--lift, var(--ease-settle)), box-shadow .4s ease; }
-.htp-ctile { transition: --mx .5s var(--lift, var(--ease-settle)), --my .5s var(--lift, var(--ease-settle)), --mr .5s var(--lift, var(--ease-settle)), --ms .5s var(--lift, var(--ease-settle)); }
+.htp-disc, .htp-sleeve { transition: translate .6s cubic-bezier(.34, 1.4, .64, 1), rotate .6s cubic-bezier(.34, 1.4, .64, 1), scale .6s cubic-bezier(.34, 1.4, .64, 1); }
+.htp-hint { transition: translate .45s var(--lift, var(--ease-settle)), rotate .45s var(--lift, var(--ease-settle)), scale .45s var(--lift, var(--ease-settle)); }
+.htp-cat { transition: translate .45s var(--lift, var(--ease-settle)), rotate .45s var(--lift, var(--ease-settle)), scale .45s var(--lift, var(--ease-settle)), box-shadow .4s ease; }
+.htp-ctile { transition: translate .5s var(--lift, var(--ease-settle)), rotate .5s var(--lift, var(--ease-settle)), scale .5s var(--lift, var(--ease-settle)); }
 @media (hover: hover) {
-  .htp-hint:hover { --lift: var(--ease-bounce); --mx: 0px !important; --my: -3px !important; --mr: 0deg !important; --ms: 1 !important; transform: translate(var(--mx), var(--my)) rotate(var(--mr)) scale(var(--ms)) !important; }
-  .htp-cat:hover { --lift: var(--ease-bounce); --mx: 0px; --my: -2px; --mr: 0deg; --ms: 1; transform: translate(var(--mx), var(--my)) rotate(var(--mr)) scale(var(--ms)); box-shadow: 3px 4.5px 0 var(--ctl-off), var(--in); }
-  .htp-cat:hover .htp-ctile { --mx: 0px !important; --my: 0px !important; --mr: 0deg !important; --ms: 1.06 !important; transform: translate(var(--mx), var(--my)) rotate(var(--mr)) scale(var(--ms)) !important; }
+  .htp-hint:hover { --lift: var(--ease-bounce); translate: 0px -3px !important; rotate: 0deg !important; scale: 1 !important; }
+  .htp-cat:hover { --lift: var(--ease-bounce); translate: 0px -2px; rotate: 0deg; scale: 1; }
+  .htp-cat:hover .htp-ctile { translate: 0px 0px !important; rotate: 0deg !important; }
 }
-.htp-hint:active:active:active:active { --mx: 2px !important; --my: 3px !important; --mr: 0deg !important; --ms: 1 !important; transform: translate(var(--mx), var(--my)) rotate(var(--mr)) scale(var(--ms)) !important; transition-duration: .15s; }
+.htp-hint:active:active:active:active { translate: 2px 3px !important; rotate: 0deg !important; scale: 1 !important; transition-duration: .15s; }
 .htp-scroll { scrollbar-width: thin; scrollbar-color: #FF8AC4 transparent; }
 .htp-clock { font-variant-numeric: tabular-nums; }
 .htp-card { animation: puffIn .7s var(--ease-settle) backwards; }
@@ -21,3 +19,5 @@
 .htp-card:nth-child(4) { animation-delay: .38s; } .htp-card:nth-child(5) { animation-delay: .44s; }
 .htp-caret { animation: htpBlink 1s steps(1) infinite; }
 @keyframes htpBlink { 50% { opacity: 0 } }
+/* Small controls keep their compositor layer, so it is never created or dropped mid-hover. */
+.htp-ctile { will-change: transform; }

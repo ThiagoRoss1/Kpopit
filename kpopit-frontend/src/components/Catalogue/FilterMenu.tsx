@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState, type CSSProperties, type ReactNode } from "react";
+import { useEffect, useRef, useState, type ReactNode } from "react";
 import { ChevronDown } from "lucide-react";
 import { cn } from "../../lib/utils";
 import "./catalogue.css";
@@ -59,7 +59,7 @@ export default function FilterMenu({ title, label, value, options, onPick, minWi
             >
                 {icon}
                 <span className="flex-1 min-w-0 overflow-hidden text-ellipsis">{label}</span>
-                <ChevronDown aria-hidden className="cg-chev absolute right-3 w-3.5 h-3.5" strokeWidth={3} style={{ "--mr": open ? "180deg" : "0deg" } as CSSProperties} />
+                <ChevronDown aria-hidden className="cg-chev absolute right-3 w-3.5 h-3.5" strokeWidth={3} style={{ rotate: open ? "180deg" : "0deg" }} />
             </button>
             {open && (
                 <div

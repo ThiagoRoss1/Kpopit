@@ -1,49 +1,40 @@
 /* Press states the Tailwind classes can't order: press must beat hover (hence the repeated
    :active), and hover only exists on devices that hover. Controls spring up on hover (--lift)
-   but settle back without overshooting.
-   Moving parts animate --mx/--my/--mr/--ms (registered in index.css): Chrome paints them each frame instead of on a GPU layer, so borders and images stay sharp. */
-.pp-press, .pp-tilt, .pp-collapse-in, .pp-toast { transform: translate(var(--mx), var(--my)) rotate(var(--mr)) scale(var(--ms)); }
+   but settle back without overshooting. */
 .pp-focus:focus-visible { outline: 3px solid #FF3399; outline-offset: 4px; }
 
 .pp-press {
   box-shadow: 2px 3px 0 var(--ctl-off), var(--pp-in, var(--in));
-  transition: --mx .45s var(--lift, var(--ease-settle)), --my .45s var(--lift, var(--ease-settle)), --mr .45s var(--lift, var(--ease-settle)), --ms .45s var(--lift, var(--ease-settle)), box-shadow .4s var(--ease-settle), background-color .3s ease, color .3s ease;
+  transition: translate .45s var(--lift, var(--ease-settle)), rotate .45s var(--lift, var(--ease-settle)), scale .45s var(--lift, var(--ease-settle)), box-shadow .4s var(--ease-settle), background-color .3s ease, color .3s ease;
 }
 @media (hover: hover) {
   .pp-press:not(:disabled):not([aria-pressed="true"]):not([aria-current="page"]):hover {
-    --mx: 0px;
-    --my: -2px;
-    --mr: 0deg;
-    --ms: 1;
-    transform: translate(var(--mx), var(--my)) rotate(var(--mr)) scale(var(--ms));
-    box-shadow: 2.5px 3.5px 0 var(--ctl-off), var(--pp-in, var(--in));
+    translate: 0px -2px;
+    rotate: 0deg;
+    scale: 1;
     --lift: var(--ease-bounce);
   }
   .pp-press[data-hover="chip"]:not(:disabled):not([aria-pressed="true"]):hover { background-color: var(--chip-hover); }
 }
 .pp-press[aria-pressed="true"],
 .pp-press[aria-current="page"] {
-  --mx: 2px;
-  --my: 3px;
-  --mr: 0deg;
-  --ms: 1;
-  transform: translate(var(--mx), var(--my)) rotate(var(--mr)) scale(var(--ms));
+  translate: 2px 3px;
+  rotate: 0deg;
+  scale: 1;
   box-shadow: 0 0 0 var(--ctl-off), var(--pp-in, var(--in));
 }
 .pp-press:not(:disabled):active:active:active {
-  --mx: 2px;
-  --my: 3px;
-  --mr: 0deg;
-  --ms: 1;
-  transform: translate(var(--mx), var(--my)) rotate(var(--mr)) scale(var(--ms));
+  translate: 2px 3px;
+  rotate: 0deg;
+  scale: 1;
   box-shadow: 0 0 0 var(--ctl-off), var(--pp-in, var(--in));
   transition-duration: .18s;
 }
 .pp-press:disabled { cursor: not-allowed; }
 
 /* Cards in lists tilt and straighten on hover. */
-.pp-tilt { --mx: 0px; --my: 0px; --mr: var(--pp-tilt, 0deg); --ms: 1; transform: translate(var(--mx), var(--my)) rotate(var(--mr)) scale(var(--ms)); transition: --mx .6s var(--lift, var(--ease-settle)), --my .6s var(--lift, var(--ease-settle)), --mr .6s var(--lift, var(--ease-settle)), --ms .6s var(--lift, var(--ease-settle)); }
-@media (hover: hover) { .pp-tilt:hover { --mx: 0px; --my: -4px; --mr: 0deg; --ms: 1; transform: translate(var(--mx), var(--my)) rotate(var(--mr)) scale(var(--ms)); --lift: var(--ease-bounce); } }
+.pp-tilt { translate: 0px 0px; rotate: var(--pp-tilt, 0deg); scale: 1; transition: translate .6s var(--lift, var(--ease-settle)), rotate .6s var(--lift, var(--ease-settle)), scale .6s var(--lift, var(--ease-settle)); }
+@media (hover: hover) { .pp-tilt:hover { translate: 0px -4px; rotate: 0deg; scale: 1; --lift: var(--ease-bounce); } }
 
 /* Horizontal rows: edge fades only when the row overflows, following the scroll. */
 .pp-hscroll { overscroll-behavior-x: contain; }
@@ -71,16 +62,18 @@
 .pp-collapse { display: grid; grid-template-rows: 0fr; transition: grid-template-rows .45s var(--ease-settle); }
 .pp-collapse[data-open="1"] { grid-template-rows: 1fr; }
 .pp-collapse > div { min-height: 0; overflow: hidden; }
-.pp-collapse-in { opacity: 0; --mx: 0px; --my: -8px; --mr: 0deg; --ms: 1; transform: translate(var(--mx), var(--my)) rotate(var(--mr)) scale(var(--ms)); transition: opacity .25s ease, --mx .45s var(--ease-settle), --my .45s var(--ease-settle), --mr .45s var(--ease-settle), --ms .45s var(--ease-settle); }
-.pp-collapse[data-open="1"] .pp-collapse-in { opacity: 1; --mx: 0px; --my: 0px; --mr: 0deg; --ms: 1; transform: translate(var(--mx), var(--my)) rotate(var(--mr)) scale(var(--ms)); transition-delay: .06s; }
-.pp-collapse[data-open="0"] .pp-collapse-in { visibility: hidden; transition: opacity .2s ease, --mx .3s ease, --my .3s ease, --mr .3s ease, --ms .3s ease, visibility 0s .45s; }
+.pp-collapse-in { opacity: 0; translate: 0px -8px; rotate: 0deg; scale: 1; transition: opacity .25s ease, translate .45s var(--ease-settle), rotate .45s var(--ease-settle), scale .45s var(--ease-settle); }
+.pp-collapse[data-open="1"] .pp-collapse-in { opacity: 1; translate: 0px 0px; rotate: 0deg; scale: 1; transition-delay: .06s; }
+.pp-collapse[data-open="0"] .pp-collapse-in { visibility: hidden; transition: opacity .2s ease, translate .3s ease, rotate .3s ease, scale .3s ease, visibility 0s .45s; }
 
 .pp-toast { animation: puffIn .42s var(--ease-settle) both; }
-.pp-toast[data-out="1"] { animation: ppToastOut .3s cubic-bezier(.4, 0, 1, 1) forwards; transform: translate(var(--mx), var(--my)) rotate(var(--mr)) scale(var(--ms)); opacity: var(--mo); }
-@keyframes ppToastOut { from { --mo: 1 } to { --mo: 0; --my: 14px; --ms: .97 } }
+.pp-toast[data-out="1"] { animation: ppToastOut .3s cubic-bezier(.4, 0, 1, 1) forwards; }
+@keyframes ppToastOut { from { opacity: 1 } to { translate: 0 14px; opacity: 0 } }
 
 .pp-enter { animation: var(--pp-anim, puffIn) .7s var(--ease-settle) var(--pp-delay, 0ms) backwards; }
 
 @media (prefers-reduced-motion: reduce) {
   .pp-root, .pp-root *, .pp-nav, .pp-nav * { animation: none !important; transition-duration: 0s !important; }
 }
+/* Small controls keep their compositor layer, so it is never created or dropped mid-hover. */
+.pp-press, .pp-toast { will-change: transform; }

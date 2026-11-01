@@ -1,9 +1,5 @@
 /* Album page: a port of the handoff's AlbumPage rules (timeline "hybrid"). Layout switches are
    variables on .ap-inner, changed by the page shell's container width. */
-/* Moving parts animate --mx/--my/--mr/--ms (registered in index.css): Chrome paints them each frame instead of on a GPU layer, so borders and images stay sharp. */
-.ap-btn, .ap-back, .ap-disc, .ap-label, .ap-sheen, .ap-cimg, .ap-sweep, .ap-tile, .ap-dot, .ap-cw, .ap-face, .ap-mimg, .ap-in, .ap-in-fade, .ap-in-disc, .ap-in-spin, .ap-in-dropt, .ap-in-drop, .ap-in-rise, .ap-in-pop, .ap-in-card, .ap-in-row {
-  transform: translate(var(--mx), var(--my)) rotate(var(--mr)) scale(var(--ms));
-}
 .ap-inner {
   --hero-w: 440px; --info-align: flex-start; --info-text: left; --disco-h: block; --disco-v: none; --title-fs: 60px;
   --hero-cols: minmax(0, 440px) minmax(0, 1fr); --hero-gap: 56px; --tiles: repeat(auto-fit, minmax(150px, 1fr)); --tile-fs: 18px;
@@ -21,28 +17,28 @@
 .ap-focus:focus-visible { outline: 3px solid #FF3399; outline-offset: 4px; }
 
 /* Buttons: lift on hover, press into the shadow */
-.ap-btn { transition: --mx .45s cubic-bezier(.34, 1.3, .64, 1), --my .45s cubic-bezier(.34, 1.3, .64, 1), --mr .45s cubic-bezier(.34, 1.3, .64, 1), --ms .45s cubic-bezier(.34, 1.3, .64, 1), box-shadow .4s var(--ease-settle), background-color .35s ease; }
+.ap-btn { transition: translate .45s cubic-bezier(.34, 1.3, .64, 1), rotate .45s cubic-bezier(.34, 1.3, .64, 1), scale .45s cubic-bezier(.34, 1.3, .64, 1), box-shadow .4s var(--ease-settle), background-color .35s ease; }
 @media (hover: hover) {
-  .ap-btn:hover { --mx: 0px; --my: -2px; --mr: 0deg; --ms: 1; transform: translate(var(--mx), var(--my)) rotate(var(--mr)) scale(var(--ms)); box-shadow: 2.5px 3.5px 0 var(--ctl-off), var(--btn-in, var(--in)) !important; background-color: var(--chip-hover) !important; }
-  .ap-btn:hover .ap-back { --mx: -2px; --my: 0px; --mr: 0deg; --ms: 1; transform: translate(var(--mx), var(--my)) rotate(var(--mr)) scale(var(--ms)); }
+  .ap-btn:hover { translate: 0px -2px; rotate: 0deg; scale: 1; background-color: var(--chip-hover) !important; }
+  .ap-btn:hover .ap-back { translate: -2px 0px; rotate: 0deg; scale: 1; }
 }
-.ap-btn:active:active:active:active { --mx: 2px; --my: 3px; --mr: 0deg; --ms: 1; transform: translate(var(--mx), var(--my)) rotate(var(--mr)) scale(var(--ms)); box-shadow: 0 0 0 var(--ctl-off), var(--btn-in, var(--in)) !important; transition-duration: .18s; }
-.ap-back { transition: --mx .35s var(--ease-pop), --my .35s var(--ease-pop), --mr .35s var(--ease-pop), --ms .35s var(--ease-pop); }
+.ap-btn:active:active:active:active { translate: 2px 3px; rotate: 0deg; scale: 1; box-shadow: 0 0 0 var(--ctl-off), var(--btn-in, var(--in)) !important; transition-duration: .18s; }
+.ap-back { transition: translate .35s var(--ease-pop), rotate .35s var(--ease-pop), scale .35s var(--ease-pop); }
 
 /* Hero: the record slides out and its label turns, the cover zooms and a light sweeps across */
-.ap-disc { transition: --mx .85s cubic-bezier(.25, 1, .5, 1), --my .85s cubic-bezier(.25, 1, .5, 1), --mr .85s cubic-bezier(.25, 1, .5, 1), --ms .85s cubic-bezier(.25, 1, .5, 1); }
-.ap-label, .ap-sheen { transition: --mx .85s cubic-bezier(.25, 1, .5, 1), --my .85s cubic-bezier(.25, 1, .5, 1), --mr .85s cubic-bezier(.25, 1, .5, 1), --ms .85s cubic-bezier(.25, 1, .5, 1); }
-.ap-cimg { transition: --mx .7s var(--ease-settle), --my .7s var(--ease-settle), --mr .7s var(--ease-settle), --ms .7s var(--ease-settle), opacity .3s ease; }
-.ap-sweep { transition: --mx .8s cubic-bezier(.25, 1, .5, 1), --my .8s cubic-bezier(.25, 1, .5, 1), --mr .8s cubic-bezier(.25, 1, .5, 1), --ms .8s cubic-bezier(.25, 1, .5, 1); }
+.ap-disc { transition: translate .85s cubic-bezier(.25, 1, .5, 1), rotate .85s cubic-bezier(.25, 1, .5, 1), scale .85s cubic-bezier(.25, 1, .5, 1); }
+.ap-label, .ap-sheen { transition: translate .85s cubic-bezier(.25, 1, .5, 1), rotate .85s cubic-bezier(.25, 1, .5, 1), scale .85s cubic-bezier(.25, 1, .5, 1); }
+.ap-cimg { transition: translate .7s var(--ease-settle), rotate .7s var(--ease-settle), scale .7s var(--ease-settle), opacity .3s ease; }
+.ap-sweep { transition: translate .8s cubic-bezier(.25, 1, .5, 1), rotate .8s cubic-bezier(.25, 1, .5, 1), scale .8s cubic-bezier(.25, 1, .5, 1); }
 @media (hover: hover) {
-  .ap-hero:hover .ap-disc { --mx: 6%; --my: 0px; --mr: 0deg; --ms: 1; transform: translate(var(--mx), var(--my)) rotate(var(--mr)) scale(var(--ms)); transition-duration: 1.2s; }
-  .ap-hero:hover .ap-label, .ap-hero:hover .ap-sheen { --mx: 0px; --my: 0px; --mr: 220deg; --ms: 1; transform: translate(var(--mx), var(--my)) rotate(var(--mr)) scale(var(--ms)); transition-duration: 1.2s; }
-  .ap-hero:hover .ap-cimg { --mx: 0px; --my: 0px; --mr: 0deg; --ms: 1.05; transform: translate(var(--mx), var(--my)) rotate(var(--mr)) scale(var(--ms)); }
-  .ap-hero:hover .ap-sweep { --mx: 42%; --my: 0px; --mr: 0deg; --ms: 1; transform: translate(var(--mx), var(--my)) rotate(var(--mr)) scale(var(--ms)); transition-duration: 1.3s; }
+  .ap-hero:hover .ap-disc { translate: 6% 0px; rotate: 0deg; scale: 1; transition-duration: 1.2s; }
+  .ap-hero:hover .ap-label, .ap-hero:hover .ap-sheen { translate: 0px 0px; rotate: 220deg; scale: 1; transition-duration: 1.2s; }
+  .ap-hero:hover .ap-cimg { translate: 0px 0px; rotate: 0deg; scale: 1.05; }
+  .ap-hero:hover .ap-sweep { translate: 42% 0px; rotate: 0deg; scale: 1; transition-duration: 1.3s; }
 }
 
-.ap-tile { transition: --mx .45s cubic-bezier(.34, 1.3, .64, 1), --my .45s cubic-bezier(.34, 1.3, .64, 1), --mr .45s cubic-bezier(.34, 1.3, .64, 1), --ms .45s cubic-bezier(.34, 1.3, .64, 1), box-shadow .4s var(--ease-settle), background-color .35s ease; }
-@media (hover: hover) { .ap-tile:hover { --mx: 0px; --my: -2px; --mr: 0deg; --ms: 1; transform: translate(var(--mx), var(--my)) rotate(var(--mr)) scale(var(--ms)); box-shadow: 4px 5px 0 var(--ctl-off), var(--btn-in, var(--in)) !important; } }
+.ap-tile { transition: translate .45s cubic-bezier(.34, 1.3, .64, 1), rotate .45s cubic-bezier(.34, 1.3, .64, 1), scale .45s cubic-bezier(.34, 1.3, .64, 1), box-shadow .4s var(--ease-settle), background-color .35s ease; }
+@media (hover: hover) { .ap-tile:hover { translate: 0px -2px; rotate: 0deg; scale: 1; } }
 
 /* Discography: the timeline fills the width and drag-scrolls (pink scrollbar) when it can't */
 .ap-track { user-select: none; -webkit-user-select: none; }
@@ -50,54 +46,56 @@
 .ap-dc::before { content: ""; position: absolute; top: 11.5px; left: -3px; right: -3px; height: 3px; background: var(--rule); }
 .ap-dc:first-child::before { left: -28px; border-radius: 3px 0 0 3px; }
 .ap-dc:last-child::before { right: -28px; border-radius: 0 3px 3px 0; }
-.ap-dot { transition: --mx .35s var(--ease-pop), --my .35s var(--ease-pop), --mr .35s var(--ease-pop), --ms .35s var(--ease-pop), background-color .3s ease; }
+.ap-dot { transition: translate .35s var(--ease-pop), rotate .35s var(--ease-pop), scale .35s var(--ease-pop), background-color .3s ease; }
 .ap-dn { transition: color .25s ease; }
 @media (hover: hover) {
-  .ap-dc:hover .ap-dot, .ap-vr:hover .ap-dot { --mx: 0px; --my: 0px; --mr: 0deg; --ms: 1.2; transform: translate(var(--mx), var(--my)) rotate(var(--mr)) scale(var(--ms)); }
+  .ap-dc:hover .ap-dot, .ap-vr:hover .ap-dot { translate: 0px 0px; rotate: 0deg; scale: 1.2; }
   .ap-dc:hover .ap-dn, .ap-vr:hover .ap-dn { color: var(--text) !important; }
 }
-.ap-dc:active .ap-dot, .ap-vr:active .ap-dot { --mx: 0px; --my: 0px; --mr: 0deg; --ms: .86; transform: translate(var(--mx), var(--my)) rotate(var(--mr)) scale(var(--ms)); transition-duration: .15s; }
+.ap-dc:active .ap-dot, .ap-vr:active .ap-dot { translate: 0px 0px; rotate: 0deg; scale: .86; transition-duration: .15s; }
 
 /* More from: tilted cards that lift and press into their pink depth */
-.ap-cw { transition: --mx .45s cubic-bezier(.34, 1.3, .64, 1), --my .45s cubic-bezier(.34, 1.3, .64, 1), --mr .45s cubic-bezier(.34, 1.3, .64, 1), --ms .45s cubic-bezier(.34, 1.3, .64, 1); }
-.ap-card:nth-child(odd) .ap-cw { --mx: 0px; --my: 0px; --mr: -.5deg; --ms: 1; transform: translate(var(--mx), var(--my)) rotate(var(--mr)) scale(var(--ms)); }
-.ap-card:nth-child(even) .ap-cw { --mx: 0px; --my: 0px; --mr: .5deg; --ms: 1; transform: translate(var(--mx), var(--my)) rotate(var(--mr)) scale(var(--ms)); }
-.ap-face { transition: --mx .35s var(--ease-settle), --my .35s var(--ease-settle), --mr .35s var(--ease-settle), --ms .35s var(--ease-settle); }
-.ap-mimg { transition: --mx .6s var(--ease-settle), --my .6s var(--ease-settle), --mr .6s var(--ease-settle), --ms .6s var(--ease-settle), opacity .3s ease; }
+.ap-cw { transition: translate .45s cubic-bezier(.34, 1.3, .64, 1), rotate .45s cubic-bezier(.34, 1.3, .64, 1), scale .45s cubic-bezier(.34, 1.3, .64, 1); }
+.ap-card:nth-child(odd) .ap-cw { translate: 0px 0px; rotate: -.5deg; scale: 1; }
+.ap-card:nth-child(even) .ap-cw { translate: 0px 0px; rotate: .5deg; scale: 1; }
+.ap-face { transition: translate .35s var(--ease-settle), rotate .35s var(--ease-settle), scale .35s var(--ease-settle); }
+.ap-mimg { transition: translate .6s var(--ease-settle), rotate .6s var(--ease-settle), scale .6s var(--ease-settle), opacity .3s ease; }
 @media (hover: hover) {
-  .ap-card:hover .ap-cw { --mx: 0px; --my: 0px; --mr: 0deg; --ms: 1; transform: translate(var(--mx), var(--my)) rotate(var(--mr)) scale(var(--ms)); }
-  .ap-card:hover .ap-face { --mx: -1px; --my: -3px; --mr: 0deg; --ms: 1; transform: translate(var(--mx), var(--my)) rotate(var(--mr)) scale(var(--ms)); }
-  .ap-card:hover .ap-mimg { --mx: 0px; --my: 0px; --mr: 0deg; --ms: 1.08; transform: translate(var(--mx), var(--my)) rotate(var(--mr)) scale(var(--ms)); }
+  .ap-card:hover .ap-cw { translate: 0px 0px; rotate: 0deg; scale: 1; }
+  .ap-card:hover .ap-face { translate: -1px -3px; rotate: 0deg; scale: 1; }
+  .ap-card:hover .ap-mimg { translate: 0px 0px; rotate: 0deg; scale: 1.08; }
 }
-.ap-card:active .ap-face { --mx: 4px; --my: 5px; --mr: 0deg; --ms: 1; transform: translate(var(--mx), var(--my)) rotate(var(--mr)) scale(var(--ms)); transition-duration: .15s; }
+.ap-card:active .ap-face { translate: 4px 5px; rotate: 0deg; scale: 1; transition-duration: .15s; }
 
 /* Entrances (backwards fill, so hover and press transforms still apply after them) */
-.ap-in { animation: apIn .6s var(--ease-settle) backwards; transform: translate(var(--mx), var(--my)) rotate(var(--mr)) scale(var(--ms)); opacity: var(--mo); }
-.ap-in-fade { animation: apFade .4s ease-out backwards; transform: translate(var(--mx), var(--my)) rotate(var(--mr)) scale(var(--ms)); opacity: var(--mo); }
-.ap-in-disc { animation: apDisc .95s var(--ease-settle) .12s backwards; transform: translate(var(--mx), var(--my)) rotate(var(--mr)) scale(var(--ms)); }
-.ap-in-spin { animation: apSpin .95s var(--ease-settle) .12s backwards; transform: translate(var(--mx), var(--my)) rotate(var(--mr)) scale(var(--ms)); }
-.ap-in-dropt { animation: apDropT .55s var(--ease-settle) backwards; transform: translate(var(--mx), var(--my)) rotate(var(--mr)) scale(var(--ms)); }
-.ap-in-drop { animation: apDrop .55s var(--ease-settle) backwards; transform: translate(var(--mx), var(--my)) rotate(var(--mr)) scale(var(--ms)); opacity: var(--mo); }
-.ap-in-rise { animation: apRise .55s var(--ease-settle) .12s backwards; transform: translate(var(--mx), var(--my)) rotate(var(--mr)) scale(var(--ms)); opacity: var(--mo); }
+.ap-in { animation: apIn .6s var(--ease-settle) backwards; }
+.ap-in-fade { animation: apFade .4s ease-out backwards; }
+.ap-in-disc { animation: apDisc .95s var(--ease-settle) .12s backwards; }
+.ap-in-spin { animation: apSpin .95s var(--ease-settle) .12s backwards; }
+.ap-in-dropt { animation: apDropT .55s var(--ease-settle) backwards; }
+.ap-in-drop { animation: apDrop .55s var(--ease-settle) backwards; }
+.ap-in-rise { animation: apRise .55s var(--ease-settle) .12s backwards; }
 .ap-tile:nth-child(2) { animation-delay: .165s; }
 .ap-tile:nth-child(3) { animation-delay: .21s; }
-.ap-in-pop { animation: apPop .55s var(--ease-pop) backwards; transform: translate(var(--mx), var(--my)) rotate(var(--mr)) scale(var(--ms)); }
-.ap-in-card { animation: apCard .55s var(--ease-settle) .08s backwards; transform: translate(var(--mx), var(--my)) rotate(var(--mr)) scale(var(--ms)); opacity: var(--mo); }
+.ap-in-pop { animation: apPop .55s var(--ease-pop) backwards; }
+.ap-in-card { animation: apCard .55s var(--ease-settle) .08s backwards; }
 .ap-card:nth-child(2) { animation-delay: .125s; }
 .ap-card:nth-child(3) { animation-delay: .17s; }
 .ap-card:nth-child(4) { animation-delay: .215s; }
 .ap-card:nth-child(5) { animation-delay: .26s; }
 .ap-card:nth-child(6) { animation-delay: .305s; }
 .ap-card:nth-child(7) { animation-delay: .35s; }
-.ap-in-row { animation: apRowIn .42s var(--ease-settle) backwards; transform: translate(var(--mx), var(--my)) rotate(var(--mr)) scale(var(--ms)); opacity: var(--mo); }
-@keyframes apIn { from { --mo: 0; --my: 22px; --ms: .98 } }
-@keyframes apFade { from { --mo: 0 } }
-@keyframes apDisc { from { --mx: -34%} }
-@keyframes apSpin { from { --mr: -240deg} }
-@keyframes apDropT { from { --my: -14px} }
-@keyframes apDrop { from { --mo: 0; --my: -14px; --mr: -2deg} }
-@keyframes apRise { from { --mo: 0; --my: 10px; --ms: .96 } }
-@keyframes apPop { 0% { --ms: .4 } 70% { --ms: 1.15 } }
-@keyframes apCard { from { --mo: 0; --my: 22px; --ms: .97 } }
-@keyframes apRowIn { from { --mo: 0; --my: -8px} }
+.ap-in-row { animation: apRowIn .42s var(--ease-settle) backwards; }
+@keyframes apIn { from { translate: 0 22px; opacity: 0} }
+@keyframes apFade { from { opacity: 0 } }
+@keyframes apDisc { from { translate: -34% 0px} }
+@keyframes apSpin { from { rotate: -240deg} }
+@keyframes apDropT { from { translate: 0px -14px} }
+@keyframes apDrop { from { translate: 0px -14px; rotate: -2deg; opacity: 0} }
+@keyframes apRise { from { translate: 0 10px; opacity: 0} }
+@keyframes apPop { 0% { scale: .4 } 70% { scale: 1.15 } }
+@keyframes apCard { from { translate: 0 22px; opacity: 0} }
+@keyframes apRowIn { from { translate: 0px -8px; opacity: 0} }
 @media (prefers-reduced-motion: reduce) { .ap-inner, .ap-inner * { animation: none !important; transition-duration: 0s !important; } }
+/* Small controls keep their compositor layer, so it is never created or dropped mid-hover. */
+.ap-btn { will-change: transform; }

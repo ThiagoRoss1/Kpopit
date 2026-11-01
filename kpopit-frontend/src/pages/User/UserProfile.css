@@ -1,41 +1,31 @@
-/* Moving parts animate --mx/--my/--mr/--ms (registered in index.css): Chrome paints them each frame instead of on a GPU layer, so borders and images stay sharp. */
-
-.profile-entry, .stat-value-fade-in {
-    transform: translate(var(--mx), var(--my)) rotate(var(--mr)) scale(var(--ms));
-}
-
 @keyframes profileEntry {
     from {
-        --mo: 0;
-        --my: 20px;
+        translate: 0px 20px;
+        opacity: 0;
     }
 
     to {
-        --mo: 1;
-        --my: 0px;
+        translate: 0px 0px;
+        opacity: 1;
     }
 }
 
 .profile-entry {
     animation: profileEntry 0.6s ease-out forwards;
-    transform: translate(var(--mx), var(--my)) rotate(var(--mr)) scale(var(--ms));
-    opacity: var(--mo);
 }
 
 @keyframes statValueFadeIn {
     0% {
-        --mo: 0;
+        opacity: 0;
     }
 
     100% {
-        --mo: 1;
+        opacity: 1;
     }
 }
 
 .stat-value-fade-in {
     animation: statValueFadeIn 0.6s ease-in-out forwards;
-    transform: translate(var(--mx), var(--my)) rotate(var(--mr)) scale(var(--ms));
-    opacity: var(--mo);
 }
 
 @keyframes constructionDots {

@@ -198,9 +198,9 @@ function IdolPage({ data, idols }: { data: IdolProfileData; idols: IdolsPageData
                                                     color: on ? "#FFFFFF" : "var(--text)",
                                                     textShadow: on ? "var(--ink-puff)" : "none",
                                                     boxShadow: on ? "3px 4px 0 0 var(--tab-o),3px 4px 0 0 var(--tab-o)" : "3px 4px 0 0 #FF8AC4,3px 4px 0 2px #1A1418",
-                                                    "--my": on ? "-3px" : "0px",
-                                                    "--mr": on ? "-2deg" : `${k % 2 ? 1 : -1}deg`,
-                                                } as CSSProperties}
+                                                    translate: on ? "0 -3px" : "0 0",
+                                                    rotate: on ? "-2deg" : `${k % 2 ? 1 : -1}deg`,
+                                                }}
                                             >
                                                 {label}
                                             </button>
