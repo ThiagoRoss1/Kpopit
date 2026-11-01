@@ -76,9 +76,9 @@ export default function About() {
                                     <p className={P}>Every day there's a new idol to find in Classic, a blurry photo in Blurry and a pixelated album cover in Pixelated. Everyone gets the same answer, and a new one arrives at midnight.</p>
                                     <div className="flex gap-2 flex-wrap mt-1">
                                         {(["classic", "blurry", "pixelated"] as const).map((m) => (
-                                            <PressLink key={m} to={m === "classic" ? "/how-to-play" : `/how-to-play?mode=${m}`} size="sm" className="h-[38px] text-[13px]">
+                                            <PressLink key={m} to={m === "classic" ? "/how-to-play" : `/how-to-play?mode=${m}`} size="sm" className="ab-link h-[38px] text-[13px]">
                                                 {`How ${m[0].toUpperCase()}${m.slice(1)} works`}
-                                                <ArrowRight className="w-3 h-3" strokeWidth={3} aria-hidden />
+                                                <ArrowRight className="ab-arrow w-3 h-3" strokeWidth={3} aria-hidden />
                                             </PressLink>
                                         ))}
                                     </div>
@@ -96,7 +96,7 @@ export default function About() {
 
                             <Section id="who" n={2} title="Who makes it">
                                 <p className={P}>
-                                    KpopIt was created by <a href={CHANNELS.github.href} target="_blank" rel="noopener noreferrer" className="font-bold text-(--group)">ThiagoRoss1</a>, a K-pop fan and Computer Science student.
+                                    KpopIt was created by <a href={CHANNELS.github.href} target="_blank" rel="noopener noreferrer" className="ab-text pp-focus font-bold text-(--group)">ThiagoRoss1</a>, a K-pop fan and Computer Science student.
                                 </p>
                                 <p className={P}>I originally started this project as a simple guessing game. But as development went on, I got more and more excited and started adding new features. I haven't been able to include everything I had planned yet, but I'm really proud of what I've accomplished so far.</p>
                             </Section>
@@ -106,7 +106,7 @@ export default function About() {
                                 <p className={P}>Want to browse the KpopIt database? Check out the idols, groups, companies and albums here.</p>
                                 <div className="grid grid-cols-[repeat(auto-fit,minmax(200px,1fr))] gap-3">
                                     {DATA_LINKS.map((d) => (
-                                        <PressLink key={d.label} to={d.to} className="h-auto justify-start gap-3.5 py-3 pr-4 pl-3 rounded-[18px]">
+                                        <PressLink key={d.label} to={d.to} className="ab-link h-auto justify-start gap-3.5 py-3 pr-4 pl-3 rounded-[18px]">
                                             <span aria-hidden className="ab-fade relative flex-none w-[60px] h-[60px] rounded-[15px] border-2 border-[#1A1418] overflow-hidden [box-shadow:2px_3px_0_#1A1418] -rotate-3" style={{ background: d.bg }}>
                                                 {d.images.map((src, i) => <img key={i} src={resolveCdnUrl(src) ?? ""} alt="" loading="lazy" className="absolute inset-0 w-full h-full object-cover" />)}
                                             </span>
@@ -114,7 +114,7 @@ export default function About() {
                                                 <span className="flex items-baseline gap-2"><span className="font-bold text-base">{d.label}</span><span lang="ko" className="font-korean font-bold text-[11px] text-(--muted)">{d.ko}</span></span>
                                                 <span className="font-medium text-xs text-(--muted) whitespace-normal">{d.text}</span>
                                             </span>
-                                            <ArrowRight className="w-4 h-4 flex-none" strokeWidth={3} aria-hidden />
+                                            <ArrowRight className="ab-arrow w-4 h-4 flex-none" strokeWidth={3} aria-hidden />
                                         </PressLink>
                                     ))}
                                 </div>
@@ -126,9 +126,9 @@ export default function About() {
                                 <p className={P}>During development, I discovered other K-pop guessing games and took inspiration from them as well. The games that inspired me the most were:</p>
                                 <div className="flex gap-2 flex-wrap">
                                     {[["Onepiecedle", "https://onepiecedle.net/"], ["Kpople", "https://www.kpople.net/"]].map(([name, href]) => (
-                                        <PressAnchor key={name} href={href} size="sm" className="h-[38px] text-[13px]">
+                                        <PressAnchor key={name} href={href} size="sm" className="ab-link h-[38px] text-[13px]">
                                             {name}
-                                            <ArrowUpRight className="w-3 h-3" strokeWidth={3} aria-hidden />
+                                            <ArrowUpRight className="ab-arrow ab-up w-3 h-3" strokeWidth={3} aria-hidden />
                                         </PressAnchor>
                                     ))}
                                 </div>
@@ -182,9 +182,9 @@ export default function About() {
                                             {CHANNELS[id].handle}
                                         </PressAnchor>
                                     ))}
-                                    <PressLink to="/contact" className="h-[46px] px-[18px]">
+                                    <PressLink to="/contact" className="ab-link h-[46px] px-[18px]">
                                         Contact page
-                                        <ArrowRight className="w-3.5 h-3.5" strokeWidth={3} aria-hidden />
+                                        <ArrowRight className="ab-arrow w-3.5 h-3.5" strokeWidth={3} aria-hidden />
                                     </PressLink>
                                 </div>
                             </Section>

@@ -1,10 +1,10 @@
 /* NavBarV2: the reference's rules (press beats hover; hover only on hover devices). Row tilts come
    from --nb-tilt so hover and press transforms can replace them. */
-.nb-item { transition: background-color .3s, color .3s, border-color .3s, box-shadow .3s, transform .35s cubic-bezier(.34, 1.4, .64, 1); }
+.nb-item { transition: background-color .3s, color .3s, border-color .3s, box-shadow .3s, transform .35s var(--lift, var(--ease-settle)); }
 @media (hover: hover) {
-  .nb-item[data-st="idle"]:hover { background: var(--chip) !important; border-color: var(--ink) !important; color: var(--text) !important; box-shadow: 2px 3px 0 var(--ctl-off), var(--btn-in, var(--in)) !important; transform: translate3d(0, -2px, 0); }
-  .nb-item[data-st="cur"]:hover { transform: translate3d(0, -2px, 0); box-shadow: 2.5px 3.5px 0 var(--ctl-off), var(--in-pink) !important; }
-  .nb-item[data-st="open"]:hover { transform: translate3d(0, -2px, 0); box-shadow: 2.5px 3.5px 0 var(--ctl-off), var(--btn-in, var(--in)) !important; }
+  .nb-item[data-st="idle"]:hover { background: var(--chip) !important; border-color: var(--ink) !important; color: var(--text) !important; box-shadow: 2px 3px 0 var(--ctl-off), var(--btn-in, var(--in)) !important; transform: translate3d(0, -2px, 0); --lift: cubic-bezier(.34, 1.4, .64, 1); }
+  .nb-item[data-st="cur"]:hover { --lift: cubic-bezier(.34, 1.4, .64, 1); transform: translate3d(0, -2px, 0); box-shadow: 2.5px 3.5px 0 var(--ctl-off), var(--in-pink) !important; }
+  .nb-item[data-st="open"]:hover { --lift: cubic-bezier(.34, 1.4, .64, 1); transform: translate3d(0, -2px, 0); box-shadow: 2.5px 3.5px 0 var(--ctl-off), var(--btn-in, var(--in)) !important; }
 }
 .nb-item:active:active:active:active { transform: translate3d(2px, 3px, 0) !important; box-shadow: 0 0 0 var(--ctl-off), var(--btn-in, var(--in)) !important; transition-duration: .18s; }
 .nb-item[data-st="cur"]:active:active:active:active { box-shadow: 0 0 0 var(--ctl-off), var(--in-pink) !important; }
@@ -13,25 +13,25 @@
 .nb-chev { transition: transform .4s cubic-bezier(.34, 1.56, .64, 1); }
 [aria-expanded="true"] > .nb-chev { transform: rotate(180deg); }
 
-.nb-logo { transition: transform .3s cubic-bezier(.22, 1, .36, 1); }
+.nb-logo { transition: transform .3s var(--ease-settle); }
 @media (hover: hover) { .nb-logo:hover { transform: scale(1.04); } }
 .nb-logo:active:active:active:active { transform: scale(.98); transition-duration: .12s; }
 
 /* Avatar: the ring widens and the photo zooms a little */
-.nb-av { box-shadow: 0 0 0 2px var(--ink), 0 0 0 4.5px #FF8AC4, 0 0 0 6.5px var(--ink); transition: transform .45s cubic-bezier(.34, 1.3, .64, 1), box-shadow .4s cubic-bezier(.22, 1, .36, 1); }
+.nb-av { box-shadow: 0 0 0 2px var(--ink), 0 0 0 4.5px #FF8AC4, 0 0 0 6.5px var(--ink); transition: transform .45s var(--lift, var(--ease-settle)), box-shadow .4s cubic-bezier(.22, 1, .36, 1); }
 .nb-av img { transition: transform .5s cubic-bezier(.34, 1.56, .64, 1); }
 @media (hover: hover) {
-  .nb-av:hover { transform: scale(1.04); box-shadow: 0 0 0 2px var(--ink), 0 0 0 5px #FF8AC4, 0 0 0 7px var(--ink); }
+  .nb-av:hover { --lift: var(--ease-bounce); transform: scale(1.04); box-shadow: 0 0 0 2px var(--ink), 0 0 0 5px #FF8AC4, 0 0 0 7px var(--ink); }
   .nb-av:hover img { transform: scale(1.08); }
 }
 .nb-av:active:active:active:active, .nb-av[aria-expanded="true"] { transform: scale(.95); transition-duration: .18s; }
 
 /* Dropdown rows: tilted at rest, straighten and lift on hover, press into their shadow */
-.nb-row { transform: rotate(var(--nb-tilt, 0deg)); transition: background-color .3s ease, box-shadow .4s cubic-bezier(.22, 1, .36, 1), transform .45s cubic-bezier(.34, 1.4, .64, 1); }
+.nb-row { transform: rotate(var(--nb-tilt, 0deg)); transition: background-color .3s ease, box-shadow .4s var(--ease-settle), transform .45s var(--lift, var(--ease-settle)); }
 .nb-row .nb-tile { transition: transform .45s cubic-bezier(.34, 1.56, .64, 1); }
 @media (hover: hover) {
-  .nb-row[data-cur="0"]:not([data-wip="1"]):hover { background: var(--chip-hover) !important; transform: translate3d(0, -2px, 0) rotate(0deg); box-shadow: 3px 4.5px 0 var(--ctl-off), var(--btn-in, var(--in)) !important; }
-  .nb-row[data-cur="1"]:hover { transform: translate3d(0, -2px, 0) rotate(0deg); }
+  .nb-row[data-cur="0"]:not([data-wip="1"]):hover { --lift: cubic-bezier(.34, 1.4, .64, 1); background: var(--chip-hover) !important; transform: translate3d(0, -2px, 0) rotate(0deg); box-shadow: 3px 4.5px 0 var(--ctl-off), var(--btn-in, var(--in)) !important; }
+  .nb-row[data-cur="1"]:hover { --lift: cubic-bezier(.34, 1.4, .64, 1); transform: translate3d(0, -2px, 0) rotate(0deg); }
   .nb-row:not([data-wip="1"]):hover .nb-tile { transform: rotate(-4deg) scale(1.03); }
 }
 .nb-row:not([data-wip="1"]):active:active:active:active { transform: translate3d(2px, 3px, 0) rotate(0deg); box-shadow: 0 0 0 var(--ctl-off), var(--btn-in, var(--in)) !important; transition-duration: .18s; }
@@ -41,9 +41,9 @@
 .nb-row[data-cur="1"]:active:active:active:active { box-shadow: 0 0 0 0 #FF8AC4, 0 0 0 2px var(--ink) !important; }
 
 /* Profile menu items: the same lift-and-press as the rows, softer */
-.nb-uitem { transition: background-color .3s ease, border-color .3s ease, box-shadow .4s cubic-bezier(.22, 1, .36, 1), transform .45s cubic-bezier(.34, 1.3, .64, 1); }
+.nb-uitem { transition: background-color .3s ease, border-color .3s ease, box-shadow .4s var(--ease-settle), transform .45s var(--lift, var(--ease-settle)); }
 @media (hover: hover) {
-  .nb-uitem:hover { background: var(--chip-hover); border-color: var(--ink); box-shadow: 2px 3px 0 var(--ctl-off), var(--btn-in, var(--in)); transform: translate3d(0, -2px, 0); }
+  .nb-uitem:hover { --lift: var(--ease-bounce); background: var(--chip-hover); border-color: var(--ink); box-shadow: 2px 3px 0 var(--ctl-off), var(--btn-in, var(--in)); transform: translate3d(0, -2px, 0); }
 }
 .nb-uitem:active:active:active:active { transform: translate3d(2px, 3px, 0); box-shadow: 0 0 0 var(--ctl-off), var(--btn-in, var(--in)); transition-duration: .18s; }
 

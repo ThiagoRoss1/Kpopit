@@ -215,7 +215,7 @@ function IdolXpButton({ hero, owner }: { hero: ProfileHeroXp; owner: boolean }) 
             to="/idol-xp"
             variant="chip"
             aria-label={`Idol XP: ${current ? `${current.artist_name}, level ${current.level}` : "no idol picked"}${owner ? ". Change idol" : ""}`}
-            className="up-xp h-[52px] box-border pl-2.5 pr-4 gap-[11px] text-left [box-shadow:3px_4px_0_0_#FF8AC4,3px_4px_0_2px_var(--ink)]"
+            className="up-xp h-[52px] box-border pl-2.5 pr-4 gap-[11px] text-left"
         >
             <span aria-hidden className="up-jar relative flex-none w-7 h-[30px] box-border rounded-[9px_9px_11px_11px] border-2 border-[#1A1418] bg-[#FFFDFA] overflow-hidden">
                 <span className="up-liquid absolute inset-x-0 bottom-0 h-[58%] bg-[#FF8AC4] border-t-2 border-[#1A1418]" />

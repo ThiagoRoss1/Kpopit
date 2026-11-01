@@ -1,16 +1,19 @@
 /* Press states the Tailwind classes can't order: press must beat hover (hence the repeated
-   :active), and hover only exists on devices that hover. */
+   :active), and hover only exists on devices that hover. Controls spring up on hover (--lift)
+   but settle back without overshooting, and keep their GPU layer so they never snap at the end. */
 .pp-focus:focus-visible { outline: 3px solid #FF3399; outline-offset: 4px; }
 
 .pp-press {
   box-shadow: 2px 3px 0 var(--ctl-off), var(--pp-in, var(--in));
-  transition: transform .45s var(--ease-bounce), box-shadow .4s var(--ease-settle), background-color .3s ease, color .3s ease;
+  transition: transform .45s var(--lift, var(--ease-settle)), box-shadow .4s var(--ease-settle), background-color .3s ease, color .3s ease;
   backface-visibility: hidden;
+  will-change: transform;
 }
 @media (hover: hover) {
   .pp-press:not(:disabled):not([aria-pressed="true"]):not([aria-current="page"]):hover {
     transform: translate3d(0, -2px, 0);
     box-shadow: 2.5px 3.5px 0 var(--ctl-off), var(--pp-in, var(--in));
+    --lift: var(--ease-bounce);
   }
   .pp-press[data-hover="chip"]:not(:disabled):not([aria-pressed="true"]):hover { background-color: var(--chip-hover); }
 }
@@ -27,19 +30,20 @@
 .pp-press:disabled { cursor: not-allowed; }
 
 /* Cards in lists tilt and straighten on hover. */
-.pp-tilt { transform: rotate(var(--pp-tilt, 0deg)); transition: transform .6s var(--ease-bounce); }
-@media (hover: hover) { .pp-tilt:hover { transform: rotate(0deg) translate3d(0, -4px, 0); } }
+.pp-tilt { transform: rotate(var(--pp-tilt, 0deg)); transition: transform .6s var(--lift, var(--ease-settle)); will-change: transform; }
+@media (hover: hover) { .pp-tilt:hover { transform: rotate(0deg) translate3d(0, -4px, 0); --lift: var(--ease-bounce); } }
 
 /* Horizontal rows: edge fades only when the row overflows, following the scroll. */
 .pp-hscroll { overscroll-behavior-x: contain; }
 .pp-hscroll:not(.pp-bar) { scrollbar-width: none; }
 .pp-hscroll:not(.pp-bar)::-webkit-scrollbar { display: none; }
 
-/* Pink scrollbar on a thin rule (the reference's): webkit pseudo-elements where they exist, the
-   standard properties only elsewhere (setting them turns the pseudo-elements off in Chrome). */
+/* Pink scrollbar on a clear track: webkit pseudo-elements where they exist, the standard
+   properties only elsewhere (setting them turns the pseudo-elements off in Chrome). */
 .pp-bar::-webkit-scrollbar { height: 14px; width: 14px; background: transparent; }
 .pp-bar::-webkit-scrollbar-corner { background: transparent; }
-.pp-bar::-webkit-scrollbar-track { margin: 0 14px; border-radius: 999px; background: linear-gradient(var(--rule), var(--rule)) center / 100% 3px no-repeat; }
+/* box-shadow: none undoes the site-wide track shadow (it drew a grey pill with a dark middle). */
+.pp-bar::-webkit-scrollbar-track { margin: 0 14px; border-radius: 999px; background: transparent; box-shadow: none; }
 .pp-bar::-webkit-scrollbar-thumb { background: #FF8AC4; border: 2px solid #1A1418; border-radius: 999px; box-shadow: inset 0 2px 0 rgba(255, 255, 255, .55); }
 .pp-bar::-webkit-scrollbar-thumb:hover { background: #FF70B8; }
 .pp-bar::-webkit-scrollbar-thumb:active { background: #FF3399; }

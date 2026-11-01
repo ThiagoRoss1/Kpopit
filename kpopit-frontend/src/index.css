@@ -119,11 +119,16 @@
   --puff-post: -2.2px -2.2px 0 #0A0A0A,2.2px -2.2px 0 #0A0A0A,-2.2px 2.2px 0 #0A0A0A,2.2px 2.2px 0 #0A0A0A,0px 2.2px 0 #0A0A0A,0px -2.2px 0 #0A0A0A,2.2px 0px 0 #0A0A0A,-2.2px 0px 0 #0A0A0A,1.13px 1.53px 0 #FF8AC4,2.27px 3.07px 0 #FF8AC4,3.40px 4.60px 0 #FF8AC4,1.2px 2.4px 0 #0A0A0A,5.6px 2.4px 0 #0A0A0A,1.2px 6.8px 0 #0A0A0A,5.6px 6.8px 0 #0A0A0A,3.4px 6.8px 0 #0A0A0A,3.4px 2.4px 0 #0A0A0A,5.6px 4.6px 0 #0A0A0A,1.2px 4.6px 0 #0A0A0A;
 }
 
-/* Puff Pop entrances: transform and opacity only. */
-@keyframes puffIn { from { opacity: 0; transform: translate3d(0, 22px, 0) scale(.97) } 60% { opacity: 1 } to { opacity: 1; transform: translate3d(0, 0, 0) scale(1) } }
-@keyframes puffSide { from { opacity: 0; transform: translate3d(-18px, 0, 0) } to { opacity: 1; transform: translate3d(0, 0, 0) } }
-@keyframes puffDrop { from { opacity: 0; transform: translate3d(0, -14px, 0) } to { opacity: 1; transform: translate3d(0, 0, 0) } }
-@keyframes puffMenu { from { opacity: 0; transform: translate3d(0, -10px, 0) scale(.97) } to { opacity: 1; transform: translate3d(0, 0, 0) scale(1) } }
+/* Puff Pop entrances: transform and opacity only. No `to` transform, so they end on the element's
+   own one (its tilt) instead of jumping to it when the animation stops. */
+@keyframes puffIn { from { opacity: 0; transform: translate3d(0, 22px, 0) scale(.97) } 60% { opacity: 1 } }
+@keyframes puffSide { from { opacity: 0; transform: translate3d(-18px, 0, 0) } }
+@keyframes puffDrop { from { opacity: 0; transform: translate3d(0, -14px, 0) } }
+@keyframes puffMenu { from { opacity: 0; transform: translate3d(0, -10px, 0) scale(.97) } }
+
+/* Puff lettering draws its outline above tall glyphs, past the line box; this headroom keeps it
+   inside the element so GPU layers and overflow clipping don't slice the tops off. */
+@utility puff-ink { padding-top: .18em; margin-top: -.18em; }
 
 html, body {
   overscroll-behavior-y: auto;

@@ -3,12 +3,12 @@
 .htp-flip { transition: transform .8s cubic-bezier(.34, 1.35, .64, 1); }
 .htp-val, .htp-blur { transition: filter .55s var(--ease-settle); }
 .htp-disc, .htp-sleeve { transition: transform .6s cubic-bezier(.34, 1.4, .64, 1); }
-.htp-hint { transition: transform .45s var(--ease-bounce); }
-.htp-cat { transition: transform .45s var(--ease-bounce), box-shadow .4s ease; }
-.htp-ctile { transition: transform .5s var(--ease-pop); }
+.htp-hint { transition: transform .45s var(--lift, var(--ease-settle)); will-change: transform; }
+.htp-cat { transition: transform .45s var(--lift, var(--ease-settle)), box-shadow .4s ease; will-change: transform; }
+.htp-ctile { transition: transform .5s var(--lift, var(--ease-settle)); }
 @media (hover: hover) {
-  .htp-hint:hover { transform: translate3d(0, -3px, 0) rotate(0deg) !important; }
-  .htp-cat:hover { transform: translate3d(0, -2px, 0); box-shadow: 3px 4.5px 0 var(--ctl-off), var(--in); }
+  .htp-hint:hover { --lift: var(--ease-bounce); transform: translate3d(0, -3px, 0) rotate(0deg) !important; }
+  .htp-cat:hover { --lift: var(--ease-bounce); transform: translate3d(0, -2px, 0); box-shadow: 3px 4.5px 0 var(--ctl-off), var(--in); }
   .htp-cat:hover .htp-ctile { transform: rotate(0deg) scale(1.06) !important; }
 }
 .htp-hint:active:active:active:active { transform: translate3d(2px, 3px, 0) !important; transition-duration: .15s; }

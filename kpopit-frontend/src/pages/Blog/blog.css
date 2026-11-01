@@ -1,20 +1,20 @@
 /* Blog cards: slow settle lift, a press that beats it, the cover zooming on its own GPU layer.
    Rest shadows live here (not in Tailwind classes, whose five-layer box-shadow can't blend into
    these), so hover and press move the depth smoothly. */
-.bl-card { transition: transform .85s var(--ease-settle), box-shadow .85s var(--ease-settle); transform: rotate(var(--bl-tilt, 0deg)); backface-visibility: hidden; box-shadow: 3px 4px 0 var(--ctl-off), var(--in); }
+.bl-card { transition: transform .85s var(--ease-settle), box-shadow .85s var(--ease-settle); transform: rotate(var(--bl-tilt, 0deg)); backface-visibility: hidden; will-change: transform; box-shadow: 3px 4px 0 var(--ctl-off), var(--in); }
 .bl-card[data-feat] { box-shadow: 5px 5px 0 0 #FF8AC4, 5px 5px 0 2px var(--ink); }
 .bl-card img { transform: translateZ(0); transition: transform 1s var(--ease-settle); }
 .bl-read { text-decoration: underline; text-decoration-thickness: 2px; text-underline-offset: 4px; text-decoration-color: var(--side); transition: text-decoration-color .3s ease; }
-.bl-arrow { transition: transform .4s var(--ease-pop); }
+.bl-arrow { transition: transform .4s var(--lift, var(--ease-settle)); will-change: transform; }
 @media (hover: hover) {
-  .bl-card:hover { transform: translate3d(0, -4px, 0) rotate(0deg); box-shadow: 4px 6px 0 var(--ctl-off), var(--in); }
+  .bl-card:hover { --lift: var(--ease-pop); transform: translate3d(0, -4px, 0) rotate(0deg); box-shadow: 4px 6px 0 var(--ctl-off), var(--in); }
   .bl-card[data-feat]:hover { box-shadow: 6px 7px 0 0 #FF8AC4, 6px 7px 0 2px var(--ink); }
   .bl-card:hover img { transform: translateZ(0) scale(1.05); }
   .bl-card:hover .bl-read { text-decoration-color: currentColor; }
   .bl-card:hover .bl-arrow { transform: translate3d(3px, 0, 0); }
   .bl-card:hover .bl-cta { transform: translate3d(0, -2px, 0); box-shadow: 2.5px 3.5px 0 var(--ink), var(--in-pink); }
 }
-.bl-cta { transition: transform .6s var(--ease-settle), box-shadow .6s var(--ease-settle); }
+.bl-cta { transition: transform .6s var(--ease-settle), box-shadow .6s var(--ease-settle); will-change: transform; }
 .bl-card:active:active:active:active { transform: translate3d(3px, 4px, 0) rotate(0deg); box-shadow: 0 0 0 var(--ctl-off), var(--in); transition-duration: .16s; }
 .bl-card[data-feat]:active:active:active:active { transform: translate3d(5px, 5px, 0); box-shadow: 0 0 0 0 #FF8AC4, 0 0 0 2px var(--ink); }
 
@@ -47,11 +47,11 @@
 .post-body .post-cta a {
   align-self: flex-start; height: 44px; padding: 0 18px; display: inline-flex; align-items: center; gap: 8px; border-radius: 999px; border: 2px solid var(--ink);
   background: var(--chip); color: var(--chip-ink); box-shadow: 2px 3px 0 var(--ctl-off), var(--in); text-decoration: none; font-weight: 700; font-size: 14px;
-  transition: transform .45s cubic-bezier(.34, 1.3, .64, 1), box-shadow .4s var(--ease-settle), background-color .3s ease;
+  transition: transform .45s var(--lift, var(--ease-settle)), box-shadow .4s var(--ease-settle), background-color .3s ease; will-change: transform;
 }
-.post-body .post-cta a svg { transition: transform .4s var(--ease-pop); }
+.post-body .post-cta a svg { transition: transform .4s var(--lift, var(--ease-settle)); }
 @media (hover: hover) {
-  .post-body .post-cta a:hover { transform: translate3d(0, -2px, 0); background: var(--chip-hover); box-shadow: 2.5px 3.5px 0 var(--ctl-off), var(--in); }
+  .post-body .post-cta a:hover { --lift: var(--ease-bounce); transform: translate3d(0, -2px, 0); background: var(--chip-hover); box-shadow: 2.5px 3.5px 0 var(--ctl-off), var(--in); }
   .post-body .post-cta a:hover svg { transform: translate3d(2px, -2px, 0); }
 }
 .post-body .post-cta a:active:active:active:active { transform: translate3d(2px, 3px, 0); box-shadow: 0 0 0 var(--ctl-off), var(--in); transition-duration: .18s; }

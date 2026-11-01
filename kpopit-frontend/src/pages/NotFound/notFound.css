@@ -1,5 +1,5 @@
-.nf-card { transition: transform .6s var(--ease-bounce); }
-@media (hover: hover) { .nf-card:hover { transform: rotate(0deg) translate3d(0, -4px, 0); } }
+.nf-card { transition: transform .6s var(--lift, var(--ease-settle)); will-change: transform; }
+@media (hover: hover) { .nf-card:hover { --lift: var(--ease-bounce); transform: rotate(0deg) translate3d(0, -4px, 0); } }
 .nf-tile { animation: nfPop .5s var(--ease-pop) both; }
 @keyframes nfPop { from { opacity: 0; transform: scale(.4) } to { opacity: 1; transform: none } }
 .nf-q { display: inline-block; animation: nfWob 3.2s ease-in-out infinite; }
