@@ -39,8 +39,8 @@ export function PageHeader({ title, korean, koreanLength, subtitle, align = "cen
                 align === "center" ? "items-center text-center" : "items-start text-left",
             )}
         >
-            <div className="flex items-center gap-3.5 max-w-full">
-                <PuffTitle className="text-[60px] @max-[580px]:text-[44px]">{title}</PuffTitle>
+            <div className={cn("flex flex-wrap items-center gap-x-3.5 gap-y-2 max-w-full", align === "center" && "justify-center")}>
+                <PuffTitle className="text-[60px] @max-[580px]:text-[44px] @max-[400px]:whitespace-normal @max-[400px]:[text-wrap:balance]">{title}</PuffTitle>
                 {korean && <KoreanTag length={koreanLength}>{korean}</KoreanTag>}
             </div>
             {subtitle && <p className="m-0 font-medium text-[15px] leading-normal text-(--muted)">{subtitle}</p>}
