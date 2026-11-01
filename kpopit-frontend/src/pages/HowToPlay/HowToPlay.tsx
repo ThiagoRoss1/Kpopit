@@ -13,7 +13,6 @@ import PixelatedCanvas from "../../components/Pixelated/PixelatedCanvas";
 import { resolveCdnUrl } from "../../utils/imageUrl";
 import { cn } from "../../lib/utils";
 import { CLASSIC_EXAMPLE, CATEGORIES, FEEDBACK, HINT_AT, MODES, parseMode, type HowToMode } from "./howToPlayData";
-import "../../components/PageShell/puff.css";
 import "./howToPlay.css";
 
 const CARD = "htp-card rounded-[23px] border-2 border-(--ink) bg-(--face) text-(--face-ink) [box-shadow:5px_5px_0_0_#FF8AC4,5px_5px_0_2px_var(--ink)] p-[26px] @max-[580px]:p-[18px] flex flex-col gap-[18px]";

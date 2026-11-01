@@ -7,10 +7,17 @@ const PATHS = {
 
 const COLORS = { discord: "#5865F2", x: "#000000", github: "#181717" } as const;
 
-export default function BrandIcon({ name, className }: { name: keyof typeof PATHS; className?: string }) {
+interface BrandIconProps {
+    name: keyof typeof PATHS;
+    className?: string;
+}
+
+const BrandIcon = ({ name, className }: BrandIconProps) => {
     return (
         <svg viewBox="0 0 24 24" aria-hidden className={className} fill={COLORS[name]}>
             <path d={PATHS[name]} />
         </svg>
     );
-}
+};
+
+export default BrandIcon;

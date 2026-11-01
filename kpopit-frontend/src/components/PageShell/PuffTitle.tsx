@@ -1,22 +1,43 @@
 import type { ElementType, ReactNode } from "react";
 import { cn } from "../../lib/utils";
 
-/** Puffy white-on-pink lettering, only for names and titles. */
-export default function PuffTitle({ as: Tag = "h1", className, children }: { as?: ElementType; className?: string; children: ReactNode }) {
+interface PuffTitleProps {
+    as?: ElementType;
+    className?: string;
+    children: ReactNode;
+}
+
+/** Puffy white-on-pink lettering, only for names and titles. puff-ink gives it the headroom its
+ *  outline needs above the tall letters, so nothing around it can clip the top. */
+const PuffTitle = ({ as: Tag = "h1", className, children }: PuffTitleProps) => {
     return (
-        <Tag className={cn("m-0 whitespace-nowrap font-bold leading-[1.05] text-white [text-shadow:var(--puff-title)] -rotate-[1.5deg] puff-ink pr-1.5 pb-2.5 pl-1", className)}>
+        <Tag
+            className={cn(
+                "m-0 pr-1.5 pb-2.5 pl-1 puff-ink",
+                "font-bold leading-[1.05] whitespace-nowrap text-white text-shadow-(--puff-title)",
+                "-rotate-[1.5deg]",
+                className,
+            )}
+        >
             {children}
         </Tag>
     );
+};
+
+interface KoreanTagProps {
+    children: ReactNode;
+    length?: "short" | "mid" | "long";
 }
 
 /** Small Hangul sticker next to a page title; long ones hide sooner on narrow screens. */
-export function KoreanTag({ children, length = "short" }: { children: ReactNode; length?: "short" | "mid" | "long" }) {
+export const KoreanTag = ({ children, length = "short" }: KoreanTagProps) => {
     return (
         <span
             lang="ko"
             className={cn(
-                "flex-none whitespace-nowrap font-korean font-bold text-sm leading-none text-(--chip-ink) bg-(--chip) border-2 border-(--ink) rounded-[10px] px-[9px] py-1.5 [box-shadow:2px_3px_0_var(--ctl-off)] rotate-4",
+                "flex-none px-2.25 py-1.5 rounded-[10px] border-2 border-(--ink)",
+                "bg-(--chip) shadow-[2px_3px_0_var(--ctl-off)] rotate-4",
+                "font-korean font-bold text-sm leading-none whitespace-nowrap text-(--chip-ink)",
                 "@max-[359px]:hidden",
                 length === "mid" && "@max-[389px]:hidden",
                 length === "long" && "@max-[419px]:hidden",
@@ -25,4 +46,6 @@ export function KoreanTag({ children, length = "short" }: { children: ReactNode;
             {children}
         </span>
     );
-}
+};
+
+export default PuffTitle;

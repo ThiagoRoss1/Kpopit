@@ -6,7 +6,6 @@ import PageMeta from "../../components/Seo/PageMeta";
 import { useHydrated } from "../../hooks/useHydrated";
 import { CHANGELOG, filterChangelog, parseChangeType, type ChangeType } from "../../content/changelog";
 import { cn } from "../../lib/utils";
-import "../../components/PageShell/puff.css";
 import "./changelog.css";
 
 const MONTHS = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];

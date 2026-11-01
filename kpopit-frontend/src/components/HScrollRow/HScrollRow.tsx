@@ -1,78 +1,103 @@
 import { useEffect, useRef, type ComponentProps } from "react";
 import { cn } from "../../lib/utils";
-import "../PageShell/puff.css";
 
 const FADE = "28px";
+
+type HScrollRowProps = ComponentProps<"div"> & { bar?: boolean };
 
 /** Sideways row: edge fades only while it overflows (following the scroll) and mouse drag-scroll;
  *  a drag never fires the click under it. The vertical wheel always scrolls the page. `bar` shows
  *  the pink scrollbar instead of hiding it. */
-export default function HScrollRow({ className, children, bar = false, ...rest }: ComponentProps<"div"> & { bar?: boolean }) {
-    const ref = useRef<HTMLDivElement>(null);
+const HScrollRow = ({ className, children, bar = false, ...rest }: HScrollRowProps) => {
+    const rowRef = useRef<HTMLDivElement>(null);
 
     useEffect(() => {
-        const row = ref.current;
+        const row = rowRef.current;
         if (!row) return;
-        const edges = () => {
-            const max = row.scrollWidth - row.clientWidth;
+
+        const updateEdges = () => {
+            const maxScroll = row.scrollWidth - row.clientWidth;
+
             row.style.setProperty("--fl", row.scrollLeft > 2 ? FADE : "0px");
-            row.style.setProperty("--fr", row.scrollLeft < max - 2 ? FADE : "0px");
+            row.style.setProperty("--fr", row.scrollLeft < maxScroll - 2 ? FADE : "0px");
+
             // Overflowing by a shadow's width doesn't make it a scroller.
-            row.dataset.over = max > 2 ? "1" : "0";
+            row.dataset.over = maxScroll > 2 ? "1" : "0";
         };
-        let drag: { x: number; left: number; moved: boolean } | null = null;
+
+        let drag: { startX: number; startLeft: number; moved: boolean } | null = null;
         let swallowClick = false;
-        const onDown = (e: PointerEvent) => {
-            if (e.pointerType !== "mouse" || e.button !== 0 || row.scrollWidth <= row.clientWidth) return;
-            drag = { x: e.clientX, left: row.scrollLeft, moved: false };
+
+        const handlePointerDown = (event: PointerEvent) => {
+            if (event.pointerType !== "mouse" || event.button !== 0 || row.scrollWidth <= row.clientWidth) return;
+
+            drag = { startX: event.clientX, startLeft: row.scrollLeft, moved: false };
         };
-        const onMove = (e: PointerEvent) => {
+
+        const handlePointerMove = (event: PointerEvent) => {
             if (!drag) return;
-            const dx = e.clientX - drag.x;
-            if (!drag.moved && Math.abs(dx) > 4) {
+
+            const distance = event.clientX - drag.startX;
+
+            if (!drag.moved && Math.abs(distance) > 4) {
                 drag.moved = true;
                 row.dataset.drag = "1";
             }
-            if (drag.moved) row.scrollLeft = drag.left - dx;
+
+            if (drag.moved) row.scrollLeft = drag.startLeft - distance;
         };
-        const onUp = () => {
+
+        const handlePointerUp = () => {
             if (!drag) return;
+
             swallowClick = drag.moved;
             drag = null;
             delete row.dataset.drag;
+
             setTimeout(() => { swallowClick = false; }, 0);
         };
-        const onClick = (e: MouseEvent) => {
-            if (!swallowClick) return;
-            e.preventDefault();
-            e.stopPropagation();
-        };
-        const onDragStart = (e: DragEvent) => e.preventDefault();
 
-        edges();
-        const resize = new ResizeObserver(edges);
-        resize.observe(row);
-        for (const child of Array.from(row.children)) resize.observe(child);
-        row.addEventListener("scroll", edges, { passive: true });
-        row.addEventListener("pointerdown", onDown);
-        window.addEventListener("pointermove", onMove);
-        window.addEventListener("pointerup", onUp);
-        row.addEventListener("click", onClick, true);
-        row.addEventListener("dragstart", onDragStart);
+        const handleClick = (event: MouseEvent) => {
+            if (!swallowClick) return;
+
+            event.preventDefault();
+            event.stopPropagation();
+        };
+
+        const handleDragStart = (event: DragEvent) => event.preventDefault();
+
+        updateEdges();
+
+        const resizeObserver = new ResizeObserver(updateEdges);
+        resizeObserver.observe(row);
+
+        for (const child of Array.from(row.children)) {
+            resizeObserver.observe(child);
+        }
+
+        row.addEventListener("scroll", updateEdges, { passive: true });
+        row.addEventListener("pointerdown", handlePointerDown);
+        window.addEventListener("pointermove", handlePointerMove);
+        window.addEventListener("pointerup", handlePointerUp);
+        row.addEventListener("click", handleClick, true);
+        row.addEventListener("dragstart", handleDragStart);
+
         return () => {
-            resize.disconnect();
-            row.removeEventListener("scroll", edges);
-            row.removeEventListener("pointerdown", onDown);
-            window.removeEventListener("pointermove", onMove);
-            window.removeEventListener("pointerup", onUp);
-            row.removeEventListener("click", onClick, true);
-            row.removeEventListener("dragstart", onDragStart);
+            resizeObserver.disconnect();
+            row.removeEventListener("scroll", updateEdges);
+            row.removeEventListener("pointerdown", handlePointerDown);
+            window.removeEventListener("pointermove", handlePointerMove);
+            window.removeEventListener("pointerup", handlePointerUp);
+            row.removeEventListener("click", handleClick, true);
+            row.removeEventListener("dragstart", handleDragStart);
         };
     }, []);
 
     return (
-        <div ref={ref} {...rest} className={cn("pp-hscroll flex overflow-x-auto", bar && "pp-bar", className)}>
+        <div ref={rowRef} {...rest} className={cn("pp-hscroll flex overflow-x-auto", bar && "pp-bar", className)}>
             {children}
         </div>
     );
-}
+};
+
+export default HScrollRow;

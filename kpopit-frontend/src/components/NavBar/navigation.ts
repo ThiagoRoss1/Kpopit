@@ -1,9 +1,25 @@
 import { BookOpen, CircleHelp, Heart, List, Mail, MessageCircle, type LucideIcon } from "lucide-react";
 import type { Features } from "../../utils/features";
+import { prefetchIdolsList } from "../../pages/Idols/idolsData";
+import { prefetchCollectionsList } from "../../pages/Collection/collectionData";
 
 export type NavPage =
-    | "classic" | "blurry" | "pixelated" | "idols" | "albums" | "calendar" | "collections"
-    | "about" | "howto" | "changelog" | "blog" | "faq" | "contact" | "privacy" | "idolxp" | "profile";
+    | "classic"
+    | "blurry"
+    | "pixelated"
+    | "idols"
+    | "albums"
+    | "calendar"
+    | "collections"
+    | "about"
+    | "howto"
+    | "changelog"
+    | "blog"
+    | "faq"
+    | "contact"
+    | "privacy"
+    | "idolxp"
+    | "profile";
 
 export type NavMenu = "games" | "idols" | "about";
 
@@ -21,7 +37,13 @@ export interface NavRow {
 }
 
 // Placeholder until the patch has its page and real name; show:false removes the card.
-export const MAJOR_PATCH = { show: false, version: "2.0", name: "Patch 2.0", tagline: "Calendar, profiles and Idol XP", href: "/major-patch" };
+export const MAJOR_PATCH = {
+    show: false,
+    version: "2.0",
+    name: "Patch 2.0",
+    tagline: "Calendar, profiles and Idol XP",
+    href: "/major-patch",
+};
 
 export const GAME_ROWS: NavRow[] = [
     { id: "classic", label: "Classic", to: "/classic", img: "/images/idols/sakura.webp" },
@@ -45,33 +67,67 @@ export const ABOUT_ROWS: NavRow[] = [
 ];
 
 const PAGE_PATHS: [string, NavPage][] = [
-    ["/classic", "classic"], ["/blurry", "blurry"], ["/pixelated", "pixelated"], ["/idols", "idols"],
-    ["/albums", "albums"], ["/calendar", "calendar"], ["/collections", "collections"], ["/about", "about"],
-    ["/how-to-play", "howto"], ["/changelog", "changelog"], ["/blog", "blog"], ["/faq", "faq"],
-    ["/contact", "contact"], ["/privacy-policy", "privacy"], ["/idol-xp", "idolxp"], ["/profile", "profile"],
+    ["/classic", "classic"],
+    ["/blurry", "blurry"],
+    ["/pixelated", "pixelated"],
+    ["/idols", "idols"],
+    ["/albums", "albums"],
+    ["/calendar", "calendar"],
+    ["/collections", "collections"],
+    ["/about", "about"],
+    ["/how-to-play", "howto"],
+    ["/changelog", "changelog"],
+    ["/blog", "blog"],
+    ["/faq", "faq"],
+    ["/contact", "contact"],
+    ["/privacy-policy", "privacy"],
+    ["/idol-xp", "idolxp"],
+    ["/profile", "profile"],
 ];
 
 export function pageOf(pathname: string): NavPage | null {
-    const hit = PAGE_PATHS.find(([prefix]) => pathname === prefix || pathname.startsWith(`${prefix}/`));
-    return hit ? hit[1] : null;
+    const match = PAGE_PATHS.find(([prefix]) => pathname === prefix || pathname.startsWith(`${prefix}/`));
+
+    return match ? match[1] : null;
 }
 
 /** The "• page" label next to the logo. */
 export const PAGE_LABEL: Record<NavPage, string> = {
-    classic: "classic", blurry: "blurry", pixelated: "pixelated", idols: "idols", albums: "albums",
-    calendar: "calendar", collections: "collections", about: "about", howto: "how to play", changelog: "changelog",
-    blog: "blog", faq: "faq", contact: "contact", privacy: "privacy", idolxp: "idol xp", profile: "profile",
+    classic: "classic",
+    blurry: "blurry",
+    pixelated: "pixelated",
+    idols: "idols",
+    albums: "albums",
+    calendar: "calendar",
+    collections: "collections",
+    about: "about",
+    howto: "how to play",
+    changelog: "changelog",
+    blog: "blog",
+    faq: "faq",
+    contact: "contact",
+    privacy: "privacy",
+    idolxp: "idol xp",
+    profile: "profile",
 };
 
 /** Which top-level entry is the current section (Contact and Privacy belong to About). */
 export function menuOf(page: NavPage | null): NavMenu | "calendar" | "collections" | null {
     if (!page) return null;
-    if (GAME_ROWS.some((r) => r.id === page)) return "games";
-    if (IDOL_ROWS.some((r) => r.id === page)) return "idols";
+
+    if (GAME_ROWS.some((row) => row.id === page)) return "games";
+    if (IDOL_ROWS.some((row) => row.id === page)) return "idols";
     if (page === "calendar" || page === "collections") return page;
-    if (ABOUT_ROWS.some((r) => r.id === page) || page === "privacy") return "about";
+    if (ABOUT_ROWS.some((row) => row.id === page) || page === "privacy") return "about";
+
     return null;
 }
+
+// Pages whose data starts loading as soon as their link is hovered or focused.
+export const PREFETCH: Partial<Record<NavPage, () => void>> = {
+    idols: prefetchIdolsList,
+    collections: prefetchCollectionsList,
+};
 
 // Collections also needs its frontend build flag: without it the route isn't mounted.
 export const showCollections = (features: Features) =>

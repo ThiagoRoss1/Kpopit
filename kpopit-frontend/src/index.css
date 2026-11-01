@@ -121,25 +121,264 @@
   --puff-post: -2.2px -2.2px 0 #0A0A0A,2.2px -2.2px 0 #0A0A0A,-2.2px 2.2px 0 #0A0A0A,2.2px 2.2px 0 #0A0A0A,0px 2.2px 0 #0A0A0A,0px -2.2px 0 #0A0A0A,2.2px 0px 0 #0A0A0A,-2.2px 0px 0 #0A0A0A,1.13px 1.53px 0 #FF8AC4,2.27px 3.07px 0 #FF8AC4,3.40px 4.60px 0 #FF8AC4,1.2px 2.4px 0 #0A0A0A,5.6px 2.4px 0 #0A0A0A,1.2px 6.8px 0 #0A0A0A,5.6px 6.8px 0 #0A0A0A,3.4px 6.8px 0 #0A0A0A,3.4px 2.4px 0 #0A0A0A,5.6px 4.6px 0 #0A0A0A,1.2px 4.6px 0 #0A0A0A;
 }
 
-/* Motion uses the individual translate / rotate / scale properties and opacity, which Chrome runs on
-   the compositor: text and borders are rasterized once and moved whole, so nothing steps or boils
-   between whole pixels. Small controls keep their layer (will-change) so it is never dropped and
-   redrawn at the end of a hover; text is never scaled (only icons and photos are). */
-/* FadeImg: a cover that finishes loading after hydration fades in (opacity, on the compositor). */
-img[data-fade="wait"] { opacity: 0; }
-img[data-fade="in"] { animation: imgIn .35s ease-out; }
-@keyframes imgIn { from { opacity: 0 } }
+/* ==========================================================================
+   Puff Pop shared rules (used across the new pages)
+   Motion animates only translate / rotate / scale and opacity, on the GPU.
+   ========================================================================== */
 
-/* Puff Pop entrances: translate and opacity only (no scale on text), ending on the element's own
-   resting values, its tilt included. */
-@keyframes puffIn { from { translate: 0 22px; opacity: 0 } 60% { opacity: 1 } }
-@keyframes puffSide { from { translate: -18px 0; opacity: 0 } }
-@keyframes puffDrop { from { translate: 0 -14px; opacity: 0 } }
-@keyframes puffMenu { from { translate: 0 -10px; opacity: 0 } }
+/* Entrances: translate and opacity only, ending on the element's own resting values. */
+@keyframes puffIn {
+    from {
+        translate: 0 22px;
+        opacity: 0;
+    }
 
-/* Puff lettering draws its outline above tall glyphs, past the line box; this headroom keeps it
-   inside the element so layers and overflow clipping don't slice the tops off. */
-@utility puff-ink { padding-top: .18em; margin-top: -.18em; }
+    60% {
+        opacity: 1;
+    }
+}
+
+@keyframes puffSide {
+    from {
+        translate: -18px 0;
+        opacity: 0;
+    }
+}
+
+@keyframes puffDrop {
+    from {
+        translate: 0 -14px;
+        opacity: 0;
+    }
+}
+
+@keyframes puffMenu {
+    from {
+        translate: 0 -10px;
+        opacity: 0;
+    }
+}
+
+@keyframes toastOut {
+    to {
+        translate: 0 14px;
+        opacity: 0;
+    }
+}
+
+@keyframes imgIn {
+    from {
+        opacity: 0;
+    }
+}
+
+.pp-enter {
+    animation: var(--pp-anim, puffIn) 0.7s var(--ease-settle) var(--pp-delay, 0ms) backwards;
+}
+
+/* Puff lettering: DynaPuff's tall glyphs and their outline rise above a line-height of 1, so the
+   lettering carries its own headroom (padding pulled back by the margin) and is never clipped. */
+@utility puff-ink {
+    padding-top: 0.18em;
+    margin-top: -0.18em;
+}
+
+/* Keyboard focus ring */
+.pp-focus:focus-visible {
+    outline: 3px solid #FF3399;
+    outline-offset: 4px;
+}
+
+/* Press buttons: lift on hover, sink into their depth on press. Press must beat hover, hence the
+   repeated :active; hover only exists on devices that hover. */
+.pp-press {
+    box-shadow: 2px 3px 0 var(--ctl-off), var(--pp-in, var(--in));
+    transition:
+        translate 0.3s var(--ease-settle),
+        box-shadow 0.18s var(--ease-settle),
+        background-color 0.3s ease,
+        color 0.3s ease;
+    will-change: transform;
+}
+
+@media (hover: hover) {
+    .pp-press:not(:disabled):not([aria-pressed="true"]):not([aria-current="page"]):hover {
+        translate: 0 -2px;
+    }
+
+    .pp-press[data-hover="chip"]:not(:disabled):not([aria-pressed="true"]):hover {
+        background-color: var(--chip-hover);
+    }
+}
+
+.pp-press[aria-pressed="true"],
+.pp-press[aria-current="page"],
+.pp-press:not(:disabled):active:active:active {
+    translate: 2px 3px;
+    box-shadow: 0 0 0 var(--ctl-off), var(--pp-in, var(--in));
+}
+
+.pp-press:not(:disabled):active:active:active {
+    transition-duration: 0.18s;
+}
+
+.pp-press:disabled {
+    cursor: not-allowed;
+}
+
+/* Horizontal rows (HScrollRow): edge fades only while the row overflows, following the scroll. */
+.pp-hscroll {
+    overscroll-behavior-x: contain;
+}
+
+.pp-hscroll:not(.pp-bar) {
+    scrollbar-width: none;
+}
+
+.pp-hscroll:not(.pp-bar)::-webkit-scrollbar {
+    display: none;
+}
+
+.pp-hscroll[data-over="1"] {
+    -webkit-mask-image: linear-gradient(90deg, transparent 0, #000 var(--fl, 0px), #000 calc(100% - var(--fr, 0px)), transparent 100%);
+    mask-image: linear-gradient(90deg, transparent 0, #000 var(--fl, 0px), #000 calc(100% - var(--fr, 0px)), transparent 100%);
+    cursor: grab;
+}
+
+.pp-hscroll[data-drag="1"],
+.pp-hscroll[data-drag="1"] * {
+    cursor: grabbing !important;
+}
+
+/* Pink scrollbar on a clear track: webkit pseudo-elements where they exist, the standard
+   properties only elsewhere (setting them turns the pseudo-elements off in Chrome). */
+.pp-bar::-webkit-scrollbar {
+    width: 14px;
+    height: 14px;
+    background: transparent;
+}
+
+.pp-bar::-webkit-scrollbar-corner {
+    background: transparent;
+}
+
+.pp-bar::-webkit-scrollbar-track {
+    margin: 0 14px;
+    border-radius: 999px;
+    background: transparent;
+    box-shadow: none;
+}
+
+.pp-bar::-webkit-scrollbar-thumb {
+    border: 2px solid #1A1418;
+    border-radius: 999px;
+    background: #FF8AC4;
+    box-shadow: inset 0 2px 0 rgba(255, 255, 255, 0.55);
+}
+
+.pp-bar::-webkit-scrollbar-thumb:hover {
+    background: #FF70B8;
+}
+
+.pp-bar::-webkit-scrollbar-thumb:active {
+    background: #FF3399;
+}
+
+@supports not selector(::-webkit-scrollbar) {
+    .pp-bar {
+        scrollbar-width: thin;
+        scrollbar-color: #FF8AC4 transparent;
+    }
+}
+
+/* Thin pink scrollbar for menus and lists inside a panel. */
+.pp-scroll::-webkit-scrollbar {
+    width: 12px;
+    background: transparent;
+}
+
+.pp-scroll::-webkit-scrollbar-track {
+    margin: 6px 0;
+    background: transparent;
+    box-shadow: none;
+}
+
+.pp-scroll::-webkit-scrollbar-thumb {
+    border: 4px solid transparent;
+    border-radius: 999px;
+    background: #FF8AC4;
+    background-clip: padding-box;
+    box-shadow: none;
+}
+
+.pp-scroll::-webkit-scrollbar-thumb:hover {
+    background: #FF70B8;
+    background-clip: padding-box;
+}
+
+@supports not selector(::-webkit-scrollbar) {
+    .pp-scroll {
+        scrollbar-width: thin;
+        scrollbar-color: #FF8AC4 transparent;
+    }
+}
+
+/* Accordion (FAQ, the navbar's menu sheet): rows open 0fr -> 1fr with the content kept mounted. */
+.pp-collapse {
+    display: grid;
+    grid-template-rows: 0fr;
+    transition: grid-template-rows 0.45s var(--ease-settle);
+}
+
+.pp-collapse[data-open="1"] {
+    grid-template-rows: 1fr;
+}
+
+.pp-collapse > div {
+    min-height: 0;
+    overflow: hidden;
+}
+
+.pp-collapse-in {
+    opacity: 0;
+    translate: 0 -8px;
+    transition:
+        opacity 0.25s ease,
+        translate 0.45s var(--ease-settle);
+}
+
+.pp-collapse[data-open="1"] .pp-collapse-in {
+    opacity: 1;
+    translate: 0 0;
+    transition-delay: 0.06s;
+}
+
+.pp-collapse[data-open="0"] .pp-collapse-in {
+    visibility: hidden;
+    transition:
+        opacity 0.2s ease,
+        translate 0.3s ease,
+        visibility 0s 0.45s;
+}
+
+/* FadeImg: a cover that finishes loading after hydration fades in. */
+img[data-fade="wait"] {
+    opacity: 0;
+}
+
+img[data-fade="in"] {
+    animation: imgIn 0.35s ease-out;
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .pp-root,
+    .pp-root *,
+    .pp-nav,
+    .pp-nav * {
+        animation: none !important;
+        transition-duration: 0s !important;
+    }
+}
 
 html, body {
   overscroll-behavior-y: auto;

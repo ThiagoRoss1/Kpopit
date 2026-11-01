@@ -8,7 +8,6 @@ import BrandIcon from "../../components/BrandIcon/BrandIcon";
 import PageMeta from "../../components/Seo/PageMeta";
 import { CHANNELS, CONTACT_EMAIL, contactMailto } from "../../data/contact";
 import { cn } from "../../lib/utils";
-import "../../components/PageShell/puff.css";
 import "./contact.css";
 
 const TOPICS = [

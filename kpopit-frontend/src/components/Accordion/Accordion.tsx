@@ -1,10 +1,16 @@
 import type { ReactNode } from "react";
 import { Plus } from "lucide-react";
 import { cn } from "../../lib/utils";
-import "../PageShell/puff.css";
 
-/** Opens with grid rows 0fr → 1fr; the content stays mounted (no layout jump, findable). */
-export function Collapse({ open, id, children, className }: { open: boolean; id?: string; children: ReactNode; className?: string }) {
+interface CollapseProps {
+    open: boolean;
+    id?: string;
+    children: ReactNode;
+    className?: string;
+}
+
+/** Opens with grid rows 0fr -> 1fr; the content stays mounted (no layout jump, findable). */
+export const Collapse = ({ open, id, children, className }: CollapseProps) => {
     return (
         <div id={id} className="pp-collapse" data-open={open ? "1" : "0"}>
             <div>
@@ -12,39 +18,44 @@ export function Collapse({ open, id, children, className }: { open: boolean; id?
             </div>
         </div>
     );
-}
+};
 
-/** One question/section: a full-width button with a plus that turns into an ×. */
-export function AccordionItem({ id, title, open, onToggle, children }: {
+interface AccordionItemProps {
     id: string;
     title: ReactNode;
     open: boolean;
     onToggle: () => void;
     children: ReactNode;
-}) {
+}
+
+/** One question or section: a full-width button with a plus that turns into an x. */
+export const AccordionItem = ({ id, title, open, onToggle, children }: AccordionItemProps) => {
     return (
-        <div className="rounded-[18px] border-2 border-(--ink) bg-(--face) text-(--face-ink) [box-shadow:2px_3px_0_var(--ctl-off),var(--in)]">
+        <div className="rounded-[18px] border-2 border-(--ink) bg-(--face) text-(--face-ink) shadow-[2px_3px_0_var(--ctl-off),var(--in)]">
             <button
                 type="button"
                 aria-expanded={open}
                 aria-controls={`${id}-panel`}
                 onClick={onToggle}
-                className="pp-focus w-full flex items-center gap-3 text-left px-[18px] py-4 font-bold text-base cursor-pointer rounded-[16px]"
+                className="pp-focus w-full flex items-center gap-3 px-4.5 py-4 rounded-2xl text-left font-bold text-base cursor-pointer"
             >
                 <span className="flex-1">{title}</span>
+
                 <span
                     aria-hidden
                     className={cn(
-                        "flex-none grid place-items-center w-8 h-8 rounded-full border-2 border-(--ink) transition-transform will-change-transform duration-500 ease-(--ease-pop)",
+                        "flex-none grid place-items-center size-8 rounded-full border-2 border-(--ink)",
+                        "transition-transform duration-500 ease-(--ease-pop) transform-gpu",
                         open ? "rotate-45 bg-[#FF8AC4] text-[#1A1418]" : "bg-(--chip) text-(--chip-ink)",
                     )}
                 >
-                    <Plus className="w-4 h-4" strokeWidth={3} />
+                    <Plus className="size-4" strokeWidth={3} />
                 </span>
             </button>
-            <Collapse open={open} id={`${id}-panel`} className="px-[18px] pb-[18px]">
+
+            <Collapse open={open} id={`${id}-panel`} className="px-4.5 pb-4.5">
                 {children}
             </Collapse>
         </div>
     );
-}
+};
