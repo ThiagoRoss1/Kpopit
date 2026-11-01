@@ -76,7 +76,7 @@ export function renderMarkdown(body: string, options: RenderOptions = {}): strin
             paragraph({ tokens }: Tokens.Paragraph) {
                 const only = tokens.length === 1 ? tokens[0] : null;
                 if (only?.type === "link" && isAllowedLink(only.href)) {
-                    return `<p class="post-cta"><a href="${escapeHtml(only.href)}">${this.parser.parseInline(only.tokens)}${CTA_ARROW}</a></p>\n`;
+                    return `<p class="post-cta"><a href="${escapeHtml(only.href)}">${this.parser.parseInline(only.tokens ?? [])}${CTA_ARROW}</a></p>\n`;
                 }
                 if (only?.type === "image") {
                     const img = this.parser.parseInline(tokens);
