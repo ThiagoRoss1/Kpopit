@@ -1,6 +1,7 @@
-/* Pressed from the click until the page changes, while the navigation waits for data: a small
-   press down (translate, on the compositor), never a scale, which would blur the control's text. */
+/* Pressed from the click until the page changes, while the navigation waits for data. `scale`
+   (not `transform`) so it also works on cards whose entrance animation holds a transform; no
+   opacity or filter, which re-rendered the control (and its depth layer) on a separate surface. */
 .link-pending {
-    translate: 0 2px;
-    transition: translate 120ms ease-out;
+    scale: 0.97;
+    transition: scale 120ms ease-out;
 }

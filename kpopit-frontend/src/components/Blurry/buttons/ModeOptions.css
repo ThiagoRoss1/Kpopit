@@ -1,7 +1,7 @@
 @keyframes cardFadeIn {
     0% {
-        translate: 0px -20px;
         opacity: 0;
+        transform: translateY(-20px);
     }
 
     40% {
@@ -9,8 +9,8 @@
     }
 
     100% {
-        translate: 0px 0px;
         opacity: 1;
+        transform: translateY(0px);
     }
 }
 

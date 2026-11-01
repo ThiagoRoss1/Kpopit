@@ -302,7 +302,7 @@ const PixelatedVictory = (props: PixelatedVictoryProps) => {
                     onClick={() => handleCopy(attempts)}
                     className="kp-tilt-l flex justify-center items-center text-center gap-2 w-45 sm:w-50 h-12 px-5 sm:px-7 rounded-full font-bold text-[14px] sm:text-base text-white
                     bg-neon-pink border-2 border-ink shadow-[0_5px_0_var(--color-ink)] firefox:shadow-none firefox:drop-shadow-[0_5px_0_var(--color-ink)] 
-                    firefox:active:drop-shadow-[0_1px_0_var(--color-ink)] transition-all duration-200
+                    firefox:active:drop-shadow-[0_1px_0_var(--color-ink)] transition-all duration-200 transform-gpu
                     hover:scale-101 firefox:hover:scale-100 hover:brightness-110 hover:cursor-pointer active:translate-y-1 active:shadow-[0_1px_0_var(--color-ink)]"
                 >
                     <Copy className="w-4 h-4" />
@@ -313,7 +313,7 @@ const PixelatedVictory = (props: PixelatedVictoryProps) => {
                     onClick={() => handleShare(attempts)}
                     className="kp-tilt-r flex justify-center items-center text-center gap-2 w-12 h-12 rounded-full 
                     bg-neon-pink border-2 border-ink shadow-[0_5px_0_var(--color-ink)] firefox:shadow-none firefox:drop-shadow-[0_5px_0_var(--color-ink)] 
-                    firefox:active:drop-shadow-[0_1px_0_var(--color-ink)] transition-all duration-200
+                    firefox:active:drop-shadow-[0_1px_0_var(--color-ink)] transition-all duration-200 transform-gpu
                     hover:scale-101 firefox:hover:scale-100 hover:brightness-110 hover:cursor-pointer active:translate-y-1 active:shadow-[0_1px_0_var(--color-ink)]"
                 >
                     <Img 

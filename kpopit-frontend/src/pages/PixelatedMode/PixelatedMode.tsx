@@ -289,7 +289,7 @@ function PixelatedMode() {
             onClick={() => setShowModal("stats")}
             aria-label="Your stats"
             className="flex shrink-0 items-center justify-center w-11 h-11 sm:w-11 sm:h-11 rounded-2xl bg-neon-pink border-2 border-ink text-white
-            shadow-[0_4px_0_var(--color-ink)] firefox:shadow-none firefox:drop-shadow-[0_4px_0_var(--color-ink)] firefox:active:drop-shadow-[0_1px_0_var(--color-ink)] transition-all duration-500
+            shadow-[0_4px_0_var(--color-ink)] firefox:shadow-none firefox:drop-shadow-[0_4px_0_var(--color-ink)] firefox:active:drop-shadow-[0_1px_0_var(--color-ink)] transition-all duration-500 transform-gpu
             hover:brightness-110 hover:cursor-pointer hover:scale-105 active:translate-y-1 active:shadow-[0_1px_0_var(--color-ink)]
             focus:outline-none focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ink"
         >
@@ -330,7 +330,7 @@ function PixelatedMode() {
                             <Link 
                                 to="/"
                                 className="inline-block bg-transparent border-0 p-0 cursor-pointer hover:scale-105
-                                transition-all duration-500">
+                                transition-all duration-500 transform-gpu">
                                 <h1 className="text-5xl font-bold text-neon-pink leading-tight">
                                     <span
                                         className="kpop-part"
@@ -456,7 +456,7 @@ function PixelatedMode() {
                                         <Link 
                                             to="/"
                                             className="inline-block bg-transparent border-0 p-0 cursor-pointer hover:scale-105
-                                            transition-all duration-500"
+                                            transition-all duration-500 transform-gpu"
                                         >
                                             <h1 className="text-5xl font-bold text-neon-pink leading-tight">
                                                 <span

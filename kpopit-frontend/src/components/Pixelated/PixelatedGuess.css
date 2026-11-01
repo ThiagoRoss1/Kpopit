@@ -15,17 +15,17 @@
 }
 .pixel-cluster { position: relative; width: 38px; height: 32px; flex-shrink: 0; }
 .pixel-cluster i { position: absolute; width: 11px; height: 11px; box-shadow: 0 1px 2px rgba(0, 0, 0, 0.25); }
-.pixel-cluster i:nth-child(1) { left: 0;  top: 4px;  translate: 0px 0px;  rotate: 6deg;  scale: 1; }
-.pixel-cluster i:nth-child(2) { left: 10px; top: 0;   translate: 0px 0px;   rotate: -8deg;   scale: 1; }
-.pixel-cluster i:nth-child(3) { left: 22px; top: 7px; translate: 0px 0px; rotate: 4deg; scale: 1; }
-.pixel-cluster i:nth-child(4) { left: 14px; top: 17px; translate: 0px 0px; rotate: -5deg; scale: 1; }
+.pixel-cluster i:nth-child(1) { left: 0;  top: 4px;  transform: rotate(6deg); }
+.pixel-cluster i:nth-child(2) { left: 10px; top: 0;   transform: rotate(-8deg); }
+.pixel-cluster i:nth-child(3) { left: 22px; top: 7px; transform: rotate(4deg); }
+.pixel-cluster i:nth-child(4) { left: 14px; top: 17px; transform: rotate(-5deg); }
 .pixel-cluster--ok i { background: #4FFFB0; border: 1.5px solid #15803d; }
 .pixel-cluster--no i { background: #FD5C63; border: 1.5px solid #b91c1c; }
 
 /* Guess-row enter + reveal animations */
 @keyframes pixelGuessEnter {
-    from { translate: 0px -8px; scale: 0.98; opacity: 0; }
-    to { translate: 0px 0px; scale: 1; opacity: 1; }
+    from { opacity: 0; transform: translateY(-8px) scale(0.98); }
+    to { opacity: 1; transform: translateY(0) scale(1); }
 }
 
 .pixel-guess-enter { animation: pixelGuessEnter 0.4s ease-out forwards; }

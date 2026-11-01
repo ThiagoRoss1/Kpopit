@@ -203,7 +203,7 @@ const AuthPage = () => {
                 <div className="relative z-10 flex flex-col items-center justify-center w-full px-2 sxs:px-3 sm:px-4 pt-15 pb-8">
 
                     <div className="relative w-full max-w-120">
-                        <div className="absolute inset-0 z-0 bg-ink border border-solid border-neon-pink/15 rounded-[40px] modal-outer-shadow translate-x-0.75 translate-y-0.75 rotate-[1.5deg]" />
+                        <div className="absolute inset-0 z-0 bg-ink border border-solid border-neon-pink/15 rounded-[40px] modal-outer-shadow translate-x-0.75 translate-y-0.75 rotate-[1.5deg] transform-gpu" />
 
                         <div className="relative z-10 flex flex-col bg-[#111111] border-4 border-neon-pink rounded-[40px] p-5 sxs:p-6 sm:p-8 modal-inner-shadow">
                             {/* Tab toggle */}
@@ -228,7 +228,7 @@ const AuthPage = () => {
 
                                 {/* Animated form pill */}
                                 <motion.div
-                                    className="absolute top-1/2 h-[calc(100%-12px)] bg-neon-pink rounded-2xl pointer-events-none -translate-y-1/2"
+                                    className="absolute top-1/2 h-[calc(100%-12px)] bg-neon-pink rounded-2xl pointer-events-none -translate-y-1/2 transform-gpu"
                                     initial={false}
                                     animate={{
                                         left: isLoginTab ? "6px" : "calc(50% + 3px)",
@@ -259,7 +259,7 @@ const AuthPage = () => {
                                     </label>
                                     <div className="neo-input-modal relative h-14 rounded-2xl overflow-hidden">
                                         <User
-                                            className={`absolute left-4 top-1/2 w-4 h-4 -translate-y-1/2 transition-colors duration-200
+                                            className={`absolute left-4 top-1/2 w-4 h-4 -translate-y-1/2 transform-gpu transition-colors duration-200
                                             ${isLoginTab ? (loginFormData.identifier.length > 0 ? "text-white" : "text-neutral-600")
                                             : (registerFormData.username.length > 0 ? "text-white" : "text-neutral-600")}`}
                                         />
@@ -338,7 +338,7 @@ const AuthPage = () => {
                                     </div>
                                     <div className="neo-input-modal relative h-14 rounded-2xl overflow-hidden">
                                         <Lock
-                                            className={`absolute left-4 top-1/2 w-4 h-4 -translate-y-1/2 transition-colors duration-200 ${activePassword.length > 0 ? "text-white" : "text-neutral-600"}`}
+                                            className={`absolute left-4 top-1/2 w-4 h-4 -translate-y-1/2 transform-gpu transition-colors duration-200 ${activePassword.length > 0 ? "text-white" : "text-neutral-600"}`}
                                         />
                                         <input
                                             type={showPassword ? "text" : "password"}
@@ -385,7 +385,7 @@ const AuthPage = () => {
                                         </label>
                                         <div className="neo-input-modal relative h-14 rounded-2xl overflow-hidden">
                                             <Lock
-                                                className={`absolute left-4 top-1/2 w-4 h-4 -translate-y-1/2 transition-colors duration-200 ${activePassword.length > 0 ? "text-white" : "text-neutral-600"}`}
+                                                className={`absolute left-4 top-1/2 w-4 h-4 -translate-y-1/2 transform-gpu transition-colors duration-200 ${activePassword.length > 0 ? "text-white" : "text-neutral-600"}`}
                                             />
                                             <input
                                                 type={showConfirmPassword ? "text" : "password"}
@@ -415,7 +415,7 @@ const AuthPage = () => {
                                             onClick={() => setLoginFormData({ ...loginFormData, rememberMe: !loginFormData.rememberMe })}
                                         >
                                             <div
-                                                className={`flex items-center justify-center w-7 h-7 border-2 border-white/20 rounded-lg transition-all duration-200
+                                                className={`flex items-center justify-center w-7 h-7 border-2 border-white/20 rounded-lg transform-gpu transition-all duration-200
                                                 ${loginFormData.rememberMe ? "bg-neon-pink" : "bg-[#1a1a1a]"}`}
                                             >
                                                 {loginFormData.rememberMe && <Check className="w-5 h-5 text-white" />}
@@ -435,7 +435,7 @@ const AuthPage = () => {
                                             initial={{ opacity: 0, y: -4 }}
                                             animate={{ opacity: 1, y: 0 }}
                                             exit={{ opacity: 0 }}
-                                            className="text-center text-xs text-red-400 font-bold"
+                                            className="text-center text-xs text-red-400 font-bold transform-gpu"
                                         >
                                             {error}
                                         </motion.p>
@@ -449,7 +449,7 @@ const AuthPage = () => {
                                     className={`flex items-center justify-center w-full h-16 font-sans italic gap-1.5 bg-neon-pink rounded-2xl 
                                     shadow-[4px_4px_0px_rgba(255,255,255,1)] text-center text-lg text-white font-black 
                                     [text-shadow:2px_2px_4px_rgba(0,0,0,1)] hover:translate-x-1 hover:translate-y-1 hover:shadow-[0px_0px_0px_rgba(0,0,0,0)] 
-                                    hover:cursor-pointer transition-all duration-200 center-stage-btn ${isPending ? "opacity-70" : ""}`}
+                                    hover:cursor-pointer transition-all duration-200 transform-gpu center-stage-btn ${isPending ? "opacity-70" : ""}`}
                                 >
                                     {isPending
                                         ? (isLoginTab ? "Signing in..." : "Creating account...")
@@ -462,7 +462,7 @@ const AuthPage = () => {
                                     {Array.from({ length: dotsCount }).map((_, i) => (
                                         <div
                                             key={i}
-                                            className={`validation-dot w-3.5 h-3.5 rounded-full ${dotsFilled[i] ? "filled" : ""}`}
+                                            className={`validation-dot w-3.5 h-3.5 rounded-full transform-gpu ${dotsFilled[i] ? "filled" : ""}`}
                                         />
                                     ))}
                                 </div>

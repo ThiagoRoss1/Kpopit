@@ -57,7 +57,7 @@ const PixelatedGuessRow = ({
                     shadow-[0_4px_0_var(--color-ink),0_6px_12px_rgba(0,0,0,0.08)] ${guess.guess_correct ? "pixel-row--correct" : "pixel-row--incorrect"}`}>
                     <div
                         className="w-12 h-12 rounded-xl border-2 border-ink bg-ink shadow-[3px_1.5px_0_rgba(0,0,0,1)]
-                        overflow-hidden hover:scale-110 transition-transform duration-300"
+                        overflow-hidden hover:scale-110 transition-transform duration-300 transform-gpu"
                     >
                         <Img
                             src={coverUrl ?? undefined}

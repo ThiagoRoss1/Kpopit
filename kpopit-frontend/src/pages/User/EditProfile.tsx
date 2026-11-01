@@ -140,14 +140,14 @@ const EditProfileContent = (props: EditProfileProps) => {
                             className="group relative grid place-items-center w-25 h-25 sxs:w-28 sxs:h-28
                                 rounded-full overflow-hidden border-[3px] border-neon-pink
                                 hover:shadow-[2px_2px_0px_rgba(255,51,153,0.5)]
-                                hover:cursor-pointer transition-all duration-200
+                                hover:cursor-pointer transition-all duration-200 transform-gpu
                                 disabled:opacity-60 disabled:cursor-not-allowed"
                         >
                             {avatarSrc ? (
                                 <Img
                                     src={avatarSrc}
                                     alt="Avatar"
-                                    className="w-full h-full object-cover"
+                                    className="w-full h-full object-cover transform-gpu"
                                     draggable={false}
                                 />
                             ) : (
@@ -312,7 +312,7 @@ const EditProfileContent = (props: EditProfileProps) => {
                                     >
                                         <span
                                             aria-hidden="true"
-                                            className={`absolute top-0.5 left-0.5 w-5 h-5 rounded-full bg-white transition-transform will-change-transform duration-200
+                                            className={`absolute top-0.5 left-0.5 w-5 h-5 rounded-full bg-white transition-transform duration-200 transform-gpu
                                                 ${visibility[field] ? "translate-x-5" : "translate-x-0"}`}
                                         />
                                     </button>
@@ -347,7 +347,7 @@ const EditProfileContent = (props: EditProfileProps) => {
                         className={`flex justify-center items-center gap-2 px-8 py-4 rounded-xl text-[12px] font-black uppercase tracking-[0.18em]
                             bg-neon-pink text-white [text-shadow:1.5px_1.5px_2px_rgba(0,0,0,0.9)] ${canSave ? "shadow-[3px_3px_0px_rgba(255,255,255,1)]" : ""}
                             hover:translate-x-1 hover:translate-y-1 hover:shadow-[1px_1px_0px_rgba(0,0,0,1)]
-                            hover:cursor-pointer transition-all duration-300
+                            hover:cursor-pointer transition-all duration-300 transform-gpu
                             disabled:opacity-50 disabled:cursor-not-allowed
                             disabled:hover:translate-x-0 disabled:hover:translate-y-0`}
                     >

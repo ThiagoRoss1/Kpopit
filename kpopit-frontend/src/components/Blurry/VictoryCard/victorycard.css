@@ -1,15 +1,13 @@
 @keyframes bigCardEntry {
     0% {
-        translate: 0px 20px;
-        scale: 0.95;
         opacity: 0;
+        transform: translateY(20px) scale(0.95);
         transform-origin: center bottom;
     }
 
     100% {
-        translate: 0px 0px;
-        scale: 1;
         opacity: 1;
+        transform: translateY(0px) scale(1);
         transform-origin: center bottom;
     }
 }
@@ -30,16 +28,14 @@
 
 @keyframes cardEntry {
     0% {
-        translate: 0px 90px;
-        scale: 0.8;
         opacity: 0;
+        transform: translateY(90px) scale(0.8);
         transform-origin: center bottom;
     }
 
     100% {
-        translate: 0px 0px;
-        scale: 1;
         opacity: 1;
+        transform: translateY(0) scale(1);
         transform-origin: center bottom;
     }
 }

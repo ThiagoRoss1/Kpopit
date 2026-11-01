@@ -41,7 +41,7 @@ function CalendarHeader({ mode, date, dayNumber }: { mode: CalendarMode; date: s
     const light = mode === "pixelated";
     return (
         <div className="flex flex-col items-center gap-4 text-center">
-            <Link to="/" className="inline-block bg-transparent border-0 p-0 cursor-pointer hover:scale-105 transition-all duration-500" draggable={false}>
+            <Link to="/" className="inline-block bg-transparent border-0 p-0 cursor-pointer hover:scale-105 transition-all duration-500 transform-gpu" draggable={false}>
                 <h1
                     className={`leading-tight font-bold text-center ${mode === "classic" ? "max-sxs:text-4xl sxs:text-5xl zm:text-6xl sm:text-7xl" : mode === "blurry" ? "max-xxs:text-3xl xxs:text-3xl xs:text-4xl sm:text-5xl" : "text-5xl text-neon-pink"}`}
                 >

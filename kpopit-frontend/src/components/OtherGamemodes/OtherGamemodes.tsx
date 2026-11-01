@@ -27,7 +27,7 @@ export const OtherGamemodes = (props: OtherGamemodesProps) => {
                         <div
                             className={`group flex items-center justify-start max-xs:justify-center min-w-0 max-xs:w-full max-xs:gap-1.5 gap-2 max-xs:h-12 h-15 max-w-55 max-xs:px-2 px-4 rounded-2xl border-2 border-ink bg-white
                             shadow-[3px_3px_0_var(--color-ink)] hover:scale-105 hover:cursor-pointer
-                            active:scale-95 ease-[cubic-bezier(0.34,1.56,0.64,1)] transition-all duration-500
+                            active:scale-95 ease-[cubic-bezier(0.34,1.56,0.64,1)] transition-all duration-500 transform-gpu
                             ${mode.won ? "opacity-50" : "opacity-100"}`}
                         >
                             <Img

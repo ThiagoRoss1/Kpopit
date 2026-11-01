@@ -125,7 +125,7 @@ const ShareText = (props: ShareContentProps) => {
 
             <div className="w-full">
                 <div className="flex flex-row justify-center items-center gap-10 mt-3">
-                    <button className={`w-30 h-12 sm:w-30 sm:h-12 bg-black/40 rounded-2xl flex items-center justify-center ${hasWon ? "hover:bg-black/70 hover:cursor-pointer hover:scale-105 firefox:hover:scale-100" : "cursor-normal" } transition-all duration-300`}
+                    <button className={`w-30 h-12 sm:w-30 sm:h-12 bg-black/40 rounded-2xl flex items-center justify-center ${hasWon ? "hover:bg-black/70 hover:cursor-pointer hover:scale-105 firefox:hover:scale-100" : "cursor-normal" } transition-all duration-300 transform-gpu`}
                         type='button'      
                         onClick={(() => {
                             if (hasWon) {
@@ -157,7 +157,7 @@ const ShareText = (props: ShareContentProps) => {
                         )}
                     </AnimatePresence>
 
-                    <button className={`w-30 h-12 sm:w-30 sm:h-12 bg-black/40 rounded-2xl flex items-center justify-center ${hasWon ? "hover:bg-black/70 hover:cursor-pointer hover:scale-105 firefox:hover:scale-100" : "cursor-normal" } transition-all duration-300`}
+                    <button className={`w-30 h-12 sm:w-30 sm:h-12 bg-black/40 rounded-2xl flex items-center justify-center ${hasWon ? "hover:bg-black/70 hover:cursor-pointer hover:scale-105 firefox:hover:scale-100" : "cursor-normal" } transition-all duration-300 transform-gpu`}
                         type='button'  
                         onClick={(() => {
                             if (hasWon) {

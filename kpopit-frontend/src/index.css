@@ -389,4 +389,27 @@ html {
     }
 }
 
+/* Avoid blur on images when hovering/scaling.
+   These two properties together break any <img> rendered inside a
+   3D-rotated face. 
+   Firefox culls it as back-facing. AlbumOfCol.css opts the
+   flip-book out via `.album-book img`. */
+img {
+  -webkit-backface-visibility: hidden;
+  backface-visibility: hidden;
+  -webkit-transform: translateZ(0);
+  transform: translateZ(0);
+  image-rendering: auto;
+}
+
+/* Speed up animations with GPU */
+.transform-gpu {
+  transform: translateZ(0);
+  will-change: transform;
+}
+
 /* Guarantee that GlassSurface loads instantly */
+canvas {
+  will-change: transform, opacity;
+  backface-visibility: hidden;
+}

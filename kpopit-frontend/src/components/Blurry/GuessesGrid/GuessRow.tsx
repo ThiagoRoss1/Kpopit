@@ -65,7 +65,7 @@ const GuessRow = (props: GuessRowProps) => {
                     src={`${import.meta.env.VITE_IMAGE_BUCKET_URL}${guess.guessed_idol_data.image_path}?v=${guess.guessed_idol_data.image_version}`}
                     alt="Idol image"
                     className={`${shouldAnimate ? 'guess-photo-enter' : ''} 
-                    max-xxs:w-16 xxs:w-18 xm:w-20 max-xxs:h-16 xxs:h-18 xm:h-20 sm:w-20 sm:h-20 hover:w-full hover:border-0 hover:cursor-pointer transition-all duration-300
+                    max-xxs:w-16 xxs:w-18 xm:w-20 max-xxs:h-16 xxs:h-18 xm:h-20 sm:w-20 sm:h-20 hover:w-full hover:border-0 hover:cursor-pointer transition-all duration-300 transform-gpu
                     object-cover rounded-[20px] border-r-4 border-b-4 border-black/30`} // object-[center_X%] per photo
                     onAnimationEnd={shouldAnimate ? handleAnimationEnd : undefined}
                     draggable={false}

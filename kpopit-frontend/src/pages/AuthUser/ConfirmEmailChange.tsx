@@ -29,7 +29,7 @@ const ConfirmEmailChange = () => {
             <div className="relative flex flex-col items-center justify-center min-h-full w-full">
                 <div className="relative z-10 flex flex-col items-center justify-center w-full px-2 sxs:px-3 sm:px-4 pt-15 pb-8">
                     <div className="relative w-full max-w-120">
-                        <div className="absolute inset-0 z-0 bg-ink border border-solid border-neon-pink/15 rounded-[40px] modal-outer-shadow translate-x-0.75 translate-y-0.75 rotate-[1.5deg]" />
+                        <div className="absolute inset-0 z-0 bg-ink border border-solid border-neon-pink/15 rounded-[40px] modal-outer-shadow translate-x-0.75 translate-y-0.75 rotate-[1.5deg] transform-gpu" />
 
                         <div className="relative z-10 flex flex-col bg-[#111111] border-4 border-neon-pink rounded-[40px] p-5 sxs:p-6 sm:p-8 modal-inner-shadow">
 
@@ -74,7 +74,7 @@ const ConfirmEmailChange = () => {
                                         className="flex items-center justify-center w-full h-16 font-sans italic gap-1.5
                                         bg-neon-pink rounded-2xl shadow-[4px_4px_0px_rgba(255,255,255,1)] text-center text-lg text-white
                                         font-black [text-shadow:2px_2px_4px_rgba(0,0,0,1)] hover:translate-x-1 hover:translate-y-1
-                                        hover:shadow-[0px_0px_0px_rgba(0,0,0,0)] hover:cursor-pointer transition-all duration-200 center-stage-btn"
+                                        hover:shadow-[0px_0px_0px_rgba(0,0,0,0)] hover:cursor-pointer transition-all duration-200 transform-gpu center-stage-btn"
                                     >
                                         {isAuthenticated ? "Continue" : "Sign In"}
                                     </Link>

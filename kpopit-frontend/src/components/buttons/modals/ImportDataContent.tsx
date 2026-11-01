@@ -38,7 +38,7 @@ const ImportDataText = (props: ImportDataTextProps) => {
                             )}
                         <button className="h-16 w-80 rounded-2xl border border-white text-center
                         shadow-[0_0_5px_1px_rgba(255,255,255,0.15),0_0_5px_1px_rgba(255,255,255,0.15)]
-                        hover:bg-black/40 hover:brightness-110 hover:cursor-pointer transition-all duration-500"
+                        hover:bg-black/40 hover:brightness-110 hover:cursor-pointer transition-all duration-500 transform-gpu"
                         onClick={() => {
                             if (handleRedeem && inputCode.trim() !== "") {
                                 handleRedeem(inputCode.trim());

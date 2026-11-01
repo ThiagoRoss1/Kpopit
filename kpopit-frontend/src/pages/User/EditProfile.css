@@ -5,34 +5,34 @@
 
 @keyframes ep-panel-in {
     from {
-        translate: 0px -20px;
         opacity: 0.5;
+        transform: translateY(-20px);
     }
     to {
-        translate: 0px 0px;
         opacity: 1;
+        transform: translateY(0px);
     }
 }
 
 @keyframes ep-error-in {
     from {
-        translate: 0px -3px;
         opacity: 0;
+        transform: translateY(-3px);
     }
     to {
-        translate: 0px 0px;
         opacity: 1;
+        transform: translateY(0);
     }
 }
 
 @keyframes ep-field-in {
     from {
-        translate: 0px 10px;
         opacity: 0;
+        transform: translateY(10px);
     }
     to {
-        translate: 0px 0px;
         opacity: 1;
+        transform: translateY(0);
     }
 }
 

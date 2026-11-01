@@ -26,35 +26,31 @@
 
 @keyframes photoEntry {
     0% {
-        translate: -50% 0px;
-        scale: 0;
         opacity: 0;
         left: 50%;
+        transform: translateX(-50%) scale(0);
         animation-timing-function: cubic-bezier(0.68, -0.55, 0.27, 1.55);
         border-radius: 0%;
         border-color: transparent;
     }
 
     35% {
-        translate: -50% 0px;
-        scale: 1.1;
         opacity: 1;
         left: 50%;
+        transform: translateX(-50%) scale(1.1);
         animation-timing-function: ease-in-out;
     }
 
     40% {
         left: 50%;
-        translate: -50% 0px;
-        scale: 1;
+        transform: translateX(-50%) scale(1);
         animation-timing-function: cubic-bezier(0.28, 1, 0.25, 1);
     }
 
     100% {
         left: 0;
-        translate: 0px 0px;
-        scale: 1;
         opacity: 1;
+        transform: translateX(0) scale(1);
         border-radius: 20px;
         border-color: rgba(0, 0, 0, 0.3);
         animation-timing-function: ease-out;
@@ -64,36 +60,34 @@
 .guess-photo-enter {
     position: relative;
     animation: photoEntry 2s forwards;
+    will-change: transform, opacity;
 }
 
 
 @keyframes nameEntry {
     0%, 50% {
-        translate: -50% 0px;
-        scale: 0.8;
         opacity: 0;
         left: 50%;
+        transform: translateX(-50%) scale(0.8);
     }
 
     100% {
-        translate: -50% 0px;
-        scale: 1;
         opacity: 1;
         left: 50%;
+        transform: translateX(-50%) scale(1);
     }  
 }
 
 .name-container {
     position: absolute;
     left: 50%;
-    translate: -50% 0px;
-    rotate: 0deg;
-    scale: 1;
+    transform: translateX(-50%);
 }
 
 .name-reveal {
     opacity: 0;
     animation: nameEntry 2s forwards;
+    will-change: transform, opacity;
 }
 
 @keyframes nameBorderB {
