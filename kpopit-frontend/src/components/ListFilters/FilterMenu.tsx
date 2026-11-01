@@ -1,7 +1,6 @@
 import { useEffect, useRef, useState, type ReactNode } from "react";
 import { ChevronDown } from "lucide-react";
 import { cn } from "../../lib/utils";
-import "./listFilters.css";
 
 export interface FilterOption {
     value: string;
@@ -10,8 +9,7 @@ export interface FilterOption {
     count?: number;
 }
 
-/** A filter control: opens a menu of options (one choice); pink while a value is picked. */
-export default function FilterMenu({ title, label, value, options, onPick, minWidth, icon, align = "left" }: {
+interface FilterMenuProps {
     /** Menu heading (e.g. "TYPE"). */
     title: string;
     /** The button text: the picked option, or the filter's name. */
@@ -22,78 +20,134 @@ export default function FilterMenu({ title, label, value, options, onPick, minWi
     minWidth: string;
     icon?: ReactNode;
     align?: "left" | "right";
-}) {
-    const [open, setOpen] = useState(false);
-    const box = useRef<HTMLDivElement>(null);
-    const active = value !== "";
+}
+
+/** A filter control: opens a menu of options (one choice); pink while a value is picked. */
+const FilterMenu = ({ title, label, value, options, onPick, minWidth, icon, align = "left" }: FilterMenuProps) => {
+    const [isOpen, setIsOpen] = useState(false);
+    const containerRef = useRef<HTMLDivElement>(null);
+    const isActive = value !== "";
 
     useEffect(() => {
-        if (!open) return;
-        const onDown = (e: PointerEvent) => { if (box.current && !box.current.contains(e.target as Node)) setOpen(false); };
-        const onKey = (e: KeyboardEvent) => { if (e.key === "Escape") setOpen(false); };
-        document.addEventListener("pointerdown", onDown);
-        document.addEventListener("keydown", onKey);
-        return () => {
-            document.removeEventListener("pointerdown", onDown);
-            document.removeEventListener("keydown", onKey);
-        };
-    }, [open]);
+        if (!isOpen) return;
 
-    const inset = active && !open ? "var(--in-pink)" : "var(--in)";
+        const handlePointerDown = (event: PointerEvent) => {
+            if (containerRef.current && !containerRef.current.contains(event.target as Node)) setIsOpen(false);
+        };
+
+        const handleKeyDown = (event: KeyboardEvent) => {
+            if (event.key === "Escape") setIsOpen(false);
+        };
+
+        document.addEventListener("pointerdown", handlePointerDown);
+        document.addEventListener("keydown", handleKeyDown);
+
+        return () => {
+            document.removeEventListener("pointerdown", handlePointerDown);
+            document.removeEventListener("keydown", handleKeyDown);
+        };
+    }, [isOpen]);
+
+    const handlePick = (optionValue: string) => {
+        onPick(optionValue);
+        setIsOpen(false);
+    };
+
     return (
-        <div ref={box} className="relative flex-(--cg-f-flex) min-w-0">
+        <div ref={containerRef} className="relative min-w-0 flex-[0_0_auto] @max-[580px]:flex-[1_1_calc(50%-4px)]">
             <button
                 type="button"
-                aria-expanded={open}
+                aria-expanded={isOpen}
                 aria-haspopup="true"
-                data-open={open ? "1" : "0"}
-                data-on={active ? "1" : "0"}
-                onClick={() => setOpen(!open)}
-                className="cg-ctl cg-focus relative flex items-center gap-2 w-(--cg-f-w) h-(--cg-ctl-h) pr-[38px] pl-3.5 rounded-[18px] border-2 border-(--ink) font-semibold text-[13px] leading-[1.2] whitespace-nowrap text-left cursor-pointer"
-                style={{
-                    minWidth,
-                    background: open ? "var(--chip-hover)" : active ? "var(--side)" : "var(--chip)",
-                    color: active ? "#1A1418" : "var(--chip-ink)",
-                    boxShadow: `${open ? "0 0 0 var(--ctl-off)" : "2px 3px 0 var(--ctl-off)"},${inset}`,
-                }}
+                onClick={() => setIsOpen(!isOpen)}
+                style={{ minWidth }}
+                className={cn(
+                    "pp-focus relative flex items-center gap-2 w-auto @max-[580px]:w-full h-10 pointer-coarse:h-11 pr-9.5 pl-3.5",
+                    "rounded-[18px] border-2 border-(--ink) cursor-pointer",
+                    "font-semibold text-[13px] leading-[1.2] whitespace-nowrap text-left",
+                    "transition-[translate,box-shadow,background-color,color] duration-450 ease-(--ease-settle) transform-gpu",
+                    "active:translate-x-0.5 active:translate-y-0.75 active:duration-180",
+                    isActive ? "text-[#1A1418]" : "text-(--chip-ink)",
+                    isOpen && "translate-x-0.5 translate-y-0.75 bg-(--chip-hover) shadow-[0_0_0_var(--ctl-off),var(--in)]",
+                    !isOpen && "hover:-translate-y-0.5",
+                    !isOpen && isActive && "bg-(--side) shadow-[2px_3px_0_var(--ctl-off),var(--in-pink)] hover:bg-[#FF9BCC] active:shadow-[0_0_0_var(--ctl-off),var(--in-pink)]",
+                    !isOpen && !isActive && "bg-(--chip) shadow-[2px_3px_0_var(--ctl-off),var(--in)] hover:bg-(--chip-hover) active:shadow-[0_0_0_var(--ctl-off),var(--in)]",
+                )}
             >
                 {icon}
                 <span className="flex-1 min-w-0 overflow-hidden text-ellipsis">{label}</span>
-                <ChevronDown aria-hidden className="cg-chev absolute right-3 w-3.5 h-3.5" strokeWidth={3} style={{ rotate: open ? "180deg" : "0deg" }} />
+                <ChevronDown
+                    aria-hidden
+                    className={cn(
+                        "absolute right-3 size-3.5 transition-transform duration-400 ease-(--ease-pop) transform-gpu",
+                        isOpen && "rotate-180",
+                    )}
+                    strokeWidth={3}
+                />
             </button>
-            {open && (
+
+            {isOpen && (
                 <div
                     role="menu"
                     aria-label={title}
-                    className={cn("cg-menu absolute top-[calc(var(--cg-ctl-h)+12px)] w-[248px] z-20 bg-(--menu-bg) text-(--chip-ink) border-2 border-(--ink) rounded-[20px] overflow-hidden [box-shadow:4px_5px_0_var(--ctl-off),0_16px_32px_rgba(var(--sh),.16),var(--in)]", align === "right" ? "right-0 origin-top-right" : "left-0 origin-top-left")}
+                    className={cn(
+                        "absolute top-13 pointer-coarse:top-14 z-20 w-62 overflow-hidden",
+                        "rounded-[20px] border-2 border-(--ink) bg-(--menu-bg) text-(--chip-ink)",
+                        "shadow-[4px_5px_0_var(--ctl-off),0_16px_32px_rgba(var(--sh),.16),var(--in)]",
+                        "animate-[puffMenu_0.38s_var(--ease-settle)_both]",
+                        align === "right" ? "right-0 origin-top-right" : "left-0 origin-top-left",
+                    )}
                 >
-                    <div className="flex items-center justify-between gap-2.5 pt-3 px-4 pb-2.5 border-b-[1.5px] border-dashed border-(--rule) font-bold text-[11px] leading-none tracking-[.12em] text-(--muted)">
+                    <div
+                        className={cn(
+                            "flex items-center justify-between gap-2.5 pt-3 px-4 pb-2.5",
+                            "border-b-[1.5px] border-dashed border-(--rule)",
+                            "font-bold text-[11px] leading-none tracking-[.12em] text-(--muted)",
+                        )}
+                    >
                         <span>{title}</span>
-                        <span className="tracking-normal font-medium">{`${options.length - 1} options`}</span>
+                        <span className="font-medium tracking-normal">{`${options.length - 1} options`}</span>
                     </div>
-                    <div className="cg-scroll max-h-[286px] overflow-y-auto overflow-x-hidden p-2 flex flex-col gap-1">
-                        {options.map((o) => {
-                            const on = o.value === value;
+
+                    <div className="pp-scroll flex flex-col gap-1 max-h-71.5 overflow-y-auto overflow-x-hidden p-2">
+                        {options.map((option) => {
+                            const isSelected = option.value === value;
+
                             return (
                                 <button
-                                    key={o.value || "all"}
+                                    key={option.value || "all"}
                                     type="button"
                                     role="menuitemradio"
-                                    aria-checked={on}
-                                    onClick={() => { onPick(o.value); setOpen(false); }}
-                                    className="cg-opt cg-focus flex-none flex items-center gap-2.5 min-h-[42px] text-left border-2 rounded-[13px] text-[13px] leading-[1.2] pr-2.5 pl-3 cursor-pointer"
-                                    style={{
-                                        borderColor: on ? "var(--ink)" : "transparent",
-                                        background: on ? "var(--side)" : "transparent",
-                                        color: on ? "#1A1418" : "var(--chip-ink)",
-                                        boxShadow: on ? "2px 2.5px 0 var(--ink),var(--in-pink)" : "none",
-                                        fontWeight: on ? 700 : 500,
-                                    }}
+                                    aria-checked={isSelected}
+                                    onClick={() => handlePick(option.value)}
+                                    className={cn(
+                                        "pp-focus flex-none flex items-center gap-2.5 min-h-10.5 pr-2.5 pl-3",
+                                        "rounded-[13px] border-2 text-left text-[13px] leading-[1.2] cursor-pointer",
+                                        "transition-[translate,background-color,border-color,box-shadow] duration-300 ease-(--ease-settle) transform-gpu",
+                                        "hover:translate-x-1 active:translate-x-1.5 active:translate-y-0.5 active:shadow-[0_0_0_var(--ink)]",
+                                        isSelected
+                                            ? "border-(--ink) bg-(--side) text-[#1A1418] font-bold shadow-[2px_2.5px_0_var(--ink),var(--in-pink)] hover:bg-[#FF9BCC]"
+                                            : cn(
+                                                "border-transparent bg-transparent text-(--chip-ink) font-medium",
+                                                "hover:border-(--ink) hover:bg-(--opt-hover) hover:shadow-[2px_2.5px_0_var(--ink),var(--in)]",
+                                            ),
+                                    )}
                                 >
-                                    {o.icon}
-                                    <span className="flex-1 min-w-0 overflow-hidden text-ellipsis whitespace-nowrap">{o.label}</span>
-                                    {o.count !== undefined && (
-                                        <span className="flex-none min-w-6 h-5 px-[7px] inline-grid place-items-center rounded-full bg-white text-[#1A1418] border-[1.5px] border-[#1A1418] [box-shadow:1px_1.5px_0_#1A1418,inset_0_1.5px_0_rgba(255,255,255,.7)] font-bold text-[11px] leading-none">{o.count}</span>
+                                    {option.icon}
+
+                                    <span className="flex-1 min-w-0 truncate">{option.label}</span>
+
+                                    {option.count !== undefined && (
+                                        <span
+                                            className={cn(
+                                                "flex-none inline-grid place-items-center min-w-6 h-5 px-1.75",
+                                                "rounded-full border-[1.5px] border-[#1A1418] bg-white text-[#1A1418]",
+                                                "shadow-[1px_1.5px_0_#1A1418,inset_0_1.5px_0_rgba(255,255,255,.7)]",
+                                                "font-bold text-[11px] leading-none",
+                                            )}
+                                        >
+                                            {option.count}
+                                        </span>
                                     )}
                                 </button>
                             );
@@ -103,4 +157,6 @@ export default function FilterMenu({ title, label, value, options, onPick, minWi
             )}
         </div>
     );
-}
+};
+
+export default FilterMenu;

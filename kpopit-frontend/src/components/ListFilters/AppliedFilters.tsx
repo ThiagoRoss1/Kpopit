@@ -1,5 +1,5 @@
 import { X } from "lucide-react";
-import "./listFilters.css";
+import { cn } from "../../lib/utils";
 
 export interface AppliedFilter {
     key: string;
@@ -7,28 +7,66 @@ export interface AppliedFilter {
     onRemove: () => void;
 }
 
-/** The result count, a removable chip per filter in use, and "Clear all" when more than one is on. */
-export default function AppliedFilters({ result, chips, onClearAll, filtersOpen }: { result: string; chips: AppliedFilter[]; onClearAll: () => void; filtersOpen: boolean }) {
+interface AppliedFiltersProps {
+    /** "All 209 idols", "12 albums"... */
+    result: string;
+    filters: AppliedFilter[];
+    onClearAll: () => void;
+    /** On phones the open filters panel hides the chips (they'd repeat it). */
+    filtersOpen: boolean;
+}
+
+/** The line under the filters: the result count, a removable chip per filter in use, and
+ *  "Clear all" when more than one is on. */
+const AppliedFilters = ({ result, filters, onClearAll, filtersOpen }: AppliedFiltersProps) => {
+    const hiddenOnPhones = filtersOpen && "@max-[580px]:hidden";
+
     return (
-        <div className="cg-res pp-enter [--pp-delay:220ms] min-h-(--cg-res-h) flex items-center flex-wrap gap-x-2.5 gap-y-2 py-1.5 font-medium text-xs text-(--muted)" data-fopen={filtersOpen ? "1" : "0"}>
+        <div
+            className={cn(
+                "pp-enter [--pp-delay:220ms] flex items-center flex-wrap gap-x-2.5 gap-y-2 min-h-16.5 @max-[580px]:min-h-12 py-1.5",
+                "font-medium text-xs text-(--muted)",
+            )}
+        >
             <span aria-live="polite" className="mr-1">{result}</span>
-            {chips.map((c) => (
+
+            {filters.map((filter) => (
                 <button
-                    key={c.key}
+                    key={filter.key}
                     type="button"
-                    onClick={c.onRemove}
-                    aria-label={`Remove ${c.label}`}
-                    className="cg-chip cg-focus inline-flex items-center gap-1.5 h-[30px] pr-[9px] pl-3 border-[1.5px] border-(--ink) rounded-full bg-(--chip) text-(--chip-ink) font-semibold text-xs cursor-pointer [box-shadow:1.5px_2px_0_var(--ctl-off),var(--in)]"
+                    onClick={filter.onRemove}
+                    aria-label={`Remove ${filter.label}`}
+                    className={cn(
+                        "pp-focus inline-flex items-center gap-1.5 h-7.5 pr-2.25 pl-3",
+                        "rounded-full border-[1.5px] border-(--ink) bg-(--chip) text-(--chip-ink)",
+                        "font-semibold text-xs cursor-pointer",
+                        "shadow-[1.5px_2px_0_var(--ctl-off),var(--in)] active:shadow-[0_0_0_var(--ctl-off),var(--in)]",
+                        "animate-[puffMenu_0.35s_var(--ease-pop)_both]",
+                        "transition-[translate,background-color,box-shadow] duration-380 ease-(--ease-settle) transform-gpu",
+                        "hover:-translate-y-0.5 hover:bg-(--chip-hover) active:translate-x-0.5 active:translate-y-0.5",
+                        hiddenOnPhones,
+                    )}
                 >
-                    <span>{c.label}</span>
-                    <X className="w-3 h-3" strokeWidth={3} aria-hidden />
+                    <span>{filter.label}</span>
+                    <X className="size-3" strokeWidth={3} aria-hidden />
                 </button>
             ))}
-            {chips.length > 1 && (
-                <button type="button" onClick={onClearAll} className="cg-clearall cg-focus border-0 bg-transparent text-(--text) font-semibold text-xs underline decoration-(--side) decoration-2 underline-offset-4 cursor-pointer py-1.5 px-0.5">
+
+            {filters.length > 1 && (
+                <button
+                    type="button"
+                    onClick={onClearAll}
+                    className={cn(
+                        "pp-focus px-0.5 py-1.5 border-0 bg-transparent cursor-pointer",
+                        "font-semibold text-xs text-(--text) underline decoration-(--side) decoration-2 underline-offset-4",
+                        hiddenOnPhones,
+                    )}
+                >
                     Clear all
                 </button>
             )}
         </div>
     );
-}
+};
+
+export default AppliedFilters;
