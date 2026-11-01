@@ -71,7 +71,7 @@ export default function BlogPost({ slug }: { slug: string }) {
                             <TagChip tag={post.tag} />
                             <span className="font-semibold text-[13px] text-(--muted)">{`${formatPostDate(post.date)} · ${post.readMinutes} min read`}</span>
                         </div>
-                        <h1 className="m-0 max-w-[680px] font-bold text-[44px] @max-[580px]:text-[32px] leading-[1.1] text-white [text-shadow:var(--puff-post)] -rotate-1 px-1.5 pb-2 [text-wrap:balance]">
+                        <h1 className="m-0 max-w-[680px] font-bold text-[44px] @max-[580px]:text-[32px] leading-[1.1] text-white [text-shadow:var(--puff-post)] -rotate-1 puff-ink px-1.5 pb-2 [text-wrap:balance]">
                             {post.title}
                         </h1>
                         {post.ko && <KoreanTag>{post.ko}</KoreanTag>}

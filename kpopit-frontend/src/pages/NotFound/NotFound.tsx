@@ -22,7 +22,7 @@ export default function NotFound() {
             <PageShell width="max-w-[1040px]">
                 <div className="grid grid-cols-[minmax(0,1fr)_minmax(0,380px)] gap-14 items-center content-center min-h-[min(760px,calc(100svh-150px))] @max-[900px]:grid-cols-1 @max-[900px]:gap-10 @max-[900px]:justify-items-center @max-[900px]:text-center @max-[580px]:min-h-[min(620px,calc(100svh-120px))]">
                     <div className="pp-enter [--pp-anim:puffSide] [--pp-delay:80ms] flex flex-col gap-[18px] @max-[900px]:items-center">
-                        <h1 className="m-0 font-bold text-[150px] @max-[580px]:text-[104px] leading-[.9] text-white [text-shadow:var(--puff-xl)] -rotate-3 pt-0 px-2 pb-3">404</h1>
+                        <h1 className="m-0 font-bold text-[150px] @max-[580px]:text-[104px] leading-[.9] text-white [text-shadow:var(--puff-xl)] -rotate-3 puff-ink px-2 pb-3">404</h1>
                         <p className="m-0 font-bold text-[30px] leading-[1.15] [text-wrap:balance]">This page got lost backstage...</p>
                         <p className="m-0 max-w-[460px] font-medium text-base leading-normal text-(--muted) [text-wrap:pretty]">The link may be old or mistyped. Today's idols are still waiting for you.</p>
                         <div className="flex gap-3 flex-wrap mt-1.5 @max-[900px]:justify-center">

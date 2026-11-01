@@ -122,7 +122,7 @@ function AlbumsCatalogue({ all }: { all: AlbumsPageItem[] }) {
                         </section>
                     ) : (
                         <div className="pp-enter min-h-[340px] grid place-content-center justify-items-center text-center gap-3.5">
-                            <div className="font-bold text-[34px] leading-[1.15] text-white [text-shadow:var(--puff-empty)] -rotate-[1.5deg] pt-0 pr-1.5 pb-2 pl-1">No albums found...</div>
+                            <div className="font-bold text-[34px] leading-[1.15] text-white [text-shadow:var(--puff-empty)] -rotate-[1.5deg] puff-ink pr-1.5 pb-2 pl-1">No albums found...</div>
                             <div className="font-medium text-sm text-(--muted)">{f.q ? `No matches for "${f.q}" with these filters.` : "No matches with these filters."}</div>
                             <button type="button" onClick={reset} className="cg-press cg-focus mt-2 h-[46px] px-[22px] rounded-full border-2 border-(--ink) bg-(--tag) text-white [text-shadow:var(--tag-text)] font-bold text-sm cursor-pointer [box-shadow:3px_4px_0_var(--ink),var(--in-pink)]">
                                 Clear search & filters

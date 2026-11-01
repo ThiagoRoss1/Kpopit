@@ -4,7 +4,7 @@ import { cn } from "../../lib/utils";
 /** Puffy white-on-pink lettering, only for names and titles. */
 export default function PuffTitle({ as: Tag = "h1", className, children }: { as?: ElementType; className?: string; children: ReactNode }) {
     return (
-        <Tag className={cn("m-0 whitespace-nowrap font-bold leading-[1.05] text-white [text-shadow:var(--puff-title)] -rotate-[1.5deg] pt-0 pr-1.5 pb-2.5 pl-1", className)}>
+        <Tag className={cn("m-0 whitespace-nowrap font-bold leading-[1.05] text-white [text-shadow:var(--puff-title)] -rotate-[1.5deg] puff-ink pr-1.5 pb-2.5 pl-1", className)}>
             {children}
         </Tag>
     );

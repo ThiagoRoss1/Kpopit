@@ -27,7 +27,7 @@ function Tiles({ tiles }: { tiles: Tile[] }) {
                     className={cn("up-tile py-3.5 px-4 rounded-[20px] border-2 border-(--ink) bg-(--face) text-(--face-ink) flex flex-col gap-1", TILE_DEPTH)}
                 >
                     <span className="font-semibold text-[10px] tracking-[.14em] text-(--muted)">{tile.label}</span>
-                    <span className="font-bold text-[30px] leading-[1.05] text-white [text-shadow:var(--puff-value)] pt-0.5 pb-1">{tile.value}</span>
+                    <span className="font-bold text-[30px] leading-[1.05] text-white [text-shadow:var(--puff-value)] puff-ink pb-1">{tile.value}</span>
                     <span className="font-medium text-xs text-(--muted)">{tile.sub}</span>
                 </div>
             ))}

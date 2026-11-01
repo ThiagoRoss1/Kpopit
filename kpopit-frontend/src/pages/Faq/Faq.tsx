@@ -109,7 +109,7 @@ export default function Faq() {
 
                     {shown.length === 0 && (
                         <div className="flex flex-col items-center gap-2 py-[30px] text-center">
-                            <span className="font-bold text-[34px] leading-none text-white [text-shadow:var(--puff-empty)]">No matches...</span>
+                            <span className="font-bold text-[34px] leading-none text-white [text-shadow:var(--puff-empty)] puff-ink">No matches...</span>
                             <span className="font-medium text-sm text-(--muted)">Try another word, or ask on Discord.</span>
                         </div>
                     )}

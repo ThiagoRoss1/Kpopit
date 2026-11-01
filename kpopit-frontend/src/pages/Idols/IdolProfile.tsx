@@ -274,7 +274,7 @@ function FactTile({ f, delay }: { f: Fact; delay: number }) {
                         </span>
                     )}
                     <span
-                        className="ip-val font-bold leading-[1.1] text-white [text-shadow:var(--puff-value)] pr-[5px] pb-[5px] whitespace-nowrap"
+                        className="ip-val font-bold leading-[1.1] text-white [text-shadow:var(--puff-value)] puff-ink pr-[5px] pb-[5px] whitespace-nowrap"
                         style={{ "--fs-cap": cap, "--len": Math.max(text.length, 1), "--fit-k": big ? 1.6 : 1.45, letterSpacing: flags.length ? ".06em" : undefined } as CSSProperties}
                     >
                         {text}
@@ -335,7 +335,7 @@ function Related({ idols }: { idols: IdolsPageData[] }) {
                             <img src={`${import.meta.env.VITE_IMAGE_BUCKET_URL}${idol.image_path}?v=${idol.image_version}`} alt="" loading="lazy" decoding="async" className="w-full h-full object-cover block" />
                         </span>
                         <span className="flex flex-col gap-[5px] px-1 min-w-0">
-                            <span className="block font-bold text-2xl leading-none text-white [text-shadow:var(--puff-value)] pr-1 pb-[5px] whitespace-nowrap overflow-hidden text-ellipsis">{idol.artist_name}</span>
+                            <span className="block font-bold text-2xl leading-none text-white [text-shadow:var(--puff-value)] puff-ink pr-1 pb-[5px] whitespace-nowrap overflow-hidden text-ellipsis">{idol.artist_name}</span>
                             <span className="font-semibold text-[13px] leading-[1.25] text-(--muted) [text-wrap:balance]">{groupLabel(idol)}</span>
                         </span>
                     </IntentLink>

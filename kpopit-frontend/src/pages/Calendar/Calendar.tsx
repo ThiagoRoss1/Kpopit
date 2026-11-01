@@ -122,7 +122,7 @@ function CalendarView({ data }: { data: CalendarTimeline }) {
             />
             <PageShell width="max-w-[1180px]">
                 <div className="cal-root">
-                    <header className="pp-enter [--pp-anim:puffDrop] flex flex-col items-center gap-2.5 pt-1 pb-[30px] text-center">
+                    <header className="pp-enter [--pp-anim:puffDrop] flex flex-col items-center gap-2.5 pt-7 pb-[30px] text-center">
                         <div className="flex items-center gap-3">
                             <PuffTitle className="text-(length:--title-fs) leading-none pb-0">Calendar</PuffTitle>
                             <span lang="ko" className="cal-ko flex-none whitespace-nowrap px-[9px] py-0.5 rounded-[8px] border-2 border-(--ink) bg-(--face) text-(--face-ink) font-korean font-semibold text-xs rotate-4 [box-shadow:2px_3px_0_var(--ctl-off)]">달력</span>
@@ -566,7 +566,7 @@ function DayPanel({ d, mode }: { d: CalendarDay; mode: CalendarMode }) {
                     </div>
                     {done && (
                         <div className="flex flex-col gap-0.5 -mt-1">
-                            <span className="font-bold text-[30px] leading-[1.05] text-white [text-shadow:var(--puff-value)] pt-0.5 pr-1.5 pb-1.5 pl-0.5">{name}</span>
+                            <span className="font-bold text-[30px] leading-[1.05] text-white [text-shadow:var(--puff-value)] puff-ink pr-1.5 pb-1.5 pl-0.5">{name}</span>
                             {group && <span className="font-semibold text-[13px] text-(--group)">{group}</span>}
                         </div>
                     )}
@@ -609,7 +609,7 @@ function DayPanel({ d, mode }: { d: CalendarDay; mode: CalendarMode }) {
                         </div>
                         <div className="flex-1 min-w-0 flex flex-col gap-[3px]">
                             <span className="font-semibold text-xs text-(--group)">{`${dayLabel} · ${formatShort(d.date)}`}</span>
-                            <span className="font-bold text-[22px] leading-[1.05] text-white [text-shadow:var(--puff-value)] whitespace-nowrap overflow-hidden text-ellipsis pt-[3px] pr-1.5 pb-1.5 pl-0.5">{done ? name : hiddenNote}</span>
+                            <span className="font-bold text-[22px] leading-[1.05] text-white [text-shadow:var(--puff-value)] whitespace-nowrap overflow-hidden text-ellipsis puff-ink pr-1.5 pb-1.5 pl-0.5">{done ? name : hiddenNote}</span>
                             <span className="font-medium text-xs leading-[1.35] text-(--muted)">{status}</span>
                         </div>
                     </div>

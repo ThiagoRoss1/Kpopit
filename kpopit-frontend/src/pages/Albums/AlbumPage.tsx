@@ -166,7 +166,7 @@ function Album({ album }: { album: AlbumPageData }) {
                                     </span>
                                 </div>
                             )}
-                            <h1 className="ap-in-drop [animation-delay:.06s] m-0 font-bold text-(length:--title-fs) leading-[1.1] tracking-[-.01em] text-white [text-shadow:var(--puff-title)] pt-0 pr-2 pb-3 pl-1 [text-wrap:balance] [overflow-wrap:anywhere]">{album.name}</h1>
+                            <h1 className="ap-in-drop [animation-delay:.06s] m-0 font-bold text-(length:--title-fs) leading-[1.1] tracking-[-.01em] text-white [text-shadow:var(--puff-title)] puff-ink pr-2 pb-3 pl-1 [text-wrap:balance] [overflow-wrap:anywhere]">{album.name}</h1>
                             <div className="flex items-center [justify-content:var(--info-align)] flex-wrap gap-x-3 gap-y-2.5">
                                 <Link to={`/albums?artist=${encodeURIComponent(artist.name)}`} className="ap-btn ap-focus inline-flex items-center gap-2 h-10 px-4 rounded-full border-2 border-(--ink) bg-(--chip) text-(--chip-ink) font-bold text-[15px] no-underline [box-shadow:2px_3px_0_var(--ctl-off),var(--in)]">
                                     {artist.name}
