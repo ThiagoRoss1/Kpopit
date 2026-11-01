@@ -1,6 +1,6 @@
 import { X } from "lucide-react";
 import { cn } from "../../lib/utils";
-import "./puff.css";
+import "../../components/PageShell/puff.css";
 
 const MONTHS = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
 

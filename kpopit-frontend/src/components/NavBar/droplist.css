@@ -1,4 +1,4 @@
-/* NavBarV2: the reference's rules (press beats hover; hover only on hover devices). Row tilts come
+/* NavBar: the reference's rules (press beats hover; hover only on hover devices). Row tilts come
    from --nb-tilt so hover and press transforms can replace them. */
 .nb-item { transition: background-color .3s, border-color .3s, box-shadow .3s, translate .35s var(--lift, var(--ease-settle)), rotate .35s var(--lift, var(--ease-settle)), scale .35s var(--lift, var(--ease-settle)); }
 @media (hover: hover) {

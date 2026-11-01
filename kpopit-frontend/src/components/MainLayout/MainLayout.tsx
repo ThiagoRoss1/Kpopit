@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import { Outlet, useMatches } from "react-router";
-import NavBarV2 from "../NavBarV2/NavBarV2";
+import NavBar from "../NavBar/NavBar";
 import Footer from "../Footer/Footer";
 import { Link } from "react-router";
 import { getUserAnalytics } from "../../services/api";
@@ -48,7 +48,7 @@ const MainLayout = () => {
         // footer too; pages draw on top of it instead of painting their own.
         <div className={`relative isolate min-h-screen flex flex-col text-foreground selection:bg-pink-800 ${puff ? "bg-(--ground) transition-colors duration-300" : "bg-transparent"}`}>
             {puff && <div aria-hidden className="absolute inset-0 -z-10 pointer-events-none bg-[radial-gradient(circle,var(--dot)_1.4px,transparent_1.8px)] bg-size-[19px_19px]" />}
-            <NavBarV2 forceTheme={puff ? undefined : navTheme ?? "night"} />
+            <NavBar forceTheme={puff ? undefined : navTheme ?? "night"} />
             
             {/* Notices */}
             {import.meta.env.VITE_GLOBAL_NOTICE === "true" && 

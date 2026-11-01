@@ -1,6 +1,6 @@
 import { useEffect, useRef, type ComponentProps } from "react";
 import { cn } from "../../lib/utils";
-import "./puff.css";
+import "../PageShell/puff.css";
 
 const FADE = "28px";
 

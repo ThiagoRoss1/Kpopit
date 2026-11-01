@@ -1,9 +1,9 @@
 import { useState } from "react";
 import { ArrowRight, Mail, Plus, Search } from "lucide-react";
-import PageShell from "../../components/Puff/PageShell";
-import { Collapse } from "../../components/Puff/Accordion";
-import { PressAnchor, PressLink } from "../../components/Puff/PressButton";
-import BrandIcon from "../../components/Puff/BrandIcon";
+import PageShell from "../../components/PageShell/PageShell";
+import { Collapse } from "../../components/Accordion/Accordion";
+import { PressAnchor, PressLink } from "../../components/buttons/PressButton";
+import BrandIcon from "../../components/BrandIcon/BrandIcon";
 import PageMeta from "../../components/Seo/PageMeta";
 import { useFeatures } from "../../hooks/useFeatures";
 import { CHANNELS, type ChannelId } from "../../data/contact";

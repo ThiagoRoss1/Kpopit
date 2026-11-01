@@ -1,7 +1,7 @@
 import { Link } from "react-router";
 import { useInfiniteQuery } from "@tanstack/react-query";
 import { Lock } from "lucide-react";
-import { PressButton } from "../../components/Puff/PressButton";
+import { PressButton } from "../../components/buttons/PressButton";
 import { getProfileHistory } from "../../services/api";
 import { resolveCdnUrl } from "../../utils/imageUrl";
 import type { HistoryEntry } from "../../interfaces/playerInterfaces";

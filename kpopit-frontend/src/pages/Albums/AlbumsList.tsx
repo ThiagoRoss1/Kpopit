@@ -2,12 +2,12 @@ import { useState } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { useSearchParams } from "react-router";
 import { SlidersHorizontal } from "lucide-react";
-import PageShell from "../../components/Puff/PageShell";
-import PuffTitle from "../../components/Puff/PuffTitle";
+import PageShell from "../../components/PageShell/PageShell";
+import PuffTitle from "../../components/PageShell/PuffTitle";
 import PageLoader from "../../components/Loading/PageLoader";
-import SearchField from "../../components/Catalogue/SearchField";
-import FilterMenu from "../../components/Catalogue/FilterMenu";
-import AppliedChips, { type AppliedChip } from "../../components/Catalogue/AppliedChips";
+import SearchField from "../../components/ListFilters/SearchField";
+import FilterMenu from "../../components/ListFilters/FilterMenu";
+import AppliedFilters, { type AppliedFilter } from "../../components/ListFilters/AppliedFilters";
 import PageMeta from "../../components/Seo/PageMeta";
 import { useHydrated } from "../../hooks/useHydrated";
 import type { AlbumsPageItem } from "../../interfaces/gameInterfaces";
@@ -52,7 +52,7 @@ function AlbumsCatalogue({ all }: { all: AlbumsPageItem[] }) {
     const countWith = (patch: Partial<AlbumFilters>) => filterAlbums(all, { ...f, ...patch, sort: "" }).length;
     const activeCount = [f.artist, f.type, f.lang, f.sort].filter(Boolean).length;
 
-    const chips: AppliedChip[] = [];
+    const chips: AppliedFilter[] = [];
     if (f.artist) chips.push({ key: "artist", label: f.artist, onRemove: () => set({ artist: "" }) });
     if (f.type) chips.push({ key: "type", label: shortType(f.type), onRemove: () => set({ type: "" }) });
     if (f.lang) chips.push({ key: "lang", label: f.lang, onRemove: () => set({ lang: "" }) });
@@ -109,7 +109,7 @@ function AlbumsCatalogue({ all }: { all: AlbumsPageItem[] }) {
                         </div>
                     </div>
 
-                    <AppliedChips
+                    <AppliedFilters
                         filtersOpen={filtersOpen}
                         result={`${albums.length === all.length ? "All " : ""}${albums.length} ${albums.length === 1 ? "album" : "albums"}`}
                         chips={chips}

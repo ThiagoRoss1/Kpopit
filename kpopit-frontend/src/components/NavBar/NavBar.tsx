@@ -8,13 +8,13 @@ import { resolveCdnUrl } from "../../utils/imageUrl";
 import { prefetchIdolsList } from "../../pages/Idols/idolsData";
 import { prefetchCollectionsList } from "../../pages/Collection/collectionData";
 import IntentLink from "../Links/IntentLink";
-import NavAuthSlot from "./NavAuthSlot";
+import UserDropdown from "./UserDropdown";
 import {
     ABOUT_ROWS, GAME_ROWS, IDOL_ROWS, MAJOR_PATCH, PAGE_LABEL, menuOf, pageOf, showCollections,
     type NavMenu, type NavPage, type NavRow,
-} from "./navConfig";
-import "../Puff/puff.css";
-import "./navbar.css";
+} from "./navigation";
+import "../PageShell/puff.css";
+import "./droplist.css";
 
 type Open = NavMenu | "sheet" | "user" | null;
 
@@ -27,7 +27,7 @@ const dot = (size: "sm" | "md" = "md") => (
 /** The site navbar on every page. Old pages pass `forceTheme` (night for the dark ones, day for
  *  Pixelated's light page); the theme toggle is then hidden but keeps its space so the bar doesn't
  *  shift between pages. */
-export default function NavBarV2({ forceTheme }: { forceTheme?: "night" | "day" }) {
+export default function NavBar({ forceTheme }: { forceTheme?: "night" | "day" }) {
     const forced = forceTheme !== undefined;
     const { pathname } = useLocation();
     const page = pageOf(pathname);
@@ -150,7 +150,7 @@ export default function NavBarV2({ forceTheme }: { forceTheme?: "night" | "day" 
                             {!forced && theme === "night" ? <Sun className="w-[18px] h-[18px]" strokeWidth={2.6} /> : <Moon className="w-[18px] h-[18px]" strokeWidth={2.6} />}
                         </button>
                         <span aria-hidden className="w-0.5 h-7 rounded-[2px] bg-[rgba(128,110,120,.3)] @max-[860px]:hidden" />
-                        <NavAuthSlot open={open === "user"} onToggle={() => toggle("user")} />
+                        <UserDropdown open={open === "user"} onToggle={() => toggle("user")} />
                     </div>
 
                     <button

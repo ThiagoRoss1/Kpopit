@@ -2,10 +2,10 @@ import { useEffect, useMemo, useRef, useState, type KeyboardEvent, type MouseEve
 import { Link, useNavigate } from "react-router";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { ArrowLeft, ArrowUpDown, Search, Star, X } from "lucide-react";
-import PageShell from "../../components/Puff/PageShell";
-import PuffCard from "../../components/Puff/PuffCard";
-import { PressButton, Pill } from "../../components/Puff/PressButton";
-import { useToast } from "../../components/Puff/Toast";
+import PageShell from "../../components/PageShell/PageShell";
+import PuffCard from "./PuffCard";
+import { PressButton, Pill } from "../../components/buttons/PressButton";
+import { useToast } from "../../components/Toast/Toast";
 import PageLoader from "../../components/Loading/PageLoader";
 import PageMeta from "../../components/Seo/PageMeta";
 import { useAuth } from "../../hooks/useAuth";

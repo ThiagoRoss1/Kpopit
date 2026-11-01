@@ -1,7 +1,7 @@
 import type { ComponentProps, ReactNode } from "react";
 import { Link } from "react-router";
 import { cn } from "../../lib/utils";
-import "./puff.css";
+import "../PageShell/puff.css";
 
 export type PressVariant = "chip" | "cta" | "pink" | "ghost";
 

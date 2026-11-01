@@ -9,7 +9,7 @@ const recordFirstPaintTheme = () => {
 const firstPaintTheme = (page: import('@playwright/test').Page) =>
   page.waitForFunction(() => (window as unknown as { __firstTheme?: string }).__firstTheme).then((h) => h.jsonValue());
 
-test.describe('NavBarV2 @mobile', () => {
+test.describe('NavBar @mobile', () => {
   test('a new page follows the saved theme; an old page keeps the navbar at night', async ({ page }) => {
     await page.goto('/about');
     const nav = page.locator('nav');

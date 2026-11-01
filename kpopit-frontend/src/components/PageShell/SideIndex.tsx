@@ -1,5 +1,5 @@
 import { cn } from "../../lib/utils";
-import HScrollRow from "./HScrollRow";
+import HScrollRow from "../HScrollRow/HScrollRow";
 import "./puff.css";
 
 export interface IndexItem {

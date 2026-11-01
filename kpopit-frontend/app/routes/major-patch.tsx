@@ -1,5 +1,5 @@
 import ComingSoon from "../../src/pages/ComingSoon/ComingSoon";
-import { MAJOR_PATCH } from "../../src/components/NavBarV2/navConfig";
+import { MAJOR_PATCH } from "../../src/components/NavBar/navigation";
 
 export const handle = { puff: true };
 

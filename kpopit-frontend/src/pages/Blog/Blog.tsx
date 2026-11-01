@@ -1,8 +1,8 @@
 import { useSearchParams } from "react-router";
 import { ArrowRight, Pin } from "lucide-react";
-import PageShell from "../../components/Puff/PageShell";
-import HScrollRow from "../../components/Puff/HScrollRow";
-import { Pill } from "../../components/Puff/PressButton";
+import PageShell from "../../components/PageShell/PageShell";
+import HScrollRow from "../../components/HScrollRow/HScrollRow";
+import { Pill } from "../../components/buttons/PressButton";
 import PageMeta from "../../components/Seo/PageMeta";
 import IntentLink from "../../components/Links/IntentLink";
 import { useHydrated } from "../../hooks/useHydrated";

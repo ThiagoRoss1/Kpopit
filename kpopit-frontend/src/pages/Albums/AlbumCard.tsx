@@ -2,7 +2,7 @@ import IntentLink from "../../components/Links/IntentLink";
 import { resolveCdnUrl } from "../../utils/imageUrl";
 import type { AlbumsPageItem } from "../../interfaces/gameInterfaces";
 import { albumPath, shortType } from "./albumsData";
-import "../../components/Catalogue/catalogue.css";
+import "../../components/ListFilters/listFilters.css";
 import FadeImg from "../../components/FadeImg";
 
 // The record peeking out of the sleeve: grooves, a sheen that turns on hover, the cover as label.

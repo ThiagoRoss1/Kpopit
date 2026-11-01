@@ -1,5 +1,5 @@
 import { cn } from "../../lib/utils";
-import "./puff.css";
+import "../PageShell/puff.css";
 
 export interface SlidingOption<T extends string> {
     value: T;

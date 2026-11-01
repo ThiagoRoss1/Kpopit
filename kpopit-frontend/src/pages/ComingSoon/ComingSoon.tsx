@@ -1,5 +1,5 @@
-import PageShell from "../../components/Puff/PageShell";
-import { PressLink } from "../../components/Puff/PressButton";
+import PageShell from "../../components/PageShell/PageShell";
+import { PressLink } from "../../components/buttons/PressButton";
 import PageMeta from "../../components/Seo/PageMeta";
 
 /** Placeholder page: the shell, the title and "Coming soon...". Never indexed. */

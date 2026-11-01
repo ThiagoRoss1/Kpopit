@@ -1,7 +1,7 @@
 import type { ReactNode } from "react";
 import { Plus } from "lucide-react";
 import { cn } from "../../lib/utils";
-import "./puff.css";
+import "../PageShell/puff.css";
 
 /** Opens with grid rows 0fr → 1fr; the content stays mounted (no layout jump, findable). */
 export function Collapse({ open, id, children, className }: { open: boolean; id?: string; children: ReactNode; className?: string }) {

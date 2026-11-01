@@ -1,14 +1,14 @@
 import { useState, type FormEvent } from "react";
 import { Link } from "react-router";
 import { ArrowUpRight, Mail } from "lucide-react";
-import PageShell from "../../components/Puff/PageShell";
-import { Pill, PressButton } from "../../components/Puff/PressButton";
-import { useToast } from "../../components/Puff/Toast";
-import BrandIcon from "../../components/Puff/BrandIcon";
+import PageShell from "../../components/PageShell/PageShell";
+import { Pill, PressButton } from "../../components/buttons/PressButton";
+import { useToast } from "../../components/Toast/Toast";
+import BrandIcon from "../../components/BrandIcon/BrandIcon";
 import PageMeta from "../../components/Seo/PageMeta";
 import { CHANNELS, CONTACT_EMAIL, contactMailto } from "../../data/contact";
 import { cn } from "../../lib/utils";
-import "../../components/Puff/puff.css";
+import "../../components/PageShell/puff.css";
 import "./contact.css";
 
 const TOPICS = [

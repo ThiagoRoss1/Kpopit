@@ -2,18 +2,18 @@ import { useEffect, useState } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { useSearchParams } from "react-router";
 import { SlidersHorizontal } from "lucide-react";
-import PageShell from "../../components/Puff/PageShell";
-import PuffTitle from "../../components/Puff/PuffTitle";
+import PageShell from "../../components/PageShell/PageShell";
+import PuffTitle from "../../components/PageShell/PuffTitle";
 import PageLoader from "../../components/Loading/PageLoader";
-import SearchField from "../../components/Catalogue/SearchField";
-import FilterMenu from "../../components/Catalogue/FilterMenu";
-import AppliedChips, { type AppliedChip } from "../../components/Catalogue/AppliedChips";
+import SearchField from "../../components/ListFilters/SearchField";
+import FilterMenu from "../../components/ListFilters/FilterMenu";
+import AppliedFilters, { type AppliedFilter } from "../../components/ListFilters/AppliedFilters";
 import PageMeta from "../../components/Seo/PageMeta";
 import { useHydrated } from "../../hooks/useHydrated";
 import { getNationalityFlag } from "../../utils/getFlags";
 import type { IdolsPageData } from "../../interfaces/gameInterfaces";
 import { IDOL_SORTS, SOLOIST, filterIdols, groupLabel, idolsListQuery, nationalities, readIdolFilters, type IdolFilters } from "./idolsData";
-import IdolCard from "./IdolCard";
+import IdolsCards from "../../components/IdolsPageCards/IdolsCards";
 
 const NO_FILTERS: IdolFilters = { q: "", group: "", nat: "", company: "", sort: "" };
 
@@ -62,7 +62,7 @@ function IdolsCatalogue({ all }: { all: IdolsPageData[] }) {
     const countWith = (patch: Partial<IdolFilters>) => filterIdols(all, { ...f, ...patch, sort: "" }).length;
     const activeCount = [f.group, f.nat, f.company, f.sort].filter(Boolean).length;
 
-    const chips: AppliedChip[] = [];
+    const chips: AppliedFilter[] = [];
     if (f.group) chips.push({ key: "group", label: f.group, onRemove: () => set({ group: "" }) });
     if (f.nat) chips.push({ key: "nat", label: f.nat, onRemove: () => set({ nat: "" }) });
     if (f.company) chips.push({ key: "company", label: f.company, onRemove: () => set({ company: "" }) });
@@ -119,7 +119,7 @@ function IdolsCatalogue({ all }: { all: IdolsPageData[] }) {
                         </div>
                     </div>
 
-                    <AppliedChips
+                    <AppliedFilters
                         filtersOpen={filtersOpen}
                         result={`${idols.length === all.length ? "All " : ""}${idols.length} ${idols.length === 1 ? "idol" : "idols"}`}
                         chips={chips}
@@ -128,7 +128,7 @@ function IdolsCatalogue({ all }: { all: IdolsPageData[] }) {
 
                     {idols.length > 0 ? (
                         <section aria-label="Idols catalogue" className="grid grid-cols-[repeat(auto-fill,minmax(var(--cg-grid-min),1fr))] gap-(--cg-grid-gap) p-(--cg-grid-pad)">
-                            {idols.map((idol, i) => <IdolCard key={idol.id} idol={idol} index={i} animate={animate} />)}
+                            {idols.map((idol, i) => <IdolsCards key={idol.id} idol={idol} index={i} animate={animate} />)}
                         </section>
                     ) : (
                         <div className="pp-enter min-h-[340px] grid place-content-center justify-items-center text-center gap-3.5">

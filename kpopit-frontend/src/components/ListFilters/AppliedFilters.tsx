@@ -1,14 +1,14 @@
 import { X } from "lucide-react";
-import "./catalogue.css";
+import "./listFilters.css";
 
-export interface AppliedChip {
+export interface AppliedFilter {
     key: string;
     label: string;
     onRemove: () => void;
 }
 
 /** The result count, a removable chip per filter in use, and "Clear all" when more than one is on. */
-export default function AppliedChips({ result, chips, onClearAll, filtersOpen }: { result: string; chips: AppliedChip[]; onClearAll: () => void; filtersOpen: boolean }) {
+export default function AppliedFilters({ result, chips, onClearAll, filtersOpen }: { result: string; chips: AppliedFilter[]; onClearAll: () => void; filtersOpen: boolean }) {
     return (
         <div className="cg-res pp-enter [--pp-delay:220ms] min-h-(--cg-res-h) flex items-center flex-wrap gap-x-2.5 gap-y-2 py-1.5 font-medium text-xs text-(--muted)" data-fopen={filtersOpen ? "1" : "0"}>
             <span aria-live="polite" className="mr-1">{result}</span>

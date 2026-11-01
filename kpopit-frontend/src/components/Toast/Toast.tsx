@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useRef, useState } from "react";
-import "./puff.css";
+import "../PageShell/puff.css";
 
 const VISIBLE_MS = 2200;
 const OUT_MS = 320;

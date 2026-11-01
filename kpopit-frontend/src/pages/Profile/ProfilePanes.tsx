@@ -1,5 +1,5 @@
 import { useState, type ReactNode } from "react";
-import SlidingPill from "../../components/Puff/SlidingPill";
+import SlidingPill from "../../components/buttons/SlidingPill";
 import { resolveCdnUrl } from "../../utils/imageUrl";
 import { cn } from "../../lib/utils";
 import type { ModeStats, ProfileStats } from "../../interfaces/playerInterfaces";

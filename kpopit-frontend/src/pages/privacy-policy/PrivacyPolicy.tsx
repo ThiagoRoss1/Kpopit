@@ -1,7 +1,7 @@
 import { ArrowRight } from "lucide-react";
-import PageShell from "../../components/Puff/PageShell";
-import { PressAnchor, PressLink } from "../../components/Puff/PressButton";
-import { IndexChips, SideIndex } from "../../components/Puff/SideIndex";
+import PageShell from "../../components/PageShell/PageShell";
+import { PressAnchor, PressLink } from "../../components/buttons/PressButton";
+import { IndexChips, SideIndex } from "../../components/PageShell/SideIndex";
 import PageMeta from "../../components/Seo/PageMeta";
 import { useScrollSpy } from "../../hooks/useScrollSpy";
 import { CHANNELS, CONTACT_EMAIL } from "../../data/contact";

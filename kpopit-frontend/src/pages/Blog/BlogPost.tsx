@@ -1,8 +1,8 @@
 import { ArrowLeft, ArrowUpRight, Copy } from "lucide-react";
-import PageShell from "../../components/Puff/PageShell";
-import { PressButton, PressLink } from "../../components/Puff/PressButton";
-import { useToast } from "../../components/Puff/Toast";
-import { KoreanTag } from "../../components/Puff/PuffTitle";
+import PageShell from "../../components/PageShell/PageShell";
+import { PressButton, PressLink } from "../../components/buttons/PressButton";
+import { useToast } from "../../components/Toast/Toast";
+import { KoreanTag } from "../../components/PageShell/PuffTitle";
 import PageMeta, { SITE_URL } from "../../components/Seo/PageMeta";
 import IntentLink from "../../components/Links/IntentLink";
 import { BLOG_POSTS } from "../../content/blog";

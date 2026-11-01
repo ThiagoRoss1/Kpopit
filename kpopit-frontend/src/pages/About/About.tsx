@@ -1,9 +1,9 @@
 import { Atom, Braces, Check, Database, FlaskConical, SquareTerminal, Zap, ArrowUpRight, ArrowRight, type LucideIcon } from "lucide-react";
 import type { ReactNode } from "react";
-import PageShell from "../../components/Puff/PageShell";
-import { PressAnchor, PressLink } from "../../components/Puff/PressButton";
-import { IndexChips, SideIndex } from "../../components/Puff/SideIndex";
-import BrandIcon from "../../components/Puff/BrandIcon";
+import PageShell from "../../components/PageShell/PageShell";
+import { PressAnchor, PressLink } from "../../components/buttons/PressButton";
+import { IndexChips, SideIndex } from "../../components/PageShell/SideIndex";
+import BrandIcon from "../../components/BrandIcon/BrandIcon";
 import PageMeta from "../../components/Seo/PageMeta";
 import { useScrollSpy } from "../../hooks/useScrollSpy";
 import { CHANNELS } from "../../data/contact";

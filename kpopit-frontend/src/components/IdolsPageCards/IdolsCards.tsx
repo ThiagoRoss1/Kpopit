@@ -1,13 +1,13 @@
-import IntentLink from "../../components/Links/IntentLink";
+import IntentLink from "../Links/IntentLink";
 import { buildIdolSlug, formatCompanyName, formatGroupName } from "../../utils/formatters";
 import { getNationalityFlag } from "../../utils/getFlags";
 import type { IdolsPageData } from "../../interfaces/gameInterfaces";
-import { groupLabel, nationalities, prefetchIdolProfile } from "./idolsData";
-import "../../components/Catalogue/catalogue.css";
-import FadeImg from "../../components/FadeImg";
+import { groupLabel, nationalities, prefetchIdolProfile } from "../../pages/Idols/idolsData";
+import "../ListFilters/listFilters.css";
+import FadeImg from "../FadeImg";
 
 /** A photo card: tilted, lifts on hover and presses into its pink depth; flags on the photo. */
-export default function IdolCard({ idol, index, animate }: { idol: IdolsPageData; index: number; animate: boolean }) {
+export default function IdolsCards({ idol, index, animate }: { idol: IdolsPageData; index: number; animate: boolean }) {
     const group = idol.group_name ? formatGroupName(idol.group_name, idol.is_former_group) : groupLabel(idol);
     const flags = nationalities(idol).map((n) => ({ n, src: getNationalityFlag(n) })).filter((f) => f.src);
     return (

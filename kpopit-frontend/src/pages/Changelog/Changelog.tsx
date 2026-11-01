@@ -1,12 +1,12 @@
 import { useSearchParams } from "react-router";
 import { ArrowLeftRight, ArrowRight, Sparkle, Wrench } from "lucide-react";
-import PageShell from "../../components/Puff/PageShell";
-import { Pill, PressLink } from "../../components/Puff/PressButton";
+import PageShell from "../../components/PageShell/PageShell";
+import { Pill, PressLink } from "../../components/buttons/PressButton";
 import PageMeta from "../../components/Seo/PageMeta";
 import { useHydrated } from "../../hooks/useHydrated";
-import { CHANGELOG, filterChangelog, parseChangeType, type ChangeType } from "../../data/changelog";
+import { CHANGELOG, filterChangelog, parseChangeType, type ChangeType } from "../../content/changelog";
 import { cn } from "../../lib/utils";
-import "../../components/Puff/puff.css";
+import "../../components/PageShell/puff.css";
 import "./changelog.css";
 
 const MONTHS = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];

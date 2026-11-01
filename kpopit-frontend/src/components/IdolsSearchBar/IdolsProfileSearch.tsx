@@ -3,12 +3,12 @@ import { useNavigate } from "react-router";
 import { Search } from "lucide-react";
 import type { IdolsPageData } from "../../interfaces/gameInterfaces";
 import { buildIdolSlug } from "../../utils/formatters";
-import { groupLabel, prefetchIdolProfile } from "./idolsData";
+import { groupLabel, prefetchIdolProfile } from "../../pages/Idols/idolsData";
 
 const MAX_RESULTS = 5;
 
 /** The skewed search bar: jumps to another idol's page; "/" focuses it from anywhere on the page. */
-export default function IdolSearch({ idols, currentId }: { idols: IdolsPageData[]; currentId: number }) {
+export default function IdolsProfileSearch({ idols, currentId }: { idols: IdolsPageData[]; currentId: number }) {
     const navigate = useNavigate();
     const input = useRef<HTMLInputElement>(null);
     const [q, setQ] = useState("");
@@ -46,7 +46,7 @@ export default function IdolSearch({ idols, currentId }: { idols: IdolsPageData[
         <div className="relative min-w-0 w-full">
             <div className="overflow-hidden pt-1 pr-2.5 pb-2.5 pl-2 -mt-1 -mr-2.5 -mb-2.5 -ml-2 flex">
                 <label
-                    className="ip-sb flex items-center box-border h-12 ml-auto overflow-hidden bg-(--chip) border-[2.5px] border-[#FF8AC4] [box-shadow:4px_5px_0_#1A1418] -skew-x-6"
+                    className="ip-sb flex items-center box-border h-12 ml-auto overflow-hidden bg-(--chip) border-[2.5px] border-[#FF8AC4] [box-shadow:4px_5px_0_#1A1418] -skew-x-6 [backface-visibility:hidden]"
                     style={{ width: show ? "100%" : "min(100%, 420px)" }}
                 >
                     <span className="grid place-items-center w-[50px] self-stretch bg-[#1A1418]">

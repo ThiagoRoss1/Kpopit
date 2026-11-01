@@ -12,7 +12,7 @@ const menuItem = "nb-uitem pp-focus flex items-center gap-3 h-11 px-3 rounded-[1
 
 /** Login for guests; for members the avatar ring opens Profile + Logout. Same box while the
  *  session resolves, so the bar never shifts. The navbar owns the open state (one menu at a time). */
-export default function NavAuthSlot({ open, onToggle }: { open: boolean; onToggle: () => void }) {
+export default function UserDropdown({ open, onToggle }: { open: boolean; onToggle: () => void }) {
     const { isAuthenticated, isLoading, user, refreshAuth } = useAuth();
     const { logout } = useAuthUser();
     const navigate = useNavigate();

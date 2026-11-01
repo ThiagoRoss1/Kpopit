@@ -1,6 +1,6 @@
 import { Search, X } from "lucide-react";
 import { cn } from "../../lib/utils";
-import "./catalogue.css";
+import "./listFilters.css";
 
 /** Catalogue search: rounded field with an icon that tilts on focus and a clear button. */
 export default function SearchField({ value, onChange, placeholder, label, className }: {
