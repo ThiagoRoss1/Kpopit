@@ -12,6 +12,9 @@ import MaintenancePage from "../src/pages/Maintenance/MaintenancePage";
 import { printEasterEgg } from "../src/utils/consoleEasterEgg";
 import { getQueryClient } from "../src/services/queryClient";
 import PageLoader from "../src/components/Loading/PageLoader";
+import PuffTitle from "../src/components/Puff/PuffTitle";
+import { PressAnchor, PressButton } from "../src/components/Puff/PressButton";
+import { safeReload } from "../src/utils/safeReload";
 import { THEME_INIT_SCRIPT } from "../src/utils/theme";
 import { fetchFeatures, orNothing } from "./prerender-api";
 
@@ -103,25 +106,20 @@ export function HydrateFallback() {
 }
 
 // Last resort when a page crashes outside its own sections: a plain page with a way back.
+// Home is a full page load so the crashed app starts over.
 export function ErrorBoundary() {
   const error = useRouteError();
   if (import.meta.env.DEV) console.error(error);
   const status = isRouteErrorResponse(error) ? error.status : null;
   return (
-    <main className="min-h-screen w-full flex flex-col items-center justify-center gap-4 bg-black text-white text-center px-4">
-      <h1 className="text-3xl font-bold">{status === 404 ? "Page not found" : "Something went wrong"}</h1>
-      <p className="text-white/70">Try again, or go back to the home page.</p>
-      <div className="flex gap-3">
-        <button
-          type="button"
-          onClick={() => window.location.reload()}
-          className="px-4 py-2 rounded-2xl border-2 border-white/60 font-bold hover:bg-white/10 hover:cursor-pointer"
-        >
-          Try again
-        </button>
-        <a href="/" className="px-4 py-2 rounded-2xl bg-white text-black font-bold hover:brightness-90">
-          Home
-        </a>
+    <main className="pp-root min-h-screen w-full flex flex-col items-center justify-center gap-4 px-4 bg-(--ground) text-(--text) text-center">
+      <PuffTitle className="text-[44px] max-[580px]:text-[34px] whitespace-normal [text-wrap:balance]">
+        {status === 404 ? "Page not found" : "Something went wrong"}
+      </PuffTitle>
+      <p className="m-0 font-medium text-base text-(--muted)">Try again, or go back to the home page.</p>
+      <div className="flex gap-3 flex-wrap justify-center mt-1">
+        <PressButton size="lg" onClick={safeReload}>Try again</PressButton>
+        <PressAnchor href="/" target="_self" rel={undefined} variant="cta" size="lg">Home</PressAnchor>
       </div>
     </main>
   );
