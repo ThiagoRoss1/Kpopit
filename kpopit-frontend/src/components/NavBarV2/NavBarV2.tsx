@@ -75,93 +75,97 @@ export default function NavBarV2({ forceTheme }: { forceTheme?: "night" | "day" 
             data-theme={forceTheme}
             className="pp-nav @container sticky top-0 z-100 w-full font-[DynaPuff,system-ui,sans-serif]"
         >
+            {/* A see-through bar: the page ground runs under it, blurred, like the old navbar. The
+                row keeps to a centred column so the logo and account never sit on the screen edges. */}
             <nav
                 aria-label="Main"
-                className="relative z-30 flex items-center gap-3.5 h-[60px] px-6 @max-[1100px]:px-5 @max-[760px]:h-[54px] @max-[760px]:px-3 bg-(--bar) border-b-2 border-(--bar-line) [box-shadow:var(--bar-sh)] text-(--text)"
+                className="relative z-30 h-[60px] @max-[860px]:h-[54px] bg-(--bar-glass) backdrop-blur-xl backdrop-saturate-150 border-b-2 border-(--bar-line) [box-shadow:var(--bar-sh)] text-(--text)"
             >
-                <Link to="/" aria-label="KpopIt home" className="nb-logo pp-focus flex min-w-0 items-center gap-2 no-underline">
-                    <img src="/kpopit-icon-svg.svg" alt="" width={36} height={36} className="block flex-none w-9 h-9" draggable={false} />
-                    {page && (
-                        <span className="flex min-w-0 items-center gap-[7px] -rotate-2 pt-0 pr-[5px] pb-[5px] pl-0.5 @max-[960px]:@min-[761px]:hidden @max-[374px]:hidden">
-                            <span aria-hidden className="flex-none w-2.5 h-2.5 rounded-full bg-[#FF3399] border-2 border-(--ink) [box-shadow:1.5px_2px_0_var(--ink)]" />
-                            <span className="min-w-0 truncate pt-1 pr-2 pb-2 pl-0.5 -mb-1 font-bold text-[19px] @max-[1100px]:text-[17px] leading-none text-white whitespace-nowrap [text-shadow:var(--puff-wm)]">
-                                {PAGE_LABEL[page]}
+                <div className="mx-auto flex h-full w-full max-w-[1360px] items-center gap-4 px-8 @max-[1100px]:gap-3 @max-[1100px]:px-5 @max-[860px]:px-3 @max-[430px]:gap-2.5">
+                    <Link to="/" aria-label="KpopIt home" className="nb-logo pp-focus flex min-w-0 items-center gap-2 no-underline">
+                        <img src="/kpopit-icon-svg.svg" alt="" width={36} height={36} className="block flex-none w-9 h-9" draggable={false} />
+                        {page && (
+                            <span className="flex min-w-0 items-center gap-[7px] -rotate-2 pt-0 pr-[5px] pb-[5px] pl-0.5 @max-[1180px]:@min-[860px]:hidden @max-[374px]:hidden">
+                                <span aria-hidden className="flex-none w-2.5 h-2.5 rounded-full bg-[#FF3399] border-2 border-(--ink) [box-shadow:1.5px_2px_0_var(--ink)] @max-[430px]:hidden" />
+                                <span className="min-w-0 truncate pt-1 pr-2 pb-2 pl-0.5 -mb-1 font-bold text-[19px] @max-[1100px]:text-[17px] @max-[430px]:text-[15.5px] leading-none text-white whitespace-nowrap [text-shadow:var(--puff-wm)]">
+                                    {PAGE_LABEL[page]}
+                                </span>
                             </span>
-                        </span>
-                    )}
-                </Link>
+                        )}
+                    </Link>
 
-                <span className="flex-1" />
+                    <span className="flex-1" />
 
-                <div className="flex items-center gap-2 mr-1.5 @max-[1100px]:gap-1 @max-[1100px]:mr-0.5 @max-[760px]:hidden">
-                    {links.map((link) => {
-                        const isCur = section === link.id;
-                        const isOpen = open === link.id;
-                        const st = isCur ? "cur" : isOpen ? "open" : "idle";
-                        const look = cn(
-                            "nb-item pp-focus box-border inline-flex items-center h-9 rounded-full border-2 font-bold text-sm no-underline cursor-pointer",
-                            isCur ? "bg-(--side) border-(--ink) text-[#1A1418] [box-shadow:2px_3px_0_var(--ctl-off),var(--in-pink)]"
-                                : isOpen ? "bg-(--chip) border-(--ink) text-(--text) [box-shadow:2px_3px_0_var(--ctl-off),var(--in)]"
-                                    : "bg-transparent border-transparent text-(--muted)",
-                        );
-                        if (link.to) {
-                            const prefetch = PREFETCH[link.id as NavPage];
-                            return (
-                                <IntentLink key={link.id} to={link.to} onIntent={prefetch} data-st={st} aria-current={isCur ? "page" : undefined} className={cn(look, "px-3.5")}>
-                                    {link.label}
-                                </IntentLink>
+                    <div className="flex items-center gap-2.5 mr-2 @max-[1100px]:gap-1.5 @max-[1100px]:mr-0.5 @max-[860px]:hidden">
+                        {links.map((link) => {
+                            const isCur = section === link.id;
+                            const isOpen = open === link.id;
+                            const st = isCur ? "cur" : isOpen ? "open" : "idle";
+                            const look = cn(
+                                "nb-item pp-focus box-border inline-flex items-center h-10 rounded-full border-2 font-bold text-[15.5px] no-underline cursor-pointer whitespace-nowrap",
+                                isCur ? "bg-(--side) border-(--ink) text-[#1A1418] [box-shadow:2px_3px_0_var(--ctl-off),var(--in-pink)]"
+                                    : isOpen ? "bg-(--chip) border-(--ink) text-(--text) [box-shadow:2px_3px_0_var(--ctl-off),var(--in)]"
+                                        : "bg-transparent border-transparent text-(--muted)",
                             );
-                        }
-                        const menu = link.id as NavMenu;
-                        return (
-                            <div key={link.id} className="relative">
-                                <button
-                                    type="button"
-                                    data-st={st}
-                                    aria-expanded={isOpen}
-                                    aria-haspopup="true"
-                                    onClick={() => toggle(menu)}
-                                    className={cn(look, "gap-1.5 pr-2.5 pl-3.5")}
-                                >
-                                    {link.label}
-                                    <ChevronDown className="nb-chev w-3.5 h-3.5" strokeWidth={3} aria-hidden />
-                                </button>
-                                {isOpen && <DesktopMenu menu={menu} rows={rowsOf(menu)} page={page} />}
-                            </div>
-                        );
-                    })}
-                </div>
+                            if (link.to) {
+                                const prefetch = PREFETCH[link.id as NavPage];
+                                return (
+                                    <IntentLink key={link.id} to={link.to} onIntent={prefetch} data-st={st} aria-current={isCur ? "page" : undefined} className={cn(look, "px-4")}>
+                                        {link.label}
+                                    </IntentLink>
+                                );
+                            }
+                            const menu = link.id as NavMenu;
+                            return (
+                                <div key={link.id} className="relative">
+                                    <button
+                                        type="button"
+                                        data-st={st}
+                                        aria-expanded={isOpen}
+                                        aria-haspopup="true"
+                                        onClick={() => toggle(menu)}
+                                        className={cn(look, "gap-1.5 pr-3 pl-4")}
+                                    >
+                                        {link.label}
+                                        <ChevronDown className="nb-chev w-4 h-4" strokeWidth={3} aria-hidden />
+                                    </button>
+                                    {isOpen && <DesktopMenu menu={menu} rows={rowsOf(menu)} page={page} />}
+                                </div>
+                            );
+                        })}
+                    </div>
 
-                <div className="flex flex-none items-center gap-3 @max-[430px]:gap-2">
+                    <div className="flex flex-none items-center gap-3 @max-[430px]:gap-2">
+                        <button
+                            type="button"
+                            onClick={toggleTheme}
+                            aria-label="Switch day and night"
+                            aria-hidden={forced || undefined}
+                            tabIndex={forced ? -1 : 0}
+                            className={cn(
+                                "pp-press pp-focus flex-none grid place-items-center w-[38px] h-[38px] p-0 rounded-full border-2 border-(--ink) bg-(--chip) text-(--chip-ink) cursor-pointer",
+                                forced && "invisible",
+                            )}
+                        >
+                            {!forced && theme === "night" ? <Sun className="w-[18px] h-[18px]" strokeWidth={2.6} /> : <Moon className="w-[18px] h-[18px]" strokeWidth={2.6} />}
+                        </button>
+                        <span aria-hidden className="w-0.5 h-7 rounded-[2px] bg-[rgba(128,110,120,.3)] @max-[860px]:hidden" />
+                        <NavAuthSlot open={open === "user"} onToggle={() => toggle("user")} />
+                    </div>
+
                     <button
                         type="button"
-                        onClick={toggleTheme}
-                        aria-label="Switch day and night"
-                        aria-hidden={forced || undefined}
-                        tabIndex={forced ? -1 : 0}
+                        onClick={() => toggle("sheet")}
+                        aria-label={open === "sheet" ? "Close menu" : "Open menu"}
+                        aria-expanded={open === "sheet"}
                         className={cn(
-                            "pp-press pp-focus flex-none grid place-items-center w-[34px] h-[34px] p-0 rounded-full border-2 border-(--ink) bg-(--chip) text-(--chip-ink) cursor-pointer",
-                            forced && "invisible",
+                            "pp-press pp-focus hidden @max-[860px]:grid place-items-center flex-none w-[38px] h-[38px] p-0 rounded-full border-2 border-(--ink) cursor-pointer",
+                            open === "sheet" ? "bg-[#FF8AC4] text-[#1A1418]" : "bg-(--chip) text-(--chip-ink)",
                         )}
                     >
-                        {!forced && theme === "night" ? <Sun className="w-4 h-4" strokeWidth={2.6} /> : <Moon className="w-4 h-4" strokeWidth={2.6} />}
+                        {open === "sheet" ? <X className="w-[18px] h-[18px]" strokeWidth={3} /> : <Menu className="w-[18px] h-[18px]" strokeWidth={2.8} />}
                     </button>
-                    <span aria-hidden className="w-0.5 h-[26px] rounded-[2px] bg-[rgba(128,110,120,.3)] @max-[760px]:hidden" />
-                    <NavAuthSlot open={open === "user"} onToggle={() => toggle("user")} />
                 </div>
-
-                <button
-                    type="button"
-                    onClick={() => toggle("sheet")}
-                    aria-label={open === "sheet" ? "Close menu" : "Open menu"}
-                    aria-expanded={open === "sheet"}
-                    className={cn(
-                        "pp-press pp-focus hidden @max-[760px]:grid place-items-center flex-none w-[38px] h-[38px] p-0 rounded-full border-2 border-(--ink) cursor-pointer",
-                        open === "sheet" ? "bg-[#FF8AC4] text-[#1A1418]" : "bg-(--chip) text-(--chip-ink)",
-                    )}
-                >
-                    {open === "sheet" ? <X className="w-[18px] h-[18px]" strokeWidth={3} /> : <Menu className="w-[18px] h-[18px]" strokeWidth={2.8} />}
-                </button>
 
                 {open === "sheet" && (
                     <MobileSheet
