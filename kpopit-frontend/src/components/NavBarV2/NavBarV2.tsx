@@ -76,18 +76,18 @@ export default function NavBarV2({ forceTheme }: { forceTheme?: "night" | "day" 
             className="pp-nav @container sticky top-0 z-100 w-full font-[DynaPuff,system-ui,sans-serif]"
         >
             {/* A see-through bar: the page ground runs under it, blurred, like the old navbar. The
-                row keeps to a centred column so the logo and account never sit on the screen edges. */}
+                row keeps to a centred 1536px column (the old navbar's) so the logo and account never sit on the screen edges. */}
             <nav
                 aria-label="Main"
                 className="relative z-30 h-[60px] @max-[860px]:h-[54px] bg-(--bar-glass) backdrop-blur-xl backdrop-saturate-150 border-b-2 border-(--bar-line) [box-shadow:var(--bar-sh)] text-(--text)"
             >
-                <div className="mx-auto flex h-full w-full max-w-[1360px] items-center gap-4 px-8 @max-[1100px]:gap-3 @max-[1100px]:px-5 @max-[860px]:px-3 @max-[430px]:gap-2.5">
+                <div className="mx-auto flex h-full w-full max-w-[1536px] items-center gap-4 px-6 @max-[1100px]:gap-3 @max-[1100px]:px-5 @max-[860px]:px-3 @max-[430px]:gap-2.5">
                     <Link to="/" aria-label="KpopIt home" className="nb-logo pp-focus flex min-w-0 items-center gap-2 no-underline">
-                        <img src="/kpopit-icon-svg.svg" alt="" width={36} height={36} className="block flex-none w-9 h-9" draggable={false} />
+                        <img src="/kpopit-icon-svg.svg" alt="" width={44} height={44} className="block flex-none w-11 h-11 @max-[860px]:w-10 @max-[860px]:h-10 @max-[430px]:w-9 @max-[430px]:h-9" draggable={false} />
                         {page && (
                             <span className="flex min-w-0 items-center gap-[7px] -rotate-2 pt-0 pr-[5px] pb-[5px] pl-0.5 @max-[1180px]:@min-[860px]:hidden @max-[374px]:hidden">
                                 <span aria-hidden className="flex-none w-2.5 h-2.5 rounded-full bg-[#FF3399] border-2 border-(--ink) [box-shadow:1.5px_2px_0_var(--ink)] @max-[430px]:hidden" />
-                                <span className="min-w-0 truncate pt-1 pr-2 pb-2 pl-0.5 -mb-1 font-bold text-[19px] @max-[1100px]:text-[17px] @max-[430px]:text-[15.5px] leading-none text-white whitespace-nowrap [text-shadow:var(--puff-wm)]">
+                                <span className="min-w-0 truncate pt-1 pr-2 pb-2 pl-0.5 -mb-1 font-bold text-[22px] @max-[1100px]:text-[19px] @max-[860px]:text-[18px] @max-[430px]:text-[15.5px] leading-none text-white whitespace-nowrap [text-shadow:var(--puff-wm)]">
                                     {PAGE_LABEL[page]}
                                 </span>
                             </span>
