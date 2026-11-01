@@ -147,7 +147,7 @@ const UserProfile = () => {
     }
     // One loader until the stats are in (usually already loaded by the route), never placeholder cards.
     if (isAuthLoading || decryptedToken === undefined || isStatsLoading) {
-        return <PageLoader />;
+        return <PageLoader tone="dark" />;
     }
 
     const displayName = user?.profile.display_name ?? null;

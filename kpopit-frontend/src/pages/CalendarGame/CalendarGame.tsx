@@ -108,7 +108,7 @@ export default function CalendarGame({ mode, date }: { mode: CalendarMode; date:
     });
 
     if (day.isError) return <NotFound />;
-    if (!day.data || !allIdolsData || (mode === "pixelated" && !albums.data)) return <PageLoader />;
+    if (!day.data || !allIdolsData || (mode === "pixelated" && !albums.data)) return <PageLoader tone="dark" />;
 
     const { puzzle, game, status } = day.data;
     const finished = status === "won_live" || status === "won_calendar";

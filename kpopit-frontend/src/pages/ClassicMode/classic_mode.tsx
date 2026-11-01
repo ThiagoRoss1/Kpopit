@@ -350,7 +350,7 @@ function ClassicMode() {
       if (isErrorGameData) refetchGameData();
       if (listError) queryClient.refetchQueries({ queryKey: ["allIdols"] });
     };
-    return <PageLoader error={isErrorGameData || userToken.isError || listError} onRetry={retry} />;
+    return <PageLoader tone="dark" error={isErrorGameData || userToken.isError || listError} onRetry={retry} />;
   }
 
   // Main return

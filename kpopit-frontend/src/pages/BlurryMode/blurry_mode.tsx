@@ -394,7 +394,7 @@ const gameMode = useGameMode();
             if (isErrorBlurryGameData) refetchBlurryGameData();
             if (listError) queryClient.refetchQueries({ queryKey: ["allIdols"] });
         };
-        return <PageLoader error={isErrorBlurryGameData || userToken.isError || listError} onRetry={retry} />;
+        return <PageLoader tone="dark" error={isErrorBlurryGameData || userToken.isError || listError} onRetry={retry} />;
     }
 
     return (

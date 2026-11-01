@@ -8,7 +8,7 @@ const ProtectedRoute = ({ children }: { children?: ReactNode }) => {
     const { isAuthenticated, isLoading } = useAuth();
 
     // The session is still being restored: the loader, not an empty page.
-    if (isLoading) return <PageLoader />;
+    if (isLoading) return <PageLoader tone="dark" />;
     if (!isAuthenticated) return <Navigate to="/login" replace />;
     return children ?? <Outlet />;
 };

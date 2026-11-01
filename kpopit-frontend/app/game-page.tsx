@@ -12,7 +12,7 @@ export default function GamePage({ title, description, path, children }: GamePag
   return (
     <>
       <PageMeta title={title} description={description} path={path} />
-      <ClientOnly fallback={<PageLoader />}>
+      <ClientOnly fallback={<PageLoader tone="dark" />}>
         <GameDayProvider>{children}</GameDayProvider>
       </ClientOnly>
     </>
