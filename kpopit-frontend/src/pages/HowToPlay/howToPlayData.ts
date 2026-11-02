@@ -8,13 +8,33 @@ export const parseMode = (value: string | null): HowToMode =>
 /** Guesses before each hint unlocks (Classic AnswerHintsBox, Blurry ModeOptions, Pixelated hints). */
 export const HINT_AT = { classic: [6, 8], blurryColor: 4, pixelated: [3, 6] } as const;
 
+// Each feedback colour as Tailwind classes: its ground, the inset edge of a tile, and the
+// raised edge of a legend swatch.
 export const FEEDBACK = {
-    correct: { label: "Correct", bg: "#4FFFB0", edge: "#15803D" },
-    partial: { label: "Partially correct", bg: "#F3E563", edge: "#A16207" },
-    incorrect: { label: "Incorrect", bg: "#FD5C63", edge: "#B91C1C" },
+    correct: {
+        label: "Correct",
+        ground: "bg-[#4FFFB0]",
+        tileEdge: "shadow-[inset_0_-3px_0_#15803D]",
+        swatchEdge: "shadow-[0_3px_0_0_#15803D,0_3px_0_2px_#1A1418]",
+    },
+    partial: {
+        label: "Partially correct",
+        ground: "bg-[#F3E563]",
+        tileEdge: "shadow-[inset_0_-3px_0_#A16207]",
+        swatchEdge: "shadow-[0_3px_0_0_#A16207,0_3px_0_2px_#1A1418]",
+    },
+    incorrect: {
+        label: "Incorrect",
+        ground: "bg-[#FD5C63]",
+        tileEdge: "shadow-[inset_0_-3px_0_#B91C1C]",
+        swatchEdge: "shadow-[0_3px_0_0_#B91C1C,0_3px_0_2px_#1A1418]",
+    },
 } as const;
 
-type Tone = keyof typeof FEEDBACK;
+export type Tone = keyof typeof FEEDBACK;
+
+/** "3 guesses" left before a hint at `need` unlocks. */
+export const guessesLeft = (guesses: number, need: number) => `${need - guesses} ${need - guesses === 1 ? "guess" : "guesses"}`;
 interface ExampleRow { name: string; image: string; cells: { value: string; tone: Tone; arrow?: boolean }[] }
 
 // Two real idols (game data): the miss shows every kind of tile, the hit is all green.
