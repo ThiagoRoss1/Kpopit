@@ -1,43 +1,102 @@
-/* Profile: entrance/chart motion and hover rules (hover only where it exists, press beats hover). */
-.up-root { --track: #EFE7DD; --heat-0: #EFE7DD; --heat-1: #FFD1E8; --heat-2: #FF8AC4; --heat-3: #FF3399; }
-[data-theme="night"] .up-root { --track: #3B343A; --heat-0: #2F2B2F; --heat-1: #5A3A4C; }
+/* ==========================================================================
+   Profile page: chart tokens (Day and Night) and the entrance and jar keyframes
+   (layout and hover motion are Tailwind in the TSX).
+   ========================================================================== */
 
-.up-pane { animation: puffIn .55s var(--ease-settle) backwards; }
-.up-tab { transition: background-color .3s ease, border-color .3s ease, color .3s ease; }
-@media (hover: hover) { .up-tab[aria-selected="false"]:hover { background: var(--chip-hover); } }
-.up-tab:active:active:active { translate: 0px 1px; rotate: 0deg; scale: 1; }
-
-.up-tile { translate: 0px 0px; rotate: var(--up-tilt, 0deg); scale: 1; transition: translate .5s var(--lift, var(--ease-settle)), rotate .5s var(--lift, var(--ease-settle)), scale .5s var(--lift, var(--ease-settle)); }
-@media (hover: hover) { .up-tile:hover { --lift: var(--ease-bounce); translate: 0px -3px; rotate: 0deg; scale: 1; } }
-.up-row { transition: translate .4s var(--ease-settle), rotate .4s var(--ease-settle), scale .4s var(--ease-settle); }
-@media (hover: hover) { .up-row:hover { translate: 4px 0px; rotate: 0deg; scale: 1; } }
-
-.up-bar { transform-origin: left; animation: upGrow 1s var(--ease-settle) backwards; }
-.up-col { transform-origin: bottom; animation: upRise .9s var(--ease-bounce) var(--up-delay, 0ms) backwards; }
-.up-ring { animation: upPop .7s var(--ease-pop) var(--up-delay, 0ms) backwards; }
-@keyframes upGrow { from { transform: scaleX(0) } }
-@keyframes upRise { from { transform: scaleY(0) } }
-@keyframes upPop { from { rotate: -40deg; scale: .6; opacity: 0 } }
-
-.up-photo { translate: 0px 0px; rotate: -2deg; scale: 1; transition: translate .6s var(--lift, var(--ease-settle)), rotate .6s var(--lift, var(--ease-settle)), scale .6s var(--lift, var(--ease-settle)); }
-@media (hover: hover) { .up-photo:hover { --lift: var(--ease-bounce); translate: 0px -3px; rotate: 0deg; scale: 1; } }
-
-/* Idol XP button: a press control with a pink depth; the repeated class outranks .pp-press's
-   own hover and press rules, which would swap the depth for the plain black one. */
-.up-xp.up-xp {
-  box-shadow: 3px 4px 0 0 #FF8AC4, 3px 4px 0 2px var(--ink);
-  transition: translate .5s var(--lift, var(--ease-settle)), rotate .5s var(--lift, var(--ease-settle)), scale .5s var(--lift, var(--ease-settle)), box-shadow .45s var(--ease-settle), background-color .3s ease;
+/* Chart tokens: ring track and the activity heatmap's four shades */
+.profile-page {
+    --track: #EFE7DD;
+    --heat-0: #EFE7DD;
+    --heat-1: #FFD1E8;
+    --heat-2: #FF8AC4;
+    --heat-3: #FF3399;
 }
-@media (hover: hover) {
-  .up-xp.up-xp.up-xp.up-xp.up-xp:hover { --lift: var(--ease-bounce); translate: 0px -3px; rotate: 0deg; scale: 1; background: var(--chip-hover); }
-  .up-xp:hover .up-jar { animation: upWob .8s var(--ease-pop) both; }
-  .up-xp:hover .up-liquid { transform: scaleY(1.25); }
-  .up-xp:hover .up-fill { transform: scaleX(1.12); }
+
+[data-theme="night"] .profile-page {
+    --track: #3B343A;
+    --heat-0: #2F2B2F;
+    --heat-1: #5A3A4C;
 }
-.up-xp.up-xp.up-xp.up-xp.up-xp:active { translate: 3px 4px; rotate: 0deg; scale: 1; box-shadow: 0 0 0 0 #FF8AC4, 0 0 0 2px var(--ink); transition-duration: .16s; }
-.up-jar { transform-origin: 50% 90%; }
-@keyframes upWob { 0% { rotate: 0deg; scale: 1 } 30% { rotate: -14deg; scale: 1.12 } 60% { rotate: 9deg; scale: 1.12 } 100% { rotate: -5deg; scale: 1.08 } }
-.up-liquid { transform-origin: bottom; transition: transform .6s cubic-bezier(.34, 1.4, .64, 1); }
-.up-fill { transform-origin: left; transition: transform .7s var(--ease-bounce); }
-.up-bubble { animation: upBub 2.6s ease-in infinite; }
-@keyframes upBub { 0% { transform: translate3d(0, 0, 0); opacity: 0 } 20% { opacity: 1 } 100% { transform: translate3d(0, -12px, 0); opacity: 0 } }
+
+/* Panes rise in when a tab opens */
+.profile-pane-enter {
+    animation: puffIn 0.55s var(--ease-settle) backwards;
+}
+
+/* Charts grow from empty: bars from the left, columns from the bottom, rings pop and spin */
+@keyframes profileBarGrow {
+    from {
+        scale: 0 1;
+    }
+}
+
+.profile-bar-enter {
+    transform-origin: left;
+    animation: profileBarGrow 1s var(--ease-settle) backwards;
+}
+
+@keyframes profileColumnRise {
+    from {
+        scale: 1 0;
+    }
+}
+
+.profile-column-enter {
+    transform-origin: bottom;
+    animation: profileColumnRise 0.9s var(--ease-bounce) backwards;
+}
+
+@keyframes profileRingPop {
+    from {
+        opacity: 0;
+        rotate: -40deg;
+        scale: 0.6;
+    }
+}
+
+.profile-ring-enter {
+    animation: profileRingPop 0.7s var(--ease-pop) backwards;
+}
+
+/* Idol XP jar: wobbles when its button is hovered; bubbles rise through the liquid */
+@keyframes profileJarWobble {
+    0% {
+        rotate: 0deg;
+        scale: 1;
+    }
+
+    30% {
+        rotate: -14deg;
+        scale: 1.12;
+    }
+
+    60% {
+        rotate: 9deg;
+        scale: 1.12;
+    }
+
+    100% {
+        rotate: -5deg;
+        scale: 1.08;
+    }
+}
+
+@keyframes profileBubble {
+    0% {
+        opacity: 0;
+        translate: 0 0;
+    }
+
+    20% {
+        opacity: 1;
+    }
+
+    100% {
+        opacity: 0;
+        translate: 0 -12px;
+    }
+}
+
+.profile-bubble {
+    animation: profileBubble 2.6s ease-in infinite;
+}
