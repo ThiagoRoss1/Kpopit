@@ -293,7 +293,7 @@ function PixelatedMode() {
             hover:brightness-110 hover:cursor-pointer hover:scale-105 active:translate-y-1 active:shadow-[0_1px_0_var(--color-ink)]
             focus:outline-none focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ink"
         >
-            <BarChart3 className="w-5 h-5 sm:w-6 sm:h-6" />
+            <BarChart3 className="size-5 sm:size-6" />
         </button>
     );
 
@@ -331,7 +331,7 @@ function PixelatedMode() {
                                 to="/"
                                 className="inline-block bg-transparent border-0 p-0 cursor-pointer hover:scale-105
                                 transition-all duration-500 transform-gpu">
-                                <h1 className="text-5xl font-bold text-neon-pink leading-tight">
+                                <h1 className="text-5xl/tight font-bold text-neon-pink">
                                     <span
                                         className="kpop-part"
                                         style={{ '--kpop-color': 'var(--color-neon-pink)' } as React.CSSProperties}
@@ -370,7 +370,7 @@ function PixelatedMode() {
                                                         imageUrl={coverUrl ?? undefined}
                                                         blockSize={blockSize}
                                                         alt="Pixelated album cover"
-                                                        className="w-full h-full object-cover block rounded-full"
+                                                        className="size-full object-cover block rounded-full"
                                                     />
                                                 </div>
                                             </div>
@@ -413,7 +413,7 @@ function PixelatedMode() {
                                                     imageUrl={coverUrl ?? undefined}
                                                     blockSize={blockSize}
                                                     alt="Pixelated album cover"
-                                                    className="w-full h-full object-cover block"
+                                                    className="size-full object-cover block"
                                                 />
                                                 {!endGame && (
                                                     <div className="absolute inset-0 z-1 flex items-center justify-center font-bold text-white/40
@@ -422,10 +422,10 @@ function PixelatedMode() {
                                                     </div>
                                                 )}
                                                 {/* Corner brackets */}
-                                                <span className="absolute top-2.5 left-2.5 w-3.5 h-3.5 z-3 pointer-events-none border-l-2 border-t-2 border-white/55" />
-                                                <span className="absolute top-2.5 right-2.5 w-3.5 h-3.5 z-3 pointer-events-none border-r-2 border-t-2 border-white/55" />
-                                                <span className="absolute bottom-2.5 left-2.5 w-3.5 h-3.5 z-3 pointer-events-none border-l-2 border-b-2 border-white/55" />
-                                                <span className="absolute bottom-2.5 right-2.5 w-3.5 h-3.5 z-3 pointer-events-none border-r-2 border-b-2 border-white/55" />
+                                                <span className="absolute top-2.5 left-2.5 size-3.5 z-3 pointer-events-none border-l-2 border-t-2 border-white/55" />
+                                                <span className="absolute top-2.5 right-2.5 size-3.5 z-3 pointer-events-none border-r-2 border-t-2 border-white/55" />
+                                                <span className="absolute bottom-2.5 left-2.5 size-3.5 z-3 pointer-events-none border-l-2 border-b-2 border-white/55" />
+                                                <span className="absolute bottom-2.5 right-2.5 size-3.5 z-3 pointer-events-none border-r-2 border-b-2 border-white/55" />
                                             </div>
                                         </div>
 
@@ -458,7 +458,7 @@ function PixelatedMode() {
                                             className="inline-block bg-transparent border-0 p-0 cursor-pointer hover:scale-105
                                             transition-all duration-500 transform-gpu"
                                         >
-                                            <h1 className="text-5xl font-bold text-neon-pink leading-tight">
+                                            <h1 className="text-5xl/tight font-bold text-neon-pink">
                                                 <span
                                                     className="kpop-part"
                                                     style={{ '--kpop-color': 'var(--color-neon-pink)' } as React.CSSProperties}
@@ -519,7 +519,7 @@ function PixelatedMode() {
 
                             {!showVictory && yesterdayAlbum && yesterdayAlbumArtist && yesterdayAlbumCover && (
                                 <div className="w-full flex flex-col items-center justify-center mt-10 lg:mt-20">
-                                    <span className="font-['Caveat',cursive] text-xl sm:text-2xl leading-tight">
+                                    <span className="font-caveat text-xl/tight sm:text-2xl">
                                         <span className="text-ink/70">
                                             Yesterday's album was
                                         </span>{" "}
@@ -532,7 +532,7 @@ function PixelatedMode() {
 
                             {!showVictory && yesterdayAlbumData?.locked && (
                                 <div className="w-full flex flex-col items-center justify-center mt-10 lg:mt-20">
-                                    <span className="font-['Caveat',cursive] text-xl sm:text-2xl leading-tight">
+                                    <span className="font-caveat text-xl/tight sm:text-2xl">
                                         <span className="text-ink/70">
                                             Yesterday's album was
                                         </span>{" "}

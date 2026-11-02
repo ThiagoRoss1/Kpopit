@@ -37,7 +37,7 @@ export default function CardGrantedReveal(props: CardGrantedRevealProps) {
             <div className={`flex flex-col items-center gap-1 rounded-xl border-[3px] bg-ink/60 px-6 py-4 text-center ${frame}`}>
                 <div className="flex flex-row gap-2 justify-center items-center text-lg font-bold text-white">
                     <span>{headline}</span>
-                    <BookImage className={`w-4.5 h-4.5 rotate-4 ${iconColor}`} />
+                    <BookImage className={`size-4.5 rotate-4 ${iconColor}`} />
                 </div>
                 
                 {cardGranted.group_photo.length > 0 && (
@@ -51,7 +51,7 @@ export default function CardGrantedReveal(props: CardGrantedRevealProps) {
                     className="flex flex-row mt-1 justify-center items-center gap-1 text-[14px] font-bold
                     text-neon-pink underline transition-all duration-300 hover:brightness-125"
                 >
-                    View your collections <ArrowRight className="inline-block w-3.5 h-3.5" />
+                    View your collections <ArrowRight className="inline-block size-3.5" />
                 </Link>
             </div>
         </div>

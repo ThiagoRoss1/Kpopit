@@ -71,7 +71,7 @@ function GroupRow({
                 style={complete ? { color: group.palette.main } : undefined}
             >
                 {complete 
-                    ? <Check className="w-5 h-5 text-green-500" /> 
+                    ? <Check className="size-5 text-green-500" /> 
                     : `${owned}/${total}`
                 }
             </span>
@@ -115,7 +115,7 @@ function AlbumPageIndex({ collectionName, groups, currentGroupId, onJump, query,
                     night ? 'border-neon-pink/40 bg-[#1c1f27] shadow-[2px_2px_0px_#FF3399]' : 'border-ink bg-white shadow-[2px_2px_0px_#0a0a0a]'
                 }`}
             >
-                <Search className={`w-4 h-4 rotate-90 ${accentText}`} />
+                <Search className={`size-4 rotate-90 ${accentText}`} />
 
                 <input
                     value={query}

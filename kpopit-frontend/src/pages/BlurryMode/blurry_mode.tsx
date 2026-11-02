@@ -456,7 +456,7 @@ const gameMode = useGameMode();
                     ].map((cornerClasses, index) => (
                         <div
                             key={index}
-                            className={`absolute max-xxs:w-4 max-xxs:h-4 xxs:w-4 xxs:h-4 xs:w-6 xs:h-6 z-10 border-white/20 ${cornerClasses}`}
+                            className={`absolute max-xxs:size-4 xxs:size-4 xs:size-6 z-10 border-white/20 ${cornerClasses}`}
                         />
                     ))}
 

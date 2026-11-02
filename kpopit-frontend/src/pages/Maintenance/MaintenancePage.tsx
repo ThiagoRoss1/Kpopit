@@ -22,7 +22,7 @@ const MaintenancePage = (props: MaintenancePageProps) => {
         }
     }
 
-    const bgClass = type === "collection" ? "bg-[#0a0a0a]" : "bg-[#242424]";
+    const bgClass = type === "collection" ? "bg-ink" : "bg-[#242424]";
 
     return (
         <div className={`min-h-screen w-full flex flex-col justify-start items-center ${bgClass} text-center px-4`}>

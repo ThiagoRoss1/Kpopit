@@ -39,7 +39,7 @@ const ButtonsDroplist = ({ menu, rows, page }: ButtonsDroplistProps) => {
                             "pp-focus group relative box-border flex items-center gap-3 overflow-hidden pr-3 pl-2.5",
                             "rounded-2xl border-2 border-(--ink) text-(--chip-ink) no-underline",
                             "transition-[translate,rotate,background-color,box-shadow] duration-450 ease-(--ease-settle) transform-gpu",
-                            index % 2 ? "rotate-[0.6deg]" : "-rotate-[0.6deg]",
+                            index % 2 ? "rotate-[0.6deg]" : "rotate-[-0.6deg]",
                             isAbout ? "min-h-17.5 py-2.5" : "h-17.5",
                             isCurrent
                                 ? "bg-(--cur-bg) shadow-[3px_4px_0_0_#FF8AC4,3px_4px_0_2px_var(--ink)] active:shadow-[0_0_0_0_#FF8AC4,0_0_0_2px_var(--ink)]"

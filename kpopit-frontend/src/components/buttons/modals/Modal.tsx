@@ -54,7 +54,7 @@ const Modal = (props: ModalProps) => {
                             hover:scale-110 hover:brightness-110 hover:cursor-pointer transition-all duration-200 transform-gpu"
                             onClick={returnPage}>
                                 <div>
-                                    <ChevronLeft className="opacity-50 group-hover:opacity-100 sm:w-10 sm:h-10 text-white"/>
+                                    <ChevronLeft className="opacity-50 group-hover:opacity-100 sm:size-10 text-white"/>
                                 </div>
                             </button>
                         ) : null}
@@ -65,7 +65,7 @@ const Modal = (props: ModalProps) => {
                             <button className="flex items-center justify-center rounded-full shrink-0 w-9 h-9 sm:w-10 sm:h-10 text-center
                             bg-linear-to-b from-[#b43777]/0 to-[#ec4850]/0 shadow-lg hover:brightness-115 hover:scale-105
                             hover:cursor-pointer hover:bg-linear-to-b hover:from-[#b43777] hover:to-[#ec4850] transition-all transform-gpu duration-500" onClick={onClose}>
-                                <X size={20} color="white" strokeWidth={3} absoluteStrokeWidth className="sm:w-5 sm:h-5" />
+                                <X size={20} color="white" strokeWidth={3} absoluteStrokeWidth className="sm:size-5" />
                             </button>
                             </div>
                     </div>

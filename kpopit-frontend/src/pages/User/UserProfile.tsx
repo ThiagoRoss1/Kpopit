@@ -182,7 +182,7 @@ const UserProfile = () => {
                             px-4 sxs:px-5 py-3 sxs:py-3.5 bg-[#111111] rounded-xl
                             shadow-[3px_3px_0px_rgba(255,255,255,1)]"
                         >
-                            <Mail className="w-5 h-5 text-white shrink-0" />
+                            <Mail className="size-5 text-white shrink-0" />
 
                             <div className="flex-1 min-w-0">
                                 {resendSent ? (
@@ -190,7 +190,7 @@ const UserProfile = () => {
                                         Verification email sent — check your inbox.
                                     </span>
                                 ) : (
-                                    <span className="text-[12px] sxs:text-sm text-white/85 font-bold leading-snug">
+                                    <span className="text-xs/snug sxs:text-sm text-white/85 font-bold">
                                         Your email isn't verified yet.
                                     </span>
                                 )}
@@ -220,7 +220,7 @@ const UserProfile = () => {
                                     text-white/70 hover:text-white hover:bg-white/5 hover:border-white
                                     hover:cursor-pointer transition-colors duration-300"
                             >
-                                <X className="w-5 h-5" />
+                                <X className="size-5" />
                             </button>
                         </div>
                     )}
@@ -252,12 +252,12 @@ const UserProfile = () => {
                                         shadow-[1px_1px_0px_rgba(0,0,0,0.4)]" />
 
                                     <div className="flex flex-col items-center xxs:flex-row xxs:justify-center xxs:items-center gap-3 xxs:gap-6 sm:gap-8">
-                                        <div className="grid place-items-center w-28 sxs:w-32 h-28 sxs:h-32 rounded-sm overflow-hidden bg-transparent rotate-[-1.5deg] border-t-2 border-l-2 border-neon-pink shrink-0">
+                                        <div className="grid place-items-center size-28 sxs:size-32 rounded-sm overflow-hidden bg-transparent rotate-[-1.5deg] border-t-2 border-l-2 border-neon-pink shrink-0">
                                             {avatarSrc ? (
                                                 <Img
                                                     src={avatarSrc}
                                                     alt={`${displayName} avatar`}
-                                                    className="w-full h-full object-cover hover:cursor-pointer hover:brightness-90"
+                                                    className="size-full object-cover hover:cursor-pointer hover:brightness-90"
                                                     draggable={false}
                                                     onClick={() => setEditModal({ open: true, initialTab: "avatar" })}
                                                 />
@@ -265,7 +265,7 @@ const UserProfile = () => {
                                                 <button
                                                     type="button"
                                                     onClick={() => setEditModal({ open: true, initialTab: "avatar" })}
-                                                    className="w-full h-full bg-linear-to-b from-[#2a2a2a] to-[#0e0e0e] hover:cursor-pointer"
+                                                    className="size-full bg-linear-to-b from-[#2a2a2a] to-[#0e0e0e] hover:cursor-pointer"
                                                 />
                                             )}
                                         </div>

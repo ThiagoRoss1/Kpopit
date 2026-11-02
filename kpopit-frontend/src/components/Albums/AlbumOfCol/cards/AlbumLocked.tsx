@@ -47,7 +47,7 @@ export function AlbumLockedGroupPhoto({ groupName, className = '', pageLabel }: 
             </span>
 
             <div className="absolute inset-0 z-0">
-                <LockKeyhole className="w-full h-full object-cover text-black opacity-10" />
+                <LockKeyhole className="size-full object-cover text-black opacity-10" />
             </div>
         </div>
     );

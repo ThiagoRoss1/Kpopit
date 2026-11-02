@@ -98,7 +98,7 @@ const UsernameModal = ({ isOpen, onClose, onBack }: UsernameModalProps) => {
                     </label>
 
                     <div className="ep-input relative h-13 rounded-2xl overflow-hidden bg-ink">
-                        <User className="absolute left-4 top-1/2 w-4 h-4 -translate-y-1/2 text-white" />
+                        <User className="absolute left-4 top-1/2 size-4 -translate-y-1/2 text-white" />
                         
                         <input
                             autoFocus
@@ -108,16 +108,16 @@ const UsernameModal = ({ isOpen, onClose, onBack }: UsernameModalProps) => {
                             disabled={locked}
                             onChange={(e) => setUsername(e.target.value)}
                             placeholder="@your-new-handle"
-                            className="w-full h-full pl-11 pr-12 bg-ink text-sm font-bold text-white placeholder:text-neutral-700 focus:outline-none disabled:opacity-50"
+                            className="size-full pl-11 pr-12 bg-ink text-sm font-bold text-white placeholder:text-neutral-700 focus:outline-none disabled:opacity-50"
                         />
                         {!unchanged && isValid && status === "checking" && (
-                            <Loader2 className="absolute right-4 top-1/2 w-4 h-4 -translate-y-1/2 text-neutral-400 animate-spin" />
+                            <Loader2 className="absolute right-4 top-1/2 size-4 -translate-y-1/2 text-neutral-400 animate-spin" />
                         )}
                         {!unchanged && isValid && status === "available" && (
-                            <Check className="absolute right-4 top-1/2 w-4 h-4 -translate-y-1/2 text-green-500" />
+                            <Check className="absolute right-4 top-1/2 size-4 -translate-y-1/2 text-green-500" />
                         )}
                         {!unchanged && isValid && status === "taken" && (
-                            <X className="absolute right-4 top-1/2 w-4 h-4 -translate-y-1/2 text-red-500" />
+                            <X className="absolute right-4 top-1/2 size-4 -translate-y-1/2 text-red-500" />
                         )}
                     </div>
 
@@ -136,7 +136,7 @@ const UsernameModal = ({ isOpen, onClose, onBack }: UsernameModalProps) => {
                             {USERNAME_MIN_LENGTH} - {USERNAME_MAX_LENGTH} letters, numbers, _ or -
                         </span>
                     )}
-                    <span className="pl-1 text-xs font-bold text-white/50 leading-snug">
+                    <span className="pl-1 text-xs/snug font-bold text-white/50">
                         Your old username stays reserved for you for 15 days, and links to it redirect to the new one.
                     </span>
                 </div>
@@ -173,7 +173,7 @@ const UsernameModal = ({ isOpen, onClose, onBack }: UsernameModalProps) => {
                             disabled:opacity-50 disabled:cursor-not-allowed
                             disabled:hover:translate-x-0 disabled:hover:translate-y-0`}
                     >
-                        {saveMutation.isPending && <Loader2 className="w-4 h-4 animate-spin" />}
+                        {saveMutation.isPending && <Loader2 className="size-4 animate-spin" />}
                         {saveMutation.isPending ? "Saving" : "Save Changes"}
                     </button>
 
@@ -186,7 +186,7 @@ const UsernameModal = ({ isOpen, onClose, onBack }: UsernameModalProps) => {
                             hover:border-white/40 hover:text-white hover:cursor-pointer transition-colors
                             disabled:opacity-50 disabled:cursor-not-allowed"
                     >
-                        <ChevronLeft className="w-5 h-5" />
+                        <ChevronLeft className="size-5" />
                         Return
                     </button>
                 </div>

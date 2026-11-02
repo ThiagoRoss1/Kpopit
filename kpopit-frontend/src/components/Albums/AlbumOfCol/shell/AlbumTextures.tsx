@@ -72,7 +72,7 @@ export function PaperGrain({ className = '' }: TextureProps) {
             alt=""
             aria-hidden
             decoding="async"
-            className={`pointer-events-none absolute left-1/2 top-1/2 h-322.5 w-237.5 max-w-none -translate-x-1/2 -translate-y-1/2 -rotate-90 object-cover isolate mix-blend-multiply ${className}`}
+            className={`pointer-events-none absolute left-1/2 top-1/2 h-322.5 w-237.5 max-w-none -translate-1/2 -rotate-90 object-cover isolate mix-blend-multiply ${className}`}
         />
     );
 }

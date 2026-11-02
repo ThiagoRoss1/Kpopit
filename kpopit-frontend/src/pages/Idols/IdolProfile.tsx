@@ -175,15 +175,15 @@ const IdolPage = ({ data, idols }: IdolPageProps) => {
                 {/* The tilted dark band and its two pink lines behind the hero */}
                 <div
                     aria-hidden
-                    className="absolute -inset-x-[30%] top-37.5 @max-[1281px]/idol:top-47.5 @max-[561px]/idol:top-40 h-75 -z-1 bg-(--band) -rotate-9 pointer-events-none"
+                    className="absolute inset-x-[-30%] top-37.5 @max-[1281px]/idol:top-47.5 @max-[561px]/idol:top-40 h-75 -z-1 bg-(--band) -rotate-9 pointer-events-none"
                 />
                 <div
                     aria-hidden
-                    className="absolute -inset-x-[30%] top-[466px] @max-[1281px]/idol:top-[506px] @max-[561px]/idol:top-[476px] h-3 -z-1 bg-[#FF3399] opacity-45 -rotate-9 pointer-events-none"
+                    className="absolute inset-x-[-30%] top-116.5 @max-[1281px]/idol:top-126.5 @max-[561px]/idol:top-119 h-3 -z-1 bg-neon-pink opacity-45 -rotate-9 pointer-events-none"
                 />
                 <div
                     aria-hidden
-                    className="absolute -inset-x-[30%] top-[484px] @max-[1281px]/idol:top-[524px] @max-[561px]/idol:top-[494px] h-1 -z-1 bg-(--band) opacity-45 -rotate-9 pointer-events-none"
+                    className="absolute inset-x-[-30%] top-121 @max-[1281px]/idol:top-131 @max-[561px]/idol:top-123.5 h-1 -z-1 bg-(--band) opacity-45 -rotate-9 pointer-events-none"
                 />
 
                 {/* Back button and search */}
@@ -201,11 +201,11 @@ const IdolPage = ({ data, idols }: IdolPageProps) => {
                             aria-label="Back to the idols list"
                             className={cn(
                                 "pp-focus grid place-items-center size-11 m-0.5 bg-[#FF8AC4] no-underline",
-                                "[transform:skewX(-7deg)] -rotate-4 [backface-visibility:hidden] will-change-transform",
+                                "transform-[skewX(-7deg)] -rotate-4 backface-hidden will-change-transform",
                                 "shadow-[inset_0_3px_0_rgba(255,255,255,.5),0_0_0_2px_#1A1418,4px_5px_0_2px_#1A1418]",
                                 "active:shadow-[inset_0_3px_0_rgba(255,255,255,.5),0_0_0_2px_#1A1418,0_0_0_2px_#1A1418]",
                                 "transition-[translate,box-shadow] duration-300 ease-(--ease-pop)",
-                                "hover:-translate-x-1 active:translate-x-0.75 active:translate-y-0.75",
+                                "hover:-translate-x-1 active:translate-0.75",
                             )}
                         >
                             <ArrowLeft aria-hidden className="size-5 text-[#1A1418]" strokeWidth={3} />
@@ -225,7 +225,7 @@ const IdolPage = ({ data, idols }: IdolPageProps) => {
                 >
                     <div
                         className={cn(
-                            "group relative isolate justify-self-center mt-3.5 pb-[calc(var(--rn)*.8)]",
+                            "group relative isolate justify-self-center mt-3.5 pb-[calc(var(--rn)*0.8)]",
                             "w-[min(100%,520px)] @max-[1281px]/idol:w-[min(100%,420px)] @max-[561px]/idol:w-[min(100%,300px)] @max-[360px]/idol:w-[min(100%,262px)]",
                         )}
                     >
@@ -233,7 +233,7 @@ const IdolPage = ({ data, idols }: IdolPageProps) => {
                         <div
                             aria-hidden
                             className={cn(
-                                "absolute -left-[18%] -top-[14%] w-[136%] aspect-square -z-1 pointer-events-none",
+                                "absolute left-[-18%] top-[-14%] w-[136%] aspect-square -z-1 pointer-events-none",
                                 "bg-[radial-gradient(circle,var(--tone)_2.4px,transparent_2.8px)] bg-size-[11px_11px]",
                                 "mask-[radial-gradient(circle_at_55%_45%,#000_0%,rgba(0,0,0,.5)_32%,transparent_62%)]",
                             )}
@@ -241,7 +241,7 @@ const IdolPage = ({ data, idols }: IdolPageProps) => {
 
                         <div className="idol-photo-enter relative">
                             <div className="relative aspect-4/5 -rotate-3 border-[3px] border-[#1A1418] rounded-[30px] bg-[#1A1418] shadow-[8px_8px_0_#FF8AC4,8px_8px_0_3px_#1A1418]">
-                                <div className="absolute inset-0 overflow-hidden rounded-[27px] [clip-path:inset(0_round_27px)] isolate [transform:translateZ(0)]">
+                                <div className="absolute inset-0 overflow-hidden rounded-[27px] [clip-path:inset(0_round_27px)] isolate transform-[translateZ(0)]">
                                     <FadeImg
                                         src={cdnImage ?? ""}
                                         alt={`${artistName} photo`}
@@ -253,9 +253,9 @@ const IdolPage = ({ data, idols }: IdolPageProps) => {
                                     <div
                                         aria-hidden
                                         className={cn(
-                                            "absolute inset-y-0 -left-[60%] w-[220%] pointer-events-none",
+                                            "absolute inset-y-0 left-[-60%] w-[220%] pointer-events-none",
                                             "bg-[linear-gradient(118deg,rgba(255,255,255,0)_40%,rgba(255,255,255,.13)_47%,rgba(255,255,255,.04)_51%,rgba(255,255,255,0)_57%)]",
-                                            "-translate-x-[30%] transition-[translate] duration-900 ease-[cubic-bezier(.25,1,.5,1)] transform-gpu",
+                                            "translate-x-[-30%] transition-[translate] duration-900 ease-[cubic-bezier(.25,1,.5,1)] transform-gpu",
                                             "group-hover:translate-x-[42%] group-hover:duration-1400",
                                         )}
                                     />
@@ -274,7 +274,7 @@ const IdolPage = ({ data, idols }: IdolPageProps) => {
                                 <span
                                     className={cn(
                                         "inline-flex items-center gap-2 ml-2 pt-1.75 px-3.25 pb-2 -rotate-4",
-                                        "border-[2.5px] border-[#1A1418] rounded-xl bg-[#FF3399] shadow-[3px_3px_0_#1A1418]",
+                                        "border-[2.5px] border-[#1A1418] rounded-xl bg-neon-pink shadow-[3px_3px_0_#1A1418]",
                                         "font-bold text-[15px] leading-none tracking-[.08em] text-[#1A1418]",
                                     )}
                                 >
@@ -305,7 +305,7 @@ const IdolPage = ({ data, idols }: IdolPageProps) => {
                                                 aria-hidden
                                                 className={cn(
                                                     "idol-name-letter inline-block pt-1 px-2 pb-1.5 border-[2.5px] border-[#1A1418] rounded-xl",
-                                                    "font-bold leading-none [backface-visibility:hidden]",
+                                                    "font-bold leading-none backface-hidden",
                                                 )}
                                                 style={{
                                                     ...letterStyle,
@@ -417,7 +417,7 @@ const IdolPage = ({ data, idols }: IdolPageProps) => {
                             to="/contact"
                             className={cn(
                                 "pp-focus grid place-items-center h-11 px-4.5 rounded-full border-2 border-[#1A1418]",
-                                "bg-[#FF3399] text-[#1A1418] font-bold text-sm no-underline",
+                                "bg-neon-pink text-[#1A1418] font-bold text-sm no-underline",
                                 "shadow-[0_4px_0_#1A1418,inset_0_2px_0_rgba(255,255,255,.4)] active:shadow-[0_0_0_#1A1418,inset_0_2px_0_rgba(255,255,255,.4)]",
                                 "transition-[translate,box-shadow] duration-200 ease-(--ease-settle) transform-gpu",
                                 "hover:-translate-y-0.5 active:translate-y-1",
@@ -455,7 +455,7 @@ const FactTile = ({ fact, delay }: FactTileProps) => {
                 "min-h-24 @max-[1281px]/idol:min-h-28 pt-5.5 px-3 pb-3 text-center",
                 "bg-(--chip) text-(--chip-ink) border-[2.5px] border-[#1A1418] rounded-[20px] shadow-[4px_4px_0_var(--ctl-off),var(--in)]",
                 SPAN_CLASSES[fact.span],
-                fact.solo && "@max-[561px]/idol:col-[1/-1]",
+                fact.solo && "@max-[561px]/idol:col-span-full",
             )}
             style={{ animationDelay: `${delay}ms` }}
         >
@@ -561,7 +561,7 @@ const ChipTag = ({ chip }: { chip: FactChip }) => {
                 "pp-focus no-underline will-change-transform",
                 "transition-[translate,rotate,box-shadow] duration-450 ease-(--ease-settle)",
                 "hover:-translate-y-0.75 hover:rotate-0",
-                "active:translate-x-0.75 active:translate-y-0.75 active:rotate-0 active:shadow-[0_0_0_#1A1418,var(--chip-in)] active:duration-150",
+                "active:translate-0.75 active:rotate-0 active:shadow-[0_0_0_#1A1418,var(--chip-in)] active:duration-150",
             )}
             style={{ "--chip-in": chipStyle.inset } as CSSProperties}
         >
@@ -584,7 +584,7 @@ const RelatedIdols = ({ idols }: { idols: IdolsPageData[] }) => {
                 />
                 <div
                     aria-hidden
-                    className="absolute -inset-x-175 top-40.5 h-3 box-border -rotate-2 bg-[#FF8AC4] border-y-2 border-[#1A1418] shadow-[var(--rb-in)]"
+                    className="absolute -inset-x-175 top-40.5 h-3 box-border -rotate-2 bg-[#FF8AC4] border-y-2 border-[#1A1418] shadow-(--rb-in)"
                 />
                 <div aria-hidden className="[display:var(--rb-l2)] absolute -inset-x-175 top-45.5 h-1 -rotate-2 bg-(--band)" />
 
@@ -612,7 +612,7 @@ const RelatedIdols = ({ idols }: { idols: IdolsPageData[] }) => {
                             "transition-[translate,rotate,box-shadow] duration-380 ease-(--ease-settle) will-change-transform",
                             "hover:-translate-y-1 hover:rotate-0",
                             "active:translate-x-0.75 active:translate-y-1 active:rotate-0 active:shadow-[2px_2px_0_var(--ctl-off),var(--in)] active:duration-150",
-                            index % 2 ? "rotate-[0.8deg]" : "-rotate-[0.8deg]",
+                            index % 2 ? "rotate-[0.8deg]" : "rotate-[-0.8deg]",
                         )}
                     >
                         <span className="block aspect-square overflow-hidden border-[2.5px] border-[#1A1418] rounded-xl bg-[#1A1418]">
@@ -620,11 +620,11 @@ const RelatedIdols = ({ idols }: { idols: IdolsPageData[] }) => {
                         </span>
 
                         <span className="flex flex-col gap-1.25 min-w-0 px-1">
-                            <span className="block pr-1 pb-1.25 puff-ink font-bold text-2xl leading-none whitespace-nowrap text-white text-shadow-(--puff-value) truncate">
+                            <span className="block pr-1 pb-1.25 puff-ink font-bold text-2xl leading-none text-white text-shadow-(--puff-value) truncate">
                                 {idol.artist_name}
                             </span>
 
-                            <span className="font-semibold text-[13px] leading-[1.25] text-(--muted) text-balance">{groupLabel(idol)}</span>
+                            <span className="font-semibold text-[13px] leading-tight text-(--muted) text-balance">{groupLabel(idol)}</span>
                         </span>
                     </IntentLink>
                 ))}

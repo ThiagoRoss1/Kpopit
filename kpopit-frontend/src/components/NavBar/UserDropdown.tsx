@@ -42,7 +42,7 @@ const UserDropdown = ({ open, onToggle }: UserDropdownProps) => {
                 to="/login"
                 className={cn(
                     "pp-press pp-focus flex-none inline-flex items-center box-border h-10 px-4.5",
-                    "rounded-full border-2 border-(--ink) bg-[#FF3399] [--pp-in:var(--in-pink)] shadow-[2px_3px_0_var(--ink),var(--in-pink)]",
+                    "rounded-full border-2 border-(--ink) bg-neon-pink [--pp-in:var(--in-pink)] shadow-[2px_3px_0_var(--ink),var(--in-pink)]",
                     "font-bold text-[15.5px] text-[#1A1418] whitespace-nowrap no-underline",
                 )}
             >

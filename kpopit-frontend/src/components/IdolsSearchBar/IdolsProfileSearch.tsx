@@ -87,7 +87,7 @@ const IdolsProfileSearch = ({ idols, currentId }: IdolsProfileSearchProps) => {
             <div className="flex overflow-hidden pt-1 pr-2.5 pb-2.5 pl-2 -mt-1 -mr-2.5 -mb-2.5 -ml-2">
                 <label
                     className={cn(
-                        "flex items-center box-border h-12 ml-auto overflow-hidden -skew-x-6 [backface-visibility:hidden]",
+                        "flex items-center box-border h-12 ml-auto overflow-hidden -skew-x-6 backface-hidden",
                         "bg-(--chip) border-[2.5px] shadow-[4px_5px_0_#1A1418]",
                         "transition-[width,box-shadow,border-color] duration-450 ease-(--ease-settle)",
                         "focus-within:border-[#1A1418] focus-within:shadow-[4px_5px_0_#FF8AC4]",
@@ -181,7 +181,7 @@ const IdolsProfileSearch = ({ idols, currentId }: IdolsProfileSearchProps) => {
                                 </span>
 
                                 {idol.id === currentId && (
-                                    <span aria-label="Current idol" className="flex-none size-2 rounded-full bg-[#FF3399]" />
+                                    <span aria-label="Current idol" className="flex-none size-2 rounded-full bg-neon-pink" />
                                 )}
                             </button>
                         );

@@ -127,7 +127,7 @@ const NavBar = ({ forceTheme }: NavBarProps) => {
                 className={cn(
                     "relative z-30 h-15 @max-[860px]:h-13.5",
                     "bg-(--bar-glass) backdrop-blur-xl backdrop-saturate-150",
-                    "border-b-2 border-(--bar-line) shadow-[var(--bar-sh)] text-(--text)",
+                    "border-b-2 border-(--bar-line) shadow-(--bar-sh) text-(--text)",
                 )}
             >
                 <div
@@ -159,7 +159,7 @@ const NavBar = ({ forceTheme }: NavBarProps) => {
                             <span className="flex min-w-0 items-center gap-1.75 -rotate-2 pr-1.25 pb-1.25 pl-0.5 @max-[1180px]:@min-[860px]:hidden @max-[374px]:hidden">
                                 <span
                                     aria-hidden
-                                    className="flex-none size-2.5 rounded-full border-2 border-(--ink) bg-[#FF3399] shadow-[1.5px_2px_0_var(--ink)] @max-[430px]:hidden"
+                                    className="flex-none size-2.5 rounded-full border-2 border-(--ink) bg-neon-pink shadow-[1.5px_2px_0_var(--ink)] @max-[430px]:hidden"
                                 />
 
                                 <span

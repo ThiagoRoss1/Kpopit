@@ -40,7 +40,7 @@ const BiasModal = ({ kind, isOpen, onClose, onBack }: { kind: "idol" | "group"; 
         <EditProfileModal isOpen={isOpen} onClose={onClose} title={kind === "idol" ? "Bias Idol" : "Bias Group"}>
             <div className="px-5 sxs:px-6 py-5 flex flex-col gap-4">
                 <div className="ep-input relative h-13 rounded-2xl overflow-hidden bg-ink">
-                    <Search className="absolute left-4 top-1/2 w-4 h-4 -translate-y-1/2 text-white" />
+                    <Search className="absolute left-4 top-1/2 size-4 -translate-y-1/2 text-white" />
                     <input
                         autoFocus
                         type="search"
@@ -48,12 +48,12 @@ const BiasModal = ({ kind, isOpen, onClose, onBack }: { kind: "idol" | "group"; 
                         onChange={(e) => setSearch(e.target.value)}
                         placeholder={`Search a ${noun}...`}
                         aria-label={`Search a ${noun}`}
-                        className="w-full h-full pl-11 pr-4 bg-ink text-sm font-bold text-white placeholder:text-neutral-700 focus:outline-none"
+                        className="size-full pl-11 pr-4 bg-ink text-sm font-bold text-white placeholder:text-neutral-700 focus:outline-none"
                     />
                 </div>
 
                 <div role="listbox" aria-label={`Pick your bias ${noun}`} className="ep-field flex flex-col gap-1.5 max-h-80 overflow-y-auto pr-1">
-                    {!options.loaded && <Loader2 className="self-center my-6 w-5 h-5 text-white/60 animate-spin" />}
+                    {!options.loaded && <Loader2 className="self-center my-6 size-5 text-white/60 animate-spin" />}
                     {shown.map((option) => {
                         const selected = option.id === current;
                         return (
@@ -69,15 +69,15 @@ const BiasModal = ({ kind, isOpen, onClose, onBack }: { kind: "idol" | "group"; 
                                     ${selected ? "border-neon-pink bg-neon-pink/10" : "border-white/10 hover:border-white/40"}`}
                             >
                                 {kind === "idol" && (
-                                    <span className="w-9 h-9 shrink-0 rounded-lg overflow-hidden bg-[#1a1a1a]">
-                                        {option.image && <img src={option.image} alt="" loading="lazy" className="w-full h-full object-cover" />}
+                                    <span className="size-9 shrink-0 rounded-lg overflow-hidden bg-[#1a1a1a]">
+                                        {option.image && <img src={option.image} alt="" loading="lazy" className="size-full object-cover" />}
                                     </span>
                                 )}
                                 <span className="flex flex-col min-w-0 flex-1">
                                     <span className="text-sm font-black text-white truncate">{option.name}</span>
                                     {option.sub && <span className="text-xs font-bold text-white/50 truncate">{option.sub}</span>}
                                 </span>
-                                {selected && <Check className="w-4 h-4 text-neon-pink shrink-0" />}
+                                {selected && <Check className="size-4 text-neon-pink shrink-0" />}
                             </button>
                         );
                     })}
@@ -111,7 +111,7 @@ const BiasModal = ({ kind, isOpen, onClose, onBack }: { kind: "idol" | "group"; 
                         hover:cursor-pointer transition-colors duration-300
                         disabled:opacity-50 disabled:cursor-not-allowed"
                     >
-                        <ChevronLeft className="w-5 h-5" />
+                        <ChevronLeft className="size-5" />
                         Return
                     </button>
                 </div>

@@ -237,7 +237,7 @@ export default function CardZoomModal(props: CardZoomModalProps) {
                                firefox:drop-shadow-[3px_3px_0px_rgba(0,0,0,1)] firefox:active:drop-shadow-[1px_1px_0px_rgba(0,0,0,1)]`
                     }`}
                 >
-                    <X className="w-5 h-5" strokeWidth={3} />
+                    <X className="size-5" strokeWidth={3} />
                 </button>
 
                 {isMember ? (
@@ -267,7 +267,7 @@ export default function CardZoomModal(props: CardZoomModalProps) {
                             <Img
                                 src={group.group_photo?.src || undefined}
                                 alt={group.group_name}
-                                className="h-full w-full object-contain lg:object-cover"
+                                className="size-full object-contain lg:object-cover"
                                 draggable={false}
                                 {...EAGER_ARTWORK_PROPS}
                             />

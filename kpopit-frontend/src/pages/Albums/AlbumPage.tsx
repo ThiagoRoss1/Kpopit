@@ -132,7 +132,7 @@ const VinylRecord = ({ cover }: { cover: string }) => {
                         </clipPath>
                     </defs>
 
-                    <g className={cn("[transform-box:view-box] origin-center", spinOnHover)}>
+                    <g className={cn("transform-view origin-center", spinOnHover)}>
                         <circle cx="50" cy="50" r="19" fill="#FF8AC4" />
                         <image href={cover} x="31" y="31" width="38" height="38" preserveAspectRatio="xMidYMid slice" clipPath={`url(#${clipId})`} />
                         <circle cx="50" cy="50" r="19" fill="none" stroke="#1A1418" strokeWidth="2" vectorEffect="non-scaling-stroke" />
@@ -156,7 +156,7 @@ const ReleaseDot = ({ release, isCurrent, size }: { release: AlbumDiscographyIte
                 "transition-[scale,background-color] duration-350 ease-(--ease-pop) transform-gpu",
                 "group-hover:scale-120 group-active:scale-86 group-active:duration-150",
                 isCurrent
-                    ? "album-dot-enter bg-[#FF3399] shadow-[2px_3px_0_#1A1418,inset_0_2px_0_rgba(255,255,255,.5)]"
+                    ? "album-dot-enter bg-neon-pink shadow-[2px_3px_0_#1A1418,inset_0_2px_0_rgba(255,255,255,.5)]"
                     : cn("shadow-[1.5px_2px_0_#1A1418]", release.type === "Single" ? "bg-(--chip)" : "bg-(--side)"),
                 size === "row" && (isCurrent ? "size-6.5" : "size-4 mt-1.25"),
                 size === "list" && (isCurrent ? "size-5.5" : "size-3.5"),
@@ -300,7 +300,7 @@ const Album = ({ album }: { album: AlbumPageData }) => {
                             <div
                                 aria-hidden
                                 className={cn(
-                                    "absolute inset-y-0 -left-[60%] w-[220%] pointer-events-none",
+                                    "absolute inset-y-0 left-[-60%] w-[220%] pointer-events-none",
                                     "bg-[linear-gradient(118deg,rgba(255,255,255,0)_40%,rgba(255,255,255,.2)_47%,rgba(255,255,255,.06)_51%,rgba(255,255,255,0)_57%)]",
                                     "transition-[translate] duration-800 transform-gpu group-hover/hero:translate-x-[42%] group-hover/hero:duration-1300",
                                     SLOW_EASE,
@@ -365,7 +365,7 @@ const Album = ({ album }: { album: AlbumPageData }) => {
                                 sub={album.language ? `${album.language} release` : undefined}
                                 flag={languageFlag(album.language)}
                                 delay={0.21}
-                                className="@max-[521px]:col-[1/-1] @max-[521px]:justify-self-center @max-[521px]:w-[calc(50%-7px)]"
+                                className="@max-[521px]:col-span-full @max-[521px]:justify-self-center @max-[521px]:w-[calc(50%-7px)]"
                             />
                         </div>
                     </div>
@@ -561,7 +561,7 @@ const MoreCard = ({ release, artistName, index }: MoreCardProps) => {
             <div
                 className={cn(
                     "relative transition-[rotate] duration-450 ease-(--ease-settle) transform-gpu group-hover:rotate-0",
-                    index % 2 ? "rotate-[0.5deg]" : "-rotate-[0.5deg]",
+                    index % 2 ? "rotate-[0.5deg]" : "rotate-[-0.5deg]",
                 )}
             >
                 <div aria-hidden className="absolute inset-0 rounded-[20px] border-2 border-(--ink) bg-(--side) translate-x-1 translate-y-1.25" />
@@ -571,7 +571,7 @@ const MoreCard = ({ release, artistName, index }: MoreCardProps) => {
                     aria-label={`${release.name}, ${release.release_year}`}
                     className={cn(
                         "pp-focus relative block w-full pt-1.5 px-1.5 pb-2.75 text-left no-underline",
-                        "rounded-[20px] border-2 border-(--ink) bg-(--face) text-(--text) shadow-[var(--face-hl)]",
+                        "rounded-[20px] border-2 border-(--ink) bg-(--face) text-(--text) shadow-(--face-hl)",
                         "transition-[translate] duration-350 ease-(--ease-settle) transform-gpu",
                         "group-hover:-translate-x-px group-hover:-translate-y-0.75 group-active:translate-x-1 group-active:translate-y-1.25 group-active:duration-150",
                     )}

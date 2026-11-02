@@ -458,7 +458,7 @@ export default function FxPanel({ night, onClose, albumName, closing, onAnimatio
                                 : 'border-ink text-ink shadow-[2px_2px_0px_rgba(0,0,0,1)] active:shadow-none'
                         }`}
                     >
-                        <X className="w-4 h-4" strokeWidth={3} />
+                        <X className="size-4" strokeWidth={3} />
                     </button>
                 </div>
 

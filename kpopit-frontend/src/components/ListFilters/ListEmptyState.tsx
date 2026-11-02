@@ -11,7 +11,7 @@ interface ListEmptyStateProps {
 const ListEmptyState = ({ title, search, onReset }: ListEmptyStateProps) => {
     return (
         <div className="pp-enter grid place-content-center justify-items-center gap-3.5 min-h-85 text-center">
-            <div className="pr-1.5 pb-2 pl-1 puff-ink -rotate-[1.5deg] font-bold text-[34px] leading-[1.15] text-white text-shadow-(--puff-empty)">
+            <div className="pr-1.5 pb-2 pl-1 puff-ink rotate-[-1.5deg] font-bold text-[34px] leading-[1.15] text-white text-shadow-(--puff-empty)">
                 {title}
             </div>
 

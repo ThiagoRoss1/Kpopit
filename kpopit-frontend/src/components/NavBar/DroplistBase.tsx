@@ -10,7 +10,7 @@ export const Dot = ({ size = "md" }: { size?: "sm" | "md" }) => {
         <span
             aria-hidden
             className={cn(
-                "flex-none rounded-full bg-[#FF3399] border-[#1A1418]",
+                "flex-none rounded-full bg-neon-pink border-[#1A1418]",
                 size === "md" ? "size-2.25 border-2" : "size-1.75 border-[1.5px]",
             )}
         />
@@ -52,7 +52,7 @@ export const Tile = ({ row, size, animated = false }: TileProps) => {
                     "flex-none grid place-items-center box-border border-2 border-[#1A1418] bg-(--tile)",
                     size === "lg"
                         ? "size-11 rounded-[13px] shadow-[2px_2.5px_0_#1A1418,var(--tile-in)]"
-                        : "size-8.5 rounded-[11px] shadow-[var(--tile-in)]",
+                        : "size-8.5 rounded-[11px] shadow-(--tile-in)",
                     motion,
                 )}
             >

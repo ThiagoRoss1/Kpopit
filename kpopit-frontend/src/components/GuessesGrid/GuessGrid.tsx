@@ -69,7 +69,7 @@ const GuessesGrid = React.memo((props: GuessesGridProps) => {
           </div>
         ))}
         
-        {/* <div className="columns-8 gap-2 w-full h-[2px] sm:h-[4px] justify-items-center items-center bg-amber-800"></div> */}
+        {/* <div className="columns-8 gap-2 w-full h-0.5 sm:h-1 justify-items-center items-center bg-amber-800"></div> */}
         
         {reversedGuesses.map((guess, index) => {
           const idolId = guess.guessed_idol_data.idol_id;

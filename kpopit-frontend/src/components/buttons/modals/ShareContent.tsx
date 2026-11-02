@@ -133,7 +133,7 @@ const ShareText = (props: ShareContentProps) => {
                             }
                         })}>
                         <div className='relative flex flex-row items-center justify-center gap-2'>
-                            <Copy className='w-6 h-6 sm:w-6 sm:h-6' />
+                            <Copy className='size-6 sm:size-6' />
                             <span className='text-base'>Copy</span>
                         </div>
                     </button>
@@ -165,7 +165,7 @@ const ShareText = (props: ShareContentProps) => {
                             }
                         })}>
                         <div className='relative flex flex-row items-center justify-center gap-2'>
-                            <Img src={Twitter} alt="Twitter" className='w-6 h-6 sm:w-6 sm:h-6' />
+                            <Img src={Twitter} alt="Twitter" className='size-6 sm:size-6' />
                             <span className='text-base'>Share</span>
                         </div>
                     </button>

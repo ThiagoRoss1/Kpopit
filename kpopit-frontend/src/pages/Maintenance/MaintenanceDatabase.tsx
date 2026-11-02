@@ -6,7 +6,7 @@ const MaintenanceDatabase = () => {
 
     return (
         <div className="w-full h-fit flex flex-col justify-center items-center mt-6 gap-4 sm:mt-16 sm:gap-10">
-            <div className="w-fit h-fit flex flex-col gap-2 justify-center items-center animate-pulse text-white [text-shadow:2px_2px_8px_rgba(0,0,0,0.5)]">
+            <div className="size-fit flex flex-col gap-2 justify-center items-center animate-pulse text-white [text-shadow:2px_2px_8px_rgba(0,0,0,0.5)]">
                 <h1 className="text-2xl sm:text-4xl font-bold">
                     Hi, lol
                 </h1>
@@ -16,10 +16,10 @@ const MaintenanceDatabase = () => {
             </div>
 
             <div className="flex justify-center items-center">
-                <Img src={HANNI_GIF} alt="Hanni Gif" className="w-40 h-40 sm:w-60 sm:h-60" />
+                <Img src={HANNI_GIF} alt="Hanni Gif" className="size-40 sm:size-60" />
             </div>
 
-            <div className="w-fit h-fit flex flex-col gap-6 justify-center items-center">
+            <div className="size-fit flex flex-col gap-6 justify-center items-center">
                 <div className="flex flex-col gap-2 justify-center items-center">
                     <span className="text-[14px] sm:text-xl font-semibold text-white [text-shadow:2px_2px_8px_rgba(0,0,0,0.5)]">
                         Update: I'm currently working on Kpopit's database!
@@ -75,7 +75,7 @@ const MaintenanceDatabase = () => {
                 </div>
 
                 <div className="flex justify-center items-center mb-6 sm:mb-10">
-                    <Img src={HAERIN_GIF} alt="Haerin Gif" className="w-60 h-60 sm:w-80 sm:h-80"/>
+                    <Img src={HAERIN_GIF} alt="Haerin Gif" className="size-60 sm:size-80"/>
                 </div>               
             </div>
         </div>

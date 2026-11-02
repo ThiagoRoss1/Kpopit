@@ -27,7 +27,7 @@ const ListCard = ({ to, label, index, animate = true, onIntent, children }: List
             <div
                 className={cn(
                     "relative transition-[rotate] duration-420 ease-(--ease-settle) transform-gpu group-hover:rotate-0",
-                    isEven ? "-rotate-[0.5deg]" : "rotate-[0.5deg]",
+                    isEven ? "rotate-[-0.5deg]" : "rotate-[0.5deg]",
                 )}
             >
                 {/* The pink depth the face presses into */}
@@ -46,12 +46,12 @@ const ListCard = ({ to, label, index, animate = true, onIntent, children }: List
                     className={cn(
                         "relative block pt-1.75 px-1.75 pb-3.25 @max-[580px]:pt-1.5 @max-[580px]:px-1.5 @max-[580px]:pb-2.75",
                         "rounded-[23px] @max-[580px]:rounded-[20px] border-2 border-(--ink)",
-                        "bg-(--face) text-(--face-ink) shadow-[var(--face-hl)] no-underline cursor-pointer",
+                        "bg-(--face) text-(--face-ink) shadow-(--face-hl) no-underline cursor-pointer",
                         "transition-[translate,background-color] duration-380 ease-(--ease-settle) transform-gpu",
                         "group-hover:-translate-x-px group-hover:-translate-y-0.75 group-hover:bg-(--face-hover)",
-                        "group-active:translate-x-1.25 group-active:translate-y-1.25 group-active:duration-120",
-                        "@max-[580px]:group-active:translate-x-1 @max-[580px]:group-active:translate-y-1",
-                        "focus-visible:outline-3 focus-visible:outline-[#FF3399] focus-visible:outline-offset-5",
+                        "group-active:translate-1.25 group-active:duration-120",
+                        "@max-[580px]:group-active:translate-1",
+                        "focus-visible:outline-3 focus-visible:outline-neon-pink focus-visible:outline-offset-5",
                     )}
                 >
                     {children}

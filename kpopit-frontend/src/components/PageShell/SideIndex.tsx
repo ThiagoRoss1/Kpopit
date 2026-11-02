@@ -39,7 +39,7 @@ export const SideIndex = ({ items, active, onPick }: IndexProps) => {
                             "pp-focus flex items-center gap-2.5 px-3 py-2 rounded-[14px] border-2",
                             "font-semibold text-sm text-(--text) no-underline",
                             "transition-[background-color,border-color,translate] duration-300 ease-(--ease-settle) transform-gpu",
-                            "active:translate-x-0.5 active:translate-y-0.5",
+                            "active:translate-0.5",
                             isActive
                                 ? "border-(--ink) bg-(--chip) shadow-[2px_3px_0_var(--ctl-off),var(--in)]"
                                 : "border-transparent hover:bg-(--chip) hover:border-(--ink) hover:translate-x-1",

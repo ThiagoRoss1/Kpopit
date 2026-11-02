@@ -119,7 +119,7 @@ const AlbumCard = ({ album, index }: AlbumCardProps) => {
                     <div
                         aria-hidden
                         className={cn(
-                            "absolute inset-y-0 -left-[60%] w-[220%] pointer-events-none",
+                            "absolute inset-y-0 left-[-60%] w-[220%] pointer-events-none",
                             "bg-[linear-gradient(118deg,rgba(255,255,255,0)_40%,rgba(255,255,255,.2)_47%,rgba(255,255,255,.06)_51%,rgba(255,255,255,0)_57%)]",
                             "transition-[translate] duration-880 transform-gpu group-hover:translate-x-[42%] group-hover:duration-1380",
                             SLOW_EASE,

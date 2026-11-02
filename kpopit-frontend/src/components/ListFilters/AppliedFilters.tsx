@@ -43,7 +43,7 @@ const AppliedFilters = ({ result, filters, onClearAll, filtersOpen }: AppliedFil
                         "shadow-[1.5px_2px_0_var(--ctl-off),var(--in)] active:shadow-[0_0_0_var(--ctl-off),var(--in)]",
                         "animate-[puffMenu_0.35s_var(--ease-pop)_both]",
                         "transition-[translate,background-color,box-shadow] duration-380 ease-(--ease-settle) transform-gpu",
-                        "hover:-translate-y-0.5 hover:bg-(--chip-hover) active:translate-x-0.5 active:translate-y-0.5",
+                        "hover:-translate-y-0.5 hover:bg-(--chip-hover) active:translate-0.5",
                         hiddenOnPhones,
                     )}
                 >

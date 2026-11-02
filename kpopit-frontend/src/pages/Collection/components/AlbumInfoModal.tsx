@@ -14,27 +14,27 @@ interface AlbumInfoModalProps {
 
 const INFO_ROWS = (props: AlbumInfoModalProps) =>[
     {
-        icon: <BookOpenText className="w-8 h-8" />,
+        icon: <BookOpenText className="size-8" />,
         title: `${props.collectionName} Album`,
         body: `${props.collectionName} features every idol and group from KpopIt. Flip through it like a real book.`,
     },
     {
-    icon: <Settings className="w-8 h-8" />,
+    icon: <Settings className="size-8" />,
     title: "Settings",
     body: "Adjust visual effects and controls from the settings button.",
     },
     {
-        icon: <Layers className="w-8 h-8" />,
+        icon: <Layers className="size-8" />,
         title: "Flip and navigate",
         body: "Tap the page sides (or use the arrows / ← → keys) to turn pages. In Focus mode the same taps move across the spread first, then turn. The carousel below jumps straight to any opening, and the Summary jumps to a group.",
     },
     {
-        icon: <Sticker className="w-8 h-8" />,
+        icon: <Sticker className="size-8" />,
         title: "Stickers",
         body: "Win Classic or Blurry to collect that idol's sticker, win the same idol again to level it up: Base → Gold → Holo. Tap any sticker to see its level, copies and more. Complete a group (full bar ✓) to unlock its group photo.",
     },
     {
-        icon: <Smartphone className="w-8 h-8" />,
+        icon: <Smartphone className="size-8" />,
         title: "On your phone",
         body: "Tap the focus button to zoom in and read one page at a time, easier to see on a small screen.",
     }
@@ -77,7 +77,7 @@ export default function AlbumInfoModal(props: AlbumInfoModalProps) {
                             : 'border-ink text-ink shadow-[2px_2px_0px_rgba(0,0,0,1)] active:shadow-[0px_1px_0px_rgba(0,0,0,0)]'
                         }`}
                     >
-                        <X className="w-5 h-5" strokeWidth={3} />
+                        <X className="size-5" strokeWidth={3} />
                     </button>
                 </div>
                 <div className={`album-index-scroll ${night ? 'album-index-scroll--night' : ''} -mx-2 mt-4.5 flex min-h-0 flex-1 flex-col gap-3.5 overflow-y-auto px-2 contain-[paint]`}>
@@ -111,7 +111,7 @@ export default function AlbumInfoModal(props: AlbumInfoModalProps) {
                                 : 'border-ink text-ink shadow-[3px_3px_0px_#0a0a0a] active:shadow-none'
                         }`}
                     >
-                        <PlayCircle className="w-5 h-5" strokeWidth={3} />
+                        <PlayCircle className="size-5" strokeWidth={3} />
                         <span className="font-major-mono-display">Replay tour</span>
                     </button>
                 )}

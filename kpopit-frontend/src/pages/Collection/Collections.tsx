@@ -72,7 +72,7 @@ export default function Collection() {
                                         ? 'border-neon-pink/60 bg-[#1c1f27] text-white shadow-[0_3px_0_rgba(255,51,153,0.6)] active:shadow-[0_1px_0_rgba(255,51,153,0.6)]'
                                         : 'border-ink bg-white text-ink shadow-[0_3px_0_var(--color-ink)] active:shadow-[0_1px_0_var(--color-ink)]'}`}
                                 >
-                                    <SlidersHorizontal className="w-4.5 h-4.5" strokeWidth={3} />
+                                    <SlidersHorizontal className="size-4.5" strokeWidth={3} />
                                 </button>
                                 {fxPanel.mounted && (
                                     <FxPanel
@@ -95,7 +95,7 @@ export default function Collection() {
                                         : 'border-ink bg-white text-ink shadow-[0_3px_0_var(--color-ink)] active:shadow-[0_1px_0_var(--color-ink)]'
                                     } `}
                                 >
-                                    {night ? <Moon className="w-5 h-5 text-white/60" /> : <Sun className="w-5 h-5 text-[#6b5f55]" />}
+                                    {night ? <Moon className="size-5 text-white/60" /> : <Sun className="size-5 text-[#6b5f55]" />}
                                 </button>
                             </div>
                         </div>

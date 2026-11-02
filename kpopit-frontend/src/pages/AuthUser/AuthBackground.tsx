@@ -11,10 +11,10 @@ const AuthBackground = () => {
             </div>
 
             {/* Corner circles */}
-            <div className="absolute -top-20 -left-20 w-80 h-80 border-2 border-neon-pink rounded-full opacity-20" />
-            <div className="absolute -bottom-10 -left-10 w-48 h-48 border-2 border-neon-pink rounded-full opacity-10" />
-            <div className="absolute top-10 -right-10 w-32 h-32 border-2 border-neon-pink rounded-full opacity-10" />
-            <div className="absolute -bottom-10 -right-16 w-72 h-72 border-2 border-neon-pink rounded-full opacity-[0.07]" />
+            <div className="absolute -top-20 -left-20 size-80 border-2 border-neon-pink rounded-full opacity-20" />
+            <div className="absolute -bottom-10 -left-10 size-48 border-2 border-neon-pink rounded-full opacity-10" />
+            <div className="absolute top-10 -right-10 size-32 border-2 border-neon-pink rounded-full opacity-10" />
+            <div className="absolute -bottom-10 -right-16 size-72 border-2 border-neon-pink rounded-full opacity-[0.07]" />
         </div>
     );
 };

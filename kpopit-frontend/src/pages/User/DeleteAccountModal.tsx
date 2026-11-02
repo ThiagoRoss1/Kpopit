@@ -38,7 +38,7 @@ const DeleteAccountModal = ({ isOpen, onClose, onBack }: { isOpen: boolean; onCl
     return (
         <EditProfileModal isOpen={isOpen} onClose={onClose} title="Delete Account">
             <div className="px-5 sxs:px-6 py-5 flex flex-col gap-5">
-                <div className="ep-field flex flex-col gap-2 text-sm font-bold text-white/80 leading-relaxed">
+                <div className="ep-field flex flex-col gap-2 text-sm/relaxed font-bold text-white/80">
                     <p className="m-0">Your account will be deleted in 15 days, with your games, stats, collection, Idol XP and profile.</p>
                     <p className="m-0 text-white/60">Changed your mind? Log in again within those 15 days and the deletion is cancelled.</p>
                 </div>
@@ -67,7 +67,7 @@ const DeleteAccountModal = ({ isOpen, onClose, onBack }: { isOpen: boolean; onCl
                             disabled:opacity-50 disabled:cursor-not-allowed disabled:shadow-none
                             disabled:hover:translate-x-0 disabled:hover:translate-y-0"
                     >
-                        {remove.isPending && <Loader2 className="w-4 h-4 animate-spin" />}
+                        {remove.isPending && <Loader2 className="size-4 animate-spin" />}
                         {remove.isPending ? "Scheduling" : "Delete in 15 days"}
                     </button>
                     <button
@@ -80,7 +80,7 @@ const DeleteAccountModal = ({ isOpen, onClose, onBack }: { isOpen: boolean; onCl
                         hover:cursor-pointer transition-colors duration-300
                         disabled:opacity-50 disabled:cursor-not-allowed"
                     >
-                        <ChevronLeft className="w-5 h-5" />
+                        <ChevronLeft className="size-5" />
                         Return
                     </button>
                 </div>

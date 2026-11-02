@@ -147,14 +147,14 @@ const EditProfileContent = (props: EditProfileProps) => {
                                 <Img
                                     src={avatarSrc}
                                     alt="Avatar"
-                                    className="w-full h-full object-cover transform-gpu"
+                                    className="size-full object-cover transform-gpu"
                                     draggable={false}
                                 />
                             ) : (
-                                <div className="w-full h-full bg-linear-to-b from-[#2a2a2a] to-[#0e0e0e]" />
+                                <div className="size-full bg-linear-to-b from-[#2a2a2a] to-[#0e0e0e]" />
                             )}
                             <div className="absolute inset-0 grid place-items-center bg-black/55 opacity-0 group-hover:opacity-100 transition-opacity duration-300">
-                                <Camera className="w-8 h-8 text-white/80 drop-shadow" />
+                                <Camera className="size-8 text-white/80 drop-shadow" />
                             </div>
                         </button>
                         
@@ -170,7 +170,7 @@ const EditProfileContent = (props: EditProfileProps) => {
                         </label>
 
                         <div className="ep-input relative h-13 rounded-2xl overflow-hidden bg-ink">
-                            <User className="absolute left-4 top-1/2 w-4 h-4 -translate-y-1/2 text-white" />
+                            <User className="absolute left-4 top-1/2 size-4 -translate-y-1/2 text-white" />
 
                             <input
                                 type="text"
@@ -178,7 +178,7 @@ const EditProfileContent = (props: EditProfileProps) => {
                                 maxLength={DISPLAY_NAME_MAX_LENGTH}
                                 onChange={(e) => setDisplayName(e.target.value)}
                                 placeholder="Your stage name"
-                                className="w-full h-full pl-11 pr-14 bg-ink text-sm font-bold text-white placeholder:text-neutral-700 focus:outline-none"
+                                className="size-full pl-11 pr-14 bg-ink text-sm font-bold text-white placeholder:text-neutral-700 focus:outline-none"
                             />
                             <span className="absolute right-3 top-1/2 -translate-y-1/2 text-[12px] font-black uppercase tracking-widest text-white/40">
                                 {displayName.length}/{DISPLAY_NAME_MAX_LENGTH}
@@ -194,9 +194,9 @@ const EditProfileContent = (props: EditProfileProps) => {
 
                         <div className="flex flex-row items-stretch gap-2">
                             <div className="ep-input flex-1 min-w-0 relative h-13 rounded-2xl overflow-hidden bg-ink">
-                                <Mail className="absolute left-4 top-1/2 w-4 h-4 -translate-y-1/2 text-neutral-500" />
+                                <Mail className="absolute left-4 top-1/2 size-4 -translate-y-1/2 text-neutral-500" />
 
-                                <div className="flex items-center w-full h-full pl-11 pr-12 text-sm font-bold text-white/80">
+                                <div className="flex items-center size-full pl-11 pr-12 text-sm font-bold text-white/80">
                                     {currentEmail
                                         ? (showEmail ? currentEmail : censorEmail(currentEmail))
                                         : <span className="text-neutral-700">No email registered</span>}
@@ -209,7 +209,7 @@ const EditProfileContent = (props: EditProfileProps) => {
                                         aria-label={showEmail ? "Hide email" : "Show email"}
                                         className="absolute right-4 top-1/2 -translate-y-1/2 text-neutral-500 hover:text-white hover:cursor-pointer transition-colors"
                                     >
-                                        {showEmail ? <EyeOff className="w-6 h-6" /> : <Eye className="w-6 h-6" />}
+                                        {showEmail ? <EyeOff className="size-6" /> : <Eye className="size-6" />}
                                     </button>
                                 )}
                             </div>
@@ -235,9 +235,9 @@ const EditProfileContent = (props: EditProfileProps) => {
 
                         <div className="flex flex-row items-stretch gap-2">
                             <div className="ep-input flex-1 min-w-0 relative h-13 rounded-2xl overflow-hidden bg-ink">
-                                <User className="absolute left-4 top-1/2 w-4 h-4 -translate-y-1/2 text-neutral-500" />
+                                <User className="absolute left-4 top-1/2 size-4 -translate-y-1/2 text-neutral-500" />
 
-                                <div className="flex items-center w-full h-full pl-11 pr-3 text-sm font-bold text-white/80 truncate">
+                                <div className="flex items-center size-full pl-11 pr-3 text-sm font-bold text-white/80 truncate">
                                     @{currentUsername}
                                 </div>
                             </div>
@@ -262,9 +262,9 @@ const EditProfileContent = (props: EditProfileProps) => {
                         </label>
                         <div className="flex items-stretch gap-2">
                             <div className="ep-input flex-1 min-w-0 relative h-13 rounded-2xl overflow-hidden bg-ink">
-                                <Lock className="absolute left-4 top-1/2 w-4 h-4 -translate-y-1/2 text-neutral-500" />
+                                <Lock className="absolute left-4 top-1/2 size-4 -translate-y-1/2 text-neutral-500" />
 
-                                <div className="flex items-center w-full h-full pl-11 pr-3 text-sm font-bold text-white/80 truncate">
+                                <div className="flex items-center size-full pl-11 pr-3 text-sm font-bold text-white/80 truncate">
                                     ••••••••••
                                 </div>
                             </div>
@@ -282,10 +282,10 @@ const EditProfileContent = (props: EditProfileProps) => {
                         </div>
                     </div>
 
-                    <EditRow label="Bias Idol" icon={<Heart className="absolute left-4 top-1/2 w-4 h-4 -translate-y-1/2 text-neutral-500" />} onEdit={() => setSubModal("biasIdol")}>
+                    <EditRow label="Bias Idol" icon={<Heart className="absolute left-4 top-1/2 size-4 -translate-y-1/2 text-neutral-500" />} onEdit={() => setSubModal("biasIdol")}>
                         {biasIdolName ?? <span className="text-neutral-700">No bias idol yet</span>}
                     </EditRow>
-                    <EditRow label="Bias Group" icon={<Users className="absolute left-4 top-1/2 w-4 h-4 -translate-y-1/2 text-neutral-500" />} onEdit={() => setSubModal("biasGroup")}>
+                    <EditRow label="Bias Group" icon={<Users className="absolute left-4 top-1/2 size-4 -translate-y-1/2 text-neutral-500" />} onEdit={() => setSubModal("biasGroup")}>
                         {biasGroupName ?? <span className="text-neutral-700">No bias group yet</span>}
                     </EditRow>
 
@@ -299,7 +299,7 @@ const EditProfileContent = (props: EditProfileProps) => {
                                 <div key={field} className="ep-input flex items-center justify-between gap-3 px-4 py-3 rounded-2xl bg-ink">
                                     <span className="flex flex-col gap-0.5 min-w-0">
                                         <span className="text-sm font-black text-white">{label}</span>
-                                        <span className="text-xs font-bold text-white/50 leading-snug">{meaning}</span>
+                                        <span className="text-xs/snug font-bold text-white/50">{meaning}</span>
                                     </span>
                                     <button
                                         type="button"
@@ -351,7 +351,7 @@ const EditProfileContent = (props: EditProfileProps) => {
                             disabled:opacity-50 disabled:cursor-not-allowed
                             disabled:hover:translate-x-0 disabled:hover:translate-y-0`}
                     >
-                        {saveMutation.isPending && <Loader2 className="w-4 h-4 animate-spin" />}
+                        {saveMutation.isPending && <Loader2 className="size-4 animate-spin" />}
                         {saveMutation.isPending ? "Saving" : "Save Changes"}
                     </button>
                 </footer>
@@ -417,7 +417,7 @@ function EditRow({ label, icon, onEdit, children }: { label: string; icon: React
             <div className="flex flex-row items-stretch gap-2">
                 <div className="ep-input flex-1 min-w-0 relative h-13 rounded-2xl overflow-hidden bg-ink">
                     {icon}
-                    <div className="flex items-center w-full h-full pl-11 pr-3 text-sm font-bold text-white/80 truncate">
+                    <div className="flex items-center size-full pl-11 pr-3 text-sm font-bold text-white/80 truncate">
                         {children}
                     </div>
                 </div>

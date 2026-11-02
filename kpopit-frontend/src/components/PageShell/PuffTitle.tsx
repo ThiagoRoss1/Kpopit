@@ -15,7 +15,7 @@ const PuffTitle = ({ as: Tag = "h1", className, children }: PuffTitleProps) => {
             className={cn(
                 "m-0 pr-1.5 pb-2.5 pl-1 puff-ink",
                 "font-bold leading-[1.05] whitespace-nowrap text-white text-shadow-(--puff-title)",
-                "-rotate-[1.5deg]",
+                "rotate-[-1.5deg]",
                 className,
             )}
         >

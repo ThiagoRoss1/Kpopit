@@ -40,7 +40,7 @@ const FiltersToggle = ({ open, activeCount, onToggle }: FiltersToggleProps) => {
                     aria-hidden
                     className={cn(
                         "absolute -top-2 -right-2 grid place-items-center min-w-5.5 h-5.5 px-1.5",
-                        "rounded-full border-2 border-[#1A1418] bg-[#FF3399] text-[#1A1418] shadow-[1px_1.5px_0_#1A1418]",
+                        "rounded-full border-2 border-[#1A1418] bg-neon-pink text-[#1A1418] shadow-[1px_1.5px_0_#1A1418]",
                         "font-bold text-[11px] leading-none",
                         "animate-[puffMenu_0.35s_var(--ease-pop)_both]",
                     )}

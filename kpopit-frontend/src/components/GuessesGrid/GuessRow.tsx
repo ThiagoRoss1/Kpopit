@@ -142,7 +142,7 @@ const GuessRow = (props: GuessRowProps) => {
                         <Img
                             src={`${import.meta.env.VITE_IMAGE_BUCKET_URL}${guess.guessed_idol_data.image_path}?v=${guess.guessed_idol_data.image_version}`}
                             alt="Idol"
-                            className="w-20 h-20 sm:w-28 sm:h-28 object-cover select-none"
+                            className="size-20 sm:size-28 object-cover select-none"
                             draggable={false}
                             loading={isMobile ? "lazy" : "eager"}
                         />
@@ -240,7 +240,7 @@ const GuessRow = (props: GuessRowProps) => {
                 {guess.feedback.birth_date?.status !== "correct" && (
                 <Img src={getStatusIcon(guess.feedback.birth_date?.status)}
                 alt="Birth Date"
-                className="w-20 h-20 sm:w-28 sm:h-28 object-cover"
+                className="size-20 sm:size-28 object-cover"
                 draggable={false} 
                 loading={isMobile ? "lazy" : "eager"} />
                 )}
@@ -255,7 +255,7 @@ const GuessRow = (props: GuessRowProps) => {
                 {guess.feedback.idol_debut_year?.status !== "correct" && (
                 <Img src={getStatusIcon(guess.feedback.idol_debut_year?.status)}
                 alt="Debut" 
-                className="w-20 h-20 sm:w-28 sm:h-28 object-cover"
+                className="size-20 sm:size-28 object-cover"
                 draggable={false} 
                 loading={isMobile ? "lazy" : "eager"} />
                 )}
@@ -270,7 +270,7 @@ const GuessRow = (props: GuessRowProps) => {
                 {guess.feedback.height?.status !== "correct" && (
                 <Img src={getStatusIcon(guess.feedback.height?.status)}
                 alt="Height"
-                className="w-20 h-20 sm:w-28 sm:h-28 object-cover"
+                className="size-20 sm:size-28 object-cover"
                 draggable={false}
                 loading={isMobile ? "lazy" : "eager"} />
                 )}

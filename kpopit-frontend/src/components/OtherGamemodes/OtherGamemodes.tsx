@@ -34,7 +34,7 @@ export const OtherGamemodes = (props: OtherGamemodesProps) => {
                                 src="/kpopit-icon-svg.svg"
                                 alt={mode.name}
                                 draggable={false}
-                                className={`${mode.photoSpecs ?? ""} max-xs:w-6 max-xs:h-6 w-9 h-9 sm:w-10 sm:h-10 object-contain shrink-0`}
+                                className={`${mode.photoSpecs ?? ""} max-xs:size-6 size-9 sm:size-10 object-contain shrink-0`}
                             />
 
                             <span className="font-bold max-xs:text-sm text-base sm:text-lg text-neon-ink leading-none truncate">

@@ -72,10 +72,10 @@ const FeedbackSquares = (props: FeedbackSquaresProps) => {
                 }, 1200);
                 }}
               >
-              <div className={`${isTouched ? "opacity-100" : "opacity-0"} sm:opacity-0 sm:group-hover:opacity-100 absolute -top-1 rounded-lg right-2 w-5 h-5 mt-2 pointer-events-auto`}>
+              <div className={`${isTouched ? "opacity-100" : "opacity-0"} sm:opacity-0 sm:group-hover:opacity-100 absolute -top-1 rounded-lg right-2 size-5 mt-2 pointer-events-auto`}>
                 <button className="flex items-center justify-center w-full h-full
                 hover:scale-105 hover:brightness-110 hover:cursor-pointer transition-all duration-300 transform-gpu" onClick={onClose}>
-                  <X color="white" className="w-5 h-5 sm:w-5 sm:h-5" />
+                  <X color="white" className="size-5 sm:size-5" />
                 </button>
               </div>
 
@@ -85,10 +85,10 @@ const FeedbackSquares = (props: FeedbackSquaresProps) => {
                   key={index}
                   className="flex flex-col items-center justify-center gap-1">
 
-                    <div className={`w-10 h-10 sm:w-10 sm:h-10 flex items-center justify-center rounded-lg border border-white ${getStatusColor(status.key)}`}>
+                    <div className={`size-10 sm:size-10 flex items-center justify-center rounded-lg border border-white ${getStatusColor(status.key)}`}>
                     
                     {getStatusIcon(status.key) && (
-                      <Img src={getStatusIcon(status.key)!} alt="status" className="w-10 h-10 sm:w-10 sm:h-10" draggable={false} />
+                      <Img src={getStatusIcon(status.key)!} alt="status" className="size-10 sm:size-10" draggable={false} />
                     )}
                       </div>
 

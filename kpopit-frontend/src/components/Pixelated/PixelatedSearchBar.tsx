@@ -127,7 +127,7 @@ const PixelatedSearchBar = (props: PixelatedSearchBarProps) => {
                 hover:brightness-110 hover:cursor-pointer active:translate-y-1 active:shadow-[0_1px_0_var(--color-ink)]
                 disabled:opacity-50 disabled:pointer-events-none"
             >
-              <Img src={SearchIcon} alt="Search Icon" aria-hidden="true" className="w-full h-full" draggable={false} />
+              <Img src={SearchIcon} alt="Search Icon" aria-hidden="true" className="size-full" draggable={false} />
             </button>
 
             <AnimatePresence>
@@ -158,7 +158,7 @@ const PixelatedSearchBar = (props: PixelatedSearchBarProps) => {
                         <Img
                           src={resolveCdnUrl(album.cover_path) ?? undefined}
                           alt=""
-                          className="w-12 h-12 object-cover rounded-full border-2 border-ink shrink-0"
+                          className="size-12 object-cover rounded-full border-2 border-ink shrink-0"
                           loading="eager"
                           draggable={false}
                         />

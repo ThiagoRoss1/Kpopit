@@ -98,7 +98,7 @@ export function CollectionCard({ collection, night }: { collection: CollectionLi
                     {collection.name.toUpperCase()}
                 </h2>
                 <p className={`font-korean mt-1.5 text-[13px] font-bold ${textMuted}`}>{koreanLabel}</p>
-                <p className={`mt-3 max-w-115 font-sans text-[14px] leading-normal ${textMuted}`}>
+                <p className={`mt-3 max-w-115 font-sans text-sm/normal ${textMuted}`}>
                     {collection.description}
                 </p>
                 <div className="flex flex-wrap items-center justify-center gap-2.5 pt-4 md:mt-auto md:justify-start">
@@ -112,7 +112,7 @@ export function CollectionCard({ collection, night }: { collection: CollectionLi
                                 : 'border-ink shadow-[0_4px_0_var(--color-ink)] active:shadow-[0_1px_0_var(--color-ink)]'
                         }`}
                     >
-                        Open album <ArrowRight className="inline-block w-4 h-4" />
+                        Open album <ArrowRight className="inline-block size-4" />
                     </IntentLink>
 
                     <div className="flex items-center justify-center gap-2.5 max-md:basis-full">

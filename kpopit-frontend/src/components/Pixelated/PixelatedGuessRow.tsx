@@ -62,7 +62,7 @@ const PixelatedGuessRow = ({
                         <Img
                             src={coverUrl ?? undefined}
                             alt={`${guess.album_name} cover`}
-                            className="w-full h-full object-cover"
+                            className="size-full object-cover"
                             draggable={false}
                         />
                     </div>
