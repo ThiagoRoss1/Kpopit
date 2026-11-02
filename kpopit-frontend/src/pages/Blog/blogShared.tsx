@@ -1,41 +1,60 @@
 import { cn } from "../../lib/utils";
-import type { PostTag } from "../../utils/posts";
-import { TAG_BG } from "./blogData";
+import type { Post, PostTag } from "../../utils/posts";
+import { COVER_ZOOM, TAG_GROUND } from "./blogLooks";
 
-export function TagChip({ tag, className }: { tag: PostTag; className?: string }) {
+export const TagChip = ({ tag, className }: { tag: PostTag; className?: string }) => {
     return (
         <span
-            className={cn("inline-flex px-2.5 py-[3px] rounded-full border-[1.5px] border-[#1A1418] text-[#1A1418] font-bold text-[10px] tracking-[.08em] [box-shadow:inset_0_2px_0_rgba(255,255,255,.6),2px_2.5px_0_#1A1418]", className)}
-            style={{ background: TAG_BG[tag] }}
+            className={cn(
+                "inline-flex px-2.5 py-0.75 rounded-full",
+                "border-[1.5px] border-[#1A1418] shadow-[inset_0_2px_0_rgba(255,255,255,.6),2px_2.5px_0_#1A1418]",
+                "font-bold text-[10px] tracking-[.08em] text-[#1A1418]",
+                TAG_GROUND[tag],
+                className,
+            )}
         >
             {tag.toUpperCase()}
         </span>
     );
-}
+};
 
-export function Sticker({ children, tone, className }: { children: string; tone: "pink" | "butter"; className?: string }) {
+export const Sticker = ({ children, tone, className }: { children: string; tone: "pink" | "butter"; className?: string }) => {
     return (
         <span
             className={cn(
-                "px-2.5 py-1 rounded-full border-2 border-[#1A1418] font-bold text-[10.5px] tracking-[.08em] [box-shadow:inset_0_2px_0_rgba(255,255,255,.55),2px_3px_0_#1A1418]",
-                tone === "pink" ? "bg-[#FF70B8] text-white [text-shadow:var(--tag-text)]" : "bg-[#FFD64F] text-[#1A1418]",
+                "px-2.5 py-1 rounded-full border-2 border-[#1A1418] shadow-[inset_0_2px_0_rgba(255,255,255,.55),2px_3px_0_#1A1418]",
+                "font-bold text-[10.5px] tracking-[.08em]",
+                tone === "pink" ? "bg-[#FF70B8] text-white text-shadow-(--tag-text)" : "bg-[#FFD64F] text-[#1A1418]",
                 className,
             )}
         >
             {children}
         </span>
     );
-}
+};
+
+/** A post's cover in its frame; it zooms in when its card is hovered. */
+export const Cover = ({ post, className, ratio = "aspect-16/10" }: { post: Post; className?: string; ratio?: string }) => {
+    return (
+        <div className={cn("overflow-hidden border-2 border-[#1A1418] bg-[#DCD6D2]", ratio, className)}>
+            <img src={post.image} alt="" loading="lazy" className={cn("block size-full object-cover", COVER_ZOOM)} />
+        </div>
+    );
+};
 
 /** Small uppercase label followed by a dashed rule. */
-export function SectionRule({ label, count }: { label: string; count?: number }) {
+export const SectionRule = ({ label, count }: { label: string; count?: number }) => {
     return (
         <div className="flex items-center gap-3">
             <span className="font-semibold text-[11px] tracking-[.14em] text-(--muted)">{label}</span>
+
             {count !== undefined && (
-                <span className="font-bold text-[11px] leading-none text-(--chip-ink) bg-(--chip) border-[1.5px] border-(--ink) rounded-full px-2 py-[3px]">{count}</span>
+                <span className="px-2 py-0.75 rounded-full border-[1.5px] border-(--ink) bg-(--chip) font-bold text-[11px] leading-none text-(--chip-ink)">
+                    {count}
+                </span>
             )}
+
             <span aria-hidden className="flex-1 h-0.5 bg-[repeating-linear-gradient(90deg,var(--rule)_0_8px,transparent_8px_14px)]" />
         </div>
     );
-}
+};

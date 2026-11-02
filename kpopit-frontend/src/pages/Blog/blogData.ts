@@ -1,6 +1,5 @@
 import { POST_TAGS, type Post, type PostTag } from "../../utils/posts.ts";
 
-export const TAG_BG: Record<PostTag, string> = { Update: "#5EE8AA", "Dev log": "#FFD64F", Thoughts: "#FF8AC4", News: "#FF926B" };
 const MONTHS = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
 
 export const tagKey = (tag: PostTag) => tag.toLowerCase().replace(/\s+/g, "-");

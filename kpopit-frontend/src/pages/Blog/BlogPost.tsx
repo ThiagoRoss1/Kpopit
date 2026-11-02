@@ -8,22 +8,29 @@ import IntentLink from "../../components/Links/IntentLink";
 import { BLOG_POSTS } from "../../content/blog";
 import { postImageUrl } from "../../utils/posts";
 import NotFound from "../NotFound/NotFound";
-import { TagChip } from "./blogShared";
+import { cn } from "../../lib/utils";
+import { Cover, TagChip } from "./blogShared";
+import { CARD_DEPTH, CARD_MOTION } from "./blogLooks";
 import { formatPostDate, readNext } from "./blogData";
 import "./blog.css";
 
-const NEXT_TILT = ["-0.6deg", "0.5deg", "-0.4deg"];
+const NEXT_TILTS = ["rotate-[-0.6deg]", "rotate-[0.5deg]", "rotate-[-0.4deg]"];
 
-export default function BlogPost({ slug }: { slug: string }) {
+const BlogPost = ({ slug }: { slug: string }) => {
     const { show, node: toast } = useToast();
-    const index = BLOG_POSTS.findIndex((p) => p.slug === slug);
+    const index = BLOG_POSTS.findIndex((candidate) => candidate.slug === slug);
     const post = BLOG_POSTS[index];
     if (!post) return <NotFound />;
 
     const path = `/blog/${post.slug}`;
     const older = BLOG_POSTS[index + 1];
     const newer = BLOG_POSTS[index - 1];
-    const next = readNext(BLOG_POSTS, post);
+    const nextPosts = readNext(BLOG_POSTS, post);
+
+    const neighbours = [
+        older && { label: "← OLDER", post: older, isEnd: false },
+        newer && { label: "NEWER →", post: newer, isEnd: true },
+    ].filter((neighbour) => !!neighbour);
 
     const copyLink = async () => {
         try {
@@ -53,100 +60,131 @@ export default function BlogPost({ slug }: { slug: string }) {
                     publisher: { "@type": "Organization", name: "KpopIt", logo: `${SITE_URL}/kpopit-icon.png` },
                 }}
             />
-            <PageShell width="max-w-[760px]" className="pt-3">
-                <div className="flex flex-col gap-[26px]">
-                    <div className="pp-enter [--pp-anim:puffSide] flex justify-between items-center gap-2.5 flex-wrap">
+            <PageShell width="max-w-190" className="pt-3">
+                <div className="flex flex-col gap-6.5">
+                    <div className="pp-enter [--pp-anim:puffSide] flex flex-wrap items-center justify-between gap-2.5">
                         <PressLink to="/blog" className="pl-2.5">
-                            <ArrowLeft className="w-4 h-4" strokeWidth={3} aria-hidden />
+                            <ArrowLeft className="size-4" strokeWidth={3} aria-hidden />
                             All posts
                         </PressLink>
+
                         <PressButton onClick={copyLink}>
-                            <Copy className="w-[15px] h-[15px]" strokeWidth={2.8} aria-hidden />
+                            <Copy className="size-3.75" strokeWidth={2.8} aria-hidden />
                             Copy link
                         </PressButton>
                     </div>
 
                     <header className="pp-enter [--pp-anim:puffSide] [--pp-delay:80ms] flex flex-col items-center gap-3.5 text-center">
-                        <div className="flex items-center gap-2.5 flex-wrap justify-center">
+                        <div className="flex flex-wrap items-center justify-center gap-2.5">
                             <TagChip tag={post.tag} />
                             <span className="font-semibold text-[13px] text-(--muted)">{`${formatPostDate(post.date)} · ${post.readMinutes} min read`}</span>
                         </div>
-                        <h1 className="m-0 max-w-[680px] font-bold text-[44px] @max-[580px]:text-[32px] leading-[1.1] text-white [text-shadow:var(--puff-post)] -rotate-1 puff-ink px-1.5 pb-2 [text-wrap:balance]">
+
+                        <h1
+                            className={cn(
+                                "puff-ink m-0 max-w-170 px-1.5 pb-2 -rotate-1",
+                                "font-bold text-[44px] @max-[581px]:text-[32px] leading-[1.1] text-white text-shadow-(--puff-post) text-balance",
+                            )}
+                        >
                             {post.title}
                         </h1>
+
                         {post.ko && <KoreanTag>{post.ko}</KoreanTag>}
                     </header>
 
-                    <figure className="pp-enter [--pp-delay:140ms] m-0 mx-auto w-full max-w-[640px] -rotate-1 transition-transform duration-500 ease-(--ease-bounce) hover:rotate-0">
-                        <div className="aspect-video rounded-[18px] border-[2.5px] border-[#1A1418] overflow-hidden bg-[#DCD6D2] [box-shadow:5px_5px_0_0_#FF8AC4,5px_5px_0_2px_#1A1418]">
-                            <img src={post.image} alt={post.imageAlt} className="block w-full h-full object-cover" />
+                    <figure
+                        className={cn(
+                            "pp-enter [--pp-delay:140ms] w-full max-w-160 m-0 mx-auto -rotate-1",
+                            "transition-[rotate] duration-500 ease-(--ease-settle) will-change-transform hover:rotate-0",
+                        )}
+                    >
+                        <div className="aspect-video overflow-hidden rounded-[18px] border-[2.5px] border-[#1A1418] bg-[#DCD6D2] shadow-[5px_5px_0_0_#FF8AC4,5px_5px_0_2px_#1A1418]">
+                            <img src={post.image} alt={post.imageAlt} className="block size-full object-cover" />
                         </div>
                     </figure>
 
-                    <article className="pp-enter [--pp-delay:200ms] relative rounded-[23px] border-2 border-(--ink) bg-(--face) text-(--face-ink) [box-shadow:3px_4px_0_var(--ctl-off),var(--in)] pt-9 px-11 pb-[34px] @max-[580px]:pt-6 @max-[580px]:px-[18px] @max-[580px]:pb-[22px] flex flex-col gap-[18px]">
+                    <article
+                        className={cn(
+                            "pp-enter [--pp-delay:200ms] relative flex flex-col gap-4.5",
+                            "pt-9 px-11 pb-8.5 @max-[581px]:pt-6 @max-[581px]:px-4.5 @max-[581px]:pb-5.5",
+                            "rounded-[23px] border-2 border-(--ink) bg-(--face) text-(--face-ink) shadow-[3px_4px_0_var(--ctl-off),var(--in)]",
+                        )}
+                    >
                         <div className="post-body" dangerouslySetInnerHTML={{ __html: post.html }} />
+
                         <div aria-hidden className="h-0.5 mt-3 bg-(--rule)" />
-                        <div className="flex items-center gap-x-5 gap-y-4 flex-wrap pt-1 pb-0.5">
-                            <img src="/kpopit-icon-svg.svg" alt="" className="flex-none w-[52px] h-[52px] -rotate-6" />
-                            <span className="flex-[1_1_200px] flex flex-col gap-1 min-w-0">
-                                <span className="font-caveat font-bold text-[30px] leading-none text-(--group) -rotate-[1.5deg] origin-left">Thanks for reading!</span>
+
+                        <div className="flex flex-wrap items-center gap-x-5 gap-y-4 pt-1 pb-0.5">
+                            <img src="/kpopit-icon-svg.svg" alt="" className="flex-none size-13 -rotate-6" />
+
+                            <span className="flex flex-[1_1_200px] flex-col gap-1 min-w-0">
+                                <span className="font-caveat font-bold text-[30px] leading-none text-(--group) rotate-[-1.5deg] origin-left">Thanks for reading!</span>
                                 <span className="font-medium text-sm leading-[1.45] text-(--muted)">A new idol arrives at midnight.</span>
                             </span>
-                            <span className="flex gap-2.5 flex-wrap">
-                                <PressLink to="/changelog" className="h-[42px] text-[13.5px]">
+
+                            <span className="flex flex-wrap gap-2.5">
+                                <PressLink to="/changelog" className="h-10.5 text-[13.5px]">
                                     Every update
-                                    <ArrowUpRight className="w-3 h-3" strokeWidth={3} aria-hidden />
+                                    <ArrowUpRight className="size-3" strokeWidth={3} aria-hidden />
                                 </PressLink>
-                                <PressLink to="/" variant="pink" className="h-[42px] px-[18px] text-[13.5px]">Play today</PressLink>
+
+                                <PressLink to="/" variant="pink" className="h-10.5 px-4.5 text-[13.5px]">Play today</PressLink>
                             </span>
                         </div>
                     </article>
 
-                    {next.length > 0 && (
+                    {nextPosts.length > 0 && (
                         <section aria-label="Read next" className="flex flex-col gap-3.5">
                             <div className="flex items-center gap-3">
                                 <span className="font-semibold text-[11px] tracking-[.14em] text-(--muted)">READ NEXT</span>
                                 <span aria-hidden className="flex-1 h-0.5 bg-[repeating-linear-gradient(90deg,var(--rule)_0_8px,transparent_8px_14px)]" />
                             </div>
+
                             <div className="grid grid-cols-[repeat(auto-fill,minmax(220px,1fr))] gap-4">
-                                {next.map((p, i) => (
+                                {nextPosts.map((nextPost, i) => (
                                     <IntentLink
-                                        key={p.slug}
-                                        to={`/blog/${p.slug}`}
-                                        style={{ ["--bl-tilt" as string]: NEXT_TILT[i] }}
-                                        className="bl-card pp-focus no-underline text-(--face-ink) flex flex-col gap-2.5 pt-2.5 px-2.5 pb-3.5 rounded-[20px] border-2 border-(--ink) bg-(--face) [box-shadow:3px_4px_0_var(--ctl-off),var(--in)]"
+                                        key={nextPost.slug}
+                                        to={`/blog/${nextPost.slug}`}
+                                        className={cn("flex flex-col gap-2.5 pt-2.5 px-2.5 pb-3.5 rounded-[20px]", CARD_MOTION, CARD_DEPTH, NEXT_TILTS[i])}
                                     >
-                                        <div className="aspect-video rounded-[13px] border-2 border-[#1A1418] overflow-hidden bg-[#DCD6D2]">
-                                            <img src={p.image} alt="" loading="lazy" className="block w-full h-full object-cover" />
-                                        </div>
+                                        <Cover post={nextPost} ratio="aspect-video" className="rounded-[13px]" />
+
                                         <span className="flex items-center gap-2 px-1">
-                                            <TagChip tag={p.tag} />
-                                            <span className="font-semibold text-[11.5px] text-(--muted)">{p.readMinutes} min read</span>
+                                            <TagChip tag={nextPost.tag} />
+                                            <span className="font-semibold text-[11.5px] text-(--muted)">{nextPost.readMinutes} min read</span>
                                         </span>
-                                        <span className="px-1 font-bold text-base leading-[1.3] [text-wrap:pretty]">{p.title}</span>
+
+                                        <span className="px-1 font-bold text-base leading-[1.3] text-pretty">{nextPost.title}</span>
                                     </IntentLink>
                                 ))}
                             </div>
                         </section>
                     )}
 
-                    {(older || newer) && (
-                        <nav aria-label="More posts" className="grid grid-cols-2 gap-3.5 @max-[580px]:grid-cols-1">
-                            {[older && { k: "← OLDER", p: older, end: false }, newer && { k: "NEWER →", p: newer, end: true }].filter(Boolean).map((n) => n && (
+                    {neighbours.length > 0 && (
+                        <nav aria-label="More posts" className="grid grid-cols-2 @max-[581px]:grid-cols-1 gap-3.5">
+                            {neighbours.map((neighbour) => (
                                 <IntentLink
-                                    key={n.k}
-                                    to={`/blog/${n.p.slug}`}
-                                    className={`pp-press pp-focus flex flex-col gap-1.5 px-[18px] py-3.5 rounded-[18px] border-2 border-(--ink) bg-(--chip) text-(--chip-ink) no-underline ${n.end ? "items-end text-right col-start-2 @max-[580px]:col-start-1" : "items-start text-left"}`}
+                                    key={neighbour.label}
+                                    to={`/blog/${neighbour.post.slug}`}
+                                    className={cn(
+                                        "pp-press pp-focus flex flex-col gap-1.5 px-4.5 py-3.5 rounded-[18px] no-underline",
+                                        "border-2 border-(--ink) bg-(--chip) text-(--chip-ink)",
+                                        neighbour.isEnd ? "items-end col-start-2 @max-[581px]:col-start-1 text-right" : "items-start text-left",
+                                    )}
                                 >
-                                    <span className="font-semibold text-[10px] tracking-[.14em] text-(--muted)">{n.k}</span>
-                                    <span className="font-bold text-[15px] leading-[1.3]">{n.p.title}</span>
+                                    <span className="font-semibold text-[10px] tracking-[.14em] text-(--muted)">{neighbour.label}</span>
+                                    <span className="font-bold text-[15px] leading-[1.3]">{neighbour.post.title}</span>
                                 </IntentLink>
                             ))}
                         </nav>
                     )}
                 </div>
             </PageShell>
+
             {toast}
         </>
     );
-}
+};
+
+export default BlogPost;

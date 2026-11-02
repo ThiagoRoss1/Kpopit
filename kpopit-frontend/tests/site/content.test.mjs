@@ -1,6 +1,6 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import { CHANGELOG, CHANGE_TYPES, filterChangelog, parseChangeType } from '../../src/data/changelog.ts';
+import { CHANGELOG, CHANGE_TYPES, filterChangelog, parseChangeType } from '../../src/content/changelog.ts';
 import { FAQ, faqJsonLd, visibleFaq } from '../../src/data/faq.ts';
 import { PRIVACY, UPDATED } from '../../src/data/privacy.ts';
 import { contactMailto } from '../../src/data/contact.ts';
