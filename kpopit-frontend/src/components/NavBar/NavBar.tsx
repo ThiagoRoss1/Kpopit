@@ -29,6 +29,9 @@ interface NavLink {
     to?: string;
 }
 
+// Each item's state as its data-st attribute, read by the navbar E2E spec.
+const STATE_ATTRIBUTE = { current: "cur", open: "open", idle: "idle" } as const;
+
 // A top-level item: a link or a dropdown button. The current section is pink; an idle one shows a
 // pill that fades in behind its label on hover (opacity only, so nothing repaints).
 const navItemClasses = (state: "current" | "open" | "idle") => cn(
@@ -190,6 +193,7 @@ const NavBar = ({ forceTheme }: NavBarProps) => {
                                         key={link.id}
                                         to={link.to}
                                         onIntent={PREFETCH[link.id as NavPage]}
+                                        data-st={STATE_ATTRIBUTE[state]}
                                         aria-current={isCurrent ? "page" : undefined}
                                         className={cn(navItemClasses(state), "px-4")}
                                     >
@@ -204,6 +208,7 @@ const NavBar = ({ forceTheme }: NavBarProps) => {
                                 <div key={link.id} className="relative">
                                     <button
                                         type="button"
+                                        data-st={STATE_ATTRIBUTE[state]}
                                         aria-expanded={isOpen}
                                         aria-haspopup="true"
                                         onClick={() => toggleMenu(menu)}
