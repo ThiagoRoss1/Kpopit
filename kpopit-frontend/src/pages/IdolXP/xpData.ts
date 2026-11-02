@@ -1,5 +1,6 @@
 import type { IdolListItem } from "../../interfaces/gameInterfaces";
 import type { IdolXpState } from "../../interfaces/playerInterfaces";
+import { resolveCdnUrl } from "../../utils/imageUrl";
 
 export const MAX_LEVEL = 10;
 export const MAX_XP = 3 * MAX_LEVEL * MAX_LEVEL;
@@ -44,6 +45,8 @@ export interface XpIdol extends Level {
     /** Shown XP, capped at max level (the 40% past it is kept but not drawn). */
     xp: number;
 }
+
+export const imageOf = (idol: Pick<XpIdol, "imagePath" | "imageVersion">) => resolveCdnUrl(idol.imagePath, idol.imageVersion) ?? "";
 
 export function buildIdols(list: IdolListItem[], state: IdolXpState | null): XpIdol[] {
     const xpById = new Map((state?.idols ?? []).map((i) => [i.idol_id, i.xp]));

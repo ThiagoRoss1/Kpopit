@@ -12,9 +12,9 @@ const PuffCard = ({ tilt, className, ...rest }: PuffCardProps) => {
         <div
             {...rest}
             className={cn(
-                "bg-(--face) text-(--face-ink) border-2 border-(--ink) rounded-[23px] shadow-[var(--card-depth)]",
+                "bg-(--face) text-(--face-ink) border-2 border-(--ink) rounded-[23px] shadow-(--card-depth)",
                 tilted && "transition-[translate,rotate] duration-500 ease-(--ease-settle) hover:-translate-y-1 hover:rotate-0",
-                tilted && (tilt % 2 ? "rotate-[0.5deg]" : "-rotate-[0.5deg]"),
+                tilted && (tilt % 2 ? "rotate-[0.5deg]" : "rotate-[-0.5deg]"),
                 className,
             )}
         />

@@ -1,36 +1,69 @@
-/* Idol XP: motion and the press states Tailwind can't order (press beats hover). */
-.xp-bar { transform-origin: left; transition: transform 1.1s var(--ease-settle); }
-.xp-liquid { transform-box: fill-box; transform-origin: bottom; transition: transform 1s cubic-bezier(.34, 1.3, .64, 1); }
-.xp-bubble { transform-box: fill-box; transform-origin: center; animation: xpBub 2.4s ease-in infinite; }
-@keyframes xpBub { 0% { opacity: 0; transform: translate3d(0, 0, 0) scale(.6) } 20% { opacity: 1 } 100% { opacity: 0; transform: translate3d(0, -46px, 0) scale(1) } }
-/* The light sweep runs twice when XP lands, after the bar has grown to its new width. */
-.xp-shine { animation: xpShine 1.1s ease-in-out .7s 2 backwards; }
-@keyframes xpShine { from { translate: -120% 0px} to { translate: 340% 0px} }
-.xp-levelup { animation: xpUp .9s var(--ease-pop) backwards; translate: 0px 0px; rotate: -3deg; scale: 1; }
-@keyframes xpUp { 0% { rotate: -10deg; scale: .4 ; opacity: 0} 60% { rotate: 4deg; scale: 1.15 ; opacity: 1} 100% { rotate: -3deg; scale: 1 } }
+/* ==========================================================================
+   Idol XP: the jar's bubbles, the bar's light sweep and the level-up sticker
+   (layout and hover motion are Tailwind in the TSX).
+   ========================================================================== */
 
-.xp-card {
-  translate: 0px 0px;
-  rotate: var(--xp-tilt, 0deg);
-  scale: 1;
-  transition: translate .42s var(--ease-settle), rotate .42s var(--ease-settle), scale .42s var(--ease-settle), box-shadow .35s var(--ease-settle), background-color .3s ease;
-  animation: puffIn .6s var(--ease-settle) var(--xp-delay, 0ms) backwards;
+/* Bubbles rise through the jar's liquid */
+@keyframes xpBubble {
+    0% {
+        opacity: 0;
+        translate: 0 0;
+        scale: 0.6;
+    }
+
+    20% {
+        opacity: 1;
+    }
+
+    100% {
+        opacity: 0;
+        translate: 0 -46px;
+        scale: 1;
+    }
 }
-@media (hover: hover) { .xp-card:hover { translate: 0px -3px; rotate: 0deg; scale: 1; } }
-.xp-card:active:active:active { translate: 1px 2px; rotate: 0deg; scale: 1; transition-duration: .15s; }
-@container (max-width: 580px) {
-  .xp-card { translate: 0px 0px; rotate: 0deg; scale: 1; }
-  @media (hover: hover) { .xp-card:hover { translate: 0px -1px; rotate: 0deg; scale: 1; } }
+
+.xp-bubble {
+    transform-box: fill-box;
+    transform-origin: center;
+    animation: xpBubble 2.4s ease-in infinite;
 }
 
-.xp-fav { transition: translate .4s var(--lift, var(--ease-settle)), rotate .4s var(--lift, var(--ease-settle)), scale .4s var(--lift, var(--ease-settle)); }
-@media (hover: hover) { .xp-fav:hover { --lift: var(--ease-pop); translate: 0px 0px; rotate: -8deg; scale: 1.15; } }
-.xp-fav:active:active:active { translate: 0px 0px; rotate: 0deg; scale: .9; }
+/* The light sweep runs twice when XP lands, after the bar has grown to its new width */
+@keyframes xpShine {
+    from {
+        translate: -120% 0;
+    }
 
-.xp-search { transition: translate .4s cubic-bezier(.34, 1.4, .64, 1), rotate .4s cubic-bezier(.34, 1.4, .64, 1), scale .4s cubic-bezier(.34, 1.4, .64, 1), box-shadow .35s ease; }
-.xp-search:focus-within { translate: -1px -2px; rotate: 0deg; scale: 1; box-shadow: 5px 6px 0 var(--ctl-off), var(--in); }
-.xp-search svg { transition: translate .45s var(--ease-pop), rotate .45s var(--ease-pop), scale .45s var(--ease-pop); }
-.xp-search:focus-within svg:first-child { translate: 0px 0px; rotate: -12deg; scale: 1.1; }
-.xp-search input::-webkit-search-decoration, .xp-search input::-webkit-search-cancel-button { display: none; -webkit-appearance: none; }
+    to {
+        translate: 340% 0;
+    }
+}
 
-.xp-pop { animation: puffIn .4s var(--ease-settle) backwards; }
+.xp-shine {
+    animation: xpShine 1.1s ease-in-out 0.7s 2 backwards;
+}
+
+/* LEVEL UP! pops in and settles tilted */
+@keyframes xpLevelUp {
+    0% {
+        opacity: 0;
+        rotate: -10deg;
+        scale: 0.4;
+    }
+
+    60% {
+        opacity: 1;
+        rotate: 4deg;
+        scale: 1.15;
+    }
+
+    100% {
+        rotate: -3deg;
+        scale: 1;
+    }
+}
+
+.xp-level-up {
+    rotate: -3deg;
+    animation: xpLevelUp 0.9s var(--ease-pop) backwards;
+}
