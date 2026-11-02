@@ -1,28 +1,40 @@
-.ab-photo { transition: translate .55s var(--lift, var(--ease-settle)), rotate .55s var(--lift, var(--ease-settle)), scale .55s var(--lift, var(--ease-settle)); }
-.ab-photo img { transition: filter .6s var(--ease-settle); }
-@media (hover: hover) {
-  .ab-photo:hover { --lift: var(--ease-bounce); translate: 0px -3px; rotate: 0deg; scale: 1; }
-  .ab-photo:hover img { filter: blur(5px) grayscale(.3); }
-  .ab-tech:hover { --lift: var(--ease-pop); }
-  .ab-tech:hover .ab-ticon { translate: 0px 0px; rotate: -8deg; scale: 1.1; }
-}
-.ab-ticon { transition: translate .45s var(--lift, var(--ease-settle)), rotate .45s var(--lift, var(--ease-settle)), scale .45s var(--lift, var(--ease-settle)); }
-.ab-fade img { opacity: 0; animation: abFade 12s ease-in-out infinite; }
-.ab-fade img:nth-child(2) { animation-delay: 3s; }
-.ab-fade img:nth-child(3) { animation-delay: 6s; }
-.ab-fade img:nth-child(4) { animation-delay: 9s; }
-@keyframes abFade { 0% { opacity: 0; transform: scale(1.1) } 6% { opacity: 1 } 25% { opacity: 1 } 31% { opacity: 0; transform: scale(1) } 100% { opacity: 0 } }
-@media (prefers-reduced-motion: reduce) { .ab-fade img:first-child { opacity: 1 !important; } }
+/* ==========================================================================
+   About page: the data tiles cross-fade through their four images
+   (each image's delay is set inline, 3s apart).
+   ========================================================================== */
 
-/* Link buttons: the arrow nudges out and the data tiles straighten on hover (the reference's). */
-.ab-fade { rotate: -3deg; }
-.ab-arrow, .ab-fade { transition: translate .4s var(--lift, var(--ease-settle)), rotate .4s var(--lift, var(--ease-settle)), scale .4s var(--lift, var(--ease-settle)); }
-@media (hover: hover) {
-  .ab-link:hover { --lift: var(--ease-pop); }
-  .ab-link:hover .ab-arrow { translate: 3px 0px; rotate: 0deg; scale: 1; }
-  .ab-link:hover .ab-up { translate: 2px -2px; rotate: 0deg; scale: 1; }
-  .ab-link:hover .ab-fade { rotate: 0deg; scale: 1.05; }
+@keyframes aboutCrossfade {
+    0% {
+        opacity: 0;
+        scale: 1.1;
+    }
+
+    6% {
+        opacity: 1;
+    }
+
+    25% {
+        opacity: 1;
+    }
+
+    31% {
+        opacity: 0;
+        scale: 1;
+    }
+
+    100% {
+        opacity: 0;
+    }
 }
-/* Text links: a pink underline that fills in on hover. */
-.ab-text { text-decoration: underline; text-decoration-thickness: 2px; text-underline-offset: 4px; text-decoration-color: var(--side); transition: color .3s ease, text-decoration-color .3s ease; }
-@media (hover: hover) { .ab-text:hover { color: var(--sig); text-decoration-color: currentColor; } }
+
+.about-crossfade-image {
+    opacity: 0;
+    animation: aboutCrossfade 12s ease-in-out infinite;
+}
+
+/* Without motion the first image stays */
+@media (prefers-reduced-motion: reduce) {
+    .about-crossfade-image:first-child {
+        opacity: 1 !important;
+    }
+}

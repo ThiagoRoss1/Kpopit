@@ -1,7 +1,0 @@
-.cl-entry .cl-card { translate: 0px 0px; rotate: var(--cl-tilt, 0deg); scale: 1; transition: translate .45s var(--lift, var(--ease-settle)), rotate .45s var(--lift, var(--ease-settle)), scale .45s var(--lift, var(--ease-settle)), box-shadow .4s var(--ease-settle); }
-.cl-entry .cl-dot { transition: translate .5s var(--lift, var(--ease-settle)), rotate .5s var(--lift, var(--ease-settle)), scale .5s var(--lift, var(--ease-settle)); }
-@media (hover: hover) {
-  .cl-entry:hover { --lift: var(--ease-bounce); }
-  .cl-entry:hover .cl-card { translate: 0px -3px; rotate: 0deg; scale: 1; }
-  .cl-entry:hover .cl-dot { translate: 0px 0px; rotate: 0deg; scale: 1.25; }
-}

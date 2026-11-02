@@ -1,6 +1,31 @@
-.nf-card { transition: translate .6s var(--lift, var(--ease-settle)), rotate .6s var(--lift, var(--ease-settle)), scale .6s var(--lift, var(--ease-settle)); }
-@media (hover: hover) { .nf-card:hover { --lift: var(--ease-bounce); translate: 0px -4px; rotate: 0deg; scale: 1; } }
-.nf-tile { animation: nfPop .5s var(--ease-pop) both; }
-@keyframes nfPop { from { scale: .4 ; opacity: 0} to { scale: 1 ; opacity: 1} }
-.nf-q { display: inline-block; animation: nfWob 3.2s ease-in-out infinite; }
-@keyframes nfWob { 0%, 100% { transform: rotate(-4deg) } 50% { transform: rotate(4deg) translate3d(0, -6px, 0) } }
+/* ==========================================================================
+   404 page: the card's tiles pop in and its question mark wobbles.
+   ========================================================================== */
+
+@keyframes notFoundTilePop {
+    from {
+        opacity: 0;
+        scale: 0.4;
+    }
+}
+
+.not-found-tile-enter {
+    animation: notFoundTilePop 0.5s var(--ease-pop) backwards;
+}
+
+@keyframes notFoundWobble {
+    0%,
+    100% {
+        rotate: -4deg;
+    }
+
+    50% {
+        rotate: 4deg;
+        translate: 0 -6px;
+    }
+}
+
+.not-found-wobble {
+    display: inline-block;
+    animation: notFoundWobble 3.2s ease-in-out infinite;
+}
