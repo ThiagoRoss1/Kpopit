@@ -16,9 +16,9 @@ const GROOVES: [number, string][] = [
 
 const SLOW_EASE = "ease-[cubic-bezier(.25,1,.5,1)]";
 
-/** The record peeking out of the sleeve: grooves, a sheen and the cover as its label. On the card's
- *  hover the record slides out a little further and turns. */
-const Vinyl = ({ cover }: { cover: string }) => {
+/** The record peeking out of the sleeve: grooves and a sheen. On the card's hover the record slides
+ *  out a little further and its sheen turns. */
+const Vinyl = () => {
     return (
         <div
             aria-hidden
@@ -39,7 +39,7 @@ const Vinyl = ({ cover }: { cover: string }) => {
                 ))}
             </svg>
 
-            {/* The sheen and the label turn together on hover */}
+            {/* The sheen turns on hover */}
             <div
                 className={cn(
                     "absolute inset-[1.4%] rounded-full pointer-events-none",
@@ -49,16 +49,8 @@ const Vinyl = ({ cover }: { cover: string }) => {
                 )}
             />
 
-            {/* No fill and no clip-path layer: Safari could paint those before the card faded in. */}
-            <div
-                className={cn(
-                    "absolute inset-[31%] rounded-full overflow-hidden",
-                    "transition-[rotate] duration-940 transform-gpu group-hover:rotate-200 group-hover:duration-1300",
-                    SLOW_EASE,
-                )}
-            >
-                <img src={cover} alt="" loading="lazy" decoding="async" className="block size-full object-cover" />
-            </div>
+            {/* The label sits under the sleeve and never shows, so it carries no cover: a second copy of
+                each cover, decoded at another size, doubled the image work and lagged the scroll. */}
 
             <svg viewBox="0 0 100 100" className="absolute inset-0 block size-full overflow-visible pointer-events-none">
                 <circle cx="50" cy="50" r="19" fill="none" stroke="#1A1418" strokeWidth="1.5" vectorEffect="non-scaling-stroke" />
@@ -100,7 +92,7 @@ const AlbumCard = ({ album, index }: AlbumCardProps) => {
 
             {/* Sleeve and record */}
             <div className="relative aspect-[1/.86]">
-                <Vinyl cover={cover} />
+                <Vinyl />
 
                 <div className="absolute left-0 top-0 w-[86%] aspect-square overflow-hidden rounded-[13px] @max-[580px]:rounded-[10px] border-[1.5px] border-(--ink) bg-[#DCD6D2] shadow-[2px_3px_0_#1A1418]">
                     <span aria-hidden className="absolute inset-0 grid place-items-center font-bold text-[34px] leading-none text-[rgba(26,20,24,.28)]">
