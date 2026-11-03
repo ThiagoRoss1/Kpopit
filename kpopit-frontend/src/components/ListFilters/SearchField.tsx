@@ -49,6 +49,7 @@ const SearchField = ({ value, onChange, placeholder, label, className }: SearchF
 
             <button
                 type="button"
+                onMouseDown={(event) => event.preventDefault()}
                 onClick={() => onChange("")}
                 aria-label="Clear search"
                 tabIndex={hasText ? 0 : -1}

@@ -1,6 +1,5 @@
-import { useState } from "react";
+import { useMemo, useState } from "react";
 import { useQuery } from "@tanstack/react-query";
-import { useSearchParams } from "react-router";
 import { cn } from "../../lib/utils";
 import PageShell from "../../components/PageShell/PageShell";
 import PuffTitle, { KoreanTag } from "../../components/PageShell/PuffTitle";
@@ -11,7 +10,8 @@ import FiltersToggle from "../../components/ListFilters/FiltersToggle";
 import AppliedFilters, { type AppliedFilter } from "../../components/ListFilters/AppliedFilters";
 import ListEmptyState from "../../components/ListFilters/ListEmptyState";
 import PageMeta from "../../components/Seo/PageMeta";
-import { useHydrated } from "../../hooks/useHydrated";
+import { useCatalogueFilters } from "../../hooks/useCatalogueFilters";
+import { countCatalogueFacets } from "../../utils/catalogueFacets";
 import type { AlbumsPageItem } from "../../interfaces/gameInterfaces";
 import {
     ALBUM_SORTS,
@@ -34,6 +34,7 @@ const Flag = ({ language, small }: { language: string; small?: boolean }) => {
 
     return (
         <img
+            draggable={false}
             src={src}
             alt=""
             className={cn(
@@ -58,34 +59,23 @@ const AlbumsList = ({ initialAlbums }: AlbumsListProps) => {
 };
 
 const AlbumsCatalogue = ({ allAlbums }: { allAlbums: AlbumsPageItem[] }) => {
-    const hydrated = useHydrated();
-    const [params, setParams] = useSearchParams();
+    const { hydrated, filters, setFilters: updateFilters } = useCatalogueFilters(readAlbumFilters, NO_FILTERS);
     const [filtersOpen, setFiltersOpen] = useState(false);
     const [animate, setAnimate] = useState(true);
+    const [stagger, setStagger] = useState(true);
     const [gridVersion, setGridVersion] = useState(0);
 
-    // The prerendered list is unfiltered; the URL's filters apply once the page is live.
-    const filters = hydrated ? readAlbumFilters(params) : NO_FILTERS;
     const albums = filterAlbums(allAlbums, filters);
 
     const setFilters = (patch: Partial<AlbumFilters>) => {
         const nextFilters = { ...filters, ...patch };
-        const clearedSearch = !!filters.q && nextFilters.q === "";
-        const clearedAll = Object.values(filters).some(Boolean) && !Object.values(nextFilters).some(Boolean);
         const recoveredResults = albums.length === 0 && filterAlbums(allAlbums, nextFilters).length > 0;
-        const replayEntrance = clearedSearch || clearedAll || recoveredResults;
 
-        setAnimate(replayEntrance);
-        if (replayEntrance) setGridVersion((version) => version + 1);
+        setAnimate(recoveredResults);
+        setStagger(false);
+        if (recoveredResults) setGridVersion((version) => version + 1);
 
-        setParams((current) => {
-            for (const [key, value] of Object.entries(patch)) {
-                if (value) current.set(key, value);
-                else current.delete(key);
-            }
-
-            return current;
-        }, { replace: true, preventScrollReset: true });
+        updateFilters(patch);
     };
 
     const resetFilters = () => setFilters(NO_FILTERS);
@@ -94,8 +84,15 @@ const AlbumsCatalogue = ({ allAlbums }: { allAlbums: AlbumsPageItem[] }) => {
     const types = [...new Set(allAlbums.map((album) => album.type))].sort();
     const languages = [...new Set(allAlbums.map((album) => album.language).filter((language): language is string => !!language))].sort();
 
-    // Counts as if that option were picked: the other filters and the search still apply.
-    const countWith = (patch: Partial<AlbumFilters>) => filterAlbums(allAlbums, { ...filters, ...patch, sort: "" }).length;
+    const countWith = useMemo(() => {
+        const search = filters.q.trim().toLowerCase();
+
+        return countCatalogueFacets(allAlbums, (album) => `${album.name} ${album.artist_name}`.toLowerCase().includes(search), [
+            { key: "artist", selected: filters.artist, values: (album) => [album.artist_name] },
+            { key: "type", selected: filters.type, values: (album) => [album.type] },
+            { key: "lang", selected: filters.lang, values: (album) => album.language ? [album.language] : [] },
+        ]);
+    }, [allAlbums, filters.q, filters.artist, filters.type, filters.lang]);
     const activeCount = [filters.artist, filters.type, filters.lang, filters.sort].filter(Boolean).length;
 
     const applied: AppliedFilter[] = [];
@@ -159,8 +156,8 @@ const AlbumsCatalogue = ({ allAlbums }: { allAlbums: AlbumsPageItem[] }) => {
                             value={filters.artist}
                             onPick={(artist) => setFilters({ artist })}
                             options={[
-                                { value: "", label: "All artists", count: countWith({ artist: "" }) },
-                                ...artists.map((artist) => ({ value: artist, label: artist, count: countWith({ artist }) })),
+                                { value: "", label: "All artists", count: countWith("artist", "") },
+                                ...artists.map((artist) => ({ value: artist, label: artist, count: countWith("artist", artist) })),
                             ]}
                         />
 
@@ -171,8 +168,8 @@ const AlbumsCatalogue = ({ allAlbums }: { allAlbums: AlbumsPageItem[] }) => {
                             value={filters.type}
                             onPick={(type) => setFilters({ type })}
                             options={[
-                                { value: "", label: "All types", count: countWith({ type: "" }) },
-                                ...types.map((type) => ({ value: type, label: type, count: countWith({ type }) })),
+                                { value: "", label: "All types", count: countWith("type", "") },
+                                ...types.map((type) => ({ value: type, label: type, count: countWith("type", type) })),
                             ]}
                         />
 
@@ -184,12 +181,12 @@ const AlbumsCatalogue = ({ allAlbums }: { allAlbums: AlbumsPageItem[] }) => {
                             icon={filters.lang ? <Flag language={filters.lang} small /> : undefined}
                             onPick={(lang) => setFilters({ lang })}
                             options={[
-                                { value: "", label: "Any language", count: countWith({ lang: "" }) },
+                                { value: "", label: "Any language", count: countWith("lang", "") },
                                 ...languages.map((lang) => ({
                                     value: lang,
                                     label: lang,
                                     icon: <Flag language={lang} />,
-                                    count: countWith({ lang }),
+                                    count: countWith("lang", lang),
                                 })),
                             ]}
                         />
@@ -222,7 +219,7 @@ const AlbumsCatalogue = ({ allAlbums }: { allAlbums: AlbumsPageItem[] }) => {
                         )}
                     >
                         {albums.map((album, index) => (
-                            <AlbumCard key={album.id} album={album} index={index} animate={animate} />
+                            <AlbumCard key={album.id} album={album} index={index} animate={animate} stagger={stagger} />
                         ))}
                     </section>
                 ) : (

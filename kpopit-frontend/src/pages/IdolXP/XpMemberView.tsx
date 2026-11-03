@@ -39,6 +39,8 @@ const XpMemberView = ({ state, stateKey, idols: idolList, username }: MemberView
     const [pendingId, setPendingId] = useState<number | null>(null);
     const [filter, setFilter] = useState<XpFilter>("All");
     const [query, setQuery] = useState("");
+    const [animateCards, setAnimateCards] = useState(true);
+    const [staggerCards, setStaggerCards] = useState(true);
     const [sort, setSort] = useState<"level" | "az">("level");
     const [favourites, setFavourites] = useState<number[]>(readFavourites);
     const [extra, setExtra] = useState(0);
@@ -115,6 +117,12 @@ const XpMemberView = ({ state, stateKey, idols: idolList, username }: MemberView
     const shown = isLimited ? sorted.slice(0, shownLimit) : sorted;
     const pendingIdol = pendingId === null ? null : allIdols.find((idol) => idol.id === pendingId) ?? null;
 
+    const changeQuery = (value: string) => {
+        setAnimateCards(sorted.length === 0);
+        setStaggerCards(false);
+        setQuery(value);
+    };
+
     const toggleFavourite = (event: MouseEvent, id: number) => {
         event.stopPropagation();
         setFavourites((list) => {
@@ -147,6 +155,7 @@ const XpMemberView = ({ state, stateKey, idols: idolList, username }: MemberView
                         <div className="relative flex-none w-32.5 @max-[581px]:w-23 -rotate-2">
                             {current ? (
                                 <img
+                                    draggable={false}
                                     src={imageOf(current)}
                                     alt={current.name}
                                     className="block size-32.5 @max-[581px]:size-23 rounded-[18px] border-[2.5px] border-[#1A1418] object-cover shadow-[4px_5px_0_#1A1418]"
@@ -295,7 +304,7 @@ const XpMemberView = ({ state, stateKey, idols: idolList, username }: MemberView
                         <input
                             type="search"
                             value={query}
-                            onChange={(event) => setQuery(event.target.value)}
+                            onChange={(event) => changeQuery(event.target.value)}
                             placeholder="Find an idol..."
                             aria-label="Find an idol or group"
                             className={cn(
@@ -305,16 +314,20 @@ const XpMemberView = ({ state, stateKey, idols: idolList, username }: MemberView
                             )}
                         />
 
-                        {query && (
-                            <button
-                                type="button"
-                                onClick={() => setQuery("")}
-                                aria-label="Clear search"
-                                className="grid place-items-center shrink-0 size-8 rounded-[10px] border-0 bg-transparent text-inherit cursor-pointer"
-                            >
-                                <X size={16} strokeWidth={2.6} />
-                            </button>
-                        )}
+                        <button
+                            type="button"
+                            onMouseDown={(event) => event.preventDefault()}
+                            onClick={() => changeQuery("")}
+                            aria-label="Clear search"
+                            tabIndex={query ? 0 : -1}
+                            className={cn(
+                                "pp-focus grid place-items-center shrink-0 size-8 rounded-[10px] border-0 bg-transparent text-inherit cursor-pointer",
+                                "transition-opacity duration-200 ease-out hover:bg-(--chip-hover) transform-gpu",
+                                !query && "opacity-0 pointer-events-none",
+                            )}
+                        >
+                            <X size={16} strokeWidth={2.6} />
+                        </button>
                     </label>
                 </div>
             </div>
@@ -325,6 +338,8 @@ const XpMemberView = ({ state, stateKey, idols: idolList, username }: MemberView
                         key={idol.id}
                         idol={idol}
                         index={index}
+                        animate={animateCards}
+                        stagger={staggerCards}
                         isCurrent={idol.id === current?.id}
                         isPending={idol.id === pendingId}
                         favourite={isFavourite(idol.id)}
@@ -354,7 +369,7 @@ const XpMemberView = ({ state, stateKey, idols: idolList, username }: MemberView
                             "animate-[puffIn_.4s_var(--ease-settle)_backwards]",
                         )}
                     >
-                        <img src={imageOf(pendingIdol)} alt="" className="size-10 rounded-full border-2 border-[#1A1418] object-cover" />
+                        <img draggable={false} src={imageOf(pendingIdol)} alt="" className="size-10 rounded-full border-2 border-[#1A1418] object-cover" />
 
                         <span className="flex flex-col">
                             <span className="font-bold text-sm">Level up {pendingIdol.name}?</span>

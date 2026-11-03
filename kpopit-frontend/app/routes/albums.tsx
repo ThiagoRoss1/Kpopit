@@ -1,4 +1,4 @@
-import { useLoaderData, type ClientLoaderFunctionArgs } from "react-router";
+import { useLoaderData, type ClientLoaderFunctionArgs, type ShouldRevalidateFunctionArgs } from "react-router";
 import AlbumsList from "../../src/pages/Albums/AlbumsList";
 import HeldData from "../../src/components/Loading/HeldData";
 import PageLoader from "../../src/components/Loading/PageLoader";
@@ -8,6 +8,13 @@ import type { AlbumsPageItem } from "../../src/interfaces/gameInterfaces";
 import { orNothing, fetchAlbumsPage } from "../prerender-api";
 
 export const handle = { puff: true };
+
+// Filters use the already-loaded catalogue; typing never needs another route data load.
+export const shouldRevalidate = ({ currentUrl, nextUrl, formMethod, defaultShouldRevalidate }: ShouldRevalidateFunctionArgs) => {
+  if (!formMethod && currentUrl.pathname === nextUrl.pathname && currentUrl.search !== nextUrl.search) return false;
+
+  return defaultShouldRevalidate;
+};
 
 // Build time only: the list is baked into the prerendered page (same flow as /idols).
 export async function loader() {

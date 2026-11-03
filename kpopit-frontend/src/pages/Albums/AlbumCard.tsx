@@ -65,11 +65,12 @@ interface AlbumCardProps {
     album: AlbumsPageItem;
     index: number;
     animate?: boolean;
+    stagger?: boolean;
 }
 
 /** An album's card in the list: sleeve and record, puffy name, artist · type · year, and a tag for
  *  Japanese and English releases. */
-const AlbumCard = ({ album, index, animate = true }: AlbumCardProps) => {
+const AlbumCard = ({ album, index, animate = true, stagger }: AlbumCardProps) => {
     const cover = resolveCdnUrl(album.cover_path) ?? "";
     const isForeignRelease = !!album.language && album.language !== "Korean";
     const isEven = index % 2 === 0;
@@ -77,6 +78,7 @@ const AlbumCard = ({ album, index, animate = true }: AlbumCardProps) => {
     return (
         <ListCard
             animate={animate}
+            stagger={stagger}
             to={albumPath(album, album.artist_name)}
             label={`${album.name} by ${album.artist_name}, ${album.release_year}`}
             index={index}
@@ -102,6 +104,7 @@ const AlbumCard = ({ album, index, animate = true }: AlbumCardProps) => {
                     </span>
 
                     <FadeImg
+                        draggable={false}
                         src={cover}
                         alt={`${album.name} cover`}
                         loading="lazy"

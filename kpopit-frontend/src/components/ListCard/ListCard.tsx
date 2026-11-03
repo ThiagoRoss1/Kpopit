@@ -7,8 +7,9 @@ interface ListCardProps {
     label: string;
     /** Position in the grid: sets the alternating tilt and the entrance delay. */
     index: number;
-    /** False when coming back to a list: it shows as it was left, without the entrance. */
+    /** Filtering reveals matches immediately; a fresh visit keeps the entrance. */
     animate?: boolean;
+    stagger?: boolean;
     onIntent?: () => void;
     children: ReactNode;
 }
@@ -16,13 +17,13 @@ interface ListCardProps {
 /** The frame of an idol or album card in a list: it enters with the others, sits tilted on its pink
  *  depth, straightens on hover while the face lifts, and presses into the depth on click. The card
  *  carries `group`, so its content can react to the same hover and press. */
-const ListCard = ({ to, label, index, animate = true, onIntent, children }: ListCardProps) => {
+const ListCard = ({ to, label, index, animate = true, stagger = true, onIntent, children }: ListCardProps) => {
     const isEven = index % 2 === 0;
 
     return (
         <div
             className={cn("group", animate && "animate-[puffIn_0.78s_var(--ease-settle)_backwards]")}
-            style={animate ? { animationDelay: `${Math.min(260 + index * 45, 900)}ms` } : undefined}
+            style={animate ? { animationDelay: stagger ? `${Math.min(260 + index * 45, 900)}ms` : "0ms" } : undefined}
         >
             <div
                 className={cn(

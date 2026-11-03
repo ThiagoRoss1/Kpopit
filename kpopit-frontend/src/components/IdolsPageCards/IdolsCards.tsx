@@ -10,11 +10,12 @@ interface IdolsCardsProps {
     idol: IdolsPageData;
     index: number;
     animate: boolean;
+    stagger?: boolean;
 }
 
 /** An idol's card in the list: the photo (zooms on hover) with the nationality flags on it, the
  *  puffy name, then group and company. */
-const IdolsCards = ({ idol, index, animate }: IdolsCardsProps) => {
+const IdolsCards = ({ idol, index, animate, stagger }: IdolsCardsProps) => {
     const group = idol.group_name ? formatGroupName(idol.group_name, idol.is_former_group) : groupLabel(idol);
     const flags = nationalities(idol)
         .map((nationality) => ({ nationality, src: getNationalityFlag(nationality) }))
@@ -26,16 +27,21 @@ const IdolsCards = ({ idol, index, animate }: IdolsCardsProps) => {
             label={`${idol.artist_name}, ${group}`}
             index={index}
             animate={animate}
+            stagger={stagger}
             onIntent={() => prefetchIdolProfile(idol.id)}
         >
             {/* Photo */}
             <div className="relative aspect-[1/1.04]">
-                <div className="absolute inset-0 overflow-hidden rounded-2xl @max-[580px]:rounded-[13px] border-[1.5px] border-(--ink) bg-[#DCD6D2]">
+                <div className={cn(
+                    "absolute inset-0 isolate overflow-hidden rounded-2xl @max-[580px]:rounded-[13px] border-[1.5px] border-(--ink) bg-(--panel)",
+                    "transform-gpu backface-hidden mask-[linear-gradient(#000,#000)]",
+                )}>
                     <span aria-hidden className="absolute inset-0 grid place-items-center font-bold text-[40px] leading-none text-[rgba(26,20,24,.28)]">
                         {idol.artist_name[0]}
                     </span>
 
                     <FadeImg
+                        draggable={false}
                         src={`${import.meta.env.VITE_IMAGE_BUCKET_URL}${idol.image_path}?v=${idol.image_version}`}
                         alt={idol.artist_name}
                         loading="lazy"
@@ -50,6 +56,7 @@ const IdolsCards = ({ idol, index, animate }: IdolsCardsProps) => {
                         <div className="absolute left-2 bottom-2 flex">
                             {flags.map((flag, flagIndex) => (
                                 <img
+                                    draggable={false}
                                     key={flag.nationality}
                                     src={flag.src!}
                                     alt={flag.nationality}

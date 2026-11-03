@@ -124,6 +124,8 @@ export const XpBar = ({ progress, filled, className }: { progress: number; fille
 interface XpCardProps {
     idol: XpIdol;
     index: number;
+    animate: boolean;
+    stagger: boolean;
     isCurrent: boolean;
     isPending: boolean;
     favourite: boolean;
@@ -133,7 +135,7 @@ interface XpCardProps {
 }
 
 /** An idol in the list: tilted, it straightens and lifts on hover (barely on phones, where it is a row). */
-export const XpCard = ({ idol, index, isCurrent, isPending, favourite, filled, onPick, onFavourite }: XpCardProps) => {
+export const XpCard = ({ idol, index, animate, stagger, isCurrent, isPending, favourite, filled, onPick, onFavourite }: XpCardProps) => {
     const isHighlighted = isCurrent || isPending;
 
     const onKeyDown = (event: KeyboardEvent) => {
@@ -150,11 +152,11 @@ export const XpCard = ({ idol, index, isCurrent, isPending, favourite, filled, o
             aria-label={`${idol.name}, ${idol.max ? "max level" : `level ${idol.level}`}${isCurrent ? ", leveling now" : ""}`}
             onClick={onPick}
             onKeyDown={onKeyDown}
-            style={{ animationDelay: `${Math.min(260 + index * 45, 900)}ms` }}
+            style={animate ? { animationDelay: stagger ? `${Math.min(260 + index * 45, 900)}ms` : "0ms" } : undefined}
             className={cn(
                 "pp-focus relative flex flex-col gap-2.25 p-2.5 rounded-[20px] border-2 border-(--ink) text-left text-(--face-ink) cursor-pointer",
                 "@max-[581px]:grid @max-[581px]:grid-cols-[56px_minmax(0,1fr)] @max-[581px]:items-center @max-[581px]:gap-x-3",
-                "animate-[puffIn_.6s_var(--ease-settle)_backwards]",
+                animate && "animate-[puffIn_.6s_var(--ease-settle)_backwards]",
                 "transition-[translate,rotate,box-shadow,background-color] duration-420 ease-(--ease-settle) transform-gpu",
                 "hover:-translate-y-0.75 hover:rotate-0 @max-[581px]:hover:-translate-y-px",
                 "active:translate-x-px active:translate-y-0.5 active:duration-150",
@@ -167,9 +169,11 @@ export const XpCard = ({ idol, index, isCurrent, isPending, favourite, filled, o
         >
             <div className="relative w-full @max-[581px]:w-14 aspect-square @max-[581px]:row-span-2 overflow-hidden rounded-[14px] border-2 border-[#1A1418] bg-[#DCD6D2]">
                 <img
+                    draggable={false}
                     src={imageOf(idol)}
                     alt=""
                     loading="lazy"
+                    decoding="async"
                     onError={(event) => { event.currentTarget.style.opacity = "0"; }}
                     className={cn("block size-full object-cover", !idol.xp && "grayscale-60")}
                 />

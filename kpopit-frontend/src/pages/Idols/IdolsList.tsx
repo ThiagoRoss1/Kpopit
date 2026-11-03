@@ -1,6 +1,5 @@
-import { useEffect, useState } from "react";
+import { useMemo, useState } from "react";
 import { useQuery } from "@tanstack/react-query";
-import { useSearchParams } from "react-router";
 import { cn } from "../../lib/utils";
 import PageShell from "../../components/PageShell/PageShell";
 import PuffTitle, { KoreanTag } from "../../components/PageShell/PuffTitle";
@@ -12,7 +11,8 @@ import AppliedFilters, { type AppliedFilter } from "../../components/ListFilters
 import ListEmptyState from "../../components/ListFilters/ListEmptyState";
 import IdolsCards from "../../components/IdolsPageCards/IdolsCards";
 import PageMeta from "../../components/Seo/PageMeta";
-import { useHydrated } from "../../hooks/useHydrated";
+import { useCatalogueFilters } from "../../hooks/useCatalogueFilters";
+import { countCatalogueFacets } from "../../utils/catalogueFacets";
 import { getNationalityFlag } from "../../utils/getFlags";
 import type { IdolsPageData } from "../../interfaces/gameInterfaces";
 import {
@@ -28,9 +28,6 @@ import {
 
 const NO_FILTERS: IdolFilters = { q: "", group: "", nat: "", company: "", sort: "" };
 
-// The entrance plays once per visit: coming back to the list shows it as it was left.
-let cardsIntroPlayed = false;
-
 const byName = (first: string, second: string) => first.localeCompare(second);
 
 const Flag = ({ nationality, small }: { nationality: string; small?: boolean }) => {
@@ -39,6 +36,7 @@ const Flag = ({ nationality, small }: { nationality: string; small?: boolean }) 
 
     return (
         <img
+            draggable={false}
             src={src}
             alt=""
             className={cn(
@@ -78,38 +76,23 @@ const IdolsList = ({ initialIdols }: IdolsListProps) => {
 };
 
 const IdolsCatalogue = ({ allIdols }: { allIdols: IdolsPageData[] }) => {
-    const hydrated = useHydrated();
-    const [params, setParams] = useSearchParams();
+    const { hydrated, filters, setFilters: updateFilters } = useCatalogueFilters(readIdolFilters, NO_FILTERS);
     const [filtersOpen, setFiltersOpen] = useState(false);
-    const [animate, setAnimate] = useState(() => !cardsIntroPlayed);
+    const [animate, setAnimate] = useState(true);
+    const [stagger, setStagger] = useState(true);
     const [gridVersion, setGridVersion] = useState(0);
 
-    useEffect(() => {
-        cardsIntroPlayed = true;
-    }, []);
-
-    // The prerendered list is unfiltered; the URL's filters apply once the page is live.
-    const filters = hydrated ? readIdolFilters(params) : NO_FILTERS;
     const idols = filterIdols(allIdols, filters);
 
     const setFilters = (patch: Partial<IdolFilters>) => {
         const nextFilters = { ...filters, ...patch };
-        const clearedSearch = !!filters.q && nextFilters.q === "";
-        const clearedAll = Object.values(filters).some(Boolean) && !Object.values(nextFilters).some(Boolean);
         const recoveredResults = idols.length === 0 && filterIdols(allIdols, nextFilters).length > 0;
-        const replayEntrance = clearedSearch || clearedAll || recoveredResults;
 
-        setAnimate(replayEntrance);
-        if (replayEntrance) setGridVersion((version) => version + 1);
+        setAnimate(recoveredResults);
+        setStagger(false);
+        if (recoveredResults) setGridVersion((version) => version + 1);
 
-        setParams((current) => {
-            for (const [key, value] of Object.entries(patch)) {
-                if (value) current.set(key, value);
-                else current.delete(key);
-            }
-
-            return current;
-        }, { replace: true, preventScrollReset: true });
+        updateFilters(patch);
     };
 
     const resetFilters = () => setFilters(NO_FILTERS);
@@ -123,8 +106,15 @@ const IdolsCatalogue = ({ allIdols }: { allIdols: IdolsPageData[] }) => {
     const allNationalities = [...new Set(allIdols.flatMap(nationalities))].sort(byName);
     const companies = [...new Set(allIdols.map((idol) => idol.company_name).filter((name): name is string => !!name))].sort(byName);
 
-    // Counts as if that option were picked: the other filters and the search still apply.
-    const countWith = (patch: Partial<IdolFilters>) => filterIdols(allIdols, { ...filters, ...patch, sort: "" }).length;
+    const countWith = useMemo(() => {
+        const search = filters.q.trim().toLowerCase();
+
+        return countCatalogueFacets(allIdols, (idol) => `${idol.artist_name} ${idol.all_groups ?? ""} ${idol.company_name ?? ""}`.toLowerCase().includes(search), [
+            { key: "group", selected: filters.group, values: (idol) => [groupLabel(idol)] },
+            { key: "nat", selected: filters.nat, values: nationalities },
+            { key: "company", selected: filters.company, values: (idol) => idol.company_name ? [idol.company_name] : [] },
+        ]);
+    }, [allIdols, filters.q, filters.group, filters.nat, filters.company]);
     const activeCount = [filters.group, filters.nat, filters.company, filters.sort].filter(Boolean).length;
 
     const applied: AppliedFilter[] = [];
@@ -189,8 +179,8 @@ const IdolsCatalogue = ({ allIdols }: { allIdols: IdolsPageData[] }) => {
                             value={filters.group}
                             onPick={(group) => setFilters({ group })}
                             options={[
-                                { value: "", label: "All groups", count: countWith({ group: "" }) },
-                                ...groups.map((group) => ({ value: group, label: group, count: countWith({ group }) })),
+                                { value: "", label: "All groups", count: countWith("group", "") },
+                                ...groups.map((group) => ({ value: group, label: group, count: countWith("group", group) })),
                             ]}
                         />
 
@@ -202,12 +192,12 @@ const IdolsCatalogue = ({ allIdols }: { allIdols: IdolsPageData[] }) => {
                             icon={filters.nat ? <Flag nationality={filters.nat} small /> : undefined}
                             onPick={(nat) => setFilters({ nat })}
                             options={[
-                                { value: "", label: "Anywhere", count: countWith({ nat: "" }) },
+                                { value: "", label: "Anywhere", count: countWith("nat", "") },
                                 ...allNationalities.map((nat) => ({
                                     value: nat,
                                     label: nat,
                                     icon: <Flag nationality={nat} />,
-                                    count: countWith({ nat }),
+                                    count: countWith("nat", nat),
                                 })),
                             ]}
                         />
@@ -219,8 +209,8 @@ const IdolsCatalogue = ({ allIdols }: { allIdols: IdolsPageData[] }) => {
                             value={filters.company}
                             onPick={(company) => setFilters({ company })}
                             options={[
-                                { value: "", label: "All companies", count: countWith({ company: "" }) },
-                                ...companies.map((company) => ({ value: company, label: company, count: countWith({ company }) })),
+                                { value: "", label: "All companies", count: countWith("company", "") },
+                                ...companies.map((company) => ({ value: company, label: company, count: countWith("company", company) })),
                             ]}
                         />
 
@@ -252,7 +242,7 @@ const IdolsCatalogue = ({ allIdols }: { allIdols: IdolsPageData[] }) => {
                         )}
                     >
                         {idols.map((idol, index) => (
-                            <IdolsCards key={idol.id} idol={idol} index={index} animate={animate} />
+                            <IdolsCards key={idol.id} idol={idol} index={index} animate={animate} stagger={stagger} />
                         ))}
                     </section>
                 ) : (
