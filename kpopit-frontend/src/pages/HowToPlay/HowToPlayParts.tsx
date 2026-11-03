@@ -88,7 +88,7 @@ export const FeedbackTile = ({ tone, arrow, children }: { tone: Tone; arrow?: bo
                 FEEDBACK[tone].tileEdge,
             )}
         >
-            {arrow && <img src={ArrowUp} alt="" aria-hidden className="absolute inset-0 size-full object-cover opacity-25" />}
+            {arrow && <img draggable={false} src={ArrowUp} alt="" aria-hidden className="absolute inset-0 size-full object-cover opacity-25" />}
             <span className="relative">{children}</span>
         </span>
     );

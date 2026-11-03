@@ -121,7 +121,7 @@ const HistoryRow = ({ entry, today }: { entry: HistoryEntry; today: string }) =>
         <div className={ROW}>
             <span className={THUMB}>
                 {imageSource
-                    ? <img src={imageSource} alt="" loading="lazy" className="block size-full object-cover" />
+                    ? <img draggable={false} src={imageSource} alt="" loading="lazy" className="block size-full object-cover" />
                     : entry.answer ? name[0] : <Lock size={18} strokeWidth={2.6} />}
             </span>
 

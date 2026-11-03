@@ -54,7 +54,7 @@ const SearchDemo = () => {
                             )}
                         >
                             {row.name[0]}
-                            <img src={resolveCdnUrl(row.image) ?? ""} alt="" className="absolute inset-0 size-full object-cover" />
+                            <img draggable={false} src={resolveCdnUrl(row.image) ?? ""} alt="" className="absolute inset-0 size-full object-cover" />
                         </span>
 
                         <span className="font-bold text-sm">
@@ -166,7 +166,7 @@ const ClassicGuide = () => {
                                         "border-2 border-[#1A1418] bg-[#FD5C63] text-[#1A1418] shadow-[0_3px_0_0_#B91C1C,0_3px_0_2px_#1A1418]",
                                     )}
                                 >
-                                    <img src={arrow.isUp ? ArrowUp : ArrowDown} alt="" className="size-full object-cover" />
+                                    <img draggable={false} src={arrow.isUp ? ArrowUp : ArrowDown} alt="" className="size-full object-cover" />
                                 </span>
 
                                 <span><b>{arrow.word}</b> {arrow.text}</span>
@@ -210,7 +210,7 @@ const ClassicGuide = () => {
                                 key={`${row.name}-idol`}
                                 className="how-to-play-tile-enter relative aspect-square overflow-hidden rounded-[14px] border-2 border-[#1A1418] bg-[#FFE3F1] transform-gpu"
                             >
-                                <img src={resolveCdnUrl(row.image) ?? ""} alt="" className="absolute inset-0 size-full object-cover" />
+                                <img draggable={false} src={resolveCdnUrl(row.image) ?? ""} alt="" className="absolute inset-0 size-full object-cover" />
                                 <span className="absolute inset-x-0 bottom-0 p-1 bg-[#1A1418]/70 font-bold text-[11px] leading-tight text-center text-white truncate">
                                     {row.name}
                                 </span>

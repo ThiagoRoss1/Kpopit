@@ -119,7 +119,7 @@ const DayPanel = ({ day, mode }: { day: CalendarDay; mode: CalendarMode }) => {
                         )}
                     >
                         {answerImage ? (
-                            <img src={answerImage} alt={name} className="absolute inset-0 size-full object-cover" />
+                            <img draggable={false} src={answerImage} alt={name} className="absolute inset-0 size-full object-cover" />
                         ) : (
                             <div className="flex flex-col items-center gap-2 p-5 text-center">
                                 <span className="font-bold text-[64px] leading-none text-white text-shadow-(--puff-title)">?</span>
@@ -155,6 +155,7 @@ const DayPanel = ({ day, mode }: { day: CalendarDay; mode: CalendarMode }) => {
                                     >
                                         <div className={cn("size-11 overflow-hidden rounded-full border-2 border-(--ink)", guess.correct && "shadow-[0_0_0_3px_#22C55E]")}>
                                             <img
+                                                draggable={false}
                                                 src={imageUrl(guess.image_path)}
                                                 alt={guess.name}
                                                 className={cn("size-full object-cover", !guess.correct && "grayscale contrast-90")}
@@ -204,7 +205,7 @@ const DayPanel = ({ day, mode }: { day: CalendarDay; mode: CalendarMode }) => {
                             )}
                         >
                             {answerImage
-                                ? <img src={answerImage} alt={name} className="absolute inset-0 size-full object-cover" />
+                                ? <img draggable={false} src={answerImage} alt={name} className="absolute inset-0 size-full object-cover" />
                                 : <span className="font-bold text-4xl leading-none text-white text-shadow-(--puff-empty)">?</span>}
                         </div>
 
@@ -221,6 +222,7 @@ const DayPanel = ({ day, mode }: { day: CalendarDay; mode: CalendarMode }) => {
                         <div className="flex flex-wrap items-center gap-1.5">
                             {guesses.map((guess, i) => (
                                 <img
+                                    draggable={false}
                                     key={guess.id}
                                     src={imageUrl(guess.image_path)}
                                     alt={guess.name}

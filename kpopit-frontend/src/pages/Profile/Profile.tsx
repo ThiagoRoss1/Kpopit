@@ -253,7 +253,7 @@ const Polaroid = ({ src }: { src: string | null }) => {
             )}
         >
             {src
-                ? <img src={src} alt="Avatar" className="block size-37.5 rounded-sm border-2 border-[#1A1418] object-cover" />
+                ? <img draggable={false} src={src} alt="Avatar" className="block size-37.5 rounded-sm border-2 border-[#1A1418] object-cover" />
                 : <div className="size-37.5 rounded-sm border-2 border-[#1A1418] bg-[#FFE3F1]" />}
 
             <span className="absolute inset-x-0 bottom-1.25 font-caveat font-bold text-[19px] text-center text-[#6B5F66]">~ KpopIt ID ~</span>

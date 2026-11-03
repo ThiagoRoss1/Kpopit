@@ -147,6 +147,7 @@ const About = () => {
                                 >
                                     <div className="aspect-square overflow-hidden rounded-[18px] border-[2.5px] border-[#1A1418] bg-[#DCD6D2] shadow-[4px_5px_0_var(--ctl-off)]">
                                         <img
+                                            draggable={false}
                                             src={resolveCdnUrl("/images/idols/chaewon.webp") ?? ""}
                                             alt="A blurred idol photo, like in Blurry mode"
                                             className={cn(
@@ -220,6 +221,7 @@ const About = () => {
                                             >
                                                 {link.images.map((src, i) => (
                                                     <img
+                                                        draggable={false}
                                                         key={i}
                                                         src={resolveCdnUrl(src) ?? ""}
                                                         alt=""

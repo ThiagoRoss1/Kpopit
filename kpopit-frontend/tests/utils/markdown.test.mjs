@@ -127,6 +127,6 @@ test('cdn: images resolve to the image bucket, or stay bucket paths without one'
 test('a paragraph that is only a link is a button, one that is only an image a captioned figure', () => {
     const html = renderMarkdown('[How it works](/how-to-play)\n\n![A cover](/blog/a/b.png)\n\nText with [a link](/faq).');
     assert.ok(html.includes('<p class="post-cta"><a href="/how-to-play">How it works<svg'));
-    assert.ok(html.includes('<figure><img src="/blog/a/b.png" alt="A cover" loading="lazy"><figcaption>A cover</figcaption></figure>'));
+    assert.ok(html.includes('<figure><img src="/blog/a/b.png" alt="A cover" loading="lazy" draggable="false"><figcaption>A cover</figcaption></figure>'));
     assert.ok(html.includes('<p>Text with <a href="/faq">a link</a>.</p>'));
 });

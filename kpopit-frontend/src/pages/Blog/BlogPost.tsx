@@ -99,7 +99,7 @@ const BlogPost = ({ slug }: { slug: string }) => {
                         )}
                     >
                         <div className="aspect-video overflow-hidden rounded-[18px] border-[2.5px] border-[#1A1418] bg-[#DCD6D2] shadow-[5px_5px_0_0_#FF8AC4,5px_5px_0_2px_#1A1418]">
-                            <img src={post.image} alt={post.imageAlt} className="block size-full object-cover" />
+                            <img draggable={false} src={post.image} alt={post.imageAlt} className="block size-full object-cover" />
                         </div>
                     </figure>
 
@@ -115,7 +115,7 @@ const BlogPost = ({ slug }: { slug: string }) => {
                         <div aria-hidden className="h-0.5 mt-3 bg-(--rule)" />
 
                         <div className="flex flex-wrap items-center gap-x-5 gap-y-4 pt-1 pb-0.5">
-                            <img src="/kpopit-icon-svg.svg" alt="" className="flex-none size-13 -rotate-6" />
+                            <img draggable={false} src="/kpopit-icon-svg.svg" alt="" className="flex-none size-13 -rotate-6" />
 
                             <span className="flex flex-[1_1_200px] flex-col gap-1 min-w-0">
                                 <span className="font-caveat font-bold text-[30px] leading-none text-(--group) rotate-[-1.5deg] origin-left">Thanks for reading!</span>

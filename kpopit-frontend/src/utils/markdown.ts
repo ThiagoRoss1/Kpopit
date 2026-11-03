@@ -99,7 +99,7 @@ export function renderMarkdown(body: string, options: RenderOptions = {}): strin
                 const href = resolveImage(raw, options.imageOrigin);
                 if (!isAllowedImage(href, options.imageOrigin)) return escapeHtml(text);
                 const titleAttr = title ? ` title="${escapeHtml(title)}"` : "";
-                return `<img src="${escapeHtml(href)}" alt="${escapeHtml(text)}"${titleAttr} loading="lazy">`;
+                return `<img src="${escapeHtml(href)}" alt="${escapeHtml(text)}"${titleAttr} loading="lazy" draggable="false">`;
             },
         },
     });

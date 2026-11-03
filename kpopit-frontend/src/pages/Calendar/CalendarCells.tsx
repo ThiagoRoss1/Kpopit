@@ -62,6 +62,7 @@ export const DayCell = ({ day, index, selected, mode, onPick }: CellProps & { in
             >
                 {isGuessed && day.entry?.image_path && (
                     <img
+                        draggable={false}
                         src={imageUrl(day.entry.image_path)}
                         alt=""
                         loading="lazy"
@@ -131,7 +132,7 @@ export const DotCell = ({ day, selected, today, mode, onPick }: CellProps & { to
                 )}
             >
                 {isGuessed && day.entry?.image_path && (
-                    <img src={imageUrl(day.entry.image_path)} alt="" loading="lazy" className="absolute inset-0 size-full object-cover" />
+                    <img draggable={false} src={imageUrl(day.entry.image_path)} alt="" loading="lazy" className="absolute inset-0 size-full object-cover" />
                 )}
 
                 <span

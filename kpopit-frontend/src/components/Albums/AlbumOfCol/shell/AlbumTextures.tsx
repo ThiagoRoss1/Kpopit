@@ -24,6 +24,7 @@ export function TextureLighting({ className = '' }: TextureProps) {
 
     return (
         <img
+            draggable={false}
             src={textures === 'low' ? lightsTextureSmallSrc : lightsTextureSrc}
             {...(textures === 'high'
                 ? { srcSet: `${lightsTextureSmallSrc} 600w, ${lightsTextureSrc} 1200w`, sizes: TEXTURE_SIZES }
@@ -44,6 +45,7 @@ export function GrainParticles({ className = '' }: TextureProps) {
 
     return (
         <img
+            draggable={false}
             src={textures === 'low' ? grainParticlesSmallSrc : grainParticlesSrc}
             {...(textures === 'high'
                 ? { srcSet: `${grainParticlesSmallSrc} 600w, ${grainParticlesSrc} 1200w`, sizes: TEXTURE_SIZES }
@@ -65,6 +67,7 @@ export function PaperGrain({ className = '' }: TextureProps) {
 
     return (
         <img
+            draggable={false}
             src={textures === 'low' ? paperSmallSrc : paperSrc}
             {...(textures === 'high'
                 ? { srcSet: `${paperSmallSrc} 800w, ${paperSrc} 1086w`, sizes: PAPER_SIZES }

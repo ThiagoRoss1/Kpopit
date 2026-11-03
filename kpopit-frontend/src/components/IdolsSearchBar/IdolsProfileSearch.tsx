@@ -170,6 +170,7 @@ const IdolsProfileSearch = ({ idols, currentId }: IdolsProfileSearchProps) => {
                                 )}
                             >
                                 <img
+                                    draggable={false}
                                     src={`${import.meta.env.VITE_IMAGE_BUCKET_URL}${idol.image_path}?v=${idol.image_version}`}
                                     alt=""
                                     className="flex-none size-10 object-cover shadow-[2px_2px_0_#1A1418]"

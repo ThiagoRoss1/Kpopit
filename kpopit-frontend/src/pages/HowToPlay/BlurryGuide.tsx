@@ -37,6 +37,7 @@ const BlurryGuide = () => {
                         <div className="aspect-square overflow-hidden rounded-[18px] border-[2.5px] border-[#1A1418] bg-[#DCD6D2] shadow-[4px_5px_0_var(--ctl-off)]">
                             {/* The blur is the game's own level for this attempt, so it stays inline. */}
                             <img
+                                draggable={false}
                                 src={resolveCdnUrl(CLASSIC_EXAMPLE.hit.image) ?? ""}
                                 alt="Blurred idol photo"
                                 className="block size-full object-cover scale-110 transition-[filter] duration-550 ease-(--ease-settle)"

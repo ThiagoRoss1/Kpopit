@@ -37,7 +37,7 @@ export const Sticker = ({ children, tone, className }: { children: string; tone:
 export const Cover = ({ post, className, ratio = "aspect-16/10" }: { post: Post; className?: string; ratio?: string }) => {
     return (
         <div className={cn("isolate overflow-hidden border-2 border-[#1A1418] bg-[#1A1418] transform-gpu", ratio, className)}>
-            <img src={post.image} alt="" loading="lazy" className={cn("block size-full object-cover backface-hidden", COVER_ZOOM)} />
+            <img draggable={false} src={post.image} alt="" loading="lazy" className={cn("block size-full object-cover backface-hidden", COVER_ZOOM)} />
         </div>
     );
 };

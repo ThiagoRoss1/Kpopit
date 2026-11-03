@@ -280,7 +280,7 @@ const MostGuessed = ({ stats, filter }: { stats: ProfileStats; filter: ModeFilte
                                     "border-2 border-[#1A1418] bg-[#FFE3F1] font-bold text-base text-[#1A1418]",
                                 )}
                             >
-                                {imageSource ? <img src={imageSource} alt="" loading="lazy" className="block size-full object-cover" /> : idol.artist_name[0]}
+                                {imageSource ? <img draggable={false} src={imageSource} alt="" loading="lazy" className="block size-full object-cover" /> : idol.artist_name[0]}
                             </span>
                             <span className="flex flex-col gap-1 min-w-0">
                                 <span className="font-bold text-sm truncate">

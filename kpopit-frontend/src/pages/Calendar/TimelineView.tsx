@@ -286,7 +286,7 @@ const TimelineRow = ({ day, selected, mode, onPick }: TimelineRowProps) => {
                     )}
                 >
                     {isGuessed && day.entry?.image_path
-                        ? <img src={imageUrl(day.entry.image_path)} alt="" loading="lazy" className="absolute inset-0 size-full object-cover" />
+                        ? <img draggable={false} src={imageUrl(day.entry.image_path)} alt="" loading="lazy" className="absolute inset-0 size-full object-cover" />
                         : <span className="font-bold text-[22px] leading-none text-white text-shadow-(--puff-empty)">?</span>}
                 </div>
 

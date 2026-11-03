@@ -11,6 +11,7 @@ export default function FadeImg({ onLoad, onError, ...props }: ImgHTMLAttributes
     const show = () => setFade((f) => (f === "wait" ? "in" : f));
     return (
         <img
+            draggable={false}
             {...props}
             ref={ref}
             data-fade={fade}
