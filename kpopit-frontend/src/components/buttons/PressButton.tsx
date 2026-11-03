@@ -1,5 +1,6 @@
 import type { ComponentProps, ReactNode } from "react";
 import { Link } from "react-router";
+import IntentLink from "../Links/IntentLink";
 import { cn } from "../../lib/utils";
 
 export type PressVariant = "chip" | "cta" | "pink" | "ghost";
@@ -55,7 +56,7 @@ export const PressButton = ({ variant, size, className, ...rest }: PressStyle & 
 /** Same look, as an in-app link. */
 export const PressLink = ({ variant, size, className, ...rest }: PressStyle & ComponentProps<typeof Link>) => {
     return (
-        <Link
+        <IntentLink
             {...rest}
             data-hover={hoverOf(variant)}
             className={pressClasses({ variant, size, className })}

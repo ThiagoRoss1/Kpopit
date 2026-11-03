@@ -78,7 +78,7 @@ const Faq = () => {
                 jsonLd={faqJsonLd(groups)}
             />
 
-            <PageShell header={{ title: "FAQ", korean: "자주 묻는 질문", koreanLength: "long", subtitle: "Quick answers to the usual questions..." }} width="max-w-180">
+            <PageShell header={{ title: "FAQ", korean: "자주 묻는 질문", koreanLength: "long", subtitle: "Quick answers to the usual questions..." }} width="max-w-180" className="[overflow-anchor:none]">
                 <div className="flex flex-col gap-9 @max-[581px]:gap-7 mt-8.5">
                     <label className="pp-enter [--pp-delay:140ms] relative block">
                         <Search aria-hidden className="absolute left-4.5 top-1/2 -translate-y-1/2 size-4.5 text-(--muted)" strokeWidth={2.6} />

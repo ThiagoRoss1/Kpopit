@@ -42,10 +42,10 @@ const ButtonsDroplist = ({ menu, rows, page }: ButtonsDroplistProps) => {
                             index % 2 ? "rotate-[0.6deg]" : "rotate-[-0.6deg]",
                             isAbout ? "min-h-17.5 py-2.5" : "h-17.5",
                             isCurrent
-                                ? "bg-(--cur-bg) shadow-[3px_4px_0_0_#FF8AC4,3px_4px_0_2px_var(--ink)] active:shadow-[0_0_0_0_#FF8AC4,0_0_0_2px_var(--ink)]"
-                                : "bg-(--chip) shadow-[2px_3px_0_var(--ctl-off),var(--in)] active:shadow-[0_0_0_var(--ctl-off),var(--in)]",
+                                ? "bg-(--cur-bg) shadow-[3px_4px_0_0_#FF8AC4,3px_4px_0_2px_var(--ink)] pressed:shadow-[0_0_0_0_#FF8AC4,0_0_0_2px_var(--ink)]"
+                                : "bg-(--chip) shadow-[2px_3px_0_var(--ctl-off),var(--in)] pressed:shadow-[0_0_0_var(--ctl-off),var(--in)]",
                             !isCurrent && !isWip && "hover:bg-(--chip-hover)",
-                            !isWip && "hover:-translate-y-0.5 hover:rotate-0 active:translate-x-0.5 active:translate-y-0.75 active:rotate-0 active:duration-180",
+                            !isWip && "hover:-translate-y-0.5 hover:rotate-0 pressed:translate-x-0.5 pressed:translate-y-0.75 pressed:rotate-0 pressed:duration-180",
                             isWip && "opacity-60 cursor-default",
                         )}
                     >
@@ -81,7 +81,7 @@ const ButtonsDroplist = ({ menu, rows, page }: ButtonsDroplistProps) => {
                         "rounded-2xl border-2 border-[#1A1418] bg-[#FF8AC4] text-[#1A1418] no-underline",
                         "shadow-[2px_3px_0_#1A1418,inset_0_2px_0_rgba(255,255,255,.55),inset_0_-3px_0_rgba(198,35,104,.22)]",
                         "transition-[translate,box-shadow] duration-450 ease-(--ease-settle) transform-gpu",
-                        "hover:-translate-y-0.5 active:translate-x-0.5 active:translate-y-0.75 active:duration-180",
+                        "hover:-translate-y-0.5 pressed:translate-x-0.5 pressed:translate-y-0.75 pressed:duration-180",
                     )}
                 >
                     <span className="flex-none grid place-items-center size-10 rounded-xl border-2 border-[#1A1418] bg-[#FFFDFA]">

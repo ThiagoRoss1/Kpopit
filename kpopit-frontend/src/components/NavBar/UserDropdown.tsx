@@ -15,11 +15,11 @@ const menuItemClasses = cn(
     "pp-focus relative flex items-center gap-3 h-11 px-3 rounded-[13px] border-2 border-transparent",
     "font-semibold text-[15px] text-(--chip-ink) no-underline cursor-pointer",
     "transition-transform duration-300 ease-(--ease-settle) transform-gpu",
-    "hover:-translate-y-0.5 active:translate-x-0.5 active:translate-y-0.75 active:duration-180",
+    "hover:-translate-y-0.5 pressed:translate-x-0.5 pressed:translate-y-0.75 pressed:duration-180",
     "before:absolute before:-inset-0.5 before:-z-1 before:rounded-[inherit] before:border-2 before:border-(--ink)",
     "before:bg-(--chip-hover) before:shadow-[2px_3px_0_var(--ctl-off),var(--in)] before:opacity-0",
     "before:transition-[opacity,box-shadow] before:duration-300",
-    "hover:before:opacity-100 active:before:opacity-100 active:before:shadow-[0_0_0_var(--ctl-off),var(--in)]",
+    "hover:before:opacity-100 pressed:before:opacity-100 pressed:before:shadow-[0_0_0_var(--ctl-off),var(--in)]",
 );
 
 interface UserDropdownProps {
@@ -79,7 +79,7 @@ const UserDropdown = ({ open, onToggle }: UserDropdownProps) => {
                     "shadow-[0_0_0_2px_var(--ink),0_0_0_4.5px_#FF8AC4,0_0_0_6.5px_var(--ink)]",
                     "hover:shadow-[0_0_0_2px_var(--ink),0_0_0_5px_#FF8AC4,0_0_0_7px_var(--ink)]",
                     "transition-[box-shadow,scale] duration-400 ease-(--ease-settle) transform-gpu",
-                    "active:scale-95 active:duration-180 aria-expanded:scale-95",
+                    "pressed:scale-95 pressed:duration-180 aria-expanded:scale-95",
                 )}
             >
                 {avatar ? (

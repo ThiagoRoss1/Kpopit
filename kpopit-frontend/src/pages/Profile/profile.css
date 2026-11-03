@@ -43,7 +43,9 @@
 
 .profile-column-enter {
     transform-origin: bottom;
-    animation: profileColumnRise 0.9s var(--ease-bounce) backwards;
+    transform: translateZ(0);
+    will-change: transform;
+    animation: profileColumnRise 0.9s var(--ease-settle) backwards;
 }
 
 @keyframes profileRingPop {

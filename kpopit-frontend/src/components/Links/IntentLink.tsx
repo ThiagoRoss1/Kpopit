@@ -1,4 +1,4 @@
-import { useRef, useState, type FocusEvent, type MouseEvent, type TouchEvent } from "react";
+import { useEffect, useRef, useState, type FocusEvent, type MouseEvent, type TouchEvent } from "react";
 import { Link, useLocation, type LinkProps } from "react-router";
 import "./IntentLink.css";
 
@@ -19,6 +19,11 @@ export default function IntentLink({ className = "", onIntent, onClick, onMouseE
     const location = useLocation();
     const [pressedOn, setPressedOn] = useState<string | null>(null);
     const hoverTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
+
+    useEffect(() => () => {
+        if (hoverTimer.current) clearTimeout(hoverTimer.current);
+    }, []);
+
     const stopHover = () => {
         if (hoverTimer.current) clearTimeout(hoverTimer.current);
         hoverTimer.current = null;

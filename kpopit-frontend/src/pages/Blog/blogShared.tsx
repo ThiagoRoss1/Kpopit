@@ -36,8 +36,8 @@ export const Sticker = ({ children, tone, className }: { children: string; tone:
 /** A post's cover in its frame; it zooms in when its card is hovered. */
 export const Cover = ({ post, className, ratio = "aspect-16/10" }: { post: Post; className?: string; ratio?: string }) => {
     return (
-        <div className={cn("overflow-hidden border-2 border-[#1A1418] bg-[#DCD6D2]", ratio, className)}>
-            <img src={post.image} alt="" loading="lazy" className={cn("block size-full object-cover", COVER_ZOOM)} />
+        <div className={cn("isolate overflow-hidden border-2 border-[#1A1418] bg-[#1A1418] transform-gpu", ratio, className)}>
+            <img src={post.image} alt="" loading="lazy" className={cn("block size-full object-cover backface-hidden", COVER_ZOOM)} />
         </div>
     );
 };

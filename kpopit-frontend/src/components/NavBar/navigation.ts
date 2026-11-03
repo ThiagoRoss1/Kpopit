@@ -19,7 +19,9 @@ export type NavPage =
     | "contact"
     | "privacy"
     | "idolxp"
-    | "profile";
+    | "profile"
+    | "login"
+    | "register";
 
 export type NavMenu = "games" | "idols" | "about";
 
@@ -67,6 +69,8 @@ export const ABOUT_ROWS: NavRow[] = [
 ];
 
 const PAGE_PATHS: [string, NavPage][] = [
+    ["/login", "login"],
+    ["/register", "register"],
     ["/classic", "classic"],
     ["/blurry", "blurry"],
     ["/pixelated", "pixelated"],
@@ -93,6 +97,8 @@ export function pageOf(pathname: string): NavPage | null {
 
 /** The "• page" label next to the logo. */
 export const PAGE_LABEL: Record<NavPage, string> = {
+    login: "login",
+    register: "register",
     classic: "classic",
     blurry: "blurry",
     pixelated: "pixelated",

@@ -4,6 +4,7 @@
 
 
 @custom-variant dark (&:is(.dark *));
+@custom-variant pressed (&:is(:active, .link-pending));
 
 @custom-variant firefox {
   @supports (-moz-appearance: none) {
@@ -174,13 +175,18 @@
 
 .pp-enter {
     animation: var(--pp-anim, puffIn) 0.7s var(--ease-settle) var(--pp-delay, 0ms) backwards;
+    transform: translateZ(0);
+    backface-visibility: hidden;
 }
 
 /* Puff lettering: DynaPuff's tall glyphs and their outline rise above a line-height of 1, so the
    lettering carries its own headroom (padding pulled back by the margin) and is never clipped. */
 @utility puff-ink {
-    padding-top: 0.18em;
-    margin-top: -0.18em;
+    padding-top: 0.24em;
+    margin-top: -0.24em;
+    padding-inline: 0.12em;
+    transform: translateZ(0);
+    backface-visibility: hidden;
 }
 
 /* Keyboard focus ring */
@@ -213,6 +219,7 @@
 
 .pp-press[aria-pressed="true"],
 .pp-press[aria-current="page"],
+.pp-press.link-pending,
 .pp-press:not(:disabled):active:active:active {
     translate: 2px 3px;
     box-shadow: 0 0 0 var(--ctl-off), var(--pp-in, var(--in));
@@ -327,7 +334,7 @@
 .pp-collapse {
     display: grid;
     grid-template-rows: 0fr;
-    transition: grid-template-rows 0.45s var(--ease-settle);
+    transition: grid-template-rows 0.35s ease-out;
 }
 
 .pp-collapse[data-open="1"] {
@@ -341,15 +348,11 @@
 
 .pp-collapse-in {
     opacity: 0;
-    translate: 0 -8px;
-    transition:
-        opacity 0.25s ease,
-        translate 0.45s var(--ease-settle);
+    transition: opacity 0.2s ease;
 }
 
 .pp-collapse[data-open="1"] .pp-collapse-in {
     opacity: 1;
-    translate: 0 0;
     transition-delay: 0.06s;
 }
 
@@ -357,8 +360,7 @@
     visibility: hidden;
     transition:
         opacity 0.2s ease,
-        translate 0.3s ease,
-        visibility 0s 0.45s;
+        visibility 0s 0.35s;
 }
 
 /* FadeImg: a cover that finishes loading after hydration fades in. */

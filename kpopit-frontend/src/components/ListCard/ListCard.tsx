@@ -48,6 +48,7 @@ const ListCard = ({ to, label, index, animate = true, onIntent, children }: List
                         "rounded-[23px] @max-[580px]:rounded-[20px] border-2 border-(--ink)",
                         "bg-(--face) text-(--face-ink) shadow-(--face-hl) no-underline cursor-pointer",
                         "transition-[translate,background-color] duration-380 ease-(--ease-settle) transform-gpu",
+                        "[--press-x:5px] [--press-y:5px] @max-[580px]:[--press-x:4px] @max-[580px]:[--press-y:4px]",
                         "group-hover:-translate-x-px group-hover:-translate-y-0.75 group-hover:bg-(--face-hover)",
                         "group-active:translate-1.25 group-active:duration-120",
                         "@max-[580px]:group-active:translate-1",

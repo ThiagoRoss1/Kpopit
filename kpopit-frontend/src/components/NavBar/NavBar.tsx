@@ -38,21 +38,22 @@ const navItemClasses = (state: "current" | "open" | "idle") => cn(
     "pp-focus relative inline-flex items-center box-border h-10 rounded-full border-2",
     "font-bold text-[15.5px] whitespace-nowrap no-underline cursor-pointer",
     "transition-[translate,background-color,border-color,box-shadow] duration-300 ease-(--ease-settle) transform-gpu",
-    "hover:-translate-y-0.5 active:translate-x-0.5 active:translate-y-0.75 active:duration-180",
+    "hover:-translate-y-0.5 pressed:translate-x-0.5 pressed:translate-y-0.75 pressed:duration-180",
     state === "current" && cn(
         "bg-(--side) border-(--ink) text-[#1A1418]",
-        "shadow-[2px_3px_0_var(--ctl-off),var(--in-pink)] active:shadow-[0_0_0_var(--ctl-off),var(--in-pink)]",
+        "shadow-[2px_3px_0_0_#FF8AC4,2px_3px_0_2px_var(--ink),var(--in-pink)]",
+        "pressed:shadow-[0_0_0_0_#FF8AC4,0_0_0_2px_var(--ink),var(--in-pink)]",
     ),
     state === "open" && cn(
         "bg-(--chip) border-(--ink) text-(--text)",
-        "shadow-[2px_3px_0_var(--ctl-off),var(--in)] active:shadow-[0_0_0_var(--ctl-off),var(--in)]",
+        "shadow-[2px_3px_0_var(--ctl-off),var(--in)] pressed:shadow-[0_0_0_var(--ctl-off),var(--in)]",
     ),
     state === "idle" && cn(
-        "bg-transparent border-transparent text-(--muted) hover:text-(--text) active:text-(--text)",
+        "bg-transparent border-transparent text-(--muted) hover:text-(--text) pressed:text-(--text)",
         "before:absolute before:-inset-0.5 before:-z-1 before:rounded-[inherit] before:border-2 before:border-(--ink)",
         "before:bg-(--chip) before:shadow-[2px_3px_0_var(--ctl-off),var(--in)] before:opacity-0",
         "before:transition-[opacity,box-shadow] before:duration-300",
-        "hover:before:opacity-100 active:before:opacity-100 active:before:shadow-[0_0_0_var(--ctl-off),var(--in)]",
+        "hover:before:opacity-100 pressed:before:opacity-100 pressed:before:shadow-[0_0_0_var(--ctl-off),var(--in)]",
     ),
 );
 
@@ -72,7 +73,7 @@ interface NavBarProps {
  *  shift between pages. */
 const NavBar = ({ forceTheme }: NavBarProps) => {
     const isThemeForced = forceTheme !== undefined;
-    const { pathname } = useLocation();
+    const { pathname, key: locationKey } = useLocation();
     const page = pageOf(pathname);
     const section = menuOf(page);
     const { features } = useFeatures();
@@ -80,9 +81,11 @@ const NavBar = ({ forceTheme }: NavBarProps) => {
     const rootRef = useRef<HTMLDivElement>(null);
 
     // A menu belongs to the page it was opened on: navigating closes it.
-    const [openState, setOpenState] = useState<{ menu: OpenMenu; path: string }>({ menu: null, path: pathname });
-    const openMenu = openState.path === pathname ? openState.menu : null;
-    const setOpenMenu = (menu: OpenMenu) => setOpenState({ menu, path: pathname });
+    const [openState, setOpenState] = useState<{ menu: OpenMenu; key: string }>({ menu: null, key: locationKey });
+    if (openState.key !== locationKey) setOpenState({ menu: null, key: locationKey });
+
+    const openMenu = openState.key === locationKey ? openState.menu : null;
+    const setOpenMenu = (menu: OpenMenu) => setOpenState({ menu, key: locationKey });
 
     // One menu at a time: opening one (dropdown, sheet or the profile menu) closes the others.
     const toggleMenu = (menu: Exclude<OpenMenu, null>) => setOpenMenu(openMenu === menu ? null : menu);
@@ -146,7 +149,7 @@ const NavBar = ({ forceTheme }: NavBarProps) => {
                         className={cn(
                             "pp-focus flex min-w-0 items-center gap-2 no-underline",
                             "transition-transform duration-300 ease-(--ease-settle) transform-gpu",
-                            "hover:scale-104 active:scale-96 active:duration-120",
+                            "hover:scale-104 pressed:scale-96 pressed:duration-120",
                         )}
                     >
                         <img
