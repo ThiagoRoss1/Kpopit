@@ -2,8 +2,8 @@ import type { IdolProfileData, IdolsPageData } from "../../interfaces/gameInterf
 import { formatGroupName } from "../../utils/formatters";
 import { nationalities } from "./idolsData";
 
-/** Tile widths on the 6-column grid (the phone grid has 2): "3n" and "2w" go full width on phones. */
-export type Span = "6" | "4" | "3" | "3n" | "2" | "2w";
+/** Paired tiles share a row; positions and past groups use the full row. */
+export type Span = "6" | "3";
 
 export interface FactChip {
     label: string;
@@ -21,10 +21,6 @@ export interface Fact {
     sub?: string;
     chips?: FactChip[];
     flags?: string[];
-    /** Numbers and short values get the larger size. */
-    big?: boolean;
-    /** The one tile left alone in a phone row spans it. */
-    solo?: boolean;
 }
 
 export type TabKey = "profile" | "career" | "status";
@@ -51,9 +47,6 @@ const COUNTRY_CODES: Record<string, string> = {
 
 const MONTHS = ["January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"];
 
-// Tiles on the phone grid: 2 = full row, 1 = half.
-const PHONE_WIDTH: Record<Span, number> = { "6": 2, "4": 2, "3n": 2, "2w": 2, "3": 1, "2": 1 };
-
 const shortCompany = (name: string) => name.replace(/ Entertainment\b/g, " Ent.");
 const plural = (count: number, one: string, many: string) => (count > 1 ? many : one);
 const splitList = (value: string | null) => (value ?? "").split(",").map((item) => item.trim()).filter(Boolean);
@@ -66,21 +59,6 @@ function longBirthDate(iso: string | null) {
     return `${MONTHS[month - 1]} ${day}, ${year}`;
 }
 
-/** The phone grid is 2 wide: a half-width tile with no partner spans the row. */
-function markSolo(facts: Fact[]) {
-    let unpairedIndex = -1;
-
-    facts.forEach((fact, index) => {
-        if (PHONE_WIDTH[fact.span] !== 1) return;
-
-        unpairedIndex = unpairedIndex >= 0 ? -1 : index;
-    });
-
-    if (unpairedIndex >= 0) facts[unpairedIndex].solo = true;
-
-    return facts;
-}
-
 /** The three panes of the idol page: profile facts, career, and where the idol plays in KpopIt. */
 export function buildFacts(data: IdolProfileData, age: number | null): Record<TabKey, Fact[]> {
     const profile = data.idol_profile;
@@ -89,18 +67,17 @@ export function buildFacts(data: IdolProfileData, age: number | null): Record<Ta
     const positions = splitList(profile.position);
 
     const profileFacts: Fact[] = [
-        { label: "ARTIST NAME", span: "3n", value: profile.artist_name, big: true },
-        { label: "REAL NAME", span: "3n", value: profile.real_name || "N/A" },
-        { label: "AGE", span: "2", value: age ? String(age) : "–", sub: "years old", big: true },
-        { label: "HEIGHT", span: "2", value: profile.height ? String(profile.height) : "–", sub: "cm", big: true },
+        { label: "ARTIST NAME", span: "3", value: profile.artist_name },
+        { label: "REAL NAME", span: "3", value: profile.real_name || "N/A" },
+        { label: "BORN", span: "3", value: longBirthDate(profile.birth_date) },
+        { label: "AGE", span: "3", value: age ? String(age) : "–", sub: "years old" },
+        { label: "HEIGHT", span: "3", value: profile.height ? String(profile.height) : "–", sub: "cm" },
         {
             label: plural(idolNationalities.length, "NATIONALITY", "NATIONALITIES"),
-            span: "2w",
+            span: "3",
             value: idolNationalities.map((nationality) => COUNTRY_CODES[nationality] ?? nationality).join(" · "),
             flags: idolNationalities,
         },
-        { label: "BORN", span: "4", value: longBirthDate(profile.birth_date) },
-        { label: "DEBUT", span: "2", value: career.idol_debut_year ? String(career.idol_debut_year) : "N/A", big: true },
         {
             label: plural(positions.length, "POSITION", "POSITIONS"),
             span: "6",
@@ -125,25 +102,26 @@ export function buildFacts(data: IdolProfileData, age: number | null): Record<Ta
     const careerFacts: Fact[] = [
         {
             label: career.is_former_group ? "LAST GROUP" : "CURRENT GROUP",
-            span: "4",
+            span: "3",
             value: career.group_name ? formatGroupName(career.group_name, career.is_former_group) : "Soloist",
             sub: groupSub || undefined,
         },
-        { label: "FANDOM", span: "2", value: career.fandom_name || "N/A" },
-        { label: plural(labels.length, "LABEL", "LABELS"), span: "3", value: labels.map(shortCompany).join(", ") || "N/A" },
+        { label: "FANDOM", span: "3", value: career.fandom_name || "N/A" },
         { label: plural(parents.length, "PARENT COMPANY", "PARENT COMPANIES"), span: "3", value: parents.map(shortCompany).join(", ") || "N/A" },
-        { label: plural(idolCompanies.length, "IDOL COMPANY", "IDOL COMPANIES"), span: "2", value: idolCompanies.map(shortCompany).join(", ") || "N/A" },
+        { label: plural(labels.length, "LABEL", "LABELS"), span: "3", value: labels.map(shortCompany).join(", ") || "N/A" },
+        { label: "DEBUT YEAR", span: "3", value: career.idol_debut_year ? String(career.idol_debut_year) : "N/A" },
+        { label: plural(idolCompanies.length, "IDOL COMPANY", "IDOL COMPANIES"), span: "3", value: idolCompanies.map(shortCompany).join(", ") || "N/A" },
         pastGroups.length
             ? {
                 label: plural(pastGroups.length, "PAST GROUP", "PAST GROUPS"),
-                span: "4",
+                span: "6",
                 chips: pastGroups.map((group, index) => ({
                     label: group.group_name,
                     sub: `${group.start_year}–${group.end_year ?? "now"}`,
                     look: index + 1,
                 })),
             }
-            : { label: "PAST GROUPS", span: "4", value: "None", sub: "First group" },
+            : { label: "PAST GROUPS", span: "6", value: "None", sub: "First group" },
     ];
 
     const modes = Object.entries(data.game_info.game_modes_available)
@@ -156,13 +134,13 @@ export function buildFacts(data: IdolProfileData, age: number | null): Record<Ta
             span: "6",
             chips: modes.map((label, index) => ({ label, to: `/${label.toLowerCase()}`, big: true, look: index })),
         },
-        { label: "KPOPIT ID", span: "6", value: `#${profile.idol_id}`, big: true },
+        { label: "KPOPIT ID", span: "6", value: `#${profile.idol_id}` },
     ];
 
     return {
-        profile: markSolo(profileFacts),
-        career: markSolo(careerFacts),
-        status: markSolo(statusFacts),
+        profile: profileFacts,
+        career: careerFacts,
+        status: statusFacts,
     };
 }
 

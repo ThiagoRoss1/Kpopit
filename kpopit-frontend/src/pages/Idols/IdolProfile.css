@@ -15,7 +15,7 @@
     --speed: rgba(255, 255, 255, 0.06);
     --stripe: rgba(255, 51, 153, 0.13);
     --rn: 58px;
-    --cap-b: 36px;
+    --cap-b: 26px;
     --ink-puff: -2px -2px 0 #1A1418,2px -2px 0 #1A1418,-2px 2px 0 #1A1418,2px 2px 0 #1A1418,0px 2px 0 #1A1418,0px -2px 0 #1A1418,2px 0px 0 #1A1418,-2px 0px 0 #1A1418,0.67px 1px 0 #1A1418,1.33px 2px 0 #1A1418,2px 3px 0 #1A1418,0px 1px 0 #1A1418,4px 1px 0 #1A1418,0px 5px 0 #1A1418,4px 5px 0 #1A1418,2px 5px 0 #1A1418,2px 1px 0 #1A1418,4px 3px 0 #1A1418,0px 3px 0 #1A1418;
 }
 
@@ -31,11 +31,10 @@
     --stripe: transparent;
 }
 
-/* Laptop widths (a MacBook's 1440-1512px): the name letters and values a step smaller. */
+/* Laptop widths (a MacBook's 1440-1512px): the name letters a step smaller. */
 @container idol (max-width: 1600px) {
     .idol-page {
         --rn: 52px;
-        --cap-b: 30px;
     }
 }
 
@@ -49,13 +48,38 @@
 @container idol (max-width: 560px) {
     .idol-page {
         --rn: 44px;
-        --cap-b: 30px;
+        --cap-b: 24px;
     }
 }
 
 /* Font fit: the ransom-note letters share the name's width, up to the size of --rn. */
 .idol-name-letter {
     font-size: min(calc(var(--rn) * var(--ls)), calc(((100cqi + 36px) / var(--len) - 24px) / 0.78 * var(--lk)));
+}
+
+/* Related idols: override the legacy horizontal scrollbar's thin track and active glow. */
+.idol-related-scroll::-webkit-scrollbar:horizontal {
+    height: 14px;
+}
+
+.idol-related-scroll::-webkit-scrollbar-thumb:horizontal {
+    background: #FF8AC4;
+    box-shadow: inset 0 2px 0 rgba(255, 255, 255, 0.55);
+}
+
+.idol-related-scroll::-webkit-scrollbar-thumb:horizontal:hover {
+    background: #FF70B8;
+}
+
+.idol-related-scroll::-webkit-scrollbar-thumb:horizontal:active {
+    background: #FF3399;
+    box-shadow: none;
+}
+
+@supports not selector(::-webkit-scrollbar) {
+    .idol-related-scroll {
+        scrollbar-width: auto;
+    }
 }
 
 /* Photo */

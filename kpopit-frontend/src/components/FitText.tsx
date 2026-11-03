@@ -23,10 +23,14 @@ const FitText = ({ children, maxSize, className }: FitTextProps) => {
             if (disposed || !container.clientWidth) return;
 
             text.style.fontSize = maxSize;
-            const maximum = Number.parseFloat(getComputedStyle(text).fontSize);
-            const ratio = Math.min(1, (container.clientWidth - 2) / text.scrollWidth);
+            let size = Number.parseFloat(getComputedStyle(text).fontSize);
+            const available = container.clientWidth - 2;
 
-            if (ratio < 1) text.style.fontSize = `${Math.floor(maximum * ratio * 10) / 10}px`;
+            // Fixed padding and rounded glyph widths make a single proportional fit slightly too wide.
+            for (let attempt = 0; attempt < 4 && text.scrollWidth > available; attempt++) {
+                size = Math.floor(size * available / text.scrollWidth * 10) / 10;
+                text.style.fontSize = `${size}px`;
+            }
         };
 
         fit();

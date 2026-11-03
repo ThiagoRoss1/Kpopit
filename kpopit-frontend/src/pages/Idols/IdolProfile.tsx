@@ -67,11 +67,7 @@ const CHIP_STYLES = [
 // Tile widths on the 6-column grid; the phone grid has 2 columns.
 const SPAN_CLASSES: Record<Span, string> = {
     "6": "col-span-6 @max-[561px]/idol:col-span-2",
-    "4": "col-span-4 @max-[561px]/idol:col-span-2",
     "3": "col-span-3 @max-[561px]/idol:col-span-1",
-    "3n": "col-span-3 @max-[561px]/idol:col-span-2",
-    "2": "col-span-2 @max-[561px]/idol:col-span-1",
-    "2w": "col-span-2 @max-[561px]/idol:col-span-2",
 };
 
 const idolImageUrl = (idol: { image_path: string; image_version: number | string }) =>
@@ -454,7 +450,6 @@ const FactTile = ({ fact, delay }: FactTileProps) => {
                 "min-h-24 @max-[1281px]/idol:min-h-28 pt-5.5 px-3 pb-3 text-center",
                 "bg-(--chip) text-(--chip-ink) border-[2.5px] border-[#1A1418] rounded-[20px] shadow-[4px_4px_0_var(--ctl-off),var(--in)]",
                 SPAN_CLASSES[fact.span],
-                fact.solo && "@max-[561px]/idol:col-span-full",
             )}
             style={{ animationDelay: `${delay}ms` }}
         >
@@ -488,11 +483,12 @@ const FactTile = ({ fact, delay }: FactTileProps) => {
                         <span className="flex justify-center gap-2">
                             {flags.map((flag) => (
                                 <img
+                                    draggable={false}
                                     key={flag.nationality}
                                     src={flag.src!}
                                     alt={flag.nationality}
                                     className={cn(
-                                        "w-[50.4px] h-[30.8px] @max-[561px]/idol:w-[28.8px] @max-[561px]/idol:h-[17.6px]",
+                                        "w-9 h-6 @max-[561px]/idol:w-7.5 @max-[561px]/idol:h-5",
                                         "rounded-[5px] border-2 border-[#1A1418] object-cover shadow-[2px_2.5px_0_#1A1418] -rotate-3",
                                     )}
                                 />
@@ -500,15 +496,16 @@ const FactTile = ({ fact, delay }: FactTileProps) => {
                         </span>
                     )}
 
-                    <FitText
-                        maxSize="var(--cap-b)"
-                        className={cn(
-                            "pr-1.25 pb-1.25 puff-ink font-bold leading-[1.1] text-white text-shadow-(--puff-value)",
-                            flags.length > 0 && "tracking-[.06em]",
-                        )}
-                    >
-                        {text}
-                    </FitText>
+                    {flags.length > 0 ? (
+                        <span className="font-semibold text-[11px] leading-[1.3] tracking-[.06em] text-(--muted)">{text}</span>
+                    ) : (
+                        <FitText
+                            maxSize="var(--cap-b)"
+                            className="pr-1.25 pb-1.25 puff-ink font-bold leading-[1.1] text-white text-shadow-(--puff-value)"
+                        >
+                            {text}
+                        </FitText>
+                    )}
                 </span>
             )}
 
@@ -595,7 +592,7 @@ const RelatedIdols = ({ idols }: { idols: IdolsPageData[] }) => {
                 </div>
             </div>
 
-            <HScrollRow bar aria-label="Related idols" className="gap-6 overflow-y-hidden mt-7.5 -mx-3.5 pt-5 px-3.5 pb-7.5">
+            <HScrollRow bar aria-label="Related idols" className="idol-related-scroll gap-6 overflow-y-hidden mt-7.5 -mx-3.5 pt-5 px-3.5 pb-7.5">
                 {idols.map((idol, index) => (
                     <IntentLink
                         key={idol.id}
@@ -613,7 +610,7 @@ const RelatedIdols = ({ idols }: { idols: IdolsPageData[] }) => {
                         )}
                     >
                         <span className="block aspect-square overflow-hidden border-[2.5px] border-[#1A1418] rounded-xl bg-[#1A1418]">
-                            <FadeImg src={idolImageUrl(idol)} alt="" loading="lazy" decoding="async" className="block size-full object-cover" />
+                            <FadeImg draggable={false} src={idolImageUrl(idol)} alt="" loading="lazy" decoding="async" className="block size-full object-cover" />
                         </span>
 
                         <span className="flex flex-col gap-1.25 min-w-0 px-1">
