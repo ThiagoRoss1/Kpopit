@@ -1,7 +1,7 @@
 /* ==========================================================================
    Idol page
    Layout and motion live in Tailwind in IdolProfile.tsx; this file keeps the page's Day/Night
-   tokens, the two font-fit formulas, the photo's rendering rules and the entrance keyframes.
+   tokens, the name's font-fit formula, the photo's rendering rules and the entrance keyframes.
    ========================================================================== */
 
 /* Page tokens (Day) */
@@ -15,7 +15,6 @@
     --speed: rgba(255, 255, 255, 0.06);
     --stripe: rgba(255, 51, 153, 0.13);
     --rn: 58px;
-    --cap-t: 24px;
     --cap-b: 36px;
     --ink-puff: -2px -2px 0 #1A1418,2px -2px 0 #1A1418,-2px 2px 0 #1A1418,2px 2px 0 #1A1418,0px 2px 0 #1A1418,0px -2px 0 #1A1418,2px 0px 0 #1A1418,-2px 0px 0 #1A1418,0.67px 1px 0 #1A1418,1.33px 2px 0 #1A1418,2px 3px 0 #1A1418,0px 1px 0 #1A1418,4px 1px 0 #1A1418,0px 5px 0 #1A1418,4px 5px 0 #1A1418,2px 5px 0 #1A1418,2px 1px 0 #1A1418,4px 3px 0 #1A1418,0px 3px 0 #1A1418;
 }
@@ -36,7 +35,6 @@
 @container idol (max-width: 1600px) {
     .idol-page {
         --rn: 52px;
-        --cap-t: 21px;
         --cap-b: 30px;
     }
 }
@@ -51,14 +49,8 @@
 @container idol (max-width: 560px) {
     .idol-page {
         --rn: 44px;
-        --cap-t: 22px;
         --cap-b: 30px;
     }
-}
-
-/* Font fit: a value shrinks with its tile's width and its length, up to the cap. */
-.idol-fact-value {
-    font-size: min(var(--fs-cap), calc((100cqi - 28px) * var(--fit-k, 1.5) / var(--len)));
 }
 
 /* Font fit: the ransom-note letters share the name's width, up to the size of --rn. */

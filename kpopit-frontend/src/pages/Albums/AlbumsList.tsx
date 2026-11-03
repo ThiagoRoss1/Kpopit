@@ -61,12 +61,23 @@ const AlbumsCatalogue = ({ allAlbums }: { allAlbums: AlbumsPageItem[] }) => {
     const hydrated = useHydrated();
     const [params, setParams] = useSearchParams();
     const [filtersOpen, setFiltersOpen] = useState(false);
+    const [animate, setAnimate] = useState(true);
+    const [gridVersion, setGridVersion] = useState(0);
 
     // The prerendered list is unfiltered; the URL's filters apply once the page is live.
     const filters = hydrated ? readAlbumFilters(params) : NO_FILTERS;
     const albums = filterAlbums(allAlbums, filters);
 
     const setFilters = (patch: Partial<AlbumFilters>) => {
+        const nextFilters = { ...filters, ...patch };
+        const clearedSearch = !!filters.q && nextFilters.q === "";
+        const clearedAll = Object.values(filters).some(Boolean) && !Object.values(nextFilters).some(Boolean);
+        const recoveredResults = albums.length === 0 && filterAlbums(allAlbums, nextFilters).length > 0;
+        const replayEntrance = clearedSearch || clearedAll || recoveredResults;
+
+        setAnimate(replayEntrance);
+        if (replayEntrance) setGridVersion((version) => version + 1);
+
         setParams((current) => {
             for (const [key, value] of Object.entries(patch)) {
                 if (value) current.set(key, value);
@@ -200,16 +211,18 @@ const AlbumsCatalogue = ({ allAlbums }: { allAlbums: AlbumsPageItem[] }) => {
                 {/* The cards */}
                 {albums.length > 0 ? (
                     <section
+                        key={`${hydrated}-${gridVersion}`}
                         aria-label="Albums catalogue"
                         className={cn(
                             "grid grid-cols-[repeat(auto-fill,minmax(190px,1fr))] gap-x-7 gap-y-9 pt-2.5 pr-2 pb-5.5 pl-0.5",
                             "@max-[580px]:grid-cols-[repeat(auto-fill,minmax(140px,1fr))] @max-[580px]:gap-x-3.5 @max-[580px]:gap-y-5.5",
                             "@max-[580px]:pt-1.5 @max-[580px]:pr-1.5 @max-[580px]:pb-4.5",
                             "@max-[359px]:grid-cols-[repeat(auto-fill,minmax(122px,1fr))] @max-[359px]:gap-x-2.5 @max-[359px]:gap-y-4.5",
+                            !hydrated && "invisible",
                         )}
                     >
                         {albums.map((album, index) => (
-                            <AlbumCard key={album.id} album={album} index={index} />
+                            <AlbumCard key={album.id} album={album} index={index} animate={animate} />
                         ))}
                     </section>
                 ) : (

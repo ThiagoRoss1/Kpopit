@@ -71,5 +71,5 @@ export function filterAlbums(albums: AlbumsPageItem[], f: AlbumFilters): AlbumsP
     if (f.sort === "oldest") return list.sort((a, b) => a.release_year - b.release_year || byName(a, b));
     if (f.sort === "az") return list.sort(byName);
     if (f.sort === "artist") return list.sort((a, b) => a.artist_name.localeCompare(b.artist_name) || a.release_year - b.release_year);
-    return list;
+    return list.sort((first, second) => first.id - second.id);
 }

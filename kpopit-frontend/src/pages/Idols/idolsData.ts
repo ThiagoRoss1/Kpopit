@@ -103,5 +103,5 @@ export function filterIdols(idols: IdolsPageData[], f: IdolFilters): IdolsPageDa
         const rank = (i: IdolsPageData) => (i.artist_name.toLowerCase().startsWith(q) ? 0 : i.artist_name.toLowerCase().includes(q) ? 1 : 2);
         return list.sort((a, b) => rank(a) - rank(b) || a.artist_name.localeCompare(b.artist_name));
     }
-    return list;
+    return list.sort((first, second) => first.id - second.id);
 }

@@ -173,7 +173,7 @@ const XpMemberView = ({ state, stateKey, idols: idolList, username }: MemberView
 
                         <div className="flex flex-col flex-1 gap-1.5 min-w-0">
                             <span className={cn(LABEL, "text-(--group)")}>{current ? "LEVELING NOW" : "NO IDOL PICKED"}</span>
-                            <span className="puff-ink pb-1.5 font-bold text-[40px] @max-[581px]:text-[30px] leading-none text-white text-shadow-(--puff-value) truncate">
+                            <span className="puff-ink pb-2 font-bold text-[40px] @max-[581px]:text-[30px] leading-[1.2] text-white text-shadow-(--puff-value) truncate">
                                 {current?.name ?? "Pick one below"}
                             </span>
                             <span className="font-semibold text-sm text-(--group)">{current?.group ?? "Your finished games fill the potion meanwhile."}</span>

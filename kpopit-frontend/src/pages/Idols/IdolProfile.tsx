@@ -13,6 +13,7 @@ import HScrollRow from "../../components/HScrollRow/HScrollRow";
 import IntentLink from "../../components/Links/IntentLink";
 import IdolsProfileSearch from "../../components/IdolsSearchBar/IdolsProfileSearch";
 import FadeImg from "../../components/FadeImg";
+import FitText from "../../components/FitText";
 import { getNationalityFlag } from "../../utils/getFlags";
 import { resolveCdnUrl } from "../../utils/imageUrl";
 import { buildIdolSlug } from "../../utils/formatters";
@@ -171,7 +172,7 @@ const IdolPage = ({ data, idols }: IdolPageProps) => {
                 jsonLd={jsonLd}
             />
 
-            <div className="idol-page relative isolate overflow-clip min-h-full px-12 @max-[901px]/idol:px-6 @max-[561px]/idol:px-4 pb-9 text-(--text) transition-colors duration-300">
+            <div className="idol-page relative isolate overflow-clip min-h-full px-12 @max-[901px]/idol:px-6 @max-[561px]/idol:px-4 pt-6.5 pb-9 text-(--text) transition-colors duration-300">
                 {/* The tilted dark band and its two pink lines behind the hero */}
                 <div
                     aria-hidden
@@ -189,7 +190,7 @@ const IdolPage = ({ data, idols }: IdolPageProps) => {
                 {/* Back button and search */}
                 <div
                     className={cn(
-                        "relative z-8 grid justify-center items-center max-w-340 mx-auto mt-6.5",
+                        "relative z-8 grid justify-center items-center max-w-340 mx-auto",
                         "grid-cols-[minmax(0,520px)_minmax(0,760px)] gap-x-16 gap-y-4",
                         "@max-[1281px]/idol:grid-cols-[auto_minmax(0,1fr)] @max-[1281px]/idol:gap-5",
                     )}
@@ -201,11 +202,12 @@ const IdolPage = ({ data, idols }: IdolPageProps) => {
                             aria-label="Back to the idols list"
                             className={cn(
                                 "pp-focus grid place-items-center size-11 m-0.5 bg-[#FF8AC4] no-underline",
+                                "[--press-x:3px] [--press-y:3px]",
                                 "transform-[skewX(-7deg)] -rotate-4 backface-hidden will-change-transform",
                                 "shadow-[inset_0_3px_0_rgba(255,255,255,.5),0_0_0_2px_#1A1418,4px_5px_0_2px_#1A1418]",
-                                "active:shadow-[inset_0_3px_0_rgba(255,255,255,.5),0_0_0_2px_#1A1418,0_0_0_2px_#1A1418]",
+                                "pressed:shadow-[inset_0_3px_0_rgba(255,255,255,.5),0_0_0_2px_#1A1418,0_0_0_2px_#1A1418]",
                                 "transition-[translate,box-shadow] duration-300 ease-(--ease-pop)",
-                                "hover:-translate-x-1 active:translate-0.75",
+                                "hover:-translate-x-1 pressed:translate-0.75",
                             )}
                         >
                             <ArrowLeft aria-hidden className="size-5 text-[#1A1418]" strokeWidth={3} />
@@ -346,11 +348,11 @@ const IdolPage = ({ data, idols }: IdolPageProps) => {
                                                 aria-controls={`idol-pane-${key}`}
                                                 onClick={() => setActiveTab(key)}
                                                 className={cn(
-                                                    "pp-focus flex items-baseline gap-2.5 pt-2.75 px-6 pb-3.25 border-2 border-[#1A1418] rounded-2xl",
+                                                    "pp-focus flex items-baseline gap-2 pt-2.5 px-4.5 pb-3 border-2 border-[#1A1418] rounded-2xl",
                                                     "font-bold leading-none uppercase whitespace-nowrap cursor-pointer",
-                                                    "text-[22px] @max-[1601px]/idol:text-xl @max-[1281px]/idol:text-lg @max-[561px]/idol:text-base",
+                                                    "text-lg @max-[561px]/idol:text-sm",
                                                     "transition-[translate,rotate,background-color,color,box-shadow] duration-380 ease-(--ease-settle) will-change-transform",
-                                                    "active:translate-x-0.5 active:translate-y-0.75 active:rotate-0 active:shadow-none active:duration-150",
+                                                    "pressed:translate-x-0.5 pressed:translate-y-0.75 pressed:rotate-0 pressed:shadow-none pressed:duration-150",
                                                     isActive
                                                         ? "bg-[#FF8AC4] text-white text-shadow-(--ink-puff) -translate-y-0.75 -rotate-2 shadow-[3px_4px_0_0_var(--tab-o),3px_4px_0_0_var(--tab-o)]"
                                                         : cn(
@@ -418,9 +420,9 @@ const IdolPage = ({ data, idols }: IdolPageProps) => {
                             className={cn(
                                 "pp-focus grid place-items-center h-11 px-4.5 rounded-full border-2 border-[#1A1418]",
                                 "bg-neon-pink text-[#1A1418] font-bold text-sm no-underline",
-                                "shadow-[0_4px_0_#1A1418,inset_0_2px_0_rgba(255,255,255,.4)] active:shadow-[0_0_0_#1A1418,inset_0_2px_0_rgba(255,255,255,.4)]",
+                                "shadow-[0_4px_0_#1A1418,inset_0_2px_0_rgba(255,255,255,.4)] pressed:shadow-[0_0_0_#1A1418,inset_0_2px_0_rgba(255,255,255,.4)]",
                                 "transition-[translate,box-shadow] duration-200 ease-(--ease-settle) transform-gpu",
-                                "hover:-translate-y-0.5 active:translate-y-1",
+                                "hover:-translate-y-0.5 pressed:translate-y-1",
                             )}
                         >
                             Contact me
@@ -441,12 +443,9 @@ interface FactTileProps {
 const FactTile = ({ fact, delay }: FactTileProps) => {
     const text = fact.value ?? "";
 
-    // Numbers and short values may grow larger than text values.
-    const isBig = fact.big || /^[\d\s.,%#/-]+$/.test(text) || text.length <= 4;
     const flags = (fact.flags ?? [])
         .map((nationality) => ({ nationality, src: getNationalityFlag(nationality) }))
         .filter((flag) => flag.src);
-    const sizeCap = flags.length ? "20px" : isBig ? "var(--cap-b)" : "var(--cap-t)";
 
     return (
         <div
@@ -501,17 +500,15 @@ const FactTile = ({ fact, delay }: FactTileProps) => {
                         </span>
                     )}
 
-                    <span
-                        className="idol-fact-value pr-1.25 pb-1.25 puff-ink font-bold leading-[1.1] whitespace-nowrap text-white text-shadow-(--puff-value)"
-                        style={{
-                            "--fs-cap": sizeCap,
-                            "--len": Math.max(text.length, 1),
-                            "--fit-k": isBig ? 1.6 : 1.45,
-                            letterSpacing: flags.length ? ".06em" : undefined,
-                        } as CSSProperties}
+                    <FitText
+                        maxSize="var(--cap-b)"
+                        className={cn(
+                            "pr-1.25 pb-1.25 puff-ink font-bold leading-[1.1] text-white text-shadow-(--puff-value)",
+                            flags.length > 0 && "tracking-[.06em]",
+                        )}
                     >
                         {text}
-                    </span>
+                    </FitText>
                 </span>
             )}
 
@@ -561,7 +558,7 @@ const ChipTag = ({ chip }: { chip: FactChip }) => {
                 "pp-focus no-underline will-change-transform",
                 "transition-[translate,rotate,box-shadow] duration-450 ease-(--ease-settle)",
                 "hover:-translate-y-0.75 hover:rotate-0",
-                "active:translate-0.75 active:rotate-0 active:shadow-[0_0_0_#1A1418,var(--chip-in)] active:duration-150",
+                "pressed:translate-0.75 pressed:rotate-0 pressed:shadow-[0_0_0_#1A1418,var(--chip-in)] pressed:duration-150",
             )}
             style={{ "--chip-in": chipStyle.inset } as CSSProperties}
         >
@@ -611,7 +608,7 @@ const RelatedIdols = ({ idols }: { idols: IdolsPageData[] }) => {
                             "bg-(--chip) text-(--chip-ink) text-left no-underline shadow-[6px_6px_0_var(--ctl-off),var(--in)]",
                             "transition-[translate,rotate,box-shadow] duration-380 ease-(--ease-settle) will-change-transform",
                             "hover:-translate-y-1 hover:rotate-0",
-                            "active:translate-x-0.75 active:translate-y-1 active:rotate-0 active:shadow-[2px_2px_0_var(--ctl-off),var(--in)] active:duration-150",
+                            "pressed:translate-x-0.75 pressed:translate-y-1 pressed:rotate-0 pressed:shadow-[2px_2px_0_var(--ctl-off),var(--in)] pressed:duration-150",
                             index % 2 ? "rotate-[0.8deg]" : "rotate-[-0.8deg]",
                         )}
                     >

@@ -64,17 +64,19 @@ const Vinyl = () => {
 interface AlbumCardProps {
     album: AlbumsPageItem;
     index: number;
+    animate?: boolean;
 }
 
 /** An album's card in the list: sleeve and record, puffy name, artist · type · year, and a tag for
  *  Japanese and English releases. */
-const AlbumCard = ({ album, index }: AlbumCardProps) => {
+const AlbumCard = ({ album, index, animate = true }: AlbumCardProps) => {
     const cover = resolveCdnUrl(album.cover_path) ?? "";
     const isForeignRelease = !!album.language && album.language !== "Korean";
     const isEven = index % 2 === 0;
 
     return (
         <ListCard
+            animate={animate}
             to={albumPath(album, album.artist_name)}
             label={`${album.name} by ${album.artist_name}, ${album.release_year}`}
             index={index}

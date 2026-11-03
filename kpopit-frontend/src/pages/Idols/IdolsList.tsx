@@ -81,7 +81,8 @@ const IdolsCatalogue = ({ allIdols }: { allIdols: IdolsPageData[] }) => {
     const hydrated = useHydrated();
     const [params, setParams] = useSearchParams();
     const [filtersOpen, setFiltersOpen] = useState(false);
-    const [animate] = useState(() => !cardsIntroPlayed);
+    const [animate, setAnimate] = useState(() => !cardsIntroPlayed);
+    const [gridVersion, setGridVersion] = useState(0);
 
     useEffect(() => {
         cardsIntroPlayed = true;
@@ -92,6 +93,15 @@ const IdolsCatalogue = ({ allIdols }: { allIdols: IdolsPageData[] }) => {
     const idols = filterIdols(allIdols, filters);
 
     const setFilters = (patch: Partial<IdolFilters>) => {
+        const nextFilters = { ...filters, ...patch };
+        const clearedSearch = !!filters.q && nextFilters.q === "";
+        const clearedAll = Object.values(filters).some(Boolean) && !Object.values(nextFilters).some(Boolean);
+        const recoveredResults = idols.length === 0 && filterIdols(allIdols, nextFilters).length > 0;
+        const replayEntrance = clearedSearch || clearedAll || recoveredResults;
+
+        setAnimate(replayEntrance);
+        if (replayEntrance) setGridVersion((version) => version + 1);
+
         setParams((current) => {
             for (const [key, value] of Object.entries(patch)) {
                 if (value) current.set(key, value);
@@ -231,12 +241,14 @@ const IdolsCatalogue = ({ allIdols }: { allIdols: IdolsPageData[] }) => {
                 {/* The cards */}
                 {idols.length > 0 ? (
                     <section
+                        key={`${hydrated}-${gridVersion}`}
                         aria-label="Idols catalogue"
                         className={cn(
                             "grid grid-cols-[repeat(auto-fill,minmax(190px,1fr))] gap-x-7 gap-y-9 pt-2.5 pr-2 pb-5.5 pl-0.5",
                             "@max-[580px]:grid-cols-[repeat(auto-fill,minmax(140px,1fr))] @max-[580px]:gap-x-3.5 @max-[580px]:gap-y-5.5",
                             "@max-[580px]:pt-1.5 @max-[580px]:pr-1.5 @max-[580px]:pb-4.5",
                             "@max-[359px]:grid-cols-[repeat(auto-fill,minmax(122px,1fr))] @max-[359px]:gap-x-2.5 @max-[359px]:gap-y-4.5",
+                            !hydrated && "invisible",
                         )}
                     >
                         {idols.map((idol, index) => (

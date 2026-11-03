@@ -54,12 +54,18 @@ const SearchField = ({ value, onChange, placeholder, label, className }: SearchF
                 tabIndex={hasText ? 0 : -1}
                 className={cn(
                     "pp-focus flex-none grid place-items-center size-9 rounded-xl border-0 bg-transparent text-inherit cursor-pointer",
-                    "transition-[opacity,rotate,scale,background-color] duration-400 ease-(--ease-pop) transform-gpu",
+                    "transition-opacity duration-200 ease-out transform-gpu",
                     "hover:bg-(--chip-hover)",
-                    hasText ? "opacity-100 rotate-0 scale-100" : "opacity-0 -rotate-90 scale-50 pointer-events-none",
+                    hasText ? "opacity-100" : "opacity-0 pointer-events-none",
                 )}
             >
-                <X className="size-4" strokeWidth={3} />
+                <X
+                    className={cn(
+                        "size-4 transition-[rotate,scale] duration-400 ease-(--ease-pop) transform-gpu",
+                        hasText ? "rotate-0 scale-100" : "-rotate-90 scale-50",
+                    )}
+                    strokeWidth={3}
+                />
             </button>
         </label>
     );
