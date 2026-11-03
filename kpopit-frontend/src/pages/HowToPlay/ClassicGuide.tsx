@@ -192,7 +192,12 @@ const ClassicGuide = () => {
                     </PressButton>
                 </div>
 
-                <div className="min-w-0 overflow-x-auto overflow-y-hidden pt-2 pb-2 scrollbar-thin [scrollbar-color:#FF8AC4_transparent]">
+                <div
+                    className={cn(
+                        "min-w-0 overflow-x-auto overflow-y-hidden pt-2 pb-2",
+                        "@min-[901px]:overflow-x-clip scrollbar-thin [scrollbar-color:#FF8AC4_transparent]",
+                    )}
+                >
                     <div className="grid grid-cols-[repeat(8,minmax(76px,112px))] justify-center gap-2 min-w-165">
                         {CLASSIC_EXAMPLE.columns.map((column) => (
                             <span key={column} className="pb-1 border-b-2 border-(--rule) font-semibold text-[11px] tracking-[.06em] text-center text-(--muted)">
