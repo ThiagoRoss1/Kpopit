@@ -142,14 +142,13 @@ const NavBar = ({ forceTheme }: NavBarProps) => {
                         "@max-[1100px]:gap-3 @max-[1100px]:px-5 @max-[860px]:px-3 @max-[430px]:gap-2.5",
                     )}
                 >
-                    {/* Logo and page label: they scale together, like the old navbar's logo */}
+                    {/* Keep outlined text at its native scale so hover never rerasterizes its shadow. */}
                     <Link
                         to="/"
                         aria-label="KpopIt home"
                         className={cn(
-                            "pp-focus flex min-w-0 items-center gap-2 no-underline",
-                            "transition-transform duration-300 ease-(--ease-settle) transform-gpu",
-                            "hover:scale-104 pressed:scale-96 pressed:duration-120",
+                            "pp-focus group/brand flex min-w-0 items-center gap-2 no-underline",
+                            "transform-gpu backface-hidden",
                         )}
                     >
                         <img
@@ -157,7 +156,10 @@ const NavBar = ({ forceTheme }: NavBarProps) => {
                             alt=""
                             width={44}
                             height={44}
-                            className="block flex-none size-11 @max-[860px]:size-10 @max-[430px]:size-9"
+                            className={cn(
+                                "block flex-none size-11 @max-[860px]:size-10 @max-[430px]:size-9",
+                                "transition-[rotate] duration-300 ease-(--ease-settle) group-hover/brand:-rotate-6 group-active/brand:rotate-0",
+                            )}
                             draggable={false}
                         />
 
@@ -170,8 +172,8 @@ const NavBar = ({ forceTheme }: NavBarProps) => {
 
                                 <span
                                     className={cn(
-                                        "min-w-0 truncate pt-1 pr-2 pb-2 pl-0.5 -mb-1",
-                                        "font-bold leading-none whitespace-nowrap text-white text-shadow-(--puff-wm)",
+                                        "puff-ink min-w-0 truncate pt-1 pr-2 pb-2 pl-0.5 -mb-1",
+                                        "font-bold leading-[1.3] whitespace-nowrap text-white text-shadow-(--puff-wm)",
                                         "text-[22px] @max-[1100px]:text-[19px] @max-[860px]:text-lg @max-[430px]:text-[15.5px]",
                                     )}
                                 >
