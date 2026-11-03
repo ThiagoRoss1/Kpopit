@@ -1,8 +1,11 @@
 import { useState } from "react";
-import { ArrowUp, Search } from "lucide-react";
+import { Search } from "lucide-react";
+import ArrowUp from "../../assets/icons/arrow-fat-line-up-fill.svg";
+import ArrowDown from "../../assets/icons/arrow-fat-line-down-fill.svg";
 import { PressButton } from "../../components/buttons/PressButton";
 import { resolveCdnUrl } from "../../utils/imageUrl";
 import { cn } from "../../lib/utils";
+import { useDateLocale } from "../../hooks/useDateLocale";
 import { CATEGORIES, CLASSIC_EXAMPLE, FEEDBACK, HINT_AT } from "./howToPlayData";
 import { FeedbackTile, GuideCard, Heading, Steps } from "./HowToPlayParts";
 
@@ -104,6 +107,7 @@ const HintCard = ({ hint, index, step, onStep }: { hint: (typeof HINTS)[number];
 };
 
 const ClassicGuide = () => {
+    const { formatBirthDate } = useDateLocale();
     const [isWon, setIsWon] = useState(false);
     const [hintSteps, setHintSteps] = useState([0, 0]);
     const rows = isWon ? [CLASSIC_EXAMPLE.miss, CLASSIC_EXAMPLE.hit] : [CLASSIC_EXAMPLE.miss];
@@ -162,7 +166,7 @@ const ClassicGuide = () => {
                                         "border-2 border-[#1A1418] bg-[#FD5C63] text-[#1A1418] shadow-[0_3px_0_0_#B91C1C,0_3px_0_2px_#1A1418]",
                                     )}
                                 >
-                                    <ArrowUp className={cn("size-6", !arrow.isUp && "rotate-180")} strokeWidth={3} />
+                                    <img src={arrow.isUp ? ArrowUp : ArrowDown} alt="" className="size-full object-cover" />
                                 </span>
 
                                 <span><b>{arrow.word}</b> {arrow.text}</span>
@@ -188,7 +192,7 @@ const ClassicGuide = () => {
                     </PressButton>
                 </div>
 
-                <div className="overflow-x-auto pb-2 scrollbar-thin [scrollbar-color:#FF8AC4_transparent]">
+                <div className="min-w-0 overflow-x-auto overflow-y-hidden pt-2 pb-2 scrollbar-thin [scrollbar-color:#FF8AC4_transparent]">
                     <div className="grid grid-cols-[repeat(8,minmax(76px,112px))] justify-center gap-2 min-w-165">
                         {CLASSIC_EXAMPLE.columns.map((column) => (
                             <span key={column} className="pb-1 border-b-2 border-(--rule) font-semibold text-[11px] tracking-[.06em] text-center text-(--muted)">
@@ -199,7 +203,7 @@ const ClassicGuide = () => {
                         {rows.flatMap((row) => [
                             <span
                                 key={`${row.name}-idol`}
-                                className="how-to-play-tile-enter relative aspect-square overflow-hidden rounded-[14px] border-2 border-[#1A1418] bg-[#FFE3F1]"
+                                className="how-to-play-tile-enter relative aspect-square overflow-hidden rounded-[14px] border-2 border-[#1A1418] bg-[#FFE3F1] transform-gpu"
                             >
                                 <img src={resolveCdnUrl(row.image) ?? ""} alt="" className="absolute inset-0 size-full object-cover" />
                                 <span className="absolute inset-x-0 bottom-0 p-1 bg-[#1A1418]/70 font-bold text-[11px] leading-tight text-center text-white truncate">
@@ -207,7 +211,9 @@ const ClassicGuide = () => {
                                 </span>
                             </span>,
                             ...row.cells.map((cell, i) => (
-                                <FeedbackTile key={`${row.name}-${i}`} tone={cell.tone} arrow={cell.arrow}>{cell.value}</FeedbackTile>
+                                <FeedbackTile key={`${row.name}-${i}`} tone={cell.tone} arrow={cell.arrow}>
+                                    {i === 3 ? formatBirthDate(cell.value) : cell.value}
+                                </FeedbackTile>
                             )),
                         ])}
                     </div>
@@ -243,7 +249,7 @@ const ClassicGuide = () => {
                                     FEEDBACK[category.tone].ground,
                                 )}
                             >
-                                {category.sample}
+                                {category.name === "Birth date" ? formatBirthDate(category.sample) : category.sample}
                             </span>
 
                             <span className="flex flex-col gap-1 min-w-0">

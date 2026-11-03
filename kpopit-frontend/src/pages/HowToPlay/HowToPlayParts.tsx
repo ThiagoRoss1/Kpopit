@@ -1,5 +1,6 @@
 import type { ReactNode } from "react";
-import { ArrowUp, ChevronLeft, ChevronRight, Lock } from "lucide-react";
+import { ChevronLeft, ChevronRight, Lock } from "lucide-react";
+import ArrowUp from "../../assets/icons/arrow-fat-line-up-fill.svg";
 import { cn } from "../../lib/utils";
 import { FEEDBACK, type Tone } from "./howToPlayData";
 
@@ -81,13 +82,13 @@ export const FeedbackTile = ({ tone, arrow, children }: { tone: Tone; arrow?: bo
     return (
         <span
             className={cn(
-                "how-to-play-tile-enter relative grid place-items-center aspect-square px-1.5 rounded-[14px]",
+                "how-to-play-tile-enter relative grid place-items-center aspect-square px-1.5 rounded-[14px] transform-gpu",
                 "border-2 border-[#1A1418] font-bold text-[12.5px] leading-tight text-center text-[#1A1418] whitespace-pre-line",
                 FEEDBACK[tone].ground,
                 FEEDBACK[tone].tileEdge,
             )}
         >
-            {arrow && <ArrowUp aria-hidden className="absolute inset-0 size-12 m-auto opacity-25" strokeWidth={3} />}
+            {arrow && <img src={ArrowUp} alt="" aria-hidden className="absolute inset-0 size-full object-cover opacity-25" />}
             <span className="relative">{children}</span>
         </span>
     );
