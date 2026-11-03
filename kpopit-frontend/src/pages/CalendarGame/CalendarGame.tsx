@@ -205,7 +205,8 @@ const CalendarGame = ({ mode, date }: { mode: CalendarMode; date: string }) => {
                         onAlbumSelectId={(album) => setSelected(album.id)}
                         onSubmit={submit}
                         excludedAlbums={albumGuesses.map((guess) => guess.album_id)}
-                        disabled={guessMutation.isPending || won}
+                        disabled={won}
+                        submitting={guessMutation.isPending}
                     />
                 ) : (
                     <SearchBar

@@ -408,6 +408,7 @@ function PixelatedMode() {
                                         onSubmit={handleSubmit}
                                         excludedAlbums={excludedIds}
                                         disabled={isCorrect || endGame}
+                                        submitting={guessMutation.isPending}
                                     />
                                 </div>
                             )}

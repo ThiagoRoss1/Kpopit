@@ -70,7 +70,7 @@ const Tile = ({ label, koreanLabel, value, sub, flag, className, delay }: TilePr
 
             <span className="flex items-center gap-2 min-w-0 font-bold text-lg leading-[1.2]">
                 {flag && (
-                    <img src={flag} alt="" className="flex-none w-6 h-4 rounded-sm border-[1.5px] border-[#1A1418] object-cover bg-[#1A1418]" />
+                    <img draggable={false} src={flag} alt="" className="flex-none w-6 h-4 rounded-sm border-[1.5px] border-[#1A1418] object-cover bg-[#1A1418]" />
                 )}
                 <span className="pb-px truncate">{value}</span>
             </span>
@@ -154,7 +154,7 @@ const ReleaseDot = ({ release, isCurrent, size }: { release: AlbumDiscographyIte
             className={cn(
                 "relative z-1 rounded-full border-2 border-[#1A1418]",
                 "transition-[scale,background-color] duration-350 ease-(--ease-pop) transform-gpu",
-                "group-hover:scale-120 group-active:scale-86 group-active:duration-150",
+                "group-hover:scale-120 group-pressed:scale-86 group-pressed:duration-150",
                 isCurrent
                     ? "album-dot-enter bg-neon-pink shadow-[2px_3px_0_#1A1418,inset_0_2px_0_rgba(255,255,255,.5)]"
                     : cn("shadow-[1.5px_2px_0_#1A1418]", release.type === "Single" ? "bg-(--chip)" : "bg-(--side)"),
@@ -291,6 +291,7 @@ const Album = ({ album }: { album: AlbumPageData }) => {
                             </span>
 
                             <FadeImg
+                                draggable={false}
                                 src={cover}
                                 alt={`${album.name} cover`}
                                 className="relative block size-full object-cover transition-[scale,opacity] duration-700 ease-(--ease-settle) group-hover/hero:scale-105"
@@ -394,6 +395,7 @@ const Album = ({ album }: { album: AlbumPageData }) => {
                                     return (
                                         <IntentLink
                                             key={release.id}
+                                            pressTarget="child"
                                             to={albumPath(release, artist.name)}
                                             aria-current={isCurrent ? "page" : undefined}
                                             aria-label={`${release.name}, ${release.release_year}`}
@@ -449,6 +451,7 @@ const Album = ({ album }: { album: AlbumPageData }) => {
                                         )}
 
                                         <IntentLink
+                                            pressTarget="child"
                                             to={albumPath(release, artist.name)}
                                             aria-current={isCurrent ? "page" : undefined}
                                             aria-label={`${release.name}, ${release.release_year}`}
@@ -582,6 +585,7 @@ const MoreCard = ({ release, artistName, index }: MoreCardProps) => {
                         </span>
 
                         <FadeImg
+                            draggable={false}
                             src={resolveCdnUrl(release.cover_path) ?? ""}
                             alt=""
                             loading="lazy"

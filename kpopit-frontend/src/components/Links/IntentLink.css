@@ -1,5 +1,5 @@
 /* Keep the same press position while the route loads; scaling here fought the control's active
    translation and made a quick click shrink, release and jump before navigation. */
-.link-pending {
+.link-pending:not(.link-press-child) {
     translate: var(--press-x, 2px) var(--press-y, 3px);
 }
