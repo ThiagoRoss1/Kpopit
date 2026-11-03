@@ -99,7 +99,7 @@ export default function App() {
 export function HydrateFallback() {
   return (
     <div className="min-h-screen bg-black">
-      <div aria-hidden className="sticky top-0 z-100 w-full h-[60px] max-[760px]:h-[54px] border-b-2 border-[#0A0A0A] bg-[#262226] shadow-[0_3px_0_#FF8AC4]" />
+      <div aria-hidden className="sticky top-0 z-100 w-full h-15 max-[760px]:h-13.5 border-b-2 border-ink bg-[#262226] shadow-[0_3px_0_#FF8AC4]" />
       <PageLoader />
     </div>
   );
@@ -113,7 +113,7 @@ export function ErrorBoundary() {
   const status = isRouteErrorResponse(error) ? error.status : null;
   return (
     <main className="pp-root min-h-screen w-full flex flex-col items-center justify-center gap-4 px-4 bg-(--ground) text-(--text) text-center">
-      <PuffTitle className="text-[44px] max-[580px]:text-[34px] whitespace-normal [text-wrap:balance]">
+      <PuffTitle className="text-[44px] max-[580px]:text-[34px] whitespace-normal text-balance">
         {status === 404 ? "Page not found" : "Something went wrong"}
       </PuffTitle>
       <p className="m-0 font-medium text-base text-(--muted)">Try again, or go back to the home page.</p>
