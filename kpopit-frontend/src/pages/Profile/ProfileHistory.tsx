@@ -1,5 +1,5 @@
 import { Link } from "react-router";
-import { useInfiniteQuery } from "@tanstack/react-query";
+import { keepPreviousData, useInfiniteQuery } from "@tanstack/react-query";
 import { Lock } from "lucide-react";
 import { PressButton } from "../../components/buttons/PressButton";
 import { getProfileHistory } from "../../services/api";
@@ -43,6 +43,7 @@ const ProfileHistory = ({ username, viewerKey, filter, isOwner, hiddenFromVisito
         queryKey: ["profileHistory", username, mode, viewerKey],
         queryFn: ({ pageParam }) => getProfileHistory(username, mode, pageParam),
         initialPageParam: 0,
+        placeholderData: keepPreviousData,
         // The next page starts after every entry loaded so far.
         getNextPageParam: (lastPage, pages) => (lastPage.has_more ? pages.reduce((count, page) => count + page.entries.length, 0) : undefined),
     });
@@ -56,6 +57,7 @@ const ProfileHistory = ({ username, viewerKey, filter, isOwner, hiddenFromVisito
 
     return (
         <section
+            aria-busy={history.isFetching || undefined}
             className={cn(
                 "profile-pane-enter flex flex-col gap-3.5 min-w-0 py-5 px-5.5 rounded-[23px]",
                 "border-2 border-(--ink) bg-(--face) text-(--face-ink) shadow-(--card-depth)",
@@ -75,12 +77,12 @@ const ProfileHistory = ({ username, viewerKey, filter, isOwner, hiddenFromVisito
                 {entries.map((entry) => <HistoryRow key={`${entry.date}-${entry.gamemode_id}`} entry={entry} today={today} />)}
             </div>
 
-            {history.isPending && <span className={STATUS_LINE}>Loading games...</span>}
+            {history.isPending && <span className={cn(STATUS_LINE, "animate-[imgIn_.15s_ease-out_.3s_backwards]")}>Loading games...</span>}
             {history.isError && <span className={STATUS_LINE}>Couldn't load the history.</span>}
             {history.isSuccess && !entries.length && <span className={STATUS_LINE}>No games in this mode yet...</span>}
 
             {history.hasNextPage && (
-                <PressButton className="self-center h-11.5 px-5.5 text-sm" disabled={history.isFetchingNextPage} onClick={() => history.fetchNextPage()}>
+                <PressButton className="self-center h-11.5 px-5.5 text-sm" disabled={history.isFetchingNextPage || history.isPlaceholderData} onClick={() => history.fetchNextPage()}>
                     {history.isFetchingNextPage ? "Loading..." : "Show more"}
                 </PressButton>
             )}

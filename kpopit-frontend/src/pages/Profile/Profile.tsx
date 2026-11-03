@@ -60,7 +60,7 @@ const Profile = () => {
     if (!hydrated || authLoading || !profile.data) return <PageLoader error={profile.isError} onRetry={() => profile.refetch()} />;
     if (profile.data.is_private) return <PrivateProfile username={profile.data.username} />;
 
-    return <ProfileView profile={profile.data} viewerKey={viewerKey} />;
+    return <ProfileView key={`${profile.data.username}-${viewerKey}`} profile={profile.data} viewerKey={viewerKey} />;
 };
 
 const ProfileMeta = ({ username, name }: { username: string; name: string }) => {
@@ -91,7 +91,7 @@ const PrivateProfile = ({ username }: { username: string }) => {
 
                 <h1 className="m-0 font-bold text-2xl">This profile is private</h1>
                 <p className="m-0 font-medium text-[15px] text-(--muted)">@{username} keeps their stats to themselves.</p>
-                <PressLink to="/" variant="cta" size="lg" className="[--ctl-off:var(--ink)]">Play today's game</PressLink>
+                <PressLink to="/" variant="cta" size="lg" className="[--ctl-off:var(--ink)]">Return home</PressLink>
             </div>
         </PageShell>
     );
@@ -249,7 +249,7 @@ const Polaroid = ({ src }: { src: string | null }) => {
             className={cn(
                 "relative flex-none pt-2.25 px-2.25 pb-8 rounded-lg -rotate-2",
                 "border-2 border-[#1A1418] bg-[#FFFDFA] shadow-[4px_5px_0_var(--ctl-off)]",
-                "transition-[translate,rotate] duration-600 ease-(--ease-settle) will-change-transform hover:-translate-y-0.75 hover:rotate-0",
+                "transition-[translate,rotate] duration-400 ease-(--ease-settle) transform-gpu hover:-translate-y-0.75 hover:rotate-0",
             )}
         >
             {src
