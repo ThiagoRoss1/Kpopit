@@ -163,7 +163,13 @@ class CalendarService:
         answer = {key: idol.get(key) for key in ("idol_id", "artist_name", "image_path", "image_version")}
         if gamemode_id == 2:
             blurry = self.repository.fetch_blurry_idol_data(answer_id) or {}
-            return {key: blurry.get(key) for key in ("blur_image_path", "blur_image_version")}, answer
+            career = self.repository.fetch_full_idol_career(answer_id)
+            groups = [entry["group_name"] for entry in career if entry.get("is_active")]
+            if not groups and idol.get("is_former_group"):
+                groups = [idol.get("group_name")]
+            puzzle = {key: blurry.get(key) for key in ("blur_image_path", "blur_image_version")}
+            puzzle["groups"] = groups
+            return puzzle, answer
 
         career = self.repository.fetch_full_idol_career(answer_id)
         groups = [c["group_name"] for c in career if c.get("is_active")]

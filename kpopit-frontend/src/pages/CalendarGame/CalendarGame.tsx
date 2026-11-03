@@ -1,4 +1,4 @@
-import { useState, type CSSProperties } from "react";
+import { useCallback, useRef, useState, type CSSProperties } from "react";
 import { Link } from "react-router";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { ArrowLeft, CalendarDays } from "lucide-react";
@@ -10,17 +10,17 @@ import type {
 import type { CardGranted } from "../../interfaces/albumInterfaces";
 import BackgroundStyle from "../../components/Background/BackgroundStyle";
 import PageLoader from "../../components/Loading/PageLoader";
-import Img from "../../components/Img";
+import BlurryStage from "../../components/Blurry/BlurryStage";
 import SearchBar from "../../components/GuessSearchBar/SearchBar";
 import GuessesGrid from "../../components/GuessesGrid/GuessGrid";
 import BlurryGuessGrid from "../../components/Blurry/GuessesGrid/GuessGrid";
 import AnswerHintsBox from "../../components/AnswerHints/AnswerHintsBox";
-import PixelatedCanvas from "../../components/Pixelated/PixelatedCanvas";
-import PixelatedHints from "../../components/Pixelated/PixelatedHints";
+import PixelatedStage from "../../components/Pixelated/PixelatedStage";
 import PixelatedSearchBar from "../../components/Pixelated/PixelatedSearchBar";
 import PixelatedGuessGrid from "../../components/Pixelated/PixelatedGuessGrid";
 import CardGrantedReveal from "../Collection/components/CardGrantedReveal";
-import GetBlurLevel from "../BlurryMode/blurLevels";
+import GetBlurLevel, { BLUR_LEVELS } from "../BlurryMode/blurLevels";
+import ModeOptions from "../../components/Blurry/buttons/ModeOptions";
 import { GetPixelLevel, PIXEL_LEVELS } from "../../utils/pixelLevels";
 import { resolveCdnUrl } from "../../utils/imageUrl";
 import NotFound from "../NotFound/NotFound";
@@ -107,6 +107,9 @@ const CalendarGame = ({ mode, date }: { mode: CalendarMode; date: string }) => {
     const [selected, setSelected] = useState<number | null>(null);
     const [added, setAdded] = useState<{ date: string; idols: IdolGuess[]; albums: PixelatedGuessDetail[] }>({ date, idols: [], albums: [] });
     const [cardGranted, setCardGranted] = useState<CardGranted>(null);
+    const [victoryRevealed, setVictoryRevealed] = useState(false);
+    const [blurryOptions, setBlurryOptions] = useState({ hardcore: false, color: false });
+    const submittingRef = useRef(false);
     // Rows guessed on this visit, on top of what the server restored (a new day starts empty).
     const extra = added.date === date ? added : { date, idols: [], albums: [] };
 
@@ -115,9 +118,17 @@ const CalendarGame = ({ mode, date }: { mode: CalendarMode; date: string }) => {
         onSuccess: (data) => {
             if (mode === "pixelated") {
                 const album = data.guessed_album_data;
-                setAdded({ ...extra, albums: [...extra.albums, { ...album, guess_correct: data.guess_correct }] });
+                setAdded((current) => {
+                    if (current.albums.some((guess) => guess.album_id === album.album_id)) return current;
+
+                    return { ...current, albums: [...current.albums, { ...album, guess_correct: data.guess_correct }] };
+                });
             } else {
-                setAdded({ ...extra, idols: [...extra.idols, data as IdolGuess] });
+                setAdded((current) => {
+                    if (current.idols.some((guess) => guess.guessed_idol_data.idol_id === data.guessed_idol_data.idol_id)) return current;
+
+                    return { ...current, idols: [...current.idols, data as IdolGuess] };
+                });
                 if (data.card_granted) {
                     setCardGranted(data.card_granted);
                     queryClient.invalidateQueries({ queryKey: ["collectionAlbum"] });
@@ -130,7 +141,16 @@ const CalendarGame = ({ mode, date }: { mode: CalendarMode; date: string }) => {
                 queryClient.invalidateQueries({ queryKey: ["userStats"] });
             }
         },
+        onSettled: () => {
+            submittingRef.current = false;
+        },
     });
+
+    const revealVictory = useCallback(() => {
+        if (extra.idols.some((guess) => guess.guess_correct) || extra.albums.some((guess) => guess.guess_correct)) {
+            setVictoryRevealed(true);
+        }
+    }, [extra.idols, extra.albums]);
 
     if (day.isError) return <NotFound />;
     if (!day.data || !allIdolsData || (mode === "pixelated" && !albums.data)) return <PageLoader tone="dark" />;
@@ -149,9 +169,20 @@ const CalendarGame = ({ mode, date }: { mode: CalendarMode; date: string }) => {
     ];
     const attempts = mode === "pixelated" ? albumGuesses.length : idolGuesses.length;
     const won = finished || idolGuesses.some((guess) => guess.guess_correct) || albumGuesses.some((guess) => guess.guess_correct);
+    const wonThisVisit = extra.idols.some((guess) => guess.guess_correct) || extra.albums.some((guess) => guess.guess_correct);
+    const showVictory = won && (!wonThisVisit || victoryRevealed);
 
     const submit = () => {
-        if (selected === null || guessMutation.isPending || won) return;
+        if (selected === null || submittingRef.current || guessMutation.isPending || won) return;
+
+        const alreadyGuessed = mode === "pixelated"
+            ? albumGuesses.some((guess) => guess.album_id === selected)
+            : idolGuesses.some((guess) => guess.guessed_idol_data.idol_id === selected);
+
+        if (alreadyGuessed) return;
+
+        // A ref closes the gap before React renders the mutation's pending state.
+        submittingRef.current = true;
         guessMutation.mutate(selected);
         setValue("");
         setSelected(null);
@@ -162,10 +193,10 @@ const CalendarGame = ({ mode, date }: { mode: CalendarMode; date: string }) => {
     const blurUrl = puzzle.blur_image_path ? `${resolveCdnUrl(puzzle.blur_image_path)}?v=${puzzle.blur_image_version}` : null;
 
     const label = `Guess this day's ${mode === "pixelated" ? "album" : "idol"}...`;
-    const search = !won && (
+    const search = !showVictory && (
         <div className="w-full flex flex-col items-center mb-6">
             <span className={cn("mb-1 text-[14px] sm:text-[16px]", mode === "pixelated" ? "text-ink/70" : "drop-shadow-lg text-[#d7d7d7]/85")}>{label}</span>
-            <div className="relative w-full max-w-4xl px-4 mx-auto flex justify-center z-40">
+            <div className={cn("relative w-full mx-auto flex justify-center z-40", mode !== "pixelated" && "px-4")}>
                 {mode === "pixelated" ? (
                     <PixelatedSearchBar
                         allAlbums={albums.data ?? []}
@@ -174,7 +205,7 @@ const CalendarGame = ({ mode, date }: { mode: CalendarMode; date: string }) => {
                         onAlbumSelectId={(album) => setSelected(album.id)}
                         onSubmit={submit}
                         excludedAlbums={albumGuesses.map((guess) => guess.album_id)}
-                        disabled={guessMutation.isPending}
+                        disabled={guessMutation.isPending || won}
                     />
                 ) : (
                     <SearchBar
@@ -184,7 +215,7 @@ const CalendarGame = ({ mode, date }: { mode: CalendarMode; date: string }) => {
                         onIdolSelectId={(idol) => setSelected(idol.id)}
                         onSubmit={submit}
                         excludedIdols={guessedIdolIds}
-                        disabled={guessMutation.isPending}
+                        disabled={guessMutation.isPending || won}
                         gameMode={mode}
                     />
                 )}
@@ -192,7 +223,7 @@ const CalendarGame = ({ mode, date }: { mode: CalendarMode; date: string }) => {
             {guessMutation.isError && <p role="alert" className="mt-3 text-[#fd5c63] font-semibold">That guess didn't go through. Try again.</p>}
         </div>
     );
-    const result = won && (
+    const result = showVictory && (
         <div className="w-full max-w-md px-4 mb-10 flex flex-col items-center gap-3 text-center" role="status">
             <p className={cn("m-0 font-bold text-2xl", mode === "pixelated" ? "text-ink" : "text-white")}>You found it!</p>
             {day.data.answer && (
@@ -205,72 +236,27 @@ const CalendarGame = ({ mode, date }: { mode: CalendarMode; date: string }) => {
     const header = <CalendarHeader mode={mode} date={date} dayNumber={day.data.day_number} />;
 
     if (mode === "pixelated") {
-        const blockSize = won ? PIXEL_LEVELS[PIXEL_LEVELS.length - 1] : GetPixelLevel(attempts);
+        const blockSize = showVictory ? PIXEL_LEVELS[PIXEL_LEVELS.length - 1] : GetPixelLevel(attempts);
         return (
             <div className="pixelmode min-h-full w-full">
                 <div className="pixelmode__bg" aria-hidden="true"><div className="pixelmode__margin" /></div>
                 <div className="mx-auto max-w-340 px-4 zm:px-6 sm:px-12 md:px-20 lg:px-10 py-4 lg:py-10">
                     <div className="flex flex-col lg:flex-row gap-4 lg:gap-10 items-center lg:items-start">
                         <div className="lg:hidden">{header}</div>
-                        <div className="flex flex-col w-full lg:w-1/2 xl:w-160">
-                            <div className="pixel-stage relative w-full h-70 xxs:h-75 xs:h-80 xm:h-85 zm:h-95 sm:h-100 md:h-110 xl:h-130 mx-auto select-none">
-                                {/* Same stage as the live Pixelated page: the record behind, the sleeve in front. */}
-                                <div
-                                    className={cn(
-                                        "absolute z-1 flex aspect-square",
-                                        "left-1/2 lg:left-32 xl:left-36 top-5 md:top-3",
-                                        "translate-x-[-35%] xs:translate-x-[-30%] zm:translate-x-[-30%] md:translate-x-[-25%] lg:translate-x-[-2%] xl:translate-x-[5%]",
-                                        "w-55 xxs:w-60 xs:w-65 xm:w-70 zm:w-76 sm:w-80 md:w-90 lg:w-90 xl:w-110",
-                                    )}
-                                >
-                                    <div className="pixel-vinyl">
-                                        <div className="pixel-vinyl__spin">
-                                            <div className="pixel-vinyl__label overflow-hidden">
-                                                <PixelatedCanvas imageUrl={coverUrl} blockSize={blockSize} alt="Pixelated album cover" className="block size-full rounded-full object-cover" />
-                                            </div>
-                                        </div>
-                                        <div className="pixel-vinyl__light" />
-                                        <div className="pixel-vinyl__hole" />
-                                    </div>
-                                </div>
-                                <div
-                                    className={cn(
-                                        "pixel-sleeve absolute z-2 flex -rotate-4 rounded-2xl rounded-b-3xl",
-                                        "border-2 border-cream bg-ink shadow-[0_14px_30px_rgba(0,0,0,0.35),0_4px_10px_rgba(0,0,0,0.2)]",
-                                        "left-1/2 lg:left-0 top-[2%]",
-                                        "translate-x-[-55%] xs:translate-x-[-65%] md:translate-x-[-60%] lg:translate-x-0",
-                                        "w-55 xxs:w-60 xs:w-65 xm:w-70 zm:w-76 sm:w-80 md:w-90 lg:w-90 xl:w-110",
-                                        "h-65 xxs:h-70 xs:h-75 xm:h-80 zm:h-86 sm:h-90 md:h-100 lg:h-100 xl:h-120",
-                                    )}
-                                >
-                                    <div className="relative flex items-center justify-center p-4 w-full h-fit">
-                                        <span className="pixel-washi absolute top-0 -left-6 w-[22%] h-5.5 z-4 rotate-[-34.8deg]" />
-                                        <span className="pixel-washi absolute top-0 -right-6 w-[22%] h-5.5 z-5 rotate-[34.8deg]" />
-                                        <div className="relative w-full aspect-square rounded-xl overflow-hidden flex flex-col bg-transparent">
-                                            <PixelatedCanvas imageUrl={coverUrl} blockSize={blockSize} alt="Pixelated album cover" className="block size-full object-cover" />
-                                        </div>
-                                    </div>
-                                    <div
-                                        className={cn(
-                                            "absolute inset-x-0 bottom-4 z-3 text-center",
-                                            "font-caveat text-xl xs:text-2xl leading-none tracking-[0.02em] text-white text-shadow-[0_2px_8px_rgba(0,0,0,0.6)]",
-                                        )}
-                                    >
-                                        Guess the album
-                                    </div>
-                                </div>
-                            </div>
-                            {!won && (
-                                <div className="mt-2 lg:mt-6 flex items-center justify-center">
-                                    <PixelatedHints guessCount={attempts} releaseYear={puzzle.release_year ?? 0} artistName={puzzle.group_name ?? ""} persist={false} />
-                                </div>
-                            )}
-                        </div>
-                        <div className="flex-1 min-w-0 w-full flex flex-col items-center">
+                        <PixelatedStage
+                            coverUrl={coverUrl}
+                            blockSize={blockSize}
+                            guessCount={attempts}
+                            gameEnded={showVictory}
+                            releaseYear={puzzle.release_year ?? 0}
+                            artistName={puzzle.group_name ?? ""}
+                            persist={false}
+                        />
+                        <div className="flex-1 min-w-0 w-full">
                             <div className="hidden lg:block mb-6">{header}</div>
                             {search}
                             {result}
-                            <PixelatedGuessGrid guesses={albumGuesses} persist={false} />
+                            <PixelatedGuessGrid guesses={albumGuesses} onAnimationComplete={revealVictory} persist={false} />
                         </div>
                     </div>
                 </div>
@@ -286,28 +272,28 @@ const CalendarGame = ({ mode, date }: { mode: CalendarMode; date: string }) => {
 
                 {mode === "classic" && (
                     <div className="w-full flex flex-col items-center justify-center mb-10.25">
-                        <AnswerHintsBox memberCount={puzzle.member_count ?? null} groups={puzzle.groups ?? null} isFormerGroup={puzzle.is_former_group ?? false} attempts={attempts} gameEnded={won} persist={false} />
+                        <AnswerHintsBox memberCount={puzzle.member_count ?? null} groups={puzzle.groups ?? null} isFormerGroup={puzzle.is_former_group ?? false} attempts={attempts} gameEnded={showVictory} persist={false} />
                     </div>
                 )}
 
                 {mode === "blurry" && blurUrl && (
-                    <div
-                        className={cn(
-                            "relative flex items-center justify-center overflow-hidden mb-4 rounded-[46px] border-2 border-white bg-black",
-                            "max-xxs:w-55 xxs:w-60 xs:w-70 xm:w-70 zm:w-80 sm:w-100",
-                            "max-xxs:h-80 xxs:h-88 xs:h-98 xm:h-98 zm:h-108 sm:h-128",
-                        )}
-                    >
-                        {["top-5 left-5 border-l-3 border-t-3", "top-5 right-5 border-r-3 border-t-3", "bottom-5 left-5 border-l-3 border-b-3", "bottom-5 right-5 border-r-3 border-b-3"].map((corner) => (
-                            <div key={corner} className={cn("absolute z-10 max-xxs:size-4 xxs:size-4 xs:size-6 border-white/20", corner)} />
-                        ))}
-                        <Img
-                            priority
-                            src={blurUrl}
-                            alt={won ? "Blurry image, day finished" : "Blurry image of the day's idol"}
-                            style={{ filter: won ? "none" : `blur(${GetBlurLevel(attempts)}px) grayscale(100%)` }}
-                            draggable={false}
-                            className="size-full object-cover select-none pointer-events-none transition-all duration-1000"
+                    <BlurryStage
+                        src={blurUrl}
+                        blur={blurryOptions.hardcore ? BLUR_LEVELS[0] : GetBlurLevel(attempts)}
+                        color={blurryOptions.color}
+                        gameEnded={showVictory}
+                        answerName={day.data.answer?.artist_name}
+                    />
+                )}
+
+                {mode === "blurry" && !showVictory && (
+                    <div className="mb-6">
+                        <ModeOptions
+                            options={blurryOptions}
+                            onToggle={(option) => setBlurryOptions((current) => ({ ...current, [option]: !current[option] }))}
+                            attempts={attempts}
+                            groups={puzzle.groups ?? null}
+                            persist={false}
                         />
                     </div>
                 )}
@@ -316,8 +302,8 @@ const CalendarGame = ({ mode, date }: { mode: CalendarMode; date: string }) => {
                 {result}
 
                 <div className="w-full flex items-center justify-center">
-                    {mode === "classic" && <GuessesGrid guesses={idolGuesses as GuessResponse[]} allIdols={allIdolsData} onAllAnimationsComplete={() => {}} persist={false} />}
-                    {mode === "blurry" && <BlurryGuessGrid guesses={idolGuesses} persist={false} />}
+                    {mode === "classic" && <GuessesGrid guesses={idolGuesses as GuessResponse[]} allIdols={allIdolsData} onAllAnimationsComplete={revealVictory} persist={false} />}
+                    {mode === "blurry" && <BlurryGuessGrid guesses={idolGuesses} onAnimationComplete={revealVictory} persist={false} />}
                 </div>
             </div>
         </>

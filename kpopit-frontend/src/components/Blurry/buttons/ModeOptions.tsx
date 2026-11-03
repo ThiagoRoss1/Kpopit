@@ -10,13 +10,14 @@ interface ModeOptionsProps {
     onToggle: (id: 'hardcore' | 'color') => void;
     attempts: number;
     groups?: string[] | null;
+    persist?: boolean;
 }
 
 const ModeOptions = (props: ModeOptionsProps) => {
-    const { options, onToggle, attempts, groups } = props;
+    const { options, onToggle, attempts, groups, persist = true } = props;
 
     const [isHintRevealed] = useState(() => {
-        return localStorage.getItem("blurryHintClicked") === "true";
+        return persist && localStorage.getItem("blurryHintClicked") === "true";
     })
 
     const [isHintClicked, setIsHintClicked] = useState(isHintRevealed);
@@ -31,10 +32,10 @@ const ModeOptions = (props: ModeOptionsProps) => {
     const groupsDisplay = groups && groups.length > 0 ? groups : ["Soloist"];
 
     useEffect(() => {
-        if (isHintClicked) {
+        if (persist && isHintClicked) {
             localStorage.setItem("blurryHintClicked", "true");
         }
-    }, [isHintClicked]);
+    }, [isHintClicked, persist]);
 
     return (
         <div className="flex flex-col items-center justify-center gap-2">

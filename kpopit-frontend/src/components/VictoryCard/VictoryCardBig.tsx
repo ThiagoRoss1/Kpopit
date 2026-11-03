@@ -1,5 +1,6 @@
 //import React from "react";
-import type { GuessedIdolData, YesterdayIdolPick } from "../../interfaces/gameInterfaces";
+import type { GuessedIdolData, YesterdayIdolPick, YesterdayLocked } from "../../interfaces/gameInterfaces";
+import YesterdayLockedCard from "./YesterdayLockedCard";
 import { Link } from "react-router";
 import TargetAttempt from "../../assets/icons/target.svg";
 import RankPosition from "../../assets/icons/ranking-fill.svg";
@@ -21,6 +22,7 @@ interface VictoryCardBigProps {
     idolActiveGroup?: string[] | null;
     attempts: number;
     yesterdayIdolId: number;
+    yesterdayLocked?: YesterdayLocked;
     yesterdayIdol: string;
     yesterdayIdolGroup?: string[] | null;
     yesterdayIdolImage?: YesterdayIdolPick["image_path"];
@@ -127,6 +129,7 @@ return (
         </div>
 
         {/* Yesterday's idol container */}
+        {props.yesterdayLocked && <YesterdayLockedCard mode="classic" day={props.yesterdayLocked} />}
         {yesterdayIdol && yesterdayIdolGroup && yesterdayIdolImage && (
         <div className="relative w-full h-fit sm:h-50 mb-5 px-4 sm:px-6">
             <div className="relative w-full h-full items-center justify-center sm:text-center bg-linear-to-r from-gray-600 to-gray-900 

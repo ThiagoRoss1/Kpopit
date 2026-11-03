@@ -64,6 +64,7 @@ function ClassicMode() {
   // Counter
   const [attempts, setAttempts] = useState<number>(0);
   const [sessionRestored, setSessionRestored] = useState<number>(0);
+  const submittingRef = useRef(false);
 
   // Transfer data logic hook
   
@@ -267,7 +268,7 @@ function ClassicMode() {
 
   // Guess submission handler function
   const handleGuessSubmit = async () => {
-    if (!selectedIdol || !gameData || !allIdolsData || guessMutation.isPending) return;
+    if (!selectedIdol || !gameData || !allIdolsData || submittingRef.current || guessMutation.isPending || isCorrect) return;
 
     // PREVENT DUPLICATE GUESSES - check if idol already guessed
     const alreadyGuessed = guesses.some(g => g.guessed_idol_data.idol_id === selectedIdol.id);
@@ -284,6 +285,26 @@ function ClassicMode() {
       return;
     }
 
+    submittingRef.current = true;
+    let token: string | null;
+
+    try {
+      const encrypted = localStorage.getItem("userToken") || "";
+      token = decryptedTokenRef.current || await decryptToken(encrypted);
+    } catch (error) {
+      submittingRef.current = false;
+      console.error("Could not prepare the guess:", error);
+      return;
+    }
+
+    if (!token) {
+      submittingRef.current = false;
+      await initUser();
+      return;
+    }
+
+    handleGuessAttempts();
+
     setGuesses(prev => {
       const updatedGuesses = [...prev, localGuessResult]
       localStorage.setItem("todayGuessesDetails", JSON.stringify(updatedGuesses));
@@ -297,25 +318,16 @@ function ClassicMode() {
       localStorage.setItem("gameWon", "true");
     }
 
-    if (!selectedIdol) {
-      return;
-    }
-
-    const encrypted = localStorage.getItem("userToken") || "";
-    const token = decryptedTokenRef.current || await decryptToken(encrypted);
-
-    if (!token) {
-      console.warn("User token not available, cannot submit guess.");
-      await initUser();
-      return;
-    }
-
     guessMutation.mutate({
       guessed_idol_id: selectedIdol.id,
       answer_id: gameData.answer_id,
       user_token: token,
       current_attempt: attempts + 1,
       game_date: localStorage.getItem("gameDate") || "",
+    }, {
+      onSettled: () => {
+        submittingRef.current = false;
+      },
     });
     // Clear input field after submission
     setCurrentGuess("");
@@ -334,7 +346,6 @@ function ClassicMode() {
   useEffect(() => {
     submitRef.current = () => {
       handleGuessSubmit();
-      handleGuessAttempts();
     };
   });
   const handleSubmit = useCallback(() => submitRef.current(), []);
@@ -462,6 +473,7 @@ function ClassicMode() {
       {endGame && guesses.length > 0 && showVictoryCard && (
         <div className="w-full flex items-center justify-center mt-10">
           <VictoryCardHud
+            yesterdayLocked={yesterday.data?.locked ? yesterday.data : undefined}
             cardInfo={guesses[guesses.length - 1].guessed_idol_data}
             guesses={guesses}
             attempts={attempts}

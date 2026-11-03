@@ -1,4 +1,5 @@
-import type { GuessedIdolData, YesterdayIdolPick } from "../../../interfaces/gameInterfaces";
+import type { GuessedIdolData, YesterdayIdolPick, YesterdayLocked } from "../../../interfaces/gameInterfaces";
+import YesterdayLockedCard from "../../VictoryCard/YesterdayLockedCard";
 import { Link } from "react-router";
 import TargetAttempt from "../../../assets/icons/target.svg";
 import RankPosition from "../../../assets/icons/ranking-fill.svg";
@@ -21,6 +22,7 @@ interface BlurryVictoryCardBigProps {
     idol_blur_image: string;
     idol_blur_image_version?: string | null;
     yesterdayIdolId: number;
+    yesterdayLocked?: YesterdayLocked;
     yesterdayIdol: string;
     yesterdayIdolGroup?: string[] | null;
     yesterdayIdolImage?: YesterdayIdolPick["image_path"];
@@ -156,6 +158,7 @@ const VictoryCardBigBlurry = (props: BlurryVictoryCardBigProps) => {
             </div>
             
             {/* Yesterday's idol container */}
+            {props.yesterdayLocked && <YesterdayLockedCard mode="blurry" day={props.yesterdayLocked} />}
             {yesterdayIdol && yesterdayIdolImage && (
             <div className="relative w-full h-fit sm:h-50 mb-5 px-4 sm:px-6">
                 <div className="relative w-full h-full items-center justify-center sm:text-center bg-linear-to-r from-gray-600 to-gray-900 

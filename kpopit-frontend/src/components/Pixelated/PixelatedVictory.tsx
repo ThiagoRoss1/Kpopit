@@ -1,7 +1,10 @@
 import { useState, useEffect, useRef } from "react";
 import "./PixelatedVictory.css";
 import { resolveCdnUrl } from "../../utils/imageUrl";
-import type { YesterdayAlbumPick } from "../../interfaces/gameInterfaces";
+import type { YesterdayAlbumPick, YesterdayLocked } from "../../interfaces/gameInterfaces";
+import { Link } from "react-router";
+import { albumPath } from "../../pages/Albums/albumsData";
+import YesterdayLockedCard from "../VictoryCard/YesterdayLockedCard";
 import { OtherGamemodes } from "../OtherGamemodes/OtherGamemodes";
 import { Copy } from "lucide-react";
 import TargetAttempt from "../../assets/icons/target.svg";
@@ -19,6 +22,8 @@ interface  GameMode {
 }
 
 interface PixelatedVictoryProps {
+    albumId: number;
+    yesterdayLocked?: YesterdayLocked;
     albumName: string;
     groupName: string;
     coverPath: string;
@@ -147,9 +152,12 @@ const PixelatedVictory = (props: PixelatedVictoryProps) => {
                             draggable={false} />
 
                         <div className="absolute left-3 right-3 bottom-2.5 text-white [text-shadow:1px_2px_4px_rgba(0,0,0,1)]">
-                            <div className="max-xxs:text-base text-xl sm:text-2xl font-bold leading-none uppercase">
+                            <Link
+                                to={albumPath({ id: props.albumId, name: albumName }, groupName)}
+                                className="block max-xxs:text-base text-xl sm:text-2xl font-bold leading-none uppercase text-white hover:underline"
+                            >
                                 {albumName}
-                            </div>
+                            </Link>
 
                             <div className="max-xxs:text-xs text-sm font-semibold mt-1 uppercase italic">
                                 {groupName}
@@ -166,6 +174,7 @@ const PixelatedVictory = (props: PixelatedVictoryProps) => {
             </span>
 
             {/* Yesterday's album */}
+            {props.yesterdayLocked && <YesterdayLockedCard mode="pixelated" day={props.yesterdayLocked} />}
             {yesterdayAlbum && (
                 <div className="mt-4 mb-8">
                     <div className="flex flex-col gap-3 rounded-[18px] bg-linear-to-br from-cream to-[#e4d2cc] border-2 border-ink shadow-[4px_4px_0_var(--color-ink)] max-xxs:px-3 max-xxs:py-3 xxs:px-3 xs:px-4 py-4 sm:px-5
