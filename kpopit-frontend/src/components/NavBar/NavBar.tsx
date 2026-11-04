@@ -142,13 +142,15 @@ const NavBar = ({ forceTheme }: NavBarProps) => {
                         "@max-[1100px]:gap-3 @max-[1100px]:px-5 @max-[860px]:px-3 @max-[430px]:gap-2.5",
                     )}
                 >
-                    {/* Keep outlined text at its native scale so hover never rerasterizes its shadow. */}
+                    {/* The tilted label keeps its own layer and outline space while the whole brand scales. */}
                     <Link
                         to="/"
                         aria-label="KpopIt home"
                         className={cn(
-                            "pp-focus group/brand flex min-w-0 items-center gap-2 no-underline",
+                            "pp-focus flex min-w-0 items-center gap-2 no-underline",
+                            "transition-[scale] duration-300 ease-(--ease-settle)",
                             "transform-gpu backface-hidden",
+                            "hover:scale-104 pressed:scale-96 pressed:duration-120",
                         )}
                     >
                         <img
@@ -156,15 +158,18 @@ const NavBar = ({ forceTheme }: NavBarProps) => {
                             alt=""
                             width={44}
                             height={44}
-                            className={cn(
-                                "block flex-none size-11 @max-[860px]:size-10 @max-[430px]:size-9",
-                                "transition-[rotate] duration-300 ease-(--ease-settle) group-hover/brand:-rotate-6 group-active/brand:rotate-0",
-                            )}
+                            className="block flex-none size-11 @max-[860px]:size-10 @max-[430px]:size-9"
                             draggable={false}
                         />
 
                         {page && (
-                            <span className="flex min-w-0 items-center gap-1.75 -rotate-2 pr-1.25 pb-1.25 pl-0.5 @max-[1180px]:@min-[860px]:hidden @max-[374px]:hidden">
+                            <span
+                                className={cn(
+                                    "flex min-w-0 items-center gap-1.75 -rotate-2 pr-1.25 pb-1.25 pl-0.5",
+                                    "transform-gpu backface-hidden",
+                                    "@max-[1180px]:@min-[860px]:hidden @max-[374px]:hidden",
+                                )}
+                            >
                                 <span
                                     aria-hidden
                                     className="flex-none size-2.5 rounded-full border-2 border-(--ink) bg-neon-pink shadow-[1.5px_2px_0_var(--ink)] @max-[430px]:hidden"
@@ -172,7 +177,7 @@ const NavBar = ({ forceTheme }: NavBarProps) => {
 
                                 <span
                                     className={cn(
-                                        "puff-ink min-w-0 truncate pt-1 pr-2 pb-2 pl-0.5 -mb-1",
+                                        "puff-ink min-w-0 truncate pt-1 px-2 pb-2 -ml-1.5 -mb-1",
                                         "font-bold leading-[1.3] whitespace-nowrap text-white text-shadow-(--puff-wm)",
                                         "text-[22px] @max-[1100px]:text-[19px] @max-[860px]:text-lg @max-[430px]:text-[15.5px]",
                                     )}
