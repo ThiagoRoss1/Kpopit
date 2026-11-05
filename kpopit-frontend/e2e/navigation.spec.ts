@@ -1,5 +1,5 @@
 import { test, expect, type Page } from './support/fixtures';
-import { newUser, registerBeforeLoad } from './support/accounts';
+import { expectLoggedOut, newUser, registerBeforeLoad } from './support/accounts';
 import { closeModal, openGame, searchInput } from './support/game';
 
 async function expectCleanLoad(page: Page, errors: { list: string[] }) {
@@ -186,6 +186,9 @@ test.describe('navbar, footer and home modals', () => {
 
   test('About and Changelog modals open and close', async ({ page }) => {
     await page.goto('/');
+    // The guest login link appears after the prerendered page hydrates.
+    await expectLoggedOut(page);
+
     await page.locator('main').getByRole('button', { name: 'About' }).click();
     await expect(page.getByRole('heading', { name: 'About...' })).toBeVisible();
     await closeModal(page, 'About...');

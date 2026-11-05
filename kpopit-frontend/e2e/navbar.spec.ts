@@ -1,4 +1,5 @@
 import { test, expect } from './support/fixtures';
+import { expectLoggedOut } from './support/accounts';
 
 // The theme the page painted with: read on the first animation frame, before React hydrates.
 const recordFirstPaintTheme = () => {
@@ -41,6 +42,9 @@ test.describe('NavBar @mobile', () => {
   test('desktop dropdowns mark the current page and close on Escape', async ({ page, isMobile }) => {
     test.skip(isMobile, 'desktop dropdowns');
     await page.goto('/changelog');
+    // The guest login link appears after the prerendered navbar hydrates.
+    await expectLoggedOut(page);
+
     const nav = page.locator('nav');
     const about = nav.getByRole('button', { name: 'About', exact: true });
     await expect(about).toHaveAttribute('data-st', 'cur');

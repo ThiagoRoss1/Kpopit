@@ -2,7 +2,7 @@ import fs from 'node:fs';
 import path from 'node:path';
 import { spawnSync } from 'node:child_process';
 import { fileURLToPath } from 'node:url';
-import { test, expect } from './support/fixtures';
+import { test, expect, stubImageBuckets } from './support/fixtures';
 import { LocalServer } from './support/tomorrow';
 import { buildAlbumSlug, buildIdolSlug } from '../src/utils/formatters';
 
@@ -10,6 +10,7 @@ import { buildAlbumSlug, buildIdolSlug } from '../src/utils/formatters';
 // backend on :5000) must already carry each page's meta and content in its HTML.
 const FRONTEND = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
 const PREVIEW = 'http://127.0.0.1:4173';
+const PREVIEW_IMAGE_ORIGIN = 'https://images.e2e.invalid';
 
 type IdolRow = { id: number; artist_name: string; group_name: string | null };
 const slug = (i: IdolRow) => buildIdolSlug(i.artist_name, i.group_name);
@@ -35,7 +36,13 @@ test.describe('prerendered pages without JavaScript', () => {
     const build = spawnSync(process.execPath, [path.join(FRONTEND, 'node_modules/@react-router/dev/bin.cjs'), 'build'], {
       cwd: FRONTEND, stdio: 'inherit', shell: false,
       // The preview proxies /api to the test backend, so the built app calls its own origin.
-      env: { ...process.env, E2E_ISOLATED: 'true', PRERENDER_API_URL: 'http://127.0.0.1:5000', VITE_API_URL: PREVIEW },
+      env: {
+        ...process.env,
+        E2E_ISOLATED: 'true',
+        PRERENDER_API_URL: 'http://127.0.0.1:5000',
+        VITE_API_URL: PREVIEW,
+        VITE_IMAGE_BUCKET_URL: PREVIEW_IMAGE_ORIGIN,
+      },
     });
     expect(build.status, 'react-router build').toBe(0);
 
@@ -43,6 +50,11 @@ test.describe('prerendered pages without JavaScript', () => {
       [path.join(FRONTEND, 'node_modules/vite/bin/vite.js'), 'preview', '--host', '127.0.0.1', '--port', '4173', '--strictPort'],
       FRONTEND, { ...process.env, E2E_ISOLATED: 'true' });
     await preview.start();
+  });
+
+  test.beforeEach(async ({ context }) => {
+    // The preview's social image URLs must use HTTPS even with the image bucket stubbed.
+    await stubImageBuckets(context, [PREVIEW_IMAGE_ORIGIN]);
   });
 
   test.afterAll(async () => {

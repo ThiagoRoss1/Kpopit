@@ -94,7 +94,10 @@ test.describe('public profile @mobile', () => {
     const play = page.getByRole('link', { name: 'Play this day' });
     await expect(play).toHaveCount(1);
     await expect(play).toHaveAttribute('href', `/calendar?mode=classic&date=${older}`);
-    await expect(page.getByText(await idolName(await dailyPick('classic', older)), { exact: true })).toHaveCount(0);
+
+    // Seeded days can share an answer, so check only the locked history row.
+    const lockedRow = play.locator('..');
+    await expect(lockedRow.getByText(await idolName(await dailyPick('classic', older)), { exact: true })).toHaveCount(0);
   });
 });
 
