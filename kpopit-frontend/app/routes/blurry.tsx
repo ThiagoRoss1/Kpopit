@@ -11,6 +11,7 @@ export default function BlurryRoute() {
       title="KpopIt Blurry - K-pop Idol Image Guessing Game"
       description="Identify today's K-pop idol from a gradually unblurred photo in KpopIt's daily Blurry mode."
       path="/blurry"
+      calendarGame={date !== null}
     >
       {date ? <CalendarGame key={date} mode="blurry" date={date} /> : <BlurryMode />}
     </GamePage>

@@ -33,15 +33,16 @@ export async function dailyPick(mode: ModeName, date: string): Promise<number> {
   return rows[0].id as number;
 }
 
-// A freshly seeded DB (CI) has no picks before today. Gives `date` a pick (any published idol other
-// than today's) only when it has none, so the real local copy is never changed.
-export async function ensurePastIdolPick(mode: 'classic' | 'blurry', date: string, today: string): Promise<void> {
+// Fresh databases need a past pick, while existing calendar picks must stay intact.
+export async function ensurePastPick(mode: ModeName, date: string, today: string): Promise<void> {
+  const [table, column] = mode === 'pixelated' ? ['albums', 'album_id'] : ['idols', 'idol_id'];
+
   await db().query(
-    `INSERT INTO daily_picks (pick_date, idol_id, gamemode_id)
-     SELECT $1, i.id, $2 FROM idols i
-      WHERE i.is_published
-        AND i.id IS DISTINCT FROM (SELECT idol_id FROM daily_picks WHERE pick_date = $3 AND gamemode_id = $2)
-      ORDER BY i.id LIMIT 1
+    `INSERT INTO daily_picks (pick_date, ${column}, gamemode_id)
+     SELECT $1, item.id, $2 FROM ${table} item
+      WHERE item.is_published
+        AND item.id IS DISTINCT FROM (SELECT ${column} FROM daily_picks WHERE pick_date = $3 AND gamemode_id = $2)
+      ORDER BY item.id LIMIT 1
      ON CONFLICT (pick_date, gamemode_id) DO NOTHING`,
     [date, GAMEMODE[mode], today],
   );

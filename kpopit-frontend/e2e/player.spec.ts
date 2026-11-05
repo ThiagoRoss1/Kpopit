@@ -1,7 +1,7 @@
 import { test, expect, ipHeader } from './support/fixtures';
 import { newUser, registerViaApi, loginViaUi, expectLoggedOut } from './support/accounts';
 import { openGame, serverDate, userToken } from './support/game';
-import { dailyPick, deletionRequested, ensurePastIdolPick, idolName, seedWin, userIdByToken, userIdByUsername } from './support/db';
+import { dailyPick, deletionRequested, ensurePastPick, idolName, seedWin, userIdByToken, userIdByUsername } from './support/db';
 
 const PLAYER_ON = { IDOL_XP_ENABLED: 'true', PUBLIC_PROFILE_ENABLED: 'true', CALENDAR_ENABLED: 'true' };
 const minusDays = (iso: string, n: number) => {
@@ -61,7 +61,7 @@ test.describe('public profile @mobile', () => {
     await openGame(page, 'classic');
     const today = await serverDate(page, 'classic');
     const yesterday = minusDays(today, 1);
-    await ensurePastIdolPick('classic', yesterday, today);
+    await ensurePastPick('classic', yesterday, today);
     await registerViaApi(page, user);
     await seedWin(await userIdByUsername(user.username), 'classic', yesterday, 4);
 
@@ -76,8 +76,8 @@ test.describe('public profile @mobile', () => {
     await openGame(page, 'classic');
     const today = await serverDate(page, 'classic');
     const [yesterday, older] = [minusDays(today, 1), minusDays(today, 2)];
-    await ensurePastIdolPick('classic', yesterday, today);
-    await ensurePastIdolPick('classic', older, today);
+    await ensurePastPick('classic', yesterday, today);
+    await ensurePastPick('classic', older, today);
 
     // The owner exists through the API only; this page stays an anonymous visitor.
     const owner = newUser();

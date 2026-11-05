@@ -11,6 +11,7 @@ export default function ClassicRoute() {
       title="KpopIt Classic - K-pop Idol Guessing Game"
       description="Guess today's K-pop idol by comparing attributes in KpopIt's daily Classic mode."
       path="/classic"
+      calendarGame={date !== null}
     >
       {date ? <CalendarGame key={date} mode="classic" date={date} /> : <ClassicMode />}
     </GamePage>

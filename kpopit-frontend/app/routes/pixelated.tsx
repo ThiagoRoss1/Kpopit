@@ -14,6 +14,7 @@ export default function PixelatedRoute() {
       title="KpopIt Pixelated - K-pop Album Cover Guessing Game"
       description="Guess today's K-pop album from its pixelated cover art in KpopIt's daily Pixelated mode."
       path="/pixelated"
+      calendarGame={date !== null}
     >
       {date ? <CalendarGame key={date} mode="pixelated" date={date} /> : <PixelatedMode />}
     </GamePage>

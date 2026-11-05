@@ -10,6 +10,7 @@ import type {
 import type { CardGranted } from "../../interfaces/albumInterfaces";
 import BackgroundStyle from "../../components/Background/BackgroundStyle";
 import PageLoader from "../../components/Loading/PageLoader";
+import PageMeta from "../../components/Seo/PageMeta";
 import BlurryStage from "../../components/Blurry/BlurryStage";
 import SearchBar from "../../components/GuessSearchBar/SearchBar";
 import GuessesGrid from "../../components/GuessesGrid/GuessGrid";
@@ -24,6 +25,7 @@ import ModeOptions from "../../components/Blurry/buttons/ModeOptions";
 import { GetPixelLevel, PIXEL_LEVELS } from "../../utils/pixelLevels";
 import { resolveCdnUrl } from "../../utils/imageUrl";
 import NotFound from "../NotFound/NotFound";
+import { MODES } from "../Calendar/calendarData";
 import { cn } from "../../lib/utils";
 import "../PixelatedMode/PixelatedMode.css";
 
@@ -153,7 +155,26 @@ const CalendarGame = ({ mode, date }: { mode: CalendarMode; date: string }) => {
     }, [extra.idols, extra.albums]);
 
     if (day.isError) return <NotFound />;
-    if (!day.data || !allIdolsData || (mode === "pixelated" && !albums.data)) return <PageLoader tone="dark" />;
+
+    const modeName = MODES.find((option) => option.id === mode)!.name;
+    const dayNumber = day.data?.day_number;
+    const metadata = (
+        <PageMeta
+            title={`${modeName} · ${dayNumber == null ? date : `Day ${dayNumber}`} – KpopIt`}
+            description={`Play a past ${modeName} challenge from the KpopIt calendar.`}
+            path={`/${mode}`}
+            noindex="follow"
+        />
+    );
+
+    if (!day.data || !allIdolsData || (mode === "pixelated" && !albums.data)) {
+        return (
+            <>
+                {metadata}
+                <PageLoader tone="dark" />
+            </>
+        );
+    }
 
     const { puzzle, game, status } = day.data;
     const finished = status === "won_live" || status === "won_calendar";
@@ -240,6 +261,7 @@ const CalendarGame = ({ mode, date }: { mode: CalendarMode; date: string }) => {
         const blockSize = showVictory ? PIXEL_LEVELS[PIXEL_LEVELS.length - 1] : GetPixelLevel(attempts);
         return (
             <div className="pixelmode min-h-full w-full">
+                {metadata}
                 <div className="pixelmode__bg" aria-hidden="true"><div className="pixelmode__margin" /></div>
                 <div className="mx-auto max-w-340 px-4 zm:px-6 sm:px-12 md:px-20 lg:px-10 py-4 lg:py-10">
                     <div className="flex flex-col lg:flex-row gap-4 lg:gap-10 items-center lg:items-start">
@@ -267,6 +289,7 @@ const CalendarGame = ({ mode, date }: { mode: CalendarMode; date: string }) => {
 
     return (
         <>
+            {metadata}
             <BackgroundStyle attempts={attempts} />
             <div className={cn("flex flex-col items-center justify-start w-full min-h-full pb-24", mode === "classic" ? "mt-12" : "mt-4")}>
                 <div className="mb-10">{header}</div>

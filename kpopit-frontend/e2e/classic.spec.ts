@@ -3,7 +3,7 @@ import {
   answerIdol, closeModal, guessIdol, idolsList, openGame, searchInput, serverDate,
   userToken, victoryMarker, wrongIdols,
 } from './support/game';
-import { dailyHistory, ensurePastIdolPick, userHistory, userIdByToken } from './support/db';
+import { dailyHistory, ensurePastPick, userHistory, userIdByToken } from './support/db';
 
 const minusOneDay = (iso: string) => {
   const d = new Date(`${iso}T12:00:00Z`);
@@ -169,7 +169,7 @@ test.describe('Classic', () => {
   test("yesterday's idol is linked while playing", async ({ page }) => {
     await openGame(page, 'classic');
     const today = await serverDate(page, 'classic');
-    await ensurePastIdolPick('classic', minusOneDay(today), today);
+    await ensurePastPick('classic', minusOneDay(today), today);
     await page.reload();
     const res = await page.request.get('/api/store-yesterdays-idol?gamemode_id=1');
     const body = await res.json();

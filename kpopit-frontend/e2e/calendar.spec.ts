@@ -1,6 +1,6 @@
 import { test, expect } from './support/fixtures';
 import { openGame, searchInput, serverDate, idolsList } from './support/game';
-import { dailyPick, ensurePastIdolPick } from './support/db';
+import { dailyPick, ensurePastPick } from './support/db';
 
 const CALENDAR_ON = { CALENDAR_ENABLED: 'true' };
 const minusDays = (iso: string, n: number) => {
@@ -17,11 +17,52 @@ test.afterAll(async ({ backend }) => {
 });
 
 test.describe('calendar @mobile', () => {
+  const gameMetadata = [
+    ['classic', 'Classic', 'KpopIt Classic - K-pop Idol Guessing Game'],
+    ['blurry', 'Blurry', 'KpopIt Blurry - K-pop Idol Image Guessing Game'],
+    ['pixelated', 'Pixelated', 'KpopIt Pixelated - K-pop Album Cover Guessing Game'],
+  ] as const;
+
+  for (const [mode, name, liveTitle] of gameMetadata) {
+    test(`${name} indexes the live game and labels a past calendar day`, async ({ page }) => {
+      const canonical = page.locator('head link[rel="canonical"]');
+      const robots = page.locator('head meta[name="robots"]');
+      const description = page.locator('head meta[name="description"]');
+      const canonicalUrl = `https://kpopit.net/${mode}`;
+
+      await openGame(page, mode);
+      await expect(page).toHaveTitle(liveTitle);
+      await expect(canonical).toHaveAttribute('href', canonicalUrl);
+      await expect(robots).toHaveAttribute('content', 'index, follow');
+
+      const today = await serverDate(page, mode);
+      const yesterday = minusDays(today, 1);
+      await ensurePastPick(mode, yesterday, today);
+
+      const response = page.waitForResponse((reply) =>
+        new URL(reply.url()).pathname === `/api/calendar/${mode}/${yesterday}` && reply.request().method() === 'GET');
+      await page.goto(`/${mode}?date=${yesterday}`);
+      const day = await response;
+      expect(day.ok()).toBeTruthy();
+      const { day_number: dayNumber } = await day.json();
+      expect(dayNumber).toBeGreaterThan(0);
+
+      await expect(page).toHaveTitle(`${name} · Day ${dayNumber} – KpopIt`);
+      await expect(canonical).toHaveAttribute('href', canonicalUrl);
+      await expect(robots).toHaveAttribute('content', 'noindex, follow');
+      await expect(description).toHaveAttribute('content', `Play a past ${name} challenge from the KpopIt calendar.`);
+
+      await page.goBack();
+      await expect(page).toHaveTitle(liveTitle);
+      await expect(robots).toHaveAttribute('content', 'index, follow');
+    });
+  }
+
   test('month view selects a day into the URL and its panel links to the past game', async ({ page, consoleErrors }) => {
     await openGame(page, 'classic');
     const today = await serverDate(page, 'classic');
     const yesterday = minusDays(today, 1);
-    await ensurePastIdolPick('classic', yesterday, today);
+    await ensurePastPick('classic', yesterday, today);
 
     await page.goto('/calendar');
     await expect(page.getByRole('heading', { name: 'Calendar', level: 1 })).toBeVisible();
@@ -51,7 +92,7 @@ test.describe('calendar @mobile', () => {
     await openGame(page, 'blurry');
     const today = await serverDate(page, 'blurry');
     const yesterday = minusDays(today, 1);
-    await ensurePastIdolPick('blurry', yesterday, today);
+    await ensurePastPick('blurry', yesterday, today);
     await page.goto(`/calendar?mode=blurry&date=${yesterday}`);
     await expect(page.getByRole('tab', { name: 'Blurry' })).toHaveAttribute('aria-selected', 'true');
     await expect(page.getByRole('link', { name: /^Play Day \d+$/ }).first()).toHaveAttribute('href', `/blurry?date=${yesterday}`);
@@ -62,7 +103,7 @@ test.describe('calendar @mobile', () => {
     await openGame(page, 'classic');
     const today = await serverDate(page, 'classic');
     const yesterday = minusDays(today, 1);
-    await ensurePastIdolPick('classic', yesterday, today);
+    await ensurePastPick('classic', yesterday, today);
     await page.reload();
 
     const pill = page.getByRole('link', { name: 'Play yesterday in the calendar' });
