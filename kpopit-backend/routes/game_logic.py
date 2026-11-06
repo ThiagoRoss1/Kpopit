@@ -1,6 +1,6 @@
-from datetime import timedelta
+from datetime import date, timedelta
 from flask import Blueprint, jsonify, g
-from services.calendar_service import CALENDAR_ENABLED
+from services.calendar_service import CALENDAR_ENABLED, CalendarService
 from services.get_db import get_db
 from services.yesterday_service import YesterdayService
 from utils.auth_decorators import optional_auth
@@ -30,7 +30,8 @@ def _locked_for_caller(cursor, gamemode_id: int):
         )
         if cursor.fetchone():
             return None
-    return {"yesterdays_pick_date": yesterday, "locked": True, "play_in_calendar": True}
+    day_number = CalendarService(None, None).day_number(cursor, gamemode_id, date.fromisoformat(yesterday))
+    return {"yesterdays_pick_date": yesterday, "day_number": day_number, "locked": True, "play_in_calendar": True}
 
 
 # Store yesterdays idol pick

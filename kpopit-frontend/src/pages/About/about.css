@@ -1,0 +1,40 @@
+/* ==========================================================================
+   About page: the data tiles cross-fade through their four images
+   (each image's delay is set inline, 3s apart).
+   ========================================================================== */
+
+@keyframes aboutCrossfade {
+    0% {
+        opacity: 0;
+        scale: 1.1;
+    }
+
+    6% {
+        opacity: 1;
+    }
+
+    25% {
+        opacity: 1;
+    }
+
+    31% {
+        opacity: 0;
+        scale: 1;
+    }
+
+    100% {
+        opacity: 0;
+    }
+}
+
+.about-crossfade-image {
+    opacity: 0;
+    animation: aboutCrossfade 12s ease-in-out infinite;
+}
+
+/* Without motion the first image stays */
+@media (prefers-reduced-motion: reduce) {
+    .about-crossfade-image:first-child {
+        opacity: 1 !important;
+    }
+}

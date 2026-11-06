@@ -207,3 +207,118 @@ def test_live_win_through_the_guess_route_goes_to_the_selected_idol(client, db_c
 def test_constants_drive_the_formula(monkeypatch):
     monkeypatch.setattr(xp_service, "LIVE_GAME_XP", 20)
     assert game_xp({"won": True, "is_calendar": False, "one_shot_win": False, "guesses_count": 9}) == 20
+
+
+def pour(client, auth, idol_id):
+    return client.post("/api/idol-xp/pour", json={"idol_id": idol_id}, headers=auth)
+
+
+def test_pour_moves_the_whole_potion_when_the_idol_has_room(client, db_conn, make_idol, game):
+    user_id, auth = register(client, "pourer")
+    idol = make_idol("Bias")
+    for n in range(3):
+        game(user_id, hours=n)  # 30 XP in the potion
+    res = pour(client, auth, idol)
+    assert res.status_code == 200
+    body = res.get_json()
+    assert body["poured"] == {"idol_id": idol, "amount": 30}
+    assert body["potion"]["xp"] == 0
+    assert [(i["idol_id"], i["xp"], i["level"]) for i in body["idols"]] == [(idol, 30, 3)]
+    assert client.get("/api/idol-xp/state", headers=auth).get_json()["potion"]["xp"] == 0
+
+
+def test_pour_stops_at_max_level_and_keeps_the_rest(client, db_conn, make_idol, game, selected):
+    user_id, auth = register(client, "nearmax")
+    idol = make_idol("Veteran")
+    selected(user_id, idol, 0, 100)
+    for n in range(29):  # 290 XP on the idol
+        game(user_id, hours=n + 1)
+    for n in range(3):  # 30 XP in the potion after the selection ended
+        game(user_id, hours=200 + n)
+    body = pour(client, auth, idol).get_json()
+    assert body["poured"]["amount"] == 10
+    assert body["potion"]["xp"] == 20
+    assert body["idols"][0]["xp"] == 300 and body["idols"][0]["level"] == 10
+    assert pour(client, auth, idol).get_json() == {"error": "Idol is already at max level"}
+
+
+def test_pour_with_an_empty_potion_is_refused(client, make_idol):
+    _, auth = register(client, "broke")
+    res = pour(client, auth, make_idol("Bias"))
+    assert res.status_code == 409 and res.get_json() == {"error": "Potion is empty"}
+
+
+def test_balance_never_goes_negative_and_refills_after_a_pour(client, db_conn, make_idol, game):
+    user_id, auth = register(client, "refill")
+    karina, winter = make_idol("Karina"), make_idol("Winter")
+    for n in range(20):  # potion capped at 150
+        game(user_id, hours=n)
+    assert pour(client, auth, karina).get_json()["poured"]["amount"] == 150
+    with db_conn.cursor() as cur:  # a later game fills the emptied potion again
+        cur.execute("INSERT INTO daily_user_history (user_id, date, gamemode_id, guesses_count, won, won_at) "
+                    "VALUES (%s, '2030-01-01', 1, 5, TRUE, NOW())", (user_id,))
+    db_conn.commit()
+    state = client.get("/api/idol-xp/state", headers=auth).get_json()
+    assert state["potion"]["xp"] == 10
+    assert pour(client, auth, winter).get_json()["potion"]["xp"] == 0
+    assert pour(client, auth, winter).status_code == 409
+    with db_conn.cursor() as cur:
+        cur.execute("SELECT SUM(amount) AS total FROM potion_pours WHERE user_id = %s", (user_id,))
+        assert cur.fetchone()["total"] == 160
+
+
+def test_concurrent_double_pour_spends_once(app, client, db_conn, make_idol, game):
+    import threading
+
+    user_id, auth = register(client, "clicker")
+    idol = make_idol("Bias")
+    for n in range(4):
+        game(user_id, hours=n)
+    results = []
+    barrier = threading.Barrier(2)
+
+    def worker():
+        with app.test_client() as own_client:
+            barrier.wait()
+            res = pour(own_client, auth, idol)
+            results.append((res.status_code, res.get_json()))
+
+    threads = [threading.Thread(target=worker) for _ in range(2)]
+    for thread in threads:
+        thread.start()
+    for thread in threads:
+        thread.join(10)
+    assert sorted(status for status, _ in results) == [200, 409]
+    with db_conn.cursor() as cur:
+        cur.execute("SELECT amount FROM potion_pours WHERE user_id = %s", (user_id,))
+        assert [row["amount"] for row in cur.fetchall()] == [40]
+
+
+def test_anonymous_players_cannot_pour(client, make_user, make_idol, game):
+    user_id, token = make_user()
+    game(user_id, hours=1)
+    assert pour(client, {"Authorization": token}, make_idol("Bias")).status_code == 401
+    assert client.post("/api/idol-xp/pour", json={"idol_id": 1}).status_code == 401
+
+
+@pytest.mark.parametrize("idol_id", [None, "1", 999999])
+def test_pour_needs_a_published_idol(client, make_idol, game, idol_id):
+    user_id, auth = register(client, "aimless")
+    game(user_id, hours=1)
+    hidden = make_idol("Hidden", is_published=False)
+    for value in (idol_id, hidden):
+        assert pour(client, auth, value).get_json() == {"error": "Unknown idol"}
+
+
+def test_idol_xp_routes_404_when_the_flag_is_off():
+    """Blueprints register at import, so a fresh interpreter checks the flag-off app."""
+    import os
+    import subprocess
+    import sys
+
+    script = ("import app; c = app.app.test_client(); "
+              "print(c.post('/api/idol-xp/pour', json={'idol_id': 1}).status_code, c.get('/api/idol-xp/state').status_code)")
+    env = {**os.environ, "IDOL_XP_ENABLED": "false"}
+    result = subprocess.run([sys.executable, "-c", script], env=env, capture_output=True, text=True, timeout=60,
+                            cwd=os.path.dirname(os.path.dirname(__file__)))
+    assert result.stdout.split()[-2:] == ["404", "404"], result.stderr[-2000:]

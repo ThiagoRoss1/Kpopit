@@ -33,6 +33,7 @@ export default function AlbumNextGroupPage({ group }: AlbumNextGroupPageProps) {
                             ) : unlocked ? (
                                 <div className="relative h-40 w-full overflow-clip rounded-br-[20px] rounded-tl-[20px] border border-white">
                                     <img
+                                        draggable={false}
                                         src={group.group_photo?.src || undefined}
                                         alt={group.group_name}
                                         className="pointer-events-none absolute inset-0 size-full rounded-br-[20px] rounded-tl-[20px] object-cover"

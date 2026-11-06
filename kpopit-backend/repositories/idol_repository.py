@@ -48,6 +48,7 @@ class IdolRepository:
                 i.is_published,
                 g.id AS group_id,
                 g.name AS group_name,
+                g.hangul_name AS group_hangul,
                 g.group_debut_year,
                 g.member_count,
                 g.generation,

@@ -1,7 +1,8 @@
 import axios from 'axios';
-import type { AddIdolRequest, CompleteGuessTrafficRequest, RestoreSessionResponse, PixelatedGameData, PixelatedGuessPayload, AlbumSearchResult } from '../interfaces/gameInterfaces';
+import type { AddIdolRequest, CompleteGuessTrafficRequest, RestoreSessionResponse, PixelatedGameData, PixelatedGuessPayload, AlbumSearchResult, AlbumsPageItem, AlbumPageData, CalendarDayData, CalendarMode, CalendarTimeline } from '../interfaces/gameInterfaces';
 import type { CollectionAlbumGroup, CollectionListItem } from '../interfaces/albumInterfaces';
 import type { MeResponse, UpdateProfilePayload } from '../interfaces/authInterfaces';
+import type { IdolXpState, PourResult, ProfileHistory, ProfileSettings, ProfileStats, PublicProfile } from '../interfaces/playerInterfaces';
 import { decryptToken } from '../utils/tokenEncryption';
 import { setAccessToken, getAccessToken, clearAccessToken } from './tokenStore';
 import { safeReload } from '../utils/safeReload';
@@ -287,6 +288,47 @@ export const getIdolsPage = async () => {
     return response.data;
 }
 
+// Optional features that are on (calendar, Idol XP, public profile, collection)
+export const getFeatures = async (): Promise<unknown> => {
+    const response = await api.get('/features');
+    return response.data;
+}
+
+// Every published album, for /albums
+export const getAlbumsPage = async (): Promise<AlbumsPageItem[]> => {
+    const response = await api.get('/albums-page');
+    return response.data;
+}
+
+// One album with its artist facts and the artist's other albums
+export const getAlbumInfo = async (albumId: number): Promise<AlbumPageData> => {
+    const response = await api.get(`/albums-page/${albumId}`);
+    return response.data;
+}
+
+// The calendar answers for the player's own token (anonymous players included), like the daily routes.
+const playerHeaders = async (): Promise<Record<string, string>> => {
+    const encrypted = localStorage.getItem('userToken');
+    const token = encrypted ? await decryptToken(encrypted) : null;
+    return token ? { 'Authorization': token } : {};
+};
+
+export const getCalendarTimeline = async (): Promise<CalendarTimeline> => {
+    const response = await api.get('/calendar/timeline', { headers: await playerHeaders() });
+    return response.data;
+};
+
+export const getCalendarDay = async (mode: CalendarMode, date: string): Promise<CalendarDayData> => {
+    const response = await api.get(`/calendar/${mode}/${date}`, { headers: await playerHeaders() });
+    return response.data;
+};
+
+export const postCalendarGuess = async (mode: CalendarMode, date: string, guessedId: number) => {
+    const body = mode === "pixelated" ? { guessed_album_id: guessedId } : { guessed_idol_id: guessedId };
+    const response = await api.post(`/calendar/${mode}/${date}/guess`, body, { headers: await playerHeaders() });
+    return response.data;
+};
+
 // Get entire idol data for a specific idol
 export const getIdolInfo = async (idol_id: number) => {
     const response = await api.get(`/idols-page/${idol_id}`);
@@ -436,3 +478,59 @@ export const revertEmailChange = async (token: string) => {
     const response = await api.post('/auth/email/revert-email-change', { token });
     return response.data;
 }
+// The viewer's anonymous token rides along so the profile can tell which days they finished
+// (anti-spoiler); a signed-in viewer is known from the JWT instead.
+const viewerHeaders = async () => {
+    const encrypted = localStorage.getItem('userToken');
+    const token = encrypted ? await decryptToken(encrypted).catch(() => null) : null;
+    return userTokenHeader(token);
+};
+
+export const getPublicProfile = async (username: string): Promise<PublicProfile> => {
+    const response = await api.get(`/profile/${encodeURIComponent(username)}`, { headers: await viewerHeaders() });
+    return response.data;
+};
+
+export const getProfileStats = async (username: string): Promise<ProfileStats> => {
+    const response = await api.get(`/profile/${encodeURIComponent(username)}/stats`, { headers: await viewerHeaders() });
+    return response.data;
+};
+
+export const getProfileHistory = async (username: string, mode: CalendarMode | null, offset: number): Promise<ProfileHistory> => {
+    const response = await api.get(`/profile/${encodeURIComponent(username)}/history`, {
+        headers: await viewerHeaders(),
+        params: { offset, ...(mode ? { mode } : {}) },
+    });
+    return response.data;
+};
+
+export const getProfileSettings = async (): Promise<ProfileSettings> => {
+    const response = await api.get('/user/profile/settings');
+    return response.data;
+};
+
+export const updateProfileSettings = async (settings: Partial<ProfileSettings>): Promise<ProfileSettings> => {
+    const response = await api.patch('/user/profile/settings', settings);
+    return response.data;
+};
+
+export const requestAccountDeletion = async (current_password: string): Promise<{ deletion_scheduled_for: string }> => {
+    const response = await api.post('/user/delete-account', { current_password });
+    return response.data;
+};
+
+/** Accounts read their XP through the JWT; guests send their game token and only get the potion. */
+export const getIdolXpState = async (asGuest: boolean): Promise<IdolXpState | Pick<IdolXpState, "potion">> => {
+    const response = await api.get('/idol-xp/state', asGuest ? { headers: await playerHeaders() } : {});
+    return response.data;
+};
+
+export const selectXpIdol = async (idol_id: number) => {
+    const response = await api.post('/idol-xp/select', { idol_id });
+    return response.data;
+};
+
+export const pourPotion = async (idol_id: number): Promise<PourResult> => {
+    const response = await api.post('/idol-xp/pour', { idol_id });
+    return response.data;
+};

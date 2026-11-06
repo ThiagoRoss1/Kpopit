@@ -295,13 +295,13 @@ const AvatarModal = ({ isOpen, onClose, onBack, avatarUrl }: AvatarModalProps) =
                             border-2 border-neon-pink transform-gpu"
                     >
                         {croppedPreviewUrl ? (
-                            <Img src={croppedPreviewUrl} alt="Cropped preview" className="w-full h-full object-cover" draggable={false} />
+                            <Img src={croppedPreviewUrl} alt="Cropped preview" className="size-full object-cover" draggable={false} />
                         ) : selectedIdolUrl ? (
-                            <Img src={resolveAvatarUrl(selectedIdolUrl) ?? ""} alt="Idol preview" className="w-full h-full object-cover" draggable={false} />
+                            <Img src={resolveAvatarUrl(selectedIdolUrl) ?? ""} alt="Idol preview" className="size-full object-cover" draggable={false} />
                         ) : (!hasChosen) ? (
-                            <Img src={avatarUrl} alt="Current avatar" className="w-full h-full object-cover" draggable={false} />
+                            <Img src={avatarUrl} alt="Current avatar" className="size-full object-cover" draggable={false} />
                         ) : (
-                            <div className="w-full h-full bg-linear-to-b from-[#2a2a2a] to-[#0e0e0e]" />
+                            <div className="size-full bg-linear-to-b from-[#2a2a2a] to-[#0e0e0e]" />
                         )}
                     </div>
                 </div>
@@ -315,7 +315,7 @@ const AvatarModal = ({ isOpen, onClose, onBack, avatarUrl }: AvatarModalProps) =
                         [text-shadow:1.5px_1.5px_1px_rgba(0,0,0,0.5)] font-black transition-colors duration-200 hover:cursor-pointer
                             ${tab === "upload" ? "text-white" : "text-white/40 hover:text-white/70"}`}
                     >
-                        <Upload className="w-3.5 h-3.5" />
+                        <Upload className="size-3.5" />
                         Upload
                     </button>
                     <button
@@ -325,7 +325,7 @@ const AvatarModal = ({ isOpen, onClose, onBack, avatarUrl }: AvatarModalProps) =
                         [text-shadow:1.5px_1.5px_1px_rgba(0,0,0,0.5)] font-black transition-colors duration-200 hover:cursor-pointer
                             ${tab === "idols" ? "text-white" : "text-white/40 hover:text-white/70"}`}
                     >
-                        <ImageIcon className="w-3.5 h-3.5" />
+                        <ImageIcon className="size-3.5" />
                         KpopIt Idols
                     </button>
                     
@@ -356,8 +356,8 @@ const AvatarModal = ({ isOpen, onClose, onBack, avatarUrl }: AvatarModalProps) =
                                     ? "border-neon-pink bg-neon-pink/10"
                                     : "border-white/25 hover:border-neon-pink/70 hover:bg-white/5"}`}
                         >
-                            <div className="grid place-items-center w-14 h-14 rounded-full bg-white/15 border-2 border-white/50">
-                                <Camera className="w-6 h-6 text-white" />
+                            <div className="grid place-items-center size-14 rounded-full bg-white/15 border-2 border-white/50">
+                                <Camera className="size-6 text-white" />
                             </div>
 
                             <div className="flex flex-col items-center gap-1">
@@ -393,14 +393,14 @@ const AvatarModal = ({ isOpen, onClose, onBack, avatarUrl }: AvatarModalProps) =
                 ) : (
                     <div className="ep-field flex flex-col gap-5">
                         <div className="ep-input relative h-12 rounded-xl overflow-hidden bg-ink">
-                            <Search className="absolute left-3.5 top-1/2 w-4 h-4 -translate-y-1/2 text-neutral-500" />
+                            <Search className="absolute left-3.5 top-1/2 size-4 -translate-y-1/2 text-neutral-500" />
                             
                             <input
                                 type="text"
                                 value={idolSearch}
                                 onChange={(e) => setIdolSearch(e.target.value)}
                                 placeholder="Search for an idol or group..."
-                                className="w-full h-full pl-10 pr-4 bg-ink text-sm font-bold text-white placeholder:text-neutral-600 focus:outline-none"
+                                className="size-full pl-10 pr-4 bg-ink text-sm font-bold text-white placeholder:text-neutral-600 focus:outline-none"
                             />
                         </div>
                         
@@ -429,7 +429,7 @@ const AvatarModal = ({ isOpen, onClose, onBack, avatarUrl }: AvatarModalProps) =
                                                 src={resolveAvatarUrl(idol.image_path) ?? ""}
                                                 alt={idol.artist_name}
                                                 loading="lazy"
-                                                className="w-full h-full object-cover"
+                                                className="size-full object-cover"
                                                 draggable={false}
                                             />
                                         </div>
@@ -463,7 +463,7 @@ const AvatarModal = ({ isOpen, onClose, onBack, avatarUrl }: AvatarModalProps) =
                             disabled:opacity-50 disabled:cursor-not-allowed
                             disabled:hover:translate-x-0 disabled:hover:translate-y-0`}
                     >
-                        {saveMutation.isPending && <Loader2 className="w-4 h-4 animate-spin" />}
+                        {saveMutation.isPending && <Loader2 className="size-4 animate-spin" />}
                         {saveMutation.isPending ? "Saving" : "Save Changes"}
                     </button>
 
@@ -477,7 +477,7 @@ const AvatarModal = ({ isOpen, onClose, onBack, avatarUrl }: AvatarModalProps) =
                         hover:cursor-pointer transition-colors duration-300
                         disabled:opacity-50 disabled:cursor-not-allowed"
                     >
-                        <ChevronLeft className="w-5 h-5" />
+                        <ChevronLeft className="size-5" />
                         Return
                     </button>
                 </div>

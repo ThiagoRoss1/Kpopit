@@ -53,7 +53,7 @@ function SideArrow({ direction, disabled, onClick, night }: { direction: -1 | 1;
             direction < 0 ? 'left-[clamp(12px,2.5vw,26px)]' : 'right-[clamp(12px,2.5vw,26px)]'
             } ${disabled ? `cursor-default bg-transparent opacity-45 ${disabledStyle}` : `cursor-pointer ${enabledStyle}`}`}
         >
-            <Icon className="w-5 h-5 md:w-6 md:h-6 xl:w-8 xl:h-8" strokeWidth={3} />
+            <Icon className="size-5 md:size-6 xl:size-8" strokeWidth={3} />
         </button>
     );
 }
@@ -361,7 +361,7 @@ export default function CollectionAlbum() {
                                 className={`inline-flex flex-row w-10 h-10 justify-center items-center gap-1 rounded-full px-1 py-1 font-sans
                                     text-[14px] font-bold ${pillClasses}`}
                             >
-                                <ChevronLeft className="w-6 h-6" strokeWidth={3} />
+                                <ChevronLeft className="size-6" strokeWidth={3} />
                             </Link>
 
                             <button
@@ -373,7 +373,7 @@ export default function CollectionAlbum() {
                                 className={`inline-flex flex-row justify-center items-center max-lg:w-10 h-10 cursor-pointer gap-1.5 rounded-full
                                 border-2 lg:px-3.25 lg:py-2 font-sans text-[14px] font-bold ${TogglePillClasses(night, summaryActive)}`}
                             >
-                                <Menu className="max-lg:w-4.5 max-lg:h-4.5 lg:w-4 lg:h-4" strokeWidth={3} /> 
+                                <Menu className="max-lg:size-4.5 lg:size-4" strokeWidth={3} /> 
                                 <span className="max-lg:hidden">Summary</span>
                             </button>
 
@@ -386,7 +386,7 @@ export default function CollectionAlbum() {
                                 className={`inline-flex flex-row justify-center items-center max-lg:w-10 h-10 cursor-pointer gap-1.5 rounded-full
                                 border-2 lg:px-3.25 lg:py-2 font-sans text-[14px] font-bold ${TogglePillClasses(night, carouselActive)}`}
                             >
-                                <GalleryVerticalEnd className="max-lg:w-4.5 max-lg:h-4.5 lg:w-4 lg:h-4" strokeWidth={3} />
+                                <GalleryVerticalEnd className="max-lg:size-4.5 lg:size-4" strokeWidth={3} />
                                 <span className="max-lg:hidden">Pages</span>
                             </button>
                             
@@ -409,8 +409,8 @@ export default function CollectionAlbum() {
                                 }`}
                             >
                                 {focusActive
-                                    ? <BookOpen className="w-4.5 h-4.5" strokeWidth={3} />
-                                    : <Fullscreen className="w-4.5 h-4.5" strokeWidth={3} />
+                                    ? <BookOpen className="size-4.5" strokeWidth={3} />
+                                    : <Fullscreen className="size-4.5" strokeWidth={3} />
                                 }
                             </button>
                         </div>
@@ -423,7 +423,7 @@ export default function CollectionAlbum() {
                                 title="Settings"
                                 night={night}
                             >
-                                <SlidersHorizontal className="w-4.5 h-4.5" strokeWidth={3} />
+                                <SlidersHorizontal className="size-4.5" strokeWidth={3} />
                             </IconBtn>
 
                             {fxPanel.mounted && (
@@ -437,7 +437,7 @@ export default function CollectionAlbum() {
                             )}
 
                             <IconBtn onClick={info.open} title="Info" night={night} dataTour="info">
-                                <Info className="w-4.5 h-4.5" strokeWidth={3} />
+                                <Info className="size-4.5" strokeWidth={3} />
                             </IconBtn>
 
                             <IconBtn
@@ -447,7 +447,7 @@ export default function CollectionAlbum() {
                                 dataTour="night"
                                 className="collections-toggle-sweep relative overflow-hidden"
                             >
-                                {night ? <Moon className="w-4.5 h-4.5" strokeWidth={2.25} /> : <Sun className="w-4.5 h-4.5" strokeWidth={2.25} />}
+                                {night ? <Moon className="size-4.5" strokeWidth={2.25} /> : <Sun className="size-4.5" strokeWidth={2.25} />}
                             </IconBtn>
                         </div>
                         

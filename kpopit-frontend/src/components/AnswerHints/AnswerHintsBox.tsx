@@ -13,10 +13,13 @@ interface AnswerHintsBoxProps {
     isFormerGroup?: boolean;
     attempts: number;
     gameEnded: boolean;
+    /** Keep the revealed hints in localStorage (today's game). A calendar day keeps them in memory. */
+    persist?: boolean;
 }
 
 const AnswerHintsBox = (props: AnswerHintsBoxProps) => {
-    const {memberCount, groups, isFormerGroup, attempts, gameEnded} = props;
+    const {memberCount, groups, isFormerGroup, attempts, gameEnded, persist = true} = props;
+    const stored = (key: string) => persist && localStorage.getItem(key) === "true";
 
     const memberCountDisplay = memberCount ?? "Soloist"; // == memberCount !== null ? memberCount : "Soloist"; As i'm returning Null
     const groupsDisplay = groups && groups.length > 0
@@ -28,41 +31,43 @@ const AnswerHintsBox = (props: AnswerHintsBoxProps) => {
     const CARD2 = 8;
 
     const [isFlipped1, setIsFlipped1] = useState(() => {
-        return localStorage.getItem("hint1Revealed") === "true";
+        return stored("hint1Revealed");
     });
 
     const [isFlipped2, setIsFlipped2] = useState(() => {
-        return localStorage.getItem("hint2Revealed") === "true";
+        return stored("hint2Revealed");
     });
 
     const canFlipCard1 = attempts >= CARD1 || gameEnded;
     const canFlipCard2 = attempts >= CARD2 || gameEnded;
 
     const [showHint1, setShowHint1] = useState(() => {
-        return localStorage.getItem("showHint1") === "true";
+        return stored("showHint1");
     });
     const [showHint2, setShowHint2] = useState(() => {
-        return localStorage.getItem("showHint2") === "true";
+        return stored("showHint2");
     });
 
     const [colorize1, setColorize1] = useState(() => {
-        return localStorage.getItem("colorize1") === "true";
+        return stored("colorize1");
     });
     const [colorize2, setColorize2] = useState(() => {
-        return localStorage.getItem("colorize2") === "true";
+        return stored("colorize2");
     });
 
     useEffect(() => {
+        if (!persist) return;
         if (isFlipped1) localStorage.setItem("hint1Revealed", "true");
         if (showHint1) localStorage.setItem("showHint1", "true");
         if (colorize1) localStorage.setItem("colorize1", "true");
-    }, [isFlipped1, showHint1, colorize1]);
+    }, [persist, isFlipped1, showHint1, colorize1]);
 
     useEffect(() => {
+        if (!persist) return;
         if (isFlipped2) localStorage.setItem("hint2Revealed", "true");
         if (showHint2) localStorage.setItem("showHint2", "true");
         if (colorize2) localStorage.setItem("colorize2", "true");
-    }, [isFlipped2, showHint2, colorize2]);
+    }, [persist, isFlipped2, showHint2, colorize2]);
 
     const getHintText = (attempts: number, cardThreshold: number) => {
         const remaining = cardThreshold - attempts;
@@ -99,7 +104,7 @@ const AnswerHintsBox = (props: AnswerHintsBoxProps) => {
                         <div className="relative z-10 max-xxs:w-74 max-xxs:h-24 xxs:w-80 xxs:h-26 xs:w-86 xs:h-28 max-w-full sm:w-96 sm:h-30 mx-auto
                         flex flex-row items-center justify-center gap-4 rounded-[20px] bg-transparent shadow-[4px_4px_4px_1px_rgba(24,24,24,0.25),inset_0_4px_4px_rgba(24,24,24,0.25)] cursor-default">
                             <span className="relative flex flex-col text-2xl text-white text-center [text-shadow:1.2px_1.2px_4px_rgba(0,0,0,0.8)] items-center justify-center gap-2">
-                                <Img src={Mic} alt="microphone" className="relative flex max-xxs:w-5 max-xxs:h-5 xxs:w-6 xxs:h-6 xs:w-7 xs:h-7 sm:w-8 sm:h-8 animate-pulse object-cover" draggable={false} />
+                                <Img src={Mic} alt="microphone" className="relative flex max-xxs:size-5 xxs:size-6 xs:size-7 sm:size-8 animate-pulse object-cover" draggable={false} />
                                 <h2 className="max-xxs:text-base xxs:text-base xs:text-[18px] sm:text-[20px] font-light">
                                     Guess any idol to start the game!
                                 </h2>

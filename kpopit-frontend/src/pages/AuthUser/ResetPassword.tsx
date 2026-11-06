@@ -75,12 +75,12 @@ const ResetPassword = () => {
             <div className="relative flex flex-col items-center justify-center min-h-full w-full">
                 <div className="relative z-10 flex flex-col items-center justify-center w-full px-2 sxs:px-3 sm:px-4 pt-15 pb-8">
                     <div className="relative w-full max-w-120">
-                        <div className="absolute inset-0 z-0 bg-ink border border-solid border-neon-pink/15 rounded-[40px] modal-outer-shadow translate-x-0.75 translate-y-0.75 rotate-[1.5deg] transform-gpu" />
+                        <div className="absolute inset-0 z-0 bg-ink border border-solid border-neon-pink/15 rounded-[40px] modal-outer-shadow translate-0.75 rotate-[1.5deg] transform-gpu" />
 
                         <div className="relative z-10 flex flex-col bg-[#111111] border-4 border-neon-pink rounded-[40px] p-5 sxs:p-6 sm:p-8 modal-inner-shadow">
 
                             <div className="mb-6 text-center">
-                                <h1 className="text-4xl sxs:text-5xl font-sans font-black uppercase leading-tight">
+                                <h1 className="text-4xl/tight sxs:text-5xl font-sans font-black uppercase">
                                     <span className="text-white">{success ? "Reset" : "Reset your"}</span>
                                     <br />
                                     <span className="text-neon-pink">{success ? "Complete." : "Password."}</span>
@@ -93,8 +93,8 @@ const ResetPassword = () => {
                             {success ? (
                                 <div className="flex flex-col gap-6">
                                     <div className="flex flex-col items-center gap-3 px-2 py-1 text-center">
-                                        <CheckCircle className="w-12 h-12 text-neon-pink" />
-                                        <p className="text-sm text-white/80 font-bold leading-relaxed">
+                                        <CheckCircle className="size-12 text-neon-pink" />
+                                        <p className="text-sm/relaxed text-white/80 font-bold">
                                             Password reset successfully.
                                         </p>
                                     </div>
@@ -118,7 +118,7 @@ const ResetPassword = () => {
                                         </label>
                                         <div className="neo-input-modal relative h-14 rounded-2xl overflow-hidden">
                                             <Lock
-                                                className={`absolute left-4 top-1/2 w-4 h-4 -translate-y-1/2 transform-gpu transition-colors duration-200 ${password.length > 0 ? "text-white" : "text-neutral-600"}`}
+                                                className={`absolute left-4 top-1/2 size-4 -translate-y-1/2 transform-gpu transition-colors duration-200 ${password.length > 0 ? "text-white" : "text-neutral-600"}`}
                                             />
                                             <input
                                                 type={showPassword ? "text" : "password"}
@@ -127,14 +127,14 @@ const ResetPassword = () => {
                                                 onChange={(e) => setPassword(e.target.value)}
                                                 placeholder="••••••••••••"
                                                 autoComplete="new-password"
-                                                className="w-full h-full pl-11 pr-11 bg-ink text-sm font-bold text-white placeholder:text-neutral-700 focus:outline-none"
+                                                className="size-full pl-11 pr-11 bg-ink text-sm font-bold text-white placeholder:text-neutral-700 focus:outline-none"
                                             />
                                             <button
                                                 type="button"
                                                 onClick={() => setShowPassword(!showPassword)}
                                                 className="absolute right-4 top-1/2 -translate-y-1/2 text-neutral-600 hover:text-white hover:cursor-pointer transition-colors"
                                             >
-                                                {showPassword ? <EyeOff className="w-6 h-6" /> : <Eye className="w-6 h-6" />}
+                                                {showPassword ? <EyeOff className="size-6" /> : <Eye className="size-6" />}
                                             </button>
                                         </div>
 
@@ -162,7 +162,7 @@ const ResetPassword = () => {
                                         </label>
                                         <div className="neo-input-modal relative h-14 rounded-2xl overflow-hidden">
                                             <Lock
-                                                className={`absolute left-4 top-1/2 w-4 h-4 -translate-y-1/2 transform-gpu transition-colors duration-200 ${confirmPassword.length > 0 ? "text-white" : "text-neutral-600"}`}
+                                                className={`absolute left-4 top-1/2 size-4 -translate-y-1/2 transform-gpu transition-colors duration-200 ${confirmPassword.length > 0 ? "text-white" : "text-neutral-600"}`}
                                             />
                                             <input
                                                 type={showConfirmPassword ? "text" : "password"}
@@ -171,14 +171,14 @@ const ResetPassword = () => {
                                                 onChange={(e) => setConfirmPassword(e.target.value)}
                                                 placeholder="••••••••••••"
                                                 autoComplete="new-password"
-                                                className="w-full h-full pl-11 pr-11 bg-ink text-sm font-bold text-white placeholder:text-neutral-700 focus:outline-none"
+                                                className="size-full pl-11 pr-11 bg-ink text-sm font-bold text-white placeholder:text-neutral-700 focus:outline-none"
                                             />
                                             <button
                                                 type="button"
                                                 onClick={() => setShowConfirmPassword(!showConfirmPassword)}
                                                 className="absolute right-4 top-1/2 -translate-y-1/2 text-neutral-600 hover:text-white hover:cursor-pointer transition-colors"
                                             >
-                                                {showConfirmPassword ? <EyeOff className="w-6 h-6" /> : <Eye className="w-6 h-6" />}
+                                                {showConfirmPassword ? <EyeOff className="size-6" /> : <Eye className="size-6" />}
                                             </button>
                                         </div>
                                     </div>

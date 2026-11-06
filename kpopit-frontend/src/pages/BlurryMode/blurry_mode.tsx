@@ -3,6 +3,7 @@ import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { useSharedGameData } from "../../hooks/useSharedGameData";
 import { useGameMode } from "../../hooks/useGameMode";
 import { useState, useEffect, useMemo, useCallback, useRef } from "react";
+import YesterdayLockedPill from "../../components/YesterdayLockedPill";
 import { getBlurryDailyIdol, getBlurryGuessIdol, getUserPosition, getYesterdaysIdol, getDailyUserCount, saveGameState } from "../../services/api";
 import type { 
     GuessResponse, 
@@ -41,7 +42,7 @@ import PageLoader from "../../components/Loading/PageLoader";
 import CardGrantedReveal from "../Collection/components/CardGrantedReveal";
 import type { CardGranted } from "../../interfaces/albumInterfaces";
 import { buildIdolSlug } from "../../utils/formatters";
-import Img from "../../components/Img";
+import BlurryStage from "../../components/Blurry/BlurryStage";
 
 function BlurryMode() {
 const gameMode = useGameMode();
@@ -57,9 +58,8 @@ const gameMode = useGameMode();
     const [confetti, setConfetti] = useState<boolean>(false);
     const [attempts, setAttempts] = useState<number>(0);
     const [sessionRestored, setSessionRestored] = useState<number>(0);
+    const submittingRef = useRef(false);
 
-    // Mobile
-    const [isTouched, setIsTouched] = useState<boolean>(false);
 
     const { userToken, initUser, decryptedTokenRef, allIdolsData,
         isInitialized, userStatsData, transferData, isErrorAllIdols, queryClient} = useSharedGameData();
@@ -197,7 +197,8 @@ const gameMode = useGameMode();
             }
         }
         setDayChecked(true);
-        setConfetti(confettiShown);
+        // A game that was already over when the page opened never replays its confetti.
+        setConfetti(confettiShown || gameComplete === "true");
     }
 
     const blurryIdols = useMemo(() => {
@@ -290,7 +291,7 @@ const gameMode = useGameMode();
     const handleSubmit = useCallback(async () => {
         const { selectedIdol, blurryGameData, allIdolsData, guesses, attempts, guessMutation } = stableDataRef.current;
 
-        if (!selectedIdol || !blurryGameData || !allIdolsData || guessMutation.isPending) return;
+        if (!selectedIdol || !blurryGameData || !allIdolsData || submittingRef.current || guessMutation.isPending) return;
 
         const gameDate = blurryGameData.server_date;
 
@@ -307,6 +308,17 @@ const gameMode = useGameMode();
         }
 
         const isCorrectGuess = guessedIdolData.id === blurryGameData.answer_id;
+        submittingRef.current = true;
+        let token: string;
+
+        try {
+            const encrypted = localStorage.getItem("userToken") || "";
+            token = decryptedTokenRef.current || await decryptToken(encrypted);
+        } catch (error) {
+            submittingRef.current = false;
+            console.error("Could not prepare the guess:", error);
+            return;
+        }
 
         const localGuessResult: GuessResponse<Partial<FeedbackData>> = {
             guess_correct: isCorrectGuess,
@@ -329,15 +341,16 @@ const gameMode = useGameMode();
             return updatedGuesses;
         });
 
-        const encrypted = localStorage.getItem("userToken") || "";
-        const token = decryptedTokenRef.current || await decryptToken(encrypted);
-        
         guessMutation.mutate({
             guessed_idol_id: selectedIdol.id,
             answer_id: blurryGameData.answer_id,
             user_token: token,
             current_attempt: attempts + 1,
             game_date: gameDate,
+        }, {
+          onSettled: () => {
+            submittingRef.current = false;
+          },
         });
 
         setCurrentGuess("");
@@ -392,7 +405,7 @@ const gameMode = useGameMode();
             if (isErrorBlurryGameData) refetchBlurryGameData();
             if (listError) queryClient.refetchQueries({ queryKey: ["allIdols"] });
         };
-        return <PageLoader error={isErrorBlurryGameData || userToken.isError || listError} onRetry={retry} />;
+        return <PageLoader tone="dark" error={isErrorBlurryGameData || userToken.isError || listError} onRetry={retry} />;
     }
 
     return (
@@ -426,53 +439,15 @@ const gameMode = useGameMode();
                 {showModal === "export-data" && <Modal isOpen onClose={() => setShowModal(null)} title="Export Data..." isTransferDataSubPages={true} returnPage={() => {setShowModal("transfer-data")}}><ExportDataText handleGenerate={transferData.handleGenerate} generatedCodes={transferData.generatedCodes} timeLeft={transferData.timeLeft} expires_At={transferData.expiresAt} fetchActiveCode={transferData.fetchActiveCode} /></Modal>}
             </div>
 
-            {/* Mobile background card zoom */}
-            {isTouched && (
-                <div 
-                    className="fixed inset-0 z-40 bg-black/60"
-                    onTouchEnd={() => setIsTouched(false)}
-                    />
-            )}
-
-            {/* Blurry Image */}
-            <div className="relative group" onTouchEnd={() => setIsTouched(false)}>
-                <div className={`relative flex items-center justify-center bg-transparent border-2 border-white
-                max-xxs:w-55 max-xxs:h-80 xxs:w-60 xxs:h-88 xs:w-70 xs:h-98 xm:w-70 xm:h-98 zm:w-80 zm:h-108 sm:w-100 sm:h-128 rounded-[46px] overflow-hidden mb-4
-                ${isImageLoading ? 'bg-gray-600' : 'bg-black'}
-                ${isTouched ? 'scale-110 z-50' : 'scale-100'} transition-all duration-300 transform-gpu`}
-                    onTouchEnd={(e) => {
-                        if (window.matchMedia("(orientation: portrait)").matches) {
-                            setIsTouched(!isTouched)
-                            e.stopPropagation();
-                        }
-                    }}
-                >
-                    {/* Corner Decorations */}
-                    {[
-                        "top-5 left-5 border-l-3 border-t-3", "top-5 right-5 border-r-3 border-t-3",
-                        "bottom-5 left-5 border-l-3 border-b-3", "bottom-5 right-5 border-r-3 border-b-3"
-                    ].map((cornerClasses, index) => (
-                        <div
-                            key={index}
-                            className={`absolute max-xxs:w-4 max-xxs:h-4 xxs:w-4 xxs:h-4 xs:w-6 xs:h-6 z-10 border-white/20 ${cornerClasses}`}
-                        />
-                    ))}
-
-                    {/* Image */}
-                    <Img
-                        priority
-                        src={`${import.meta.env.VITE_IMAGE_BUCKET_URL}${blurryGameData.blur_image_path}?v=${blurryGameData.blur_image_version}`}
-                        style={{filter: `${endGame ? "blur(0px)" : `blur(${currentBlur}px)`} ${endGame ? "grayscale(0%)" : `grayscale(${blurryToggleOptions.color ? 0 : 100}%)`}`}}
-                        // The name is the answer: screen readers and the DOM get it only once the game ends.
-                        alt={endGame ? `Blurry image of ${artistName}` : "Blurry image of today's idol"}
-                        onLoad={() => setIsImageLoading(false)}
-                        onError={() => setIsImageLoading(false)}
-                        draggable={false}
-                        className={`max-xxs:w-55 max-xxs:h-80 xxs:w-60 xxs:h-88 xs:w-70 xs:h-98 xm:w-70 xm:h-98 zm:w-80 zm:h-108 sm:w-100 sm:h-128 pointer-events-none select-none object-cover transition-all duration-1000
-                        ${isImageLoading ? 'opacity-0' : 'opacity-100'}`} // load image (TODO)
-                    />
-                </div>
-            </div>
+            <BlurryStage
+                src={`${import.meta.env.VITE_IMAGE_BUCKET_URL}${blurryGameData.blur_image_path}?v=${blurryGameData.blur_image_version}`}
+                blur={currentBlur}
+                color={blurryToggleOptions.color}
+                gameEnded={endGame}
+                answerName={artistName}
+                isLoading={isImageLoading}
+                onLoad={() => setIsImageLoading(false)}
+            />
 
             {/* Mode Options */}
             {!endGame && !showVictoryCard && (
@@ -535,6 +510,17 @@ const gameMode = useGameMode();
             </div>
             )}
 
+
+      {!showVictoryCard && yesterdayIdol.data?.locked && (
+      <div className={`w-full flex flex-col items-center justify-center mt-10 mb-10`}>
+        <span className="font-semibold max-xxs:text-[14px] xxs:text-[15px] xs:text-base sm:text-[18px] leading-tight">
+          <span className="text-white">
+            Yesterday's idol was
+          </span> <YesterdayLockedPill mode="blurry" date={yesterdayIdol.data.yesterdays_pick_date} dayNumber={yesterdayIdol.data.day_number} />
+        </span>
+      </div>
+      )}
+
             {endGame && isCorrect && !confetti && (
                 <WinnerExplosion onComplete={() => {
                     setConfetti(true)
@@ -548,6 +534,7 @@ const gameMode = useGameMode();
             {endGame && guesses.length > 0 && showVictoryCard && (
                 <div className="w-full flex items-center justify-center mt-10">
                     <VictoryCardHudBlurry
+                    yesterdayLocked={yesterdayIdol.data?.locked ? yesterdayIdol.data : undefined}
                         cardInfo={guesses[guesses.length - 1].guessed_idol_data}
                         guesses={guesses}
                         attempts={attempts}

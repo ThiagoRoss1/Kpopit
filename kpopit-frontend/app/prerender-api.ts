@@ -1,13 +1,16 @@
 /// <reference types="node" />
-import type { IdolProfileData, IdolsPageData } from "../src/interfaces/gameInterfaces";
+import type { AlbumPageData, AlbumsPageItem, IdolProfileData, IdolsPageData } from "../src/interfaces/gameInterfaces";
+import { parseFeatures } from "../src/utils/features";
 
 // Build-time reads for the prerender (react-router.config.ts and route loaders). Defaults to the
 // local backend; point PRERENDER_API_URL at another API explicitly, never by default.
 const API_URL = (process.env.PRERENDER_API_URL || "http://127.0.0.1:5000").replace(/\/+$/, "");
 
 // Vercel preview deploys may point at a dev backend that is off: they build without the idol pages,
-// which the SPA fallback then serves. Production, CI and local builds fail instead.
-export const LENIENT_PRERENDER = process.env.VERCEL_ENV === "preview";
+// which the SPA fallback then serves. The dev server is lenient too: its document requests run these
+// loaders, and a backend that isn't up yet just means the page loads its own data. Production, CI
+// and local builds fail instead.
+export const LENIENT_PRERENDER = process.env.VERCEL_ENV === "preview" || process.env.NODE_ENV === "development";
 
 // A production deploy can't use the local default; stop before building, with just the fix.
 export function requirePrerenderApi() {
@@ -38,3 +41,9 @@ export async function orNothing<T>(read: Promise<T>): Promise<T | null> {
 export const fetchIdolsPage = () => get<IdolsPageData[]>("/idols-page");
 
 export const fetchIdolProfile = (id: number) => get<IdolProfileData>(`/idols-page/${id}`);
+
+export const fetchFeatures = async () => parseFeatures(await get<unknown>("/features"));
+
+export const fetchAlbumsPage = () => get<AlbumsPageItem[]>("/albums-page");
+
+export const fetchAlbum = (id: number) => get<AlbumPageData>(`/albums-page/${id}`);

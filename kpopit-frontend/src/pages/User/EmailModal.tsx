@@ -64,7 +64,7 @@ const EmailModal = ({ isOpen, onClose, onBack }: EmailModalProps) => {
                     </label>
 
                     <div className="ep-input relative h-13 rounded-2xl overflow-hidden bg-ink">
-                        <Mail className="absolute left-4 top-1/2 w-4 h-4 -translate-y-1/2 text-white" />
+                        <Mail className="absolute left-4 top-1/2 size-4 -translate-y-1/2 text-white" />
 
                         <input
                             autoFocus
@@ -74,7 +74,7 @@ const EmailModal = ({ isOpen, onClose, onBack }: EmailModalProps) => {
                             disabled={sent}
                             onChange={(e) => setNewEmail(e.target.value)}
                             placeholder="you@example.com"
-                            className="w-full h-full pl-11 pr-4 bg-ink text-sm font-bold text-white placeholder:text-neutral-700 focus:outline-none disabled:opacity-50"
+                            className="size-full pl-11 pr-4 bg-ink text-sm font-bold text-white placeholder:text-neutral-700 focus:outline-none disabled:opacity-50"
                         />
                     </div>
 
@@ -128,7 +128,7 @@ const EmailModal = ({ isOpen, onClose, onBack }: EmailModalProps) => {
                             disabled:opacity-50 disabled:cursor-not-allowed
                             disabled:hover:translate-x-0 disabled:hover:translate-y-0`}
                     >
-                        {saveMutation.isPending && <Loader2 className="w-4 h-4 animate-spin" />}
+                        {saveMutation.isPending && <Loader2 className="size-4 animate-spin" />}
                         {saveMutation.isPending ? "Sending" : sent ? "Sent" : "Send Confirmation"}
                     </button>
 
@@ -141,7 +141,7 @@ const EmailModal = ({ isOpen, onClose, onBack }: EmailModalProps) => {
                             hover:border-white/40 hover:text-white hover:cursor-pointer transition-colors
                             disabled:opacity-50 disabled:cursor-not-allowed"
                     >
-                        <ChevronLeft className="w-5 h-5" />
+                        <ChevronLeft className="size-5" />
                         Return
                     </button>
                 </div>

@@ -44,7 +44,7 @@ export const WinnerExplosion = (props: { onComplete: () => void }) => {
 
   return (
   <div 
-    className="fixed top-0 left-0 w-full h-full pointer-events-none z-50 transition-opacity duration-1000 ease-out"
+    className="fixed top-0 left-0 size-full pointer-events-none z-50 transition-opacity duration-1000 ease-out"
     style={{opacity: opacity}}>
       <Confetti
         width={windowSize.width}

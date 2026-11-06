@@ -1,126 +1,128 @@
-import "./droplist.css";
-import { useEffect, useRef, useState } from "react";
-import { useNavigate } from "react-router";
+import { Link, useNavigate } from "react-router";
 import { LogOut, User } from "lucide-react";
+import { cn } from "../../lib/utils";
 import { useAuth } from "../../hooks/useAuth";
 import { useAuthUser } from "../../hooks/useAuthUser";
 import { resolveAvatarUrl } from "../../utils/resolveAvatarUrl";
-import Img from "../Img";
-import IntentLink from "../Links/IntentLink";
 import { loadProfileStats } from "../../pages/User/profileData";
+import IntentLink from "../Links/IntentLink";
 
-// Profile link intent: start the stats request (the route loader then finds it in the cache).
 const prefetchProfile = () => void loadProfileStats();
 
-const UserDropdown = () => {
-    const { user, refreshAuth } = useAuth();
+// Profile-menu items: the hover pill is a layer behind the label that fades in (opacity only),
+// and the item lifts on hover and sinks on press.
+const menuItemClasses = cn(
+    "pp-focus relative flex items-center gap-3 h-11 px-3 rounded-[13px] border-2 border-transparent",
+    "font-semibold text-[15px] text-(--chip-ink) no-underline cursor-pointer",
+    "transition-transform duration-300 ease-(--ease-settle) transform-gpu",
+    "hover:-translate-y-0.5 pressed:translate-x-0.5 pressed:translate-y-0.75 pressed:duration-180",
+    "before:absolute before:-inset-0.5 before:-z-1 before:rounded-[inherit] before:border-2 before:border-(--ink)",
+    "before:bg-(--chip-hover) before:shadow-[2px_3px_0_var(--ctl-off),var(--in)] before:opacity-0",
+    "before:transition-[opacity,box-shadow] before:duration-300",
+    "hover:before:opacity-100 pressed:before:opacity-100 pressed:before:shadow-[0_0_0_var(--ctl-off),var(--in)]",
+);
+
+interface UserDropdownProps {
+    open: boolean;
+    onToggle: () => void;
+}
+
+/** Login for guests; for members the avatar ring opens Profile + Logout. Same box while the
+ *  session resolves, so the bar never shifts. The navbar owns the open state (one menu at a time). */
+const UserDropdown = ({ open, onToggle }: UserDropdownProps) => {
+    const { isAuthenticated, isLoading, user, refreshAuth } = useAuth();
     const { logout } = useAuthUser();
     const navigate = useNavigate();
 
-    const [isOpen, setIsOpen] = useState(false);
-    const containerRef = useRef<HTMLDivElement>(null);
+    if (isLoading) return <span aria-hidden className="block w-12 h-10" />;
 
-    useEffect(() => {
-        if (!isOpen) return;
-        const handleClickOutside = (event: MouseEvent) => {
-            const target = event.target as Node;
-            if (containerRef.current && !containerRef.current.contains(target)) {
-                setIsOpen(false);
-            }
-        };
-        document.addEventListener("mousedown", handleClickOutside);
-        return () => document.removeEventListener("mousedown", handleClickOutside);
-    }, [isOpen]);
+    if (!isAuthenticated || !user) {
+        return (
+            <Link
+                to="/login"
+                className={cn(
+                    "pp-press pp-focus flex-none inline-flex items-center box-border h-10 px-4.5",
+                    "rounded-full border-2 border-(--ink) bg-neon-pink [--pp-in:var(--in-pink)] shadow-[2px_3px_0_var(--ink),var(--in-pink)]",
+                    "font-bold text-[15.5px] text-[#1A1418] whitespace-nowrap no-underline",
+                )}
+            >
+                Login
+            </Link>
+        );
+    }
 
-    if (!user) return null;
-
-    const avatarSrc = resolveAvatarUrl(user.profile.avatar_url, user.profile.updated_at);
-    const displayName = user.profile.display_name;
+    const avatar = resolveAvatarUrl(user.profile.avatar_url, user.profile.updated_at);
     const username = user.user_credentials.username;
 
     const handleLogout = async () => {
         try {
             await logout();
             await refreshAuth();
-
             navigate("/login");
         } catch (error) {
-            console.error("Logout failed:", error);
+            if (import.meta.env.DEV) console.error("Logout failed:", error);
         }
     };
 
     return (
-        <div className="relative" ref={containerRef}>
+        <div className="relative mx-1">
+            {/* The avatar: its ring widens on hover and only the photo zooms (an image scaled by
+                itself stays sharp; one scaled by its parent is redrawn when the motion ends). */}
             <button
                 type="button"
-                onClick={() => setIsOpen(prev => !prev)}
-                className="flex items-center justify-center w-9 h-9 sm:w-10 sm:h-10 rounded-full overflow-hidden bg-transparent hover:scale-105 hover:cursor-pointer transition-transform duration-300 transform-gpu"
                 aria-label="User menu"
-                aria-expanded={isOpen}
+                aria-expanded={open}
+                onClick={onToggle}
+                className={cn(
+                    "pp-focus group relative block flex-none size-10 box-border p-0 overflow-hidden",
+                    "rounded-full bg-(--ink) cursor-pointer",
+                    "shadow-[0_0_0_2px_var(--ink),0_0_0_4.5px_#FF8AC4,0_0_0_6.5px_var(--ink)]",
+                    "hover:shadow-[0_0_0_2px_var(--ink),0_0_0_5px_#FF8AC4,0_0_0_7px_var(--ink)]",
+                    "transition-[box-shadow,scale] duration-400 ease-(--ease-settle) transform-gpu",
+                    "pressed:scale-95 pressed:duration-180 aria-expanded:scale-95",
+                )}
             >
-                {avatarSrc ? (
-                    <Img
-                        src={avatarSrc}
-                        alt="User avatar"
-                        className="w-full h-full rounded-full object-cover"
+                {avatar ? (
+                    <img
+                        src={avatar}
+                        alt=""
+                        className="block size-full object-cover transition-transform duration-500 ease-(--ease-settle) group-hover:scale-108"
                         draggable={false}
                     />
                 ) : (
-                    <div className="w-full h-full rounded-full bg-linear-to-b from-[#2a2a2a] to-[#0e0e0e]" />
+                    <User className="size-5 mx-auto text-[#FF8AC4]" strokeWidth={2.6} aria-hidden />
                 )}
             </button>
 
-            <div
-                data-state={isOpen ? "open" : "closed"}
-                className="droplist-base absolute right-0 top-full mt-3 w-60 z-50 bg-ink rounded-2xl shadow-[4px_4px_0px_rgba(255,51,153,1)] border-t border-neon-pink overflow-hidden"
-            >
-                {/* Header */}
-                <div className="flex flex-row items-center gap-3 px-4 py-3 border-b border-neon-pink/20">
-                    {avatarSrc ? (
-                        <Img
-                            src={avatarSrc}
-                            alt="User avatar"
-                            className="w-10 h-10 rounded-full object-cover shrink-0"
-                            draggable={false}
-                        />
-                    ) : (
-                        <div className="w-10 h-10 rounded-full shrink-0 bg-linear-to-b from-[#2a2a2a] to-[#0e0e0e]" />
+            {open && (
+                <div
+                    className={cn(
+                        "absolute right-0 top-[calc(100%+20px)] @max-[860px]:top-[calc(100%+17px)] z-40 flex flex-col gap-0.5 w-60 box-border p-2",
+                        "rounded-[20px] border-2 border-(--ink) bg-(--menu-bg) shadow-[3px_4px_0_var(--ctl-off),var(--in)]",
+                        "animate-[puffMenu_0.38s_var(--ease-settle)_both] origin-[calc(100%-20px)_0]",
                     )}
-                    <div className="flex flex-col min-w-0 font-sans">
-                        <span title={displayName} className="text-white font-black truncate max-w-35">
-                            {displayName}
-                        </span>
-                        <span title={username} className="text-gray-400 text-sm font-bold truncate max-w-35">
-                            @{username}
-                        </span>
-                    </div>
-                </div>
+                >
+                    <div className="min-w-0 px-3 pt-2 pb-2.5 mb-1 border-b-2 border-(--rule)">
+                        <p title={user.profile.display_name} className="m-0 font-bold text-base text-(--chip-ink) truncate">
+                            {user.profile.display_name}
+                        </p>
 
-                {/* Buttons */}
-                <div className="flex flex-col gap-1.5 px-2 py-2 font-sans font-bold">
-                    <IntentLink
-                        to={`/profile/${username.toLowerCase()}`}
-                        onIntent={prefetchProfile}
-                        onClick={() => setIsOpen(false)}
-                        className="flex items-center justify-start gap-4 px-4 h-12 text-left text-white rounded-[10px]
-                        bg-transparent hover:bg-gray-700/30 hover:text-neon-pink transition-colors duration-300"
-                    >
-                        <User className="w-4 h-4" />
-                        <span className="text-sm sm:text-base">Profile</span>
+                        <p title={username} className="m-0 font-medium text-[13px] text-(--muted) truncate">
+                            @{username}
+                        </p>
+                    </div>
+
+                    <IntentLink to={`/profile/${username.toLowerCase()}`} onIntent={prefetchProfile} className={menuItemClasses}>
+                        <User className="size-4" strokeWidth={2.6} aria-hidden />
+                        Profile
                     </IntentLink>
 
-                    <button
-                        type="button"
-                        onClick={handleLogout}
-                        className="flex items-center justify-start gap-4 px-4 h-12 text-left text-white rounded-[10px]
-                        bg-transparent hover:bg-gray-700/30 hover:text-neon-pink
-                        hover:cursor-pointer transition-colors duration-300"
-                    >
-                        <LogOut className="w-4 h-4" />
-                        <span className="text-sm sm:text-base">Logout</span>
+                    <button type="button" onClick={handleLogout} className={cn(menuItemClasses, "bg-transparent text-left")}>
+                        <LogOut className="size-4" strokeWidth={2.6} aria-hidden />
+                        Logout
                     </button>
                 </div>
-            </div>
+            )}
         </div>
     );
 };

@@ -5,6 +5,8 @@ interface PixelatedHintsProps {
     guessCount: number;
     releaseYear: number;
     artistName: string;
+    /** Keep the opened sleeves in localStorage (today's game). A calendar day keeps them in memory. */
+    persist?: boolean;
 }
 
 type HintId = "year" | "artist";
@@ -25,10 +27,10 @@ const HINTS: HintDef[] = [
     { id: "artist", sleeve: "artist", label: "Artist", korean: "가수", unlockGuesses: 6, stampIndex: "#02", storageKey: "pixelatedHint2Revealed" },
 ];
 
-const PixelatedHints = ({ guessCount, releaseYear, artistName }: PixelatedHintsProps) => {
+const PixelatedHints = ({ guessCount, releaseYear, artistName, persist = true }: PixelatedHintsProps) => {
     const [status, setStatus] = useState<Record<HintId, HintStatus>>(() =>
         HINTS.reduce((acc, h) => {
-            acc[h.id] = localStorage.getItem(h.storageKey) === "true" ? "open" : "closed";
+            acc[h.id] = persist && localStorage.getItem(h.storageKey) === "true" ? "open" : "closed";
             return acc;
         }, {} as Record<HintId, HintStatus>)
     );
@@ -64,7 +66,7 @@ const PixelatedHints = ({ guessCount, releaseYear, artistName }: PixelatedHintsP
                             if (!unlocked) return;
                             setStatus((s) => {
                                 const next = s[hint.id] === "open" ? "closing" : "open";
-                                localStorage.setItem(hint.storageKey, next === "open" ? "true" : "false");
+                                if (persist) localStorage.setItem(hint.storageKey, next === "open" ? "true" : "false");
                                 return { ...s, [hint.id]: next };
                             });
                         }}

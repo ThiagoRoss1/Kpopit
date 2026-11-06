@@ -491,7 +491,7 @@ function AlbumOfCol({
         <div
             ref={albumStageRef}
             data-browser={isSafariAlbumEngine ? 'safari' : undefined}
-            className="album-stage flex h-full min-h-0 w-full flex-col items-center px-3 pt-3 pb-3 lg:pb-28"
+            className="album-stage flex size-full min-h-0 flex-col items-center px-3 pt-3 pb-3 lg:pb-28"
         >
             <div ref={stageRef} className="flex min-h-0 w-full flex-1 items-center justify-center">
                 <div className="album-perspective album-zoom-in transform-gpu">

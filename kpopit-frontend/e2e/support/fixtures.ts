@@ -30,8 +30,8 @@ export async function tagApiRequests(context: BrowserContext, ip: string): Promi
 const STUB_IMAGE_ORIGINS = (process.env.E2E_STUB_IMAGE_ORIGINS ?? 'http://images.e2e.invalid').split(',').map((o) => o.trim()).filter(Boolean);
 const STUB_IMAGE = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '../../public/kpopit-icon.png');
 
-export async function stubImageBuckets(context: BrowserContext): Promise<void> {
-  for (const origin of STUB_IMAGE_ORIGINS) {
+export async function stubImageBuckets(context: BrowserContext, origins = STUB_IMAGE_ORIGINS): Promise<void> {
+  for (const origin of origins) {
     await context.route(`${origin}/**`, (route) =>
       route.fulfill({ status: 200, contentType: 'image/png', path: STUB_IMAGE, headers: { 'Access-Control-Allow-Origin': '*' } }),
     );

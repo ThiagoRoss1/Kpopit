@@ -123,7 +123,7 @@ const SearchBar = (props: SearchBarProps) => {
   };
 
   return (
-    <div ref={containerRef} className="relative w-fit h-fit rounded-3xl">
+    <div ref={containerRef} className="relative size-fit rounded-3xl">
       <div className={`relative max-xxs:w-80 max-xxs:h-13 xxs:w-90 xxs:h-13 xs:w-100 xs:h-13 max-w-full 
       ${gameMode === "classic" ? "sm:w-140" : gameMode === "blurry" ? "sm:w-100" : ""} sm:h-13 mx-auto flex items-center 
       border border-white/50 rounded-3xl bg-linear-to-r from-[#000000]/10 to-[#b43777]/10`}>
@@ -184,7 +184,7 @@ const SearchBar = (props: SearchBarProps) => {
               <motion.img 
                 src={SearchIcon} 
                 alt="G" 
-                className="w-5.5 h-5.5 sm:w-5.5 sm:h-5.5 mx-auto" 
+                className="size-5.5 sm:size-5.5 mx-auto" 
                 draggable={false} 
                 animate={{ scale: isButtonHovered ? 1.2 : 1 }}
                 transition={{
@@ -197,7 +197,7 @@ const SearchBar = (props: SearchBarProps) => {
                 <Img
                 src={SearchIcon} 
                 alt="G" 
-                className="w-5.5 h-5.5 sm:w-5.5 sm:h-5.5 mx-auto" 
+                className="size-5.5 sm:size-5.5 mx-auto" 
                 draggable={false} 
                 />
               )}
@@ -286,7 +286,7 @@ const SearchBar = (props: SearchBarProps) => {
                     <motion.img 
                     src={`${import.meta.env.VITE_IMAGE_BUCKET_URL}${suggestion.image_path}?v=${suggestion.image_version}`}
                     alt={"Idol image"}
-                    className="w-11 h-11 object-cover rounded-full border border-white"
+                    className="size-11 object-cover rounded-full border border-white"
                     loading="eager"
                     fetchPriority="high"
                     animate={{ scale: isHovered ? 1.16 : 1 }}

@@ -52,14 +52,14 @@ const BackgroundStyle = (props: BackgroundStyleProps) => {
 
   const getSizeClass = (size: string) => {
     switch(size) {
-      case 'extreme-large': return 'max-xxs:w-14 max-xxs:h-14 xxs:w-16 xxs:h-16 sm:w-30 sm:h-30 md:w-40 md:h-40';
-      case 'super-large': return 'max-xxs:w-10 max-xxs:h-10 xxs:w-12 xxs:h-12 sm:w-14 sm:h-14 md:w-22 md:h-22';
-      case 'extra-large': return 'max-xxs:w-8 max-xxs:h-8 xxs:w-10 xxs:h-10 sm:w-10 sm:h-10 md:w-16 md:h-16';
-      case 'large': return 'max-xxs:w-5 max-xxs:h-5 xxs:w-6 xxs:h-6 sm:w-6 sm:h-6 md:w-10 md:h-10';
-      case 'medium': return 'max-xxs:w-4 max-xxs:h-4 xxs:w-5 xxs:h-5 sm:w-4 sm:h-4 md:w-6 md:h-6';
-      case 'sparkle': return 'max-xxs:w-2 max-xxs:h-2 xxs:w-3 xxs:h-3 sm:w-3 sm:h-3 md:w-5 md:h-5';
-      case 'particle': return 'max-xxs:w-1 max-xxs:h-1 xxs:w-1 xxs:h-1 sm:w-1.5 sm:h-1.5 md:w-4 md:h-4';
-      default: return 'w-4 h-4 sm:w-6 sm:h-6';
+      case 'extreme-large': return 'max-xxs:size-14 xxs:size-16 sm:size-30 md:size-40';
+      case 'super-large': return 'max-xxs:size-10 xxs:size-12 sm:size-14 md:size-22';
+      case 'extra-large': return 'max-xxs:size-8 xxs:size-10 sm:size-10 md:size-16';
+      case 'large': return 'max-xxs:size-5 xxs:size-6 sm:size-6 md:size-10';
+      case 'medium': return 'max-xxs:size-4 xxs:size-5 sm:size-4 md:size-6';
+      case 'sparkle': return 'max-xxs:size-2 xxs:size-3 sm:size-3 md:size-5';
+      case 'particle': return 'max-xxs:size-1 xxs:size-1 sm:size-1.5 md:size-4';
+      default: return 'size-4 sm:size-6';
     }
   };
 
@@ -98,7 +98,7 @@ const BackgroundStyle = (props: BackgroundStyleProps) => {
       }}
     >
       <div className="absolute inset-0 bg-linear-to-br from-[#090311] via-[#050416] to-[#050822]" />
-        <div className="absolute inset-0 top-0 bg-black/0" />
+        <div className="absolute inset-0 bg-black/0" />
         {attempts ? attempts < 1 && (
         <motion.div 
             animate={ attempts === 0 ? { opacity: 1 } : { opacity: 0 }}

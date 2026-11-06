@@ -5,6 +5,7 @@ import type { GuessedIdolData, GuessResponse, UserStats } from "../../interfaces
 import { motion } from "motion/react";
 import VictoryCardSmall from "./VictoryCardSmall.tsx";
 import VictoryCardBig from "./VictoryCardBig.tsx";
+import type { YesterdayLocked } from "../../interfaces/gameInterfaces";
 
 interface GameMode {
     id: string;
@@ -15,6 +16,7 @@ interface GameMode {
 }
 
 interface VictoryCardHudProps {
+    yesterdayLocked?: YesterdayLocked;
     cardInfo: GuessedIdolData;
     guesses: GuessResponse[]
     attempts: number;
@@ -70,6 +72,7 @@ return (
                 }}
             >
                 <VictoryCardBig
+                    yesterdayLocked={props.yesterdayLocked}
                     cardInfo={cardInfo}
                     attempts={attempts}
                     nextReset={nextReset}

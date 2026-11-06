@@ -59,7 +59,7 @@ const ExportDataText = (props: ExportDataTextProps) => {
                                     {isFetching ? "Loading..." : (showLoading ? "Generating..." : generatedCodes)}
                                 </span>
 
-                                <Copy className="opacity-0 group-hover:opacity-80 w-10 h-10 absolute right-4 top-1/2 -translate-y-1/2 transition-all duration-500 transform-gpu"/>
+                                <Copy className="opacity-0 group-hover:opacity-80 size-10 absolute right-4 top-1/2 -translate-y-1/2 transition-all duration-500 transform-gpu"/>
                             </div>
                         </button>
                         <AnimatePresence>

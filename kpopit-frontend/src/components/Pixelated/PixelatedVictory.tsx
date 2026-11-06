@@ -1,7 +1,10 @@
 import { useState, useEffect, useRef } from "react";
 import "./PixelatedVictory.css";
 import { resolveCdnUrl } from "../../utils/imageUrl";
-import type { YesterdayAlbumPick } from "../../interfaces/gameInterfaces";
+import type { YesterdayAlbumPick, YesterdayLocked } from "../../interfaces/gameInterfaces";
+import { Link } from "react-router";
+import { albumPath } from "../../pages/Albums/albumsData";
+import YesterdayLockedCard from "../VictoryCard/YesterdayLockedCard";
 import { OtherGamemodes } from "../OtherGamemodes/OtherGamemodes";
 import { Copy } from "lucide-react";
 import TargetAttempt from "../../assets/icons/target.svg";
@@ -19,6 +22,8 @@ interface  GameMode {
 }
 
 interface PixelatedVictoryProps {
+    albumId: number;
+    yesterdayLocked?: YesterdayLocked;
     albumName: string;
     groupName: string;
     coverPath: string;
@@ -123,11 +128,11 @@ const PixelatedVictory = (props: PixelatedVictoryProps) => {
                 </div>
 
                 {/* Vinyl disc */}
-                <div className="absolute max-xxs:right-2 right-4.5 max-xxs:top-4 top-5.5 z-1 max-xxs:w-37 max-xxs:h-37 w-45 h-45 sm:w-55 sm:h-55 sm:top-7.5">
+                <div className="absolute max-xxs:right-2 right-4.5 max-xxs:top-4 top-5.5 z-1 size-45 max-xxs:size-37 sm:size-55 sm:top-7.5">
                     <div className="pixel-vinyl">
                         <div className="pixel-vinyl__spin">
                             <div className="pixel-vinyl__label overflow-hidden rounded-full">
-                                <Img src={coverUrl ?? undefined} alt={`${albumName} cover`} className="w-full h-full object-cover" draggable={false} />
+                                <Img src={coverUrl ?? undefined} alt={`${albumName} cover`} className="size-full object-cover" draggable={false} />
                             </div>
                         </div>
                         <div className="pixel-vinyl__light" />
@@ -139,17 +144,20 @@ const PixelatedVictory = (props: PixelatedVictoryProps) => {
                 <div className="absolute max-xxs:left-3 left-7.5 top-2 z-2 max-xxs:p-1.5 p-2 rounded-[14px] bg-[#1c1c1c] -rotate-3
                     shadow-[0_8px_22px_rgba(10,10,10,0.25),0_0_0_2px_rgba(10,10,10,0.6)]
                     firefox:shadow-none firefox:drop-shadow-[0_8px_22px_rgba(10,10,10,0.25)] firefox:active:drop-shadow-[0_0_0_2px_0_rgba(10,10,10,0.6)]">
-                    <div className="relative max-xxs:w-39 max-xxs:h-39 w-47.5 h-47.5 sm:w-57.5 sm:h-57.5 rounded-lg overflow-hidden">
+                    <div className="relative size-47.5 max-xxs:size-39 sm:size-57.5 rounded-lg overflow-hidden">
                         <Img
                             src={coverUrl ?? undefined}
                             alt={`${albumName} cover`}
-                            className="w-full h-full object-cover"
+                            className="size-full object-cover"
                             draggable={false} />
 
                         <div className="absolute left-3 right-3 bottom-2.5 text-white [text-shadow:1px_2px_4px_rgba(0,0,0,1)]">
-                            <div className="max-xxs:text-base text-xl sm:text-2xl font-bold leading-none uppercase">
+                            <Link
+                                to={albumPath({ id: props.albumId, name: albumName }, groupName)}
+                                className="block max-xxs:text-base text-xl sm:text-2xl font-bold leading-none uppercase text-white hover:underline"
+                            >
                                 {albumName}
-                            </div>
+                            </Link>
 
                             <div className="max-xxs:text-xs text-sm font-semibold mt-1 uppercase italic">
                                 {groupName}
@@ -160,12 +168,13 @@ const PixelatedVictory = (props: PixelatedVictoryProps) => {
             </div>
 
             <span className="flex justify-center items-center text-center mb-4">
-                <span className="font-['Caveat',cursive] text-2xl text-ink">
+                <span className="font-caveat text-2xl text-ink">
                     You were the <span className="text-neon-pink font-bold">{ordinal(position)}</span> fan to guess the album!
                 </span>
             </span>
 
             {/* Yesterday's album */}
+            {props.yesterdayLocked && <YesterdayLockedCard mode="pixelated" day={props.yesterdayLocked} />}
             {yesterdayAlbum && (
                 <div className="mt-4 mb-8">
                     <div className="flex flex-col gap-3 rounded-[18px] bg-linear-to-br from-cream to-[#e4d2cc] border-2 border-ink shadow-[4px_4px_0_var(--color-ink)] max-xxs:px-3 max-xxs:py-3 xxs:px-3 xs:px-4 py-4 sm:px-5
@@ -178,14 +187,14 @@ const PixelatedVictory = (props: PixelatedVictoryProps) => {
                             {/* Sleeve */}
                             <div className="relative shrink-0 max-xxs:w-26 max-xxs:h-21 w-31 h-25 sm:w-34 sm:h-26">
                                 {/* Vinyl disc */}
-                                <div className="absolute right-0 top-1/2 -translate-y-1/2 max-xxs:w-16 max-xxs:h-16 w-20 h-20 sm:w-21 sm:h-21 z-0">
+                                <div className="absolute right-0 top-1/2 -translate-y-1/2 size-20 max-xxs:size-16 sm:size-21 z-0">
                                     <div className="pixel-vinyl">
                                         <div className="pixel-vinyl__spin">
                                             <div className="pixel-vinyl__label overflow-hidden rounded-full">
                                                 <Img 
                                                     src={yesterdayAlbumCover ? resolveCdnUrl(yesterdayAlbumCover) ?? undefined : undefined} 
                                                     alt={`${yesterdayAlbum} cover`} 
-                                                    className="w-full h-full object-cover" draggable={false} />
+                                                    className="size-full object-cover" draggable={false} />
                                             </div>
                                         </div>
                                         <div className="pixel-vinyl__light" />
@@ -199,7 +208,7 @@ const PixelatedVictory = (props: PixelatedVictoryProps) => {
                                     <Img
                                         src={yesterdayCoverUrl ?? undefined}
                                         alt={`${yesterdayAlbum} cover`}
-                                        className="w-full h-full object-cover rounded-md"
+                                        className="size-full object-cover rounded-md"
                                         draggable={false}
                                     />
                                 </div>
@@ -252,7 +261,7 @@ const PixelatedVictory = (props: PixelatedVictoryProps) => {
                     className="flex flex-1 flex-col justify-start items-center text-center max-xxs:py-2.5 max-xxs:px-1 py-3 px-2 gap-1 bg-linear-to-r from-[#1f1f1f] to-[#1f1f1f]/90 rounded-3xl
                     shadow-[3px_3px_0_var(--color-neon-pink)] text-cream hover:translate-y-1 hover:translate-x-1 hover:shadow-[0px_1px_0_var(--color-neon-pink)] transition-all duration-300"
                 >
-                    <Img src={TargetAttempt} alt="Attempts Icon" className="w-4 h-4 sm:w-6 sm:h-6" draggable={false} />
+                    <Img src={TargetAttempt} alt="Attempts Icon" className="size-4 sm:size-6" draggable={false} />
 
                     <div className="font-bold max-xxs:text-xl text-2xl">{attempts}</div>
 
@@ -264,7 +273,7 @@ const PixelatedVictory = (props: PixelatedVictoryProps) => {
                     className="flex flex-1 flex-col justify-start items-center text-center max-xxs:py-2.5 max-xxs:px-1 py-3 px-2 gap-1 bg-linear-to-r from-[#1f1f1f] to-[#1f1f1f]/90 rounded-3xl
                     shadow-[3px_3px_0_var(--color-neon-pink)] text-cream hover:translate-y-1 hover:translate-x-1 hover:shadow-[0px_1px_0_var(--color-neon-pink)] transition-all duration-300"
                 >
-                    <Img src={RankPosition} alt="Rank Icon" className="w-4 h-4 sm:w-6 sm:h-6" draggable={false} />
+                    <Img src={RankPosition} alt="Rank Icon" className="size-4 sm:size-6" draggable={false} />
 
                     <div className="font-bold max-xxs:text-xl text-2xl">{fmt(rank)}</div>
 
@@ -275,7 +284,7 @@ const PixelatedVictory = (props: PixelatedVictoryProps) => {
                     className="flex flex-1 flex-col justify-start items-center text-center max-xxs:py-2.5 max-xxs:px-1 py-3 px-2 gap-1 bg-linear-to-r from-[#1f1f1f] to-[#1f1f1f]/90 rounded-3xl
                     shadow-[3px_3px_0_var(--color-neon-pink)] text-cream hover:translate-y-1 hover:translate-x-1 hover:shadow-[0px_1px_0_var(--color-neon-pink)] transition-all duration-300"
                 >
-                    <Img src={PositionTrend} alt="Position Icon" className="w-4 h-4 sm:w-6 sm:h-6" draggable={false} />
+                    <Img src={PositionTrend} alt="Position Icon" className="size-4 sm:size-6" draggable={false} />
 
                     <div className="font-bold max-xxs:text-xl text-2xl">{fmt(score, 2)}</div>
 
@@ -283,7 +292,7 @@ const PixelatedVictory = (props: PixelatedVictoryProps) => {
                 </div>
             </div>
 
-            <div className="flex flex-col w-full h-full gap-1">
+            <div className="flex flex-col size-full gap-1">
                 <div className="flex items-start justify-start">
                     <span className="text-ink text-lg font-bold [text-shadow:1px_1px_6px_rgba(0,0,0,0)]">
                         Other Game Modes
@@ -305,7 +314,7 @@ const PixelatedVictory = (props: PixelatedVictoryProps) => {
                     firefox:active:drop-shadow-[0_1px_0_var(--color-ink)] transition-all duration-200 transform-gpu
                     hover:scale-101 firefox:hover:scale-100 hover:brightness-110 hover:cursor-pointer active:translate-y-1 active:shadow-[0_1px_0_var(--color-ink)]"
                 >
-                    <Copy className="w-4 h-4" />
+                    <Copy className="size-4" />
                     {copied ? "Copied!" : "Share Results"}
                 </button>
 
@@ -319,7 +328,7 @@ const PixelatedVictory = (props: PixelatedVictoryProps) => {
                     <Img 
                         src={Xlogo} 
                         alt="X" 
-                        className="w-8 h-8 object-cover" 
+                        className="size-8 object-cover" 
                         draggable={false} />
                 </button>
             </div>

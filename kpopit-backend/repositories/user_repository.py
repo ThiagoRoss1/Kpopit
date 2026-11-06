@@ -147,10 +147,11 @@ class UserRepository:
         return cursor.fetchone()
 
     def upsert_profile(self, cursor, user_id: int, display_name: str | None, avatar_url: str | None) -> dict:
+        # Only a new profile gets show_match_history = TRUE; an existing one keeps its switches.
         cursor.execute(
             """
-            INSERT INTO user_profiles (user_id, display_name, avatar_url)
-            VALUES (%s, %s, %s)
+            INSERT INTO user_profiles (user_id, display_name, avatar_url, show_match_history)
+            VALUES (%s, %s, %s, TRUE)
             ON CONFLICT (user_id) DO UPDATE
                 SET display_name = COALESCE(EXCLUDED.display_name, user_profiles.display_name),
                     avatar_url = COALESCE(EXCLUDED.avatar_url, user_profiles.avatar_url),

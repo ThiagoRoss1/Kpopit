@@ -6,12 +6,14 @@ import Img from "../Img";
 const Footer = () => {
 
     return (
-        <div className={`w-full flex flex-col items-center justify-center max-[768px]:mt-12 mt-4 mb-0 gap-1`}>
+        // Below the page in stacking order (the layout isolates it), so overlays a page opens, such as
+        // the Idol XP switch bar, always cover it.
+        <footer className="relative -z-1 w-full flex flex-col items-center justify-center max-[768px]:mt-12 mt-4 pb-4 gap-1">
             <div className="w-full flex flex-row items-center justify-center gap-3">
             <button
             className="flex items-center justify-center max-xxs:w-10 max-xxs:h-10 xxs:w-10 xxs:h-10 xs:w-10 xs:h-10 sm:w-10 sm:h-10 bg-black rounded-full hover:scale-110 hover:brightness-110 hover:cursor-pointer
             transition-all duration-300 transform-gpu" onClick={() => window.open("https://x.com/TgoRoss1", "_blank")}>
-                <Img src={XLogo} alt="X" className="max-xxs:w-7.5 max-xxs:h-7.5 xxs:w-7.5 xxs:h-7.5 xs:w-7.5 xs:h-7.5 sm:w-7.5 sm:h-7.5 items-center justify-center" draggable={false} />
+                <Img src={XLogo} alt="X" className="max-xxs:size-7.5 xxs:size-7.5 xs:size-7.5 sm:size-7.5 items-center justify-center" draggable={false} />
             </button>
             
             <Link 
@@ -20,7 +22,7 @@ const Footer = () => {
                 transition-all duration-300 transform-gpu"
                 aria-label="Contact"
             >
-                <Info className="max-xxs:w-10 max-xxs:h-10 xxs:w-10 xxs:h-10 xs:w-10 xs:h-10 sm:w-10 sm:h-10" />
+                <Info className="max-xxs:size-10 xxs:size-10 xs:size-10 sm:size-10" />
 
             </Link>
             </div>
@@ -30,7 +32,7 @@ const Footer = () => {
                     <span className="normal-font font-bold text-white max-xxs:text-[14px] xxs:text-[14px] xs:text-base sm:text-base hover:underline [text-shadow:1px_1px_4px_rgba(0,0,0,1)]">Privacy Policy</span>
                 </Link>
                 </div>
-        </div>
+        </footer>
     )
 
 }

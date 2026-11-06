@@ -1,240 +1,147 @@
-import "./droplist.css";
-import { Link, useLocation } from "react-router";
-import { useState, useEffect, useRef } from "react";
-import { GAMES_LINKS, IDOLS_LINKS } from "./navigation";
-import { ChevronDown } from "lucide-react";
-import Img from "../Img";
-import { prefetchCollectionsList } from "../../pages/Collection/collectionData";
+import { useState } from "react";
+import { Link } from "react-router";
+import { ArrowRight, ChevronDown, Sparkles } from "lucide-react";
+import { cn } from "../../lib/utils";
 import IntentLink from "../Links/IntentLink";
-
+import { Dot, RowLink, Tile } from "./DroplistBase";
+import { MAJOR_PATCH, PREFETCH, menuOf, type NavMenu, type NavPage, type NavRow } from "./navigation";
 
 interface ButtonsListMobileProps {
-    isOpen?: boolean;
-    onClose: () => void;
+    page: NavPage | null;
+    section: ReturnType<typeof menuOf>;
+    rowsOf: (menu: NavMenu) => NavRow[];
+    calendar: boolean;
+    collections: boolean;
 }
 
-const ButtonsListMobile = (props: ButtonsListMobileProps) => {
-    const { isOpen, onClose } = props;
+// A section button of the sheet (an accordion header or a direct link).
+const sectionClasses = (isCurrent: boolean, isOpen: boolean) => cn(
+    "pp-press pp-focus flex-none flex items-center gap-2.5 box-border w-full h-13.5 pr-3.5 pl-4",
+    "rounded-2xl border-2 border-(--ink) font-bold text-base text-left no-underline cursor-pointer",
+    isCurrent && "bg-(--side) text-[#1A1418] [--pp-in:var(--in-pink)]",
+    !isCurrent && isOpen && "bg-(--chip-hover) text-(--chip-ink)",
+    !isCurrent && !isOpen && "bg-(--chip) text-(--chip-ink)",
+);
 
-    const [isRendered, setIsRendered] = useState(isOpen);
+/** The menu sheet under the navbar on phones and small tablets: Games, Idols and About open as
+ *  accordions of tiles; Calendar and Collections are direct links. */
+const ButtonsListMobile = ({ page, section, rowsOf, calendar, collections }: ButtonsListMobileProps) => {
+    // The current page's section starts open.
+    const startOpen = section === "games" || section === "idols" || section === "about" ? section : null;
+    const [openMenu, setOpenMenu] = useState<NavMenu | null>(startOpen);
 
-    const [activeSection, setActiveSection] = useState<null | "games" | "idols">(null);
+    const renderAccordion = (menu: NavMenu, label: string) => {
+        const isOpen = openMenu === menu;
+        const isCurrent = section === menu;
 
-    const containerRef = useRef<HTMLUListElement>(null);
-    const location = useLocation();
+        return (
+            <div className="flex-none flex flex-col">
+                <button
+                    type="button"
+                    aria-expanded={isOpen}
+                    onClick={() => setOpenMenu(isOpen ? null : menu)}
+                    className={sectionClasses(isCurrent, isOpen)}
+                >
+                    {isCurrent && <Dot />}
+                    <span className="flex-1">{label}</span>
+                    <ChevronDown
+                        className={cn(
+                            "flex-none size-4 transition-transform duration-400 ease-(--ease-pop) transform-gpu",
+                            isOpen && "rotate-180",
+                        )}
+                        strokeWidth={3}
+                        aria-hidden
+                    />
+                </button>
 
-    const text = "text-white max-xxs:text-[12px] xxs:text-[14px] xs:text-base xm:text-lg sm:text-xl whitespace-nowrap [text-shadow:2px_2px_0px_rgba(0,0,0,0.5)]";
+                <div className="pp-collapse" data-open={isOpen ? "1" : "0"}>
+                    <div>
+                        <div className="pp-collapse-in pt-2.5 pr-1 pb-1.5">
+                            <div className="grid grid-cols-2 gap-2.5">
+                                {rowsOf(menu).map((row) => {
+                                    const isCurrentRow = row.id === page;
+                                    const isWip = !!row.wip;
 
-    useEffect(() => {
-        const handleClickOutside = (event: MouseEvent) => {
-            const target = event.target as HTMLElement;
+                                    return (
+                                        <RowLink
+                                            key={row.id}
+                                            row={row}
+                                            className={cn(
+                                                "pp-focus group relative box-border flex items-center gap-2.5 overflow-hidden min-h-14.5 py-1.5 pr-2.5 pl-1.5",
+                                                "rounded-[15px] border-2 border-(--ink) text-(--chip-ink) no-underline",
+                                                "shadow-[2px_2.5px_0_var(--ctl-off)] active:shadow-[0_0_0_var(--ctl-off)]",
+                                                "transition-[translate,background-color,box-shadow] duration-450 ease-(--ease-settle) transform-gpu",
+                                                isCurrentRow ? "bg-(--chip-hover)" : "bg-(--chip)",
+                                                !isWip && "active:translate-x-0.5 active:translate-y-0.75 active:duration-180",
+                                                isWip && "opacity-60 cursor-default",
+                                            )}
+                                        >
+                                            <Tile row={row} size="sm" />
 
-            if (isOpen && containerRef.current && !containerRef.current.contains(target) && !target.closest("#mobile-menu-button")) {
-                onClose();
-            }
-        };
+                                            <span className="flex flex-col gap-0.5 min-w-0">
+                                                <span className="flex items-center gap-1.5 font-bold text-sm leading-[1.1] whitespace-nowrap">
+                                                    {isCurrentRow && <Dot size="sm" />}
+                                                    {row.label}
+                                                </span>
 
-        document.addEventListener("mousedown", handleClickOutside);
+                                                {isWip && <span className="font-bold text-[9px] tracking-[.08em] text-(--muted)">SOON</span>}
+                                            </span>
+                                        </RowLink>
+                                    );
+                                })}
 
-        return () => {
-            document.removeEventListener("mousedown", handleClickOutside);
-        };
-    }, [isOpen, onClose, containerRef]);
+                                {menu === "about" && MAJOR_PATCH.show && (
+                                    <Link
+                                        to={MAJOR_PATCH.href}
+                                        className={cn(
+                                            "pp-focus col-span-2 box-border flex items-center gap-2.5 overflow-hidden h-13 pr-3 pl-2",
+                                            "rounded-[15px] border-2 border-[#1A1418] bg-[#FF8AC4] text-[#1A1418] no-underline",
+                                            "shadow-[2px_2.5px_0_var(--ctl-off),inset_0_2px_0_rgba(255,255,255,.55)]",
+                                        )}
+                                    >
+                                        <Sparkles className="flex-none size-4.25" fill="#FF3399" stroke="#1A1418" strokeWidth={2} aria-hidden />
+                                        <span className="flex-1 min-w-0 font-bold text-sm truncate">{`${MAJOR_PATCH.name} is here`}</span>
+                                    </Link>
+                                )}
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        );
+    };
 
-    // Mount at once on open (adjusted while rendering); unmount after the 500ms fade-out.
-    if (isOpen && !isRendered) setIsRendered(true);
-    useEffect(() => {
-        if (isOpen) return;
-        const timer = setTimeout(() => setIsRendered(false), 500);
-        return () => clearTimeout(timer);
-    }, [isOpen]);
+    const renderDirectLink = (id: "calendar" | "collections", label: string, to: string) => {
+        const isCurrent = section === id;
 
-    if (!isRendered) return null;
+        return (
+            <IntentLink
+                to={to}
+                onIntent={PREFETCH[id]}
+                aria-current={isCurrent ? "page" : undefined}
+                className={sectionClasses(isCurrent, false)}
+            >
+                {isCurrent && <Dot />}
+                <span className="flex-1">{label}</span>
+                <ArrowRight className="flex-none size-4" strokeWidth={3} aria-hidden />
+            </IntentLink>
+        );
+    };
 
     return (
-        <div 
-            className={`fixed inset-0 -z-100 w-full h-screen flex items-start justify-center bg-black/90 backdrop-blur-3xl md:hidden overflow-y-auto pb-40
-            transition-opacity duration-500 ${isOpen ? "opacity-100" : "opacity-0 pointer-events-none"}`}
+        <div
+            className={cn(
+                "absolute inset-x-2.5 top-[calc(100%+10px)] z-40 flex flex-col gap-2.5 box-border",
+                "max-h-[calc(100dvh-54px-30px)] overflow-auto overscroll-contain pt-3.5 px-3.5 pb-4",
+                "rounded-[22px] border-2 border-(--ink) bg-(--menu-bg) shadow-[4px_5px_0_var(--ctl-off),var(--in)]",
+                "animate-[puffMenu_0.38s_var(--ease-settle)_both] origin-[calc(100%-24px)_0]",
+            )}
         >
-            <ul 
-                className={`flex flex-col ${isOpen ? "mobile-navbar-enter" : "mobile-navbar-exit"} items-center justify-start gap-4 max-xxs:w-75 xxs:w-90 xs:w-100 sm:w-100 h-fit bg-white/10 border border-white/20 rounded-2xl mt-20 py-6 px-8`}
-                ref={containerRef}
-            >
-                {/* Home */}
-                <li className="flex w-full max-xxs:h-12 xxs:h-14 xs:h-16 bg-linear-to-r from-neon-pink to-[#df4a83] rounded-2xl items-center justify-center text-center text-white">
-                    <Link
-                        to="/" onClick={onClose} className={`flex w-full h-full items-center justify-center rounded-2xl text-center ${text}`}>
-                            <span className={text}>Home</span>
-                    </Link>
-                </li>
-                {/* Games Section */}
-                <li className="flex w-full flex-col items-center justify-center">
-                    <button
-                        className={`w-full max-xxs:h-12 xxs:h-14 xs:h-16 rounded-2xl bg-black text-white transition-transform duration-300 transform-gpu ${activeSection === "games" ? "bg-white/20 scale-105 border border-white/60" : ""}`}
-                        onClick={() => setActiveSection((prev) => prev === "games" ? null : "games")}
-                    >
-                        <span className={`flex flex-row items-center justify-center gap-4 ${text}`}>Games <ChevronDown className={`w-8 h-8 transition-all duration-300 transform-gpu ${activeSection === "games" ? "rotate-180" : ""}`} /></span>
-                    </button>
-
-                    {/* Games List */}
-                    <ul className={`flex flex-col w-full rounded-2xl gap-2 text-white border-b
-                    transition-all duration-300 ease-in-out overflow-hidden transform-gpu
-                    ${activeSection === "games"
-                        ? "max-h-150 opacity-100 bg-black/40 border-neon-pink mt-4 mb-2 p-4"
-                        : "max-h-0 opacity-0 mt-0 p-0 border-transparent"}
-                    `}>
-                        {GAMES_LINKS.map((game) => {
-                            const isPath = location.pathname.includes(game.path);
-                            
-                            if (game.isWip) {
-                                return (
-                                    <li 
-                                        key={game.path}
-                                        className="flex w-full max-xxs:h-12 xxs:h-14 xs:h-16 bg-black/40 rounded-2xl items-center px-4 gap-3 cursor-default"
-                                    >
-                                        {game.icon && (
-                                            <Img 
-                                                src={game.icon} 
-                                                alt={`${game.label} icon`} 
-                                                className="grayscale w-9 h-9"
-                                            />
-                                        )}
-                                        <span className="text-white/40 italic text-sm">{game.label}</span>
-                                    </li>
-                                );
-                            }
-
-                            return (
-                                <li 
-                                    key={game.path}
-                                    className={`flex w-full max-xxs:h-12 xxs:h-14 xs:h-16 rounded-2xl items-center justify-center px-4 gap-3 hover:bg-neon-pink/80 transition-colors ${
-                                        isPath ? "bg-white/10" : "bg-black/0"
-                                    }`}
-                                >
-                                    <IntentLink
-                                        to={game.path}
-                                        onIntent={game.onIntent}
-                                        onClick={onClose} 
-                                        className="flex items-center justify-center gap-3 w-full"
-                                    >
-                                        {game.icon && (
-                                            <Img 
-                                                src={game.icon} 
-                                                alt={`${game.label} icon`} 
-                                                className="w-9 h-9"
-                                            />
-                                        )}
-                                        <span className={text}>
-                                            {isPath && (
-                                                <span className="text-neon-pink [text-shadow:1px_1px_10px_#FF3399,1px_1px_10px_#FF3399] pr-1">• </span>
-                                            )}
-                                            <span className="[text-shadow:1.2px_1.6px_2.0px_rgba(255,51,153,1)]">{game.label}</span>
-                                        </span>
-                                    </IntentLink>
-                                </li>
-                            );
-                        })}
-                    </ul>
-                </li>
-
-                {/* Idols Section */}
-                <li className="w-full flex flex-col items-center justify-center list-none">
-                    <button
-                        className={`w-full max-xxs:h-12 xxs:h-14 xs:h-16 rounded-2xl bg-black text-white transition-transform duration-300 transform-gpu ${activeSection === "idols" ? "bg-white/20 scale-105 border border-white/60" : ""}`}
-                        onClick={() => setActiveSection((prev) => prev === "idols" ? null : "idols")}
-                    >
-                        <span className={`flex flex-row items-center justify-center gap-4 ${text}`}>Idols <ChevronDown className={`w-8 h-8 transition-all duration-300 transform-gpu ${activeSection === "idols" ? "rotate-180" : ""}`} /></span>
-                    </button>
-
-                    {/* Idols List */}
-                    <ul className={`flex flex-col w-full rounded-2xl gap-2 text-white border-b
-                        transition-all duration-300 ease-in-out overflow-hidden transform-gpu
-                        ${activeSection === "idols" 
-                            ? "max-h-150 opacity-100 border-neon-pink mt-2 mb-2 p-2"
-                            : "max-h-0 opacity-0 mt-0 mb-0 p-0 border-transparent"}
-                    `}>
-                        {IDOLS_LINKS.map((idol) => {
-                            const isPath = location.pathname.includes(idol.path);
-                            
-                            if (idol.isWip) {
-                                return (
-                                    <li 
-                                        key={idol.path}
-                                        className="flex w-full max-xxs:h-12 xxs:h-14 xs:h-16 bg-black/40 rounded-2xl items-center px-4 gap-3 cursor-default"
-                                    >
-                                        {idol.icon && (
-                                            <Img 
-                                                src={idol.icon} 
-                                                alt={`${idol.label} icon`} 
-                                                className="grayscale w-9 h-9"
-                                            />
-                                        )}
-                                        <span className="text-white/40 italic max-xxs:text-sm xxs:text-base xs:text-lg">{idol.label}</span>
-                                    </li>
-                                );
-                            }
-
-                            return (
-                                <li 
-                                    key={idol.path}
-                                    className={`flex w-full max-xxs:h-12 xxs:h-14 xs:h-16 rounded-2xl items-center px-4 gap-3 hover:bg-neon-pink/80 transition-colors ${
-                                        isPath ? "bg-white/10" : "bg-black/80"
-                                    }`}
-                                >
-                                    <IntentLink
-                                        to={idol.path}
-                                        onIntent={idol.onIntent}
-                                        onClick={onClose}
-                                        className="flex items-center gap-3 w-full"
-                                    >
-                                        {idol.icon && (
-                                            <Img 
-                                                src={idol.icon} 
-                                                alt={`${idol.label} icon`} 
-                                                className="w-9 h-9"
-                                            />
-                                        )}
-                                        <span className={text}>
-                                            {isPath && (
-                                                <span className="text-neon-pink [text-shadow:1px_1px_10px_#FF3399,1px_1px_10px_#FF3399] pr-1">• </span>
-                                            )}
-                                            <span className="[text-shadow:1.2px_1.6px_2.0px_rgba(255,51,153,1)]">{idol.label}</span>
-                                        </span>
-                                    </IntentLink>
-                                </li>
-                            );
-                        })}
-                    </ul>
-                </li>
-
-                {/* Collection */}
-                {import.meta.env.VITE_COLLECTION_ENABLED === "true" && (
-                    <li className="w-full flex items-center justify-center list-none">
-                        <IntentLink
-                            to="/collections"
-                            onIntent={prefetchCollectionsList}
-                            onClick={onClose}
-                            className={`flex w-full max-xxs:h-12 xxs:h-14 xs:h-16 bg-black rounded-2xl items-center justify-center text-center ${text}`}>
-                                <span className={text}>
-                                    {location.pathname.includes("/collections") && (
-                                        <span className="text-neon-pink [text-shadow:1px_1px_10px_#FF3399,1px_1px_10px_#FF3399] pr-1">• </span>
-                                    )}
-                                    Collections
-                                </span>
-                        </IntentLink>
-                    </li>
-                )}
-
-                {/* Contact */}
-                <li className="w-full flex items-center justify-center list-none">
-                    <Link
-                        to="/contact" 
-                        onClick={onClose} 
-                        className={`flex w-full max-xxs:h-12 xxs:h-14 xs:h-16 bg-linear-to-r from-neon-pink to-[#df4a83] rounded-2xl items-center justify-center text-center ${text}`}>
-                            <span className={text}>Contact</span>
-                    </Link>
-                </li>
-            </ul>
+            {renderAccordion("games", "Games")}
+            {renderAccordion("idols", "Idols")}
+            {calendar && renderDirectLink("calendar", "Calendar", "/calendar")}
+            {collections && renderDirectLink("collections", "Collections", "/collections")}
+            {renderAccordion("about", "About")}
         </div>
     );
 };

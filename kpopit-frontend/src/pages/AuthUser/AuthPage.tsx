@@ -203,7 +203,7 @@ const AuthPage = () => {
                 <div className="relative z-10 flex flex-col items-center justify-center w-full px-2 sxs:px-3 sm:px-4 pt-15 pb-8">
 
                     <div className="relative w-full max-w-120">
-                        <div className="absolute inset-0 z-0 bg-ink border border-solid border-neon-pink/15 rounded-[40px] modal-outer-shadow translate-x-0.75 translate-y-0.75 rotate-[1.5deg] transform-gpu" />
+                        <div className="absolute inset-0 z-0 bg-ink border border-solid border-neon-pink/15 rounded-[40px] modal-outer-shadow translate-0.75 rotate-[1.5deg] transform-gpu" />
 
                         <div className="relative z-10 flex flex-col bg-[#111111] border-4 border-neon-pink rounded-[40px] p-5 sxs:p-6 sm:p-8 modal-inner-shadow">
                             {/* Tab toggle */}
@@ -240,7 +240,7 @@ const AuthPage = () => {
 
                             {/* Title */}
                             <div className="mb-6 text-center">
-                                <h1 className="text-4xl sxs:text-5xl justify-center items-center font-sans flex flex-col font-black uppercase leading-tight">
+                                <h1 className="text-4xl/tight sxs:text-5xl justify-center items-center font-sans flex flex-col font-black uppercase">
                                     <span className="text-white">{isLoginTab ? "Welcome" : "Welcome to"}</span>
                                     <span className="text-neon-pink">{isLoginTab ? "Back!" : "KpopIt!"}</span>
                                 </h1>
@@ -271,17 +271,17 @@ const AuthPage = () => {
                                             placeholder={isLoginTab ? "@username or email" : "Pick your stage name"}
                                             maxLength={isLoginTab ? undefined : 12}
                                             autoComplete="username"
-                                            className="w-full h-full pl-11 pr-11 bg-ink text-sm font-bold text-white placeholder:text-neutral-700 focus:outline-none"
+                                            className="size-full pl-11 pr-11 bg-ink text-sm font-bold text-white placeholder:text-neutral-700 focus:outline-none"
                                         />
 
                                         {!isLoginTab && isValidUsername && usernameStatus === "checking" && (
-                                            <Loader2 className="absolute right-4 top-1/2 w-4 h-4 -translate-y-1/2 text-neutral-400 animate-spin" />
+                                            <Loader2 className="absolute right-4 top-1/2 size-4 -translate-y-1/2 text-neutral-400 animate-spin" />
                                         )}
                                         {!isLoginTab && isValidUsername && usernameStatus === "available" && (
-                                            <Check className="absolute right-4 top-1/2 w-4 h-4 -translate-y-1/2 text-green-500" />
+                                            <Check className="absolute right-4 top-1/2 size-4 -translate-y-1/2 text-green-500" />
                                         )}
                                         {!isLoginTab && isValidUsername && usernameStatus === "taken" && (
-                                            <X className="absolute right-4 top-1/2 w-4 h-4 -translate-y-1/2 text-red-500" />
+                                            <X className="absolute right-4 top-1/2 size-4 -translate-y-1/2 text-red-500" />
                                         )}
 
                                     </div>
@@ -310,7 +310,7 @@ const AuthPage = () => {
                                                 onChange={handleRegisterChange}
                                                 placeholder="bias@example.com"
                                                 autoComplete="email"
-                                                className="w-full h-full px-5 bg-ink text-sm font-bold text-white placeholder:text-neutral-700 focus:outline-none"
+                                                className="size-full px-5 bg-ink text-sm font-bold text-white placeholder:text-neutral-700 focus:outline-none"
                                             />
                                         </div>
 
@@ -338,7 +338,7 @@ const AuthPage = () => {
                                     </div>
                                     <div className="neo-input-modal relative h-14 rounded-2xl overflow-hidden">
                                         <Lock
-                                            className={`absolute left-4 top-1/2 w-4 h-4 -translate-y-1/2 transform-gpu transition-colors duration-200 ${activePassword.length > 0 ? "text-white" : "text-neutral-600"}`}
+                                            className={`absolute left-4 top-1/2 size-4 -translate-y-1/2 transform-gpu transition-colors duration-200 ${activePassword.length > 0 ? "text-white" : "text-neutral-600"}`}
                                         />
                                         <input
                                             type={showPassword ? "text" : "password"}
@@ -347,14 +347,14 @@ const AuthPage = () => {
                                             onChange={isLoginTab ? handleLoginChange : handleRegisterChange}
                                             placeholder="••••••••••••"
                                             autoComplete={isLoginTab ? "current-password" : "new-password"}
-                                            className="w-full h-full pl-11 pr-11 bg-ink text-sm font-bold text-white placeholder:text-neutral-700 focus:outline-none"
+                                            className="size-full pl-11 pr-11 bg-ink text-sm font-bold text-white placeholder:text-neutral-700 focus:outline-none"
                                         />
                                         <button
                                             type="button"
                                             onClick={() => setShowPassword(!showPassword)}
                                             className="absolute right-4 top-1/2 -translate-y-1/2 text-neutral-600 hover:text-white hover:cursor-pointer transition-colors"
                                         >
-                                            {showPassword ? <EyeOff className="w-6 h-6" /> : <Eye className="w-6 h-6" />}
+                                            {showPassword ? <EyeOff className="size-6" /> : <Eye className="size-6" />}
                                         </button>
                                     </div>
 
@@ -385,7 +385,7 @@ const AuthPage = () => {
                                         </label>
                                         <div className="neo-input-modal relative h-14 rounded-2xl overflow-hidden">
                                             <Lock
-                                                className={`absolute left-4 top-1/2 w-4 h-4 -translate-y-1/2 transform-gpu transition-colors duration-200 ${activePassword.length > 0 ? "text-white" : "text-neutral-600"}`}
+                                                className={`absolute left-4 top-1/2 size-4 -translate-y-1/2 transform-gpu transition-colors duration-200 ${activePassword.length > 0 ? "text-white" : "text-neutral-600"}`}
                                             />
                                             <input
                                                 type={showConfirmPassword ? "text" : "password"}
@@ -394,14 +394,14 @@ const AuthPage = () => {
                                                 onChange={handleRegisterChange}
                                                 placeholder="••••••••••••"
                                                 autoComplete="new-password"
-                                                className="w-full h-full pl-11 pr-11 bg-ink text-sm font-bold text-white placeholder:text-neutral-700 focus:outline-none"
+                                                className="size-full pl-11 pr-11 bg-ink text-sm font-bold text-white placeholder:text-neutral-700 focus:outline-none"
                                             />
                                             <button
                                                 type="button"
                                                 onClick={() => setShowConfirmPassword(!showConfirmPassword)}
                                                 className="absolute right-4 top-1/2 -translate-y-1/2 text-neutral-600 hover:text-white hover:cursor-pointer transition-colors"
                                             >
-                                                {showConfirmPassword ? <EyeOff className="w-6 h-6" /> : <Eye className="w-6 h-6" />}
+                                                {showConfirmPassword ? <EyeOff className="size-6" /> : <Eye className="size-6" />}
                                             </button>
                                         </div>
                                     </div>
@@ -418,7 +418,7 @@ const AuthPage = () => {
                                                 className={`flex items-center justify-center w-7 h-7 border-2 border-white/20 rounded-lg transform-gpu transition-all duration-200
                                                 ${loginFormData.rememberMe ? "bg-neon-pink" : "bg-[#1a1a1a]"}`}
                                             >
-                                                {loginFormData.rememberMe && <Check className="w-5 h-5 text-white" />}
+                                                {loginFormData.rememberMe && <Check className="size-5 text-white" />}
                                             </div>
 
                                             <span className="text-[12px] text-neutral-500 font-black uppercase tracking-widest group-hover:text-neutral-300 transition-colors">
@@ -462,7 +462,7 @@ const AuthPage = () => {
                                     {Array.from({ length: dotsCount }).map((_, i) => (
                                         <div
                                             key={i}
-                                            className={`validation-dot w-3.5 h-3.5 rounded-full transform-gpu ${dotsFilled[i] ? "filled" : ""}`}
+                                            className={`validation-dot size-3.5 rounded-full transform-gpu ${dotsFilled[i] ? "filled" : ""}`}
                                         />
                                     ))}
                                 </div>
@@ -491,7 +491,7 @@ const AuthPage = () => {
                             >
                             <span className="text-neon-pink">{idolCount ?? "—"} <span className="text-white/30">Idols</span></span>
                         </Link>
-                        <div className="w-1.5 h-1.5 bg-neon-pink rounded-full" />
+                        <div className="size-1.5 bg-neon-pink rounded-full" />
                         <span className="text-neon-pink">{gameModeCount ?? "—"} <span className="text-white/30">Game Modes</span></span>
                     </div>
                 </div>

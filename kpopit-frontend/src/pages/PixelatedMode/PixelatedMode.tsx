@@ -3,14 +3,14 @@ import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { useSharedGameData } from "../../hooks/useSharedGameData";
 import { useGameMode } from "../../hooks/useGameMode";
 import { useState, useEffect, useCallback, useMemo, useRef } from "react";
+import YesterdayLockedPill from "../../components/YesterdayLockedPill";
 import { getPixelatedDailyAlbum, getPixelatedGuessAlbum, getAllAlbums, getYesterdaysAlbum, getUserPosition, getDailyUserCount, saveGameState}  from "../../services/api";
 import type { PixelatedGameData, AlbumSearchResult, PixelatedGuessDetail, YesterdayAlbum } from "../../interfaces/gameInterfaces";
 import { decryptToken } from "../../utils/tokenEncryption";
 import { resolveCdnUrl } from "../../utils/imageUrl";
 import PixelatedSearchBar from "../../components/Pixelated/PixelatedSearchBar";
-import PixelatedCanvas from "../../components/Pixelated/PixelatedCanvas";
+import PixelatedStage from "../../components/Pixelated/PixelatedStage";
 import PixelatedGuessGrid from "../../components/Pixelated/PixelatedGuessGrid";
-import PixelatedHints from "../../components/Pixelated/PixelatedHints";
 import PixelatedVictory from "../../components/Pixelated/PixelatedVictory";
 import {GetPixelLevel, PIXEL_LEVELS} from "../../utils/pixelLevels";
 import { WinnerExplosion } from "../../utils/confetti";
@@ -45,9 +45,8 @@ function PixelatedMode() {
     const [confetti, setConfetti] = useState<boolean>(false);
     const [attempts, setAttempts] = useState<number>(0);
     const [sessionRestored, setSessionRestored] = useState<number>(0);
+    const submittingRef = useRef(false);
     const [showModal, setShowModal] = useState<null | "stats" | "transfer-data" | "import-data" | "export-data">(null);
-    const [zoom, setZoom] = useState<"closed" | "open" | "closing">("closed");
-    const touchStartRef = useRef<{ x: number; y: number } | null>(null);
 
     const { userToken, initUser, decryptedTokenRef, isInitialized, queryClient, userStatsData, transferData } = useSharedGameData();
     const { day, onNewDay } = useGameDay();
@@ -161,7 +160,8 @@ function PixelatedMode() {
             }
         }
         setDayChecked(true);
-        setConfetti(confettiShown);
+        // A game that was already over when the page opened never replays its confetti.
+        setConfetti(confettiShown || gameComplete === "true");
     }
 
     const guessMutation = useMutation({
@@ -210,7 +210,7 @@ function PixelatedMode() {
     const handleSubmit = useCallback(async () => {
         const { selectedAlbum, pixelatedGameData, guesses, attempts, guessMutation } = stableDataRef.current;
 
-        if (!selectedAlbum || !pixelatedGameData || guessMutation.isPending) return;
+        if (!selectedAlbum || !pixelatedGameData || submittingRef.current || guessMutation.isPending) return;
 
         const gameDate = pixelatedGameData.server_date;
 
@@ -221,6 +221,17 @@ function PixelatedMode() {
         }
 
         const guessCorrect = selectedAlbum.id === pixelatedGameData.answer_id;
+        submittingRef.current = true;
+        let token: string;
+
+        try {
+            const encrypted = localStorage.getItem("userToken") || "";
+            token = decryptedTokenRef.current || await decryptToken(encrypted);
+        } catch (error) {
+            submittingRef.current = false;
+            console.error("Could not prepare the guess:", error);
+            return;
+        }
 
         const localGuessResult: PixelatedGuessDetail = {
             album_id: selectedAlbum.id,
@@ -238,14 +249,15 @@ function PixelatedMode() {
         localStorage.setItem("pixelatedGameComplete", guessCorrect ? "true" : "false");
         localStorage.setItem("pixelatedGameWon", guessCorrect ? "true" : "false");
 
-        const encrypted = localStorage.getItem("userToken") || "";
-        const token = decryptedTokenRef.current || (await decryptToken(encrypted));
-
         guessMutation.mutate({
             album_id: selectedAlbum.id,
             current_attempt: attempts + 1,
             game_date: gameDate,
             user_token: token,
+        }, {
+          onSettled: () => {
+            submittingRef.current = false;
+          },
         });
 
         setCurrentGuess("");
@@ -291,7 +303,7 @@ function PixelatedMode() {
             hover:brightness-110 hover:cursor-pointer hover:scale-105 active:translate-y-1 active:shadow-[0_1px_0_var(--color-ink)]
             focus:outline-none focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ink"
         >
-            <BarChart3 className="w-5 h-5 sm:w-6 sm:h-6" />
+            <BarChart3 className="size-5 sm:size-6" />
         </button>
     );
 
@@ -312,14 +324,6 @@ function PixelatedMode() {
                     <div className="pixelmode__margin" />
                 </div>
 
-                {/* Mobile zoom backdrop */}
-                {zoom !== "closed" && (
-                    <div
-                        className={`fixed inset-0 z-40 bg-black/60 ${zoom === "closing" ? "pixel-zoom-backdrop-out" : "pixel-zoom-backdrop-in"}`}
-                        onTouchEnd={() => setZoom((z) => (z === "open" ? "closing" : z))}
-                    />
-                )}
-
                 <div className={`mx-auto max-w-340 px-4 zm:px-6 sm:px-12 md:px-20 lg:px-10 ${isLg ? "py-10" : "py-4"}`}>
                     <div className={`flex flex-col lg:flex-row gap-4 lg:gap-10 ${isLg ? "items-start" : "items-center"}`}>
 
@@ -329,7 +333,7 @@ function PixelatedMode() {
                                 to="/"
                                 className="inline-block bg-transparent border-0 p-0 cursor-pointer hover:scale-105
                                 transition-all duration-500 transform-gpu">
-                                <h1 className="text-5xl font-bold text-neon-pink leading-tight">
+                                <h1 className="text-5xl/tight font-bold text-neon-pink">
                                     <span
                                         className="kpop-part"
                                         style={{ '--kpop-color': 'var(--color-neon-pink)' } as React.CSSProperties}
@@ -349,102 +353,14 @@ function PixelatedMode() {
                         </div>  
                         )}
                         
-                        {/* ── LEFT: album sleeve + vinyl + hints ── */}
-                        <div className="flex flex-col w-full lg:w-1/2 xl:w-160">
-                                <div
-                                    className={`pixel-stage relative w-full h-70 xxs:h-75 xs:h-80 xm:h-85 zm:h-95 sm:h-100 md:h-110 xl:h-130 mx-auto select-none
-                                    ${zoom !== "closed" ? "z-50" : ""}`}
-                                >
-                                    {/* Vinyl disc */}
-                                    <div
-                                        className={`absolute flex left-1/2 translate-x-[-35%] xs:translate-x-[-30%] top-5 w-55 zm:translate-x-[-30%]
-                                        xxs:w-60 xs:w-65 xm:w-70 zm:w-76 sm:w-80 md:translate-x-[-25%] md:top-3 md:w-90 lg:translate-x-[-2%] lg:left-32 lg:w-90 xl:translate-x-[5%] xl:left-36 xl:w-110 aspect-square z-1
-                                        transition-opacity duration-300 ${zoom === "open" ? "opacity-0" : "opacity-100"}`}
-                                    >
-                                        <div className="pixel-vinyl">
-                                            <div className="pixel-vinyl__spin">
-                                                <div className="pixel-vinyl__label overflow-hidden">
-                                                    <PixelatedCanvas
-                                                        imageUrl={coverUrl ?? undefined}
-                                                        blockSize={blockSize}
-                                                        alt="Pixelated album cover"
-                                                        className="w-full h-full object-cover block rounded-full"
-                                                    />
-                                                </div>
-                                            </div>
-                                            <div className="pixel-vinyl__light" />
-                                            <div className="pixel-vinyl__hole" />
-                                        </div>
-                                    </div>
-
-                                    {/* Sleeve */}
-                                    <div
-                                        className={`pixel-sleeve absolute flex z-2 bg-ink border-2 border-cream -rotate-4 left-1/2 translate-x-[-55%] xs:translate-x-[-65%] top-[2%] w-55 h-65 xxs:w-60 xxs:h-70 xs:w-65 xs:h-75 xm:w-70 xm:h-80 zm:w-76 zm:h-86
-                                        shadow-[0_14px_30px_rgba(0,0,0,0.35),0_4px_10px_rgba(0,0,0,0.2)] rounded-2xl rounded-b-3xl
-                                        sm:w-80 sm:h-90 md:translate-x-[-60%] md:w-90 md:h-100 lg:left-0 lg:translate-x-0 lg:w-90 lg:h-100 xl:w-110 xl:h-120
-                                        ${zoom === "open" ? "pixel-sleeve-zoom-in" : zoom === "closing" ? "pixel-sleeve-zoom-out" : ""}`}
-                                        onTouchStart={(e) => {
-                                            const t = e.touches[0];
-                                            if (t) touchStartRef.current = { x: t.clientX, y: t.clientY };
-                                        }}
-                                        onTouchEnd={(e) => {
-                                            if (isLg || !window.matchMedia("(orientation: portrait)").matches) return;
-                                            const start = touchStartRef.current;
-                                            touchStartRef.current = null;
-                                            const t = e.changedTouches[0];
-                                            if (!start || !t) return;
-                                            if (Math.hypot(t.clientX - start.x, t.clientY - start.y) > 10) return;
-                                            e.stopPropagation();
-                                            setZoom((z) => (z === "open" ? "closing" : "open"));
-                                        }}
-                                        onAnimationEnd={(e) => {
-                                            if (e.animationName === "pixelSleeveZoomOut") setZoom("closed");
-                                        }}
-                                    >
-                                        <div className="relative flex items-center justify-center p-4 w-full h-fit">
-                                            <span className="pixel-washi absolute top-0 -left-6 w-[22%] h-5.5 z-4 rotate-[-34.8deg]" />
-                                            <span className="pixel-washi absolute top-0 -right-6 w-[22%] h-5.5 z-5 rotate-[34.8deg]" />
-
-                                            {/* Cover */}
-                                            <div className="relative w-full aspect-square rounded-xl overflow-hidden flex flex-col bg-transparent">
-                                                <PixelatedCanvas
-                                                    imageUrl={coverUrl ?? undefined}
-                                                    blockSize={blockSize}
-                                                    alt="Pixelated album cover"
-                                                    className="w-full h-full object-cover block"
-                                                />
-                                                {!endGame && (
-                                                    <div className="absolute inset-0 z-1 flex items-center justify-center font-bold text-white/40
-                                                        mix-blend-overlay pointer-events-none text-[clamp(56px,15vw,120px)] [text-shadow:0_4px_20px_rgba(0,0,0,0.5)]">
-                                                        {guesses.length === 0 ? "?" : ""}
-                                                    </div>
-                                                )}
-                                                {/* Corner brackets */}
-                                                <span className="absolute top-2.5 left-2.5 w-3.5 h-3.5 z-3 pointer-events-none border-l-2 border-t-2 border-white/55" />
-                                                <span className="absolute top-2.5 right-2.5 w-3.5 h-3.5 z-3 pointer-events-none border-r-2 border-t-2 border-white/55" />
-                                                <span className="absolute bottom-2.5 left-2.5 w-3.5 h-3.5 z-3 pointer-events-none border-l-2 border-b-2 border-white/55" />
-                                                <span className="absolute bottom-2.5 right-2.5 w-3.5 h-3.5 z-3 pointer-events-none border-r-2 border-b-2 border-white/55" />
-                                            </div>
-                                        </div>
-
-                                        <div className="absolute left-0 right-0 bottom-4 z-3 justify-center items-center text-center text-white text-xl xs:text-2xl leading-none
-                                            tracking-[0.02em] font-['Caveat',cursive] [text-shadow:0_2px_8px_rgba(0,0,0,0.6)]">
-                                            Guess the album
-                                        </div>
-                                    </div>
-                                </div>
-
-                                {!endGame && (
-                                    <div className="mt-2 lg:mt-6 flex items-center justify-center">
-                                        <PixelatedHints
-                                            guessCount={guesses.length}
-                                            releaseYear={pixelatedGameData.release_year}
-                                            artistName={pixelatedGameData.group_name}
-                                        />
-                                    </div>
-                                )}
-                       
-                        </div>
+                        <PixelatedStage
+                            coverUrl={coverUrl ?? undefined}
+                            blockSize={blockSize}
+                            guessCount={guesses.length}
+                            gameEnded={endGame}
+                            releaseYear={pixelatedGameData.release_year}
+                            artistName={pixelatedGameData.group_name}
+                        />
 
                         {/* ── RIGHT: title - if lg (1024px +), search, status, guesses ── */}
                         <div className="flex-1 min-w-0 w-full">
@@ -456,7 +372,7 @@ function PixelatedMode() {
                                             className="inline-block bg-transparent border-0 p-0 cursor-pointer hover:scale-105
                                             transition-all duration-500 transform-gpu"
                                         >
-                                            <h1 className="text-5xl font-bold text-neon-pink leading-tight">
+                                            <h1 className="text-5xl/tight font-bold text-neon-pink">
                                                 <span
                                                     className="kpop-part"
                                                     style={{ '--kpop-color': 'var(--color-neon-pink)' } as React.CSSProperties}
@@ -492,6 +408,7 @@ function PixelatedMode() {
                                         onSubmit={handleSubmit}
                                         excludedAlbums={excludedIds}
                                         disabled={isCorrect || endGame}
+                                        submitting={guessMutation.isPending}
                                     />
                                 </div>
                             )}
@@ -517,13 +434,24 @@ function PixelatedMode() {
 
                             {!showVictory && yesterdayAlbum && yesterdayAlbumArtist && yesterdayAlbumCover && (
                                 <div className="w-full flex flex-col items-center justify-center mt-10 lg:mt-20">
-                                    <span className="font-['Caveat',cursive] text-xl sm:text-2xl leading-tight">
+                                    <span className="font-caveat text-xl/tight sm:text-2xl">
                                         <span className="text-ink/70">
                                             Yesterday's album was
                                         </span>{" "}
                                         <span className="text-neon-pink font-bold [text-shadow:1.2px_1.2px_2px_rgba(0,0,0,0.6),0_0_4px_rgba(255,51,153,1)]">
                                             {yesterdayAlbum}
                                         </span>
+                                    </span>
+                                </div>
+                            )}
+
+                            {!showVictory && yesterdayAlbumData?.locked && (
+                                <div className="w-full flex flex-col items-center justify-center mt-10 lg:mt-20">
+                                    <span className="font-caveat text-xl/tight sm:text-2xl">
+                                        <span className="text-ink/70">
+                                            Yesterday's album was
+                                        </span>{" "}
+                                        <YesterdayLockedPill mode="pixelated" date={yesterdayAlbumData.yesterdays_pick_date} dayNumber={yesterdayAlbumData.day_number} />
                                     </span>
                                 </div>
                             )}
@@ -537,6 +465,8 @@ function PixelatedMode() {
                     {endGame && isCorrect && showVictory && winningGuess && (
                         <div className="mt-25">
                             <PixelatedVictory
+                                albumId={winningGuess.album_id}
+                                yesterdayLocked={yesterdayAlbumData?.locked ? yesterdayAlbumData : undefined}
                                 albumName={winningGuess.album_name}
                                 groupName={pixelatedGameData.group_name}
                                 coverPath={pixelatedGameData.cover_path}

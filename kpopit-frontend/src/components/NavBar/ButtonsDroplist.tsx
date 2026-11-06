@@ -1,82 +1,105 @@
-import DroplistBase from "./DroplistBase";
-import { useState, useRef } from "react";
-import { useLocation } from "react-router";
-import { ChevronDown } from "lucide-react";
-import type { DropLink } from "./navigation";
-import Img from "../Img";
-import IntentLink from "../Links/IntentLink";
+import { Link } from "react-router";
+import { Sparkles } from "lucide-react";
+import { cn } from "../../lib/utils";
+import { Dot, RowLink, SoonTag, Tile } from "./DroplistBase";
+import { MAJOR_PATCH, type NavMenu, type NavPage, type NavRow } from "./navigation";
 
 interface ButtonsDroplistProps {
-    buttonName: string;
-    items: DropLink[];
-    className?: string;
-    dropdownClassName?: string;
+    menu: NavMenu;
+    rows: NavRow[];
+    page: NavPage | null;
 }
 
-const ButtonsDroplist = (props: ButtonsDroplistProps) => {
-    const { buttonName, items, className, dropdownClassName } = props;
+/** A desktop dropdown: two columns of tilted rows that straighten and lift on hover and sink
+ *  into their depth on press. The About menu also shows each page's description. */
+const ButtonsDroplist = ({ menu, rows, page }: ButtonsDroplistProps) => {
+    const isAbout = menu === "about";
 
-    const [isOpen, setIsOpen] = useState<boolean>(false);
-
-    const containerRef = useRef<HTMLDivElement>(null);
-
-    const isGrid = buttonName === "Games";
-
-    const location = useLocation();
-    
     return (
-            <div className="relative" ref={containerRef}>
-                <button 
-                    className={`flex items-center justify-center rounded-3xl hover:cursor-pointer hover:scale-105 hover:bg-[#b43777] transition-all duration-300 transform-gpu ${className || ""}`}
-                    onClick={() => setIsOpen(!isOpen)}    
+        <div
+            role="menu"
+            className={cn(
+                "absolute top-14.5 z-40 grid grid-cols-2 gap-x-3 gap-y-3.25 box-border p-3",
+                "rounded-3xl border-2 border-(--ink) bg-(--menu-bg)",
+                "shadow-[5px_5px_0_0_#FF8AC4,5px_5px_0_2px_var(--ink)]",
+                "animate-[puffMenu_0.38s_var(--ease-settle)_both] transform-gpu",
+                isAbout ? "right-0 w-117.5 origin-[calc(100%-24px)_0]" : "-left-3 w-105 origin-[24px_0]",
+            )}
+        >
+            {rows.map((row, index) => {
+                const isCurrent = row.id === page;
+                const isWip = !!row.wip;
+
+                return (
+                    <RowLink
+                        key={row.id}
+                        row={row}
+                        role="menuitem"
+                        className={cn(
+                            "pp-focus group relative box-border flex items-center gap-3 overflow-hidden pr-3 pl-2.5",
+                            "rounded-2xl border-2 border-(--ink) text-(--chip-ink) no-underline",
+                            "transition-[translate,rotate,background-color,box-shadow] duration-450 ease-(--ease-settle) transform-gpu",
+                            index % 2 ? "rotate-[0.6deg]" : "rotate-[-0.6deg]",
+                            isAbout ? "min-h-17.5 py-2.5" : "h-17.5",
+                            isCurrent
+                                ? "bg-(--cur-bg) shadow-[3px_4px_0_0_#FF8AC4,3px_4px_0_2px_var(--ink)] pressed:shadow-[0_0_0_0_#FF8AC4,0_0_0_2px_var(--ink)]"
+                                : "bg-(--chip) shadow-[2px_3px_0_var(--ctl-off),var(--in)] pressed:shadow-[0_0_0_var(--ctl-off),var(--in)]",
+                            !isCurrent && !isWip && "hover:bg-(--chip-hover)",
+                            !isWip && "hover:-translate-y-0.5 hover:rotate-0 pressed:translate-x-0.5 pressed:translate-y-0.75 pressed:rotate-0 pressed:duration-180",
+                            isWip && "opacity-60 cursor-default",
+                        )}
                     >
-                    <span className="flex flex-row text-white max-xxs:text-[14px] xxs:text-[14px] xs:text-[14px] sm:text-base gap-1 sm:gap-1.5 text-center items-center justify-center">{buttonName} <ChevronDown className={`w-3.5 h-3.5 sm:w-4.5 sm:h-4.5 transition-all duration-300 transform-gpu ${isOpen ? "rotate-180" : ""}`} /></span>
-                </button>
+                        <Tile row={row} size="lg" animated={!isWip} />
 
-                <DroplistBase isOpen={isOpen} onClose={() => setIsOpen(false)} containerRef={containerRef} className={`${isGrid ? "max-xxs:w-45 xxs:w-55 xm:w-65 sm:w-80 lg:w-80 xl:w-90 2xl:w-100" : "w-50"} h-auto`}>
-                    <div className={`flex ${isGrid ? "grid grid-cols-1 xl:grid-cols-2" : "flex flex-col"} gap-2 p-2`}>
-                        {items.map((item, index) => { 
-                            const isPath = location.pathname.includes(item.path);
-                            const isLastOdd = isGrid && items.length % 2 !== 0 &&  index === items.length - 1;
+                        <span className="flex-1 min-w-0 flex flex-col gap-0.75">
+                            <span
+                                className={cn(
+                                    "flex items-center gap-2 font-bold whitespace-nowrap",
+                                    isAbout ? "text-base leading-[1.1]" : "text-[17px] leading-none",
+                                )}
+                            >
+                                {isCurrent && <Dot />}
+                                {row.label}
+                            </span>
 
-                            if (item.isWip) {
-                                {/* WIP Item */}
-                                return (
-                                    <div
-                                        key={item.path}
-                                        className={`relative flex w-full items-center text-white/40 max-xxs:text-[14px] xxs:text-[14px] xs:text-[14px] sm:text-base rounded-xl h-15 sm:h-17 px-2 sm:px-4 gap-4 sm:gap-4 
-                                        hover:bg-neon-pink/20 cursor-default select-none ${dropdownClassName || ""}
-                                        ${isPath ? "bg-white/10" : ""} ${isLastOdd ? "xl:col-span-2 justify-center" : ""}`}>
-                                            {item.icon && <Img src={item.icon} alt={`${item.label} icon`} className="grayscale w-9 h-9 sm:w-10 sm:h-10" />}
-                                            <span className="italic">{item.label}</span>
-                                        </div>
-                                );
-                            }
-                            {/* Regular Item */}
-                            return (
-                                <IntentLink
-                                    key={item.path}
-                                    to={item.path}
-                                    onIntent={item.onIntent}
-                                    className={`relative flex w-full items-center text-white max-xxs:text-[14px] xxs:text-base xs:text-base xm:text-lg 2xl:text-xl rounded-xl h-15 sm:h-17 px-4 gap-2 hover:bg-neon-pink/80 
-                                    transition-[flex,background-color,transform]  ${dropdownClassName || ""} 
-                                    ${isPath ? "bg-white/10" : ""} ${isLastOdd ? "xl:col-span-2 xl:justify-center" : ""}`}
-                                    onClick={() => setIsOpen(false)}
-                                    >
-                                    {item.icon && <Img src={item.icon} alt={`${item.label} icon`} className="w-8 h-8 sm:w-10 sm:h-10" />}
-                                    <span className="font-normal">
-                                        {isPath && (
-                                        <span className="text-neon-pink [text-shadow:1px_1px_10px_#FF3399,1px_1px_10px_#FF3399] pr-1">• </span>
-                                        )}
-                                            <span className="[text-shadow:1.2px_1.6px_2.0px_rgba(255,51,153,1)]">{item.label}</span>
-                                    </span>
-                                </IntentLink>
-                            );
-                        })}
-                    </div>
-                </DroplistBase>
-            </div>
-    )
-}
+                            {isAbout && row.description && (
+                                <span className="font-medium text-xs leading-[1.3] text-(--muted)">{row.description}</span>
+                            )}
+                        </span>
+
+                        {isWip && <SoonTag />}
+                    </RowLink>
+                );
+            })}
+
+            {isAbout && MAJOR_PATCH.show && (
+                <Link
+                    to={MAJOR_PATCH.href}
+                    role="menuitem"
+                    className={cn(
+                        "pp-focus group col-span-2 mt-0.75 box-border flex items-center gap-3 h-15 pr-3.5 pl-2.5",
+                        "rounded-2xl border-2 border-[#1A1418] bg-[#FF8AC4] text-[#1A1418] no-underline",
+                        "shadow-[2px_3px_0_#1A1418,inset_0_2px_0_rgba(255,255,255,.55),inset_0_-3px_0_rgba(198,35,104,.22)]",
+                        "transition-[translate,box-shadow] duration-450 ease-(--ease-settle) transform-gpu",
+                        "hover:-translate-y-0.5 pressed:translate-x-0.5 pressed:translate-y-0.75 pressed:duration-180",
+                    )}
+                >
+                    <span className="flex-none grid place-items-center size-10 rounded-xl border-2 border-[#1A1418] bg-[#FFFDFA]">
+                        <Sparkles className="size-5" fill="#FF3399" stroke="#1A1418" strokeWidth={2} aria-hidden />
+                    </span>
+
+                    <span className="flex-1 flex flex-col gap-0.5">
+                        <span className="font-bold text-base leading-[1.1]">{`${MAJOR_PATCH.name} is here`}</span>
+                        <span className="font-medium text-xs">{MAJOR_PATCH.tagline}</span>
+                    </span>
+
+                    <span className="px-2.25 py-0.75 rounded-full border-[1.5px] border-[#1A1418] bg-[#FFFDFA] rotate-4 font-bold text-[10px] tracking-[.08em]">
+                        NEW
+                    </span>
+                </Link>
+            )}
+        </div>
+    );
+};
 
 export default ButtonsDroplist;

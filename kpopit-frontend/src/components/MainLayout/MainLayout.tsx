@@ -1,11 +1,13 @@
 import { useEffect, useState } from "react";
-import { Outlet } from "react-router";
+import { Outlet, useMatches } from "react-router";
 import NavBar from "../NavBar/NavBar";
 import Footer from "../Footer/Footer";
 import { Link } from "react-router";
 import { getUserAnalytics } from "../../services/api";
 import GlobalNotices from "../GlobalNotices/GlobalNotices";
 import { useHydrated } from "../../hooks/useHydrated";
+import { useFeatures } from "../../hooks/useFeatures";
+import type { Features } from "../../utils/features";
 
 const MainLayout = () => {
     useEffect(() => {
@@ -29,9 +31,24 @@ const MainLayout = () => {
         sessionStorage.setItem('kpopit_notice_closed', 'true');
     }
 
+    // Puff Pop pages (route handle { puff: true }, or a feature flag's name for pages that are
+    // Puff Pop only while it is on) paint their own ground and follow the saved theme; the older
+    // pages keep their dark look with the navbar forced to night.
+    const { features } = useFeatures();
+    const matches = useMatches();
+    const puff = matches.some((match) => {
+        const flag = (match.handle as { puff?: boolean | keyof Features } | undefined)?.puff;
+        return flag === true || (typeof flag === "string" && features[flag]);
+    });
+    // An old page with a light look (Pixelated) keeps the navbar in Day until it is redesigned.
+    const navTheme = matches.map((match) => (match.handle as { navTheme?: "day" } | undefined)?.navTheme).find(Boolean);
+
     return (
-        <div className="min-h-screen flex flex-col bg-transparent text-foreground selection:bg-pink-800">
-            <NavBar />
+        // The page ground (and its dots) is painted once here, so it runs under the navbar and the
+        // footer too; pages draw on top of it instead of painting their own.
+        <div className={`relative isolate min-h-screen flex flex-col text-foreground selection:bg-pink-800 ${puff ? "bg-(--ground) transition-colors duration-300" : "bg-transparent"}`}>
+            {puff && <div aria-hidden className="absolute inset-0 -z-10 pointer-events-none bg-[radial-gradient(circle,var(--dot)_1.4px,transparent_1.8px)] bg-size-[19px_19px]" />}
+            <NavBar forceTheme={puff ? undefined : navTheme ?? "night"} />
             
             {/* Notices */}
             {import.meta.env.VITE_GLOBAL_NOTICE === "true" && 
@@ -51,7 +68,7 @@ const MainLayout = () => {
                 </GlobalNotices>
             }
 
-            <main className="flex-1 w-full px-2 sm:px-4 lg:px-4">
+            <main className={puff ? "flex-1 w-full flex flex-col" : "flex-1 w-full px-2 sm:px-4 lg:px-4"}>
                 <Outlet />
             </main>
 

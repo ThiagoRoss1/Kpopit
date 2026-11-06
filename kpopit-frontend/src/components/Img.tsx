@@ -9,6 +9,7 @@ type ImgProps = ImgHTMLAttributes<HTMLImageElement> & {
 export default function Img({ priority = false, loading, decoding, fetchPriority, ...props }: ImgProps) {
     return (
         <img
+            draggable={false}
             loading={loading ?? (priority ? "eager" : "lazy")}
             decoding={decoding ?? "async"}
             fetchPriority={fetchPriority ?? (priority ? "high" : undefined)}

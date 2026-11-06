@@ -1,4 +1,5 @@
 from flask import Blueprint, jsonify
+from services.features import public_features
 from services.gamemode_service import GameModeService
 from services.get_db import get_db
 from utils.dates import get_reset_countdown
@@ -21,3 +22,10 @@ def get_game_modes_count():
 def get_reset_timer():
     """Return the time remaining until the next daily idol reset"""
     return jsonify(get_reset_countdown())
+
+# Which optional features are on, so the frontend renders only their pages and links
+@general_bp.route("/features", methods=["GET"])
+def get_features():
+    response = jsonify(public_features())
+    response.headers["Cache-Control"] = "public, max-age=60"
+    return response

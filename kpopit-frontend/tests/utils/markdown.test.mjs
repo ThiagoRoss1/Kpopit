@@ -3,24 +3,25 @@ import assert from 'node:assert/strict';
 import fs from 'node:fs';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
-import { isAllowedImage, loadPosts, parseFrontmatter, renderMarkdown } from '../../src/utils/markdown.ts';
+import { isAllowedImage, loadPost, loadPosts, parseFrontmatter, readMinutes, renderMarkdown } from '../../src/utils/markdown.ts';
 import { postImageUrl } from '../../src/utils/posts.ts';
 
 const FRONTEND = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '../..');
-const CHANGELOG = path.join(FRONTEND, 'content/changelog');
+const BLOG = path.join(FRONTEND, 'content/blog');
 const BUCKET = 'https://images.example.com';
 
 const post = (fields, body = 'Body text') =>
     `---\n${Object.entries(fields).map(([k, v]) => `${k}: ${v}`).join('\n')}\n---\n${body}`;
 const FIELDS = {
     title: '"Hello"', date: '2026-10-23', description: 'A post',
-    image: '/blog/hello/thumb.png', imageAlt: 'A thumbnail',
+    image: '/blog/hello/thumb.png', imageAlt: 'A thumbnail', tag: 'Dev log',
 };
 
-test('frontmatter gives title, date, description, image and imageAlt; the rest is the body', () => {
+test('frontmatter gives title, date, description, image, imageAlt, tag and pinned; the rest is the body', () => {
     const { data, body } = parseFrontmatter(post(FIELDS));
     assert.deepEqual(data, {
         title: 'Hello', date: '2026-10-23', description: 'A post', image: '/blog/hello/thumb.png', imageAlt: 'A thumbnail',
+        tag: 'Dev log', pinned: false,
     });
     assert.equal(body, 'Body text');
 });
@@ -34,6 +35,23 @@ test('a post without a required field, with a bad date or a foreign thumbnail is
     assert.throws(() => parseFrontmatter(post({ ...FIELDS, date: '23/10' })), /YYYY-MM-DD/);
     assert.throws(() => parseFrontmatter(post({ ...FIELDS, image: 'https://other.example/x.png' }), { imageOrigin: BUCKET }), /image/);
     assert.equal(parseFrontmatter(post({ ...FIELDS, image: `${BUCKET}/x.png` }), { imageOrigin: BUCKET }).data.image, `${BUCKET}/x.png`);
+});
+
+test('tag must be a known one and pinned must be true or false (default false)', () => {
+    for (const tag of ['Update', 'Dev log', 'Thoughts', 'News']) assert.equal(parseFrontmatter(post({ ...FIELDS, tag })).data.tag, tag);
+    assert.throws(() => parseFrontmatter(post({ ...FIELDS, tag: 'update' })), /tag must be one of/);
+    assert.throws(() => parseFrontmatter(post({ ...FIELDS, tag: 'Gossip' })), /tag must be one of/);
+    assert.equal(parseFrontmatter(post({ ...FIELDS, pinned: 'true' })).data.pinned, true);
+    assert.equal(parseFrontmatter(post({ ...FIELDS, pinned: 'false' })).data.pinned, false);
+    assert.throws(() => parseFrontmatter(post({ ...FIELDS, pinned: 'yes' })), /pinned must be true or false/);
+});
+
+test('read time is words / 200 rounded up, at least a minute, ignoring Markdown syntax and URLs', () => {
+    assert.equal(readMinutes('one two'), 1);
+    assert.equal(readMinutes(Array(200).fill('word').join(' ')), 1);
+    assert.equal(readMinutes(Array(201).fill('word').join(' ')), 2);
+    assert.equal(readMinutes(`## ${Array(399).fill('w').join(' ')} [link](https://example.com/a/very/long/url)`), 2);
+    assert.equal(loadPost('/content/blog/x.md', post(FIELDS, Array(450).fill('w').join(' '))).readMinutes, 3);
 });
 
 test('images are allowed only from site paths or the image bucket', () => {
@@ -73,9 +91,9 @@ test('headings, paragraphs, lists, marks, code, links, blockquotes and tables re
 
 test('posts come newest first', () => {
     const posts = loadPosts({
-        '/content/changelog/a.md': post({ ...FIELDS, date: '2026-01-02' }),
-        '/content/changelog/b.md': post({ ...FIELDS, date: '2026-03-01' }),
-        '/content/changelog/c.md': post({ ...FIELDS, date: '2025-12-31' }),
+        '/content/blog/a.md': post({ ...FIELDS, date: '2026-01-02' }),
+        '/content/blog/b.md': post({ ...FIELDS, date: '2026-03-01' }),
+        '/content/blog/c.md': post({ ...FIELDS, date: '2025-12-31' }),
     });
     assert.deepEqual(posts.map((p) => p.slug), ['b', 'a', 'c']);
 });
@@ -85,13 +103,30 @@ test('the post thumbnail becomes an absolute og:image URL', () => {
     assert.equal(postImageUrl({ image: `${BUCKET}/t.png` }), `${BUCKET}/t.png`);
 });
 
-test('the changelog posts in the repo parse and their thumbnails exist', () => {
-    const sources = Object.fromEntries(fs.readdirSync(CHANGELOG).filter((f) => f.endsWith('.md'))
-        .map((f) => [`/content/changelog/${f}`, fs.readFileSync(path.join(CHANGELOG, f), 'utf8')]));
+test('the blog posts in the repo parse and their thumbnails exist', () => {
+    const sources = Object.fromEntries(fs.readdirSync(BLOG).filter((f) => f.endsWith('.md'))
+        .map((f) => [`/content/blog/${f}`, fs.readFileSync(path.join(BLOG, f), 'utf8')]));
     const posts = loadPosts(sources);
     assert.ok(posts.length >= 1);
     for (const p of posts) {
         assert.ok(p.title && p.description && p.imageAlt && p.html.includes('<'));
-        assert.ok(fs.existsSync(path.join(FRONTEND, 'public', p.image)), p.image);
+        // Bucket images (cdn:) stay bucket paths without a bucket URL; site images must exist.
+        if (!p.image.startsWith('/images/')) assert.ok(fs.existsSync(path.join(FRONTEND, 'public', p.image)), p.image);
     }
+});
+
+test('cdn: images resolve to the image bucket, or stay bucket paths without one', () => {
+    const md = '---\ntitle: T\ndate: 2026-01-01\ndescription: D\nimage: cdn:/images/albums/a.webp\nimageAlt: A\ntag: Update\n---\n\n![x](cdn:/images/albums/b.webp)\n';
+    const withBucket = loadPost('/content/blog/2026-01-01-t.md', md, { imageOrigin: BUCKET });
+    assert.equal(withBucket.image, `${BUCKET}/images/albums/a.webp`);
+    assert.ok(withBucket.html.includes(`src="${BUCKET}/images/albums/b.webp"`));
+    const noBucket = loadPost('/content/blog/2026-01-01-t.md', md);
+    assert.equal(noBucket.image, '/images/albums/a.webp');
+});
+
+test('a paragraph that is only a link is a button, one that is only an image a captioned figure', () => {
+    const html = renderMarkdown('[How it works](/how-to-play)\n\n![A cover](/blog/a/b.png)\n\nText with [a link](/faq).');
+    assert.ok(html.includes('<p class="post-cta"><a href="/how-to-play">How it works<svg'));
+    assert.ok(html.includes('<figure><img src="/blog/a/b.png" alt="A cover" loading="lazy" draggable="false"><figcaption>A cover</figcaption></figure>'));
+    assert.ok(html.includes('<p>Text with <a href="/faq">a link</a>.</p>'));
 });

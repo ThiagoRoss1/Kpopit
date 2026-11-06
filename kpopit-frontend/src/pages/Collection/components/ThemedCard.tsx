@@ -19,7 +19,7 @@ function BookCover({ album }: { album: ThemedAlbumPreview }) {
     return (
         <div className="relative h-20.25 w-13.5 overflow-hidden rounded shadow-[0_10px_24px_-10px_rgba(0,0,0,0.5)]" style={{ background }}>
             <div className="absolute bottom-0 left-0 top-0 w-0.5 bg-linear-to-r from-white/28 to-transparent" />
-            <div className="absolute inset-0 flex items-center justify-center text-[10px] font-bold -tracking-[0.03em] text-white/90">
+            <div className="absolute inset-0 flex items-center justify-center text-[10px] font-bold tracking-[-0.03em] text-white/90">
                 {album.cap}
             </div>
         </div>
@@ -42,7 +42,7 @@ export function ThemedCard({ album, night }: { album: ThemedAlbumPreview; night:
 
                 <div className="min-w-0 flex-1">
                     <Cap className="text-[8px] text-neon-pink">{album.tag}</Cap>
-                    <p className={`mt-0.75 overflow-hidden text-ellipsis whitespace-nowrap text-lg font-bold leading-[1.05] ${night ? 'text-white' : 'text-ink'}`}>
+                    <p className={`mt-0.75 truncate text-lg font-bold leading-[1.05] ${night ? 'text-white' : 'text-ink'}`}>
                         {album.title}
                     </p>
                     {album.group && album.stickers !== undefined && (
@@ -58,7 +58,7 @@ export function ThemedCard({ album, night }: { album: ThemedAlbumPreview; night:
 
             <div className="mt-3 flex items-center justify-between gap-2">
                 <span className={`inline-flex items-center gap-1.5 font-mono text-[9px] tracking-[0.14em] ${night ? 'text-white/40' : 'text-[#9a8e83]'} uppercase`}>
-                    <Lock className={`w-3 h-3 ${night ? 'text-white/40' : 'text-[#9a8e83]'}`} />
+                    <Lock className={`size-3 ${night ? 'text-white/40' : 'text-[#9a8e83]'}`} />
                     Coming Soon
                 </span>
             </div>

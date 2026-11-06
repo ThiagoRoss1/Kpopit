@@ -17,7 +17,14 @@ const R2_VARS = [
 function localDbUrl() {
   const url = process.env.E2E_DB_URL ?? process.env.DB_URL;
   if (!url) throw new Error('Set E2E_DB_URL to a local test database; no .env files are read.');
-  if (!['localhost', '127.0.0.1', '[::1]'].includes(new URL(url).hostname)) {
+  let hostname;
+  try {
+    hostname = new URL(url).hostname;
+  } catch {
+    // The value itself may hold credentials: name the variable, never echo it.
+    throw new Error('E2E_DB_URL is not a valid URL (expected postgresql://localhost/<db>).');
+  }
+  if (!['localhost', '127.0.0.1', '[::1]'].includes(hostname)) {
     throw new Error('Lighthouse only connects to a local database.');
   }
   return url;

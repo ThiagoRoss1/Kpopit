@@ -7,17 +7,17 @@ const MaintenanceCollection = () => {
 
     const faqs = [
         {
-            icon: <ShieldCheck className="w-5 h-5 text-neon-pink shrink-0" />,
+            icon: <ShieldCheck className="size-5 text-neon-pink shrink-0" />,
             q: "Will I lose my stats or streaks?",
             a: "No. Nothing gets deleted — we're only adding. Every guess, streak and daily record stays exactly where it is.",
         },
         {
-            icon: <Sparkles className="w-5 h-5 text-neon-pink shrink-0" />,
+            icon: <Sparkles className="size-5 text-neon-pink shrink-0" />,
             q: "What do I actually get?",
             a: "A collectible card for every idol you've already guessed right in Classic or Blurry. Win the same idol again and the card levels up.",
         },
         {
-            icon: <RefreshCw className="w-5 h-5 text-neon-pink shrink-0" />,
+            icon: <RefreshCw className="size-5 text-neon-pink shrink-0" />,
             q: "Do I need to do anything?",
             a: "Nope. Just come back and refresh in a few minutes — your album will be waiting, already filled in.",
         },
@@ -35,18 +35,18 @@ const MaintenanceCollection = () => {
                     Building your album 📸
                 </h1>
 
-                <p className="max-w-md text-sm sm:text-lg font-medium text-gray-300 leading-relaxed">
+                <p className="max-w-md text-sm/relaxed sm:text-lg font-medium text-gray-300">
                     KpopIt is launching <span className="text-white font-semibold">Collections</span> — a sticker album that turns your daily wins into cards you can keep.
                 </p>
             </div>
 
             {/* ETA pill */}
             <div className="flex items-center gap-2.5 px-5 py-2.5 rounded-full bg-[#111111] border-2 border-neon-pink shadow-[4px_4px_0px_rgba(255,51,153,0.25)]">
-                <span className="relative flex h-2.5 w-2.5">
-                    <span className="absolute inline-flex h-full w-full rounded-full bg-neon-pink opacity-75 animate-ping" />
-                    <span className="relative inline-flex h-2.5 w-2.5 rounded-full bg-neon-pink" />
+                <span className="relative flex size-2.5">
+                    <span className="absolute inline-flex size-full rounded-full bg-neon-pink opacity-75 animate-ping" />
+                    <span className="relative inline-flex size-2.5 rounded-full bg-neon-pink" />
                 </span>
-                <Clock className="w-4 h-4 text-white" />
+                <Clock className="size-4 text-white" />
                 <span className="text-sm sm:text-base font-semibold text-white">
                     Back in ~10–20 minutes
                 </span>
@@ -58,7 +58,7 @@ const MaintenanceCollection = () => {
                     <Img
                         src={HANNI_GIF}
                         alt="Hanni"
-                        className="w-28 h-28 sm:w-40 sm:h-40 object-cover rounded-sm"
+                        className="size-28 sm:size-40 object-cover rounded-sm"
                     />
                     <figcaption className="mt-1.5 text-center text-[11px] sm:text-sm font-semibold text-[#111111]">
                         sorting cards…
@@ -69,7 +69,7 @@ const MaintenanceCollection = () => {
                     <Img
                         src={HAERIN_GIF}
                         alt="Haerin"
-                        className="w-28 h-28 sm:w-40 sm:h-40 object-cover rounded-sm"
+                        className="size-28 sm:size-40 object-cover rounded-sm"
                     />
                     <figcaption className="mt-1.5 text-center text-[11px] sm:text-sm font-semibold text-[#111111]">
                         almost done!
@@ -80,12 +80,12 @@ const MaintenanceCollection = () => {
             {/* What's happening */}
             <div className="w-full text-left flex flex-col gap-3 p-5 sm:p-6 rounded-2xl bg-[#111111] border-2 border-[#2a2a2a] shadow-[6px_6px_0px_rgba(255,51,153,0.15)]">
                 <div className="flex items-center gap-2.5">
-                    <Layers className="w-5 h-5 text-neon-pink" />
+                    <Layers className="size-5 text-neon-pink" />
                     <h2 className="text-base sm:text-xl font-bold text-white">
                         What's happening right now
                     </h2>
                 </div>
-                <p className="text-sm sm:text-base font-medium text-gray-300 leading-relaxed">
+                <p className="text-sm/relaxed sm:text-base font-medium text-gray-300">
                     We're replaying <span className="text-white font-semibold">every past Classic &amp; Blurry win</span> to mint the cards you've already earned. It's a one-time step, so your album starts full instead of empty — that's why the games are paused for a few minutes.
                 </p>
             </div>

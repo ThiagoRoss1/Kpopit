@@ -72,7 +72,7 @@ const EditProfileModal = ({ isOpen, onClose, title, children }: EditProfileModal
                                     text-white/70 hover:text-white hover:bg-white/5 hover:border-neon-pink
                                     hover:cursor-pointer transition-colors duration-300"
                             >
-                                <X className="w-5 h-5" />
+                                <X className="size-5" />
                             </button>
                         </header>
 

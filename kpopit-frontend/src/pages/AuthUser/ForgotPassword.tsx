@@ -56,12 +56,12 @@ const ForgotPassword = () => {
             <div className="relative flex flex-col items-center justify-center min-h-full w-full">
                 <div className="relative z-10 flex flex-col items-center justify-center w-full px-2 sxs:px-3 sm:px-4 pt-15 pb-8">
                     <div className="relative w-full max-w-120">
-                        <div className="absolute inset-0 z-0 bg-ink border border-solid border-neon-pink/15 rounded-[40px] modal-outer-shadow translate-x-0.75 translate-y-0.75 rotate-[1.5deg] transform-gpu" />
+                        <div className="absolute inset-0 z-0 bg-ink border border-solid border-neon-pink/15 rounded-[40px] modal-outer-shadow translate-0.75 rotate-[1.5deg] transform-gpu" />
 
                         <div className="relative z-10 flex flex-col bg-[#111111] border-4 border-neon-pink rounded-[40px] p-5 sxs:p-6 sm:p-8 modal-inner-shadow">
 
                             <div className="mb-6 text-center">
-                                <h1 className="flex flex-col text-4xl sxs:text-[42px] font-sans font-black uppercase leading-tight">
+                                <h1 className="flex flex-col text-4xl/tight sxs:text-[42px] font-sans font-black uppercase">
                                     <span className="text-white">Forgot your</span>
                                     <span className="text-neon-pink">Password?</span>
                                 </h1>
@@ -73,8 +73,8 @@ const ForgotPassword = () => {
                             {submitted ? (
                                 <div className="flex flex-col gap-6">
                                     <div className="flex flex-col items-center gap-3 px-2 py-1 text-center">
-                                        <CheckCircle className="w-12 h-12 text-neon-pink" />
-                                        <span className="text-sm text-white/80 font-bold leading-relaxed">
+                                        <CheckCircle className="size-12 text-neon-pink" />
+                                        <span className="text-sm/relaxed text-white/80 font-bold">
                                             If an account with that email exists, a reset link has been sent.
                                         </span>
                                         <p className="text-[11px] text-white/40 font-bold uppercase tracking-widest">
@@ -102,7 +102,7 @@ const ForgotPassword = () => {
                                         
                                         <div className="neo-input-modal relative h-14 rounded-2xl overflow-hidden">
                                             <Mail
-                                                className={`absolute left-4 top-1/2 w-4 h-4 -translate-y-1/2 transform-gpu transition-colors duration-200 ${email.length > 0 ? "text-white" : "text-neutral-600"}`}
+                                                className={`absolute left-4 top-1/2 size-4 -translate-y-1/2 transform-gpu transition-colors duration-200 ${email.length > 0 ? "text-white" : "text-neutral-600"}`}
                                             />
                                             <input
                                                 type="email"
@@ -111,7 +111,7 @@ const ForgotPassword = () => {
                                                 onChange={(e) => setEmail(e.target.value)}
                                                 placeholder="bias@example.com"
                                                 autoComplete="email"
-                                                className="w-full h-full pl-11 pr-4 bg-ink text-sm font-bold text-white placeholder:text-neutral-700 focus:outline-none"
+                                                className="size-full pl-11 pr-4 bg-ink text-sm font-bold text-white placeholder:text-neutral-700 focus:outline-none"
                                             />
                                         </div>
                                     </div>

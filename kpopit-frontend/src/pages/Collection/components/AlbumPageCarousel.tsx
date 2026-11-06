@@ -181,7 +181,7 @@ export default function AlbumPageCarousel({ openings, shown, onJump, onStep, can
                     data-carousel-rail
                     {...dragHandlers}
                     className="cursor-pointer overflow-x-auto px-1.5 pt-2 pb-6.5 -mb-4.5 select-none
-                    active:cursor-pointer [scrollbar-width:none] [&::-webkit-scrollbar]:hidden"
+                    active:cursor-pointer scrollbar-none [&::-webkit-scrollbar]:hidden"
                 >
                     <div className="flex min-w-full items-center justify-center-safe gap-2.5">
                         {openings.map((opening) => (

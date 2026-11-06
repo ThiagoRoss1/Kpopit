@@ -4,6 +4,7 @@ import { useEffect, useState, useRef } from "react";
 import type { GuessedIdolData, FeedbackData, GuessResponse, UserStats } from "../../../interfaces/gameInterfaces"
 import VictoryCardBigBlurry from "./VictoryCardBigBlurry";
 import VictoryCardSmall from "../../VictoryCard/VictoryCardSmall";
+import type { YesterdayLocked } from "../../../interfaces/gameInterfaces";
 
 interface GameMode {
     id: string;
@@ -14,6 +15,7 @@ interface GameMode {
 }
 
 interface BlurryVictoryCardHudProps {
+    yesterdayLocked?: YesterdayLocked;
     cardInfo: GuessedIdolData;
     guesses: GuessResponse<Partial<FeedbackData>>[];
     attempts: number;
@@ -63,6 +65,7 @@ const VictoryCardHudBlurry = (props: BlurryVictoryCardHudProps) => {
             <div ref={bigCardRef}>
                 <div className="bigCardEntry">
                     <VictoryCardBigBlurry 
+                        yesterdayLocked={props.yesterdayLocked}
                         cardInfo={cardInfo}
                         attempts={attempts}
                         idol_blur_image={idol_blur_image}

@@ -14,7 +14,7 @@ BIAS_EXISTS_SQL = {
     "bias_group_id": "SELECT 1 FROM groups WHERE id = %s AND is_published = TRUE",
 }
 MATCH_HISTORY_LIMIT = 30
-ACTIVITY_DAYS = 365
+ACTIVITY_DAYS = 18 * 7
 
 
 class ProfileError(Exception):
@@ -86,29 +86,40 @@ class ProfileService:
         )
         return cursor.fetchone()
 
-    def public_profile(self, cursor, owner: dict, today: date) -> dict:
-        """What the owner's visibility allows; a private profile says only that it exists, which
-        /auth/check-username already reveals."""
-        if not owner["is_public"]:
-            return {"username": owner["username"], "is_private": True}
+    def viewer_id(self, cursor, auth: dict, user_token: str | None) -> int | None:
+        """Who is looking: the account behind a JWT, else the anonymous player behind X-User-Token."""
+        if auth.get("source") == "jwt":
+            return auth["user_id"]
+        if user_token:
+            cursor.execute("SELECT id FROM users WHERE token = %s", (user_token,))
+            row = cursor.fetchone()
+            return row["id"] if row else None
+        return None
 
-        profile = {
+    def can_view(self, owner: dict, viewer_id: int | None) -> bool:
+        return bool(owner["is_public"]) or owner["id"] == viewer_id
+
+    def public_profile(self, cursor, owner: dict, today: date, viewer_id: int | None, idol_xp: dict | None) -> dict:
+        """What the owner's visibility allows the viewer to see. A private profile says only that it
+        exists (which /auth/check-username already reveals); the owner always sees everything."""
+        is_owner = owner["id"] == viewer_id
+        if not self.can_view(owner, viewer_id):
+            return {"username": owner["username"], "is_private": True}
+        show_activity = is_owner or bool(owner["show_activity"])
+        return {
             "username": owner["username"],
             "is_private": False,
+            "is_owner": is_owner,
+            "today": today.isoformat(),
             "display_name": owner["display_name"],
             "avatar_url": owner["avatar_url"],
             "member_since": owner["created_at"].date().isoformat() if owner.get("created_at") else None,
             "bias_idol": self._bias_idol(cursor, owner["bias_idol_id"]),
             "bias_group": self._bias_group(cursor, owner["bias_group_id"]),
-            "stats": self._stats(cursor, owner["id"]),
-            "match_history": None,
-            "activity": None,
+            "history_visible": is_owner or bool(owner["show_match_history"]),
+            "activity": self._activity(cursor, owner["id"], today) if show_activity else None,
+            "idol_xp": idol_xp,
         }
-        if owner["show_match_history"]:
-            profile["match_history"] = self._match_history(cursor, owner["id"], today)
-        if owner["show_activity"]:
-            profile["activity"] = self._activity(cursor, owner["id"], today)
-        return profile
 
     def _bias_idol(self, cursor, idol_id):
         if idol_id is None:
@@ -124,35 +135,57 @@ class ProfileService:
         row = cursor.fetchone()
         return dict(row) if row else None
 
-    def _stats(self, cursor, user_id: int) -> list[dict]:
-        cursor.execute(
-            """
-                SELECT gamemode_id, current_streak, max_streak, wins_count, average_guesses, one_shot_wins
-                FROM user_history WHERE user_id = %s ORDER BY gamemode_id
-            """, (user_id,)
-        )
-        return [{**row, "average_guesses": float(row["average_guesses"] or 0)} for row in cursor.fetchall()]
-
-    def _match_history(self, cursor, user_id: int, today: date) -> list[dict]:
-        cursor.execute(
-            """
-                SELECT date, gamemode_id, won, one_shot_win, guesses_count
-                FROM daily_user_history
-                WHERE user_id = %s AND date <= %s AND COALESCE(guesses_count, 0) > 0
-                ORDER BY date DESC, gamemode_id
-                LIMIT %s
-            """, (user_id, today, MATCH_HISTORY_LIMIT)
-        )
-        return [{**row, "date": row["date"].isoformat()} for row in cursor.fetchall()]
-
     def _activity(self, cursor, user_id: int, today: date) -> list[dict]:
-        """Activity heatmap: games and wins per day over the last year (backfill rows included)."""
+        """Heatmap of the last ACTIVITY_DAYS days: how many modes were played each day (0-3)."""
         cursor.execute(
             """
-                SELECT date, COUNT(*) AS games, COUNT(*) FILTER (WHERE won) AS wins
+                SELECT date, COUNT(DISTINCT gamemode_id) AS modes
                 FROM daily_user_history
                 WHERE user_id = %s AND date <= %s AND date > %s AND COALESCE(guesses_count, 0) > 0
                 GROUP BY date ORDER BY date
             """, (user_id, today, today - timedelta(days=ACTIVITY_DAYS))
         )
-        return [{"date": row["date"].isoformat(), "games": row["games"], "wins": row["wins"]} for row in cursor.fetchall()]
+        return [{"date": row["date"].isoformat(), "modes": row["modes"]} for row in cursor.fetchall()]
+
+    def history(self, cursor, owner_id: int, viewer_id: int | None, today: date, mode: int | None,
+                offset: int) -> dict:
+        """The owner's games, newest first. An entry carries its answer only when the viewer finished
+        that same day and mode (the owner included); otherwise it is locked: date, mode and Day N, and
+        nothing about the answer is sent."""
+        cursor.execute(
+            """
+                SELECT h.date, h.gamemode_id, h.won, h.guesses_count, h.is_calendar,
+                       (v.id IS NOT NULL) AS viewer_finished,
+                       CASE WHEN h.date >= first.first_day THEN h.date - first.first_day + 1 END AS day_number,
+                       COALESCE(al.name, i.artist_name) AS answer_name,
+                       COALESCE(al.cover_path, i.image_path) AS answer_image
+                FROM daily_user_history h
+                LEFT JOIN daily_user_history v
+                    ON v.user_id = %(viewer)s AND v.date = h.date AND v.gamemode_id = h.gamemode_id AND v.won = TRUE
+                LEFT JOIN (SELECT gamemode_id, MIN(pick_date) AS first_day FROM daily_picks GROUP BY gamemode_id) first
+                    ON first.gamemode_id = h.gamemode_id
+                LEFT JOIN daily_picks dp ON dp.pick_date = h.date AND dp.gamemode_id = h.gamemode_id
+                LEFT JOIN idols i ON i.id = dp.idol_id
+                LEFT JOIN albums al ON al.id = dp.album_id
+                WHERE h.user_id = %(owner)s AND h.date <= %(today)s AND COALESCE(h.guesses_count, 0) > 0
+                  AND (%(mode)s::int IS NULL OR h.gamemode_id = %(mode)s::int)
+                ORDER BY h.date DESC, h.gamemode_id
+                LIMIT %(limit)s OFFSET %(offset)s
+            """, {"viewer": viewer_id, "owner": owner_id, "today": today, "mode": mode,
+                  "limit": MATCH_HISTORY_LIMIT + 1, "offset": offset},
+        )
+        rows = cursor.fetchall()
+        entries = []
+        for row in rows[:MATCH_HISTORY_LIMIT]:
+            entry = {"date": row["date"].isoformat(), "gamemode_id": row["gamemode_id"], "day_number": row["day_number"]}
+            if row["viewer_finished"]:
+                entry.update(locked=False, won=row["won"], guesses=row["guesses_count"], is_calendar=row["is_calendar"],
+                             answer={"name": row["answer_name"], "image_path": row["answer_image"]})
+            elif owner_id == viewer_id:
+                # The owner's own unfinished day: the game, but not the answer they haven't found yet.
+                entry.update(locked=False, won=False, guesses=row["guesses_count"], is_calendar=row["is_calendar"],
+                             answer=None)
+            else:
+                entry["locked"] = True
+            entries.append(entry)
+        return {"entries": entries, "has_more": len(rows) > MATCH_HISTORY_LIMIT}

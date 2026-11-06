@@ -1,0 +1,31 @@
+/* ==========================================================================
+   404 page: the card's tiles pop in and its question mark wobbles.
+   ========================================================================== */
+
+@keyframes notFoundTilePop {
+    from {
+        opacity: 0;
+        scale: 0.4;
+    }
+}
+
+.not-found-tile-enter {
+    animation: notFoundTilePop 0.5s var(--ease-pop) backwards;
+}
+
+@keyframes notFoundWobble {
+    0%,
+    100% {
+        rotate: -4deg;
+    }
+
+    50% {
+        rotate: 4deg;
+        translate: 0 -6px;
+    }
+}
+
+.not-found-wobble {
+    display: inline-block;
+    animation: notFoundWobble 3.2s ease-in-out infinite;
+}

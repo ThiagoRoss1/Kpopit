@@ -27,3 +27,8 @@ test('skips the preview-build placeholder and escapes XML', () => {
     const xml = buildSitemap(['/idols/0/preview', "/a&b'"]);
     assert.deepEqual(locs(xml), ['https://kpopit.net/a&amp;b&apos;']);
 });
+
+test('never lists Idol XP, profiles, auth, admin or the Major Patch stub', () => {
+    const xml = buildSitemap(['/about', '/idol-xp', '/profile/thiago', '/login', '/major-patch', '/admin', '/calendar', '/blog/hello']);
+    assert.deepEqual(locs(xml), ['https://kpopit.net/about', 'https://kpopit.net/calendar', 'https://kpopit.net/blog/hello']);
+});

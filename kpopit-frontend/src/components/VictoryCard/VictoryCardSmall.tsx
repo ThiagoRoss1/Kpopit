@@ -115,15 +115,15 @@ const VictoryCardSmall = <T = FeedbackData, >(props: VictoryCardSmallProps<T>) =
                             
                 {/* Icons Container */}
                 <div className="relative w-full h-25 sm:h-25 mb-2">
-                    <div className="absolute flex items-center justify-center top-0 right-4 w-10 h-10 sm:w-10 sm:h-10 rounded-full bg-transparent mt-2.5">
-                        <button className="flex items-center justify-center hover:scale-115 w-full h-full transform duration-500 hover:brightness-110 transform-gpu hover:cursor-pointer" onClick={onClose}>
-                            <X size={20} color="white" strokeWidth={3} absoluteStrokeWidth className="w-5 h-5 sm:w-5 sm:h-5 opacity-50 hover:opacity-100 transform duration-500 transform-gpu" />
+                    <div className="absolute flex items-center justify-center top-0 right-4 size-10 sm:size-10 rounded-full bg-transparent mt-2.5">
+                        <button className="flex items-center justify-center hover:scale-115 size-full duration-500 hover:brightness-110 transform-gpu hover:cursor-pointer" onClick={onClose}>
+                            <X size={20} color="white" strokeWidth={3} absoluteStrokeWidth className="size-5 sm:size-5 opacity-50 hover:opacity-100 duration-500 transform-gpu" />
                         </button>
                     </div>
                     
-                    <div className="absolute flex items-center justify-center top-0 left-1/2 transform -translate-x-1/2 w-16 h-16 sm:w-16 sm:h-16 rounded-full mt-7.5">
+                    <div className="absolute flex items-center justify-center top-0 left-1/2 transform -translate-x-1/2 size-16 sm:size-16 rounded-full mt-7.5">
                         <div className="hover:scale-105 transform duration-1000">
-                            <Img src={trophyIcon} alt="Trophy" className="w-12 h-12 sm:w-12 sm:h-12" draggable={false}/>
+                            <Img src={trophyIcon} alt="Trophy" className="size-12 sm:size-12" draggable={false}/>
                         </div>
                         
                     </div>
@@ -139,7 +139,7 @@ const VictoryCardSmall = <T = FeedbackData, >(props: VictoryCardSmallProps<T>) =
                                 </span>
                                  <span className="ml-1 drop-shadow-lg">🎊</span>
                             </h2>
-                            <span className="font-semibold text-[18px] sm:text-[18px] leading-tight">
+                            <span className="font-semibold text-lg/tight sm:text-[18px]">
                                 <span 
                                 className="bg-white text-transparent bg-clip-text drop-shadow-xl/50">
                                     You guessed it in 
@@ -156,13 +156,13 @@ const VictoryCardSmall = <T = FeedbackData, >(props: VictoryCardSmallProps<T>) =
                         <div className={`relative flex items-center justify-center ${isOnMobile ? "bg-black/80" : "bg-black/70"} max-xxs:w-75 max-xxs:h-24 xxs:w-80 xxs:h-24 p-5 sm:w-80 sm:h-24 sm:p-5 rounded-[20px]
                         hover:scale-105 hover:bg-black hover:brightness-110 hover:cursor-default transform duration-300 transform-gpu`}> {/* Maybe shadow-2xl or lg */}
 
-                            <div className="absolute left-5 flex items-center justify-center h-20 w-20 sm:h-20 sm:w-20 bg-transparent rounded-[20px] hover:scale-110 hover:rotate-4 transition-transform duration-500 will-change-transform transform-gpu">
+                            <div className="absolute left-5 flex items-center justify-center size-20 sm:size-20 bg-transparent rounded-[20px] hover:scale-110 hover:rotate-4 transition-transform duration-500 will-change-transform transform-gpu">
                                 <Link
                                     to={`/idols/${cardInfo.idol_id}/${buildIdolSlug(cardInfo.artist_name, cardInfo.active_group)}`}>
                                     <Img 
                                         src={`${import.meta.env.VITE_IMAGE_BUCKET_URL}${cardInfo.image_path}?v=${cardInfo.image_version}`} 
                                         alt="Idol" 
-                                        className="w-20 h-20 sm:w-full sm:h-full rounded-[20px] object-cover object-top transform-gpu" 
+                                        className="size-20 sm:size-full rounded-[20px] object-cover object-top transform-gpu" 
                                         draggable={false} 
                                     />
                                 </Link>
@@ -172,7 +172,7 @@ const VictoryCardSmall = <T = FeedbackData, >(props: VictoryCardSmallProps<T>) =
                                 <p className="font-bold text-[20px] sm:text-[22px] bg-linear-to-b from-[#b43777] to-[#ce757a] shadow-2xl drop-shadow-2xl text-transparent bg-clip-text transform-gpu backface-visibility-hidden">
                                     {cardInfo.artist_name}
                                 </p>
-                                <p className="text-base sm:text-[16px] leading-tight bg-linear-to-b from-[#ce757a] to-white brightness-105 text-transparent bg-clip-text">
+                                <p className="text-base/tight sm:text-[16px] bg-linear-to-b from-[#ce757a] to-white brightness-105 text-transparent bg-clip-text">
                                     {cardInfo.groups && cardInfo.groups.length > 0 ? `(${cardInfo.groups.join(", ")})` : ""}
                                 </p>
                             </div>
@@ -247,17 +247,17 @@ const VictoryCardSmall = <T = FeedbackData, >(props: VictoryCardSmallProps<T>) =
                                 <button className={`relative left-0 items-center text-center bg-linear-to-r ${isOnMobile ? "from-black/90 to-black/50" : "from-black/90 to-black/30"} w-12 h-12 sm:w-12 sm:h-12 rounded-[20px] 
                                 hover:scale-110 hover:brightness-110 hover:cursor-pointer hover:rotate-3 hover:bg-black transform duration-300 transform-gpu`}
                                 onClick={() => shareOnTwitter(attempts, stats, userRank, userScore)}>
-                                    <div className="flex w-full h-full items-center justify-center text-center brightness-100 hover:brightness-110 transform duration-300">
-                                        <Img src={XLogo} alt="X" className="w-8 h-8 sm:w-9 sm:h-9" draggable={false} />
+                                    <div className="flex size-full items-center justify-center text-center brightness-100 hover:brightness-110 transform duration-300">
+                                        <Img src={XLogo} alt="X" className="size-8 sm:size-9" draggable={false} />
                                     </div>
                                 </button>
 
                                 <button className={`relative right-0 items-center text-center bg-linear-to-r ${isOnMobile ? "from-black/90 to-black/50" : "from-black/30 to-black/90"} w-12 h-12 sm:w-12 sm:h-12 rounded-[20px]
                                 hover:scale-110 hover:brightness-110 hover:cursor-pointer hover:-rotate-3 hover:bg-black transform duration-300 transform-gpu`}>
-                                    <div className="flex w-full h-full items-center justify-center text-center brightness-100 hover:brightness-110"
+                                    <div className="flex size-full items-center justify-center text-center brightness-100 hover:brightness-110"
                                     onClick={() => handleWip()}>
-                                        <Download size={30} color="#ce757a" className="w-8 h-8 sm:w-9 sm:h-9" />
-                                        {/* <Img src={InstagramLogo} alt="Insta" className="w-8 h-8 sm:w-9 sm:h-9" draggable={false} /> */}
+                                        <Download size={30} color="#ce757a" className="size-8 sm:size-9" />
+                                        {/* <Img src={InstagramLogo} alt="Insta" className="size-8 sm:size-9" draggable={false} /> */}
                                     </div>
                                 </button>
                                 <AnimatePresence>
@@ -286,10 +286,10 @@ const VictoryCardSmall = <T = FeedbackData, >(props: VictoryCardSmallProps<T>) =
                     {/* Next idol Container */}
                     <div className="flex w-full items-center justify-center h-5 sm:h-5">
                         <div className="flex flex-row items-center justify-center text-center w-48 h-5 sm:w-48 sm:h-5 gap-1 hover:cursor-default">
-                            <p className="text-base text-[16px] text-[#ce757a] brightness-105">
+                            <p className="text-base text-[#ce757a] brightness-105">
                                 Next idol in 
                             </p>
-                            <p className="text-base font-bold text-[16px] text-white brightness-105">
+                            <p className="text-base font-bold text-white brightness-105">
                                 {nextReset().formattedTime}
                             </p>
                         </div>

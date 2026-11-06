@@ -20,7 +20,7 @@ export const idolProfileQuery = (id: string) => queryOptions<IdolProfileData>({
 
 // Cached data at once; otherwise the page's prerendered .data file (snapshot), falling back to the
 // API for pages added after the build. A snapshot is marked stale so the page refreshes it quietly.
-async function load<T>(queryKey: QueryKey, snapshot: () => Promise<T>, fromApi: () => Promise<T>): Promise<T> {
+export async function loadWithSnapshot<T>(queryKey: QueryKey, snapshot: () => Promise<T>, fromApi: () => Promise<T>): Promise<T> {
     const client = getQueryClient();
     const cached = client.getQueryData<T>(queryKey);
     if (cached !== undefined) return cached;
@@ -53,11 +53,55 @@ async function load<T>(queryKey: QueryKey, snapshot: () => Promise<T>, fromApi: 
 }
 
 export const loadIdolsList = (snapshot: () => Promise<IdolsPageData[]>) =>
-    load(idolsListQuery.queryKey, snapshot, getIdolsPage);
+    loadWithSnapshot(idolsListQuery.queryKey, snapshot, getIdolsPage);
 
 export const loadIdolProfile = (id: string, snapshot: () => Promise<IdolProfileData>) =>
-    load(idolProfileQuery(id).queryKey, snapshot, () => getIdolInfo(Number(id)));
+    loadWithSnapshot(idolProfileQuery(id).queryKey, snapshot, () => getIdolInfo(Number(id)));
 
 // Link intent (hover, focus, touch): start the request so it is usually done before the click ends.
 export const prefetchIdolsList = () => void getQueryClient().prefetchQuery(idolsListQuery);
 export const prefetchIdolProfile = (id: string | number) => void getQueryClient().prefetchQuery(idolProfileQuery(String(id)));
+
+// The /idols filters live in the URL (?q=&group=&nat=&company=&sort=).
+export type IdolSort = "" | "az" | "group";
+export const IDOL_SORTS: Record<IdolSort, string> = { "": "Catalogue order", az: "A–Z", group: "Group" };
+export const SOLOIST = "Soloist";
+
+export interface IdolFilters {
+    q: string;
+    group: string;
+    nat: string;
+    company: string;
+    sort: IdolSort;
+}
+
+export function readIdolFilters(params: URLSearchParams): IdolFilters {
+    const sort = params.get("sort") ?? "";
+    return {
+        q: params.get("q") ?? "",
+        group: params.get("group") ?? "",
+        nat: params.get("nat") ?? "",
+        company: params.get("company") ?? "",
+        sort: (sort in IDOL_SORTS ? sort : "") as IdolSort,
+    };
+}
+
+export const groupLabel = (idol: IdolsPageData) => idol.group_name ?? SOLOIST;
+export const nationalities = (idol: IdolsPageData) => (idol.nationality ?? "").split(",").map((n) => n.trim()).filter(Boolean);
+
+/** The idols matching the filters, in the chosen order. A search puts names starting with it first. */
+export function filterIdols(idols: IdolsPageData[], f: IdolFilters): IdolsPageData[] {
+    const q = f.q.trim().toLowerCase();
+    const list = idols.filter((i) =>
+        (!q || `${i.artist_name} ${i.all_groups ?? ""} ${i.company_name ?? ""}`.toLowerCase().includes(q))
+        && (!f.group || groupLabel(i) === f.group)
+        && (!f.nat || nationalities(i).includes(f.nat))
+        && (!f.company || i.company_name === f.company));
+    if (f.sort === "az") return list.sort((a, b) => a.artist_name.localeCompare(b.artist_name));
+    if (f.sort === "group") return list.sort((a, b) => groupLabel(a).localeCompare(groupLabel(b)) || a.id - b.id);
+    if (q) {
+        const rank = (i: IdolsPageData) => (i.artist_name.toLowerCase().startsWith(q) ? 0 : i.artist_name.toLowerCase().includes(q) ? 1 : 2);
+        return list.sort((a, b) => rank(a) - rank(b) || a.artist_name.localeCompare(b.artist_name));
+    }
+    return list.sort((first, second) => first.id - second.id);
+}

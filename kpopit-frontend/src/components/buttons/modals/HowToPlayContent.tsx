@@ -44,17 +44,17 @@ const HowToPlayText = () => {
                         <span className="normal-font">The color of each tile changes depending on your guess:</span>            
                         <div className="flex flex-col items-start justify-center gap-2">
                             <div className="flex flex-row items-center gap-2">
-                                <div className="sm:w-12 sm:h-12 bg-[#4FFFB0] shadow-[0_0_10px_2px_rgba(79,255,176,0.15),0_0_10px_2px_rgba(79,255,176,0.15)] rounded-lg" />
+                                <div className="sm:size-12 bg-[#4FFFB0] shadow-[0_0_10px_2px_rgba(79,255,176,0.15),0_0_10px_2px_rgba(79,255,176,0.15)] rounded-lg" />
                                     <span className="font-semibold text-[#4FFFB0] text-shadow-2xs"> -{'>'} Correct</span>
                             </div>
 
                             <div className="flex flex-row items-center gap-2">
-                                <div className="sm:w-12 sm:h-12 bg-[#f3e563] shadow-[0_0_10px_2px_rgba(243,229,99,0.15),0_0_10px_2px_rgba(243,229,99,0.15)] rounded-lg" />
+                                <div className="sm:size-12 bg-[#f3e563] shadow-[0_0_10px_2px_rgba(243,229,99,0.15),0_0_10px_2px_rgba(243,229,99,0.15)] rounded-lg" />
                                     <span className="font-semibold text-[#f3e563] text-shadow-2xs"> -{'>'} Partially Correct</span>
                             </div>
 
                             <div className="flex flex-row items-center gap-2">
-                                <div className="sm:w-12 sm:h-12 bg-[#fd5c63] shadow-[0_0_10px_2px_rgba(253,92,99,0.15),0_0_10px_2px_rgba(253,92,99,0.15)] rounded-lg" />
+                                <div className="sm:size-12 bg-[#fd5c63] shadow-[0_0_10px_2px_rgba(253,92,99,0.15),0_0_10px_2px_rgba(253,92,99,0.15)] rounded-lg" />
                                     <span className="font-semibold text-[#fd5c63] text-shadow-2xs"> -{'>'} Incorrect</span>
                             </div>
                         </div>
@@ -66,8 +66,8 @@ const HowToPlayText = () => {
                         <span className="normal-font">The arrows indicate whether <b>today's idol</b> has higher or lower stats compared to your guess:</span>
                         <div className="flex flex-col items-start justify-center gap-2">
                             <div className="flex flex-row items-center gap-2">
-                                <div className="sm:w-12 sm:h-12 bg-[#fd5c63] shadow-[0_0_10px_2px_rgba(253,92,99,0.15),0_0_10px_2px_rgba(253,92,99,0.15)] rounded-lg">
-                                    <Img src={ArrowUp} alt="Arrow Up Icon" className="sm:w-12 sm:h-12 object-cover" draggable={false} />               
+                                <div className="sm:size-12 bg-[#fd5c63] shadow-[0_0_10px_2px_rgba(253,92,99,0.15),0_0_10px_2px_rgba(253,92,99,0.15)] rounded-lg">
+                                    <Img src={ArrowUp} alt="Arrow Up Icon" className="sm:size-12 object-cover" draggable={false} />               
                                 </div> 
                                     <span className="font-semibold text-[#fd5c63] text-shadow-2xs"> -{'>'} Up arrow means today's idol is <b>above</b> - 
                                     younger, taller or debuted recently</span>
@@ -75,8 +75,8 @@ const HowToPlayText = () => {
 
 
                             <div className="flex flex-row items-center gap-2">
-                                <div className="sm:w-12 sm:h-12 bg-[#fd5c63] shadow-[0_0_10px_2px_rgba(253,92,99,0.15),0_0_10px_2px_rgba(253,92,99,0.15)] rounded-lg">
-                                    <Img src={ArrowDown} alt="Arrow Down Icon" className="sm:w-12 sm:h-12 object-cover" draggable={false} />               
+                                <div className="sm:size-12 bg-[#fd5c63] shadow-[0_0_10px_2px_rgba(253,92,99,0.15),0_0_10px_2px_rgba(253,92,99,0.15)] rounded-lg">
+                                    <Img src={ArrowDown} alt="Arrow Down Icon" className="sm:size-12 object-cover" draggable={false} />               
                                 </div> 
                                     <span className="font-semibold text-[#fd5c63] text-shadow-2xs"> -{'>'} Down arrow means today's idol is <b>below</b> - 
                                     older, shorter or debuted earlier</span>

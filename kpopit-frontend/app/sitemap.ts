@@ -7,10 +7,14 @@ const escapeXml = (value: string) =>
 /** Daily games change every day; the rest changes rarely. */
 const changefreq = (path: string) => (["/", "/classic", "/blurry", "/pixelated"].includes(path) ? "daily" : "weekly");
 
+// Private, per-player or placeholder pages never go in the sitemap, even if a path list holds them.
+const NEVER = ["/idol-xp", "/profile", "/login", "/register", "/major-patch", "/admin", "/forgot-password", "/reset-password", "/verify-email", "/confirm-email-change", "/revert-email-change"];
+const excluded = (path: string) => NEVER.some((prefix) => path === prefix || path.startsWith(`${prefix}/`));
+
 // No <lastmod>: the only date at hand is the build date, which would mark every page as changed on each deploy.
 export function buildSitemap(paths: string[]): string {
   const urls = [...new Set(paths)]
-    .filter((path) => path.startsWith("/") && !path.endsWith("/preview"))
+    .filter((path) => path.startsWith("/") && !path.endsWith("/preview") && !excluded(path))
     .map((path) => [
       "  <url>",
       `    <loc>${escapeXml(`${SITE_URL}${path}`)}</loc>`,

@@ -101,6 +101,8 @@ export interface YesterdayLocked {
   locked: true;
   play_in_calendar: true;
   yesterdays_pick_date: string;
+  /** Day N of the mode, for the calendar link. */
+  day_number: number | null;
 }
 
 export interface YesterdayIdolPick {
@@ -193,6 +195,8 @@ export interface IdolsPageData extends Pick<IdolListItem,
     "is_former_group": boolean;
     "is_published": boolean;
     "all_groups": string;
+    /** Comma-separated, e.g. "South Korean, American". */
+    "nationality": string | null;
   }
   
 export interface IdolsPageIdolInfo extends Pick<IdolListItem,
@@ -234,6 +238,7 @@ export interface IdolProfileData {
   idol_career: {
     fandom_name: string | null;
     group_name: string | null;
+    group_hangul?: string | null;
     is_former_group: boolean;
     idol_debut_year: number;
     group_companies: Company[];
@@ -312,4 +317,102 @@ export interface RestoreSessionResponse {
   blurry: BlurryGameState | null;
   pixelated: PixelatedGameState | null;
   server_date: string;
+}
+
+// /albums and /albums/:id/:slug (published albums only).
+export interface AlbumsPageItem {
+  id: number;
+  name: string;
+  type: string;
+  language: string | null;
+  cover_path: string;
+  release_year: number;
+  group_id: number;
+  soloist_id: number | null;
+  artist_name: string;
+}
+
+export interface AlbumDiscographyItem {
+  id: number;
+  name: string;
+  type: string;
+  language: string | null;
+  cover_path: string;
+  release_year: number;
+}
+
+export interface AlbumPageData {
+  id: number;
+  name: string;
+  type: string;
+  language: string | null;
+  cover_path: string;
+  palette: unknown;
+  release_date: string;
+  artist: {
+    name: string;
+    group_id: number;
+    soloist_id: number | null;
+    is_soloist: boolean;
+    hangul_name: string | null;
+    debut_year: number | null;
+    generation: number | null;
+    member_count: number | null;
+    fandom_name: string | null;
+  };
+  discography: AlbumDiscographyItem[];
+}
+
+// The calendar (/api/calendar/*): past challenge days per mode.
+export type CalendarMode = "classic" | "blurry" | "pixelated";
+export type CalendarStatus = "not_played" | "in_progress" | "won_live" | "won_calendar";
+
+export interface CalendarTimelineDay {
+  date: string;
+  status: CalendarStatus;
+  /** Guesses made that day. */
+  guesses: number;
+  /** The answer (picture, name) and the game's XP, only on days the caller finished. */
+  image_path: string | null;
+  answer_name: string | null;
+  xp: number | null;
+}
+
+export type CalendarTimeline = Record<CalendarMode, CalendarTimelineDay[]>;
+
+export interface CalendarGuessSummary {
+  id: number;
+  name: string;
+  image_path: string | null;
+  correct: boolean;
+}
+
+export interface CalendarDayData {
+  challenge_date: string;
+  day_number: number | null;
+  mode: CalendarMode;
+  status: CalendarStatus;
+  /** What the day needs to be played (hints, blurred photo or pixelated cover). */
+  puzzle: {
+    member_count?: number | null;
+    groups?: string[];
+    is_former_group?: boolean;
+    blur_image_path?: string | null;
+    blur_image_version?: string | null;
+    cover_path?: string;
+    release_year?: number;
+    group_name?: string;
+    type?: string;
+  };
+  /** The caller's game so far, in the live pages' restore shape. */
+  game: {
+    today_guesses_details?: GuessResponse[];
+    blurry_guesses_details?: GuessResponse<Partial<FeedbackData>>[];
+    pixelated_guesses_details?: PixelatedGuessDetail[];
+    game_complete?: boolean;
+  } | null;
+  /** Only once the caller finished the day. */
+  answer: { idol_id?: number; artist_name?: string; image_path?: string | null; album_id?: number; album_name?: string } | null;
+  guesses: CalendarGuessSummary[] | null;
+  xp: number | null;
 }

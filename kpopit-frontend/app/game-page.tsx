@@ -4,15 +4,21 @@ import ClientOnly from "../src/components/ClientOnly";
 import PageLoader from "../src/components/Loading/PageLoader";
 import GameDayProvider from "../src/components/GameDayProvider";
 
-type GamePageProps = { title: string; description: string; path: string; children: ReactNode };
+type GamePageProps = {
+  title: string;
+  description: string;
+  path: string;
+  calendarGame?: boolean;
+  children: ReactNode;
+};
 
 // Game state lives in localStorage, so the game renders only in the browser; the prerendered
 // HTML carries the page meta and the same loader the page shows until its data is in.
-export default function GamePage({ title, description, path, children }: GamePageProps) {
+export default function GamePage({ title, description, path, calendarGame = false, children }: GamePageProps) {
   return (
     <>
-      <PageMeta title={title} description={description} path={path} />
-      <ClientOnly fallback={<PageLoader />}>
+      {!calendarGame && <PageMeta title={title} description={description} path={path} />}
+      <ClientOnly fallback={<PageLoader tone="dark" />}>
         <GameDayProvider>{children}</GameDayProvider>
       </ClientOnly>
     </>

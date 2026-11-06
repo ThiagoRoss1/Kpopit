@@ -1,44 +1,88 @@
-import Img from "../Img";
+import { buildIdolSlug, formatCompanyName, formatGroupName } from "../../utils/formatters";
+import { getNationalityFlag } from "../../utils/getFlags";
+import type { IdolsPageData } from "../../interfaces/gameInterfaces";
+import { groupLabel, nationalities, prefetchIdolProfile } from "../../pages/Idols/idolsData";
+import { cn } from "../../lib/utils";
+import FadeImg from "../FadeImg";
+import ListCard, { ListCardMeta, ListCardName } from "../ListCard/ListCard";
 
 interface IdolsCardsProps {
-    idolImage?: string;
-    artistName?: string;
-    groupName?: string | null;
-    companyName?: string | null;
+    idol: IdolsPageData;
+    index: number;
+    animate: boolean;
+    stagger?: boolean;
 }
 
-const IdolsCards = (props: IdolsCardsProps) => {
-    const { idolImage, artistName, groupName, companyName } = props;
+/** An idol's card in the list: the photo (zooms on hover) with the nationality flags on it, the
+ *  puffy name, then group and company. */
+const IdolsCards = ({ idol, index, animate, stagger }: IdolsCardsProps) => {
+    const group = idol.group_name ? formatGroupName(idol.group_name, idol.is_former_group) : groupLabel(idol);
+    const flags = nationalities(idol)
+        .map((nationality) => ({ nationality, src: getNationalityFlag(nationality) }))
+        .filter((flag) => flag.src);
 
     return (
-        <div className="group relative flex w-full h-70 sm:w-full sm:h-70 lg:h-80 bg-black/20 border-2 border-white/50 rounded-[20px] overflow-hidden
-        hover:cursor-pointer hover:scale-105 hover:border-white transition-transform duration-300 ease-out transform-gpu will-change-transform backface-hidden">
-            {/* Idol Image */}
-            <div className="w-full h-full flex justify-center items-center overflow-hidden">
-                <Img 
-                    src={idolImage} 
-                    alt={`${artistName} image`} 
-                    className="w-full h-full object-cover transform-gpu hover:scale-110 transition-transform duration-700 " 
-                    draggable={false}
-                />
-            </div>
+        <ListCard
+            to={`/idols/${idol.id}/${buildIdolSlug(idol.artist_name, idol.group_name)}`}
+            label={`${idol.artist_name}, ${group}`}
+            index={index}
+            animate={animate}
+            stagger={stagger}
+            onIntent={() => prefetchIdolProfile(idol.id)}
+        >
+            {/* Photo */}
+            <div className="relative aspect-[1/1.04]">
+                <div className={cn(
+                    "absolute inset-0 isolate overflow-hidden rounded-2xl @max-[580px]:rounded-[13px] border-[1.5px] border-(--ink) bg-(--panel)",
+                    "transform-gpu backface-hidden mask-[linear-gradient(#000,#000)]",
+                )}>
+                    <span aria-hidden className="absolute inset-0 grid place-items-center font-bold text-[40px] leading-none text-[rgba(26,20,24,.28)]">
+                        {idol.artist_name[0]}
+                    </span>
 
-            {/* Idol Info */}
-            <div className="absolute flex flex-col bottom-0 w-full h-20 border-t-2 border-white/20 rounded-t-2xl bg-black/60 justify-center items-start px-2 
-            pointer-events-none group-hover:bg-black group-hover:border-white transition-colors duration-700 transform-gpu backface-hidden">
-                <h3 className="text-white font-bold text-base sm:text-lg lg:text-xl [text-shadow:3px_3px_0px_rgba(0,0,0,0.8)] text-center translate-x-0 scale-100
-                group-hover:translate-x-4 group-hover:scale-110 group-hover:text-neon-pink group-hover:[text-shadow:2px_2px_12px_rgba(255,51,153,0.8)]
-                antialiased transition-transform duration-500 transform-gpu will-change-transform">
-                    {artistName}
-                </h3>
+                    <FadeImg
+                        draggable={false}
+                        src={`${import.meta.env.VITE_IMAGE_BUCKET_URL}${idol.image_path}?v=${idol.image_version}`}
+                        alt={idol.artist_name}
+                        loading="lazy"
+                        decoding="async"
+                        className={cn(
+                            "relative block size-full object-cover object-[center_28%]",
+                            "transition-[scale,opacity] duration-750 ease-(--ease-settle) group-hover:scale-108",
+                        )}
+                    />
 
-                <div className="flex flex-row gap-1 justify-center items-center text-white [text-shadow:-3px_3px_0px_rgba(0,0,0,0.8)]
-                leading-tight wrap-break-word whitespace-normal text-[12px] sm:text-sm">
-                    <span className="font-semibold italic">{groupName} {companyName && `• ${companyName}`}</span>
+                    {flags.length > 0 && (
+                        <div className="absolute left-2 bottom-2 flex">
+                            {flags.map((flag, flagIndex) => (
+                                <img
+                                    draggable={false}
+                                    key={flag.nationality}
+                                    src={flag.src!}
+                                    alt={flag.nationality}
+                                    title={flag.nationality}
+                                    className={cn(
+                                        "block w-8.5 h-6 rounded-[5px] border-2 border-[#1A1418] object-cover bg-[#1A1418] shadow-[1.5px_2px_0_#1A1418]",
+                                        flagIndex === 0 ? "-rotate-4" : "-ml-1.75 rotate-6",
+                                    )}
+                                />
+                            ))}
+                        </div>
+                    )}
                 </div>
             </div>
-        </div>
+
+            <ListCardName className="text-[17px] @max-[580px]:text-[15px]">{idol.artist_name}</ListCardName>
+
+            <ListCardMeta>
+                <span className="shrink-0">{group}</span>
+
+                {idol.company_name && (
+                    <span className="flex-1 min-w-0 pr-0.5 truncate">{`· ${formatCompanyName(idol.company_name)}`}</span>
+                )}
+            </ListCardMeta>
+        </ListCard>
     );
-}
+};
 
 export default IdolsCards;

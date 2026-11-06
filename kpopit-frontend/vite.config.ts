@@ -25,7 +25,8 @@ export default defineConfig(({ isSsrBuild }) => ({
   server: {
     proxy: {
         '/api': {
-            target: 'http://127.0.0.1:5000',
+            // DEV_API_TARGET lets a second local stack (another port) run next to the default one.
+            target: process.env.DEV_API_TARGET ?? 'http://127.0.0.1:5000',
             changeOrigin: true,
             cookieDomainRewrite: 'localhost'
         }

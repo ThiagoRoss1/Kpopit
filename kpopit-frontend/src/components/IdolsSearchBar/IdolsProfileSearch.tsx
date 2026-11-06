@@ -1,136 +1,200 @@
-import "./IdolsSearchBar.css";
 import { useEffect, useRef, useState } from "react";
-import { useIdolSearch } from "../../hooks/useIdolSearch";
-import type { IdolsPageData } from "../../interfaces/gameInterfaces";
 import { useNavigate } from "react-router";
+import { Search } from "lucide-react";
+import { cn } from "../../lib/utils";
+import type { IdolsPageData } from "../../interfaces/gameInterfaces";
 import { buildIdolSlug } from "../../utils/formatters";
-import Img from "../Img";
-import IntentLink from "../Links/IntentLink";
-import { prefetchIdolProfile } from "../../pages/Idols/idolsData";
+import { groupLabel, prefetchIdolProfile } from "../../pages/Idols/idolsData";
+
+// Like the old search: up to 20 matches, five rows visible and a scrollbar for the rest.
+const MAX_RESULTS = 20;
 
 interface IdolsProfileSearchProps {
-    idolsData: IdolsPageData[];
-    searchTerm: string;
-    onClose?: () => void;
-    onChange?: (newTerm: string) => void;
-    excludedIdols?: number[];
-
-    onChoose: (idol: IdolsPageData) => void;
+    idols: IdolsPageData[];
+    currentId: number;
 }
 
-const IdolsProfileSearch = (props: IdolsProfileSearchProps) => {
-    const { idolsData, searchTerm, onClose, onChange, excludedIdols = [], onChoose } = props;
+const matchesFirst = (term: string) => (first: IdolsPageData, second: IdolsPageData) => {
+    const firstStarts = first.artist_name.toLowerCase().startsWith(term);
+    const secondStarts = second.artist_name.toLowerCase().startsWith(term);
 
-    const [showList, setShowList] = useState(false);
+    return Number(!firstStarts) - Number(!secondStarts) || first.artist_name.localeCompare(second.artist_name);
+};
 
-    const containerRef = useRef<HTMLDivElement>(null);
-
+/** The skewed search bar on an idol's page: type to list idols by name, group or company and jump
+ *  to one; "/" focuses it from anywhere on the page. */
+const IdolsProfileSearch = ({ idols, currentId }: IdolsProfileSearchProps) => {
     const navigate = useNavigate();
+    const inputRef = useRef<HTMLInputElement>(null);
+    const optionRefs = useRef<(HTMLButtonElement | null)[]>([]);
+    const [query, setQuery] = useState("");
+    const [isFocused, setIsFocused] = useState(false);
+    const [activeIndex, setActiveIndex] = useState(0);
 
     useEffect(() => {
-    const handleClickOutside = (event: MouseEvent) => {
-        if (containerRef.current && !containerRef.current.contains(event.target as Node)) {
-            setShowList(false);
-            onClose?.();
+        const handleSlash = (event: KeyboardEvent) => {
+            const target = (event.target as HTMLElement | null)?.tagName ?? "";
+            if (event.key !== "/" || /input|textarea|select/i.test(target)) return;
+
+            event.preventDefault();
+            inputRef.current?.focus();
+        };
+
+        document.addEventListener("keydown", handleSlash);
+
+        return () => document.removeEventListener("keydown", handleSlash);
+    }, []);
+
+    // Keyboard navigation keeps the highlighted row inside the scrolled list.
+    useEffect(() => {
+        optionRefs.current[activeIndex]?.scrollIntoView({ block: "nearest" });
+    }, [activeIndex]);
+
+    const term = query.trim().toLowerCase();
+
+    const results = term
+        ? idols
+            .filter((idol) => `${idol.artist_name} ${idol.all_groups ?? ""} ${idol.company_name ?? ""}`.toLowerCase().includes(term))
+            .sort(matchesFirst(term))
+            .slice(0, MAX_RESULTS)
+        : [];
+
+    const isListOpen = isFocused && term !== "";
+
+    const pickIdol = (idol: IdolsPageData) => {
+        setQuery("");
+        setIsFocused(false);
+        inputRef.current?.blur();
+        navigate(`/idols/${idol.id}/${buildIdolSlug(idol.artist_name, idol.group_name)}`);
+    };
+
+    const handleKeyDown = (event: React.KeyboardEvent<HTMLInputElement>) => {
+        if (event.key === "ArrowDown" || event.key === "ArrowUp") {
+            event.preventDefault();
+
+            const step = event.key === "ArrowDown" ? 1 : -1;
+            setActiveIndex((index) => (results.length ? (index + step + results.length) % results.length : 0));
+        } else if (event.key === "Enter" && results[activeIndex]) {
+            pickIdol(results[activeIndex]);
+        } else if (event.key === "Escape") {
+            inputRef.current?.blur();
         }
     };
-        document.addEventListener("mousedown", handleClickOutside);
-        return () => document.removeEventListener("mousedown", handleClickOutside);
-    }, [onClose])
-
-    const { filtered: searchResults, hasQuery } = useIdolSearch({
-        idols: idolsData,
-        query: searchTerm,
-        excludedIdols,
-    });
-
-    const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-        const value = e.target.value;
-        onChange?.(value);
-        if (value.trim().length > 0) {
-            setShowList(true);
-        }
-    }
 
     return (
-        <div ref={containerRef} className="relative h-full w-full sm:max-w-92.5">
-            <div className="flex w-full h-full bg-transparent text-white border-2 border-white/50 rounded-3xl justify-center items-center overflow-hidden">
-                <form 
-                    className="flex flex-col w-full h-full gap-2"
-                    onSubmit={(e) => {
-                        e.preventDefault();
-                        if (hasQuery && searchResults.length > 0) {
-                            const firstResult = searchResults[0];
-
-                            onChoose(firstResult);
-
-                            navigate(`/idols/${firstResult.id}/${buildIdolSlug(firstResult.artist_name, firstResult.group_name)}`);
-
-                            onChange?.("");
-                            setShowList(false);
-                        }
-                    }}
-                    >
-                    <div className="flex items-center gap-2 w-full h-full">
-                        <input 
-                            className="flex w-full h-13 sm:w-92.5 sm:h-15 grow placeholder-white/60 px-4 rounded-3xl"
-                            type="text"
-                            value={searchTerm}
-                            onChange={handleInputChange}
-                            onFocus={() => searchTerm.length > 0 && setShowList(true)}
-                            placeholder="Search for an Idol, Group, or Company..."
-                        />
-
-                    </div>
-
-                    {searchTerm.length > 0 && hasQuery && showList && searchResults.length > 0 && (
-                    <ul className={`droplist-enter absolute z-50 left-0 top-full mt-2 w-full h-fit rounded-3xl
-                    overflow-y-auto overflow-x-hidden searchbar-scroll
-                    border-2 border-white/50 max-h-60 sm:max-h-60`}>
-                        {searchResults.map((idol) => {
-                            return (
-                                // The list stays (the picked row pressed) until the new idol shows; the page then clears the search.
-                                <IntentLink
-                                    to={`/idols/${idol.id}/${buildIdolSlug(idol.artist_name, idol.group_name)}`}
-                                    key={idol.id}
-                                    onIntent={() => prefetchIdolProfile(idol.id)}
-                                    onClick={() => onChoose(idol)}
-                                >
-                                    <li 
-                                        className="group relative px-4 py-3 bg-ink/80 hover:bg-[#1f1f1f] cursor-pointer 
-                                        transition-all duration-300"
-                                    >
-                                        {idol.image_path && (
-                                            <div className="flex justify-start items-center gap-3">
-                                                <Img 
-                                                    src={`${import.meta.env.VITE_IMAGE_BUCKET_URL}${idol.image_path}?v=${idol.image_version}`}
-                                                    alt={`${idol.artist_name} image`}
-                                                    className="w-11 h-11 sm:w-12 sm:h-12 object-cover rounded-2xl border border-white
-                                                    group-hover:scale-105 group-hover:translate-x-1 transition-transform duration-500 transform-gpu" 
-                                                />
-                                                <div className="relative flex flex-col">
-                                                    <span className="font-sans font-bold text-base sm:text-lg text-white [text:shadow:1px_1px_0px_rgba(0,0,0,0.6)] 
-                                                    group-hover:translate-x-1 transition-transform duration-500 transform-gpu">
-                                                        {idol.group_name ? `${idol.artist_name} (${idol.group_name})` : idol.artist_name}
-                                                    </span>
-
-                                                    <span className="font-sans font-bold text-xs sm:text-sm text-white/60 
-                                                    group-hover:translate-x-1 transition-transform duration-500 transform-gpu">
-                                                        {idol.company_name}
-                                                    </span>
-                                                </div>
-                                            </div>
-                                        )}
-                                    </li>
-                                </IntentLink>
-                            )}).filter((_, index) => index < 20)}
-                    </ul>
+        <div className="relative min-w-0 w-full">
+            {/* Room around the bar for its shadow (the wrapper clips the skew) */}
+            <div className="flex overflow-hidden pt-1 pr-2.5 pb-2.5 pl-2 -mt-1 -mr-2.5 -mb-2.5 -ml-2">
+                <label
+                    className={cn(
+                        "flex items-center box-border h-12 ml-auto overflow-hidden -skew-x-6 backface-hidden",
+                        "bg-(--chip) border-[2.5px] shadow-[4px_5px_0_#1A1418]",
+                        "transition-[width,box-shadow,border-color] duration-450 ease-(--ease-settle)",
+                        "focus-within:border-[#1A1418] focus-within:shadow-[4px_5px_0_#FF8AC4]",
+                        isListOpen ? "w-full border-[#1A1418]" : "w-[min(100%,420px)] @max-[561px]:w-full border-[#FF8AC4]",
                     )}
-                </form>
-            </div>
-        </div>
+                >
+                    <span className="grid place-items-center w-12.5 self-stretch bg-[#1A1418]">
+                        <Search aria-hidden className="size-4.75 text-[#FF8AC4] skew-x-6 -rotate-8" strokeWidth={3} />
+                    </span>
 
-    )
-}
+                    <input
+                        ref={inputRef}
+                        value={query}
+                        onChange={(event) => {
+                            setQuery(event.target.value);
+                            setActiveIndex(0);
+                        }}
+                        onFocus={() => setIsFocused(true)}
+                        onBlur={() => setIsFocused(false)}
+                        onKeyDown={handleKeyDown}
+                        placeholder="Idol, group or company..."
+                        aria-label="Search idols, groups or companies"
+                        role="combobox"
+                        aria-expanded={isListOpen}
+                        aria-controls="idol-search-results"
+                        aria-autocomplete="list"
+                        className={cn(
+                            "flex-1 min-w-0 h-full pr-3.5 pl-4 border-0 outline-0 bg-transparent skew-x-6",
+                            "font-semibold text-[15px] text-(--chip-ink) text-ellipsis",
+                        )}
+                    />
+
+                    <span
+                        aria-hidden
+                        className={cn(
+                            "flex-none grid place-items-center min-w-6.5 h-6.5 px-1.5 mr-3 skew-x-6 -rotate-4 @max-[561px]:hidden",
+                            "rounded-[7px] border-2 border-[#1A1418] bg-[#FFE3F1] shadow-[1.5px_2px_0_#1A1418]",
+                            "font-bold text-[13px] leading-none text-[#1A1418]",
+                        )}
+                    >
+                        /
+                    </span>
+                </label>
+            </div>
+
+            {isListOpen && (
+                <div
+                    id="idol-search-results"
+                    role="listbox"
+                    aria-label="Idols"
+                    className={cn(
+                        "pp-scroll absolute z-40 top-[calc(100%+14px)] left-0 @max-[561px]:-left-15.5 right-0",
+                        "flex flex-col gap-0.5 max-h-72.5 overflow-y-auto overflow-x-hidden p-1.5",
+                        "bg-(--menu-bg) border-2 border-[#1A1418] shadow-[5px_5px_0_#FF8AC4,0_18px_40px_rgba(26,20,24,.18)]",
+                        "origin-top animate-[puffMenu_0.34s_cubic-bezier(.34,1.4,.64,1)_backwards]",
+                    )}
+                >
+                    {results.map((idol, index) => {
+                        const isActive = index === activeIndex;
+
+                        return (
+                            <button
+                                key={idol.id}
+                                ref={(element) => { optionRefs.current[index] = element; }}
+                                type="button"
+                                role="option"
+                                aria-selected={isActive}
+                                onMouseDown={(event) => {
+                                    event.preventDefault();
+                                    pickIdol(idol);
+                                }}
+                                onMouseEnter={() => {
+                                    setActiveIndex(index);
+                                    prefetchIdolProfile(idol.id);
+                                }}
+                                className={cn(
+                                    "flex-none flex items-center gap-3 w-full py-1.75 pr-3 pl-2 border-0 text-left cursor-pointer",
+                                    "transition-[translate,background-color] duration-300 ease-(--ease-settle) transform-gpu",
+                                    isActive ? "translate-x-1 bg-(--chip-hover)" : "bg-transparent",
+                                )}
+                            >
+                                <img
+                                    draggable={false}
+                                    src={`${import.meta.env.VITE_IMAGE_BUCKET_URL}${idol.image_path}?v=${idol.image_version}`}
+                                    alt=""
+                                    className="flex-none size-10 object-cover shadow-[2px_2px_0_#1A1418]"
+                                />
+
+                                <span className="flex-1 flex flex-col gap-1 min-w-0">
+                                    <span className="font-bold text-[15px] leading-[1.1] text-(--text) truncate">{idol.artist_name}</span>
+                                    <span className="font-semibold text-xs leading-[1.2] text-(--muted) truncate">{groupLabel(idol)}</span>
+                                </span>
+
+                                {idol.id === currentId && (
+                                    <span aria-label="Current idol" className="flex-none size-2 rounded-full bg-neon-pink" />
+                                )}
+                            </button>
+                        );
+                    })}
+
+                    {results.length === 0 && (
+                        <div className="py-4 px-3 font-medium text-sm text-center text-(--muted)">No idols found...</div>
+                    )}
+                </div>
+            )}
+        </div>
+    );
+};
 
 export default IdolsProfileSearch;

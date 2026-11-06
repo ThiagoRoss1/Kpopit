@@ -1,39 +1,89 @@
-@keyframes profileEntry {
-    from {
-        opacity: 0;
-        transform: translateY(20px);
-    }
+/* ==========================================================================
+   Idol page
+   Layout and motion live in Tailwind in IdolProfile.tsx; this file keeps the page's Day/Night
+   tokens, the name's font-fit formula, the photo's rendering rules and the entrance keyframes.
+   ========================================================================== */
 
-    to {
-        opacity: 1;
-        transform: translateY(0);
+/* Page tokens (Day) */
+.idol-page {
+    --ip-panel: #FFFDFA;
+    --band: #1A1418;
+    --tone: rgba(255, 51, 153, 0.11);
+    --tab-o: #FFFDFA;
+    --rb-in: inset 0 2px 0 rgba(255, 255, 255, 0.5);
+    --rb-l2: block;
+    --speed: rgba(255, 255, 255, 0.06);
+    --stripe: rgba(255, 51, 153, 0.13);
+    --rn: 58px;
+    --cap-b: 26px;
+    --ink-puff: -2px -2px 0 #1A1418,2px -2px 0 #1A1418,-2px 2px 0 #1A1418,2px 2px 0 #1A1418,0px 2px 0 #1A1418,0px -2px 0 #1A1418,2px 0px 0 #1A1418,-2px 0px 0 #1A1418,0.67px 1px 0 #1A1418,1.33px 2px 0 #1A1418,2px 3px 0 #1A1418,0px 1px 0 #1A1418,4px 1px 0 #1A1418,0px 5px 0 #1A1418,4px 5px 0 #1A1418,2px 5px 0 #1A1418,2px 1px 0 #1A1418,4px 3px 0 #1A1418,0px 3px 0 #1A1418;
+}
+
+/* Page tokens (Night) */
+[data-theme="night"] .idol-page {
+    --ip-panel: #262226;
+    --band: #3A3338;
+    --tone: transparent;
+    --tab-o: #1A1418;
+    --rb-in: none;
+    --rb-l2: none;
+    --speed: rgba(255, 255, 255, 0.05);
+    --stripe: transparent;
+}
+
+/* Laptop widths (a MacBook's 1440-1512px): the name letters a step smaller. */
+@container idol (max-width: 1600px) {
+    .idol-page {
+        --rn: 52px;
     }
 }
 
-.idol-profile-enter {
-    opacity: 0;
-    animation: profileEntry 0.4s ease-out forwards;
-    will-change: transform, opacity;
-}
-
-@keyframes IdolProfilePhotoEntry {
-    from {
-        opacity: 0;
-        transform: scale(1.2);
-    }
-
-    to {
-        opacity: 1;
-        transform: scale(1);
-        animation-timing-function: cubic-bezier(0.68, -0.55, 0.27, 1.55);
+/* Stacked layout: the selected tab's depth is ink on both themes. */
+@container idol (max-width: 1280px) {
+    .idol-page {
+        --tab-o: #1A1418;
     }
 }
 
-.idol-photo-enter {
-    opacity: 0;
-    animation: IdolProfilePhotoEntry 1.2s ease-out forwards;
-    will-change: transform, opacity;
+@container idol (max-width: 560px) {
+    .idol-page {
+        --rn: 44px;
+        --cap-b: 24px;
+    }
+}
 
+/* Font fit: the ransom-note letters share the name's width, up to the size of --rn. */
+.idol-name-letter {
+    font-size: min(calc(var(--rn) * var(--ls)), calc(((100cqi + 36px) / var(--len) - 24px) / 0.78 * var(--lk)));
+}
+
+/* Related idols: override the legacy horizontal scrollbar's thin track and active glow. */
+.idol-related-scroll::-webkit-scrollbar:horizontal {
+    height: 14px;
+}
+
+.idol-related-scroll::-webkit-scrollbar-thumb:horizontal {
+    background: #FF8AC4;
+    box-shadow: inset 0 2px 0 rgba(255, 255, 255, 0.55);
+}
+
+.idol-related-scroll::-webkit-scrollbar-thumb:horizontal:hover {
+    background: #FF70B8;
+}
+
+.idol-related-scroll::-webkit-scrollbar-thumb:horizontal:active {
+    background: #FF3399;
+    box-shadow: none;
+}
+
+@supports not selector(::-webkit-scrollbar) {
+    .idol-related-scroll {
+        scrollbar-width: auto;
+    }
+}
+
+/* Photo */
+.idol-photo-image {
     image-rendering: -webkit-optimize-contrast;
     image-rendering: crisp-edges;
     image-rendering: auto;
@@ -43,55 +93,47 @@
     transform: translateZ(0);
 }
 
-@keyframes idolNamesEntry {
+/* Entrances (backwards fill, so hover and press motion still apply after them) */
+@keyframes idolPhotoEntry {
     from {
         opacity: 0;
-        transform: translateX(-20px);
-    }
-
-    to {
-        opacity: 1;
-        transform: translateX(0px);
+        scale: 1.12;
     }
 }
 
-.names-enter {
-    opacity: 0;
-    animation: idolNamesEntry 0.4s ease-out forwards;
+.idol-photo-enter {
+    animation: idolPhotoEntry 0.7s var(--ease-settle) backwards;
 }
 
-@keyframes mainNameEntry {
+@keyframes idolSideEntry {
     from {
         opacity: 0;
-        transform: translateX(-40px);
-    }
-
-    to {
-        opacity: 1;
-        transform: translateX(0px);
+        translate: -24px 0;
     }
 }
 
-.main-name-enter {
-    opacity: 0;
-    animation: mainNameEntry 0.6s ease-out forwards;
+.idol-side-enter {
+    animation: idolSideEntry 0.5s var(--ease-settle) 0.2s backwards;
 }
 
-@keyframes infosEntry {
+@keyframes idolMenuEntry {
     from {
         opacity: 0;
-        transform: scale(0.95);
-    }
-    
-    to {
-        opacity: 1;
-        transform: scale(1);
-        animation-timing-function: cubic-bezier(0.68, -0.55, 0.27, 1.55);
+        translate: 90px 0;
     }
 }
 
-.infos-enter {
-    opacity: 0;
-    animation: infosEntry 0.4s ease-out forwards;
-    will-change: opacity, transform;
+.idol-menu-enter {
+    animation: idolMenuEntry 0.55s var(--ease-settle) backwards;
+}
+
+@keyframes idolTileEntry {
+    from {
+        opacity: 0;
+        translate: 0 10px;
+    }
+}
+
+.idol-tile-enter {
+    animation: idolTileEntry 0.45s cubic-bezier(0.34, 1.4, 0.64, 1) backwards;
 }

@@ -132,7 +132,7 @@ const PasswordModal = ({ isOpen, onClose, onBack }: PasswordModalProps) => {
                             disabled:opacity-50 disabled:cursor-not-allowed
                             disabled:hover:translate-x-0 disabled:hover:translate-y-0`}
                     >
-                        {saveMutation.isPending && <Loader2 className="w-4 h-4 animate-spin" />}
+                        {saveMutation.isPending && <Loader2 className="size-4 animate-spin" />}
                         {saveMutation.isPending ? "Saving" : "Save Changes"}
                     </button>
 
@@ -146,7 +146,7 @@ const PasswordModal = ({ isOpen, onClose, onBack }: PasswordModalProps) => {
                         hover:cursor-pointer transition-colors duration-300
                         disabled:opacity-50 disabled:cursor-not-allowed"
                     >
-                        <ChevronLeft className="w-5 h-5" />
+                        <ChevronLeft className="size-5" />
                         Return
                     </button>
                 </div>

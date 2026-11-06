@@ -31,7 +31,7 @@ const StatsText = (props: StatsContentProps) => {
 
     return (
         <div className="w-full bg-transparent px-2 sm:px-10 mt-5 mb-5">
-            <div className="w-full grid grid-cols-2 justify-center items-center gap-x-6 sm:gap-x-16 gap-y-6">
+            <div className="w-full grid grid-cols-2 justify-center items-center gap-6 sm:gap-x-16">
                 {/* Games won */}
                 <div className="flex flex-col justify-center items-center p-4 gap-3 rounded-2xl border-2 border-white h-28 sm:h-28 
                 backface-hidden shadow-[0_0_10px_2px_rgba(255,255,255,0.25),0_0_10px_2px_rgba(255,255,255,0.25)] bg-black/50

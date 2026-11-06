@@ -26,7 +26,7 @@ export default tseslint.config([
     files: ['app/**/*.tsx'],
     rules: {
       'react-refresh/only-export-components': ['error', {
-        allowExportNames: ['loader', 'clientLoader', 'meta', 'links', 'Layout', 'HydrateFallback', 'ErrorBoundary'],
+        allowExportNames: ['loader', 'clientLoader', 'meta', 'links', 'handle', 'shouldRevalidate', 'Layout', 'HydrateFallback', 'ErrorBoundary'],
       }],
     },
   },

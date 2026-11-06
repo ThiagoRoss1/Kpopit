@@ -21,7 +21,7 @@ export function TextureFill({ treatment }: { treatment: CardTreatment }) {
     if (treatment === 'gold') {
         return (
             <>
-                <img src={goldTextureSrc} alt="" aria-hidden className="album-gold-base pointer-events-none absolute inset-0 size-full object-cover" />
+                <img draggable={false} src={goldTextureSrc} alt="" aria-hidden className="album-gold-base pointer-events-none absolute inset-0 size-full object-cover" />
                 <span aria-hidden className="album-gold-tint pointer-events-none absolute inset-0" />
                 <span aria-hidden className="album-gold-sheen pointer-events-none absolute inset-0" />
             </>
@@ -81,6 +81,7 @@ export default function AlbumMemberCard({ member, palette, zoomed = false }: Alb
             <TextureFill treatment={treatment} />
             <div className="relative flex size-full flex-col justify-between overflow-clip bg-[rgba(217,217,217,0.32)]">
                 <img
+                    draggable={false}
                     src={member.src || undefined}
                     alt={member.artist_name}
                     {...EAGER_ARTWORK_PROPS}

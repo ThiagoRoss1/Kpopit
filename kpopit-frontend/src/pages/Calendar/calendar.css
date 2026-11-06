@@ -1,0 +1,59 @@
+/* ==========================================================================
+   Calendar page: entrance keyframes (layout and hover motion are Tailwind in the TSX).
+   Backwards fill, so hover and press motion still apply after them.
+   ========================================================================== */
+
+/* Cells, rows and the side panel rise or drop in */
+.calendar-enter {
+    animation: puffIn 0.55s var(--ease-settle) backwards;
+}
+
+.calendar-panel-enter {
+    animation: puffDrop 0.45s var(--ease-settle) backwards;
+}
+
+/* The month slides in from the side of the arrow that was pressed */
+@keyframes calendarFromLeft {
+    from {
+        opacity: 0;
+        translate: -28px 0;
+    }
+}
+
+@keyframes calendarFromRight {
+    from {
+        opacity: 0;
+        translate: 28px 0;
+    }
+}
+
+.calendar-from-left {
+    animation: calendarFromLeft 0.45s var(--ease-settle) backwards;
+}
+
+.calendar-from-right {
+    animation: calendarFromRight 0.45s var(--ease-settle) backwards;
+}
+
+/* Guesses in the side panel pop in one after another */
+@keyframes calendarGuessPop {
+    from {
+        opacity: 0;
+        scale: 0.6;
+    }
+}
+
+.calendar-guess-enter {
+    animation: calendarGuessPop 0.45s var(--ease-pop) backwards;
+}
+
+/* The progress bar fills from empty */
+@keyframes calendarFill {
+    from {
+        translate: -100% 0;
+    }
+}
+
+.calendar-fill-enter {
+    animation: calendarFill 1.2s var(--ease-settle) 0.35s backwards;
+}

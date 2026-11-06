@@ -1,0 +1,104 @@
+/* ==========================================================================
+   Album page: entrance keyframes (layout and hover motion are Tailwind in AlbumPage.tsx).
+   Backwards fill, so hover and press motion still apply after them.
+   ========================================================================== */
+
+@keyframes albumRise {
+    from {
+        opacity: 0;
+        translate: 0 22px;
+    }
+}
+
+.album-rise-enter {
+    animation: albumRise 0.6s var(--ease-settle) backwards;
+}
+
+@keyframes albumFade {
+    from {
+        opacity: 0;
+    }
+}
+
+.album-fade-enter {
+    animation: albumFade 0.4s ease-out backwards;
+}
+
+/* The record slides out of the sleeve and its label spins into place. */
+@keyframes albumDisc {
+    from {
+        translate: -34% 0;
+    }
+}
+
+.album-disc-enter {
+    animation: albumDisc 0.95s var(--ease-settle) 0.12s backwards;
+}
+
+@keyframes albumSpin {
+    from {
+        rotate: -240deg;
+    }
+}
+
+.album-spin-enter {
+    animation: albumSpin 0.95s var(--ease-settle) 0.12s backwards;
+}
+
+@keyframes albumSleeveDrop {
+    from {
+        translate: 0 -14px;
+    }
+}
+
+.album-sleeve-enter {
+    animation: albumSleeveDrop 0.55s var(--ease-settle) backwards;
+}
+
+@keyframes albumDrop {
+    from {
+        opacity: 0;
+        translate: 0 -14px;
+        rotate: -2deg;
+    }
+}
+
+.album-drop-enter {
+    animation: albumDrop 0.55s var(--ease-settle) backwards;
+}
+
+@keyframes albumTileRise {
+    from {
+        opacity: 0;
+        translate: 0 10px;
+    }
+}
+
+.album-tile-enter {
+    animation: albumTileRise 0.55s var(--ease-settle) 0.12s backwards;
+}
+
+@keyframes albumDotPop {
+    0% {
+        scale: 0.4;
+    }
+
+    70% {
+        scale: 1.15;
+    }
+}
+
+.album-dot-enter {
+    animation: albumDotPop 0.55s var(--ease-pop) backwards;
+}
+
+@keyframes albumRowIn {
+    from {
+        opacity: 0;
+        translate: 0 -8px;
+    }
+}
+
+.album-row-enter {
+    animation: albumRowIn 0.42s var(--ease-settle) backwards;
+}

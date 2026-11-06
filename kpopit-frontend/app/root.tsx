@@ -12,14 +12,31 @@ import MaintenancePage from "../src/pages/Maintenance/MaintenancePage";
 import { printEasterEgg } from "../src/utils/consoleEasterEgg";
 import { getQueryClient } from "../src/services/queryClient";
 import PageLoader from "../src/components/Loading/PageLoader";
+import PuffTitle from "../src/components/PageShell/PuffTitle";
+import { PressAnchor, PressButton } from "../src/components/buttons/PressButton";
+import { safeReload } from "../src/utils/safeReload";
+import { THEME_INIT_SCRIPT } from "../src/utils/theme";
+import { fetchFeatures, orNothing } from "./prerender-api";
+
+// Build time only: the feature flags the prerendered navbar and pages render with (useFeatures).
+export async function loader() {
+  return { features: await orNothing(fetchFeatures()) };
+}
+
+// There is no server to ask again: the build-time flags stay, and useFeatures refreshes them.
+export function shouldRevalidate() {
+  return false;
+}
 
 // Site-wide head only: each page sets its own title, description and og:title/og:description
 // (React hoists them here), so the document never carries two of them.
 export function Layout({ children }: { children: ReactNode }) {
   return (
-    <html lang="en">
+    <html lang="en" suppressHydrationWarning>
       <head>
         <meta charSet="UTF-8" />
+        {/* Applies the saved Day/Night before the first paint (the HTML ships Day). */}
+        <script dangerouslySetInnerHTML={{ __html: THEME_INIT_SCRIPT }} />
         <meta name="google-site-verification" content="nUFMUckTn3CptHY3LyumUH3r60ddG2RweN_l40TE6-M" />
         <link rel="icon" type="image/x-icon" href="/favicon.ico" />
         <link rel="icon" type="image/png" sizes="16x16" href="/favicon-16x16.png" />
@@ -31,7 +48,6 @@ export function Layout({ children }: { children: ReactNode }) {
         <meta name="viewport" content="width=device-width, initial-scale=1.0" />
         <meta name="keywords" content="kpop, kpopdle, kpop wordle, kpop game, idol, idol game, kpop quiz, daily game, guess the idol, kpop guessing game, wordle like, TWICE, NewJeans, BLACKPINK, ILLIT, LE SSERAFIM, LOONA" />
         <meta name="author" content="KpopIt" />
-        <meta name="robots" content="index, follow" />
         <meta property="og:type" content="website" />
         <meta name="twitter:card" content="summary_large_image" />
         <meta name="twitter:creator" content="@TgoRoss1" />
@@ -83,32 +99,27 @@ export default function App() {
 export function HydrateFallback() {
   return (
     <div className="min-h-screen bg-black">
-      <div aria-hidden className="sticky top-0 z-100 w-full h-12 sm:h-15 border-b border-neon-pink/40 bg-black/50" />
+      <div aria-hidden className="sticky top-0 z-100 w-full h-15 max-[760px]:h-13.5 border-b-2 border-ink bg-[#262226] shadow-[0_3px_0_#FF8AC4]" />
       <PageLoader />
     </div>
   );
 }
 
 // Last resort when a page crashes outside its own sections: a plain page with a way back.
+// Home is a full page load so the crashed app starts over.
 export function ErrorBoundary() {
   const error = useRouteError();
   if (import.meta.env.DEV) console.error(error);
   const status = isRouteErrorResponse(error) ? error.status : null;
   return (
-    <main className="min-h-screen w-full flex flex-col items-center justify-center gap-4 bg-black text-white text-center px-4">
-      <h1 className="text-3xl font-bold">{status === 404 ? "Page not found" : "Something went wrong"}</h1>
-      <p className="text-white/70">Try again, or go back to the home page.</p>
-      <div className="flex gap-3">
-        <button
-          type="button"
-          onClick={() => window.location.reload()}
-          className="px-4 py-2 rounded-2xl border-2 border-white/60 font-bold hover:bg-white/10 hover:cursor-pointer"
-        >
-          Try again
-        </button>
-        <a href="/" className="px-4 py-2 rounded-2xl bg-white text-black font-bold hover:brightness-90">
-          Home
-        </a>
+    <main className="pp-root min-h-screen w-full flex flex-col items-center justify-center gap-4 px-4 bg-(--ground) text-(--text) text-center">
+      <PuffTitle className="text-[44px] max-[580px]:text-[34px] whitespace-normal text-balance">
+        {status === 404 ? "Page not found" : "Something went wrong"}
+      </PuffTitle>
+      <p className="m-0 font-medium text-base text-(--muted)">Try again, or go back to the home page.</p>
+      <div className="flex gap-3 flex-wrap justify-center mt-1">
+        <PressButton size="lg" onClick={safeReload}>Try again</PressButton>
+        <PressAnchor href="/" target="_self" rel={undefined} variant="cta" size="lg">Home</PressAnchor>
       </div>
     </main>
   );

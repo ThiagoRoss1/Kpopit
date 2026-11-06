@@ -3,6 +3,7 @@ import "./style.css";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { useSharedGameData } from "../../hooks/useSharedGameData.tsx";
 import { useState, useEffect, useCallback, useMemo, useRef } from "react";
+import YesterdayLockedPill from "../../components/YesterdayLockedPill";
 import { getDailyIdol, getGuessIdol, getYesterdaysIdol, getDailyUserCount, getUserPosition, saveGameState } from "../../services/api.ts";
 import type {
   GameData,
@@ -63,6 +64,7 @@ function ClassicMode() {
   // Counter
   const [attempts, setAttempts] = useState<number>(0);
   const [sessionRestored, setSessionRestored] = useState<number>(0);
+  const submittingRef = useRef(false);
 
   // Transfer data logic hook
   
@@ -175,7 +177,8 @@ function ClassicMode() {
     }
 
     setDayChecked(true);
-    setConfetti(confettiShown);
+    // A game that was already over when the page opened never replays its confetti.
+    setConfetti(confettiShown || gameComplete === "true");
   }
 
   const guessMutation = useMutation({
@@ -265,7 +268,7 @@ function ClassicMode() {
 
   // Guess submission handler function
   const handleGuessSubmit = async () => {
-    if (!selectedIdol || !gameData || !allIdolsData || guessMutation.isPending) return;
+    if (!selectedIdol || !gameData || !allIdolsData || submittingRef.current || guessMutation.isPending || isCorrect) return;
 
     // PREVENT DUPLICATE GUESSES - check if idol already guessed
     const alreadyGuessed = guesses.some(g => g.guessed_idol_data.idol_id === selectedIdol.id);
@@ -282,6 +285,26 @@ function ClassicMode() {
       return;
     }
 
+    submittingRef.current = true;
+    let token: string | null;
+
+    try {
+      const encrypted = localStorage.getItem("userToken") || "";
+      token = decryptedTokenRef.current || await decryptToken(encrypted);
+    } catch (error) {
+      submittingRef.current = false;
+      console.error("Could not prepare the guess:", error);
+      return;
+    }
+
+    if (!token) {
+      submittingRef.current = false;
+      await initUser();
+      return;
+    }
+
+    handleGuessAttempts();
+
     setGuesses(prev => {
       const updatedGuesses = [...prev, localGuessResult]
       localStorage.setItem("todayGuessesDetails", JSON.stringify(updatedGuesses));
@@ -295,25 +318,16 @@ function ClassicMode() {
       localStorage.setItem("gameWon", "true");
     }
 
-    if (!selectedIdol) {
-      return;
-    }
-
-    const encrypted = localStorage.getItem("userToken") || "";
-    const token = decryptedTokenRef.current || await decryptToken(encrypted);
-
-    if (!token) {
-      console.warn("User token not available, cannot submit guess.");
-      await initUser();
-      return;
-    }
-
     guessMutation.mutate({
       guessed_idol_id: selectedIdol.id,
       answer_id: gameData.answer_id,
       user_token: token,
       current_attempt: attempts + 1,
       game_date: localStorage.getItem("gameDate") || "",
+    }, {
+      onSettled: () => {
+        submittingRef.current = false;
+      },
     });
     // Clear input field after submission
     setCurrentGuess("");
@@ -332,7 +346,6 @@ function ClassicMode() {
   useEffect(() => {
     submitRef.current = () => {
       handleGuessSubmit();
-      handleGuessAttempts();
     };
   });
   const handleSubmit = useCallback(() => submitRef.current(), []);
@@ -348,7 +361,7 @@ function ClassicMode() {
       if (isErrorGameData) refetchGameData();
       if (listError) queryClient.refetchQueries({ queryKey: ["allIdols"] });
     };
-    return <PageLoader error={isErrorGameData || userToken.isError || listError} onRetry={retry} />;
+    return <PageLoader tone="dark" error={isErrorGameData || userToken.isError || listError} onRetry={retry} />;
   }
 
   // Main return
@@ -422,7 +435,7 @@ function ClassicMode() {
       )}
       
       <div className="flex flex-row items-center justify-center mb-10">
-        <span className="leading-tight text-base sm:text-base">
+        <span className="text-base/tight sm:text-base">
           <span className="text-[#b43777] [text-shadow:1.2px_1.2px_4px_rgba(0,0,0,1.8),0_0_12px_rgba(180,55,119,1.0)] brightness-110">
             {dailyUserCount?.data?.user_count ?? 0}
           </span> <span className="text-[#d7d7d7]/85 [text-shadow:1.2px_1.2px_4px_rgba(0,0,0,1.8),0_0_12px_rgba(255,255,255,0.2)]">
@@ -460,6 +473,7 @@ function ClassicMode() {
       {endGame && guesses.length > 0 && showVictoryCard && (
         <div className="w-full flex items-center justify-center mt-10">
           <VictoryCardHud
+            yesterdayLocked={yesterday.data?.locked ? yesterday.data : undefined}
             cardInfo={guesses[guesses.length - 1].guessed_idol_data}
             guesses={guesses}
             attempts={attempts}
@@ -491,6 +505,16 @@ function ClassicMode() {
                   {yesterdayArtist ? `${yesterdayArtist} (${yesterdayArtistGroup && yesterdayArtistGroup.length > 0 ? yesterdayArtistGroup : "Soloist"})` : "Unknown"}
               </span>
           </Link>
+        </span>
+      </div>
+      )}
+
+      {!showVictoryCard && yesterday.data?.locked && (
+      <div className={`w-full flex flex-col items-center justify-center mt-10 mb-26`}>
+        <span className="font-semibold max-xxs:text-[14px] xxs:text-[15px] xs:text-base sm:text-[18px] leading-tight">
+          <span className="text-white">
+            Yesterday's idol was
+          </span> <YesterdayLockedPill mode="classic" date={yesterday.data.yesterdays_pick_date} dayNumber={yesterday.data.day_number} />
         </span>
       </div>
       )}

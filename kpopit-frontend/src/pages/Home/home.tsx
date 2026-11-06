@@ -25,7 +25,7 @@ function Home() {
         
         <BackgroundStyle />
             <div className="min-h-full w-full flex flex-col items-center justify-start">
-                <div className="flex flex-col items-center justify-center h-fit w-fit mt-10 sm:mt-25 mb-10 gap-0">
+                <div className="flex flex-col items-center justify-center size-fit mt-10 sm:mt-25 mb-10 gap-0">
                     <Link
                         to="/"
                         className="inline-block bg-transparent border-0 p-0 cursor-pointer
@@ -44,7 +44,7 @@ function Home() {
 
                 </div>
                 
-                <div className="flex w-fit h-fit items-center justify-center mb-15">
+                <div className="flex size-fit items-center justify-center mb-15">
                     <InfoButtons
                         onSubmitChangelog={() => {setShowModal("changelog")}}
                         onSubmitAbout={() => {setShowModal("about")}}
@@ -56,7 +56,7 @@ function Home() {
                 </div>
 
                 {/* Games */}
-                <div className="flex flex-col items-center justify-center w-fit h-fit mb-25">
+                <div className="flex flex-col items-center justify-center size-fit mb-25">
                     <div className="w-full h-fit flex flex-col bg-transparent items-center justify-center gap-6 sm:gap-10">
                         {/* Classic */}
                         <Link
@@ -65,11 +65,11 @@ function Home() {
                             items-center justify-start max-xxs:gap-0 xxs:gap-1 xs:gap-2 shadow-[4px_4px_0px_0px_rgba(255,255,255,1)] hover:shadow-[0px_0px_0px_0px_rgba(255,255,255,1)]
                             hover:bg-black hover:translate-x-1 hover:translate-y-1 transition-all duration-200 transform-gpu
                             active:shadow-[0px_0px_0px_0px_rgba(255,255,255,1)] active:bg-black active:translate-x-1 active:translate-y-1">
-                            <div className="flex w-20 h-20 bg-white/0 rounded-full items-center text-center justify-center">
+                            <div className="flex size-20 bg-white/0 rounded-full items-center text-center justify-center">
                                 <Img
                                     src="/kpopit-icon-svg.svg"
                                     alt="Kpopit Icon"
-                                    className="max-xxs:w-10 max-xxs:h-10 xxs:w-10 xxs:h-10 xs:w-12 xs:h-12 sm:w-12 sm:h-12"
+                                    className="max-xxs:size-10 xxs:size-10 xs:size-12 sm:size-12"
                                     draggable={false} />
                             </div>
 
@@ -107,11 +107,11 @@ function Home() {
                             items-center justify-start max-xxs:gap-0 xxs:gap-1 xs:gap-2 shadow-[4px_4px_0px_0px_rgba(255,255,255,1)] hover:shadow-[0px_0px_0px_0px_rgba(255,255,255,1)]
                             hover:bg-black hover:translate-x-1 hover:translate-y-1 transition-all duration-200 transform-gpu
                             active:shadow-[0px_0px_0px_0px_rgba(255,255,255,1)] active:bg-black active:translate-x-1 active:translate-y-1">
-                            <div className="flex w-20 h-20 bg-white/0 rounded-full items-center text-center justify-center">
+                            <div className="flex size-20 bg-white/0 rounded-full items-center text-center justify-center">
                                 <Img
                                     src="/kpopit-icon-svg.svg"
                                     alt="Kpopit Icon"
-                                    className="max-xxs:w-10 max-xxs:h-10 xxs:w-10 xxs:h-10 xs:w-12 xs:h-12 sm:w-12 sm:h-12 blur-[2px]"
+                                    className="max-xxs:size-10 xxs:size-10 xs:size-12 sm:size-12 blur-[2px]"
                                     draggable={false} />
                             </div>
 
@@ -149,11 +149,11 @@ function Home() {
                             items-center justify-start max-xxs:gap-0 xxs:gap-1 xs:gap-2 shadow-[4px_4px_0px_0px_rgba(255,255,255,1)] hover:shadow-[0px_0px_0px_0px_rgba(255,255,255,1)]
                             hover:bg-black hover:translate-x-1 hover:translate-y-1 transition-all duration-200 transform-gpu
                             active:shadow-[0px_0px_0px_0px_rgba(255,255,255,1)] active:bg-black active:translate-x-1 active:translate-y-1">
-                            <div className="flex w-20 h-20 bg-white/0 rounded-full items-center text-center justify-center">
+                            <div className="flex size-20 bg-white/0 rounded-full items-center text-center justify-center">
                                 <Img
                                     src="/kpopit-icon-svg.svg"
                                     alt="Kpopit Icon"
-                                    className="max-xxs:w-10 max-xxs:h-10 xxs:w-10 xxs:h-10 xs:w-12 xs:h-12 sm:w-12 sm:h-12 [image-rendering:pixelated]"
+                                    className="max-xxs:size-10 xxs:size-10 xs:size-12 sm:size-12 [image-rendering:pixelated]"
                                     draggable={false} />
                             </div>
 
@@ -186,7 +186,7 @@ function Home() {
                     </div>
                 </div>
 
-                <div className="flex h-fit w-fit items-center justify-center text-center">
+                <div className="flex size-fit items-center justify-center text-center">
                     <span className="text-white max-xxs:text-[14px] xxs:text-base xs:text-lg sm:text-lg font-bold brightness-110 [text-shadow:2px_2px_0px_rgba(0,0,0,1)]">
                         Made with ❤️ for K-pop fans
                     </span>

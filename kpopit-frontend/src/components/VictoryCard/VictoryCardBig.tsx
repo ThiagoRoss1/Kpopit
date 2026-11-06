@@ -1,5 +1,6 @@
 //import React from "react";
-import type { GuessedIdolData, YesterdayIdolPick } from "../../interfaces/gameInterfaces";
+import type { GuessedIdolData, YesterdayIdolPick, YesterdayLocked } from "../../interfaces/gameInterfaces";
+import YesterdayLockedCard from "./YesterdayLockedCard";
 import { Link } from "react-router";
 import TargetAttempt from "../../assets/icons/target.svg";
 import RankPosition from "../../assets/icons/ranking-fill.svg";
@@ -21,6 +22,7 @@ interface VictoryCardBigProps {
     idolActiveGroup?: string[] | null;
     attempts: number;
     yesterdayIdolId: number;
+    yesterdayLocked?: YesterdayLocked;
     yesterdayIdol: string;
     yesterdayIdolGroup?: string[] | null;
     yesterdayIdolImage?: YesterdayIdolPick["image_path"];
@@ -65,7 +67,7 @@ return (
                     <Img 
                         src={`${import.meta.env.VITE_IMAGE_BUCKET_URL}${cardInfo.image_path}?v=${cardInfo.image_version}`} 
                         alt="Idol" 
-                        className="max-xxs:w-23 max-xxs:h-23 xxs:w-26 xxs:h-26 xs:w-29 xs:h-29 sm:w-34 sm:h-34 rounded-[48px] sm:rounded-[50px] object-cover object-top transform-gpu" 
+                        className="max-xxs:size-23 xxs:size-26 xs:size-29 sm:size-34 rounded-[48px] sm:rounded-[50px] object-cover object-top transform-gpu" 
                         draggable={false} 
                     />
                 </Link>
@@ -93,7 +95,7 @@ return (
             <div className="relative grid grid-cols-3 gap-5">
                 <div className="relative flex flex-col items-center justify-start text-center max-xxs:h-21.5 xxs:h-21.5 xs:w-27 xs:h-25 xm:w-29 xm:h-25 sm:w-45 sm:h-25 bg-linear-to-br from-[#db3189] to-[#511061] 
                     gap-0.5 rounded-[18px] sm:rounded-[20px]">
-                    <Img src={TargetAttempt} alt="M" className="max-xxs:w-4 max-xxs:h-4 xxs:w-5 xxs:h-5 xs:w-6 xs:h-6 sm:w-6 sm:h-6 mt-2" draggable={false} /> {/* w-27 */}
+                    <Img src={TargetAttempt} alt="M" className="max-xxs:size-4 xxs:size-5 xs:size-6 sm:size-6 mt-2" draggable={false} /> {/* w-27 */}
                     <span className="max-xxs:text-lg xxs:text-[20px] xs:text-[22px] font-bold">
                         {attempts}
                     </span>
@@ -104,7 +106,7 @@ return (
 
                 <div className="relative flex flex-col items-center justify-start text-center max-xxs:h-21.5 xxs:h-21.5 xs:w-27 xs:h-25 xm:w-29 xm:h-25 sm:w-45 sm:h-25 bg-linear-to-br from-[#7a4de4] to-[#1f2686] 
                     gap-0.5 rounded-[18px] sm:rounded-[20px]">
-                    <Img src={RankPosition} alt="P" className="max-xxs:w-4 max-xxs:h-4 xxs:w-5 xxs:h-5 xs:w-6 xs:h-6 sm:w-6 sm:h-6 mt-2" draggable={false} />
+                    <Img src={RankPosition} alt="P" className="max-xxs:size-4 xxs:size-5 xs:size-6 sm:size-6 mt-2" draggable={false} />
                     <span className="max-xxs:text-lg xxs:text-[20px] xs:text-[22px] font-bold">
                         {userRank ?? "-"}
                     </span>
@@ -115,7 +117,7 @@ return (
 
                 <div className="relative flex flex-col items-center justify-start text-center max-xxs:h-21.5 xxs:h-21.5 xs:w-27 xs:h-25 xm:w-29 xm:h-25 sm:w-45 sm:h-25 bg-linear-to-br from-[#ec5e65] to-[#802256] 
                     gap-0.5 rounded-[18px] sm:rounded-[20px]">
-                    <Img src={PositionTrend} alt="S" className="max-xxs:w-4 max-xxs:h-4 xxs:w-5 xxs:h-5 xs:w-6 xs:h-6 sm:w-6 sm:h-6 mt-2" draggable={false} />
+                    <Img src={PositionTrend} alt="S" className="max-xxs:size-4 xxs:size-5 xs:size-6 sm:size-6 mt-2" draggable={false} />
                     <span className="max-xxs:text-lg xxs:text-[20px] xs:text-[22px] font-bold">
                         {userScore?.toFixed(2)}
                     </span>
@@ -127,17 +129,18 @@ return (
         </div>
 
         {/* Yesterday's idol container */}
+        {props.yesterdayLocked && <YesterdayLockedCard mode="classic" day={props.yesterdayLocked} />}
         {yesterdayIdol && yesterdayIdolGroup && yesterdayIdolImage && (
         <div className="relative w-full h-fit sm:h-50 mb-5 px-4 sm:px-6">
             <div className="relative w-full h-full items-center justify-center sm:text-center bg-linear-to-r from-gray-600 to-gray-900 
             shadow-[0_0_4px_2px_rgba(0,0,0,0.2),inset_2px_2px_4px_2px_rgba(0,0,0,0.2)] border border-white/35 py-4 rounded-[20px] overflow-hidden
             hover:scale-102 hover:brightness-110 hover:bg-linear-to-r transition-all duration-500 transform-gpu">
-                <div className="relative w-full h-full flex flex-col items-center justify-between gap-1">
+                <div className="relative size-full flex flex-col items-center justify-between gap-1">
                     <span className="max-xxs:text-lg xxs:text-lg xs:text-xl sm:text-2xl font-bold select-none">
                         Yesterday's idol was
                     </span>
 
-                    <div className="flex flex-row w-full h-full items-center justify-start max-xxs:pr-0 xxs:pr-2 xs:pr-4 xm:pr-2 sm:pr-4 ml-10 sm:ml-20 gap-2 sm:gap-6">
+                    <div className="flex flex-row size-full items-center justify-start max-xxs:pr-0 xxs:pr-2 xs:pr-4 xm:pr-2 sm:pr-4 ml-10 sm:ml-20 gap-2 sm:gap-6">
                         <Link
                             to={`/idols/${yesterdayIdolId}/${buildIdolSlug(yesterdayIdol, yesterdayGroup)}`}>
                             <Img 
@@ -157,7 +160,7 @@ return (
                         </div>
                     </div>
                     
-                    <div className="flex w-full h-full items-center justify-center">
+                    <div className="flex size-full items-center justify-center">
                         <span className="max-xxs:text-[12px] xxs:text-[12px] xs:text-[14px] sm:text-base">
                             Next idol in {nextReset().formattedTime}
                         </span>
@@ -174,8 +177,8 @@ return (
                 rounded-xl hover:bg-black hover:brightness-105 hover:scale-105 hover:cursor-pointer transition-transform duration-500 transform-gpu" 
                 onClick={() => onShareClick?.()}
             >
-                <div className="relative flex flex-row w-full h-full items-center justify-center text-center gap-3">
-                    <Share2 className="max-xxs:w-4 max-xxs:h-4 xxs:w-4 xxs:h-4 xs:w-5 xs:h-5 sm:w-6 sm:h-6" />
+                <div className="relative flex flex-row size-full items-center justify-center text-center gap-3">
+                    <Share2 className="max-xxs:size-4 xxs:size-4 xs:size-5 sm:size-6" />
                     <span className="max-xxs:text-base xxs:text-base xs:text-[18px] sm:text-xl">Share Results</span>
                 </div>
             </button>
@@ -183,7 +186,7 @@ return (
 
         {/* Other Game Modes */}
         <div className="relative w-full sm:h-fit mb-5 px-4 sm:px-6">
-            <div className="relative flex flex-col w-full h-full items-start justify-start text-center gap-1 mt-4">
+            <div className="relative flex flex-col size-full items-start justify-start text-center gap-1 mt-4">
                 <span className="text-[14px] sm:text-base drop-shadow-2xl">Other Game Modes</span>
                 
                 <div className="relative flex w-full h-fit sm:h-fit items-center justify-start text-center px-3.5 bg-transparent 
@@ -201,7 +204,7 @@ return (
                                             src="/kpopit-icon-svg.svg"
                                             alt="Kpopit Icon"
                                             draggable={false}
-                                            className={`${mode.photoSpecs} w-10 h-10 sm:w-11 sm:h-11 object-contain`}
+                                            className={`${mode.photoSpecs} size-10 sm:size-11 object-contain`}
                                         />
                                         <span className="absolute text-white font-semibold text-sm [text-shadow:1px_1px_4px_rgba(0,0,0,0.7)]">{mode.name}</span>
                                     </div>
