@@ -3,6 +3,7 @@ import csv
 import os
 from utils.env import load_local_env
 from services.get_db import get_manual_db
+from services.inkit_mode import SEED_PHOTOS_FROM_BLURRY_SQL
 
 load_local_env()
 DATA_FOLDER = os.getenv("DATA_FOLDER")
@@ -163,6 +164,9 @@ def run_seed():
                     "idol_id", "blur_image_path", "is_active", "blur_image_version"
                 ]
                 seed_table(cursor, BLURRY_IDOLS_CSV_FILE, 'blurry_mode_data', blurry_idols_columns, conflict_column=["idol_id"])
+
+                # InkIt photos: a Blurry photo without an InkIt row gets one (opaque path, new rows only)
+                cursor.execute(SEED_PHOTOS_FROM_BLURRY_SQL)
 
                 # Albums Table Seeding
                 albums_columns = [
