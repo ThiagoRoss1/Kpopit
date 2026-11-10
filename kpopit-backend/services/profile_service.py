@@ -136,7 +136,7 @@ class ProfileService:
         return dict(row) if row else None
 
     def _activity(self, cursor, user_id: int, today: date) -> list[dict]:
-        """Heatmap of the last ACTIVITY_DAYS days: how many modes were played each day (0-3)."""
+        """Heatmap of the last ACTIVITY_DAYS days: how many modes were played each day (0 to the number of modes)."""
         cursor.execute(
             """
                 SELECT date, COUNT(DISTINCT gamemode_id) AS modes

@@ -6,7 +6,7 @@ import os
 from utils.dates import utc_now
 
 COLLECTION_ENABLED = os.getenv("COLLECTION_ENABLED", "false").lower() == "true"
-COLLECTION_GAMEMODE_IDS = (1, 2)
+COLLECTION_GAMEMODE_IDS = (1, 2, 4)
 SOLOIST_GROUP_ID = 20  # Soloists' page closes the album
 EST = ZoneInfo("America/New_York")
 

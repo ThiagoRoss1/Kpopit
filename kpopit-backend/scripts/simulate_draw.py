@@ -11,7 +11,7 @@ from services.daily_draw import _MODES, DrawItem, draw
 from services.get_db import get_manual_db, pool
 from utils.dates import get_today_date
 
-MODE_NAMES = {1: "Classic", 2: "Blurry", 3: "Pixelated"}
+MODE_NAMES = {1: "Classic", 2: "Blurry", 3: "Pixelated", 4: "InkIt"}
 RETURN_WINDOW = 30
 
 

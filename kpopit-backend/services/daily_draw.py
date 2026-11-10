@@ -9,6 +9,7 @@ import random
 from dataclasses import dataclass
 from datetime import date, timedelta
 
+from services.inkit_mode import DRAFT_KEEP_DAYS
 from utils.dates import get_today_date
 
 logger = logging.getLogger(__name__)
@@ -31,7 +32,8 @@ class DrawItem:
 
 
 # Per mode: the daily_picks column, plus eligible items with their entry date.
-# Eligibility matches what each mode used before this draw.
+# Eligibility matches what each mode used before this draw. `new_day` runs once a day,
+# when the mode's next pick is drawn (the mode's daily cleanup).
 _MODES = {
     1: {
         "column": "idol_id",
@@ -48,6 +50,16 @@ _MODES = {
     3: {
         "column": "album_id",
         "eligible": "SELECT a.id, a.created_at::date AS entry_date FROM albums a WHERE a.is_published = TRUE",
+    },
+    4: {
+        "column": "idol_id",
+        "eligible": """
+            SELECT i.id, m.created_at::date AS entry_date FROM idols i
+            JOIN inkit_mode_data m ON m.idol_id = i.id AND m.is_active = TRUE
+            WHERE i.is_published = TRUE
+        """,
+        # updated_at, not the game date: a past day played today through the calendar survives.
+        "new_day": f"DELETE FROM inkit_drafts WHERE updated_at < CURRENT_TIMESTAMP - INTERVAL '{DRAFT_KEEP_DAYS} days'",
     },
 }
 
@@ -187,9 +199,13 @@ def ensure_daily_picks(cursor, gamemode_id: int, rng: random.Random | None = Non
             (today, today_id, today),
         )
 
+    tomorrow = today + timedelta(days=1)
     cursor.execute("SAVEPOINT draw_tomorrow")
     try:
-        ensure_pick(cursor, gamemode_id, today + timedelta(days=1), rng)
+        is_new_day = _read_pick(cursor, gamemode_id, tomorrow) is None
+        ensure_pick(cursor, gamemode_id, tomorrow, rng)
+        if is_new_day and _MODES[gamemode_id].get("new_day"):
+            cursor.execute(_MODES[gamemode_id]["new_day"])
         cursor.execute("RELEASE SAVEPOINT draw_tomorrow")
     except Exception as error:
         cursor.execute("ROLLBACK TO SAVEPOINT draw_tomorrow")

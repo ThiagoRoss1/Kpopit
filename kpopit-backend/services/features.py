@@ -4,6 +4,7 @@ Values are the flags the backend already reads at import; only booleans, never s
 """
 import services.calendar_service as calendar_service
 import services.collections_service as collections_service
+import services.inkit_mode as inkit_mode
 import services.profile_service as profile_service
 import services.xp_service as xp_service
 
@@ -12,6 +13,7 @@ _FLAGS = {
     "idol_xp": lambda: xp_service.IDOL_XP_ENABLED,
     "public_profile": lambda: profile_service.PUBLIC_PROFILE_ENABLED,
     "collection": lambda: collections_service.COLLECTION_ENABLED,
+    "inkit": lambda: inkit_mode.INKIT_ENABLED,
 }
 
 

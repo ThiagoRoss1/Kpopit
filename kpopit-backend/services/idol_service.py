@@ -1,4 +1,5 @@
 from repositories.idol_repository import IdolRepository, CURRENT_CAREER_CTE
+import services.inkit_mode as inkit_mode
 
 
 class IdolService:
@@ -62,6 +63,10 @@ class IdolService:
                 AND bi.is_active = TRUE
             """, (idol_id,))
         game_modes["Blurry"] = cursor.fetchone() is not None
+
+        if inkit_mode.INKIT_ENABLED:
+            cursor.execute("SELECT 1 FROM inkit_mode_data WHERE idol_id = %s AND is_active = TRUE", (idol_id,))
+            game_modes["InkIt"] = cursor.fetchone() is not None
 
         return {
             "idol_profile": {

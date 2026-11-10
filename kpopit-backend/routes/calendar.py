@@ -9,6 +9,8 @@ calendar_bp = Blueprint("calendar", __name__)
 
 logger = logging.getLogger(__name__)
 
+MAX_GUESS_BODY_BYTES = 64 * 1024
+
 
 def _caller_id(cursor):
     """(user_id, None) for a logged-in or anonymous caller, else (None, error response)."""
@@ -66,6 +68,9 @@ def calendar_guess(mode, day):
     """A guess on a challenge day; same response as the mode's live guess route."""
     if mode not in MODES:
         return jsonify({"error": "Not found"}), 404
+    # The largest body is an InkIt guess: its drawing (at most 32 KB, base64) plus small fields.
+    if (request.content_length or 0) > MAX_GUESS_BODY_BYTES:
+        return jsonify({"error": "Invalid request"}), 400
     data = request.get_json() or {}
     guessed_id = data.get("guessed_album_id" if mode == "pixelated" else "guessed_idol_id")
     analytics_data = get_analytics_data() or {}
@@ -78,7 +83,9 @@ def calendar_guess(mode, day):
         user_id, error = _caller_id(cursor)
         if error:
             return error
-        result = CalendarService(connect, get_idol_repo()).guess(cursor, user_id, mode, day, guessed_id, analytics_data)
+        result = CalendarService(connect, get_idol_repo()).guess(
+            cursor, user_id, mode, day, guessed_id, analytics_data, draft=data.get("draft"),
+        )
         return jsonify(result), 200
     except CalendarError as err:
         connect.rollback()
