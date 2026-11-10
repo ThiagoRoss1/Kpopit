@@ -42,6 +42,7 @@ function backendEnv() {
     MAINTENANCE_MODE: 'false',
     CALENDAR_ENABLED: 'false',
     IDOL_XP_ENABLED: 'false',
+    INKIT_ENABLED: 'false',
     PUBLIC_PROFILE_ENABLED: 'false',
     ADMIN_ENABLED: 'false',
     RESEND_API_KEY: '',

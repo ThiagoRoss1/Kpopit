@@ -46,7 +46,7 @@ Start a test backend with both set plus explicit safe values; empty is safe now 
 
 ```
 PYTHON_DOTENV_DISABLED=1  FLASK_SKIP_DOTENV=1  FLASK_ENV=development  DB_URL=<local test DB>
-COLLECTION_ENABLED=true  CALENDAR_ENABLED=false  IDOL_XP_ENABLED=false  PUBLIC_PROFILE_ENABLED=false
+COLLECTION_ENABLED=true  CALENDAR_ENABLED=false  IDOL_XP_ENABLED=false  PUBLIC_PROFILE_ENABLED=false  INKIT_ENABLED=false
 RESEND_API_KEY=  EMAIL_DELIVERY=outbox  EMAIL_OUTBOX_DIR=<a gitignored folder>  RESEND_EMAIL_FRONTEND_URL=http://localhost:5173
 BACKUP_AUTH_KEY=  ACCOUNT_PURGE_AUTH_KEY=  BACKUP_DB_URL=  and every R2_* name empty (storage off)
 ```

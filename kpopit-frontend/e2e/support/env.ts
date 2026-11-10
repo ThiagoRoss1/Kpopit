@@ -36,6 +36,7 @@ const R2_VARS = [
 const DISABLED = {
   CALENDAR_ENABLED: 'false',
   IDOL_XP_ENABLED: 'false',
+  INKIT_ENABLED: 'false',
   PUBLIC_PROFILE_ENABLED: 'false',
   BACKUP_AUTH_KEY: '',
   ACCOUNT_PURGE_AUTH_KEY: '',

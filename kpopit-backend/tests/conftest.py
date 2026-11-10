@@ -59,6 +59,7 @@ os.environ["ADMIN_ENABLED"] = "true"
 os.environ["PUBLIC_PROFILE_ENABLED"] = "true"
 os.environ["CALENDAR_ENABLED"] = "true"
 os.environ["IDOL_XP_ENABLED"] = "true"
+os.environ["INKIT_ENABLED"] = "true"
 # No test may reach Resend: emails go to a per-test outbox (see the email_outbox fixture).
 os.environ["EMAIL_DELIVERY"] = "outbox"
 os.environ["RESEND_API_KEY"] = ""
@@ -83,6 +84,8 @@ TRUNCATE_SQL = """
         yesterday_picks,
         albums,
         blurry_mode_data,
+        inkit_mode_data,
+        inkit_drafts,
         user_cards,
         cards,
         collection_group_eligibility,
@@ -105,7 +108,8 @@ SEED_GAMEMODES_SQL = """
     INSERT INTO gamemodes (id, name, description, is_active) VALUES
         (1, 'classic',   'classic',   TRUE),
         (2, 'blurry',    'blurry',    TRUE),
-        (3, 'pixelated', 'pixelated', FALSE)
+        (3, 'pixelated', 'pixelated', FALSE),
+        (4, 'inkit',     'inkit',     FALSE)
     ON CONFLICT (id) DO NOTHING
 """
 
