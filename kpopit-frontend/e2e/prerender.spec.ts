@@ -116,6 +116,9 @@ test.describe('prerendered pages without JavaScript', () => {
   test('the build writes a sitemap of the prerendered pages', async ({ request }) => {
     const sitemap = await (await request.get(`${PREVIEW}/sitemap.xml`)).text();
     const locs = [...sitemap.matchAll(/<loc>([^<]*)<\/loc>/g)].map((m) => m[1]);
+    // The E2E backend runs with INKIT_ENABLED off: no /inkit page in the build or the sitemap.
+    expect(locs).not.toContain('https://kpopit.net/inkit');
+    expect(fs.existsSync(path.join(FRONTEND, 'build/client/inkit/index.html'))).toBe(false);
     const pages = ['/', '/classic', '/blurry', '/pixelated', '/idols', '/privacy-policy', '/contact', '/about', '/how-to-play', '/faq', '/blog', '/changelog', ...BLOG_POSTS, '/albums'];
     for (const p of pages) expect(locs).toContain(`https://kpopit.net${p}`);
     expect(locs).toContain(`https://kpopit.net/idols/${idol.id}/${slug(idol)}`);

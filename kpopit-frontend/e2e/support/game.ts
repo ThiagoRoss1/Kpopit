@@ -15,12 +15,14 @@ export const DATE_KEY: Record<ModeName, string> = {
   classic: 'gameDate',
   blurry: 'blurryGameDate',
   pixelated: 'pixelatedGameDate',
+  inkit: 'inkitGameDate',
 };
 
 const SEARCH_PLACEHOLDER: Record<ModeName, string> = {
   classic: 'Search for an idol or group...',
   blurry: 'Search for an idol or group...',
   pixelated: 'Type an album or group…',
+  inkit: "Type an idol's name...",
 };
 
 const escapeRe = (s: string) => s.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
@@ -29,8 +31,8 @@ export const searchInput = (page: Page, mode: ModeName): Locator =>
   page.getByPlaceholder(SEARCH_PLACEHOLDER[mode]);
 
 export const victoryMarker = (page: Page, mode: ModeName): Locator =>
-  mode === 'pixelated'
-    ? page.getByText('Score', { exact: true })
+  mode === 'pixelated' ? page.getByText('Score', { exact: true })
+    : mode === 'inkit' ? page.getByTestId('inkit-victory')
     : page.getByText('Share Results', { exact: true });
 
 // Wait for the stored server date, then for the usable search (its placeholder changes once the
@@ -141,7 +143,10 @@ export async function guessAlbum(page: Page, album: AlbumEntry): Promise<void> {
   expect((await response).ok()).toBeTruthy();
 }
 
-export async function winGame(page: Page, mode: ModeName, wrong = 0): Promise<number> {
+/** The modes played through the shared search helpers (InkIt has its own spec helpers). */
+export type SearchMode = Exclude<ModeName, 'inkit'>;
+
+export async function winGame(page: Page, mode: SearchMode, wrong = 0): Promise<number> {
   await openGame(page, mode);
   if (mode === 'pixelated') {
     const answer = await answerAlbum(page);

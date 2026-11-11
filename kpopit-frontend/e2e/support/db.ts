@@ -19,7 +19,7 @@ export async function closeDb(): Promise<void> {
   pool = null;
 }
 
-export const GAMEMODE = { classic: 1, blurry: 2, pixelated: 3 } as const;
+export const GAMEMODE = { classic: 1, blurry: 2, pixelated: 3, inkit: 4 } as const;
 export type ModeName = keyof typeof GAMEMODE;
 
 // From daily_picks, not the API payload, which will stop exposing the answer.
@@ -36,11 +36,13 @@ export async function dailyPick(mode: ModeName, date: string): Promise<number> {
 // Fresh databases need a past pick, while existing calendar picks must stay intact.
 export async function ensurePastPick(mode: ModeName, date: string, today: string): Promise<void> {
   const [table, column] = mode === 'pixelated' ? ['albums', 'album_id'] : ['idols', 'idol_id'];
+  // InkIt only draws idols that have an InkIt photo.
+  const eligible = mode === 'inkit' ? 'AND EXISTS (SELECT 1 FROM inkit_mode_data m WHERE m.idol_id = item.id AND m.is_active)' : '';
 
   await db().query(
     `INSERT INTO daily_picks (pick_date, ${column}, gamemode_id)
      SELECT $1, item.id, $2 FROM ${table} item
-      WHERE item.is_published
+      WHERE item.is_published ${eligible}
         AND item.id IS DISTINCT FROM (SELECT ${column} FROM daily_picks WHERE pick_date = $3 AND gamemode_id = $2)
       ORDER BY item.id LIMIT 1
      ON CONFLICT (pick_date, gamemode_id) DO NOTHING`,
@@ -151,4 +153,16 @@ export async function deletionRequested(userId: number): Promise<boolean> {
 export async function idolName(idolId: number): Promise<string> {
   const { rows } = await db().query('SELECT artist_name FROM idols WHERE id = $1', [idolId]);
   return rows[0].artist_name;
+}
+
+/** The InkIt photo path of an idol (what the day payload sends instead of her name). */
+export async function inkitPhotoPath(idolId: number): Promise<string> {
+  const { rows } = await db().query('SELECT image_path FROM inkit_mode_data WHERE idol_id = $1', [idolId]);
+  return rows[0].image_path as string;
+}
+
+/** The drawing saved with the player's last InkIt guess of a day (size in bytes), or null. */
+export async function inkitDraftSize(userId: number, date: string): Promise<number | null> {
+  const { rows } = await db().query('SELECT octet_length(masks) AS size FROM inkit_drafts WHERE user_id = $1 AND game_date = $2', [userId, date]);
+  return rows[0]?.size ?? null;
 }
