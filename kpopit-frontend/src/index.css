@@ -27,6 +27,7 @@
   --font-caveat: 'Caveat', cursive;
   --font-mono-display: 'Major Mono Display', monospace;
   --font-korean: 'Noto Sans KR', sans-serif;
+  --font-script: 'Kaushan Script', cursive;
 }
 
 /* Puff Pop (docs/design-system/tokens/puffpop.css). Day is the default; data-theme="night" on any
