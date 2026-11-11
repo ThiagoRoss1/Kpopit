@@ -17,10 +17,16 @@ GROUP_CA_CSV_FILE = os.path.join(DATA_FOLDER, "group_company_affiliation.csv")
 IDOL_CA_CSV_FILE = os.path.join(DATA_FOLDER, "idol_company_affiliation.csv")
 GAME_MODES_CSV_FILE = os.path.join(DATA_FOLDER, "gamemodes.csv")
 BLURRY_IDOLS_CSV_FILE = os.path.join(DATA_FOLDER, "blurry_idols.csv")
+INKIT_IDOLS_CSV_FILE = os.path.join(DATA_FOLDER, "inkit_idols.csv")
 ALBUMS_CSV_FILE = os.path.join(DATA_FOLDER, "albums.csv")
 COLLECTIONS_CSV_FILE= os.path.join(DATA_FOLDER, "collections.csv")
 COLLECTION_GROUP_ELIGIBILITY_CSV_FILE = os.path.join(DATA_FOLDER, "collection_group_eligibility.csv")
 GROUP_FEATURES_CSV_FILE = os.path.join(DATA_FOLDER, "group_features.csv")
+
+def csv_has_rows(csv_file):
+    """True when the CSV has at least one data row under its header."""
+    with open(csv_file, "r", encoding="utf-8") as file:
+        return next(csv.DictReader(file), None) is not None
 
 def seed_table(cursor, csv_file, table_name, columns, conflict_column=None):
     """Read data from a CSV file and insert it into a database table."""
@@ -165,8 +171,15 @@ def run_seed():
                 ]
                 seed_table(cursor, BLURRY_IDOLS_CSV_FILE, 'blurry_mode_data', blurry_idols_columns, conflict_column=["idol_id"])
 
-                # InkIt photos: a Blurry photo without an InkIt row gets one (opaque path, new rows only)
-                cursor.execute(SEED_PHOTOS_FROM_BLURRY_SQL)
+                # InkIt idol Table Seeding (image_path must be opaque: it reaches the browser before the win)
+                inkit_idols_columns = [
+                    "idol_id", "image_path", "is_active", "image_version"
+                ]
+                seed_table(cursor, INKIT_IDOLS_CSV_FILE, 'inkit_mode_data', inkit_idols_columns, conflict_column=["idol_id"])
+
+                # Until inkit_idols.csv has rows, the Blurry photos stand in as placeholders
+                if not csv_has_rows(INKIT_IDOLS_CSV_FILE):
+                    cursor.execute(SEED_PHOTOS_FROM_BLURRY_SQL)
 
                 # Albums Table Seeding
                 albums_columns = [

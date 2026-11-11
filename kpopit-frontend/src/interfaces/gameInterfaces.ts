@@ -30,6 +30,8 @@ export interface IdolListItem {
   companies: string[];
   blur_image_path?: string | null;
   blur_image_version?: string | null;
+  /** Only while the inkit flag is on: InkIt can draw her (she has an InkIt photo). */
+  has_inkit_photo?: boolean;
 }
 
 export interface FeedbackItem {

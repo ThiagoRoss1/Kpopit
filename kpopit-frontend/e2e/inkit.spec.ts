@@ -52,7 +52,7 @@ async function todaysAnswer(page: Page): Promise<{ answer: IdolEntry; wrong: Ido
   // Unique names only: the suggestion filter picks by name.
   const names = new Set<string>();
   const wrong = idols.filter((idol) => {
-    if (idol.id === answerId || names.has(idol.artist_name) || idol.artist_name === answer.artist_name) return false;
+    if (idol.id === answerId || !idol.has_inkit_photo || names.has(idol.artist_name) || idol.artist_name === answer.artist_name) return false;
     names.add(idol.artist_name);
     return true;
   }).slice(0, 10);

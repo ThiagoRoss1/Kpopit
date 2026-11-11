@@ -72,7 +72,7 @@ const DepthPhoto = ({ to, name, src, className }: { to: string; name: string; sr
         <Link to={to} aria-label={`${name} profile`} className={cn("inkit-photo pp-focus relative block flex-none rounded-3xl", className)}>
             <span aria-hidden className="inkit-photo-depth absolute inset-0 translate-x-1 translate-y-1.25 rounded-3xl border-2 border-(--ink) bg-[#FF8AC4]" />
             <span className="relative block size-full overflow-hidden rounded-3xl border-2 border-(--ink) transform-gpu">
-                <img src={src ?? undefined} alt={name} draggable={false} className="block size-full object-cover" />
+                <img src={src ?? undefined} alt={name} draggable={false} className="block size-full object-cover object-center" />
             </span>
         </Link>
     );
@@ -236,7 +236,7 @@ const InkVictory = ({
                                             src={resolveCdnUrl(mode.image) ?? undefined}
                                             alt=""
                                             draggable={false}
-                                            className={cn("block size-full scale-[1.06] object-cover", mode.imageClass)}
+                                            className={cn("block size-full scale-[1.06] object-cover object-center", mode.imageClass)}
                                         />
                                     </span>
                                     <span className="font-bold text-[13px]">{mode.name}</span>

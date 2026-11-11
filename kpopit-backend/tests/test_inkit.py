@@ -592,8 +592,27 @@ def test_idol_page_and_search_list(client, game):
     profile = client.get(f"/api/idols-page/{game['answer']}").get_json()
     assert profile["game_info"]["game_modes_available"]["InkIt"] is True
 
-    # The search list must never map an opaque InkIt path to an idol.
-    assert "/images/inkit/" not in client.get("/api/idols-list").get_data(as_text=True)
+    # The search list must never map an opaque InkIt path to an idol, only say who InkIt can draw.
+    listing = client.get("/api/idols-list")
+    assert "/images/inkit/" not in listing.get_data(as_text=True)
+    flags = {idol["id"]: idol["has_inkit_photo"] for idol in listing.get_json()}
+    assert flags[game["answer"]] is True and all(flags[idol] for idol in game["wrong"])
+
+
+def test_search_list_leaves_out_idols_without_an_inkit_photo(client, make_idol, monkeypatch):
+    no_photo = make_idol("No InkIt Photo")
+    assert next(i for i in client.get("/api/idols-list").get_json() if i["id"] == no_photo)["has_inkit_photo"] is False
+
+    monkeypatch.setattr("services.inkit_mode.INKIT_ENABLED", False)
+    assert "has_inkit_photo" not in client.get("/api/idols-list").get_json()[0]
+
+
+def test_seed_csv_header_matches_the_table():
+    import csv
+    from pathlib import Path
+
+    with open(Path(__file__).parents[1] / "data/inkit_idols.csv", encoding="utf-8") as file:
+        assert next(csv.reader(file)) == ["idol_id", "image_path", "is_active", "image_version"]
 
 
 def test_gamemodes_count_follows_the_flag(client, monkeypatch):

@@ -65,11 +65,11 @@ const InkGuessRows = ({ rows, settledCount }: InkGuessRowsProps) => {
                                 isNew && "animate-[ikPhoto_1.05s_cubic-bezier(.3,.75,.35,1)_.15s_backwards]",
                             )}
                         >
-                            {!isNew && <img src={photo} alt="" draggable={false} className="block size-full object-cover" />}
+                            {!isNew && <img src={photo} alt="" draggable={false} className="block size-full object-cover object-center" />}
 
                             {isNew && (
                                 <>
-                                    <img src={photo} alt="" draggable={false} className="absolute inset-0 block size-full object-cover opacity-50 brightness-[1.2] contrast-[1.7] grayscale" />
+                                    <img src={photo} alt="" draggable={false} className="absolute inset-0 block size-full object-cover object-center opacity-50 brightness-[1.2] contrast-[1.7] grayscale" />
 
                                     {STROKES.map((stroke) => (
                                         <img
@@ -78,7 +78,7 @@ const InkGuessRows = ({ rows, settledCount }: InkGuessRowsProps) => {
                                             alt=""
                                             draggable={false}
                                             style={{ "--t": stroke.top, "--b": stroke.bottom, animation: stroke.animation } as CSSProperties}
-                                            className="absolute inset-0 block size-full object-cover"
+                                            className="absolute inset-0 block size-full object-cover object-center"
                                         />
                                     ))}
                                 </>

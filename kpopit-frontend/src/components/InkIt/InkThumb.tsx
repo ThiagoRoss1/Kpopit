@@ -12,7 +12,7 @@ const InkThumb = ({ className }: { className?: string }) => {
                 src={resolveCdnUrl(INKIT_PHOTO) ?? undefined}
                 alt=""
                 draggable={false}
-                className="block size-full object-cover contrast-[1.3] grayscale"
+                className="block size-full object-cover object-center contrast-[1.3] grayscale"
             />
             <span aria-hidden className="inkit-paper-thumb pointer-events-none absolute inset-0" />
         </span>

@@ -126,7 +126,6 @@ const InkSearch = ({ idols, triedIds, isPending, winnerCount, onGuess }: InkSear
                         className={cn(
                             "h-11.5 min-w-0 flex-1 rounded-full border-0 bg-(--ik-field) px-4.5 outline-0 max-[900px]:h-10",
                             "font-semibold text-base text-(--chip-ink) placeholder:text-(--muted) placeholder:opacity-100 max-[900px]:text-[15px]",
-                            "focus-visible:ring-2 focus-visible:ring-[#FF70B8]",
                         )}
                     />
 
@@ -177,7 +176,7 @@ const InkSearch = ({ idols, triedIds, isPending, winnerCount, onGuess }: InkSear
                                             <Img
                                                 src={photo}
                                                 alt=""
-                                                className={cn("size-10 flex-none rounded-full border-2 border-(--ink) bg-(--chip-hover) object-cover", tried && "grayscale")}
+                                                className={cn("size-10 flex-none rounded-full border-2 border-(--ink) bg-(--chip-hover) object-cover object-center", tried && "grayscale")}
                                             />
                                         )}
 

@@ -553,7 +553,12 @@ const darkness = (source: CanvasLike): Float32Array => {
 export const buildLayers = (image: CanvasImageSource, seed: number, makeCanvas: MakeCanvas): Layers => {
     const full = makeCanvas();
     const target = context(full);
-    target.drawImage(image, 0, 0, SHEET_SIDE, SHEET_SIDE);
+
+    // A non-square photo is cropped to its centred square, never stretched.
+    const width = "naturalWidth" in image ? image.naturalWidth : SHEET_SIDE;
+    const height = "naturalHeight" in image ? image.naturalHeight : SHEET_SIDE;
+    const crop = Math.min(width, height);
+    target.drawImage(image, (width - crop) / 2, (height - crop) / 2, crop, crop, 0, 0, SHEET_SIDE, SHEET_SIDE);
 
     const fullSource = full as unknown as CanvasImageSource;
 

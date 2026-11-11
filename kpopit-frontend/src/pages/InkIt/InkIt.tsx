@@ -452,6 +452,9 @@ const InkItGame = ({ data, idols, isCalendarDay }: InkItGameProps) => {
     }), [guesses, idolById, idolHref]);
 
     const triedIds = useMemo(() => guesses.map((guess) => guess.idol_id), [guesses]);
+    // Only the idols InkIt can draw are worth guessing; the full list still names past rows. A list
+    // cached before the field existed has no flags at all and is shown whole until it refreshes.
+    const guessable = useMemo(() => idols.filter((idol) => idol.has_inkit_photo !== false), [idols]);
 
     const yesterdayData = yesterdayIdol.data;
     const yesterday: YesterdayInfo | null = !yesterdayData || !("yesterdays_pick_date" in yesterdayData) ? null : yesterdayData.locked
@@ -568,7 +571,7 @@ const InkItGame = ({ data, idols, isCalendarDay }: InkItGameProps) => {
                 <div className="relative z-20 w-full max-w-140 justify-self-center [grid-area:search]">
                     {phase !== "won" && (
                         <InkSearch
-                            idols={idols}
+                            idols={guessable}
                             triedIds={triedIds}
                             isPending={guessMutation.isPending || finished}
                             winnerCount={isCalendarDay ? null : dailyUserCount.data?.user_count ?? 0}

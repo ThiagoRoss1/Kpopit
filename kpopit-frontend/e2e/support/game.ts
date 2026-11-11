@@ -6,6 +6,7 @@ export type IdolEntry = {
   artist_name: string;
   active_group: string | null;
   blur_image_path?: string | null;
+  has_inkit_photo?: boolean;
 };
 
 export type AlbumEntry = { id: number; name: string; group_name: string };
