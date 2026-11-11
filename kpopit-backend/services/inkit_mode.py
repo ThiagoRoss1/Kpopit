@@ -11,14 +11,15 @@ INKIT_ENABLED = os.getenv("INKIT_ENABLED", "false").lower() == "true"
 INKIT_GAMEMODE_ID = 4
 INKIT_MODE = {"inkit": INKIT_GAMEMODE_ID} if INKIT_ENABLED else {}
 
-# Rounds: round N is the Nth guess being made (1 + guesses already recorded).
+# Rounds: round N is the Nth guess being made (wrong guesses + 1). Same numbers as INKIT_CONFIG in
+# kpopit-frontend/src/features/inkit/config.ts (test_inkit checks both sides agree).
 INK_HINT_ROUND = 5
 GROUP_HINT_ROUND = 8
 
-# Drawing blob: 1 version byte + zlib deflate of three 250x250 masks at 4 bits per value.
+# Drawing: zlib deflate of [version byte, three 250x250 masks at 4 bits per value], as base64.
 DRAFT_VERSION = 1
 DRAFT_MASK_SIDE = 250
-DRAFT_RAW_LENGTH = 3 * DRAFT_MASK_SIDE * DRAFT_MASK_SIDE // 2
+DRAFT_RAW_LENGTH = 1 + 3 * DRAFT_MASK_SIDE * DRAFT_MASK_SIDE // 2
 DRAFT_MAX_BYTES = 32 * 1024
 DRAFT_KEEP_DAYS = 2
 

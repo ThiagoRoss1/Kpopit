@@ -21,8 +21,9 @@ class InkItError(Exception):
 
 
 def decode_draft(raw) -> bytes | None:
-    """The drawing blob of a guess (base64 in the body), checked: size cap, format version and the
-    exact inflated length. None when the guess carries no drawing; InkItError for anything else."""
+    """The drawing of a guess (base64 of the deflated [version byte + packed masks]), checked: the
+    compressed size cap, then the inflated length and version. None when the guess carries no
+    drawing; InkItError for anything else. Stored as sent (compressed)."""
     if raw is None:
         return None
     if not isinstance(raw, str) or not raw or len(raw) > DRAFT_MAX_BASE64:
@@ -31,16 +32,17 @@ def decode_draft(raw) -> bytes | None:
         blob = base64.b64decode(raw, validate=True)
     except (binascii.Error, ValueError):
         raise InkItError("Invalid drawing") from None
-    if len(blob) < 2 or len(blob) > DRAFT_MAX_BYTES or blob[0] != DRAFT_VERSION:
+    if not blob or len(blob) > DRAFT_MAX_BYTES:
         raise InkItError("Invalid drawing")
 
     # max_length stops a small blob from inflating past the expected size.
     inflater = zlib.decompressobj()
     try:
-        masks = inflater.decompress(blob[1:], DRAFT_RAW_LENGTH + 1)
+        packed = inflater.decompress(blob, DRAFT_RAW_LENGTH + 1)
     except zlib.error:
         raise InkItError("Invalid drawing") from None
-    if len(masks) != DRAFT_RAW_LENGTH or not inflater.eof or inflater.unused_data or inflater.unconsumed_tail:
+    if (len(packed) != DRAFT_RAW_LENGTH or packed[0] != DRAFT_VERSION or not inflater.eof
+            or inflater.unused_data or inflater.unconsumed_tail):
         raise InkItError("Invalid drawing")
     return blob
 

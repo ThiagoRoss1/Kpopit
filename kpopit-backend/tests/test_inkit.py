@@ -20,8 +20,9 @@ MODE = 4
 SECRET_NAME = "Secret Answer"
 
 
-def draft(fill: int = 0, version: int = 1, length: int = DRAFT_RAW_LENGTH) -> str:
-    return base64.b64encode(bytes([version]) + zlib.compress(bytes([fill]) * length)).decode("ascii")
+def draft(fill: int = 0, version: int = 1, length: int = DRAFT_RAW_LENGTH - 1) -> str:
+    """The client's format: deflate of [version byte + `length` packed bytes], as base64."""
+    return base64.b64encode(zlib.compress(bytes([version]) + bytes([fill]) * length)).decode("ascii")
 
 
 def day(offset: int) -> str:
@@ -267,19 +268,21 @@ def test_drawing_is_kept_after_the_win(client, db_conn, game):
 
 
 def _bomb() -> str:
-    return base64.b64encode(bytes([1]) + zlib.compress(bytes(50 * 1024 * 1024), 9)).decode("ascii")
+    return base64.b64encode(zlib.compress(bytes([1]) + bytes(50 * 1024 * 1024), 9)).decode("ascii")
 
 
 @pytest.mark.parametrize("bad", [
     draft(version=2),
-    draft(length=DRAFT_RAW_LENGTH - 1),
-    draft(length=DRAFT_RAW_LENGTH + 1),
+    draft(length=DRAFT_RAW_LENGTH - 2),
+    draft(length=DRAFT_RAW_LENGTH),
     "not base64 !!",
     "",
-    base64.b64encode(b"\x01not deflate").decode("ascii"),
-    base64.b64encode(b"\x01").decode("ascii"),
-    base64.b64encode(bytes([1]) + zlib.compress(bytes(DRAFT_RAW_LENGTH)) + b"extra").decode("ascii"),
-    base64.b64encode(bytes([1]) + os.urandom(DRAFT_MAX_BYTES)).decode("ascii"),
+    base64.b64encode(b"not deflate").decode("ascii"),
+    base64.b64encode(zlib.compress(b"")).decode("ascii"),
+    base64.b64encode(zlib.compress(bytes([1]) + bytes(DRAFT_RAW_LENGTH - 1)) + b"extra").decode("ascii"),
+    base64.b64encode(os.urandom(DRAFT_MAX_BYTES + 1)).decode("ascii"),
+    # The old layout (version byte outside the deflate stream).
+    base64.b64encode(bytes([1]) + zlib.compress(bytes(DRAFT_RAW_LENGTH - 1))).decode("ascii"),
     123,
     ["a"],
 ])
@@ -705,3 +708,22 @@ def test_thirty_days_of_play(client, db_conn, inkit_idol, make_user, monkeypatch
     assert len(timeline) == 30
     for entry in timeline:
         assert (entry["answer_name"] is None) == (entry["status"] != "won_live")
+
+
+def test_backend_rules_match_the_frontend_config():
+    """The server enforces the same rounds and drawing format the game is built on (INKIT_CONFIG)."""
+    import re
+    from pathlib import Path
+
+    from services import inkit_mode
+
+    config = (Path(__file__).parents[2] / "kpopit-frontend/src/features/inkit/config.ts").read_text(encoding="utf-8")
+
+    def number(pattern):
+        return float(re.search(pattern, config).group(1))
+
+    assert number(r"hint1: \{ fromRound: (\d+)") == inkit_mode.INK_HINT_ROUND
+    assert number(r"hint2: \{ fromRound: (\d+)") == inkit_mode.GROUP_HINT_ROUND
+    assert number(r"version: (\d+)") == inkit_mode.DRAFT_VERSION
+    assert number(r"export const SHEET = (\d+)") / 2 == inkit_mode.DRAFT_MASK_SIDE
+    assert inkit_mode.DRAFT_RAW_LENGTH == 93_751
