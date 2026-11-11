@@ -230,26 +230,47 @@ test('composition: bare paper is white, paint shows the photo, pencil and pen da
 
 test('the win reveal rubs the attempt out and ends on the whole photo', () => {
     const { sheet } = drawStroke();
-    const reveal = startReveal(sheet, 0);
+    const drawn = coverage(sheet, 'pencil');
+    const reveal = startReveal(sheet, 1000);
     const tools = [];
     let frame = { done: false };
-    let now = 0;
+    let now = 1000;
 
-    while (!frame.done && now < REVEAL_DURATION_MS + 2000) {
+    assert.equal(REVEAL_DURATION_MS, 2800);
+
+    while (!frame.done && now < 1000 + REVEAL_DURATION_MS + 2000) {
         now += 16;
         frame = stepReveal(sheet, reveal, now);
         if (tools.at(-1) !== frame.tool) tools.push(frame.tool);
-        assert.ok(frame.head.x >= 0 && frame.head.x <= SHEET_SIDE);
+        assert.ok(frame.edge >= 0 && frame.edge <= 1);
+
+        // Halfway through the eraser pass part of the attempt is already gone.
+        if (now === 1000 + 16 * 22) assert.ok(coverage(sheet, 'pencil') < drawn);
     }
 
     assert.equal(frame.done, true);
     assert.deepEqual(tools, [null, 'pencil', 'pen', 'paint']);
-    assert.ok(now <= REVEAL_DURATION_MS + 200, `took ${now} ms`);
-    assert.ok(coverage(sheet, 'paint') > 0.97);
-    assert.ok(coverage(sheet, 'pencil') < 0.02);
-
-    showPhoto(sheet);
+    assert.ok(now <= 1000 + REVEAL_DURATION_MS + 32, `took ${now - 1000} ms`);
     assert.equal(coverage(sheet, 'paint'), 1);
+    assert.equal(coverage(sheet, 'pencil'), 0);
+    assert.equal(coverage(sheet, 'pen'), 0);
+});
+
+test('each reveal pass ends with its own tool covering the sheet', () => {
+    const sheet = createSheet();
+    const reveal = startReveal(sheet, 0);
+
+    stepReveal(sheet, reveal, 699);
+    assert.equal(coverage(sheet, 'pencil') + coverage(sheet, 'pen') + coverage(sheet, 'paint'), 0);
+
+    stepReveal(sheet, reveal, 1399);
+    assert.ok(coverage(sheet, 'pencil') > 0.99);
+
+    stepReveal(sheet, reveal, 2099);
+    assert.ok(coverage(sheet, 'pen') > 0.99 && coverage(sheet, 'pencil') < 0.01);
+
+    stepReveal(sheet, reveal, 2799);
+    assert.ok(coverage(sheet, 'paint') > 0.99 && coverage(sheet, 'pen') < 0.01);
 });
 
 test('an empty sheet is detected, and the photo seed is stable', () => {

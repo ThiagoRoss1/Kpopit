@@ -1,5 +1,6 @@
 import { useCallback, useEffect, useMemo, useRef, useState, type PointerEvent as ReactPointerEvent } from "react";
 import { SHEET_SIDE, TOOLS, type ToolId } from "./config.ts";
+import { spriteUrl } from "./sprites.ts";
 import { decodeDraft, encodeDraft } from "./codec.ts";
 import {
     addHintInk, buildLayers, clearSheet, composeFrame, createPen, createSheet, isSheetEmpty, loadMasks, newestTool,
@@ -8,13 +9,6 @@ import {
 } from "./engine.ts";
 
 export type SheetStatus = "loading" | "ready" | "error";
-
-export interface RevealCursor {
-    /** Leading edge of the reveal pass, as a share (0-1) of the sheet. */
-    x: number;
-    y: number;
-    tool: ToolId | null;
-}
 
 interface UseInkItOptions {
     /** Full URL of the day's photo (CORS-readable), or null while the day loads. */
@@ -63,7 +57,9 @@ export const useInkIt = ({
     const [inkShare, setInkShare] = useState(1);
     const [isEmpty, setIsEmpty] = useState(true);
     const [isRevealing, setIsRevealing] = useState(false);
-    const [revealCursor, setRevealCursor] = useState<RevealCursor | null>(null);
+    // The tool sprite that rides the reveal's leading edge: moved straight on the element, since
+    // it changes every frame.
+    const revealSpriteRef = useRef<HTMLImageElement | null>(null);
 
     const unlocked = useMemo(() => unlockedTools(round), [round]);
 
@@ -344,20 +340,28 @@ export const useInkIt = ({
 
         return new Promise((resolve) => {
             const reveal = startReveal(sheet, performance.now());
+            const sprite = revealSpriteRef.current;
 
             const tick = (now: number) => {
                 const frame = stepReveal(sheet, reveal, now);
-                setRevealCursor({ x: frame.head.x / SHEET_SIDE, y: frame.head.y / SHEET_SIDE, tool: frame.tool });
                 render();
+
+                if (sprite && !frame.done) {
+                    const side = sprite.parentElement?.clientWidth ?? 0;
+                    const x = frame.edge * side - 10;
+                    const y = (0.5 + 0.38 * Math.sin(frame.progress * Math.PI * 5)) * side - 46;
+
+                    sprite.src = spriteUrl(frame.tool ?? "eraser");
+                    sprite.style.transform = `translate(${x}px, ${y}px) rotate(${Math.sin(frame.progress * 20) * 8}deg)`;
+                    sprite.style.opacity = "1";
+                }
 
                 if (!frame.done) {
                     requestAnimationFrame(tick);
                     return;
                 }
 
-                showPhoto(sheet);
-                render();
-                setRevealCursor(null);
+                if (sprite) sprite.style.opacity = "0";
                 setIsRevealing(false);
                 resolve();
             };
@@ -377,7 +381,7 @@ export const useInkIt = ({
         outOfInk: inkShare <= 0,
         isEmpty,
         isRevealing,
-        revealCursor,
+        revealSpriteRef,
         addHint,
         captureDraft,
         snapshotForShare,

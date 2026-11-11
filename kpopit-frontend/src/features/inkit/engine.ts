@@ -617,73 +617,110 @@ export const composeFrame = (out: Uint8ClampedArray, layers: Layers, masks: Mask
 
 /* ---------- Win reveal ---------- */
 
-/** The zigzag every reveal pass follows, in sheet units. */
-export const revealPath = (): Point[] => {
-    const path: Point[] = [];
-
-    for (let row = 0; row < REVEAL.rows; row++) {
-        for (let step = 0; step <= REVEAL.stepsPerRow; step++) {
-            const across = row % 2 ? 1 - step / REVEAL.stepsPerRow : step / REVEAL.stepsPerRow;
-
-            path.push({
-                x: across * SHEET_SIDE,
-                y: ((row + 0.5) / REVEAL.rows) * SHEET_SIDE + Math.sin(step * 1.3 + row) * SHEET_SIDE * REVEAL.wobbleShare,
-            });
-        }
-    }
-
-    return path;
-};
-
-export const REVEAL_DURATION_MS = REVEAL.passes.reduce((total, pass) => total + pass.durationMs, 0);
+export const REVEAL_DURATION_MS = REVEAL.passMs * REVEAL.passes.length;
 
 export interface RevealState {
-    path: Point[];
-    passIndex: number;
-    position: number;
-    passStartedAt: number;
+    startedAt: number;
+    /** The player's drawing as it was when the reveal started. */
+    snapshot: Masks;
+    /** Per band: how far it trails the leading edge. */
+    lag: number[];
 }
-
-export const startReveal = (sheet: Sheet, now: number): RevealState => {
-    beginStroke(sheet);
-
-    return { path: revealPath(), passIndex: 0, position: 0, passStartedAt: now };
-};
 
 export interface RevealFrame {
     done: boolean;
-    /** Leading edge of the pass, where the tool sprite is drawn. */
-    head: Point;
+    /** Index of the pass being drawn (0 eraser, then pencil, pen, paint). */
+    pass: number;
     tool: ToolId | null;
+    /** Eased progress of the pass, 0-1. */
+    progress: number;
+    /** Leading edge as a share of the sheet width, where the tool sprite rides. */
+    edge: number;
 }
 
-/** Advance the reveal to `now`: rub out the attempt, then redraw the photo pass by pass. */
-export const stepReveal = (sheet: Sheet, state: RevealState, now: number): RevealFrame => {
-    const radius = SHEET_SIDE * REVEAL.radiusShare;
-    const pass = REVEAL.passes[state.passIndex];
-    const reached = Math.min(
-        state.path.length,
-        Math.floor(((now - state.passStartedAt) / pass.durationMs) * state.path.length),
-    );
+// Small seeded generator: the bands are ragged the same way on every device.
+const lagValues = (): number[] => {
+    let state = (REVEAL.seed * 9301 + 49297) >>> 0 || 1;
 
-    for (; state.position < reached; state.position++) {
-        const point = state.path[state.position];
+    return Array.from({ length: REVEAL.bands }, () => {
+        state = (state * 1664525 + 1013904223) >>> 0;
 
-        if (pass.tool) stamp(sheet, pass.tool, point.x, point.y, radius, 1);
-        else rub(sheet, point.x, point.y, radius * REVEAL.eraserRadiusScale);
+        return (state / 4294967296) * REVEAL.bandLag;
+    });
+};
+
+export const startReveal = (sheet: Sheet, now: number): RevealState => ({
+    startedAt: now,
+    snapshot: {
+        pencil: sheet.masks.pencil.slice(),
+        pen: sheet.masks.pen.slice(),
+        paint: sheet.masks.paint.slice(),
+    },
+    lag: lagValues(),
+});
+
+/** Per sheet row, how many pixels from the left the sweep has covered. */
+const sweptWidths = (lag: number[], progress: number): Int32Array => {
+    const widths = new Int32Array(SHEET_SIDE);
+
+    for (let y = 0; y < SHEET_SIDE; y++) {
+        const band = Math.min(REVEAL.bands - 1, Math.floor((y * REVEAL.bands) / SHEET_SIDE));
+        const reached = (progress * REVEAL.overshoot - lag[band]) * SHEET_SIDE;
+
+        widths[y] = Math.max(0, Math.min(SHEET_SIDE, Math.round(reached)));
     }
 
-    const head = state.path[Math.max(0, state.position - 1)];
-    if (state.position < state.path.length) return { done: false, head, tool: pass.tool };
+    return widths;
+};
 
-    state.passIndex++;
-    if (state.passIndex === REVEAL.passes.length) return { done: true, head, tool: pass.tool };
+// Inside the swept part of each row the mask is `inside`; the rest is `outside` (a value, or
+// the snapshot's own pixels).
+const sweep = (mask: Float32Array, widths: Int32Array, inside: number, outside: number | Float32Array): void => {
+    for (let y = 0; y < SHEET_SIDE; y++) {
+        const start = y * SHEET_SIDE;
+        const edge = start + widths[y];
+        const end = start + SHEET_SIDE;
 
-    state.position = 0;
-    state.passStartedAt = now;
-    beginStroke(sheet);
+        mask.fill(inside, start, edge);
 
-    return { done: false, head, tool: pass.tool };
+        if (typeof outside === "number") mask.fill(outside, edge, end);
+        else mask.set(outside.subarray(edge, end), edge);
+    }
+};
+
+/** Draw the reveal as it stands at `now`: rub the attempt out, then redraw the photo tool by tool. */
+export const stepReveal = (sheet: Sheet, state: RevealState, now: number): RevealFrame => {
+    const elapsed = Math.max(0, now - state.startedAt);
+    const { masks } = sheet;
+
+    if (elapsed >= REVEAL_DURATION_MS) {
+        showPhoto(sheet);
+
+        return { done: true, pass: REVEAL.passes.length - 1, tool: "paint", progress: 1, edge: 1 };
+    }
+
+    const pass = Math.floor(elapsed / REVEAL.passMs);
+    const linear = (elapsed - pass * REVEAL.passMs) / REVEAL.passMs;
+    const progress = 1 - Math.pow(1 - linear, 2);
+    const widths = sweptWidths(state.lag, progress);
+
+    if (pass === 0) {
+        for (const tool of TOOL_IDS) sweep(masks[tool], widths, 0, state.snapshot[tool]);
+    } else if (pass === 1) {
+        sweep(masks.pencil, widths, 1, 0);
+        masks.pen.fill(0);
+        masks.paint.fill(0);
+    } else if (pass === 2) {
+        sweep(masks.pencil, widths, 0, 1);
+        sweep(masks.pen, widths, 1, 0);
+        masks.paint.fill(0);
+    } else {
+        masks.pencil.fill(0);
+        sweep(masks.pen, widths, 0, 1);
+        sweep(masks.paint, widths, 1, 0);
+    }
+
+    return { done: false, pass, tool: REVEAL.passes[pass], progress, edge: Math.min(1, progress * 1.1) };
 };
 
 /** The finished sheet (reduced motion, or a won game after a reload): the photo, fully painted. */

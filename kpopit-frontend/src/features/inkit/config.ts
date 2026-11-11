@@ -93,17 +93,15 @@ export const DRAFT = {
     levels: 15,
 };
 
-/** Win reveal: eraser, then the three tools redraw the whole photo along a zigzag. */
+/** Win reveal: four passes sweep the sheet left to right in ragged bands (eraser, pencil, pen,
+    paint), each tool replacing the one before it. */
 export const REVEAL = {
-    radiusShare: 0.16,
-    eraserRadiusScale: 1.15,
-    rows: 7,
-    stepsPerRow: 22,
-    wobbleShare: 0.03,
-    passes: [
-        { tool: null, durationMs: 550 },
-        { tool: "pencil", durationMs: 750 },
-        { tool: "pen", durationMs: 750 },
-        { tool: "paint", durationMs: 900 },
-    ] as { tool: ToolId | null; durationMs: number }[],
+    passMs: 700,
+    bands: 18,
+    /** How far (share of the sheet) a band may lag behind the leading edge. */
+    bandLag: 0.14,
+    /** The sweep overshoots so the laggiest band still reaches the far edge. */
+    overshoot: 1.18,
+    seed: 17,
+    passes: [null, "pencil", "pen", "paint"] as (ToolId | null)[],
 };
