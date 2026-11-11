@@ -1,87 +1,74 @@
-import { DRAFT, SHEET_SIDE, TOOL_IDS, type ToolId } from "./config.ts";
+import { DRAFT, SHEET, TOOL_IDS } from "./config.ts";
+import type { Masks } from "./engine.ts";
 
-// A saved drawing: the three tool masks at 250x250, 4 bits per value, deflated, after one
-// version byte, as base64. The server stores it as it is and checks version and length.
+// The drawing saved with each guess (the reference engine's exportDraft/importDraft): a version
+// byte, then the three masks at 250×250, 4 bits per value, high nibble first; the whole thing is
+// deflated and sent as base64. Inflated length: 1 + 93,750 = 93,751 bytes.
 
-type Masks = Record<ToolId, Float32Array>;
+const HALF = DRAFT.side;
 
-const SIDE = DRAFT.side;
-const CELLS = SIDE * SIDE;
-const SCALE = SHEET_SIDE / SIDE;
+/** Masks → version byte + packed 4-bit values (each value is the mean of a 2×2 block). */
+export const packDraft = (masks: Masks): Uint8Array => {
+    const packed = new Uint8Array(DRAFT.length);
+    packed[0] = DRAFT.version;
+    let count = 0;
 
-/** Packed length before deflate: three masks, two 4-bit values per byte. */
-export const PACKED_LENGTH = (TOOL_IDS.length * CELLS) / 2;
+    for (const id of TOOL_IDS) {
+        const mask = masks[id];
 
-/** Sheet masks → 4-bit values at the saved size (each cell is the mean of its sheet pixels). */
-export const packMasks = (masks: Masks): Uint8Array => {
-    const packed = new Uint8Array(PACKED_LENGTH);
-    let cursor = 0;
+        for (let y = 0; y < HALF; y++) {
+            for (let x = 0; x < HALF; x++) {
+                const index = y * 2 * SHEET + x * 2;
+                const mean = (mask[index] + mask[index + 1] + mask[index + SHEET] + mask[index + SHEET + 1]) / 4;
+                const level = Math.round(mean * DRAFT.levels);
+                const byte = 1 + (count >> 1);
 
-    for (const tool of TOOL_IDS) {
-        const mask = masks[tool];
-
-        for (let cell = 0; cell < CELLS; cell++) {
-            const left = (cell % SIDE) * SCALE;
-            const top = Math.floor(cell / SIDE) * SCALE;
-            let sum = 0;
-
-            for (let dy = 0; dy < SCALE; dy++) {
-                for (let dx = 0; dx < SCALE; dx++) sum += mask[(top + dy) * SHEET_SIDE + left + dx];
+                packed[byte] |= count & 1 ? level : level << 4;
+                count++;
             }
-
-            const level = Math.round(Math.max(0, Math.min(1, sum / (SCALE * SCALE))) * DRAFT.levels);
-
-            if (cursor % 2 === 0) packed[cursor >> 1] = level << 4;
-            else packed[cursor >> 1] |= level;
-
-            cursor++;
         }
     }
 
     return packed;
 };
 
-/** 4-bit values → sheet masks, smoothed back up to sheet size (bilinear between cell centres). */
-export const unpackMasks = (packed: Uint8Array): Masks => {
-    if (packed.length !== PACKED_LENGTH) throw new Error("Invalid drawing");
+/** Packed values → masks, upsampled back to 500×500 (bilinear: the brush is soft). Throws on an
+ *  unknown version or a wrong length. */
+export const unpackDraft = (packed: Uint8Array, masks: Masks): void => {
+    if (packed[0] !== DRAFT.version || packed.length !== DRAFT.length) throw new Error("Unknown InkIt draft format");
 
-    const masks = {} as Masks;
+    let count = 0;
 
-    TOOL_IDS.forEach((tool, toolIndex) => {
-        const small = new Float32Array(CELLS);
+    for (const id of TOOL_IDS) {
+        const small = new Float32Array(HALF * HALF);
 
-        for (let cell = 0; cell < CELLS; cell++) {
-            const cursor = toolIndex * CELLS + cell;
-            const byte = packed[cursor >> 1];
-
-            small[cell] = (cursor % 2 === 0 ? byte >> 4 : byte & 15) / DRAFT.levels;
+        for (let cell = 0; cell < small.length; cell++) {
+            const byte = packed[1 + (count >> 1)];
+            small[cell] = (count & 1 ? byte & 15 : byte >> 4) / DRAFT.levels;
+            count++;
         }
 
-        const mask = new Float32Array(SHEET_SIDE * SHEET_SIDE);
+        const mask = masks[id];
 
-        for (let y = 0; y < SHEET_SIDE; y++) {
-            const sourceY = Math.max(0, Math.min(SIDE - 1, (y + 0.5) / SCALE - 0.5));
+        for (let y = 0; y < SHEET; y++) {
+            const sourceY = Math.min(HALF - 1, Math.max(0, (y - 0.5) / 2));
             const top = Math.floor(sourceY);
-            const bottom = Math.min(SIDE - 1, top + 1);
+            const bottom = Math.min(HALF - 1, top + 1);
             const mixY = sourceY - top;
 
-            for (let x = 0; x < SHEET_SIDE; x++) {
-                const sourceX = Math.max(0, Math.min(SIDE - 1, (x + 0.5) / SCALE - 0.5));
+            for (let x = 0; x < SHEET; x++) {
+                const sourceX = Math.min(HALF - 1, Math.max(0, (x - 0.5) / 2));
                 const left = Math.floor(sourceX);
-                const right = Math.min(SIDE - 1, left + 1);
+                const right = Math.min(HALF - 1, left + 1);
                 const mixX = sourceX - left;
 
-                const upper = small[top * SIDE + left] * (1 - mixX) + small[top * SIDE + right] * mixX;
-                const lower = small[bottom * SIDE + left] * (1 - mixX) + small[bottom * SIDE + right] * mixX;
+                const upper = small[top * HALF + left] * (1 - mixX) + small[top * HALF + right] * mixX;
+                const lower = small[bottom * HALF + left] * (1 - mixX) + small[bottom * HALF + right] * mixX;
 
-                mask[y * SHEET_SIDE + x] = upper * (1 - mixY) + lower * mixY;
+                mask[y * SHEET + x] = upper * (1 - mixY) + lower * mixY;
             }
         }
-
-        masks[tool] = mask;
-    });
-
-    return masks;
+    }
 };
 
 const pipe = async (bytes: Uint8Array, stream: CompressionStream | DecompressionStream): Promise<Uint8Array> => {
@@ -124,21 +111,10 @@ const toBase64 = (bytes: Uint8Array): string => {
 
 const fromBase64 = (text: string): Uint8Array => Uint8Array.from(atob(text), (char) => char.charCodeAt(0));
 
-/** The drawing as the string a guess carries. */
-export const encodeDraft = async (masks: Masks): Promise<string> => {
-    const deflated = await pipe(packMasks(masks), new CompressionStream("deflate"));
-    const blob = new Uint8Array(deflated.length + 1);
+/** The drawing as the base64 string a guess carries. */
+export const exportDraft = async (masks: Masks): Promise<string> => toBase64(await pipe(packDraft(masks), new CompressionStream("deflate")));
 
-    blob[0] = DRAFT.version;
-    blob.set(deflated, 1);
-
-    return toBase64(blob);
-};
-
-/** A saved drawing back to sheet masks; throws on an unknown version or a wrong length. */
-export const decodeDraft = async (draft: string): Promise<Masks> => {
-    const blob = fromBase64(draft);
-    if (blob.length < 2 || blob[0] !== DRAFT.version) throw new Error("Invalid drawing");
-
-    return unpackMasks(await pipe(blob.subarray(1), new DecompressionStream("deflate")));
+/** A saved drawing back onto the masks; throws on a bad payload. */
+export const importDraft = async (draft: string, masks: Masks): Promise<void> => {
+    unpackDraft(await pipe(fromBase64(draft), new DecompressionStream("deflate")), masks);
 };

@@ -1,23 +1,20 @@
-import { useCallback, useEffect, useMemo, useRef, useState, type PointerEvent as ReactPointerEvent } from "react";
-import { SHEET_SIDE, TOOLS, type ToolId } from "./config.ts";
+import { useCallback, useEffect, useRef, useState, type PointerEvent as ReactPointerEvent } from "react";
+import { SHEET, type ToolId } from "./config.ts";
+import { exportDraft, importDraft } from "./codec.ts";
+import { InkItSheet, toSheet, unlockedTools, type Layers } from "./engine.ts";
+import { buildLayers, seedFromPath } from "./layers.ts";
 import { spriteUrl } from "./sprites.ts";
-import { decodeDraft, encodeDraft } from "./codec.ts";
-import {
-    addHintInk, buildLayers, clearSheet, composeFrame, createPen, createSheet, isSheetEmpty, loadMasks, newestTool,
-    penDown, penMove, penTick, penUp, refill, seedFromPath, showPhoto, startReveal, stepReveal, toSheetPoint,
-    unlockedTools, type InkPen, type Layers, type Point, type Sheet,
-} from "./engine.ts";
 
 export type SheetStatus = "loading" | "ready" | "error";
 
 interface UseInkItOptions {
     /** Full URL of the day's photo (CORS-readable), or null while the day loads. */
     photoUrl: string | null;
-    /** Stable per photo: seeds the pencil sketch, so every device draws the same one. */
+    /** Stable per photo: seeds the pencil hatching, so every device draws the same one. */
     photoKey: string;
-    /** The guess being made now: 1 + guesses already sent. */
+    /** The server's round: the guess about to be made = wrong guesses + 1. */
     round: number;
-    /** Hint 1 "More ink" was used in this game. */
+    /** Hint 1 "More ink" was accepted by the server in this game. */
     hintActive: boolean;
     /** The game is over: the sheet takes no strokes. */
     finished: boolean;
@@ -28,9 +25,12 @@ interface UseInkItOptions {
     onOutOfInk?: () => void;
 }
 
+// The reference drives the drain and the hold build-up once per animation frame with a fixed step.
+const FRAME_SECONDS = 1 / 60;
+
 const makeCanvas = () => {
     const canvas = document.createElement("canvas");
-    canvas.width = canvas.height = SHEET_SIDE;
+    canvas.width = canvas.height = SHEET;
 
     return canvas;
 };
@@ -39,32 +39,29 @@ export const useInkIt = ({
     photoUrl, photoKey, round, hintActive, finished, canDraw, savedDraft, onOutOfInk,
 }: UseInkItOptions) => {
     const canvasRef = useRef<HTMLCanvasElement | null>(null);
-    const sheetRef = useRef<Sheet>(createSheet());
-    const penRef = useRef<InkPen>(createPen());
+    const sheetRef = useRef<InkItSheet>(new InkItSheet());
     const layersRef = useRef<Layers | null>(null);
     const frameRef = useRef<ImageData | null>(null);
     const renderQueuedRef = useRef(false);
     const pointerIdRef = useRef<number | null>(null);
     const shareSnapshotRef = useRef<ImageData | null>(null);
-    const roundRef = useRef(round);
+    // The tool sprite that rides the reveal's leading edge, moved straight on the element.
+    const revealSpriteRef = useRef<HTMLImageElement | null>(null);
     const onOutOfInkRef = useRef(onOutOfInk);
     const finishedRef = useRef(finished);
     const hintActiveRef = useRef(hintActive);
+    // Playtest panel: the ink the last stroke cost (spent when it ended minus spent when it began).
+    const strokeStartSpentRef = useRef(0);
+    const lastStrokeCostRef = useRef(0);
 
     const [status, setStatus] = useState<SheetStatus>("loading");
     const [attempt, setAttempt] = useState(0);
-    const [tool, setTool] = useState<ToolId>(() => newestTool(round));
+    const [tool, setTool] = useState<ToolId>("pencil");
     const [inkShare, setInkShare] = useState(1);
     const [isEmpty, setIsEmpty] = useState(true);
     const [isRevealing, setIsRevealing] = useState(false);
-    // The tool sprite that rides the reveal's leading edge: moved straight on the element, since
-    // it changes every frame.
-    const revealSpriteRef = useRef<HTMLImageElement | null>(null);
 
-    const unlocked = useMemo(() => unlockedTools(round), [round]);
-
-    // Read by effects that must not re-run when these change (the win is handled by the reveal,
-    // the hint tops the pot up through addHint).
+    // Read by effects that must not re-run when these change.
     useEffect(() => {
         onOutOfInkRef.current = onOutOfInk;
         finishedRef.current = finished;
@@ -81,8 +78,8 @@ export const useInkIt = ({
         const target = canvas.getContext("2d");
         if (!target) return;
 
-        frameRef.current ??= target.createImageData(SHEET_SIDE, SHEET_SIDE);
-        composeFrame(frameRef.current.data, layers, sheetRef.current.masks);
+        frameRef.current ??= target.createImageData(SHEET, SHEET);
+        sheetRef.current.render(layers, frameRef.current);
         target.putImageData(frameRef.current, 0, 0);
     }, []);
 
@@ -94,11 +91,13 @@ export const useInkIt = ({
         requestAnimationFrame(render);
     }, [render]);
 
+    // The ring and the jar follow inkLeft / inkMax.
     const syncInk = useCallback(() => {
-        const pen = penRef.current;
-        const share = pen.capacity > 0 ? pen.ink / pen.capacity : 0;
+        const sheet = sheetRef.current;
+        const share = sheet.inkMax > 0 ? sheet.inkLeft / sheet.inkMax : 0;
 
         setInkShare((current) => (Math.abs(current - share) >= 0.004 || share === 0 || share === 1 ? share : current));
+        setTool(sheet.tool);
     }, []);
 
     // Load the photo and build what each tool reveals.
@@ -114,7 +113,7 @@ export const useInkIt = ({
             if (cancelled) return;
 
             try {
-                layersRef.current = buildLayers(image, seedFromPath(photoKey), makeCanvas);
+                layersRef.current = buildLayers(image, seedFromPath(photoKey));
                 setStatus("ready");
             } catch {
                 // A photo served without CORS headers taints the canvas: its pixels can't be read.
@@ -138,7 +137,7 @@ export const useInkIt = ({
         setAttempt((current) => current + 1);
     }, []);
 
-    // The sheet of the last guess (or the finished photo), once per photo and saved drawing.
+    // Restore: the sheet of the last guess (or the finished photo), once per photo and saved drawing.
     useEffect(() => {
         if (status !== "ready") return;
 
@@ -148,28 +147,25 @@ export const useInkIt = ({
         const settle = () => {
             if (cancelled) return;
 
-            setIsEmpty(isSheetEmpty(sheet));
+            setIsEmpty(sheet.isEmpty());
             if (finishedRef.current && layersRef.current) {
                 // Kept for "Share my drawing" after a reload: the sheet as it was at the last guess.
-                const snapshot = new ImageData(SHEET_SIDE, SHEET_SIDE);
-                composeFrame(snapshot.data, layersRef.current, sheet.masks);
+                const snapshot = new ImageData(SHEET, SHEET);
+                sheet.render(layersRef.current, snapshot);
                 shareSnapshotRef.current ??= snapshot;
-                showPhoto(sheet);
+                sheet.showPhoto();
             }
             queueRender();
         };
 
-        clearSheet(sheet);
+        sheet.clear();
         if (!savedDraft) {
             settle();
             return;
         }
 
-        decodeDraft(savedDraft)
-            .then((masks) => {
-                if (!cancelled) loadMasks(sheet, masks);
-            })
-            .catch(() => undefined)
+        importDraft(savedDraft, sheet.masks)
+            .catch(() => sheet.clear())
             .finally(settle);
 
         return () => {
@@ -177,53 +173,48 @@ export const useInkIt = ({
         };
     }, [status, savedDraft, queueRender]);
 
-    // A new round: a full pot, and the tool that just arrived (if any) in hand.
+    // The server's round: a new round refills to 100% and a tool that arrives becomes the tool in hand.
     useEffect(() => {
-        const previous = roundRef.current;
-        roundRef.current = round;
-
-        refill(penRef.current, hintActiveRef.current);
+        sheetRef.current.setRound(round, hintActiveRef.current);
         syncInk();
-
-        const arrived = unlockedTools(round).filter((id) => TOOLS[id].fromRound > previous);
-        if (arrived.length || round < previous) setTool(newestTool(round));
     }, [round, syncInk]);
 
     const selectTool = useCallback((next: ToolId) => {
-        if (unlockedTools(roundRef.current).includes(next)) setTool(next);
-    }, []);
-
-    /** Hint 1 was just used: the extra ink right away. */
-    const addHint = useCallback(() => {
-        addHintInk(penRef.current);
+        sheetRef.current.selectTool(next);
         syncInk();
     }, [syncInk]);
 
-    const sheetPoint = (event: ReactPointerEvent<HTMLCanvasElement>): Point =>
-        toSheetPoint(event.clientX, event.clientY, event.currentTarget.getBoundingClientRect());
+    /** Hint 1, once the server accepted it: the extra ink right away. */
+    const addHint = useCallback(() => {
+        sheetRef.current.useHint1();
+        syncInk();
+    }, [syncInk]);
+
+    const totalSpent = () => Object.values(sheetRef.current.spentByTool).reduce((sum, value) => sum + value, 0);
 
     const stopStroke = useCallback(() => {
-        penUp(penRef.current);
+        lastStrokeCostRef.current = totalSpent() - strokeStartSpentRef.current;
+        sheetRef.current.pointerUp();
         pointerIdRef.current = null;
-        setIsEmpty(isSheetEmpty(sheetRef.current));
+        setIsEmpty(sheetRef.current.isEmpty());
         syncInk();
     }, [syncInk]);
 
-    // While the pointer is down: the continuous drain and the hold-still build-up, once a frame.
-    // Kept in a ref so the frame callback can schedule itself.
-    const holdFrameRef = useRef<() => void>(() => undefined);
+    // While the pointer is down, once per frame: the drain and the hold-still build-up. Kept in a
+    // ref so the frame callback can schedule itself.
+    const frameLoopRef = useRef<(now: number) => void>(() => undefined);
 
     useEffect(() => {
-        holdFrameRef.current = () => {
-            const pen = penRef.current;
-            if (!pen.drawing) return;
+        frameLoopRef.current = (now) => {
+            const sheet = sheetRef.current;
+            if (!sheet.drawing) return;
 
-            penTick(sheetRef.current, pen, performance.now());
+            sheet.tick(FRAME_SECONDS, now);
             syncInk();
             queueRender();
 
-            if (pen.drawing) {
-                requestAnimationFrame(holdFrameRef.current);
+            if (sheet.drawing) {
+                requestAnimationFrame((next) => frameLoopRef.current(next));
                 return;
             }
 
@@ -236,10 +227,11 @@ export const useInkIt = ({
         if (finished || !canDraw || isRevealing || status !== "ready" || pointerIdRef.current !== null) return;
         if (event.pointerType === "mouse" && event.button !== 0) return;
 
-        const pen = penRef.current;
-        pen.tool = tool;
+        const sheet = sheetRef.current;
+        const point = toSheet(event.clientX, event.clientY, event.currentTarget.getBoundingClientRect());
+        strokeStartSpentRef.current = totalSpent();
 
-        if (!penDown(sheetRef.current, pen, sheetPoint(event), performance.now())) {
+        if (!sheet.pointerDown(point, performance.now())) {
             onOutOfInkRef.current?.();
             return;
         }
@@ -254,26 +246,20 @@ export const useInkIt = ({
         setIsEmpty(false);
         syncInk();
         queueRender();
-        requestAnimationFrame(() => holdFrameRef.current());
-    }, [canDraw, finished, isRevealing, queueRender, status, syncInk, tool]);
+        requestAnimationFrame((next) => frameLoopRef.current(next));
+    }, [canDraw, finished, isRevealing, queueRender, status, syncInk]);
 
     const onPointerMove = useCallback((event: ReactPointerEvent<HTMLCanvasElement>) => {
         if (event.pointerId !== pointerIdRef.current) return;
 
-        const pen = penRef.current;
-        const coalesced = event.nativeEvent.getCoalescedEvents?.() ?? [];
-        const rect = event.currentTarget.getBoundingClientRect();
-        const samples = coalesced.length ? coalesced : [event.nativeEvent];
-
-        for (const sample of samples) {
-            penMove(sheetRef.current, pen, toSheetPoint(sample.clientX, sample.clientY, rect), sample.timeStamp || performance.now());
-        }
+        const sheet = sheetRef.current;
+        sheet.pointerMove(toSheet(event.clientX, event.clientY, event.currentTarget.getBoundingClientRect()), performance.now());
 
         queueRender();
         syncInk();
 
         // The pot ran dry mid-stroke: the sheet locks until the next guess.
-        if (!pen.drawing) {
+        if (!sheet.drawing) {
             stopStroke();
             onOutOfInkRef.current?.();
         }
@@ -288,7 +274,7 @@ export const useInkIt = ({
         if (!layersRef.current) return null;
 
         try {
-            return await encodeDraft(sheetRef.current.masks);
+            return await exportDraft(sheetRef.current.masks);
         } catch {
             return null;
         }
@@ -298,8 +284,8 @@ export const useInkIt = ({
     const snapshotForShare = useCallback(() => {
         if (!layersRef.current) return;
 
-        const snapshot = new ImageData(SHEET_SIDE, SHEET_SIDE);
-        composeFrame(snapshot.data, layersRef.current, sheetRef.current.masks);
+        const snapshot = new ImageData(SHEET, SHEET);
+        sheetRef.current.render(layersRef.current, snapshot);
         shareSnapshotRef.current = snapshot;
     }, []);
 
@@ -316,21 +302,22 @@ export const useInkIt = ({
         if (!target) return null;
 
         target.fillStyle = paperColor;
-        target.fillRect(0, 0, SHEET_SIDE, SHEET_SIDE);
+        target.fillRect(0, 0, SHEET, SHEET);
         target.globalCompositeOperation = "multiply";
         target.drawImage(drawing, 0, 0);
 
         return new Promise((resolve) => out.toBlob(resolve, "image/png"));
     }, []);
 
-    /** The win: rub the attempt out and redraw the photo pass by pass. Resolves when it ends. */
+    /** The win: the reference's reveal stepper (eraser, pencil, pen, paint), with the design's
+     *  sprite at its head. Resolves when it ends. */
     const playReveal = useCallback((animate: boolean): Promise<void> => {
         const sheet = sheetRef.current;
-        penUp(penRef.current);
+        sheet.pointerUp();
         pointerIdRef.current = null;
 
         if (!animate || !layersRef.current) {
-            showPhoto(sheet);
+            sheet.showPhoto();
             queueRender();
 
             return Promise.resolve();
@@ -339,25 +326,25 @@ export const useInkIt = ({
         setIsRevealing(true);
 
         return new Promise((resolve) => {
-            const reveal = startReveal(sheet, performance.now());
+            const step = sheet.revealStepper();
             const sprite = revealSpriteRef.current;
+            const startedAt = performance.now();
 
-            const tick = (now: number) => {
-                const frame = stepReveal(sheet, reveal, now);
+            const frame = (now: number) => {
+                const { done, head } = step(now - startedAt);
                 render();
 
-                if (sprite && !frame.done) {
-                    const side = sprite.parentElement?.clientWidth ?? 0;
-                    const x = frame.edge * side - 10;
-                    const y = (0.5 + 0.38 * Math.sin(frame.progress * Math.PI * 5)) * side - 46;
+                if (sprite && head) {
+                    const scale = (sprite.parentElement?.clientWidth ?? SHEET) / SHEET;
+                    const wobble = Math.sin((now - startedAt) / 60) * 8;
 
-                    sprite.src = spriteUrl(frame.tool ?? "eraser");
-                    sprite.style.transform = `translate(${x}px, ${y}px) rotate(${Math.sin(frame.progress * 20) * 8}deg)`;
+                    sprite.src = spriteUrl(head.stage);
+                    sprite.style.transform = `translate(${head.x * scale - 10}px, ${head.y * scale - 58}px) rotate(${wobble}deg)`;
                     sprite.style.opacity = "1";
                 }
 
-                if (!frame.done) {
-                    requestAnimationFrame(tick);
+                if (!done) {
+                    requestAnimationFrame(frame);
                     return;
                 }
 
@@ -366,7 +353,7 @@ export const useInkIt = ({
                 resolve();
             };
 
-            requestAnimationFrame(tick);
+            requestAnimationFrame(frame);
         });
     }, [queueRender, render]);
 
@@ -376,7 +363,7 @@ export const useInkIt = ({
         retry,
         tool,
         selectTool,
-        unlocked,
+        unlocked: unlockedTools(round),
         inkShare,
         outOfInk: inkShare <= 0,
         isEmpty,
@@ -388,7 +375,8 @@ export const useInkIt = ({
         capturePng,
         playReveal,
         /** Playtest numbers (dev panel only). */
-        pen: penRef,
+        sheet: sheetRef,
+        lastStrokeCost: lastStrokeCostRef,
         canvasHandlers: {
             onPointerDown,
             onPointerMove,

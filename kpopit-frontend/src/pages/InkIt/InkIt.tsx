@@ -379,6 +379,8 @@ const InkItGame = ({ data, idols, isCalendarDay }: InkItGameProps) => {
     const requestInkHint = async () => {
         try {
             const result = await hintMutation.mutateAsync();
+            // The extra ink lands as soon as the server accepts the hint; the card animates on top.
+            ink.addHint();
             setInkHintRound(result.hint_ink_guess);
 
             return true;
@@ -561,7 +563,6 @@ const InkItGame = ({ data, idols, isCalendarDay }: InkItGameProps) => {
                         reducedMotion={reducedMotion}
                         inkHintUsed={inkHintRound !== null}
                         onUseInkHint={requestInkHint}
-                        onInkHintRevealed={ink.addHint}
                         groupHint={groupHint ?? (answer ? answer.groups : null)}
                         groupHintShown={groupHintShown}
                         onShowGroupHint={showGroupHint}
@@ -670,7 +671,7 @@ const InkItGame = ({ data, idols, isCalendarDay }: InkItGameProps) => {
 
             {showDebug && InkDebugPanel && (
                 <Suspense fallback={null}>
-                    <InkDebugPanel pen={ink.pen} round={round} />
+                    <InkDebugPanel sheet={ink.sheet} lastStrokeCost={ink.lastStrokeCost} round={round} />
                 </Suspense>
             )}
 

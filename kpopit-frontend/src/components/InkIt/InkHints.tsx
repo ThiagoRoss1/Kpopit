@@ -1,7 +1,7 @@
 import { useEffect, useRef, useState, type ReactNode } from "react";
 import { Lock } from "lucide-react";
 import { cn } from "../../lib/utils";
-import { HINTS, INK } from "../../features/inkit/config.ts";
+import { INKIT_CONFIG } from "../../features/inkit/config.ts";
 import { spriteUrl } from "../../features/inkit/sprites.ts";
 
 const ERASE_MS = 720;
@@ -144,32 +144,29 @@ interface InkHintsProps {
     /** Hint 1 was already used in this game. */
     inkHintUsed: boolean;
     onUseInkHint: () => Promise<boolean>;
-    /** The extra ink lands once the card has written its result. */
-    onInkHintRevealed: () => void;
     /** The answer's groups, once round 8 unlocked them (the server sends them only then). */
     groupHint: string[] | null;
     groupHintShown: boolean;
     onShowGroupHint: () => void;
 }
 
-const BOOST_LABEL = `+${Math.round(INK.hintBoost * 100)}%`;
+const BOOST_LABEL = `+${Math.round(INKIT_CONFIG.hint1.bonus * 100)}%`;
 
 /** Hint 1 "More ink" (opt-in, from round 5) and hint 2 "Group" (from round 8). */
 const InkHints = ({
-    round, finished, reducedMotion, inkHintUsed, onUseInkHint, onInkHintRevealed, groupHint, groupHintShown, onShowGroupHint,
+    round, finished, reducedMotion, inkHintUsed, onUseInkHint, groupHint, groupHintShown, onShowGroupHint,
 }: InkHintsProps) => {
     return (
         <div className="grid w-110 max-w-full grid-cols-2 gap-3.5 pt-2.5 max-[1180px]:w-95 max-[900px]:w-full">
             <HintCard
                 label="More ink"
-                guessesLeft={Math.max(0, HINTS.inkRound - round)}
+                guessesLeft={Math.max(0, INKIT_CONFIG.hint1.fromRound - round)}
                 used={inkHintUsed}
                 disabled={finished}
                 reducedMotion={reducedMotion}
                 tilt="rotate-[-.5deg]"
                 testId="inkit-hint-ink"
                 onUse={onUseInkHint}
-                onRevealed={onInkHintRevealed}
             >
                 Max ink
                 <span className="rounded-full border-[1.5px] border-[#1A1418] bg-[#FF70B8] px-1.75 py-px font-[DynaPuff,system-ui,sans-serif] font-bold text-xs text-white text-shadow-(--tag-text)">
@@ -179,7 +176,7 @@ const InkHints = ({
 
             <HintCard
                 label="Group"
-                guessesLeft={groupHint ? 0 : Math.max(1, HINTS.groupRound - round)}
+                guessesLeft={groupHint ? 0 : Math.max(1, INKIT_CONFIG.hint2.fromRound - round)}
                 used={groupHintShown || (finished && groupHint !== null)}
                 disabled={finished}
                 reducedMotion={reducedMotion}

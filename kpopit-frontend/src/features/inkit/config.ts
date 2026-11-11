@@ -1,107 +1,64 @@
-// Every InkIt number lives here: balance changes never touch the engine or the page.
+// Every InkIt number, as approved in the InkIt Lab (docs: the InkIt reference engine). Balance changes
+// happen here only; the engine, the page and the backend constants follow it.
 
 export type ToolId = "pencil" | "pen" | "paint";
 
 export const TOOL_IDS: readonly ToolId[] = ["pencil", "pen", "paint"];
 
-/** Logical sheet side. Brush sizes, speed, ink and saved masks are all in these units. */
-export const SHEET_SIDE = 500;
-export const SHEET_PIXELS = SHEET_SIDE * SHEET_SIDE;
+/** The logical sheet side: every position, radius, speed and saved mask is in these units. */
+export const SHEET = 500;
+export const SHEET_PIXELS = SHEET * SHEET;
 
 export interface ToolConfig {
-    /** Round (the Nth guess being made) the tool unlocks at. */
-    fromRound: number;
+    /** The round (the guess about to be made = wrong guesses + 1) the tool unlocks at. */
+    unlockRound: number;
+    /** Brush radius in sheet px. */
     radius: number;
-    /** Share of the radius that is fully strong before the cosine fade. */
-    core: number;
-    /** Coverage one calm stroke lays down. */
+    /** Opacity of the centre of one calm pass. */
     strength: number;
-    /** Ink cost multiplier. */
+    /** Share of the radius that is fully strong before the cosine fade to the rim. */
+    core: number;
+    /** Ink multiplier. */
     cost: number;
 }
 
-export const TOOLS: Record<ToolId, ToolConfig> = {
-    pencil: { fromRound: 1, radius: 40, core: 0.45, strength: 0.95, cost: 1 },
-    pen: { fromRound: 3, radius: 30, core: 0.55, strength: 1, cost: 1.25 },
-    paint: { fromRound: 5, radius: 40, core: 0.5, strength: 1, cost: 1.5 },
-};
+export const INKIT_CONFIG = {
+    tools: {
+        pencil: { unlockRound: 1, radius: 40, strength: 0.95, core: 0.45, cost: 1 },
+        pen: { unlockRound: 3, radius: 30, strength: 1, core: 0.55, cost: 1.25 },
+        paint: { unlockRound: 5, radius: 40, strength: 1, core: 0.5, cost: 1.5 },
+    } satisfies Record<ToolId, ToolConfig>,
 
-/** Where a later tool passes, the share of each earlier one it rubs out. */
-export const ERASES: Record<ToolId, Partial<Record<ToolId, number>>> = {
-    pencil: {},
-    pen: { pencil: 1 },
-    paint: { pencil: 1, pen: 0.95 },
-};
+    /** A later tool rubs out the earlier ones where it passes (share rubbed out at full coverage). */
+    erases: { pen: { pencil: 1 }, paint: { pencil: 1, pen: 0.95 } } as Partial<Record<ToolId, Partial<Record<ToolId, number>>>>,
 
-export const INK = {
-    perRound: 550,
-    /** Dab spacing as a share of the brush radius (also the path cost of one dab). */
-    stepShare: 0.35,
-    /** Comfortable speed, in sheet units per ms. */
+    /** Full refill on every wrong guess; leftover is lost. */
+    inkPerRound: 550,
+    /** Distance between dabs = radius × this (also the base cost of one dab). */
+    dabSpacing: 0.35,
+    /** A dab on an area already ≥92% covered by that tool is free. */
+    freshMin: 0.08,
+    /** Comfortable pace, sheet px per ms. */
     idealSpeed: 0.8,
-    speedCostSlope: 0.35,
+    /** speedCost = min(maxSpeedCost, 1 + speedWeight × max(0, v / idealSpeed − 1)). */
+    speedWeight: 0.35,
     maxSpeedCost: 1.6,
-    /** Ink per second while the pointer is down, moving or not. */
-    holdPerSecond: 60,
-    /** Below this share of uncovered sheet under the brush, a dab is free and lays nothing. */
-    freshFloor: 0.08,
-    /** Hint 1: the extra share added at once and to every later refill. */
-    hintBoost: 0.4,
+    /** While the pointer is down, moving or not (× tool cost × fresh). */
+    drainPerSecond: 60,
+    /** Holding still soaks the spot toward opaque. */
+    holdBuild: { afterMs: 120, radius: 0.8, rate: 0.05 },
+
+    /** Opt-in: +40% now, every later refill 40% bigger. */
+    hint1: { fromRound: 5, bonus: 0.4 },
+    /** The group. */
+    hint2: { fromRound: 8 },
 };
 
-export const FLOW = {
-    floor: 0.75,
-    calm: 1.1,
-    slope: 0.15,
-    /** Share of the ideal speed where strokes start to come out lighter. */
-    startShare: 0.5,
-};
-
-export const HOLD = {
-    /** Pointer still for this long (ms) starts building the spot toward opaque. */
-    idleMs: 120,
-    radiusShare: 0.8,
-    strength: 0.05,
-    /** One build dab per this many ms, so 60 and 120 Hz screens build alike. */
-    intervalMs: 1000 / 60,
-};
-
-/** New speed sample weight in the smoothed speed. */
-export const SPEED_SMOOTHING = 0.45;
-
-export const HINTS = {
-    inkRound: 5,
-    groupRound: 8,
-};
-
-/** How graphite and pen ink darken each channel of what is under them. */
-export const TINT = {
-    graphite: [0.86, 0.84, 0.76],
-    pen: [1, 1, 0.95],
-};
-
-export const LAYERS = {
-    lineArtDodge: 5,
-    lineArtPower: 2.6,
-    scribbleBlur: 3,
-};
-
-/** Saved drawing: three masks at this side, 4 bits per value, deflated, after a version byte. */
+/** The saved drawing: a version byte and three masks at half size, 4 bits per value, deflated. */
 export const DRAFT = {
     version: 1,
-    side: 250,
+    side: SHEET / 2,
     levels: 15,
-};
-
-/** Win reveal: four passes sweep the sheet left to right in ragged bands (eraser, pencil, pen,
-    paint), each tool replacing the one before it. */
-export const REVEAL = {
-    passMs: 700,
-    bands: 18,
-    /** How far (share of the sheet) a band may lag behind the leading edge. */
-    bandLag: 0.14,
-    /** The sweep overshoots so the laggiest band still reaches the far edge. */
-    overshoot: 1.18,
-    seed: 17,
-    passes: [null, "pencil", "pen", "paint"] as (ToolId | null)[],
+    /** Inflated length: the version byte plus two values per byte. */
+    length: 1 + (SHEET / 2) * (SHEET / 2) * 3 / 2,
 };

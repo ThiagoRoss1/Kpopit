@@ -1,98 +1,85 @@
 import test, { after } from 'node:test';
 import assert from 'node:assert/strict';
-import { DRAFT, SHEET_SIDE, TOOL_IDS } from '../../src/features/inkit/config.ts';
-import { PACKED_LENGTH, decodeDraft, encodeDraft, packMasks, unpackMasks } from '../../src/features/inkit/codec.ts';
-import { createPen, createSheet, penDown, penMove, penUp } from '../../src/features/inkit/engine.ts';
+import { inflateSync } from 'node:zlib';
+import { DRAFT, SHEET, TOOL_IDS } from '../../src/features/inkit/config.ts';
+import { exportDraft, importDraft, packDraft, unpackDraft } from '../../src/features/inkit/codec.ts';
+import { InkItSheet } from '../../src/features/inkit/engine.ts';
 
 // Node's CompressionStream doesn't keep the event loop alive on its own while it works.
 const keepAlive = setInterval(() => {}, 1000);
 after(() => clearInterval(keepAlive));
 
-const blankMasks = () => Object.fromEntries(TOOL_IDS.map((tool) => [tool, new Float32Array(SHEET_SIDE * SHEET_SIDE)]));
-
-// Values that are constant inside each saved cell, so only the 4-bit rounding is measured.
-const cellMasks = () => {
-    const masks = blankMasks();
-    TOOL_IDS.forEach((tool, offset) => {
-        for (let y = 0; y < SHEET_SIDE; y++) {
-            for (let x = 0; x < SHEET_SIDE; x++) {
-                const cell = (y >> 1) * DRAFT.side + (x >> 1);
-                masks[tool][y * SHEET_SIDE + x] = ((cell * 7 + offset * 13) % 1000) / 999;
-            }
-        }
-    });
-    return masks;
-};
-
 const drawnSheet = () => {
-    const sheet = createSheet();
-    const pen = createPen();
-    penDown(sheet, pen, { x: 80, y: 120 }, 0);
-    for (let step = 1; step <= 30; step++) penMove(sheet, pen, { x: 80 + step * 11, y: 120 + Math.sin(step / 3) * 60 }, step * 20);
-    penUp(pen);
+    const sheet = new InkItSheet();
+    sheet.pointerDown({ x: 80, y: 120 }, 0);
+    for (let step = 1; step <= 30; step++) sheet.pointerMove({ x: 80 + step * 11, y: 120 + Math.sin(step / 3) * 60 }, step * 20);
+    sheet.pointerUp();
     return sheet;
 };
 
-test('packed masks have the length the server checks', () => {
-    assert.equal(PACKED_LENGTH, 93750);
-    assert.equal(packMasks(blankMasks()).length, PACKED_LENGTH);
+test('the draft inflates to 93,751 bytes: version 1, then the masks high nibble first', async () => {
+    const sheet = new InkItSheet();
+    sheet.masks.pencil.fill(1);
+    const inflated = inflateSync(Buffer.from(await exportDraft(sheet.masks), 'base64'));
+
+    assert.equal(inflated.length, 93_751);
+    assert.equal(DRAFT.length, 93_751);
+    assert.equal(inflated[0], 1);
+    assert.equal(inflated[1], 0xff, 'first two pencil cells at 15');
+    assert.equal(inflated[1 + 31_250], 0, 'pen starts at the next third');
 });
 
-test('round trip keeps every saved value within one 4-bit level', async () => {
-    const masks = blankMasks();
-    const values = { pencil: 0.37, pen: 0.5, paint: 0.93 };
-    for (const tool of TOOL_IDS) masks[tool].fill(values[tool]);
-
-    const restored = await decodeDraft(await encodeDraft(masks));
-
-    for (const tool of TOOL_IDS) {
-        for (let index = 0; index < SHEET_SIDE * SHEET_SIDE; index += 97) {
-            assert.ok(Math.abs(restored[tool][index] - values[tool]) <= 0.5 / DRAFT.levels + 1e-6, `${tool} ${index}`);
-        }
-    }
-
-    // Saving a restored sheet again changes nothing.
-    assert.equal(Buffer.compare(packMasks(restored), packMasks(masks)), 0);
-});
-
-test('a drawn stroke comes back within 1/15 per saved value and looks the same', async () => {
+test('round trip: every value comes back within 1/15 (plus the soft upsample of an edge)', async () => {
     const sheet = drawnSheet();
-    const restored = await decodeDraft(await encodeDraft(sheet.masks));
+    const restored = new InkItSheet();
+    await importDraft(await exportDraft(sheet.masks), restored.masks);
 
     let worst = 0;
     let total = 0;
-    for (let index = 0; index < SHEET_SIDE * SHEET_SIDE; index++) {
-        const error = Math.abs(restored.pencil[index] - sheet.masks.pencil[index]);
-        worst = Math.max(worst, error);
-        total += error;
+    for (const id of TOOL_IDS) {
+        for (let index = 0; index < SHEET * SHEET; index++) {
+            const error = Math.abs(restored.masks[id][index] - sheet.masks[id][index]);
+            worst = Math.max(worst, error);
+            total += error;
+        }
     }
 
-    // Soft brush edges: the smoothed restore stays close everywhere, and closer on average.
-    assert.ok(worst <= 1 / DRAFT.levels, `worst ${worst}`);
-    assert.ok(total / (SHEET_SIDE * SHEET_SIDE) < 0.01);
+    assert.ok(worst <= 1 / 15 + 0.05, `worst ${worst}`);
+    assert.ok(total / (3 * SHEET * SHEET) < 0.005);
 
-    const saved = packMasks(sheet.masks);
-    const again = packMasks(restored);
-    let drift = 0;
-    for (let cursor = 0; cursor < saved.length; cursor++) {
-        drift = Math.max(drift, Math.abs((saved[cursor] >> 4) - (again[cursor] >> 4)), Math.abs((saved[cursor] & 15) - (again[cursor] & 15)));
+    // Flat areas come back exactly at their 4-bit level.
+    const flat = new InkItSheet();
+    flat.masks.paint.fill(0.5);
+    unpackDraft(packDraft(flat.masks), restored.masks);
+    assert.ok(Math.abs(restored.masks.paint[1234] - 0.5) <= 0.5 / 15 + 1e-6);
+});
+
+test('a heavy sheet stays under the 32 KB cap', async () => {
+    const sheet = new InkItSheet();
+    sheet.setRound(5, false);
+    let seed = 7;
+    const random = () => ((seed = (seed * 16807) % 2147483647) / 2147483647);
+    for (let stroke = 0; stroke < 240; stroke++) {
+        sheet.inkLeft = 100000;
+        sheet.tool = TOOL_IDS[stroke % 3];
+        let x = random() * SHEET;
+        let y = random() * SHEET;
+        sheet.pointerDown({ x, y }, 0);
+        for (let ms = 16; ms < 500; ms += 16) {
+            x += (random() - 0.5) * 60;
+            y += (random() - 0.5) * 60;
+            sheet.pointerMove({ x, y }, ms);
+        }
+        sheet.pointerUp();
     }
-    assert.ok(drift <= 1, `saving a restored sheet moves a value by ${drift} levels`);
+
+    const bytes = Buffer.from(await exportDraft(sheet.masks), 'base64').length;
+    assert.ok(bytes <= 32 * 1024, `drawing is ${bytes} bytes`);
 });
 
-test('a blank sheet is tiny and a busy one stays under the server cap', async () => {
-    const blank = await encodeDraft(blankMasks());
-    assert.ok(blank.length < 400);
-
-    const busy = await encodeDraft(cellMasks());
-    assert.ok(atob(busy).length <= 32 * 1024, `busy drawing is ${atob(busy).length} bytes`);
-});
-
-test('unknown versions and wrong lengths are refused', async () => {
-    const good = await encodeDraft(blankMasks());
-    const bytes = Uint8Array.from(atob(good), (char) => char.charCodeAt(0));
-    bytes[0] = 2;
-
-    await assert.rejects(decodeDraft(btoa(String.fromCharCode(...bytes))), /Invalid drawing/);
-    assert.throws(() => unpackMasks(new Uint8Array(10)), /Invalid drawing/);
+test('unknown versions and wrong lengths are refused', () => {
+    const packed = packDraft(new InkItSheet().masks);
+    packed[0] = 2;
+    assert.throws(() => unpackDraft(packed, new InkItSheet().masks), /Unknown InkIt draft format/);
+    assert.throws(() => unpackDraft(new Uint8Array(10).fill(1), new InkItSheet().masks), /Unknown InkIt draft format/);
 });

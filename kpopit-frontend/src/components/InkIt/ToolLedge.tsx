@@ -1,7 +1,7 @@
 import type { CSSProperties } from "react";
 import { Lock } from "lucide-react";
 import { cn } from "../../lib/utils";
-import { TOOL_IDS, TOOLS, type ToolId } from "../../features/inkit/config.ts";
+import { INKIT_CONFIG, TOOL_IDS, type ToolId } from "../../features/inkit/config.ts";
 import { greySpriteUrl, spriteUrl } from "../../features/inkit/sprites.ts";
 import { TOOL_INFO } from "./toolInfo";
 
@@ -69,7 +69,7 @@ const ToolLedge = ({ tool, unlocked, inkShare, disabled, onSelect, labelled = fa
                             <button
                                 type="button"
                                 aria-pressed={isSelected}
-                                aria-label={isLocked ? `${info.name}, locked until guess ${TOOLS[id].fromRound}` : `${info.name}: reveals ${info.reveals}`}
+                                aria-label={isLocked ? `${info.name}, locked until guess ${INKIT_CONFIG.tools[id].unlockRound}` : `${info.name}: reveals ${info.reveals}`}
                                 disabled={disabled || isLocked}
                                 onClick={() => onSelect(id)}
                                 data-testid={`inkit-tool-${id}`}
@@ -120,7 +120,7 @@ const ToolLedge = ({ tool, unlocked, inkShare, disabled, onSelect, labelled = fa
 
                             {(labelled || isLocked) && (
                                 <span className={cn("font-bold text-[11px] leading-none", isLocked ? "text-(--muted)" : "text-(--face-ink)")}>
-                                    {isLocked ? `guess ${TOOLS[id].fromRound}` : info.name}
+                                    {isLocked ? `guess ${INKIT_CONFIG.tools[id].unlockRound}` : info.name}
                                 </span>
                             )}
                         </div>
