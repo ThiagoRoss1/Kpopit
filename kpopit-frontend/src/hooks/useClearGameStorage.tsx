@@ -14,11 +14,16 @@ export const useClearGameStorage = () => {
         clearModeKeys(localStorage, "pixelated");
     }, []);
 
+    const clearInkit = useCallback(() => {
+        clearModeKeys(localStorage, "inkit");
+    }, []);
+
     const clearAll = useCallback(() => {
         clearClassic();
         clearBlurry();
         clearPixelated();
-    }, [clearClassic, clearBlurry, clearPixelated]);
+        clearInkit();
+    }, [clearClassic, clearBlurry, clearPixelated, clearInkit]);
 
-    return { clearClassic, clearBlurry, clearPixelated, clearAll };
+    return { clearClassic, clearBlurry, clearPixelated, clearInkit, clearAll };
 };

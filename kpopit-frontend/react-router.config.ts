@@ -13,8 +13,12 @@ const STATIC_PATHS = [
 
 requirePrerenderApi();
 
+// /inkit is prerendered (and listed in the sitemap) only while its flag is on at build time.
+const inkitPaths = () => fetchFeatures().then((features) => (features.inkit ? ["/inkit"] : []), () => []);
+
 async function prerenderPaths() {
   let idols, albums;
+  const inkit = await inkitPaths();
   try {
     [idols, albums] = await Promise.all([fetchIdolsPage(), fetchAlbumsPage()]);
   } catch (err) {
@@ -22,11 +26,11 @@ async function prerenderPaths() {
     console.warn(`${(err as Error).message} Preview build: the idol pages load client-side; set PRERENDER_API_URL to a running API to prerender them.`);
     // React Router needs one prerendered path per route with a build-time loader: /idols is kept
     // (its loader returns nothing) and a placeholder stands in for the idol pages.
-    return [...STATIC_PATHS, ...blogPaths(), "/idols/0/preview", "/albums", "/albums/0/preview"];
+    return [...STATIC_PATHS, ...inkit, ...blogPaths(), "/idols/0/preview", "/albums", "/albums/0/preview"];
   }
   if (idols.length === 0) throw new Error("Prerender: the idol list is empty; check the build-time API database.");
   return [
-    ...STATIC_PATHS, ...blogPaths(), "/albums",
+    ...STATIC_PATHS, ...inkit, ...blogPaths(), "/albums",
     ...idols.map((idol) => `/idols/${idol.id}/${buildIdolSlug(idol.artist_name, idol.group_name)}`),
     ...albums.map((album) => `/albums/${album.id}/${buildAlbumSlug(album.name, album.artist_name)}`),
   ];

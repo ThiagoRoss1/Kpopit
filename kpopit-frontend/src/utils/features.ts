@@ -5,9 +5,10 @@ export interface Features {
     idol_xp: boolean;
     public_profile: boolean;
     collection: boolean;
+    inkit: boolean;
 }
 
-export const NO_FEATURES: Features = { calendar: false, idol_xp: false, public_profile: false, collection: false };
+export const NO_FEATURES: Features = { calendar: false, idol_xp: false, public_profile: false, collection: false, inkit: false };
 
 export function parseFeatures(raw: unknown): Features {
     if (!raw || typeof raw !== "object") return NO_FEATURES;
@@ -17,5 +18,6 @@ export function parseFeatures(raw: unknown): Features {
         idol_xp: value.idol_xp === true,
         public_profile: value.public_profile === true,
         collection: value.collection === true,
+        inkit: value.inkit === true,
     };
 }

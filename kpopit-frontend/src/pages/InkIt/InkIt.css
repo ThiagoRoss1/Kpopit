@@ -1,0 +1,422 @@
+/* ==========================================================================
+   InkIt page
+   Layout and motion live in Tailwind in the components; this file keeps the page's Day/Night
+   tokens, the paper texture, the masks, the press rules, the scrollbar and the keyframes.
+   ========================================================================== */
+
+/* Page tokens (Day) */
+.inkit-page {
+    --wood: #F3E3D3;
+    --ik-field: rgba(26, 20, 24, 0.05);
+    --ik-num: #FF3399;
+    --ik-hatch: rgba(26, 20, 24, 0.07);
+    --ik-grain-blend: multiply;
+    --ik-grain-opacity: 0.45;
+    --row-wrong: #FD5C63;
+    --row-right: #4FFFB0;
+}
+
+/* Page tokens (Night) */
+[data-theme="night"] .inkit-page {
+    --wood: #3B343A;
+    --ik-field: rgba(255, 138, 196, 0.1);
+    --ik-num: #FF8AC4;
+    --ik-hatch: rgba(255, 255, 255, 0.06);
+    --ik-grain-blend: soft-light;
+    --ik-grain-opacity: 0.3;
+}
+
+/* Ground: a diagonal hatch around the edges, the centre stays clean. */
+.inkit-hatch {
+    background: repeating-linear-gradient(-45deg, var(--ik-hatch) 0 1.2px, transparent 1.2px 8px);
+    -webkit-mask-image: radial-gradient(ellipse 62% 66% at 50% 46%, transparent 34%, rgba(0, 0, 0, 0.3) 60%, #000 100%);
+    mask-image: radial-gradient(ellipse 62% 66% at 50% 46%, transparent 34%, rgba(0, 0, 0, 0.3) 60%, #000 100%);
+}
+
+.inkit-grain {
+    mix-blend-mode: var(--ik-grain-blend);
+    opacity: var(--ik-grain-opacity);
+}
+
+/* Yesterday's card: the same hatch, masked to its edges. */
+.inkit-hatch-card {
+    background: repeating-linear-gradient(-45deg, var(--ik-hatch) 0 1.2px, transparent 1.2px 8px);
+    -webkit-mask-image: radial-gradient(ellipse 72% 68% at 50% 50%, transparent 45%, #000 100%);
+    mask-image: radial-gradient(ellipse 72% 68% at 50% 50%, transparent 45%, #000 100%);
+}
+
+/* Drip band: one ink outline and offset around the strip and all its drips. */
+.inkit-drips {
+    filter:
+        drop-shadow(1.5px 0 0 var(--ink))
+        drop-shadow(-1.5px 0 0 var(--ink))
+        drop-shadow(0 1.5px 0 var(--ink))
+        drop-shadow(0 -1.5px 0 var(--ink))
+        drop-shadow(2px 2.5px 0 var(--ctl-off));
+}
+
+/* Drawing sheet: the paper. The canvas multiplies over it, so white canvas pixels are bare paper. */
+.inkit-paper {
+    background-color: #FBF8F1;
+    background-image:
+        radial-gradient(circle at 1.5px 1.5px, rgba(105, 88, 70, 0.18) 0.75px, transparent 1.15px),
+        radial-gradient(circle at 0 0, rgba(105, 88, 70, 0.07) 0.55px, transparent 0.95px),
+        repeating-linear-gradient(0deg, rgba(120, 100, 80, 0.05) 0 1px, transparent 1px 3px),
+        repeating-linear-gradient(90deg, rgba(120, 100, 80, 0.05) 0 1px, transparent 1px 3px);
+    background-size: 3px 3px, 3px 3px, auto, auto;
+    box-shadow: inset 0 0 0 16px rgba(150, 130, 110, 0.04), inset 0 0 26px rgba(120, 100, 80, 0.1);
+}
+
+/* The same paper inside the hint cards. */
+.inkit-paper-card {
+    background-color: #FBF8F1;
+    background-image:
+        radial-gradient(circle at 1.5px 1.5px, rgba(105, 88, 70, 0.18) 0.75px, transparent 1.15px),
+        repeating-linear-gradient(0deg, rgba(120, 100, 80, 0.05) 0 1px, transparent 1px 3px),
+        repeating-linear-gradient(90deg, rgba(120, 100, 80, 0.05) 0 1px, transparent 1px 3px);
+    background-size: 3px 3px, auto, auto;
+}
+
+/* Paper laid over the InkIt thumbnail photo. */
+.inkit-paper-thumb {
+    background-color: #F3EBDD;
+    background-image:
+        radial-gradient(circle at 1.5px 1.5px, rgba(105, 88, 70, 0.4) 0.75px, transparent 1.15px),
+        repeating-linear-gradient(0deg, rgba(120, 100, 80, 0.14) 0 1px, transparent 1px 3px),
+        repeating-linear-gradient(90deg, rgba(120, 100, 80, 0.14) 0 1px, transparent 1px 3px);
+    background-size: 3px 3px, auto, auto;
+    mix-blend-mode: multiply;
+}
+
+.inkit-canvas {
+    mix-blend-mode: multiply;
+    image-rendering: auto;
+    touch-action: none;
+    -webkit-user-select: none;
+    user-select: none;
+    -webkit-touch-callout: none;
+}
+
+.inkit-sprite {
+    image-rendering: pixelated;
+}
+
+/* Ink ring around the selected tool: the conic fill follows the ink left. */
+.inkit-ring {
+    background: conic-gradient(#FF70B8 0 calc(var(--ink-share, 1) * 100%), var(--chip-hover) calc(var(--ink-share, 1) * 100%) 100%);
+    -webkit-mask: radial-gradient(circle, transparent 26px, #000 26.5px);
+    mask: radial-gradient(circle, transparent 26px, #000 26.5px);
+}
+
+/* Small controls: lift on hover (hover devices only), sink flat on press. Press must beat
+   hover, hence the repeated :active. */
+.inkit-btn {
+    box-shadow: 2px 3px 0 var(--ctl-off), var(--in);
+    transition:
+        translate 0.18s var(--ease-settle),
+        box-shadow 0.18s var(--ease-settle);
+    will-change: transform;
+    backface-visibility: hidden;
+}
+
+@media (hover: hover) {
+    .inkit-btn:not(:disabled):hover {
+        translate: -1px -2px;
+        box-shadow: 2.5px 3.5px 0 var(--ctl-off), var(--in);
+    }
+}
+
+.inkit-btn:not(:disabled):active:active:active:active {
+    translate: 2px 3px;
+    box-shadow: 0 0 0 var(--ctl-off), var(--in);
+}
+
+/* Main call to action (Share my drawing). */
+.inkit-cta {
+    box-shadow: 0 4px 0 var(--ctl-off), var(--in-pink);
+    transition:
+        translate 0.18s var(--ease-settle),
+        box-shadow 0.18s var(--ease-settle),
+        filter 0.18s;
+    will-change: transform;
+}
+
+@media (hover: hover) {
+    .inkit-cta:not(:disabled):hover {
+        translate: 0 -2px;
+        box-shadow: 0 6px 0 var(--ctl-off), var(--in-pink);
+        filter: brightness(1.05);
+    }
+}
+
+.inkit-cta:not(:disabled):active:active:active:active {
+    translate: 0 4px;
+    box-shadow: 0 0 0 var(--ctl-off), var(--in-pink);
+}
+
+/* Tool buttons: a springy lift and squash. */
+.inkit-tool {
+    transition: translate 0.34s var(--ease-pop), scale 0.34s var(--ease-pop);
+    will-change: transform;
+    backface-visibility: hidden;
+    -webkit-tap-highlight-color: transparent;
+}
+
+@media (hover: hover) {
+    .inkit-tool:not(:disabled):hover {
+        translate: 0 -2px;
+    }
+}
+
+.inkit-tool:not(:disabled):active:active:active:active {
+    translate: 0 2px;
+    scale: 0.9;
+}
+
+/* The search's round magnifier. */
+.inkit-go {
+    box-shadow: 0 3px 0 var(--ink), var(--in-pink);
+    transition:
+        translate 0.18s var(--ease-settle),
+        rotate 0.18s var(--ease-settle),
+        box-shadow 0.18s;
+    will-change: transform;
+}
+
+@media (hover: hover) {
+    .inkit-go:not(:disabled):hover {
+        translate: 0 -1px;
+        rotate: -8deg;
+    }
+}
+
+.inkit-go:not(:disabled):active:active:active:active {
+    translate: 0 3px;
+    rotate: 0deg;
+    box-shadow: 0 0 0 var(--ink), var(--in-pink);
+}
+
+/* Idol photos with a pink depth block: the photo zooms on hover and sinks into the block. */
+.inkit-photo {
+    transition: scale 0.38s var(--ease-settle), translate 0.18s var(--ease-settle);
+    will-change: transform;
+}
+
+.inkit-photo-depth {
+    transition: translate 0.18s var(--ease-settle);
+}
+
+@media (hover: hover) {
+    .inkit-photo:hover {
+        scale: 1.05;
+    }
+}
+
+.inkit-photo:active:active:active:active {
+    scale: 1;
+    translate: 2px 3px;
+}
+
+.inkit-photo:active:active:active:active .inkit-photo-depth {
+    translate: 2px 2px;
+}
+
+/* Suggestions: the pink scrollbar. */
+.inkit-scroll::-webkit-scrollbar {
+    width: 14px;
+}
+
+.inkit-scroll::-webkit-scrollbar-track {
+    margin: 10px 0;
+    border-radius: 999px;
+    background: linear-gradient(var(--rule), var(--rule)) center / 3px 100% no-repeat;
+}
+
+.inkit-scroll::-webkit-scrollbar-thumb {
+    border: 2px solid var(--ink);
+    border-radius: 999px;
+    background: #FF8AC4;
+    box-shadow: inset 0 2px 0 rgba(255, 255, 255, 0.55);
+}
+
+.inkit-scroll::-webkit-scrollbar-thumb:hover {
+    background: #FF70B8;
+}
+
+@supports not selector(::-webkit-scrollbar) {
+    .inkit-scroll {
+        scrollbar-width: thin;
+        scrollbar-color: #FF8AC4 transparent;
+    }
+}
+
+/* Guess rows hide the group when the text box gets narrow. */
+@container inkrow (max-width: 150px) {
+    .inkit-row-group {
+        display: none;
+    }
+}
+
+/* Entrances */
+@keyframes ikIn {
+    from {
+        translate: 0 12px;
+        opacity: 0;
+    }
+}
+
+@keyframes ikPop {
+    0% {
+        scale: 0.9;
+        opacity: 0;
+    }
+
+    60% {
+        scale: 1.03;
+        opacity: 1;
+    }
+}
+
+@keyframes ikDrop {
+    from {
+        translate: 0 -8px;
+        opacity: 0;
+    }
+}
+
+@keyframes ikScrim {
+    from {
+        opacity: 0;
+    }
+}
+
+/* Empty-sheet invite */
+@keyframes ikNudge {
+    50% {
+        translate: 0 -3px;
+    }
+}
+
+/* Out-of-ink toast: up, hold, away. */
+@keyframes ikToast {
+    0% {
+        translate: 0 24px;
+        opacity: 0;
+    }
+
+    12%,
+    78% {
+        translate: 0 0;
+        opacity: 1;
+    }
+
+    100% {
+        translate: 0 34px;
+        opacity: 0;
+    }
+}
+
+/* New guess row: drop in, pencil photo, four brush strokes of colour, name, wash. */
+@keyframes ikRow {
+    from {
+        translate: 0 -14px;
+        scale: 0.985;
+        opacity: 0;
+    }
+}
+
+@keyframes ikPhoto {
+    from {
+        translate: -20px 0;
+        opacity: 0;
+    }
+}
+
+@keyframes ikName {
+    from {
+        translate: -18px 0;
+        opacity: 0;
+    }
+}
+
+@keyframes ikWash {
+    from {
+        opacity: 0;
+    }
+}
+
+@keyframes ikStrokeL {
+    from {
+        clip-path: inset(var(--t) 100% var(--b) 0);
+    }
+
+    to {
+        clip-path: inset(var(--t) 0 var(--b) 0);
+    }
+}
+
+@keyframes ikStrokeR {
+    from {
+        clip-path: inset(var(--t) 0 var(--b) 100%);
+    }
+
+    to {
+        clip-path: inset(var(--t) 0 var(--b) 0);
+    }
+}
+
+/* Hint cards: the label is rubbed out, then the result is written in. */
+@keyframes ikErase {
+    from {
+        clip-path: inset(0 0 0 0);
+    }
+
+    to {
+        clip-path: inset(0 0 0 100%);
+    }
+}
+
+@keyframes ikWrite {
+    from {
+        clip-path: inset(0 100% 0 0);
+    }
+
+    to {
+        clip-path: inset(0 0 0 0);
+    }
+}
+
+@keyframes ikMove {
+    from {
+        translate: -4cqw 0;
+    }
+
+    to {
+        translate: 96cqw 0;
+    }
+}
+
+@keyframes ikWig {
+    0%,
+    100% {
+        translate: -50% -50%;
+        rotate: -24deg;
+    }
+
+    50% {
+        translate: -50% -62%;
+        rotate: -12deg;
+    }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .inkit-page *,
+    .inkit-page *::before,
+    .inkit-page *::after,
+    .inkit-modal,
+    .inkit-modal * {
+        animation-duration: 0.01ms !important;
+        animation-delay: 0s !important;
+        transition: none !important;
+    }
+}

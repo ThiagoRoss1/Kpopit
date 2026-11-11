@@ -1,10 +1,10 @@
 import { useEffect } from "react";
 import { restoreSession } from "../services/api";
 import { applyRestoredSession } from "../utils/applyRestoredSession";
-import type { GameModeKey } from "../utils/gameStorage";
+import type { StoredGameModeKey } from "../utils/gameStorage";
 
 // The key each mode keeps its guesses under; empty means this browser has nothing for today.
-const GUESSES_KEY: Record<GameModeKey, string> = {
+const GUESSES_KEY: Record<StoredGameModeKey, string> = {
     classic: "todayGuessesDetails",
     blurry: "blurryGuessesDetails",
     pixelated: "pixelatedGuessesDetails",
@@ -16,7 +16,7 @@ const GUESSES_KEY: Record<GameModeKey, string> = {
  * Runs once per server date; a guess made meanwhile wins over the response.
  */
 export const useServerDayRestore = (
-    mode: GameModeKey,
+    mode: StoredGameModeKey,
     serverDate: string | undefined,
     initUser: () => Promise<string | null>,
 ) => {

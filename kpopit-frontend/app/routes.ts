@@ -38,7 +38,8 @@ export default [
     route("changelog", "routes/changelog.tsx"),
     route("albums", "routes/albums.tsx"),
     route("albums/:id/:slug", "routes/album.tsx"),
-    // Flag-gated (calendar, idol_xp): the page itself shows the 404 when the flag is off.
+    // Flag-gated (inkit, calendar, idol_xp): the page itself shows the 404 when the flag is off.
+    route("inkit", "routes/inkit.tsx"),
     route("calendar", "routes/calendar.tsx"),
     route("idol-xp", "routes/idol-xp.tsx"),
     route("profile/:username", "routes/profile.tsx"),
