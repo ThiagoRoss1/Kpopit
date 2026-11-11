@@ -35,6 +35,15 @@ async function draw(page: Page, from: [number, number], to: [number, number], st
   await page.mouse.up();
 }
 
+/** The sheet's RGB pixels, as drawn on the canvas. */
+async function sheetPixels(page: Page): Promise<number[]> {
+  await page.waitForTimeout(300);
+  return page.getByTestId('inkit-sheet').evaluate((canvas: HTMLCanvasElement) => {
+    const data = canvas.getContext('2d')!.getImageData(0, 0, canvas.width, canvas.height).data;
+    return Array.from(data.filter((_, index) => index % 4 !== 3));
+  });
+}
+
 async function guess(page: Page, idol: IdolEntry): Promise<void> {
   const reply = page.waitForResponse((r) => /\/api\/(game\/inkit|calendar\/inkit\/[\d-]+)\/guess/.test(r.url()) && r.request().method() === 'POST');
   await searchInput(page, 'inkit').fill(idol.artist_name);
@@ -96,6 +105,8 @@ test.describe('inkit', () => {
     await expect(page.getByTestId('inkit-out-of-ink')).toBeVisible();
 
     await expect(page.getByTestId('inkit-tool-pen')).toHaveAttribute('data-locked', 'true');
+    await expect(page.getByTestId('inkit-tool-paint')).toHaveAttribute('data-locked', 'true');
+    await expect(page.getByTestId('inkit-tool-pen')).toBeDisabled();
     await guess(page, wrong[0]);
     expect(await inkLeft(page)).toBe(100);
     await expect(page.getByTestId('inkit-tool-pen')).toHaveAttribute('data-locked', 'true');
@@ -162,6 +173,7 @@ test.describe('inkit', () => {
 
     const userId = await userIdByToken(await userToken(page));
     expect(await inkitDraftSize(userId, today)).toBeGreaterThan(0);
+    const before = await sheetPixels(page);
 
     // A fresh browser state with the same player: everything comes back from the server.
     await page.evaluate(() => {
@@ -171,6 +183,12 @@ test.describe('inkit', () => {
     await expect(page.getByTestId('inkit-guess-row')).toHaveCount(2);
     await expect(page.getByTestId('inkit-invite')).toHaveCount(0);
     await expect(page.getByTestId('inkit-tool-pen')).toHaveAttribute('data-locked', 'false');
+
+    // The same sheet: only the saved drawing's 4-bit rounding at soft brush edges may differ.
+    const after = await sheetPixels(page);
+    let total = 0;
+    for (let index = 0; index < before.length; index++) total += Math.abs(before[index] - after[index]);
+    expect(total / before.length).toBeLessThan(1.5);
   });
 
   test('reduced motion: the win shows the photo and the card at once', async ({ page }) => {
