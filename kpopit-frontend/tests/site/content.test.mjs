@@ -6,8 +6,8 @@ import { PRIVACY, UPDATED } from '../../src/data/privacy.ts';
 import { contactMailto } from '../../src/data/contact.ts';
 import { formatPostDate, isNewPost, readNext, tagFromKey, tagKey } from '../../src/pages/Blog/blogData.ts';
 
-const ALL_ON = { calendar: true, idol_xp: true, public_profile: true, collection: true };
-const ALL_OFF = { calendar: false, idol_xp: false, public_profile: false, collection: false };
+const ALL_ON = { calendar: true, idol_xp: true, public_profile: true, collection: true, inkit: true };
+const ALL_OFF = { calendar: false, idol_xp: false, public_profile: false, collection: false, inkit: false };
 
 test('changelog entries are newest first, with ISO dates and known types', () => {
     const dates = CHANGELOG.map((e) => e.date);
@@ -43,6 +43,8 @@ test('flagged FAQ questions only show while their feature is on', () => {
     assert.ok(questions(ALL_ON).includes('What is Idol XP?'));
     assert.ok(!questions(ALL_OFF).includes('Can I play days I missed?'));
     assert.ok(!questions(ALL_OFF).includes('What is Idol XP?'));
+    assert.ok(questions(ALL_ON).includes('How does InkIt work?'));
+    assert.ok(!questions(ALL_OFF).includes('How does InkIt work?'));
     assert.equal(new Set(FAQ.flatMap((g) => g.items.map((i) => i.question))).size, FAQ.flatMap((g) => g.items).length, 'no duplicate questions');
 });
 

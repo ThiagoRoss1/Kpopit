@@ -1,3 +1,4 @@
+import type { Features } from "../../utils/features";
 import { useEffect, useRef, useState } from "react";
 import { Link, useLocation } from "react-router";
 import { ChevronDown, Menu, Moon, Sun, X } from "lucide-react";
@@ -10,7 +11,7 @@ import ButtonsListMobile from "./ButtonsListMobile";
 import UserDropdown from "./UserDropdown";
 import {
     ABOUT_ROWS,
-    GAME_ROWS,
+    gameRows,
     IDOL_ROWS,
     PAGE_LABEL,
     PREFETCH,
@@ -57,8 +58,8 @@ const navItemClasses = (state: "current" | "open" | "idle") => cn(
     ),
 );
 
-const rowsOf = (menu: NavMenu) => {
-    if (menu === "games") return GAME_ROWS;
+const menuRows = (menu: NavMenu, features: Features) => {
+    if (menu === "games") return gameRows(features);
     if (menu === "idols") return IDOL_ROWS;
 
     return ABOUT_ROWS;
@@ -77,6 +78,7 @@ const NavBar = ({ forceTheme }: NavBarProps) => {
     const page = pageOf(pathname);
     const section = menuOf(page);
     const { features } = useFeatures();
+    const rowsOf = (menu: NavMenu) => menuRows(menu, features);
     const [theme, toggleTheme] = useTheme();
     const rootRef = useRef<HTMLDivElement>(null);
 

@@ -3,19 +3,21 @@
    (layout and hover motion are Tailwind in the TSX).
    ========================================================================== */
 
-/* Chart tokens: ring track and the activity heatmap's four shades */
+/* Chart tokens: ring track and the activity heatmap's shades (0 to 4 modes in a day) */
 .profile-page {
     --track: #EFE7DD;
     --heat-0: #EFE7DD;
     --heat-1: #FFD1E8;
     --heat-2: #FF8AC4;
     --heat-3: #FF3399;
+    --heat-4: #C62368;
 }
 
 [data-theme="night"] .profile-page {
     --track: #3B343A;
     --heat-0: #2F2B2F;
     --heat-1: #5A3A4C;
+    --heat-4: #FFD1E8;
 }
 
 /* Panes rise in when a tab opens */

@@ -68,7 +68,7 @@ const STEPS: readonly TourStep[] = [
         key: 'sticker',
         target: '.album-card-isolate, [data-treatment]',
         title: 'Your stickers',
-        body: 'Win Classic or Blurry to collect a sticker. Win again to level it up: Base → Gold → Holo. Tap any sticker to zoom in.',
+        body: 'Win a daily idol game to collect that idol\'s sticker. Win again to level it up: Base → Gold → Holo. Tap any sticker to zoom in.',
     },
     {
         key: 'done',

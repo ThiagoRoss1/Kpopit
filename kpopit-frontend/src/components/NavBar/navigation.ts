@@ -7,6 +7,7 @@ export type NavPage =
     | "classic"
     | "blurry"
     | "pixelated"
+    | "inkit"
     | "idols"
     | "albums"
     | "calendar"
@@ -26,7 +27,7 @@ export type NavPage =
 export type NavMenu = "games" | "idols" | "about";
 
 export interface NavRow {
-    id: NavPage | "inkit";
+    id: NavPage;
     label: string;
     to?: string;
     /** Mode/idol tiles show a photo, the About tiles an icon. */
@@ -34,7 +35,7 @@ export interface NavRow {
     imgClass?: string;
     icon?: LucideIcon;
     description?: string;
-    /** Shown but not linked yet (InkIt). */
+    /** Shown but not linked (InkIt while its flag is off). */
     wip?: boolean;
 }
 
@@ -51,8 +52,12 @@ export const GAME_ROWS: NavRow[] = [
     { id: "classic", label: "Classic", to: "/classic", img: "/images/idols/sakura.webp" },
     { id: "blurry", label: "Blurry", to: "/blurry", img: "/images/idols/karina.webp", imgClass: "blur-[3px]" },
     { id: "pixelated", label: "Pixelated", to: "/pixelated", img: "/images/albums/after_like.webp", imgClass: "[image-rendering:pixelated] scale-[1.02]" },
-    { id: "inkit", label: "InkIt", img: "/images/idols/winter.webp", imgClass: "grayscale contrast-[1.3]", wip: true },
+    { id: "inkit", label: "InkIt", to: "/inkit", img: "/images/idols/winter.webp", imgClass: "grayscale contrast-[1.3]", wip: true },
 ];
+
+/** The Games rows: InkIt links to its page once its flag is on, and stays "soon" until then. */
+export const gameRows = (features: Features): NavRow[] =>
+    GAME_ROWS.map((row) => (row.id === "inkit" && features.inkit ? { ...row, wip: false } : row));
 
 export const IDOL_ROWS: NavRow[] = [
     { id: "idols", label: "All idols", to: "/idols", img: "/images/idols/kazuha.webp" },
@@ -74,6 +79,7 @@ const PAGE_PATHS: [string, NavPage][] = [
     ["/classic", "classic"],
     ["/blurry", "blurry"],
     ["/pixelated", "pixelated"],
+    ["/inkit", "inkit"],
     ["/idols", "idols"],
     ["/albums", "albums"],
     ["/calendar", "calendar"],
@@ -102,6 +108,7 @@ export const PAGE_LABEL: Record<NavPage, string> = {
     classic: "classic",
     blurry: "blurry",
     pixelated: "pixelated",
+    inkit: "inkit",
     idols: "idols",
     albums: "albums",
     calendar: "calendar",

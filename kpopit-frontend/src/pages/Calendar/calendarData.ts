@@ -1,10 +1,15 @@
 import type { CalendarMode, CalendarTimelineDay } from "../../interfaces/gameInterfaces.ts";
+import type { Features } from "../../utils/features.ts";
 
 export const MODES: { id: CalendarMode; name: string; noun: string }[] = [
     { id: "classic", name: "Classic", noun: "idol" },
     { id: "blurry", name: "Blurry", noun: "idol" },
     { id: "pixelated", name: "Pixelated", noun: "album" },
+    { id: "inkit", name: "InkIt", noun: "idol" },
 ];
+
+/** The modes to list: InkIt only while its flag is on. */
+export const modesFor = (features: Features) => MODES.filter((mode) => mode.id !== "inkit" || features.inkit);
 export const MONTHS = ["January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"];
 export const MON = MONTHS.map((m) => m.slice(0, 3));
 const WEEKDAYS = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"];

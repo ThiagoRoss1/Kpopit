@@ -38,17 +38,20 @@ const shortDate = (iso: string) => {
 };
 
 // The live pages' title sizes per mode.
-const TITLE_SIZES: Record<CalendarMode, string> = {
+// InkIt plays its past days on its own page.
+type PlayableMode = Exclude<CalendarMode, "inkit">;
+
+const TITLE_SIZES: Record<PlayableMode, string> = {
     classic: "max-sxs:text-4xl sxs:text-5xl zm:text-6xl sm:text-7xl",
     blurry: "max-xxs:text-3xl xxs:text-3xl xs:text-4xl sm:text-5xl",
     pixelated: "text-5xl text-neon-pink",
 };
 
-const TITLES: Record<CalendarMode, [string, string]> = { classic: ["Kpop", "it"], blurry: ["Blur", "it"], pixelated: ["Pixel", "It"] };
+const TITLES: Record<PlayableMode, [string, string]> = { classic: ["Kpop", "it"], blurry: ["Blur", "it"], pixelated: ["Pixel", "It"] };
 
 /** The mode's own title (same look as the live page) with the calendar day under it: back to that
  *  day in the calendar, and a tag with Day N and the date. */
-const CalendarHeader = ({ mode, date, dayNumber }: { mode: CalendarMode; date: string; dayNumber: number | null }) => {
+const CalendarHeader = ({ mode, date, dayNumber }: { mode: PlayableMode; date: string; dayNumber: number | null }) => {
     const [firstPart, secondPart] = TITLES[mode];
     const isLight = mode === "pixelated";
 
@@ -98,7 +101,7 @@ type IdolGuess = GuessResponse<Partial<FeedbackData>> & { card_granted?: CardGra
 /** A past challenge day (/<mode>?date=YYYY-MM-DD), played through the calendar API with the live
  *  pages' components and look. The answer never reaches the browser before the day is finished,
  *  so every row comes back from the server; nothing is kept in localStorage. */
-const CalendarGame = ({ mode, date }: { mode: CalendarMode; date: string }) => {
+const CalendarGame = ({ mode, date }: { mode: PlayableMode; date: string }) => {
     const { allIdolsData, isInitialized } = useSharedGameData();
     const queryClient = useQueryClient();
     const dayKey = ["calendarDay", mode, date];

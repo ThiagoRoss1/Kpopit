@@ -1,9 +1,10 @@
 import { Link } from "react-router";
 import { Lock } from "lucide-react";
+import type { CalendarMode } from "../interfaces/gameInterfaces";
 
 /** Yesterday's answer for a player who didn't finish that day: a small lock pill that opens the
  *  day in the calendar instead of the name (old game-page look). */
-export default function YesterdayLockedPill({ mode, date, dayNumber }: { mode: "classic" | "blurry" | "pixelated"; date: string; dayNumber: number | null }) {
+export default function YesterdayLockedPill({ mode, date, dayNumber }: { mode: CalendarMode; date: string; dayNumber: number | null }) {
     return (
         <Link
             to={`/calendar?mode=${mode}&date=${date}`}

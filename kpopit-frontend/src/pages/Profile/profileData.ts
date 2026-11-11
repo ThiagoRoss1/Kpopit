@@ -1,5 +1,6 @@
 import type { CalendarMode } from "../../interfaces/gameInterfaces";
 import type { RateBucket } from "../../interfaces/playerInterfaces";
+import type { Features } from "../../utils/features";
 
 export type ProfileTab = "overview" | "stats" | "history";
 export type ModeFilter = CalendarMode | "all";
@@ -14,7 +15,11 @@ export const MODES: { id: CalendarMode; name: string; color: string; gamemodeId:
     { id: "classic", name: "Classic", color: "#FF3399", gamemodeId: 1 },
     { id: "blurry", name: "Blurry", color: "#FF8AC4", gamemodeId: 2 },
     { id: "pixelated", name: "Pixelated", color: "#FFE3F1", gamemodeId: 3 },
+    { id: "inkit", name: "InkIt", color: "#C62368", gamemodeId: 4 },
 ];
+
+/** The modes to list: InkIt only while its flag is on. */
+export const modesFor = (features: Features) => MODES.filter((mode) => mode.id !== "inkit" || features.inkit);
 
 export const modeById = (gamemodeId: number) => MODES.find((m) => m.gamemodeId === gamemodeId) ?? MODES[0];
 export const modeName = (filter: ModeFilter) => (filter === "all" ? "All modes" : MODES.find((m) => m.id === filter)!.name);
@@ -26,18 +31,19 @@ export function parseTab(value: string | null): ProfileTab {
 }
 
 export const HEAT_DAYS = 18 * 7;
-export const HEAT_TONES = ["var(--heat-0)", "var(--heat-1)", "var(--heat-2)", "var(--heat-3)"];
+/** One shade per number of modes played in a day (0 up to every mode). */
+export const HEAT_TONES = ["var(--heat-0)", "var(--heat-1)", "var(--heat-2)", "var(--heat-3)", "var(--heat-4)"];
 export const GROUP_COLORS = ["#FF3399", "#FF8AC4", "#C62368", "#FF70B8", "#FFD1E8", "var(--track)"];
 
 const DAY_MS = 864e5;
 const isoPlus = (iso: string, days: number) => new Date(Date.parse(`${iso}T00:00:00Z`) + days * DAY_MS).toISOString().slice(0, 10);
 
-/** The last 18 weeks ending on `today`, oldest first, with the modes played each day (0-3). */
+/** The last 18 weeks ending on `today`, oldest first, with the modes played each day. */
 export function heatmapDays(today: string, activity: { date: string; modes: number }[]): { date: string; modes: number }[] {
     const byDate = new Map(activity.map((a) => [a.date, a.modes]));
     return Array.from({ length: HEAT_DAYS }, (_, n) => {
         const date = isoPlus(today, n - HEAT_DAYS + 1);
-        return { date, modes: Math.min(3, byDate.get(date) ?? 0) };
+        return { date, modes: Math.min(HEAT_TONES.length - 1, byDate.get(date) ?? 0) };
     });
 }
 

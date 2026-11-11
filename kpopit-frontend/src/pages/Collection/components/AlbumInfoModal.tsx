@@ -31,7 +31,7 @@ const INFO_ROWS = (props: AlbumInfoModalProps) =>[
     {
         icon: <Sticker className="size-8" />,
         title: "Stickers",
-        body: "Win Classic or Blurry to collect that idol's sticker, win the same idol again to level it up: Base → Gold → Holo. Tap any sticker to see its level, copies and more. Complete a group (full bar ✓) to unlock its group photo.",
+        body: "Win a daily idol game (not Pixelated) to collect that idol's sticker, win the same idol again to level it up: Base → Gold → Holo. Tap any sticker to see its level, copies and more. Complete a group (full bar ✓) to unlock its group photo.",
     },
     {
         icon: <Smartphone className="size-8" />,

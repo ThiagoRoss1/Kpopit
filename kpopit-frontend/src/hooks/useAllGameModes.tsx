@@ -1,28 +1,33 @@
+import { useFeatures } from "./useFeatures";
+
+const MODES = [
+    { id: "classic", name: "Classic", path: "/classic", photoSpecs: "" },
+    { id: "blurry", name: "Blurry", path: "/blurry", photoSpecs: "blur-[2px]" },
+    { id: "pixelated", name: "Pixelated", path: "/pixelated", photoSpecs: "" },
+    { id: "inkit", name: "InkIt", path: "/inkit", photoSpecs: "grayscale contrast-[1.3]" },
+];
+
+const dateKeyOf = (modeId: string) => (modeId === "classic" ? "gameDate" : `${modeId}GameDate`);
+
+/** Every mode with whether it was won today, and the ones other than `currentMode` (InkIt only
+ *  while its flag is on). */
 export const useAllGameModes = (currentMode: string) => {
+    const { features } = useFeatures();
+
     const isWonToday = (modeId: string): boolean => {
-        const wonKey = modeId === 'classic' ? 'gameWon' : `${modeId}GameWon`;
-        const dateKey = modeId === 'classic' ? 'gameDate' : `${modeId}GameDate`;
-        const won = localStorage.getItem(wonKey) === 'true';
-        const savedDate = localStorage.getItem(dateKey);
+        const won = localStorage.getItem(modeId === "classic" ? "gameWon" : `${modeId}GameWon`) === "true";
+        const savedDate = localStorage.getItem(dateKeyOf(modeId));
 
         if (!won || !savedDate) return false;
 
-        const currentDate = localStorage.getItem(currentMode === 'classic' ? 'gameDate' : `${currentMode}GameDate`);
-
-        return currentDate === savedDate;
+        return localStorage.getItem(dateKeyOf(currentMode)) === savedDate;
     };
 
-    const allModes = [
-        { id: 'classic', name: 'Classic', path: '/classic' },
-        { id: 'blurry', name: 'Blurry', path: '/blurry' },
-        { id: 'pixelated', name: 'Pixelated', path: '/pixelated' },
-    ].map(mode => ({
-        ...mode,
-        won: isWonToday(mode.id),
-        photoSpecs: mode.id === 'classic' ? "" : mode.id === 'blurry' ? "blur-[2px]" : ""
-    }));
+    const allModes = MODES
+        .filter((mode) => mode.id !== "inkit" || features.inkit)
+        .map((mode) => ({ ...mode, won: isWonToday(mode.id) }));
 
-    const otherModes = allModes.filter(mode => mode.id !== currentMode);
+    const otherModes = allModes.filter((mode) => mode.id !== currentMode);
 
     return { allModes, otherModes };
 };

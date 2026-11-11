@@ -19,7 +19,7 @@ import { cn } from "../../lib/utils";
 import type { ProfileHeroXp, PublicProfile } from "../../interfaces/playerInterfaces";
 import { OverviewPane, ModeDot, StatsPane } from "./ProfilePanes";
 import ProfileHistory from "./ProfileHistory";
-import { MODES, TABS, formatJoined, parseTab, type ModeFilter, type ProfileTab } from "./profileData";
+import { MODES, TABS, formatJoined, modesFor, parseTab, type ModeFilter, type ProfileTab } from "./profileData";
 import "./profile.css";
 
 const BANNER_DISMISS_KEY = "emailVerifiedBannerDismissed";
@@ -203,7 +203,7 @@ const ProfileView = ({ profile, viewerKey }: { profile: VisibleProfile; viewerKe
 
                 {tab !== "overview" && (
                     <div role="group" aria-label="Mode" className="flex flex-wrap justify-center gap-2 -mt-2.5">
-                        {(["all", ...MODES.map((mode) => mode.id)] as ModeFilter[]).map((id) => (
+                        {(["all", ...modesFor(features).map((mode) => mode.id)] as ModeFilter[]).map((id) => (
                             <Pill
                                 key={id}
                                 active={filter === id}

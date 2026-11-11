@@ -16,7 +16,8 @@ import { DayCell, DotCell, Legend } from "./CalendarCells";
 import DayPanel from "./DayPanel";
 import TimelineView, { type OpenPicker, type TimelineOrder } from "./TimelineView";
 import { CALENDAR_BUTTON } from "./calendarLooks";
-import { MODES, MONTHS, addDays, dayOf, formatLong, isDone, monthIndex, parseMode, toT } from "./calendarData";
+import { useFeatures } from "../../hooks/useFeatures";
+import { MODES, MONTHS, addDays, dayOf, formatLong, isDone, modesFor, monthIndex, parseMode, toT } from "./calendarData";
 import "./calendar.css";
 
 const WEEKDAYS = ["MON", "TUE", "WED", "THU", "FRI", "SAT", "SUN"];
@@ -47,7 +48,11 @@ const Calendar = () => {
 
 const CalendarView = ({ data }: { data: CalendarTimeline }) => {
     const [params, setParams] = useSearchParams();
-    const mode = parseMode(params.get("mode"));
+    const { features } = useFeatures();
+    const modes = modesFor(features);
+    // A mode the API didn't send (its flag is off) falls back to Classic.
+    const askedMode = parseMode(params.get("mode"));
+    const mode = data[askedMode] ? askedMode : "classic";
     const modeInfo = MODES.find((option) => option.id === mode)!;
     const days = data[mode];
     const byDate = useMemo(() => new Map(days.map((day) => [day.date, day])), [days]);
@@ -146,7 +151,7 @@ const CalendarView = ({ data }: { data: CalendarTimeline }) => {
         <>
             <PageMeta
                 title="KpopIt Calendar: play every daily K-pop puzzle you missed"
-                description="Every past KpopIt day in Classic, Blurry and Pixelated: see the answers you found and play the days you missed."
+                description="Every past KpopIt day in every mode: see the answers you found and play the days you missed."
                 path="/calendar"
             />
 
@@ -188,7 +193,7 @@ const CalendarView = ({ data }: { data: CalendarTimeline }) => {
 
                 <div className="pp-enter [--pp-anim:puffDrop] [--pp-delay:70ms] flex flex-wrap items-center gap-3 @max-[581px]:gap-2.5 mb-5.5">
                     <div role="tablist" aria-label="Game mode" className="flex flex-wrap flex-[1_1_auto] justify-start @max-[581px]:justify-center gap-2 @max-[581px]:gap-1.5">
-                        {MODES.map((option) => {
+                        {modes.filter((option) => data[option.id]).map((option) => {
                             const isOn = option.id === mode;
 
                             return (
