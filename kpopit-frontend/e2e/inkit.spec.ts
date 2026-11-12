@@ -1,5 +1,5 @@
 import { test, expect, type Page } from './support/fixtures';
-import { DATE_KEY, idolsList, searchInput, serverDate, userToken, type IdolEntry } from './support/game';
+import { DATE_KEY, escapeRe, idolsList, searchInput, serverDate, userToken, type IdolEntry } from './support/game';
 import { dailyPick, ensurePastPick, idolName, inkitDraftSize, inkitPhotoPath, userIdByToken } from './support/db';
 
 const INKIT_ON = { INKIT_ENABLED: 'true', CALENDAR_ENABLED: 'true' };
@@ -46,8 +46,12 @@ async function sheetPixels(page: Page): Promise<number[]> {
 
 async function guess(page: Page, idol: IdolEntry): Promise<void> {
   const reply = page.waitForResponse((r) => /\/api\/(game\/inkit|calendar\/inkit\/[\d-]+)\/guess/.test(r.url()) && r.request().method() === 'POST');
-  await searchInput(page, 'inkit').fill(idol.artist_name);
+  const input = searchInput(page, 'inkit');
+  await input.fill(idol.artist_name);
+  // Like Classic and Blurry: a click picks the idol ("Name (Group)"), Enter sends it.
   await page.getByTestId('inkit-suggestion').filter({ hasText: idol.artist_name }).first().click();
+  await expect(input).toHaveValue(new RegExp(`^${escapeRe(idol.artist_name)} \\(`));
+  await input.press('Enter');
   expect((await reply).status()).toBe(200);
   await expect(page.getByTestId('inkit-guess-row').filter({ hasText: idol.artist_name })).toBeVisible();
 }
@@ -109,6 +113,11 @@ test.describe('inkit', () => {
     await expect(page.getByTestId('inkit-tool-pen')).toBeDisabled();
     await guess(page, wrong[0]);
     expect(await inkLeft(page)).toBe(100);
+
+    // A guessed idol leaves the suggestions, as in Classic and Blurry.
+    await searchInput(page, 'inkit').fill(wrong[0].artist_name);
+    await expect(page.getByTestId('inkit-suggestion').filter({ has: page.getByText(wrong[0].artist_name, { exact: true }) })).toHaveCount(0);
+    await searchInput(page, 'inkit').fill('');
     await expect(page.getByTestId('inkit-tool-pen')).toHaveAttribute('data-locked', 'true');
 
     await guess(page, wrong[1]);

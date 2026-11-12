@@ -26,7 +26,7 @@ const SEARCH_PLACEHOLDER: Record<ModeName, string> = {
   inkit: "Type an idol's name...",
 };
 
-const escapeRe = (s: string) => s.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+export const escapeRe = (s: string) => s.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
 
 export const searchInput = (page: Page, mode: ModeName): Locator =>
   page.getByPlaceholder(SEARCH_PLACEHOLDER[mode]);

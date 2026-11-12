@@ -8,7 +8,7 @@ import { groupOf } from "./idolGroup";
 
 interface InkSearchProps {
     idols: IdolListItem[];
-    /** Idols already guessed: listed, but not selectable. */
+    /** Idols already guessed: left out of the suggestions, like the other modes. */
     triedIds: number[];
     isPending: boolean;
     /** Winners so far today; null hides the line (calendar days). */
@@ -16,58 +16,81 @@ interface InkSearchProps {
     onGuess: (idol: IdolListItem) => void;
 }
 
-const MAX_SUGGESTIONS = 30;
+const MAX_SUGGESTIONS = 20;
 
 const normalise = (text: string) => text.toLowerCase().normalize("NFD").replace(/\p{M}/gu, "");
 
-/** Guess today's idol: type a name or a group, pick a suggestion (Enter takes the first). */
+const isSoloist = (idol: IdolListItem) => idol.groups?.length === 0;
+
+const asksForSoloists = (wanted: string) => "solo".includes(wanted) || wanted.includes("solo");
+
+/** The idol as the field shows it once picked, as in Classic and Blurry: "Name (Group)". */
+const displayName = (idol: IdolListItem) => `${idol.artist_name} (${groupOf(idol)})`;
+
+/** Suggestions with the same rules as the Classic/Blurry search bar: name, any group (past ones too)
+ *  or "solo" for soloists; guessed idols left out; name start, name, group, soloist order. */
+const findSuggestions = (idols: IdolListItem[], query: string, triedIds: number[]): IdolListItem[] => {
+    const wanted = normalise(query.trim());
+    if (!wanted) return [];
+
+    const priority = (idol: IdolListItem) => {
+        const name = normalise(idol.artist_name);
+        if (name.startsWith(wanted)) return 1;
+        if (name.includes(wanted)) return 2;
+        if ((idol.all_groups ?? idol.groups ?? []).some((group) => normalise(group).includes(wanted))) return 3;
+        if (isSoloist(idol) && asksForSoloists(wanted)) return 4;
+
+        return 5;
+    };
+
+    return idols
+        .filter((idol) => !triedIds.includes(idol.id))
+        .map((idol) => ({ idol, order: priority(idol) }))
+        .filter((entry) => entry.order < 5)
+        .sort((a, b) => a.order - b.order || a.idol.artist_name.localeCompare(b.idol.artist_name))
+        .slice(0, MAX_SUGGESTIONS)
+        .map((entry) => entry.idol);
+};
+
+/** Guess today's idol like the other modes: type a name or a group, pick a suggestion (the first is
+ *  picked by default), then Enter or the button sends it. Guessed idols leave the list. */
 const InkSearch = ({ idols, triedIds, isPending, winnerCount, onGuess }: InkSearchProps) => {
     const listId = useId();
     const [query, setQuery] = useState("");
+    const [picked, setPicked] = useState<IdolListItem | null>(null);
     const [isFocused, setIsFocused] = useState(false);
     const [activeIndex, setActiveIndex] = useState(0);
 
-    const suggestions = useMemo(() => {
-        const wanted = normalise(query.trim());
-        if (!wanted) return [];
+    const suggestions = useMemo(
+        () => (picked ? [] : findSuggestions(idols, query, triedIds)),
+        [idols, picked, query, triedIds],
+    );
 
-        const rank = (idol: IdolListItem) => {
-            const name = normalise(idol.artist_name);
-            if (name.startsWith(wanted)) return 0;
-            if (name.includes(wanted)) return 1;
+    const current = Math.min(activeIndex, suggestions.length - 1);
+    const chosen = picked ?? suggestions[current] ?? null;
 
-            return (idol.all_groups ?? idol.groups ?? []).some((group) => normalise(group).includes(wanted)) ? 2 : 3;
-        };
-
-        return idols
-            .map((idol) => ({ idol, order: rank(idol) }))
-            .filter((entry) => entry.order < 3)
-            .sort((a, b) => a.order - b.order || a.idol.artist_name.localeCompare(b.idol.artist_name))
-            .slice(0, MAX_SUGGESTIONS)
-            .map((entry) => entry.idol);
-    }, [idols, query]);
-
-    const isTried = (idol: IdolListItem) => triedIds.includes(idol.id);
-    const firstFree = suggestions.findIndex((idol) => !isTried(idol));
-    const current = suggestions[activeIndex] && !isTried(suggestions[activeIndex]) ? activeIndex : firstFree;
-
-    const submit = (idol: IdolListItem | undefined) => {
-        if (!idol || isTried(idol) || isPending) return;
-
-        onGuess(idol);
+    const reset = () => {
         setQuery("");
+        setPicked(null);
         setActiveIndex(0);
+    };
+
+    const submit = () => {
+        if (!chosen || isPending || triedIds.includes(chosen.id)) return;
+
+        onGuess(chosen);
+        reset();
+    };
+
+    const pick = (idol: IdolListItem) => {
+        setPicked(idol);
+        setQuery(displayName(idol));
     };
 
     const move = (direction: 1 | -1) => {
         if (!suggestions.length) return;
 
-        let next = current;
-        for (let step = 0; step < suggestions.length; step++) {
-            next = (next + direction + suggestions.length) % suggestions.length;
-            if (!isTried(suggestions[next])) break;
-        }
-
+        const next = (current + direction + suggestions.length) % suggestions.length;
         setActiveIndex(next);
         document.getElementById(`${listId}-${next}`)?.scrollIntoView({ block: "nearest" });
     };
@@ -81,7 +104,7 @@ const InkSearch = ({ idols, triedIds, isPending, winnerCount, onGuess }: InkSear
             move(-1);
         } else if (event.key === "Enter") {
             event.preventDefault();
-            submit(suggestions[current]);
+            submit();
         } else if (event.key === "Escape") {
             event.currentTarget.blur();
         }
@@ -118,6 +141,7 @@ const InkSearch = ({ idols, triedIds, isPending, winnerCount, onGuess }: InkSear
                         data-testid="inkit-search"
                         onChange={(event) => {
                             setQuery(event.target.value);
+                            setPicked(null);
                             setActiveIndex(0);
                         }}
                         onFocus={() => setIsFocused(true)}
@@ -132,10 +156,10 @@ const InkSearch = ({ idols, triedIds, isPending, winnerCount, onGuess }: InkSear
                     <button
                         type="button"
                         aria-label="Guess"
-                        disabled={isPending || current < 0}
+                        disabled={isPending || !chosen}
                         // Keeps the input focused, so the list is still there when the click lands.
                         onPointerDown={(event) => event.preventDefault()}
-                        onClick={() => submit(suggestions[current])}
+                        onClick={submit}
                         data-testid="inkit-guess-button"
                         className="inkit-go pp-focus grid size-11.5 flex-none cursor-pointer place-items-center rounded-full border-2 border-(--ink) bg-[#FF70B8] p-0 disabled:cursor-default max-[900px]:size-10"
                     >
@@ -152,7 +176,6 @@ const InkSearch = ({ idols, triedIds, isPending, winnerCount, onGuess }: InkSear
                     >
                         <ul id={listId} role="listbox" aria-label="Idols" className="inkit-scroll m-0 flex max-h-80 list-none flex-col gap-0.5 overflow-y-auto p-1.5">
                             {suggestions.map((idol, index) => {
-                                const tried = isTried(idol);
                                 const photo = resolveCdnUrl(idol.image_path, idol.image_version);
 
                                 return (
@@ -161,30 +184,23 @@ const InkSearch = ({ idols, triedIds, isPending, winnerCount, onGuess }: InkSear
                                         id={`${listId}-${index}`}
                                         role="option"
                                         aria-selected={index === current}
-                                        aria-disabled={tried}
                                         data-testid="inkit-suggestion"
                                         onPointerDown={(event) => event.preventDefault()}
-                                        onClick={() => submit(idol)}
-                                        onPointerEnter={() => !tried && setActiveIndex(index)}
-                                        className={cn(
-                                            "flex items-center gap-3 rounded-[13px] p-2",
-                                            tried ? "cursor-default opacity-50" : "cursor-pointer",
-                                            index === current && !tried && "bg-(--opt-hover)",
-                                        )}
+                                        onClick={() => pick(idol)}
+                                        onPointerEnter={() => setActiveIndex(index)}
+                                        className={cn("flex cursor-pointer items-center gap-3 rounded-[13px] p-2", index === current && "bg-(--opt-hover)")}
                                     >
                                         {photo && (
                                             <Img
                                                 src={photo}
                                                 alt=""
-                                                className={cn("size-10 flex-none rounded-full border-2 border-(--ink) bg-(--chip-hover) object-cover object-center", tried && "grayscale")}
+                                                className="size-10 flex-none rounded-full border-2 border-(--ink) bg-(--chip-hover) object-cover object-center"
                                             />
                                         )}
 
                                         <div className="min-w-0 flex-1">
-                                            <div className={cn("truncate font-bold text-[15px] text-(--chip-ink)", tried && "line-through")}>{idol.artist_name}</div>
-                                            <div className="truncate font-medium text-[11px] text-(--group)">
-                                                {tried ? `${groupOf(idol)} · already tried` : groupOf(idol)}
-                                            </div>
+                                            <div className="truncate font-bold text-[15px] text-(--chip-ink)">{idol.artist_name}</div>
+                                            <div className="truncate font-medium text-[11px] text-(--group)">{groupOf(idol)}</div>
                                         </div>
                                     </li>
                                 );
