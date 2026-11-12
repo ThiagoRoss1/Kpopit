@@ -1,7 +1,7 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import { INKIT_CONFIG, SHEET } from '../../src/features/inkit/config.ts';
-import { InkItSheet, flow, isUnlocked, pixelAt, roundInk, speedCost, toSheet, unlockedTools } from '../../src/features/inkit/engine.ts';
+import { InkItSheet, glowAt, isUnlocked, pixelAt, roundInk, speedCost, toSheet, unlockedTools } from '../../src/features/inkit/engine.ts';
 
 const near = (actual, expected, tolerance, label) =>
     assert.ok(Math.abs(actual - expected) <= tolerance, `${label ?? 'value'}: ${actual} vs ${expected} (±${tolerance})`);
@@ -27,7 +27,7 @@ const drawStroke = ({ interval = 1000 / 60, cssSide = SHEET, tool = 'pencil', du
     for (let ms = interval; ms <= duration + 1e-6; ms += interval) {
         sheet.pointerMove(event(ms), ms);
         while (nextFrame <= ms) {
-            sheet.tick(1 / 60, nextFrame);
+            sheet.tick(1 / 60);
             nextFrame += 1000 / 60;
         }
     }
@@ -64,16 +64,54 @@ test('locked tools cannot be selected; an arriving tool becomes the tool in hand
     assert.equal(sheet.tool, 'paint');
 });
 
-test('speed cost and flow follow the reference formulas', () => {
+test('speed cost follows the reference formula', () => {
     assert.equal(speedCost(0), 1);
     near(speedCost(INKIT_CONFIG.idealSpeed * 2), 1.35, 1e-9);
     assert.equal(speedCost(100), 1.6);
-    near(flow(0), 1.1, 1e-9);
-    near(flow(INKIT_CONFIG.idealSpeed * 1.5), 0.95, 1e-9);
-    assert.equal(flow(100), 0.75);
 });
 
-test('fairness: the same stroke costs and covers the same at 1400 px and 380 px wide (±1%)', () => {
+test('glow: the v9 stops scaled by the peak, each clamped to 1, linear in between, 0 at the rim', () => {
+    near(glowAt(0, 0.2), 0.2, 1e-9);
+    near(glowAt(0.25, 0.2), 0.106, 1e-9);
+    near(glowAt(0.125, 0.2), (0.2 + 0.106) / 2, 1e-9);
+    near(glowAt(0.75, 0.2), 0.01, 1e-9);
+    assert.equal(glowAt(1, 0.2), 0);
+    assert.equal(glowAt(1.2, 0.2), 0);
+    assert.equal(glowAt(0, 3), 1, 'clamped at the centre');
+    near(glowAt(0.25, 3), 1, 1e-9, 'clamped stop');
+    near(glowAt(0.5, 3), 0.66, 1e-9);
+});
+
+/** A straight 200-sheet-px pencil stroke at a steady pace, one event and one tick per 60 Hz frame. */
+const straightStroke = (cssSide) => {
+    const sheet = new InkItSheet();
+    const rect = { left: 11, top: 23, width: cssSide, height: cssSide };
+    const at = (x) => toSheet(rect.left + (x / SHEET) * cssSide, rect.top + (250 / SHEET) * cssSide, rect);
+    let x = 150;
+    let now = 0;
+
+    sheet.pointerDown(at(x), now);
+    while (x < 350) {
+        x = Math.min(350, x + 4.75);
+        now += 1000 / 60;
+        sheet.pointerMove(at(x), now);
+        sheet.tick(1 / 60);
+    }
+    sheet.pointerUp();
+
+    return sheet;
+};
+
+test('fairness: a 200-sheet-px pencil stroke leaves the same ink (~374) at 1400 px and 380 px wide', () => {
+    const large = straightStroke(1400);
+    const small = straightStroke(380);
+
+    near(small.inkLeft, large.inkLeft, large.inkLeft * 0.01, 'ink');
+    near(large.inkLeft, 374.2, 1, 'reference ink left');
+    near(small.coverage('pencil'), large.coverage('pencil'), large.coverage('pencil') * 0.01, 'coverage');
+});
+
+test('fairness: the same curved stroke costs and covers the same at 1400 px and 380 px wide (±1%)', () => {
     const large = drawStroke({ cssSide: 1400 });
     const small = drawStroke({ cssSide: 380 });
 
@@ -83,14 +121,12 @@ test('fairness: the same stroke costs and covers the same at 1400 px and 380 px 
     assert.ok(large.spent > 100);
 });
 
-// The reference smooths the speed once per pointer event, so 120 Hz input reads a slightly different
-// speed: about 1.4% more coverage on this stroke, identical to the reference engine (kept 1:1).
-test('fairness: 60 Hz and 120 Hz pointer events give the same coverage (±2%)', () => {
+test('fairness: 60 Hz and 120 Hz pointer events give the same coverage (±1%)', () => {
     const slow = drawStroke({ interval: 1000 / 60 });
     const fast = drawStroke({ interval: 1000 / 120 });
 
-    near(fast.sheet.coverage('pencil'), slow.sheet.coverage('pencil'), slow.sheet.coverage('pencil') * 0.02, 'coverage');
-    near(fast.spent, slow.spent, slow.spent * 0.04, 'ink');
+    near(fast.sheet.coverage('pencil'), slow.sheet.coverage('pencil'), slow.sheet.coverage('pencil') * 0.01, 'coverage');
+    near(fast.spent, slow.spent, slow.spent * 0.01, 'ink');
 });
 
 test('ink: 550 a round, hint 1 from round 5 gives 770 now and on the next refill, refused at round 4 and twice', () => {
@@ -131,51 +167,145 @@ test('out of ink: the stroke stops and the sheet takes no more until the next ro
     assert.equal(sheet.pointerDown({ x: 300, y: 300 }, 20), true);
 });
 
-test('fresh discount: redrawing the same stroke costs far less than the first pass', () => {
-    const first = drawStroke();
-    const again = drawStroke({ sheet: first.sheet });
-    assert.ok(again.spent < first.spent * 0.15, `second ${again.spent} vs first ${first.spent}`);
+test('need: a spot this tool covers past 92% costs nothing; less coverage costs 1 − coverage', () => {
+    const sheet = new InkItSheet();
+    const spot = pixelAt(250, 250);
+
+    sheet.masks.pencil[spot] = 0.93;
+    assert.equal(sheet.need(250, 250), 0);
+    assert.equal(sheet.applyDab(250, 250, 0), 0, 'the dab is free');
+
+    sheet.masks.pencil[spot] = 0.4;
+    near(sheet.need(250, 250), 0.6, 1e-6);
+    near(sheet.applyDab(250, 250, 0), INKIT_CONFIG.dabStep * 0.6, 1e-5);
+
+    sheet.masks.pen[spot] = 0.99;
+    near(sheet.need(250, 250), 1 - sheet.masks.pencil[spot], 1e-6, 'need reads the tool in hand only');
 });
 
-test('drain: 60 ink a second × tool cost × fresh while the pointer is down', () => {
-    for (const [tool, expected] of [['pencil', 60], ['pen', 75], ['paint', 90]]) {
+test('need: redrawing the same stroke costs less than the first pass', () => {
+    const first = drawStroke();
+    const again = drawStroke({ sheet: first.sheet });
+    assert.ok(again.spent < first.spent, `second ${again.spent} vs first ${first.spent}`);
+});
+
+test('drain: 60 ink a second × tool cost × need while the pointer is down', () => {
+    for (const [tool, perSecond] of [['pencil', 60], ['pen', 75], ['paint', 90]]) {
         const sheet = new InkItSheet();
         sheet.setRound(5, false);
         sheet.tool = tool;
         sheet.inkLeft = 5000;
         sheet.pointerDown({ x: 250, y: 250 }, 0);
-        const afterDab = sheet.inkLeft;
-        for (let frame = 1; frame <= 60; frame++) sheet.tick(1 / 60, (frame * 1000) / 60);
-        near(afterDab - sheet.inkLeft, expected, 0.01, tool);
+
+        for (let frame = 1; frame <= 30; frame++) {
+            const before = sheet.inkLeft;
+            const need = sheet.need(250, 250);
+            sheet.tick(1 / 60);
+            near(before - sheet.inkLeft, (perSecond / 60) * need, 1e-6, `${tool} frame ${frame}`);
+        }
     }
 });
 
-test('erase: pen rubs pencil out under its core; paint leaves at most 5% of the pen', () => {
+test('brush: one dab adds exactly glowAt(d, peak); two dabs give 1 − (1 − a)²', () => {
+    const { radius, peak } = INKIT_CONFIG.tools.pencil;
+    const sheet = new InkItSheet();
+
+    sheet.stamp('pencil', 250, 250, radius, peak);
+    for (const offset of [0, 5, 11, 20, 30, 40, 45]) {
+        near(sheet.masks.pencil[pixelAt(250 + offset, 250)], glowAt(offset / radius, peak), 1e-6, `d = ${offset}`);
+    }
+
+    sheet.stamp('pencil', 250, 250, radius, peak);
+    for (const offset of [0, 11, 30]) {
+        const single = glowAt(offset / radius, peak);
+        near(sheet.masks.pencil[pixelAt(250 + offset, 250)], 1 - (1 - single) ** 2, 1e-6, `two dabs, d = ${offset}`);
+    }
+});
+
+test('brush: no hard edge, coverage falls smoothly to 0 at the radius', () => {
+    const { radius, peak } = INKIT_CONFIG.tools.pen;
+    const sheet = new InkItSheet();
+    sheet.setRound(3, false);
+    sheet.stamp('pen', 250, 250, radius, peak);
+
+    let previous = sheet.masks.pen[pixelAt(250, 250)];
+    let biggestDrop = 0;
+    for (let offset = 1; offset <= radius + 2; offset++) {
+        const value = sheet.masks.pen[pixelAt(250 + offset, 250)];
+        assert.ok(value <= previous + 1e-9, 'never rises outward');
+        biggestDrop = Math.max(biggestDrop, previous - value);
+        previous = value;
+    }
+
+    assert.equal(previous, 0);
+    assert.ok(biggestDrop < peak * 0.1, `largest step ${biggestDrop}`);
+    assert.ok(sheet.masks.pen[pixelAt(250 + radius - 2, 250)] < 0.005, 'almost nothing near the rim');
+});
+
+test('hand-over: a pen dab multiplies pencil by 1 − glowAt(d, .28 × 1.6) and adds pen', () => {
+    const { radius, peak } = INKIT_CONFIG.tools.pen;
+    const sheet = new InkItSheet();
+    sheet.setRound(3, false);
+    sheet.masks.pencil.fill(0.8);
+
+    sheet.stamp('pen', 250, 250, radius, peak);
+    for (const offset of [0, 8, 17, 26]) {
+        const index = pixelAt(250 + offset, 250);
+        near(sheet.masks.pencil[index], 0.8 * (1 - glowAt(offset / radius, peak * 1.6)), 1e-6, `pencil, d = ${offset}`);
+        near(sheet.masks.pen[index], glowAt(offset / radius, peak), 1e-6, `pen, d = ${offset}`);
+    }
+    assert.ok(sheet.masks.pencil[pixelAt(250, 250)] > 0.4, 'one pen dab refines the sketch, it does not erase it');
+});
+
+test('hand-over: repeated pen passes take pencil toward 0 gradually', () => {
+    const { radius, peak } = INKIT_CONFIG.tools.pen;
+    const sheet = new InkItSheet();
+    sheet.setRound(3, false);
+    sheet.masks.pencil.fill(1);
+
+    const centre = pixelAt(250, 250);
+    const values = [];
+    for (let pass = 0; pass < 12; pass++) {
+        sheet.stamp('pen', 250, 250, radius, peak);
+        values.push(sheet.masks.pencil[centre]);
+    }
+
+    for (let pass = 1; pass < values.length; pass++) {
+        assert.ok(values[pass] < values[pass - 1], 'goes down every pass');
+        near(values[pass] / values[pass - 1], 1 - peak * 1.6, 1e-4, 'by the same share');
+    }
+    assert.ok(values[0] > 0.5);
+    assert.ok(values.at(-1) < 0.01);
+});
+
+test('hand-over: paint rubs out pencil and pen with the same glow at 1.6×', () => {
+    const { radius, peak } = INKIT_CONFIG.tools.paint;
     const sheet = new InkItSheet();
     sheet.setRound(5, false);
     sheet.masks.pencil.fill(1);
-    sheet.masks.pen.fill(0);
+    sheet.masks.pen.fill(1);
 
-    sheet.tool = 'pen';
-    sheet.beginStroke();
-    sheet.stamp('pen', 250, 250, INKIT_CONFIG.tools.pen.radius, 1);
-    assert.ok(sheet.masks.pencil[pixelAt(250, 250)] < 1e-6);
-    assert.ok(sheet.masks.pen[pixelAt(250, 250)] > 0.999);
-
-    sheet.beginStroke();
-    sheet.stamp('paint', 250, 250, INKIT_CONFIG.tools.paint.radius, 1);
-    assert.ok(sheet.masks.pen[pixelAt(250, 250)] <= 0.05 + 1e-6);
-    assert.ok(sheet.masks.paint[pixelAt(250, 250)] > 0.999);
+    sheet.stamp('paint', 250, 250, radius, peak);
+    const keep = 1 - glowAt(0, peak * 1.6);
+    near(sheet.masks.pencil[pixelAt(250, 250)], keep, 1e-6);
+    near(sheet.masks.pen[pixelAt(250, 250)], keep, 1e-6);
+    near(sheet.masks.paint[pixelAt(250, 250)], peak, 1e-6);
 });
 
-test('hold still: the spot soaks toward opaque after 120 ms', () => {
+test('hold still: every frame adds a dab of peak dt × 1.4 under the pointer', () => {
+    const { radius } = INKIT_CONFIG.tools.pencil;
     const sheet = new InkItSheet();
     sheet.inkLeft = 5000;
-    const edge = pixelAt(250 + INKIT_CONFIG.tools.pencil.radius * 0.7, 250);
     sheet.pointerDown({ x: 250, y: 250 }, 0);
-    const start = sheet.masks.pencil[edge];
-    for (let frame = 1; frame <= 120; frame++) sheet.tick(1 / 60, (frame * 1000) / 60);
-    assert.ok(sheet.masks.pencil[edge] > start + 0.1);
+
+    const edge = pixelAt(250 + radius * 0.5, 250);
+    const before = sheet.masks.pencil[edge];
+    sheet.tick(1 / 60);
+    const added = glowAt(Math.hypot(Math.floor(250 + radius * 0.5) - 250, 0) / radius, (1 / 60) * 1.4);
+    near(sheet.masks.pencil[edge], before + (1 - before) * added, 1e-6);
+
+    for (let frame = 0; frame < 120; frame++) sheet.tick(1 / 60);
+    assert.ok(sheet.masks.pencil[pixelAt(250, 250)] > 0.9, 'holding still sharpens the spot');
 });
 
 test('reveal stepper: eraser, pencil, pen, paint; ends with paint 1 and pencil/pen 0', () => {

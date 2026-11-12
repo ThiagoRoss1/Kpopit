@@ -1,5 +1,5 @@
-// Every InkIt number, as approved in the InkIt Lab (docs: the InkIt reference engine). Balance changes
-// happen here only; the engine, the page and the backend constants follow it.
+// Every InkIt number, from the InkIt reference engine (the v9 glow brush with the InkIt Lab's layers, ink,
+// rounds and hints). Balance changes happen here only; the engine, the page and the backend follow it.
 
 export type ToolId = "pencil" | "pen" | "paint";
 
@@ -12,41 +12,41 @@ export const SHEET_PIXELS = SHEET * SHEET;
 export interface ToolConfig {
     /** The round (the guess about to be made = wrong guesses + 1) the tool unlocks at. */
     unlockRound: number;
-    /** Brush radius in sheet px. */
+    /** v9 brush radius in sheet px (7% of the sheet × tool size). */
     radius: number;
-    /** Opacity of the centre of one calm pass. */
-    strength: number;
-    /** Share of the radius that is fully strong before the cosine fade to the rim. */
-    core: number;
+    /** Opacity of one dab's centre; dabs add up, so strokes build gradually and stay light. */
+    peak: number;
     /** Ink multiplier. */
     cost: number;
 }
 
 export const INKIT_CONFIG = {
     tools: {
-        pencil: { unlockRound: 1, radius: 40, strength: 0.95, core: 0.45, cost: 1 },
-        pen: { unlockRound: 3, radius: 30, strength: 1, core: 0.55, cost: 1.25 },
-        paint: { unlockRound: 5, radius: 40, strength: 1, core: 0.5, cost: 1.5 },
+        pencil: { unlockRound: 1, radius: 45.5, peak: 0.2, cost: 1 },
+        pen: { unlockRound: 3, radius: 35, peak: 0.28, cost: 1.25 },
+        paint: { unlockRound: 5, radius: 42, peak: 0.2, cost: 1.5 },
     } satisfies Record<ToolId, ToolConfig>,
 
-    /** A later tool rubs out the earlier ones where it passes (share rubbed out at full coverage). */
-    erases: { pen: { pencil: 1 }, paint: { pencil: 1, pen: 0.95 } } as Partial<Record<ToolId, Partial<Record<ToolId, number>>>>,
+    /** Glow of one dab: [distance from the centre as a share of the radius, opacity at peak 1]. */
+    glow: [[0, 1], [0.25, 0.53], [0.5, 0.22], [0.75, 0.05], [1, 0]] as [number, number][],
+    /** A later tool rubs out the earlier ones with the same glow at 1.6× its peak: a gradual hand-over. */
+    erases: { pen: { pencil: 1.6 }, paint: { pencil: 1.6, pen: 1.6 } } as Partial<Record<ToolId, Partial<Record<ToolId, number>>>>,
+    /** Sheet px between dabs, every tool. */
+    dabStep: 8.75,
 
     /** Full refill on every wrong guess; leftover is lost. */
     inkPerRound: 550,
-    /** Distance between dabs = radius × this (also the base cost of one dab). */
-    dabSpacing: 0.35,
-    /** A dab on an area already ≥92% covered by that tool is free. */
-    freshMin: 0.08,
+    /** A spot this tool already covers past 92% costs nothing ("need"). */
+    freshFull: 0.92,
     /** Comfortable pace, sheet px per ms. */
     idealSpeed: 0.8,
     /** speedCost = min(maxSpeedCost, 1 + speedWeight × max(0, v / idealSpeed − 1)). */
     speedWeight: 0.35,
     maxSpeedCost: 1.6,
-    /** While the pointer is down, moving or not (× tool cost × fresh). */
+    /** While the pointer is down, moving or not (× tool cost × need). */
     drainPerSecond: 60,
-    /** Holding still soaks the spot toward opaque. */
-    holdBuild: { afterMs: 120, radius: 0.8, rate: 0.05 },
+    /** Every frame the pointer is down adds a dab of peak dt × this under it. */
+    holdBuildPerSecond: 1.4,
 
     /** Opt-in: +40% now, every later refill 40% bigger. */
     hint1: { fromRound: 5, bonus: 0.4 },

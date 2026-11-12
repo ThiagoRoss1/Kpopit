@@ -202,19 +202,19 @@ export const useInkIt = ({
 
     // While the pointer is down, once per frame: the drain and the hold-still build-up. Kept in a
     // ref so the frame callback can schedule itself.
-    const frameLoopRef = useRef<(now: number) => void>(() => undefined);
+    const frameLoopRef = useRef<() => void>(() => undefined);
 
     useEffect(() => {
-        frameLoopRef.current = (now) => {
+        frameLoopRef.current = () => {
             const sheet = sheetRef.current;
             if (!sheet.drawing) return;
 
-            sheet.tick(FRAME_SECONDS, now);
+            sheet.tick(FRAME_SECONDS);
             syncInk();
             queueRender();
 
             if (sheet.drawing) {
-                requestAnimationFrame((next) => frameLoopRef.current(next));
+                requestAnimationFrame(() => frameLoopRef.current());
                 return;
             }
 
@@ -246,7 +246,7 @@ export const useInkIt = ({
         setIsEmpty(false);
         syncInk();
         queueRender();
-        requestAnimationFrame((next) => frameLoopRef.current(next));
+        requestAnimationFrame(() => frameLoopRef.current());
     }, [canDraw, finished, isRevealing, queueRender, status, syncInk]);
 
     const onPointerMove = useCallback((event: ReactPointerEvent<HTMLCanvasElement>) => {

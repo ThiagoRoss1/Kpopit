@@ -1,7 +1,7 @@
 import { INKIT_CONFIG, SHEET, SHEET_PIXELS, TOOL_IDS, type ToolId } from "./config.ts";
 
-// The InkIt sheet, ported 1:1 from the reference engine approved in the InkIt Lab. Everything is
-// in sheet units (a fixed 500×500 sheet): convert pointer positions with toSheet first, so screen
+// The InkIt sheet, ported 1:1 from the reference engine (v9 glow brush, InkIt Lab ink and rounds).
+// Everything is in sheet units (a fixed 500×500 sheet): convert pointer positions with toSheet first, so screen
 // size never changes the game. "round" = the guess the player is about to make = wrong guesses + 1.
 
 export interface Point {
@@ -15,7 +15,7 @@ export type Masks = Record<ToolId, Float32Array>;
 export interface Layers {
     /** The photo's RGBA pixels at sheet size. */
     photo: Uint8ClampedArray;
-    /** Darkness (0 paper, 1 black) of the pencil scribble. */
+    /** Darkness (0 paper, 1 black) of the pencil sketch (line art + hatching). */
     pencil: Float32Array;
     /** Darkness of the pen line art. */
     pen: Float32Array;
@@ -43,15 +43,27 @@ export const unlockedTools = (round: number): ToolId[] => TOOL_IDS.filter((tool)
 export const pixelAt = (x: number, y: number): number =>
     Math.max(0, Math.min(SHEET - 1, y | 0)) * SHEET + Math.max(0, Math.min(SHEET - 1, x | 0));
 
-// Brush edge: fully strong inside `core`, then a cosine fade to nothing at the rim.
-const profile = (distance: number, core: number): number =>
-    distance <= core ? 1 : (1 + Math.cos((Math.PI * (distance - core)) / (1 - core))) / 2;
+/** Opacity of one dab at `distance` (share of the radius), like the v9 canvas radial gradient: each
+ *  stop is clamped to 1 first, then interpolated. */
+export const glowAt = (distance: number, peak: number): number => {
+    const stops = INKIT_CONFIG.glow;
+
+    for (let index = 1; index < stops.length; index++) {
+        if (distance > stops[index][0]) continue;
+
+        const [fromDistance, fromAlpha] = stops[index - 1];
+        const [toDistance, toAlpha] = stops[index];
+        const from = Math.min(1, fromAlpha * peak);
+        const to = Math.min(1, toAlpha * peak);
+
+        return from + ((to - from) * (distance - fromDistance)) / (toDistance - fromDistance);
+    }
+
+    return 0;
+};
 
 export const speedCost = (speed: number): number =>
     Math.min(INKIT_CONFIG.maxSpeedCost, 1 + INKIT_CONFIG.speedWeight * Math.max(0, speed / INKIT_CONFIG.idealSpeed - 1));
-
-/** Calm strokes lay down more; fast ones come out lighter (never below 75%). */
-export const flow = (speed: number): number => Math.max(0.75, 1.1 - 0.15 * Math.max(0, speed / INKIT_CONFIG.idealSpeed - 0.5));
 
 export const roundInk = (hint1Used: boolean): number => INKIT_CONFIG.inkPerRound * (hint1Used ? 1 + INKIT_CONFIG.hint1.bonus : 1);
 
@@ -65,8 +77,6 @@ const emptyMasks = (): Masks => ({
 
 export class InkItSheet {
     masks: Masks = emptyMasks();
-    before: Masks = emptyMasks();
-    strokeCover = new Float32Array(SHEET_PIXELS);
     round = 1;
     tool: ToolId = "pencil";
     hint1Used = false;
@@ -134,7 +144,6 @@ export class InkItSheet {
         this.last = point;
         this.lastTime = now;
         this.speed = 0;
-        this.beginStroke();
         this.spend(this.applyDab(point.x, point.y, 0));
 
         return true;
@@ -145,7 +154,7 @@ export class InkItSheet {
 
         const distance = Math.hypot(point.x - this.last.x, point.y - this.last.y);
         const elapsed = Math.max(1, now - this.lastTime);
-        const step = INKIT_CONFIG.tools[this.tool].radius * INKIT_CONFIG.dabSpacing;
+        const step = INKIT_CONFIG.dabStep;
 
         // Fixed-step interpolation: the event rate (60/120 Hz) doesn't matter.
         if (distance < step) return;
@@ -177,41 +186,34 @@ export class InkItSheet {
         this.speed = 0;
     }
 
-    /** Once per animation frame while drawing (dt in seconds): time on the sheet costs ink, and
-     *  holding still keeps soaking the same spot. */
-    tick(dt: number, now: number): void {
+    /** Once per animation frame while drawing (dt in seconds), as in v9: time on the sheet costs ink,
+     *  and the spot under the pointer keeps building up (holding still sharpens it, but costs). */
+    tick(dt: number): void {
         if (!this.drawing) return;
 
         const tool = INKIT_CONFIG.tools[this.tool];
-        const fresh = 1 - this.before[this.tool][pixelAt(this.last.x, this.last.y)];
-        this.spend(INKIT_CONFIG.drainPerSecond * dt * tool.cost * fresh);
+        this.spend(INKIT_CONFIG.drainPerSecond * dt * tool.cost * this.need(this.last.x, this.last.y));
+        if (!this.drawing) return;
 
-        if (now - this.lastTime > INKIT_CONFIG.holdBuild.afterMs) {
-            this.stamp(this.tool, this.last.x, this.last.y, tool.radius * INKIT_CONFIG.holdBuild.radius, INKIT_CONFIG.holdBuild.rate, true);
-            this.speed *= 0.9;
-        }
+        this.stamp(this.tool, this.last.x, this.last.y, tool.radius, Math.min(1, dt * INKIT_CONFIG.holdBuildPerSecond));
     }
 
     /* ---- Brush ---- */
 
-    /** Snapshot the sheet when a stroke starts. Inside one stroke coverage is the max of its dabs,
-     *  so the brush keeps a solid centre and a soft rim; the stroke is laid over the snapshot. */
-    beginStroke(): void {
-        for (const id of TOOL_IDS) this.before[id].set(this.masks[id]);
+    /** Ink pays only for what is new: a spot this tool already covers past 92% is free. */
+    need(x: number, y: number): number {
+        const covered = this.masks[this.tool][pixelAt(x, y)];
 
-        this.strokeCover.fill(0);
+        return covered >= INKIT_CONFIG.freshFull ? 0 : 1 - covered;
     }
 
     applyDab(x: number, y: number, speed: number): number {
         const info = INKIT_CONFIG.tools[this.tool];
+        const fresh = this.need(x, y);
 
-        // Ink pays only for what is new, measured against the sheet before this stroke.
-        const fresh = 1 - this.before[this.tool][pixelAt(x, y)];
-        if (fresh < INKIT_CONFIG.freshMin) return 0;
+        this.stamp(this.tool, x, y, info.radius, info.peak);
 
-        this.stamp(this.tool, x, y, info.radius, Math.min(1, info.strength * flow(speed)));
-
-        return info.radius * INKIT_CONFIG.dabSpacing * info.cost * speedCost(speed) * fresh;
+        return INKIT_CONFIG.dabStep * info.cost * speedCost(speed) * fresh;
     }
 
     spend(amount: number): void {
@@ -225,9 +227,9 @@ export class InkItSheet {
         }
     }
 
-    /** One dab. build = true is the hold-still case: the spot soaks toward fully opaque. */
-    stamp(id: ToolId, x: number, y: number, radius: number, strength: number, build = false): void {
-        const { core } = INKIT_CONFIG.tools[id];
+    /** One glow dab: adds to the tool's mask (source-over) and rubs the earlier tools out
+     *  (destination-out) with the same glow at their erase factor. */
+    stamp(id: ToolId, x: number, y: number, radius: number, peak: number): void {
         const erases = INKIT_CONFIG.erases[id] ?? {};
         const others = Object.keys(erases) as ToolId[];
         const left = Math.max(0, Math.floor(x - radius));
@@ -241,16 +243,9 @@ export class InkItSheet {
                 if (distance >= 1) continue;
 
                 const index = py * SHEET + px;
-                const amount = profile(distance, core) * strength;
+                this.masks[id][index] += (1 - this.masks[id][index]) * glowAt(distance, peak);
 
-                if (build) this.strokeCover[index] += (1 - this.strokeCover[index]) * amount;
-                else if (amount > this.strokeCover[index]) this.strokeCover[index] = amount;
-                else continue;
-
-                const cover = this.strokeCover[index];
-                this.masks[id][index] = 1 - (1 - this.before[id][index]) * (1 - cover);
-
-                for (const other of others) this.masks[other][index] = this.before[other][index] * (1 - cover * erases[other]!);
+                for (const other of others) this.masks[other][index] *= 1 - glowAt(distance, peak * erases[other]!);
             }
         }
     }
@@ -267,7 +262,7 @@ export class InkItSheet {
                 const distance = Math.hypot(px - x, py - y) / radius;
                 if (distance >= 1) continue;
 
-                const keep = 1 - profile(distance, 0.45);
+                const keep = 1 - glowAt(distance, 1);
                 const index = py * SHEET + px;
 
                 for (const id of TOOL_IDS) this.masks[id][index] *= keep;
@@ -292,12 +287,7 @@ export class InkItSheet {
     }
 
     clear(): void {
-        for (const id of TOOL_IDS) {
-            this.masks[id].fill(0);
-            this.before[id].fill(0);
-        }
-
-        this.strokeCover.fill(0);
+        for (const id of TOOL_IDS) this.masks[id].fill(0);
     }
 
     /** The finished sheet: the photo, fully painted. */
@@ -363,7 +353,6 @@ export class InkItSheet {
         let stageIndex = 0;
         let position = 0;
         let stageStart = 0;
-        this.beginStroke();
 
         return (elapsed) => {
             const stage = stages[stageIndex];
@@ -389,7 +378,6 @@ export class InkItSheet {
 
                 position = 0;
                 stageStart = elapsed;
-                this.beginStroke();
             }
 
             return { done: false, head: { x: head[0], y: head[1], stage: stages[stageIndex].id ?? "eraser" } };

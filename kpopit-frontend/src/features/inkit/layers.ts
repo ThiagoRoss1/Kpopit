@@ -78,9 +78,9 @@ export const penLines = (source: CanvasImageSource, dodge = 5, power = 2.6): Flo
     return out;
 };
 
-/** PENCIL layer: the v9 scribble only. Loose diagonal hatching for tone and short hairy strokes
- *  that chase the edges: shapes read, features don't. Returns darkness. */
-export const pencilScribble = (full: CanvasImageSource, seed: number): Float32Array => {
+/** v9 scribble: loose diagonal hatching for tone and short hairy strokes that chase the edges.
+ *  Returns a canvas (white paper, grey strokes). */
+export const scribble = (full: CanvasImageSource, seed: number): HTMLCanvasElement => {
     const work = makeCanvas();
     const target = context(work);
     target.fillStyle = "#fff";
@@ -193,7 +193,43 @@ export const pencilScribble = (full: CanvasImageSource, seed: number): Float32Ar
         }
     }
 
-    const data = pencil.getImageData(0, 0, SHEET, SHEET).data;
+    pencil.globalAlpha = 1;
+
+    return canvas;
+};
+
+/** PENCIL layer (the InkIt Lab's sharper pencil): soft line art (dodge 5, power 2), a faint second
+ *  pass 1px off so the lines look gone over, and the v9 hatching on top. Returns darkness. */
+export const pencilSketch = (full: CanvasImageSource, seed: number): Float32Array => {
+    const lines = penLines(full, 5, 2);
+    const lineCanvas = makeCanvas();
+    const lineContext = context(lineCanvas);
+    const lineImage = lineContext.createImageData(SHEET, SHEET);
+
+    for (let index = 0; index < SHEET_PIXELS; index++) {
+        const value = 255 * (1 - lines[index]);
+        lineImage.data[index * 4] = lineImage.data[index * 4 + 1] = lineImage.data[index * 4 + 2] = value;
+        lineImage.data[index * 4 + 3] = 255;
+    }
+
+    lineContext.putImageData(lineImage, 0, 0);
+
+    const canvas = makeCanvas();
+    const sketch = context(canvas);
+    sketch.fillStyle = "#fff";
+    sketch.fillRect(0, 0, SHEET, SHEET);
+
+    sketch.globalCompositeOperation = "multiply";
+    sketch.globalAlpha = 0.85;
+    sketch.drawImage(lineCanvas, 0, 0);
+    sketch.globalAlpha = 0.3;
+    sketch.drawImage(lineCanvas, 1, 1);
+    sketch.globalAlpha = 0.7;
+    sketch.drawImage(scribble(full, seed), 0, 0);
+    sketch.globalAlpha = 1;
+    sketch.globalCompositeOperation = "source-over";
+
+    const data = sketch.getImageData(0, 0, SHEET, SHEET).data;
     const out = new Float32Array(SHEET_PIXELS);
 
     for (let index = 0; index < SHEET_PIXELS; index++) out[index] = 1 - data[index * 4] / 255;
@@ -213,7 +249,7 @@ export const buildLayers = (image: HTMLImageElement, seed: number): Layers => {
 
     return {
         photo: target.getImageData(0, 0, SHEET, SHEET).data,
-        pencil: pencilScribble(full, seed),
+        pencil: pencilSketch(full, seed),
         pen: penLines(full),
     };
 };
