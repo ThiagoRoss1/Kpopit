@@ -177,7 +177,7 @@ const InkHints = ({
             <HintCard
                 label="Group"
                 guessesLeft={groupHint ? 0 : Math.max(1, INKIT_CONFIG.hint2.fromRound - round)}
-                used={groupHintShown || (finished && groupHint !== null)}
+                used={groupHintShown}
                 disabled={finished}
                 reducedMotion={reducedMotion}
                 tilt="rotate-[.5deg]"

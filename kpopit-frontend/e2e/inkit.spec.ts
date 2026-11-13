@@ -166,10 +166,14 @@ test.describe('inkit', () => {
       await expect(page.getByTestId(`inkit-other-${mode}`)).toHaveAttribute('href', `/${mode}`);
     }
     await expect(searchInput(page, 'inkit')).toHaveCount(0);
+    // Like Blurry and Pixelated, the hints leave once the victory card is up.
+    await expect(inkHint).toHaveCount(0);
+    await expect(groupHint).toHaveCount(0);
 
     // A reload shows the finished game, not a new one.
     await openInkIt(page);
     await expect(page.getByTestId('inkit-victory')).toBeVisible();
+    await expect(inkHint).toHaveCount(0);
     expect(consoleErrors.list).toEqual([]);
   });
 
@@ -290,8 +294,10 @@ test.describe('inkit layers in every engine @mobile', () => {
       image.src = source.toDataURL();
       await image.decode();
 
-      const { buildLayers } = await import('/src/features/inkit/layers.ts');
-      const layers = buildLayers(image, 7);
+      // Loaded from the Vite dev server inside the page, not by the test runner.
+      const layersModule = '/src/features/inkit/layers.ts';
+      const { buildLayers } = await import(/* @vite-ignore */ layersModule);
+      const layers: { pen: Float32Array; pencil: Float32Array } = buildLayers(image, 7);
       const mean = (values: Float32Array) => values.reduce((sum, value) => sum + value, 0) / values.length;
       const at = (values: Float32Array, x: number, y: number) => values[y * 500 + x];
 

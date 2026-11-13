@@ -557,16 +557,19 @@ const InkItGame = ({ data, idols, isCalendarDay }: InkItGameProps) => {
                         {!isMobile && tools(false)}
                     </InkSheet>
 
-                    <InkHints
-                        round={round}
-                        finished={finished}
-                        reducedMotion={reducedMotion}
-                        inkHintUsed={inkHintRound !== null}
-                        onUseInkHint={requestInkHint}
-                        groupHint={groupHint ?? (answer ? answer.groups : null)}
-                        groupHintShown={groupHintShown}
-                        onShowGroupHint={showGroupHint}
-                    />
+                    {/* Like Blurry and Pixelated: the hints stay through the reveal and leave with the victory card. */}
+                    {phase !== "won" && (
+                        <InkHints
+                            round={round}
+                            finished={finished}
+                            reducedMotion={reducedMotion}
+                            inkHintUsed={inkHintRound !== null}
+                            onUseInkHint={requestInkHint}
+                            groupHint={groupHint}
+                            groupHintShown={groupHintShown}
+                            onShowGroupHint={showGroupHint}
+                        />
+                    )}
                 </div>
 
                 <div className="relative z-20 w-full max-w-140 justify-self-center [grid-area:search]">
