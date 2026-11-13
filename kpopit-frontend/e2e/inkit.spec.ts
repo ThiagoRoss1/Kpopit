@@ -270,6 +270,41 @@ test.describe('inkit on a phone @mobile', () => {
   });
 });
 
+test.describe('inkit layers in every engine @mobile', () => {
+  // Safari ignores the canvas `filter`; a layer built with it came out blank and the pen only erased.
+  test('the pen line art and the pencil sketch are drawn, not blank paper', async ({ page }) => {
+    await page.goto('/');
+    const darkness = await page.evaluate(async () => {
+      const source = document.createElement('canvas');
+      source.width = source.height = 500;
+      const paint = source.getContext('2d')!;
+      paint.fillStyle = '#f2d6c9';
+      paint.fillRect(0, 0, 500, 500);
+      paint.fillStyle = '#3b2a2a';
+      paint.beginPath();
+      paint.arc(250, 220, 110, 0, Math.PI * 2);
+      paint.fill();
+      paint.fillRect(120, 380, 260, 40);
+
+      const image = new Image();
+      image.src = source.toDataURL();
+      await image.decode();
+
+      const { buildLayers } = await import('/src/features/inkit/layers.ts');
+      const layers = buildLayers(image, 7);
+      const mean = (values: Float32Array) => values.reduce((sum, value) => sum + value, 0) / values.length;
+      const at = (values: Float32Array, x: number, y: number) => values[y * 500 + x];
+
+      return { pen: mean(layers.pen), pencil: mean(layers.pencil), penEdge: at(layers.pen, 250, 110), penFlat: at(layers.pen, 40, 40) };
+    });
+
+    expect(darkness.pen).toBeGreaterThan(0.01);
+    expect(darkness.pencil).toBeGreaterThan(0.01);
+    expect(darkness.penEdge).toBeGreaterThan(0.3);
+    expect(darkness.penFlat).toBeLessThan(0.05);
+  });
+});
+
 test.describe('inkit flag off', () => {
   test.beforeAll(async ({ backend }) => {
     await backend.restart(0, {});

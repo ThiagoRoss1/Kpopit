@@ -18,15 +18,83 @@ const context = (canvas: HTMLCanvasElement): CanvasRenderingContext2D => {
     return found;
 };
 
+/** One Gaussian pass along a row or a column of premultiplied RGBA; outside the sheet is transparent. */
+const blurPass = (input: Float32Array, output: Float32Array, kernel: Float32Array, horizontal: boolean): void => {
+    const reach = (kernel.length - 1) / 2;
+
+    for (let line = 0; line < SHEET; line++) {
+        for (let along = 0; along < SHEET; along++) {
+            let red = 0;
+            let green = 0;
+            let blue = 0;
+            let alpha = 0;
+
+            for (let tap = -reach; tap <= reach; tap++) {
+                const position = along + tap;
+                if (position < 0 || position >= SHEET) continue;
+
+                const weight = kernel[tap + reach];
+                const offset = (horizontal ? line * SHEET + position : position * SHEET + line) * 4;
+                red += input[offset] * weight;
+                green += input[offset + 1] * weight;
+                blue += input[offset + 2] * weight;
+                alpha += input[offset + 3] * weight;
+            }
+
+            const target = (horizontal ? line * SHEET + along : along * SHEET + line) * 4;
+            output[target] = red;
+            output[target + 1] = green;
+            output[target + 2] = blue;
+            output[target + 3] = alpha;
+        }
+    }
+};
+
+/** The source blurred like the canvas filter `blur(radius px)` (a Gaussian with σ = radius, transparent
+ *  outside). Computed in JS because Safari ignores `ctx.filter`, which left the line art blank there. */
 const blurred = (source: CanvasImageSource, radius: number): HTMLCanvasElement => {
-    const canvas = makeCanvas();
-    const target = context(canvas);
-
-    target.filter = `blur(${radius}px)`;
+    const work = makeCanvas();
+    const target = context(work);
     target.drawImage(source, 0, 0, SHEET, SHEET);
-    target.filter = "none";
 
-    return canvas;
+    const image = target.getImageData(0, 0, SHEET, SHEET);
+    const premultiplied = new Float32Array(SHEET_PIXELS * 4);
+
+    for (let index = 0; index < SHEET_PIXELS; index++) {
+        const alpha = image.data[index * 4 + 3] / 255;
+        premultiplied[index * 4] = image.data[index * 4] * alpha;
+        premultiplied[index * 4 + 1] = image.data[index * 4 + 1] * alpha;
+        premultiplied[index * 4 + 2] = image.data[index * 4 + 2] * alpha;
+        premultiplied[index * 4 + 3] = alpha;
+    }
+
+    const reach = Math.ceil(radius * 3);
+    const kernel = new Float32Array(reach * 2 + 1);
+    let total = 0;
+
+    for (let tap = -reach; tap <= reach; tap++) {
+        const weight = Math.exp(-(tap * tap) / (2 * radius * radius));
+        kernel[tap + reach] = weight;
+        total += weight;
+    }
+    for (let tap = 0; tap < kernel.length; tap++) kernel[tap] /= total;
+
+    const between = new Float32Array(SHEET_PIXELS * 4);
+    blurPass(premultiplied, between, kernel, true);
+    blurPass(between, premultiplied, kernel, false);
+
+    for (let index = 0; index < SHEET_PIXELS; index++) {
+        const alpha = premultiplied[index * 4 + 3];
+        const offset = index * 4;
+        image.data[offset] = alpha > 0 ? premultiplied[offset] / alpha : 0;
+        image.data[offset + 1] = alpha > 0 ? premultiplied[offset + 1] / alpha : 0;
+        image.data[offset + 2] = alpha > 0 ? premultiplied[offset + 2] / alpha : 0;
+        image.data[offset + 3] = alpha * 255;
+    }
+
+    target.putImageData(image, 0, 0);
+
+    return work;
 };
 
 /** Seeded random: the same seed always gives the same hatching. */
