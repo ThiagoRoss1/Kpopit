@@ -3,7 +3,8 @@ import FeatureGate from "../../src/components/FeatureGate";
 import { useCalendarDate } from "../../src/hooks/useCalendarDate";
 import InkIt from "../../src/pages/InkIt/InkIt";
 
-export const handle = { puff: true };
+// The hatch ground runs under the footer too.
+export const handle = { puff: true, ground: "hatch" };
 
 export default function InkItRoute() {
   // ?date= plays a past day from the calendar on the same page.

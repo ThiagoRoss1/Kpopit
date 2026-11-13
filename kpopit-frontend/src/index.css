@@ -36,6 +36,7 @@
 [data-theme="day"] {
   --ground: #FAF6F0;
   --dot: rgba(26, 20, 24, .07);
+  --hatch: rgba(26, 20, 24, .07);
   --text: #1A1418;
   --muted: #6B5F66;
   --ink: #1A1418;
@@ -86,6 +87,7 @@
 [data-theme="night"] {
   --ground: #1E1C1F;
   --dot: rgba(255, 255, 255, .05);
+  --hatch: rgba(255, 255, 255, .06);
   --text: #FAF6F0;
   --muted: #CFC5CB;
   --ink: #0A0A0A;
