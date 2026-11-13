@@ -2,6 +2,7 @@ import { BookOpen, CircleHelp, Heart, List, Mail, MessageCircle, type LucideIcon
 import type { Features } from "../../utils/features";
 import { prefetchIdolsList } from "../../pages/Idols/idolsData";
 import { prefetchCollectionsList } from "../../pages/Collection/collectionData";
+import { PIXEL_LEVELS } from "../../utils/pixelLevels";
 
 export type NavPage =
     | "classic"
@@ -33,6 +34,8 @@ export interface NavRow {
     /** Mode/idol tiles show a photo, the About tiles an icon. */
     img?: string;
     imgClass?: string;
+    /** Pixelated: the photo drawn as the game's mosaic at this block size. */
+    pixelBlock?: number;
     icon?: LucideIcon;
     description?: string;
     /** Shown but not linked (InkIt while its flag is off). */
@@ -51,7 +54,7 @@ export const MAJOR_PATCH = {
 export const GAME_ROWS: NavRow[] = [
     { id: "classic", label: "Classic", to: "/classic", img: "/images/idols/sakura.webp" },
     { id: "blurry", label: "Blurry", to: "/blurry", img: "/images/idols/karina.webp", imgClass: "blur-[3px]" },
-    { id: "pixelated", label: "Pixelated", to: "/pixelated", img: "/images/albums/after_like.webp", imgClass: "[image-rendering:pixelated] scale-[1.02]" },
+    { id: "pixelated", label: "Pixelated", to: "/pixelated", img: "/images/albums/summer_magic.webp", pixelBlock: PIXEL_LEVELS[7] }, // guess 8's mosaic: a hint of pixels
     { id: "inkit", label: "InkIt", to: "/inkit", img: "/images/idols/winter.webp", imgClass: "grayscale contrast-[1.3]", wip: true },
 ];
 

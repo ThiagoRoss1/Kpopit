@@ -6,6 +6,7 @@ import type { InkItAnswer } from "../../interfaces/gameInterfaces";
 import { resolveCdnUrl } from "../../utils/imageUrl";
 import InkThumb from "./InkThumb";
 import { PressButton } from "../buttons/PressButton";
+import ModeImage from "../NavBar/ModeImage";
 
 export interface OtherMode {
     id: string;
@@ -14,6 +15,7 @@ export interface OtherMode {
     won: boolean;
     image: string | null;
     imageClass?: string;
+    pixelBlock?: number;
 }
 
 export type ShareState = "idle" | "working" | "shared" | "copied" | "saved" | "failed";
@@ -234,12 +236,7 @@ const InkVictory = ({
                                     )}
                                 >
                                     <span className="block size-21 overflow-hidden rounded-[14px] border-2 border-(--ink) max-[900px]:size-18">
-                                        <img
-                                            src={resolveCdnUrl(mode.image) ?? undefined}
-                                            alt=""
-                                            draggable={false}
-                                            className={cn("block size-full scale-[1.06] object-cover object-center", mode.imageClass)}
-                                        />
+                                        <ModeImage src={mode.image} pixelBlock={mode.pixelBlock} className={cn("scale-[1.06] object-center", mode.imageClass)} />
                                     </span>
                                     <span className="font-bold text-[13px]">{mode.name}</span>
                                 </Link>

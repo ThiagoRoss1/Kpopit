@@ -473,7 +473,7 @@ const InkItGame = ({ data, idols, isCalendarDay }: InkItGameProps) => {
     const modeTiles = otherModes.map((mode) => {
         const row = GAME_ROWS.find((entry) => entry.id === mode.id);
 
-        return { id: mode.id, name: mode.name, path: mode.path, won: mode.won, image: row?.img ?? null, imageClass: row?.imgClass };
+        return { id: mode.id, name: mode.name, path: mode.path, won: mode.won, image: row?.img ?? null, imageClass: row?.imgClass, pixelBlock: row?.pixelBlock };
     });
 
     // Drawing mode: the sheet as large as fits between the Done pill and the tools bar.

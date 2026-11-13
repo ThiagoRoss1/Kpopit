@@ -1,6 +1,6 @@
 import type { ReactNode } from "react";
+import ModeImage from "./ModeImage";
 import { cn } from "../../lib/utils";
-import { resolveCdnUrl } from "../../utils/imageUrl";
 import IntentLink from "../Links/IntentLink";
 import { PREFETCH, type NavPage, type NavRow } from "./navigation";
 
@@ -69,13 +69,7 @@ export const Tile = ({ row, size, animated = false }: TileProps) => {
                 motion,
             )}
         >
-            <img
-                src={resolveCdnUrl(row.img ?? null) ?? ""}
-                alt=""
-                loading="lazy"
-                className={cn("block size-full object-cover", row.imgClass)}
-                draggable={false}
-            />
+            <ModeImage src={row.img ?? null} pixelBlock={row.pixelBlock} className={row.imgClass} />
         </span>
     );
 };

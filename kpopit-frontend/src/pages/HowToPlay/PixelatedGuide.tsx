@@ -28,7 +28,7 @@ const PixelatedGuide = () => {
                         <div className="relative aspect-square overflow-hidden rounded-[18px] border-[2.5px] border-[#1A1418] bg-[#DCD6D2] shadow-[4px_5px_0_var(--ctl-off)]">
                             {/* The game's own mosaic canvas, so each step looks exactly like that attempt in Pixelated. */}
                             <PixelatedCanvas
-                                imageUrl={resolveCdnUrl("/images/albums/after_like.webp") ?? undefined}
+                                imageUrl={resolveCdnUrl("/images/albums/summer_magic.webp") ?? undefined}
                                 blockSize={PIXEL_LEVELS[Math.min(guesses, PIXEL_LEVELS.length - 1)]}
                                 alt="Pixelated album cover"
                                 className="absolute inset-0 size-full"
