@@ -83,3 +83,32 @@ test('unknown versions and wrong lengths are refused', () => {
     assert.throws(() => unpackDraft(packed, new InkItSheet().masks), /Unknown InkIt draft format/);
     assert.throws(() => unpackDraft(new Uint8Array(10).fill(1), new InkItSheet().masks), /Unknown InkIt draft format/);
 });
+
+test('a reload keeps faint glow tails and leaves no rings: dithered export, smoothed import', async () => {
+    const sheet = new InkItSheet();
+    sheet.masks.paint.fill(0.03);
+    sheet.masks.pencil.fill(0.5);
+    sheet.stamp('pen', 250, 250, 35, 0.28);
+
+    const restored = new InkItSheet();
+    await importDraft(await exportDraft(sheet.masks), restored.masks);
+
+    // 0.03 used to round to 0 everywhere, cutting the tail off in a ring.
+    let paint = 0;
+    for (let index = 0; index < SHEET * SHEET; index++) paint += restored.masks.paint[index];
+    assert.ok(Math.abs(paint / (SHEET * SHEET) - 0.03) < 0.003, `paint mean ${paint / (SHEET * SHEET)}`);
+
+    // No step between neighbours bigger than the original's plus a hair.
+    let worstExtraStep = 0;
+    for (const id of TOOL_IDS) {
+        for (let y = 2; y < SHEET - 2; y++) {
+            for (let x = 3; x < SHEET - 2; x++) {
+                const index = y * SHEET + x;
+                const step = Math.abs(restored.masks[id][index] - restored.masks[id][index - 1]);
+                const original = Math.abs(sheet.masks[id][index] - sheet.masks[id][index - 1]);
+                worstExtraStep = Math.max(worstExtraStep, step - original);
+            }
+        }
+    }
+    assert.ok(worstExtraStep < 0.02, `extra step ${worstExtraStep}`);
+});
