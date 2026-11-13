@@ -9,7 +9,6 @@
     --wood: #F3E3D3;
     --ik-field: rgba(26, 20, 24, 0.05);
     --ik-num: #FF3399;
-    --ik-hatch: rgba(26, 20, 24, 0.07);
     --ik-grain-blend: multiply;
     --ik-grain-opacity: 0.45;
     --row-wrong: #FD5C63;
@@ -21,14 +20,13 @@
     --wood: #3B343A;
     --ik-field: rgba(255, 138, 196, 0.1);
     --ik-num: #FF8AC4;
-    --ik-hatch: rgba(255, 255, 255, 0.06);
     --ik-grain-blend: soft-light;
     --ik-grain-opacity: 0.3;
 }
 
 /* Ground: a diagonal hatch around the edges, the centre stays clean. */
 .inkit-hatch {
-    background: repeating-linear-gradient(-45deg, var(--ik-hatch) 0 1.2px, transparent 1.2px 8px);
+    background: repeating-linear-gradient(-45deg, var(--hatch) 0 1.2px, transparent 1.2px 8px);
     -webkit-mask-image: radial-gradient(ellipse 62% 66% at 50% 46%, transparent 34%, rgba(0, 0, 0, 0.3) 60%, #000 100%);
     mask-image: radial-gradient(ellipse 62% 66% at 50% 46%, transparent 34%, rgba(0, 0, 0, 0.3) 60%, #000 100%);
 }
@@ -40,7 +38,7 @@
 
 /* Yesterday's card: the same hatch, masked to its edges. */
 .inkit-hatch-card {
-    background: repeating-linear-gradient(-45deg, var(--ik-hatch) 0 1.2px, transparent 1.2px 8px);
+    background: repeating-linear-gradient(-45deg, var(--hatch) 0 1.2px, transparent 1.2px 8px);
     -webkit-mask-image: radial-gradient(ellipse 72% 68% at 50% 50%, transparent 45%, #000 100%);
     mask-image: radial-gradient(ellipse 72% 68% at 50% 50%, transparent 45%, #000 100%);
 }
@@ -132,26 +130,24 @@
 }
 
 /* Main call to action (Share my drawing). */
-.inkit-cta {
-    box-shadow: 0 4px 0 var(--ctl-off), var(--in-pink);
+/* Hint cards: sink into their pink depth on press, like the Puff Pop press buttons. */
+.inkit-hint {
     transition:
-        translate 0.18s var(--ease-settle),
-        box-shadow 0.18s var(--ease-settle),
-        filter 0.18s;
+        translate 0.3s var(--ease-settle),
+        box-shadow 0.18s var(--ease-settle);
     will-change: transform;
 }
 
 @media (hover: hover) {
-    .inkit-cta:not(:disabled):hover {
+    .inkit-hint:not(:disabled):hover {
         translate: 0 -2px;
-        box-shadow: 0 6px 0 var(--ctl-off), var(--in-pink);
-        filter: brightness(1.05);
     }
 }
 
-.inkit-cta:not(:disabled):active:active:active:active {
-    translate: 0 4px;
-    box-shadow: 0 0 0 var(--ctl-off), var(--in-pink);
+.inkit-hint:not(:disabled):active:active:active:active {
+    translate: 0 5px;
+    box-shadow: 0 2px 0 -2px #FF8AC4, 0 2px 0 0 var(--ink), var(--in);
+    transition-duration: 0.18s;
 }
 
 /* Tool buttons: a springy lift and squash. */
@@ -202,10 +198,6 @@
     will-change: transform;
 }
 
-.inkit-photo-depth {
-    transition: translate 0.18s var(--ease-settle);
-}
-
 @media (hover: hover) {
     .inkit-photo:hover {
         scale: 1.05;
@@ -214,40 +206,7 @@
 
 .inkit-photo:active:active:active:active {
     scale: 1;
-    translate: 2px 3px;
-}
-
-.inkit-photo:active:active:active:active .inkit-photo-depth {
-    translate: 2px 2px;
-}
-
-/* Suggestions: the pink scrollbar. */
-.inkit-scroll::-webkit-scrollbar {
-    width: 14px;
-}
-
-.inkit-scroll::-webkit-scrollbar-track {
-    margin: 10px 0;
-    border-radius: 999px;
-    background: linear-gradient(var(--rule), var(--rule)) center / 3px 100% no-repeat;
-}
-
-.inkit-scroll::-webkit-scrollbar-thumb {
-    border: 2px solid var(--ink);
-    border-radius: 999px;
-    background: #FF8AC4;
-    box-shadow: inset 0 2px 0 rgba(255, 255, 255, 0.55);
-}
-
-.inkit-scroll::-webkit-scrollbar-thumb:hover {
-    background: #FF70B8;
-}
-
-@supports not selector(::-webkit-scrollbar) {
-    .inkit-scroll {
-        scrollbar-width: thin;
-        scrollbar-color: #FF8AC4 transparent;
-    }
+    translate: 4px 5px;
 }
 
 /* Guess rows hide the group when the text box gets narrow. */

@@ -59,13 +59,15 @@ const InkGuessRows = ({ rows, settledCount }: InkGuessRowsProps) => {
                             to={row.href}
                             aria-label={`${row.artist_name} profile`}
                             className={cn(
-                                "pp-focus relative block size-14 flex-none overflow-hidden rounded-2xl border-2 border-[#1A1418] bg-(--chip-hover) max-[900px]:size-12.5",
+                                "pp-focus relative block size-14 flex-none overflow-hidden rounded-2xl border-2 border-[#1A1418] max-[900px]:size-12.5",
+                                // A dark fill under a settled photo: a light one showed at the antialiased corners.
+                                isNew ? "bg-(--chip-hover)" : "bg-[#1A1418]",
                                 "shadow-[3px_3px_0_color-mix(in_oklab,var(--col)_55%,#000),5px_5px_8px_color-mix(in_oklab,var(--col)_40%,transparent)]",
                                 "transform-gpu transition-[scale,rotate] duration-[380ms] ease-(--ease-settle) hover:scale-105 hover:rotate-[-2deg]",
                                 isNew && "animate-[ikPhoto_1.05s_cubic-bezier(.3,.75,.35,1)_.15s_backwards]",
                             )}
                         >
-                            {!isNew && <img src={photo} alt="" draggable={false} className="block size-full object-cover object-center" />}
+                            {!isNew && <img src={photo} alt="" draggable={false} className="absolute inset-0 size-full object-cover object-center" />}
 
                             {isNew && (
                                 <>

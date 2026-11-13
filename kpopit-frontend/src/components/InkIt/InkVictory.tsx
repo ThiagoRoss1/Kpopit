@@ -5,6 +5,7 @@ import { cn } from "../../lib/utils";
 import type { InkItAnswer } from "../../interfaces/gameInterfaces";
 import { resolveCdnUrl } from "../../utils/imageUrl";
 import InkThumb from "./InkThumb";
+import { PressButton } from "../buttons/PressButton";
 
 export interface OtherMode {
     id: string;
@@ -71,8 +72,8 @@ const DepthPhoto = ({ to, name, src, className }: { to: string; name: string; sr
     return (
         <Link to={to} aria-label={`${name} profile`} className={cn("inkit-photo pp-focus relative block flex-none rounded-3xl", className)}>
             <span aria-hidden className="inkit-photo-depth absolute inset-0 translate-x-1 translate-y-1.25 rounded-3xl border-2 border-(--ink) bg-[#FF8AC4]" />
-            <span className="relative block size-full overflow-hidden rounded-3xl border-2 border-(--ink) transform-gpu">
-                <img src={src ?? undefined} alt={name} draggable={false} className="block size-full object-cover object-center" />
+            <span className="relative block size-full overflow-hidden rounded-3xl border-2 border-(--ink) bg-(--ink) transform-gpu">
+                <img src={src ?? undefined} alt={name} draggable={false} className="absolute inset-0 size-full object-cover object-center" />
             </span>
         </Link>
     );
@@ -194,16 +195,17 @@ const InkVictory = ({
 
                 <div className="flex w-full flex-col gap-3">
                     {canShare && (
-                        <button
-                            type="button"
+                        <PressButton
+                            variant="cta"
+                            size="lg"
                             onClick={onShare}
                             disabled={shareState === "working"}
                             data-testid="inkit-share"
-                            className="inkit-cta pp-focus flex h-13 w-full cursor-pointer items-center justify-center gap-2 rounded-full border-2 border-(--ink) bg-[#FF70B8] font-bold text-base text-white text-shadow-(--tag-text)"
+                            className="w-full"
                         >
                             <Share2 className="size-4.5" strokeWidth={2.6} aria-hidden />
                             {SHARE_LABEL[shareState]}
-                        </button>
+                        </PressButton>
                     )}
 
                     {isCalendarDay ? (

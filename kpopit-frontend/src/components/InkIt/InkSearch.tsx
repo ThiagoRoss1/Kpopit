@@ -174,7 +174,7 @@ const InkSearch = ({ idols, triedIds, isPending, winnerCount, onGuess }: InkSear
                             "shadow-[4px_5px_0_var(--ctl-off)] animate-[ikDrop_.22s_var(--ease-settle)_backwards]",
                         )}
                     >
-                        <ul id={listId} role="listbox" aria-label="Idols" className="inkit-scroll m-0 flex max-h-80 list-none flex-col gap-0.5 overflow-y-auto p-1.5">
+                        <ul id={listId} role="listbox" aria-label="Idols" className="pp-scroll m-0 flex max-h-80 list-none flex-col gap-0.5 overflow-y-auto p-1.5">
                             {suggestions.map((idol, index) => {
                                 const photo = resolveCdnUrl(idol.image_path, idol.image_version);
 

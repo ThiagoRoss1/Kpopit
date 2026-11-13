@@ -4,15 +4,16 @@ import { GAME_ROWS } from "../NavBar/navigation";
 
 const INKIT_PHOTO = GAME_ROWS.find((row) => row.id === "inkit")?.img ?? null;
 
-/** InkIt's stand-in logo: a photo under the paper texture (until the real asset exists). */
+/** InkIt's stand-in logo: a photo under the paper texture (until the real asset exists). The dark fill
+ *  keeps the tilted frame's antialiased corners from showing a light edge. */
 const InkThumb = ({ className }: { className?: string }) => {
     return (
-        <span className={cn("relative block flex-none overflow-hidden border-2 border-(--ink)", className)}>
+        <span className={cn("relative block flex-none overflow-hidden border-2 border-(--ink) bg-(--ink)", className)}>
             <img
                 src={resolveCdnUrl(INKIT_PHOTO) ?? undefined}
                 alt=""
                 draggable={false}
-                className="block size-full object-cover object-center contrast-[1.3] grayscale"
+                className="absolute inset-0 size-full object-cover object-center contrast-[1.3] grayscale"
             />
             <span aria-hidden className="inkit-paper-thumb pointer-events-none absolute inset-0" />
         </span>

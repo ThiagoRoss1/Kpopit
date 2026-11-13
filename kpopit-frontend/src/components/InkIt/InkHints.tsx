@@ -77,12 +77,12 @@ const HintCard = ({ label, guessesLeft, used, disabled, reducedMotion, tilt, tes
             data-testid={testId}
             data-state={isLocked ? "locked" : shown}
             className={cn(
-                "pp-focus relative mb-1.25 block h-22.5 rounded-[18px] border-2 border-(--ink) bg-(--face) p-2 text-left max-[900px]:h-15.5",
-                "[container-type:inline-size] transition-[translate] duration-200 ease-(--ease-settle)",
+                "inkit-hint pp-focus relative mb-1.25 block h-22.5 rounded-[18px] border-2 border-(--ink) bg-(--face) p-2 text-left max-[900px]:h-15.5",
+                "[container-type:inline-size]",
                 tilt,
                 isAnimating ? "z-5" : "z-1",
                 isLocked ? "shadow-[2px_3px_0_var(--ctl-off),var(--in)]" : "shadow-[0_7px_0_-2px_#FF8AC4,0_7px_0_0_var(--ink),var(--in)]",
-                isReady ? "cursor-pointer active:translate-y-0.5" : "cursor-default",
+                isReady ? "cursor-pointer" : "cursor-default",
             )}
         >
             <div className="inkit-paper-card relative grid h-full place-items-center overflow-hidden rounded-[11px] border-[1.5px] border-[rgba(26,20,24,.22)]">
