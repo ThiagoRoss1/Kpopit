@@ -66,7 +66,7 @@ const UserDropdown = ({ open, onToggle }: UserDropdownProps) => {
 
     return (
         <div className="relative mx-1">
-            {/* The avatar: its ring widens on hover and only the photo zooms (an image scaled by
+            {/* The avatar: the ring stays put on hover and only the photo zooms (an image scaled by
                 itself stays sharp; one scaled by its parent is redrawn when the motion ends). */}
             <button
                 type="button"
@@ -77,8 +77,7 @@ const UserDropdown = ({ open, onToggle }: UserDropdownProps) => {
                     "pp-focus group relative block flex-none size-10 box-border p-0 overflow-hidden",
                     "rounded-full bg-(--ink) cursor-pointer",
                     "shadow-[0_0_0_2px_var(--ink),0_0_0_4.5px_#FF8AC4,0_0_0_6.5px_var(--ink)]",
-                    "hover:shadow-[0_0_0_2px_var(--ink),0_0_0_5px_#FF8AC4,0_0_0_7px_var(--ink)]",
-                    "transition-[box-shadow,scale] duration-400 ease-(--ease-settle) transform-gpu",
+                    "transition-[scale] duration-400 ease-(--ease-settle) transform-gpu",
                     "pressed:scale-95 pressed:duration-180 aria-expanded:scale-95",
                 )}
             >
