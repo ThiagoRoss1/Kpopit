@@ -326,6 +326,40 @@ test('reveal stepper: eraser, pencil, pen, paint; ends with paint 1 and pencil/p
     assert.equal(sheet.coverage('pen'), 0);
 });
 
+test('reveal: the photo eases in over the settle frames, never in one jump', () => {
+    const { sheet } = drawStroke();
+    const step = sheet.revealStepper();
+    let result = { done: false, head: {} };
+    let elapsed = 0;
+
+    // Run the passes until the settle starts (no head, not done).
+    while (result.head && elapsed < 10_000) {
+        result = step(elapsed);
+        elapsed += 16;
+    }
+    assert.equal(result.done, false, 'a settle follows the passes');
+
+    let previous = Float32Array.from(sheet.masks.paint);
+    let settleFrames = 0;
+    let worstFrameChange = 0;
+
+    while (!result.done && elapsed < 10_000) {
+        result = step(elapsed);
+        elapsed += 16;
+        if (result.done) break;
+
+        settleFrames++;
+        for (let index = 0; index < SHEET * SHEET; index += 7) {
+            worstFrameChange = Math.max(worstFrameChange, Math.abs(sheet.masks.paint[index] - previous[index]));
+        }
+        previous = Float32Array.from(sheet.masks.paint);
+    }
+
+    assert.ok(settleFrames >= 20, `settle frames ${settleFrames}`);
+    assert.ok(worstFrameChange < 0.07, `largest change in one frame ${worstFrameChange}`);
+    assert.equal(sheet.coverage('paint'), 1);
+});
+
 test('compositing: white paper, paint shows the photo, graphite and ink darken (reference factors)', () => {
     const pixels = SHEET * SHEET;
     const layers = { photo: new Uint8ClampedArray(pixels * 4).fill(100), pencil: new Float32Array(pixels).fill(1), pen: new Float32Array(pixels).fill(1) };

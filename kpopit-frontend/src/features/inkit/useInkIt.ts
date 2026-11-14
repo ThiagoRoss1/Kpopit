@@ -334,6 +334,9 @@ export const useInkIt = ({
                 const { done, head } = step(now - startedAt);
                 render();
 
+                // The settle has no head: the sprite leaves while the photo eases in.
+                if (sprite && !head) sprite.style.opacity = "0";
+
                 if (sprite && head) {
                     const scale = (sprite.parentElement?.clientWidth ?? SHEET) / SHEET;
                     const wobble = Math.sin((now - startedAt) / 60) * 8;

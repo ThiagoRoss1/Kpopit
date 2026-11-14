@@ -67,6 +67,15 @@ export const speedCost = (speed: number): number =>
 
 export const roundInk = (hint1Used: boolean): number => INKIT_CONFIG.inkPerRound * (hint1Used ? 1 + INKIT_CONFIG.hint1.bonus : 1);
 
+/** The reveal's last stage: the masks ease into the photo over this long. */
+export const REVEAL_SETTLE_MS = 450;
+
+const copyMasks = (masks: Masks): Masks => ({
+    pencil: Float32Array.from(masks.pencil),
+    pen: Float32Array.from(masks.pen),
+    paint: Float32Array.from(masks.paint),
+});
+
 const emptyMasks = (): Masks => ({
     pencil: new Float32Array(SHEET_PIXELS),
     pen: new Float32Array(SHEET_PIXELS),
@@ -331,8 +340,31 @@ export class InkItSheet {
 
     /* ---- Ending (the look of the sprite comes from the design) ---- */
 
+    /** One frame of the reveal's settle: paint eases to 1, pencil and pen to 0 (smooth step). */
+    private settleStep(settle: { start: number; from: Masks }, elapsed: number): RevealStep {
+        const progress = Math.min(1, (elapsed - settle.start) / REVEAL_SETTLE_MS);
+
+        if (progress >= 1) {
+            this.showPhoto();
+
+            return { done: true, head: null };
+        }
+
+        const eased = progress * progress * (3 - 2 * progress);
+        const { from } = settle;
+
+        for (let index = 0; index < SHEET_PIXELS; index++) {
+            this.masks.paint[index] = from.paint[index] + (1 - from.paint[index]) * eased;
+            this.masks.pencil[index] = from.pencil[index] * (1 - eased);
+            this.masks.pen[index] = from.pen[index] * (1 - eased);
+        }
+
+        return { done: false, head: null };
+    }
+
     /** A stepper: call it with the elapsed ms each frame. Eraser, then pencil, pen and paint along a
-     *  7-row zigzag; ends as the photo. */
+     *  7-row zigzag, then a short settle that eases whatever the passes left into the photo (the
+     *  reference snapped to it in one frame, a visible jump). */
     revealStepper(): (elapsed: number) => RevealStep {
         const radius = SHEET * 0.16;
         const path: [number, number][] = [];
@@ -353,8 +385,11 @@ export class InkItSheet {
         let stageIndex = 0;
         let position = 0;
         let stageStart = 0;
+        let settle: { start: number; from: Masks } | null = null;
 
         return (elapsed) => {
+            if (settle) return this.settleStep(settle, elapsed);
+
             const stage = stages[stageIndex];
             const upto = Math.min(path.length, Math.floor(((elapsed - stageStart) / stage.duration) * path.length));
 
@@ -371,9 +406,9 @@ export class InkItSheet {
                 stageIndex++;
 
                 if (stageIndex === stages.length) {
-                    this.showPhoto();
+                    settle = { start: elapsed, from: copyMasks(this.masks) };
 
-                    return { done: true, head: null };
+                    return { done: false, head: null };
                 }
 
                 position = 0;
@@ -386,4 +421,4 @@ export class InkItSheet {
 }
 
 /** Total length of the reveal, in ms. */
-export const REVEAL_DURATION_MS = 550 + 750 + 750 + 900;
+export const REVEAL_DURATION_MS = 550 + 750 + 750 + 900 + REVEAL_SETTLE_MS;
