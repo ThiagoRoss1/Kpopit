@@ -64,7 +64,9 @@ export const Tile = ({ row, size, animated = false }: TileProps) => {
     return (
         <span
             className={cn(
-                "flex-none box-border overflow-hidden rounded-[13px] border-2 border-[#1A1418] bg-[#DCD6D2]",
+                "flex-none box-border overflow-hidden rounded-[13px] border-2 border-[#1A1418]",
+                // An ink fill: a light one showed as a stripe at the tilted photo's antialiased edges.
+                "bg-[#1A1418]",
                 size === "lg" ? "size-11.5 shadow-[2px_2px_0_#1A1418]" : "size-10",
                 motion,
             )}

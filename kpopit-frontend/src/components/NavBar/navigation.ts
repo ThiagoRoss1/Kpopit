@@ -53,7 +53,7 @@ export const MAJOR_PATCH = {
 
 export const GAME_ROWS: NavRow[] = [
     { id: "classic", label: "Classic", to: "/classic", img: "/images/idols/sakura.webp" },
-    { id: "blurry", label: "Blurry", to: "/blurry", img: "/images/idols/karina.webp", imgClass: "blur-[3px]" },
+    { id: "blurry", label: "Blurry", to: "/blurry", img: "/images/idols/karina.webp", imgClass: "blur-[3px] scale-110" },
     { id: "pixelated", label: "Pixelated", to: "/pixelated", img: "/images/albums/summer_magic.webp", pixelBlock: PIXEL_LEVELS[7] }, // guess 8's mosaic: a hint of pixels
     { id: "inkit", label: "InkIt", to: "/inkit", img: "/images/idols/winter.webp", imgClass: "grayscale contrast-[1.3]", wip: true },
 ];
