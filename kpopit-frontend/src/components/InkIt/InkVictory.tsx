@@ -7,6 +7,9 @@ import { resolveCdnUrl } from "../../utils/imageUrl";
 import InkThumb from "./InkThumb";
 import { PressButton } from "../buttons/PressButton";
 import ModeImage from "../NavBar/ModeImage";
+import TargetIcon from "../../assets/icons/target.svg";
+import RankIcon from "../../assets/icons/ranking-fill.svg";
+import TrendIcon from "../../assets/icons/trending-up.svg";
 
 export interface OtherMode {
     id: string;
@@ -67,7 +70,7 @@ const ordinal = (value: number) => {
 const TILE_TILT = ["rotate-[-.6deg]", "rotate-[.5deg]", "rotate-[-.4deg]"];
 
 // Long values step down so they stay inside the tile.
-const valueSize = (value: string) => (value.length <= 3 ? "text-[28px] max-[900px]:text-2xl" : value.length <= 5 ? "text-[22px] max-[900px]:text-lg" : "text-lg max-[900px]:text-[15px]");
+const valueSize = (value: string) => (value.length <= 3 ? "text-[40px] max-[900px]:text-[32px]" : value.length <= 5 ? "text-[32px] max-[900px]:text-[26px]" : "text-2xl max-[900px]:text-xl");
 
 /** An idol photo over its pink depth block, linking to her page. */
 const DepthPhoto = ({ to, name, src, className }: { to: string; name: string; src: string | null; className: string }) => {
@@ -87,6 +90,17 @@ const GroupPill = ({ children }: { children: ReactNode }) => {
     );
 };
 
+/** The other modes' stat icons (white SVGs for their dark cards), painted in ink through a mask. */
+const StatIcon = ({ src }: { src: string }) => {
+    return (
+        <span
+            aria-hidden
+            style={{ maskImage: `url("${src}")`, WebkitMaskImage: `url("${src}")` }}
+            className="block size-6.5 bg-(--ink) mask-contain mask-center mask-no-repeat max-[900px]:size-5.5"
+        />
+    );
+};
+
 const PINK_DEPTH = "shadow-[0_6px_0_-2px_#FF8AC4,0_6px_0_0_var(--ink),var(--in)]";
 
 /** The win: today's idol, the numbers, yesterday's idol, share, countdown and the other modes. */
@@ -94,10 +108,10 @@ const InkVictory = ({
     cardRef, answer, answerHref, guessCount, position, score, yesterday, countdown, otherModes, shareState, onShare, canShare, isCalendarDay,
 }: InkVictoryProps) => {
     const stats = [
-        { label: "GUESSES", value: String(guessCount) },
+        { label: "GUESSES", icon: TargetIcon, value: String(guessCount) },
         ...(isCalendarDay ? [] : [
-            { label: "POSITION", value: position ? `#${position}` : "-" },
-            { label: "SCORE", value: score != null ? String(Number(score.toFixed(2))) : "-" },
+            { label: "POSITION", icon: RankIcon, value: position ? `#${position}` : "-" },
+            { label: "SCORE", icon: TrendIcon, value: score != null ? String(Number(score.toFixed(2))) : "-" },
         ]),
     ];
 
@@ -152,12 +166,13 @@ const InkVictory = ({
                             key={stat.label}
                             data-testid={`inkit-stat-${stat.label.toLowerCase()}`}
                             className={cn(
-                                "mb-1 flex h-31 flex-col items-center justify-center gap-2 rounded-3xl border-2 border-(--ink) bg-(--face) max-[900px]:h-25",
+                                "mb-1 flex h-38 flex-col items-center justify-center gap-2 rounded-3xl border-2 border-(--ink) bg-(--face) max-[900px]:h-31 max-[900px]:gap-1.5",
                                 PINK_DEPTH, TILE_TILT[index],
                             )}
                         >
+                            <StatIcon src={stat.icon} />
                             <div className={cn("font-bold leading-none text-white text-shadow-(--puff-value)", valueSize(stat.value))}>{stat.value}</div>
-                            <div className="font-semibold text-[10px] tracking-[.12em] text-(--muted)">{stat.label}</div>
+                            <div className="font-semibold text-xs tracking-[.12em] text-(--muted) max-[900px]:text-[10px]">{stat.label}</div>
                         </div>
                     ))}
                 </div>
