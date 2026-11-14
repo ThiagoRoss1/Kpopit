@@ -1,4 +1,4 @@
-import { SHEET, SHEET_PIXELS } from "./config.ts";
+import { PEN_LINES, SHEET, SHEET_PIXELS } from "./config.ts";
 import type { Layers } from "./engine.ts";
 
 // What each tool reveals, built once per photo (from the v9 prototype, as in the reference engine).
@@ -113,7 +113,8 @@ const seeded = (seed: number): (() => number) => {
 const greyOf = (pixels: Uint8ClampedArray, index: number): number =>
     0.299 * pixels[index * 4] + 0.587 * pixels[index * 4 + 1] + 0.114 * pixels[index * 4 + 2];
 
-/** PEN layer: v9 colour-dodge line art (grey divided by its own blurred negative, then deepened).
+/** v9 colour-dodge line art (grey divided by its own blurred negative, then deepened): the pencil's
+ *  soft lines and the base of the pen's.
  *  Returns darkness: 0 = paper, 1 = black. */
 export const penLines = (source: CanvasImageSource, dodge = 5, power = 2.6): Float32Array => {
     const work = makeCanvas();
@@ -144,6 +145,63 @@ export const penLines = (source: CanvasImageSource, dodge = 5, power = 2.6): Flo
     }
 
     return out;
+};
+
+/** Removes line pieces smaller than `minSize` px (texture noise reads as dirt, not ink), as in the
+ *  InkIt Lab's dropSpecks, with the same faint halo left around what was removed. */
+const dropSpecks = (lines: Float32Array, minSize: number): Float32Array => {
+    const seen = new Uint8Array(SHEET_PIXELS);
+    const stack: number[] = [];
+    const piece: number[] = [];
+
+    for (let start = 0; start < SHEET_PIXELS; start++) {
+        if (seen[start] || lines[start] < 0.25) continue;
+
+        seen[start] = 1;
+        stack.push(start);
+        piece.length = 0;
+
+        while (stack.length) {
+            const index = stack.pop()!;
+            piece.push(index);
+            const x = index % SHEET;
+            const y = (index / SHEET) | 0;
+
+            for (let dy = -1; dy <= 1; dy++) {
+                for (let dx = -1; dx <= 1; dx++) {
+                    const nextX = x + dx;
+                    const nextY = y + dy;
+                    if (nextX < 0 || nextY < 0 || nextX >= SHEET || nextY >= SHEET) continue;
+
+                    const next = nextY * SHEET + nextX;
+                    if (!seen[next] && lines[next] >= 0.25) {
+                        seen[next] = 1;
+                        stack.push(next);
+                    }
+                }
+            }
+        }
+
+        if (piece.length < minSize) for (const index of piece) lines[index] = 0;
+    }
+
+    for (let index = 0; index < SHEET_PIXELS; index++) if (lines[index] < 0.25 && !seen[index]) lines[index] *= 0.4;
+
+    return lines;
+};
+
+/** PEN layer: crisp line art. The v9 line art, then levels (faint shading drops to paper, real lines
+ *  go solid ink, a smooth step between) and the stray specks dropped. Returns darkness. */
+export const inkLineArt = (full: CanvasImageSource, settings = PEN_LINES): Float32Array => {
+    const lines = penLines(full, settings.dodge, settings.power);
+    const span = settings.levelsHigh - settings.levelsLow;
+
+    for (let index = 0; index < SHEET_PIXELS; index++) {
+        const level = Math.min(1, Math.max(0, (lines[index] - settings.levelsLow) / span));
+        lines[index] = level * level * (3 - 2 * level);
+    }
+
+    return dropSpecks(lines, settings.minSpeck);
 };
 
 /** v9 scribble: loose diagonal hatching for tone and short hairy strokes that chase the edges.
@@ -318,7 +376,7 @@ export const buildLayers = (image: HTMLImageElement, seed: number): Layers => {
     return {
         photo: target.getImageData(0, 0, SHEET, SHEET).data,
         pencil: pencilSketch(full, seed),
-        pen: penLines(full),
+        pen: inkLineArt(full),
     };
 };
 

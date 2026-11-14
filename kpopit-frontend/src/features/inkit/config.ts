@@ -54,6 +54,18 @@ export const INKIT_CONFIG = {
     hint2: { fromRound: 8 },
 };
 
+/** The pen's line art: the v9 colour dodge sharpened with levels, so skin and background texture
+ *  stop reading as speckle and the outlines come out as solid ink. */
+export const PEN_LINES = {
+    dodge: 5,
+    power: 2.6,
+    /** Darkness below levelsLow becomes paper, above levelsHigh solid ink. */
+    levelsLow: 0.12,
+    levelsHigh: 0.7,
+    /** Line pieces smaller than this many px are dropped. */
+    minSpeck: 18,
+};
+
 /** The saved drawing: a version byte and three masks at half size, 4 bits per value, deflated. */
 export const DRAFT = {
     version: 1,
