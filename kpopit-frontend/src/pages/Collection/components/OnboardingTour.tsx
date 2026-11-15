@@ -203,9 +203,13 @@ export default function OnboardingTour({ night, onClose, onShowSticker }: Onboar
         rootRef.current?.focus();
     }, []);
 
-    // Keyboard: Esc skips, arrows/Enter navigate.
+    // Keyboard: Esc skips, arrows/Enter navigate. Enter on a button reached with Tab (Skip, Back)
+    // presses that button; a clicked button keeps focus without :focus-visible, so Enter stays Next.
     useEffect(() => {
         const onKey = (event: KeyboardEvent) => {
+            const target = event.target as HTMLElement;
+            if (event.key === 'Enter' && target instanceof HTMLButtonElement && target.matches(':focus-visible')) return;
+
             if (event.key === 'Escape') {
                 event.preventDefault();
                 finish();

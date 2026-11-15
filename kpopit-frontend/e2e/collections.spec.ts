@@ -68,6 +68,35 @@ test.describe('Collections', () => {
     expect(await userIdolCard(userId, answer.id)).toEqual({ level: 2, times_won: 2 });
   });
 
+  test('the album tour: Enter is Next, but presses Back or Skip when reached with Tab', async ({ page }) => {
+    await page.addInitScript(() => localStorage.setItem('kpopit-collections-hq-warned', 'true'));
+    await page.goto('/collections');
+    await page.locator('a[href^="/collections/1/"]').first().click();
+    const tour = page.getByRole('dialog', { name: 'Album tour' });
+    await expect(tour.getByText(/^Step 1 of \d+$/)).toBeVisible();
+
+    await page.keyboard.press('Enter');
+    await expect(tour.getByText(/^Step 2 of \d+$/)).toBeVisible();
+    // A clicked Back keeps focus but no focus ring: Enter still means Next.
+    await tour.getByRole('button', { name: 'Back' }).click();
+    await expect(tour.getByText(/^Step 1 of \d+$/)).toBeVisible();
+    await page.keyboard.press('Enter');
+    await expect(tour.getByText(/^Step 2 of \d+$/)).toBeVisible();
+
+    const tabTo = async (name: string, key = 'Tab') => {
+      for (let i = 0; i < 5 && !(await tour.getByRole('button', { name }).evaluate((el) => el === document.activeElement)); i++) {
+        await page.keyboard.press(key);
+      }
+    };
+    await tabTo('Back');
+    await page.keyboard.press('Enter');
+    await expect(tour.getByText(/^Step 1 of \d+$/)).toBeVisible();
+    // Skip sits before Back.
+    await tabTo('Skip', 'Shift+Tab');
+    await page.keyboard.press('Enter');
+    await expect(tour).toBeHidden();
+  });
+
   test('anonymous visitor sees the collections list and a locked album', async ({ page }) => {
     await skipOverlays(page);
     await page.goto('/collections');
