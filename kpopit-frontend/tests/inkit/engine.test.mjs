@@ -150,6 +150,13 @@ test('ink: 550 a round, hint 1 from round 5 gives 770 now and on the next refill
 
     sheet.setRound(6, sheet.hint1Used);
     assert.equal(sheet.inkLeft, 770);
+
+    const spentFirst = new InkItSheet();
+    spentFirst.setRound(5, false);
+    spentFirst.inkLeft = 450;
+    spentFirst.useHint1();
+    assert.equal(spentFirst.inkLeft, 670);
+    assert.equal(spentFirst.inkMax, 770, 'ink spent before the hint still shows on the meter');
     assert.equal(roundInk(true), 770);
     assert.equal(roundInk(false), 550);
 });

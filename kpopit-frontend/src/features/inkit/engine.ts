@@ -127,7 +127,8 @@ export class InkItSheet {
 
         this.hint1Used = true;
         this.inkLeft += INKIT_CONFIG.inkPerRound * INKIT_CONFIG.hint1.bonus;
-        this.inkMax = Math.max(this.inkMax, this.inkLeft);
+        // The meter reads against the hint's full round (770): ink spent before the hint still shows as spent.
+        this.inkMax = Math.max(roundInk(true), this.inkLeft);
 
         return true;
     }
