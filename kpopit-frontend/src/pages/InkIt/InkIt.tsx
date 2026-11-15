@@ -225,6 +225,7 @@ const InkItGame = ({ data, idols, isCalendarDay }: InkItGameProps) => {
 
     // Guesses made elsewhere (another device or tab) arrive with a refetch; the sheet stays as it is.
     const [syncedCount, setSyncedCount] = useState(guesses.length);
+    const [syncedWin, setSyncedWin] = useState(false);
     if (serverGame && serverGame.inkit_guesses.length > syncedCount && phase === "playing") {
         setSyncedCount(serverGame.inkit_guesses.length);
         setGuesses(serverGame.inkit_guesses);
@@ -233,6 +234,7 @@ const InkItGame = ({ data, idols, isCalendarDay }: InkItGameProps) => {
         if (serverGame.game_won) {
             setAnswer(serverGame.answer);
             setPhase("won");
+            setSyncedWin(true);
         }
     }
 
@@ -320,6 +322,11 @@ const InkItGame = ({ data, idols, isCalendarDay }: InkItGameProps) => {
     useEffect(() => () => timers.current.forEach((timer) => window.clearTimeout(timer)), []);
 
     const { playReveal } = ink;
+
+    // A win from another tab skips the reveal: the sheet shows the photo once its layers are built.
+    useEffect(() => {
+        if (syncedWin && ink.status === "ready") void playReveal(false);
+    }, [syncedWin, ink.status, playReveal]);
     const celebrate = useCallback(() => {
         // 1) the winning row lands, 2) the sheet resolves into the photo, 3) the card and the confetti.
         timers.current.push(window.setTimeout(() => {
