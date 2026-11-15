@@ -97,6 +97,22 @@ test.describe('Collections', () => {
     await expect(tour).toBeHidden();
   });
 
+  test('the FX panel takes keyboard focus and hands it back to its button', async ({ page }) => {
+    await skipOverlays(page);
+    await page.goto('/collections');
+    const toggle = page.locator('#fx-panel-toggle');
+    const panel = page.getByRole('dialog', { name: 'Visual effects' });
+
+    await toggle.focus();
+    await page.keyboard.press('Enter');
+    await expect(panel).toBeVisible();
+    expect(await panel.evaluate((el) => el.contains(document.activeElement))).toBe(true);
+
+    await page.keyboard.press('Escape');
+    await expect(panel).toBeHidden();
+    await expect(toggle).toBeFocused();
+  });
+
   test('anonymous visitor sees the collections list and a locked album', async ({ page }) => {
     await skipOverlays(page);
     await page.goto('/collections');
