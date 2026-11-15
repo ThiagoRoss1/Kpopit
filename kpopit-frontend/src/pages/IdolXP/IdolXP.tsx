@@ -13,7 +13,7 @@ import type { IdolXpState } from "../../interfaces/playerInterfaces";
 import PuffCard from "./PuffCard";
 import PotionJar from "./PotionJar";
 import XpMemberView from "./XpMemberView";
-import { RulesRow } from "./XpParts";
+import { HowXpWorks, RulesRow } from "./XpParts";
 import { useFilled } from "./useFilled";
 import "./idolXp.css";
 
@@ -102,6 +102,7 @@ const GuestView = ({ potion }: { potion: IdolXpState["potion"] }) => {
                 </div>
             </PuffCard>
 
+            <HowXpWorks />
             <RulesRow />
         </div>
     );

@@ -25,6 +25,15 @@ test.describe('idol xp @mobile', () => {
     await expect(page.getByRole('heading', { name: 'Your potion is filling up...' })).toBeVisible();
     await expect(page.getByRole('button', { name: 'Create account' })).toBeVisible();
     await expect(page.getByRole('group', { name: 'Filter idols' })).toHaveCount(0);
+
+    // The rules: chips on wide screens, the How XP works popover on phones.
+    const howXp = page.getByRole('button', { name: 'How XP works' });
+    if (await howXp.isVisible()) {
+      await howXp.click();
+      await expect(page.getByRole('dialog', { name: 'How XP works' })).toBeVisible();
+    } else {
+      await expect(page.locator('span.border-dashed').first()).toBeVisible();
+    }
     expect(consoleErrors.list).toEqual([]);
   });
 
