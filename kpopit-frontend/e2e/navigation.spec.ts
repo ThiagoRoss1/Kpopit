@@ -39,6 +39,8 @@ test.describe('every route loads @mobile', () => {
   for (const mode of ['classic', 'blurry', 'pixelated'] as const) {
     test(`/${mode} loads without console errors @smoke`, async ({ page, consoleErrors }) => {
       await openGame(page, mode);
+      // The icon-only submit button has a name for screen readers.
+      await expect(page.getByRole('button', { name: 'Guess', exact: true })).toBeVisible();
       await expectCleanLoad(page, consoleErrors);
     });
   }
