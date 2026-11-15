@@ -112,8 +112,9 @@ const InkStatsModal = ({ stats, onClose, onTransferData }: InkStatsModalProps) =
                                 tile.wide && "col-span-full",
                             )}
                         >
-                            <span className="font-semibold text-sm leading-[1.1] text-(--group)">{tile.label}</span>
-                            <span className="font-bold text-[28px] leading-none text-white text-shadow-(--puff-value)">{tile.value}</span>
+                            <span className="font-bold text-[15px] leading-[1.2] text-white text-shadow-(--puff-name)">{tile.label}</span>
+                            {/* The puffy shadow reaches ~6 px right of and below the digits: the padding keeps it inside the box. */}
+                            <span className="inline-block self-center pr-1.5 pb-1.5 font-bold text-[28px] leading-none text-white text-shadow-(--puff-value)">{tile.value}</span>
                         </div>
                     ))}
                 </div>
