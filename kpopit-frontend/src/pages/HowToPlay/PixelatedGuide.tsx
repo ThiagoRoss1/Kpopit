@@ -7,8 +7,8 @@ import { HINT_AT, guessesLeft } from "./howToPlayData";
 import { GuessStepper, GuideCard, Heading, Steps } from "./HowToPlayParts";
 
 const SLEEVES = [
-    { label: "Release Year", korean: "발매년도", value: "2022", unlocksAt: HINT_AT.pixelated[0], look: "bg-[#E4E4E4] text-[#72401A]" },
-    { label: "Artist", korean: "가수", value: "IVE", unlocksAt: HINT_AT.pixelated[1], look: "bg-[#FFD1E8] text-[#5A1A48]" },
+    { label: "Release Year", korean: "발매년도", value: "2018", unlocksAt: HINT_AT.pixelated[0], look: "bg-[#E4E4E4] text-[#72401A]" },
+    { label: "Artist", korean: "가수", value: "Red Velvet", unlocksAt: HINT_AT.pixelated[1], look: "bg-[#FFD1E8] text-[#5A1A48]" },
 ];
 
 // The game's sleeve motion: a springy slide for the record and the sleeve.
