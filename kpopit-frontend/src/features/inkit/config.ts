@@ -54,8 +54,8 @@ export const INKIT_CONFIG = {
     hint2: { fromRound: 8 },
 };
 
-/** The pen's line art: the v9 colour dodge sharpened with levels, so skin and background texture
- *  stop reading as speckle and the outlines come out as solid ink. */
+/** The pen's line art: the v9 colour dodge sharpened with levels (outlines as solid ink, no speckle)
+ *  over a share of its soft tone, so it refines the pencil instead of erasing shaded features. */
 export const PEN_LINES = {
     dodge: 5,
     power: 2.6,
@@ -64,6 +64,9 @@ export const PEN_LINES = {
     levelsHigh: 0.7,
     /** Line pieces smaller than this many px are dropped. */
     minSpeck: 18,
+    /** Under the solid lines: a softer line art (this power) at this share, for noses, cheeks, jaws. */
+    softPower: 2,
+    softTone: 0.55,
 };
 
 /** The saved drawing: a version byte and three masks at half size, 4 bits per value, deflated. */

@@ -190,18 +190,27 @@ const dropSpecks = (lines: Float32Array, minSize: number): Float32Array => {
     return lines;
 };
 
-/** PEN layer: crisp line art. The v9 line art, then levels (faint shading drops to paper, real lines
- *  go solid ink, a smooth step between) and the stray specks dropped. Returns darkness. */
+/** PEN layer: crisp line art. The v9 line art through levels (faint shading drops to paper, real
+ *  lines go solid ink) with the stray specks dropped, over a share of a softer line art's tone,
+ *  so features drawn by shading rather than outlines (a nose, a cheek) survive the pen. */
 export const inkLineArt = (full: CanvasImageSource, settings = PEN_LINES): Float32Array => {
-    const lines = penLines(full, settings.dodge, settings.power);
+    const raw = penLines(full, settings.dodge, settings.power);
+    const lines = new Float32Array(SHEET_PIXELS);
     const span = settings.levelsHigh - settings.levelsLow;
 
     for (let index = 0; index < SHEET_PIXELS; index++) {
-        const level = Math.min(1, Math.max(0, (lines[index] - settings.levelsLow) / span));
+        const level = Math.min(1, Math.max(0, (raw[index] - settings.levelsLow) / span));
         lines[index] = level * level * (3 - 2 * level);
     }
 
-    return dropSpecks(lines, settings.minSpeck);
+    dropSpecks(lines, settings.minSpeck);
+
+    // The pen rubs the pencil out, so without this tone it erased whatever wasn't an outline. The
+    // softer line art (lower power) keeps mid-tones such as a nose.
+    const soft = penLines(full, settings.dodge, settings.softPower);
+    for (let index = 0; index < SHEET_PIXELS; index++) lines[index] = Math.max(lines[index], soft[index] * settings.softTone);
+
+    return lines;
 };
 
 /** v9 scribble: loose diagonal hatching for tone and short hairy strokes that chase the edges.
