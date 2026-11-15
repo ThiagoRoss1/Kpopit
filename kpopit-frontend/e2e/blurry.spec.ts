@@ -106,4 +106,18 @@ test.describe('Blurry', () => {
     await expect(page.getByText('Games won')).toBeVisible();
     await closeModal(page, 'Stats...');
   });
+
+  test('the portrait tap zoom closes when the phone turns sideways @mobile', async ({ page, isMobile }) => {
+    test.skip(!isMobile, 'touch zoom');
+    await openGame(page, 'blurry');
+    const photo = page.getByAltText("Blurry image of the day's idol");
+    await expect(photo).toBeVisible();
+    const box = (await photo.boundingBox())!;
+    await page.touchscreen.tap(box.x + box.width / 2, box.y + box.height / 2);
+    const backdrop = page.locator('div.fixed.inset-0.z-40');
+    await expect(backdrop).toBeVisible();
+
+    await page.setViewportSize({ width: 844, height: 390 });
+    await expect(backdrop).toHaveCount(0);
+  });
 });
