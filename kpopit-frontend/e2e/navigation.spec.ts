@@ -47,6 +47,10 @@ test.describe('every route loads @mobile', () => {
     await page.goto('/idols');
     const cards = page.locator('a[href^="/idols/"]');
     await expect(cards.nth(1)).toBeVisible();
+    // The cards puff in with a staggered entrance: measured mid-way, neighbours sit a few px apart.
+    await page.evaluate(() => Promise.all(document.getAnimations()
+      .filter((animation) => (animation as CSSAnimation).animationName === 'puffIn')
+      .map((animation) => animation.finished)));
     const [a, b] = [await cards.nth(0).boundingBox(), await cards.nth(1).boundingBox()];
     // Side by side on one row, even on a phone (two columns at least): not a single stacked column.
     expect(Math.abs(a!.y - b!.y)).toBeLessThan(2);
