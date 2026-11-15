@@ -1,7 +1,7 @@
 import { test, expect, type Page } from './support/fixtures';
 import { answerIdol, guessIdol, openGame, userToken, victoryMarker, type IdolEntry } from './support/game';
 import { anyIdolWithCard, idolHasCard, seedIdolCard, userIdByToken, userIdByUsername, userIdolCard } from './support/db';
-import { expectLoggedIn, newUser, registerViaApi } from './support/accounts';
+import { expectLoggedIn, newUser, registerBeforeLoad, registerViaApi } from './support/accounts';
 
 type Mode = 'classic' | 'blurry';
 
@@ -111,6 +111,19 @@ test.describe('Collections', () => {
     await page.keyboard.press('Escape');
     await expect(panel).toBeHidden();
     await expect(toggle).toBeFocused();
+  });
+
+  test('a failed collections list shows an error with Retry, not an empty page', async ({ page }) => {
+    await skipOverlays(page);
+    // Signed in: the route can't load ahead of the session, so the page's own query fetches the list.
+    await registerBeforeLoad(page, newUser());
+    await page.route(/\/api\/collections\/list/, (route) => route.fulfill({ status: 500, json: { error: 'down' } }));
+    await page.goto('/collections');
+    await expect(page.getByText('Error loading your collections.')).toBeVisible({ timeout: 30_000 });
+
+    await page.unroute(/\/api\/collections\/list/);
+    await page.getByRole('button', { name: 'Retry' }).click();
+    await expect(page.getByText(/% complete/).first()).toBeVisible();
   });
 
   test('anonymous visitor sees the collections list and a locked album', async ({ page }) => {
