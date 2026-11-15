@@ -121,6 +121,10 @@ const CalendarView = ({ data }: { data: CalendarTimeline }) => {
     const monthDays = Array.from({ length: monthLength }, (_, i) => dayAt(addDays(startIso, i)));
     const playedInMonth = monthDays.filter((day) => isDone(day.kind)).length;
     const openInMonth = monthDays.filter((day) => day.kind === "unplayed" || day.kind === "started").length;
+    // With the selection in another month, the shown month's first open day keeps the grid in the Tab order.
+    const tabStop = monthDays.some((day) => day.date === selected)
+        ? selected
+        : monthDays.find((day) => day.kind !== "pre" && day.kind !== "future")?.date;
     const slideClass = slide === "right" ? "calendar-from-right" : slide === "left" ? "calendar-from-left" : "";
 
     const onGridKey = (event: KeyboardEvent) => {
@@ -128,7 +132,7 @@ const CalendarView = ({ data }: { data: CalendarTimeline }) => {
         if (step === undefined) return;
 
         event.preventDefault();
-        let next = addDays(selected, step);
+        let next = addDays((event.target as HTMLElement).dataset.date ?? selected, step);
         if (next < first) next = first;
         if (next > today) next = today;
 
@@ -318,7 +322,7 @@ const CalendarView = ({ data }: { data: CalendarTimeline }) => {
                                     {Array.from({ length: leadingBlanks }, (_, i) => <span key={`lead-${i}`} aria-hidden />)}
 
                                     {monthDays.map((day, i) => (
-                                        <DayCell key={day.date} day={day} index={i} selected={day.date === selected} mode={mode} onPick={select} />
+                                        <DayCell key={day.date} day={day} index={i} selected={day.date === selected} tabbable={day.date === tabStop} mode={mode} onPick={select} />
                                     ))}
                                 </div>
 
@@ -338,7 +342,7 @@ const CalendarView = ({ data }: { data: CalendarTimeline }) => {
                                     {Array.from({ length: leadingBlanks }, (_, i) => <span key={`lead-${i}`} aria-hidden />)}
 
                                     {monthDays.map((day) => (
-                                        <DotCell key={day.date} day={day} selected={day.date === selected} today={today} mode={mode} onPick={select} />
+                                        <DotCell key={day.date} day={day} selected={day.date === selected} tabbable={day.date === tabStop} today={today} mode={mode} onPick={select} />
                                     ))}
                                 </div>
 

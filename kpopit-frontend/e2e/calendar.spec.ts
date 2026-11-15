@@ -143,4 +143,12 @@ test.describe('calendar @mobile', () => {
     await expect(page.getByText(/NaN|undefined/)).toHaveCount(0);
   });
 
+  test("another month's grid keeps a day in the Tab order", async ({ page }) => {
+    await page.goto('/calendar');
+    const previous = page.locator('button[aria-label="Previous month"]:visible').first();
+    test.skip(await previous.isDisabled(), 'only one month of challenges');
+    await previous.click();
+    await expect(page.locator('[role="grid"]:visible [data-date][tabindex="0"]')).toHaveCount(1);
+  });
+
 });
