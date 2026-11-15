@@ -17,6 +17,7 @@ import DayPanel from "./DayPanel";
 import TimelineView, { type OpenPicker, type TimelineOrder } from "./TimelineView";
 import { CALENDAR_BUTTON } from "./calendarLooks";
 import { useFeatures } from "../../hooks/useFeatures";
+import { isIsoDate } from "../../utils/isoDate";
 import { MODES, MONTHS, addDays, dayOf, formatLong, isDone, modesFor, monthIndex, parseMode, toT } from "./calendarData";
 import "./calendar.css";
 
@@ -68,7 +69,7 @@ const CalendarView = ({ data }: { data: CalendarTimeline }) => {
     const gridRef = useRef<HTMLDivElement>(null);
 
     const askedDate = params.get("date");
-    const selected = askedDate && first && today && askedDate >= first && askedDate <= today ? askedDate : today ?? "";
+    const selected = isIsoDate(askedDate) && first && today && askedDate >= first && askedDate <= today ? askedDate : today ?? "";
     const [shownMonth, setShownMonth] = useState<{ mode: CalendarMode; month: number } | null>(null);
     const month = shownMonth?.mode === mode ? shownMonth.month : monthIndex(selected || "1970-01-01");
 

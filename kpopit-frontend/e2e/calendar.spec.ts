@@ -137,4 +137,10 @@ test.describe('calendar @mobile', () => {
     }
   });
 
+  test('a malformed ?date= falls back to today', async ({ page }) => {
+    await page.goto('/calendar?date=2026-11-0x');
+    await expect(page.getByRole('link', { name: 'Go to Classic' }).first()).toBeVisible();
+    await expect(page.getByText(/NaN|undefined/)).toHaveCount(0);
+  });
+
 });
