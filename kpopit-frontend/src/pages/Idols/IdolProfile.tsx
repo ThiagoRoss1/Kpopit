@@ -288,7 +288,10 @@ const IdolPage = ({ data, idols }: IdolPageProps) => {
                             )}
 
                             <div className="@container w-full">
-                                <div role="img" aria-label={artistName} className="flex flex-nowrap gap-0.75">
+                                {/* The page's heading: the tiles are drawn letters, so the name itself is read from the hidden span. */}
+                                <h1 className="flex flex-nowrap gap-0.75">
+                                    <span className="sr-only">{artistName}</span>
+
                                     {letters.map((character, position) => {
                                         if (character === " ") return <span key={position} aria-hidden className="w-2.5 flex-none" />;
 
@@ -318,7 +321,7 @@ const IdolPage = ({ data, idols }: IdolPageProps) => {
                                             </span>
                                         );
                                     })}
-                                </div>
+                                </h1>
                             </div>
                         </div>
                     </div>

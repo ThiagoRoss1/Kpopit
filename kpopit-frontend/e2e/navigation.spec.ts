@@ -67,6 +67,10 @@ test.describe('every route loads @mobile', () => {
     await page.goto(href!);
     await expect(page).toHaveURL(href!);
     await expect(page.getByRole('img', { name: / photo$/ }).first()).toBeVisible();
+    // The lettered name is the page's only h1, named like the photo.
+    const photoName = (await page.getByRole('img', { name: / photo$/ }).first().getAttribute('alt'))!.replace(/ photo$/, '');
+    await expect(page.getByRole('heading', { level: 1 })).toHaveCount(1);
+    await expect(page.getByRole('heading', { level: 1 })).toContainText(photoName);
     await expectCleanLoad(page, consoleErrors);
   });
 
