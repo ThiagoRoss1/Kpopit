@@ -1,9 +1,11 @@
 import { useState } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-import { addGeneratedCodes, redeemTransferCode, fetchGameState, getActiveTransferCode } from '../services/api';
+import { addGeneratedCodes, redeemTransferCode, getActiveTransferCode, restoreSession } from '../services/api';
+import { applyRestoredSession } from '../utils/applyRestoredSession';
+import { clearModeKeys } from '../utils/gameStorage';
 import { encryptToken, decryptToken } from '../utils/tokenEncryption';
 import { safeReload } from '../utils/safeReload';
-import type { GeneratedCodes, GuessResponse, RedeemUserToken } from '../interfaces/gameInterfaces';
+import type { GeneratedCodes, RedeemUserToken } from '../interfaces/gameInterfaces';
 import type { AxiosError } from 'axios';
 import { useNow } from './useNow';
 
@@ -47,36 +49,13 @@ export const useTransferDataLogic = () => {
         mutationKey: ['redeemCode'],
         mutationFn: async (code) => redeemTransferCode(code),
         onSuccess: async (data) => {
-            const gameState = await fetchGameState(data.user_token);
-            if (import.meta.env.DEV) console.log("Fetched game state after redeem:", gameState);
-
-            if (gameState && gameState.today_guesses_details) {
-                localStorage.setItem("todayGuessesDetails", JSON.stringify(gameState.today_guesses_details));
-                localStorage.setItem("animatedIdols", JSON.stringify(gameState.animated_idols || []));
-                localStorage.setItem("gameDate", gameState.game_date || "");
-                localStorage.setItem("gameComplete", String(gameState.game_complete || false));
-                localStorage.setItem("gameWon", String(gameState.game_won || false));
-                localStorage.setItem("guessedIdols", JSON.stringify(gameState.guessed_idols || []));
-
-                if (gameState.hints_revealed) {
-                    localStorage.setItem("hint1Revealed", JSON.stringify(gameState.hints_revealed.hint1 || false));
-                    localStorage.setItem("hint2Revealed", JSON.stringify(gameState.hints_revealed.hint2 || false));
-                }
-
-                if (gameState.show_hints) {
-                    localStorage.setItem("showHint1", JSON.stringify(gameState.show_hints.hint1 || false));
-                    localStorage.setItem("showHint2", JSON.stringify(gameState.show_hints.hint2 || false));
-                }
-
-                if (gameState.colorize_hints) {
-                    localStorage.setItem("colorize1", JSON.stringify(gameState.colorize_hints.hint1 || false));
-                    localStorage.setItem("colorize2", JSON.stringify(gameState.colorize_hints.hint2 || false));
-                }
-
-                const animatedIdols = gameState.today_guesses_details.map(
-                    (guess: GuessResponse) => guess.guessed_idol_data.idol_id
-                );
-                localStorage.setItem("animatedIdols", JSON.stringify(animatedIdols));
+            // The code's account replaces this device's day in every mode, not just Classic.
+            (["classic", "blurry", "pixelated", "inkit"] as const).forEach((mode) => clearModeKeys(localStorage, mode));
+            try {
+                applyRestoredSession(await restoreSession(data.user_token));
+            } catch (error) {
+                // With the keys cleared, each page restores its day from the server on load.
+                if (import.meta.env.DEV) console.warn("Could not restore the transferred day:", error);
             }
 
             const encrypted = await encryptToken(data.user_token);

@@ -198,11 +198,6 @@ export const saveGameState = async (gameState: object) => {
     return api.post('/game-state', { game_state: gameState }, { headers: userTokenHeader(token) });
 }
 
-export const fetchGameState = async (user_token: string) => {
-    const response = await api.get('/game-state', { headers: userTokenHeader(user_token) });
-    return response.data;
-}
-
 // Logged in: the interceptor's Bearer token wins. Anonymous: the UUID identifies the player.
 export const restoreSession = async (anonymousToken?: string): Promise<RestoreSessionResponse> => {
     const response = await api.get('/game/restore-session', {
