@@ -70,6 +70,8 @@ test.describe('Blurry', () => {
     expect((await dailyHistory(userId, 'blurry'))[0]).toMatchObject({ won: true, guesses_count: 2 });
 
     await page.getByRole('img', { name: 'Share' }).first().click();
+    // The heading matches the copied line, which names the mode.
+    await expect(page.getByText("I found today's #KpopIt Blurry Idol in 2 attempts! 🎤").first()).toBeVisible();
     await expect(page.getByText(/Hardmode ❌/)).toBeVisible();
     await expect(page.getByText(/Grayscale ✅/)).toBeVisible();
     await closeModal(page, 'Share...');
