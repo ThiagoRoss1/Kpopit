@@ -87,7 +87,10 @@ const usePhotoUrl = (imagePath: string, imageVersion: string): string | null => 
 
     if (getInkItDevPhotoSource !== null) {
         if (devSource.isPending) return null;
-        if (devSource.data) return resolveCdnUrl(devSource.data.image_path, devSource.data.image_version);
+        // The marker keeps a cache entry apart from Blurry's plain copy of the same file: Safari reuses
+        // that non-CORS copy for this CORS load, and the sheet can't read its pixels.
+        const url = devSource.data && resolveCdnUrl(devSource.data.image_path, devSource.data.image_version);
+        if (url) return `${url}${url.includes("?") ? "&" : "?"}inkit=1`;
     }
 
     return resolveCdnUrl(imagePath, imageVersion);
