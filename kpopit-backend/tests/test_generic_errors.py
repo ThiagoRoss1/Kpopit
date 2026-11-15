@@ -66,3 +66,10 @@ def test_user_init_failure_has_no_details(client, monkeypatch, caplog):
     with caplog.at_level(logging.ERROR):
         res = client.post("/api/user/init")
     assert_generic(res, caplog)
+
+
+@pytest.mark.parametrize("body", ["[1]", '"text"', "null", "{broken", "3"])
+@pytest.mark.parametrize("url", ["/api/transfer-data", "/api/game/classic/guess", "/api/auth/login"])
+def test_a_non_object_json_body_is_a_json_400(client, url, body):
+    res = client.post(url, data=body, content_type="application/json")
+    assert (res.status_code, res.get_json()) == (400, {"error": "Request body must be a JSON object"})

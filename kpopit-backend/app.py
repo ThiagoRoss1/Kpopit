@@ -94,6 +94,14 @@ def check_maintenance_mode():
         return jsonify({"error": "The service is currently under maintenance. Please try again later."}), 503 
 
 @app.before_request
+def reject_non_object_json():
+    """Every JSON route reads `.get` on the body: a list, string, null or broken JSON gets a JSON
+    400 here instead of an HTML 500 inside the handler. An empty body is left to the route."""
+    if request.path.startswith("/api") and request.is_json and request.get_data():
+        if not isinstance(request.get_json(silent=True), dict):
+            return jsonify({"error": "Request body must be a JSON object"}), 400
+
+@app.before_request
 def load_gamemode():
     """Load gamemode from request args before each request"""
     g.gamemode_id = request.args.get("gamemode_id", default=1, type=int)
