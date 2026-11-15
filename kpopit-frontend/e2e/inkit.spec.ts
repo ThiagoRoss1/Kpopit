@@ -212,6 +212,28 @@ test.describe('inkit', () => {
     await expect(page.getByTestId('inkit-victory')).toBeVisible({ timeout: 3_000 });
   });
 
+  test('a win from another tab lays the photo on this tab\'s sheet', async ({ page, context }) => {
+    await openInkIt(page);
+    const { answer } = await todaysAnswer(page);
+
+    const other = await context.newPage();
+    await openInkIt(other);
+    await guess(other, answer);
+    await expect(other.getByTestId('inkit-victory')).toBeVisible({ timeout: 15_000 });
+    await other.close();
+
+    // The first tab learns about the win the way a returning tab does: a refetch on visibility.
+    await page.bringToFront();
+    await page.evaluate(() => window.dispatchEvent(new Event('visibilitychange')));
+    await expect(page.getByTestId('inkit-page')).toHaveAttribute('data-phase', 'won', { timeout: 15_000 });
+
+    // Blank paper is nearly flat; the photo has real contrast.
+    const pixels = await sheetPixels(page);
+    const mean = pixels.reduce((sum, value) => sum + value, 0) / pixels.length;
+    const spread = Math.sqrt(pixels.reduce((sum, value) => sum + (value - mean) ** 2, 0) / pixels.length);
+    expect(spread).toBeGreaterThan(25);
+  });
+
   test('a past day plays from the calendar under its own title', async ({ page }) => {
     await openInkIt(page);
     const { today } = await todaysAnswer(page);
