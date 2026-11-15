@@ -1,3 +1,4 @@
+import { useEffect, useRef } from "react";
 import { X } from "lucide-react";
 import { cn } from "../../lib/utils";
 
@@ -30,8 +31,37 @@ const MonthPicker = ({ min, max, value, onPick, onClose, note, title = "Jump to 
         years.push(year);
     }
 
+    const rootRef = useRef<HTMLDivElement>(null);
+    const onCloseRef = useRef(onClose);
+    useEffect(() => { onCloseRef.current = onClose; });
+
+    // Escape and a click outside close it, like the navbar menus. A click on the opener also lands
+    // here, but its own toggle closes it too, so it doesn't reopen.
+    useEffect(() => {
+        const opener = document.activeElement instanceof HTMLElement ? document.activeElement : null;
+
+        const onKey = (event: KeyboardEvent) => {
+            if (event.key !== "Escape") return;
+            onCloseRef.current();
+            opener?.focus();
+        };
+        const onClick = (event: MouseEvent) => {
+            if (!rootRef.current?.contains(event.target as Node)) onCloseRef.current();
+        };
+
+        document.addEventListener("keydown", onKey);
+        // Next task: the click that opened the picker is still bubbling up to the document.
+        const listen = window.setTimeout(() => document.addEventListener("click", onClick));
+        return () => {
+            window.clearTimeout(listen);
+            document.removeEventListener("keydown", onKey);
+            document.removeEventListener("click", onClick);
+        };
+    }, []);
+
     return (
         <div
+            ref={rootRef}
             role="dialog"
             aria-label={title}
             className={cn(

@@ -151,4 +151,27 @@ test.describe('calendar @mobile', () => {
     await expect(page.locator('[role="grid"]:visible [data-date][tabindex="0"]')).toHaveCount(1);
   });
 
+  test('the month picker closes on Escape, outside clicks and its opener', async ({ page }) => {
+    await page.goto('/calendar');
+    const opener = page.locator('button[aria-haspopup="dialog"]:visible').first();
+    const picker = page.getByRole('dialog', { name: 'Jump to a month...' });
+
+    // From the keyboard, Escape hands focus back to the opener.
+    await opener.focus();
+    await page.keyboard.press('Enter');
+    await expect(picker).toBeVisible();
+    await page.keyboard.press('Escape');
+    await expect(picker).toBeHidden();
+    await expect(opener).toBeFocused();
+
+    await opener.click();
+    await expect(picker).toBeVisible();
+    await page.getByRole('heading', { name: 'Calendar', level: 1 }).click();
+    await expect(picker).toBeHidden();
+
+    await opener.click();
+    await expect(picker).toBeVisible();
+    await opener.click();
+    await expect(picker).toBeHidden();
+  });
 });
