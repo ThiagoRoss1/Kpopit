@@ -126,6 +126,28 @@ test.describe('Collections', () => {
     await expect(page.getByText(/% complete/).first()).toBeVisible();
   });
 
+  test("widening past lg closes the album's phone-only Focus mode and index", async ({ page, isMobile }) => {
+    test.skip(isMobile, 'resizes a desktop window');
+    await skipOverlays(page);
+    await page.setViewportSize({ width: 390, height: 844 });
+    await page.goto('/collections');
+    await page.locator('a[href^="/collections/1/"]').first().click();
+    const root = page.locator('[data-focus]');
+
+    await page.locator('[data-tour="focus"]').click();
+    await expect(root).toHaveAttribute('data-focus', 'on');
+    await page.setViewportSize({ width: 1440, height: 900 });
+    await expect(root).toHaveAttribute('data-focus', 'off');
+
+    await page.setViewportSize({ width: 390, height: 844 });
+    await page.locator('[data-tour="summary"]').click();
+    const search = page.getByPlaceholder(/^Search for a group/);
+    await expect(search).toBeVisible();
+    await page.setViewportSize({ width: 1440, height: 900 });
+    // The desktop rail keeps its own search; the modal's copy goes away.
+    await expect(search).toHaveCount(1);
+  });
+
   test('anonymous visitor sees the collections list and a locked album', async ({ page }) => {
     await skipOverlays(page);
     await page.goto('/collections');
