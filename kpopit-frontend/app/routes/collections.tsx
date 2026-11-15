@@ -1,6 +1,8 @@
-import { Navigate, useLoaderData } from "react-router";
+import { useLoaderData } from "react-router";
 import Collections from "../../src/pages/Collection/Collections";
 import HeldData from "../../src/components/Loading/HeldData";
+import FeatureGate from "../../src/components/FeatureGate";
+import NotFound from "../../src/pages/NotFound/NotFound";
 import { loadCollectionsList } from "../../src/pages/Collection/collectionData";
 import { holdForData } from "../../src/utils/holdNavigation";
 
@@ -14,10 +16,13 @@ export async function clientLoader() {
 
 export default function CollectionsRoute() {
   const { held } = useLoaderData<typeof clientLoader>();
-  if (!ENABLED) return <Navigate to="/" replace />;
+  // Off in this build or on the backend (/api/features): the 404, like every disabled feature.
+  if (!ENABLED) return <NotFound />;
   return (
-    <HeldData data={held} message="Loading Kpopit..." errorMessage="Error loading your collections.">
-      {() => <Collections />}
-    </HeldData>
+    <FeatureGate flag="collection">
+      <HeldData data={held} message="Loading Kpopit..." errorMessage="Error loading your collections.">
+        {() => <Collections />}
+      </HeldData>
+    </FeatureGate>
   );
 }

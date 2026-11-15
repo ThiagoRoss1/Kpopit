@@ -161,3 +161,22 @@ test('an expired access token on the collections list is refreshed, not cached a
   expect(rows[0].owned_cards).toBe(1);
   await expect(page.getByText(/^1\/\d+ stickers$/).first()).toBeVisible();
 });
+
+test.describe('Collections off on the backend', () => {
+  test.beforeAll(async ({ backend }) => {
+    await backend.restart(0, { COLLECTION_ENABLED: 'false' });
+  });
+  test.afterAll(async ({ backend }) => {
+    await backend.restart(0, {});
+  });
+
+  test('the list and an album are the 404, and the navbar has no Collections link', async ({ page }) => {
+    await page.goto('/collections');
+    await expect(page.getByRole('heading', { name: '404' })).toBeVisible();
+    await expect(page.locator('meta[name="robots"]')).toHaveAttribute('content', 'noindex');
+    await expect(page.locator('nav').getByRole('link', { name: 'Collections' })).toHaveCount(0);
+
+    await page.goto('/collections/1/official-collection');
+    await expect(page.getByRole('heading', { name: '404' })).toBeVisible();
+  });
+});
