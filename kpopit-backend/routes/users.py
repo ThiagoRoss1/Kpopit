@@ -133,6 +133,7 @@ def generate_transfer_code(user_token=None):
     return jsonify(result)
 
 @user_bp.route("/transfer-data", methods=["POST"])
+@limiter.limit("5 per minute; 20 per hour")
 def transfer_data():
     """Transfer user data using a transfer code"""
     data = request.get_json()
