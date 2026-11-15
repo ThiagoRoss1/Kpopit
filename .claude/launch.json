@@ -64,6 +64,7 @@
         "R2_AVATARS_SECRET_ACCESS_KEY=",
         "R2_AVATARS_BUCKET_NAME=",
         "R2_AVATARS_PREFIX=",
+        "R2_PUBLIC_URL=",
         ".venv/bin/python",
         "app.py"
       ],
@@ -103,6 +104,7 @@
         "R2_AVATARS_SECRET_ACCESS_KEY=",
         "R2_AVATARS_BUCKET_NAME=",
         "R2_AVATARS_PREFIX=",
+        "R2_PUBLIC_URL=",
         "COLLECTION_ENABLED=true",
         ".venv/bin/python",
         "app.py"
@@ -143,6 +145,7 @@
         "R2_AVATARS_SECRET_ACCESS_KEY=",
         "R2_AVATARS_BUCKET_NAME=",
         "R2_AVATARS_PREFIX=",
+        "R2_PUBLIC_URL=",
         ".venv/Scripts/python.exe",
         "app.py"
       ],

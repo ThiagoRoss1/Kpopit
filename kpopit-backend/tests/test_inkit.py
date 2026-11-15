@@ -624,15 +624,43 @@ def test_gamemodes_count_follows_the_flag(client, monkeypatch):
     assert client.get("/api/gamemodes-count").get_json() == {"gamemodes_count": 3}
 
 
-def test_dev_photo_source_maps_only_known_paths(client, db_conn, game):
+class _Upstream:
+    """Stands in for the public bucket's response."""
+
+    headers = type("Headers", (), {"get_content_type": staticmethod(lambda: "image/webp")})()
+
+    def __enter__(self):
+        return self
+
+    def __exit__(self, *exc):
+        return False
+
+    def read(self):
+        return b"webp-bytes"
+
+
+def test_dev_photo_streams_the_bytes_without_naming_the_file(client, db_conn, game, monkeypatch):
+    from routes.games import inkit as inkit_routes
+
     with db_conn.cursor() as cur:
         cur.execute("INSERT INTO blurry_mode_data (idol_id, blur_image_path, is_active) VALUES (%s, '/b/a_b.webp', TRUE)",
                     (game["answer"],))
     db_conn.commit()
+    fetched = []
+    monkeypatch.setattr(inkit_routes, "R2_PUBLIC_URL", "https://bucket.test")
+    monkeypatch.setattr(inkit_routes.urllib.request, "urlopen", lambda url, timeout: fetched.append(url) or _Upstream())
 
-    known = client.get(f"/api/game/inkit/dev/photo-source?path=/images/inkit/{game['answer']:032x}.webp")
-    assert known.get_json() == {"image_path": "/b/a_b.webp", "image_version": "1"}
-    assert client.get("/api/game/inkit/dev/photo-source?path=/images/inkit/unknown.webp").status_code == 404
+    res = client.get(f"/api/game/inkit/dev/photo?path=/images/inkit/{game['answer']:032x}.webp")
+    assert (res.status_code, res.mimetype, res.data) == (200, "image/webp", b"webp-bytes")
+    assert "a_b" not in res.get_data(as_text=True) and fetched == ["https://bucket.test/b/a_b.webp?v=1"]
+    assert client.get("/api/game/inkit/dev/photo?path=/images/inkit/unknown.webp").status_code == 404
+
+
+def test_dev_photo_needs_the_bucket_url(client, monkeypatch):
+    from routes.games import inkit as inkit_routes
+
+    monkeypatch.setattr(inkit_routes, "R2_PUBLIC_URL", "")
+    assert client.get("/api/game/inkit/dev/photo?path=x").status_code == 503
 
 
 def _run_app(script: str, **env) -> subprocess.CompletedProcess:
@@ -648,7 +676,7 @@ def test_inkit_is_absent_when_the_flag_is_off():
         "c.post('/api/game/inkit/guess', json={}).status_code, "
         "c.post('/api/game/inkit/hint', json={}).status_code, "
         "c.get('/api/calendar/inkit/2026-01-01', headers={'Authorization': '00000000-0000-4000-8000-000000000000'}).status_code, "
-        "c.get('/api/game/inkit/dev/photo-source').status_code, "
+        "c.get('/api/game/inkit/dev/photo').status_code, "
         "json.dumps(c.get('/api/features').get_json()['inkit']), "
         "c.get('/api/gamemodes-count').get_json()['gamemodes_count'])"
     )
@@ -656,9 +684,9 @@ def test_inkit_is_absent_when_the_flag_is_off():
     assert result.stdout.split()[-7:] == ["404", "404", "404", "404", "404", "false", "3"], result.stderr[-2000:]
 
 
-def test_dev_photo_source_is_absent_in_production():
+def test_dev_photo_is_absent_in_production():
     script = ("import app; c = app.app.test_client(); "
-              "print(c.get('/api/game/inkit/dev/photo-source?path=x').status_code, c.get('/api/game/inkit/daily').status_code)")
+              "print(c.get('/api/game/inkit/dev/photo?path=x').status_code, c.get('/api/game/inkit/daily').status_code)")
     result = _run_app(script, FLASK_ENV="production", INKIT_ENABLED="true", FRONTEND_URL="http://localhost:5173",
                       PYTHON_DOTENV_DISABLED="", FLASK_SKIP_DOTENV="")
     # Startup refuses a local test DB outside the isolated runners, or serves no dev route at all.

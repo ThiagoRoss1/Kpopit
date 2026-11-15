@@ -1,6 +1,8 @@
 import logging
 import os
-from flask import Blueprint, g, jsonify, request
+import urllib.error
+import urllib.request
+from flask import Blueprint, Response, g, jsonify, request
 from services.calendar_service import CALENDAR_ENABLED, CalendarError, CalendarService
 from services.daily_draw import ensure_daily_picks
 from services.get_db import get_db, get_idol_repo
@@ -168,10 +170,16 @@ def use_inkit_ink_hint():
 
 
 if FLASK_ENV == "development":
-    @inkit_bp.route("/game/inkit/dev/photo-source", methods=["GET"])
-    def dev_photo_source():
-        """Development only: the bucket path a local build loads an InkIt photo from, since the
-        opaque paths only exist in the image bucket after the photos are copied there."""
+    R2_PUBLIC_URL = os.getenv("R2_PUBLIC_URL", "").rstrip("/")
+
+    @inkit_bp.route("/game/inkit/dev/photo", methods=["GET"])
+    def dev_photo():
+        """Development only: the opaque InkIt copies exist in the bucket only once uploaded, so this
+        streams the idol's Blurry photo instead. The bytes come through here, so the browser never
+        sees the file name (which names the idol). Reads the public bucket at R2_PUBLIC_URL."""
+        if not R2_PUBLIC_URL:
+            return jsonify({"error": "Set R2_PUBLIC_URL to load InkIt photos locally"}), 503
+
         connect = get_db()
         cursor = connect.cursor()
         try:
@@ -183,8 +191,19 @@ if FLASK_ENV == "development":
                 """, (request.args.get("path", ""),),
             )
             row = cursor.fetchone()
-            if not row:
-                return jsonify({"error": "Not found"}), 404
-            return jsonify(dict(row)), 200
         finally:
             cursor.close()
+        if not row:
+            return jsonify({"error": "Not found"}), 404
+
+        source = f"{R2_PUBLIC_URL}/{row['image_path'].lstrip('/')}?v={row['image_version']}"
+        try:
+            with urllib.request.urlopen(source, timeout=10) as upstream:
+                body, mimetype = upstream.read(), upstream.headers.get_content_type()
+        except (urllib.error.URLError, OSError):
+            logger.warning("Could not fetch the InkIt dev photo from the public bucket")
+            return jsonify({"error": "Could not load the photo"}), 502
+
+        response = Response(body, mimetype=mimetype)
+        response.headers["Cache-Control"] = "private, max-age=3600"
+        return response

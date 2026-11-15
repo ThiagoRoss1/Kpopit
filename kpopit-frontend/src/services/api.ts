@@ -280,11 +280,9 @@ export const postInkItHint = async (gameDate: string): Promise<{ hint_ink_guess:
 
 /** Development only (null in production builds): where a local build finds an InkIt photo
  *  before its opaque copy exists in the image bucket. */
-export const getInkItDevPhotoSource = import.meta.env.DEV
-    ? async (path: string): Promise<{ image_path: string; image_version: string }> => {
-        const response = await api.get('/game/inkit/dev/photo-source', { params: { path } });
-        return response.data;
-    }
+// Development only: the photo's bytes through the API (the opaque copies aren't in the bucket yet).
+export const inkitDevPhotoUrl = import.meta.env.DEV
+    ? (path: string) => `${api.defaults.baseURL}/game/inkit/dev/photo?path=${encodeURIComponent(path)}`
     : null;
 
 const collectionAuthHeaders = async () => {

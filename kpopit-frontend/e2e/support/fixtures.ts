@@ -77,6 +77,10 @@ export const test = base.extend<{ consoleErrors: ConsoleErrors }, { backend: Off
     currentIp = nextClientIp();
     await tagApiRequests(context, currentIp);
     await stubImageBuckets(context);
+    // A dev build loads InkIt's photo through the backend, which reads the real bucket: same stub here.
+    await context.route(/\/api\/game\/inkit\/dev\/photo\?/, (route) =>
+      route.fulfill({ status: 200, contentType: 'image/png', path: STUB_IMAGE }),
+    );
     await context.route('**/*', (route) => {
       const url = new URL(route.request().url());
       if (['localhost', '127.0.0.1', '[::1]'].includes(url.hostname) || STUB_IMAGE_ORIGINS.includes(url.origin)) {

@@ -5,7 +5,7 @@ import { Navigate, useSearchParams } from "react-router";
 import { Check, Info } from "lucide-react";
 import { cn } from "../../lib/utils";
 import {
-    getDailyUserCount, getInkItCalendarDay, getInkItDaily, getInkItDevPhotoSource, getUserPosition, getYesterdaysIdol,
+    getDailyUserCount, getInkItCalendarDay, getInkItDaily, getUserPosition, getYesterdaysIdol, inkitDevPhotoUrl,
     postInkItGuess, postInkItHint,
 } from "../../services/api";
 import type { IdolListItem, InkItAnswer, InkItGame, InkItGuess, YesterdayIdol } from "../../interfaces/gameInterfaces";
@@ -73,28 +73,10 @@ interface DayData {
 
 type StatsModal = null | "stats" | "transfer-data" | "import-data" | "export-data";
 
-/** In production the photo is the opaque bucket path. A dev build asks the local backend where the
- *  photo really is, since the opaque copies only exist in the bucket once they are uploaded. */
-const usePhotoUrl = (imagePath: string, imageVersion: string): string | null => {
-    const devSource = useQuery({
-        queryKey: ["inkitDevPhoto", imagePath],
-        queryFn: () => getInkItDevPhotoSource!(imagePath),
-        enabled: getInkItDevPhotoSource !== null,
-        staleTime: Infinity,
-        retry: false,
-        refetchOnWindowFocus: false,
-    });
-
-    if (getInkItDevPhotoSource !== null) {
-        if (devSource.isPending) return null;
-        // The marker keeps a cache entry apart from Blurry's plain copy of the same file: Safari reuses
-        // that non-CORS copy for this CORS load, and the sheet can't read its pixels.
-        const url = devSource.data && resolveCdnUrl(devSource.data.image_path, devSource.data.image_version);
-        if (url) return `${url}${url.includes("?") ? "&" : "?"}inkit=1`;
-    }
-
-    return resolveCdnUrl(imagePath, imageVersion);
-};
+/** In production the photo is the opaque bucket path. A dev build loads it through the local backend,
+ *  since the opaque copies only exist in the bucket once they are uploaded. */
+const photoUrlFor = (imagePath: string, imageVersion: string): string | null =>
+    inkitDevPhotoUrl ? inkitDevPhotoUrl(imagePath) : resolveCdnUrl(imagePath, imageVersion);
 
 const InkIt = ({ date = null }: InkItProps) => {
     const gameMode = useGameMode();
@@ -246,7 +228,7 @@ const InkItGame = ({ data, idols, isCalendarDay }: InkItGameProps) => {
 
     const round = guesses.length + 1;
     const finished = phase !== "playing";
-    const photoUrl = usePhotoUrl(data.imagePath, data.imageVersion);
+    const photoUrl = photoUrlFor(data.imagePath, data.imageVersion);
     const onOutOfInk = useCallback(() => setOutOfInkNudge((count) => count + 1), []);
 
     const ink = useInkIt({
