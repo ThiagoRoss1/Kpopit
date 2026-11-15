@@ -308,6 +308,26 @@ test('hold still: every frame adds a dab of peak dt × 1.4 under the pointer', (
     assert.ok(sheet.masks.pencil[pixelAt(250, 250)] > 0.9, 'holding still sharpens the spot');
 });
 
+test('hold still: one second at 60, 120 and 144 Hz frame time spends and builds the same (±2%)', () => {
+    const holdFor = (hz) => {
+        const sheet = new InkItSheet();
+        sheet.inkLeft = 5000;
+        sheet.pointerDown({ x: 250, y: 250 }, 0);
+        const before = sheet.inkLeft;
+        for (let frame = 0; frame < hz; frame++) sheet.tick(1 / hz);
+
+        const { radius } = INKIT_CONFIG.tools.pencil;
+        return { spent: before - sheet.inkLeft, edge: sheet.masks.pencil[pixelAt(250 + radius * 0.6, 250)] };
+    };
+
+    const base = holdFor(60);
+    for (const hz of [120, 144]) {
+        const other = holdFor(hz);
+        near(other.spent, base.spent, base.spent * 0.02, `${hz} Hz ink`);
+        near(other.edge, base.edge, Math.max(0.02, base.edge * 0.02), `${hz} Hz coverage`);
+    }
+});
+
 test('reveal stepper: eraser, pencil, pen, paint; ends with paint 1 and pencil/pen 0', () => {
     const { sheet } = drawStroke();
     const step = sheet.revealStepper();

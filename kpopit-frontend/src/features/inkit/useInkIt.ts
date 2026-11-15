@@ -25,8 +25,10 @@ interface UseInkItOptions {
     onOutOfInk?: () => void;
 }
 
-// The reference drives the drain and the hold build-up once per animation frame with a fixed step.
-const FRAME_SECONDS = 1 / 60;
+// The drain and the hold build-up run on real frame time, so 60, 120 and 144 Hz screens play alike.
+// The first frame of a stroke has no previous one; a stall (tab switch) is capped so it can't dump ink.
+const FIRST_FRAME_SECONDS = 1 / 60;
+const MAX_FRAME_SECONDS = 0.05;
 
 const makeCanvas = () => {
     const canvas = document.createElement("canvas");
@@ -202,19 +204,22 @@ export const useInkIt = ({
 
     // While the pointer is down, once per frame: the drain and the hold-still build-up. Kept in a
     // ref so the frame callback can schedule itself.
-    const frameLoopRef = useRef<() => void>(() => undefined);
+    const frameLoopRef = useRef<(now: number) => void>(() => undefined);
+    const lastFrameRef = useRef<number | null>(null);
 
     useEffect(() => {
-        frameLoopRef.current = () => {
+        frameLoopRef.current = (now) => {
             const sheet = sheetRef.current;
             if (!sheet.drawing) return;
 
-            sheet.tick(FRAME_SECONDS);
+            const last = lastFrameRef.current;
+            lastFrameRef.current = now;
+            sheet.tick(last === null ? FIRST_FRAME_SECONDS : Math.min(MAX_FRAME_SECONDS, Math.max(0, now - last) / 1000));
             syncInk();
             queueRender();
 
             if (sheet.drawing) {
-                requestAnimationFrame(() => frameLoopRef.current());
+                requestAnimationFrame((next) => frameLoopRef.current(next));
                 return;
             }
 
@@ -246,7 +251,8 @@ export const useInkIt = ({
         setIsEmpty(false);
         syncInk();
         queueRender();
-        requestAnimationFrame(() => frameLoopRef.current());
+        lastFrameRef.current = null;
+        requestAnimationFrame((now) => frameLoopRef.current(now));
     }, [canDraw, finished, isRevealing, queueRender, status, syncInk]);
 
     const onPointerMove = useCallback((event: ReactPointerEvent<HTMLCanvasElement>) => {
