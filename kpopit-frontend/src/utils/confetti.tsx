@@ -1,8 +1,13 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import Confetti from "react-confetti";
 
 export const WinnerExplosion = (props: { onComplete: () => void }) => {
-  const { onComplete } = props;
+  // Kept in a ref: pages pass a new callback on every render, which restarted the timers and let the
+  // confetti run until every piece fell (InkIt re-renders constantly while the sheet animates).
+  const onCompleteRef = useRef(props.onComplete);
+  useEffect(() => {
+    onCompleteRef.current = props.onComplete;
+  });
 
   const [isExploding, setIsExploding] = useState(true);
   const [opacity, setOpacity] = useState(1);
@@ -31,14 +36,14 @@ export const WinnerExplosion = (props: { onComplete: () => void }) => {
 
     const removeTimer = setTimeout(() => {
       setIsExploding(false);
-      onComplete?.();
+      onCompleteRef.current?.();
     }, 2500);
 
     return () => {
       clearTimeout(fadeTimer);
       clearTimeout(removeTimer);
     };
-  }, [onComplete]);
+  }, []);
 
   if (!isExploding) return null;
 
