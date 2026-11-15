@@ -1,5 +1,5 @@
 import type { Features } from "../../utils/features";
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useRef, useState, useSyncExternalStore } from "react";
 import { Link, useLocation } from "react-router";
 import { ChevronDown, Menu, Moon, Sun, X } from "lucide-react";
 import { cn } from "../../lib/utils";
@@ -23,6 +23,12 @@ import {
 } from "./navigation";
 
 type OpenMenu = NavMenu | "sheet" | "user" | null;
+
+// The bar spans the page, so its container width is the page's width without the scrollbar.
+const subscribeResize = (onChange: () => void) => {
+    window.addEventListener("resize", onChange);
+    return () => window.removeEventListener("resize", onChange);
+};
 
 interface NavLink {
     id: NavMenu | "calendar" | "collections";
@@ -85,6 +91,10 @@ const NavBar = ({ forceTheme }: NavBarProps) => {
     // A menu belongs to the page it was opened on: navigating closes it.
     const [openState, setOpenState] = useState<{ menu: OpenMenu; key: string }>({ menu: null, key: locationKey });
     if (openState.key !== locationKey) setOpenState({ menu: null, key: locationKey });
+
+    // The sheet is the phone/tablet menu: widening past the bar's 860px container breakpoint closes it.
+    const wideBar = useSyncExternalStore(subscribeResize, () => document.documentElement.clientWidth >= 860, () => false);
+    if (wideBar && openState.menu === "sheet") setOpenState({ ...openState, menu: null });
 
     const openMenu = openState.key === locationKey ? openState.menu : null;
     const setOpenMenu = (menu: OpenMenu) => setOpenState({ menu, key: locationKey });

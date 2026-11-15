@@ -75,6 +75,20 @@ test.describe('NavBar @mobile', () => {
     await expect(nav.getByRole('button', { name: 'Open menu' })).toHaveAttribute('aria-expanded', 'false');
   });
 
+  test('widening to the desktop bar closes the mobile sheet', async ({ page, isMobile }) => {
+    test.skip(isMobile, 'resizes a desktop window');
+    await page.setViewportSize({ width: 390, height: 844 });
+    await page.goto('/about');
+    const nav = page.locator('nav');
+    await nav.getByRole('button', { name: 'Open menu' }).click();
+    await expect(nav.getByRole('link', { name: /^Contact/ })).toBeVisible();
+
+    await page.setViewportSize({ width: 1440, height: 900 });
+    await expect(nav.getByRole('link', { name: /^Contact/ })).toHaveCount(0);
+    await page.setViewportSize({ width: 390, height: 844 });
+    await expect(nav.getByRole('button', { name: 'Open menu' })).toHaveAttribute('aria-expanded', 'false');
+  });
+
   test('a disabled feature has no link and its route is the 404', async ({ page, isMobile }) => {
     // The E2E backend runs with CALENDAR_ENABLED and IDOL_XP_ENABLED off.
     const features = await (await page.request.get('/api/features')).json();
