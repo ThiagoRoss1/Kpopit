@@ -126,6 +126,8 @@ class CalendarService:
         puzzle, answer = self._puzzle(cursor, gamemode_id, answer_id)
         return {
             "challenge_date": day,
+            # Today's challenge belongs to the live page: the client sends ?date=<today> there.
+            "is_today": day == get_today_date().isoformat(),
             "day_number": self.day_number(cursor, gamemode_id, date.fromisoformat(day)),
             "mode": mode,
             "status": status,

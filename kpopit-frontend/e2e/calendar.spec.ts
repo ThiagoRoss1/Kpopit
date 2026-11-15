@@ -126,4 +126,15 @@ test.describe('calendar @mobile', () => {
     await page.locator('main').getByRole('link', { name: 'Calendar', exact: true }).click();
     await expect(page.getByText(/^Played from the calendar · /).filter({ visible: true }).first()).toBeVisible();
   });
+
+  test("today's date in ?date= opens the live game", async ({ page }) => {
+    for (const [mode, , liveTitle] of gameMetadata) {
+      await openGame(page, mode);
+      const today = await serverDate(page, mode);
+      await page.goto(`/${mode}?date=${today}`);
+      await expect(page).toHaveURL(new RegExp(`/${mode}$`));
+      await expect(page).toHaveTitle(liveTitle);
+    }
+  });
+
 });

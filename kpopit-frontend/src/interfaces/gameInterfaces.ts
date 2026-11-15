@@ -410,6 +410,7 @@ export interface InkItDay {
 
 export interface InkItCalendarDay {
   challenge_date: string;
+  is_today: boolean;
   day_number: number | null;
   status: CalendarStatus;
   puzzle: { image_path: string; image_version: string };
@@ -452,6 +453,7 @@ export interface CalendarGuessSummary {
 
 export interface CalendarDayData {
   challenge_date: string;
+  is_today: boolean;
   day_number: number | null;
   mode: CalendarMode;
   status: CalendarStatus;

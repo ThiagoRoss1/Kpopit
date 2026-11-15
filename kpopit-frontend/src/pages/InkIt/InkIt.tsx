@@ -1,7 +1,7 @@
 import "./InkIt.css";
 import { lazy, Suspense, useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { useMutation, useQuery } from "@tanstack/react-query";
-import { useSearchParams } from "react-router";
+import { Navigate, useSearchParams } from "react-router";
 import { Check, Info } from "lucide-react";
 import { cn } from "../../lib/utils";
 import {
@@ -163,6 +163,9 @@ const InkIt = ({ date = null }: InkItProps) => {
     );
 
     const query = isCalendarDay ? past : live;
+
+    // A hand-typed ?date=<today> plays the live game, which keeps the day on this device.
+    if (past.data?.is_today) return <Navigate to="/inkit" replace />;
 
     if (!data || !allIdolsData) {
         const retry = () => {

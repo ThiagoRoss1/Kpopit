@@ -1,5 +1,5 @@
 import { useCallback, useRef, useState, type CSSProperties } from "react";
-import { Link } from "react-router";
+import { Link, Navigate } from "react-router";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { ArrowLeft, CalendarDays } from "lucide-react";
 import { useSharedGameData } from "../../hooks/useSharedGameData";
@@ -158,6 +158,9 @@ const CalendarGame = ({ mode, date }: { mode: PlayableMode; date: string }) => {
     }, [extra.idols, extra.albums]);
 
     if (day.isError) return <NotFound />;
+
+    // A hand-typed ?date=<today> plays the live game, which keeps the day on this device.
+    if (day.data?.is_today) return <Navigate to={`/${mode}`} replace />;
 
     const modeName = MODES.find((option) => option.id === mode)!.name;
     const dayNumber = day.data?.day_number;
