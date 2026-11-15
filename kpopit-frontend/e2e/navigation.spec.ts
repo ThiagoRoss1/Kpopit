@@ -199,5 +199,11 @@ test.describe('navbar, footer and home modals', () => {
     await page.getByRole('button', { name: 'Changelog' }).click();
     await expect(page.getByRole('heading', { name: 'Changelog...' })).toBeVisible();
     await closeModal(page, 'Changelog...');
+
+    // Escape closes them too.
+    await page.getByRole('button', { name: 'Changelog' }).click();
+    await expect(page.getByRole('heading', { name: 'Changelog...' })).toBeVisible();
+    await page.keyboard.press('Escape');
+    await expect(page.getByRole('heading', { name: 'Changelog...' })).toBeHidden();
   });
 });
