@@ -1,5 +1,6 @@
 import { useId, useMemo, useState, type KeyboardEvent } from "react";
 import { Search } from "lucide-react";
+import { AnimatePresence, motion } from "motion/react";
 import { cn } from "../../lib/utils";
 import type { IdolListItem } from "../../interfaces/gameInterfaces";
 import { resolveCdnUrl } from "../../utils/imageUrl";
@@ -26,6 +27,9 @@ const asksForSoloists = (wanted: string) => "solo".includes(wanted) || wanted.in
 
 /** The idol as the field shows it once picked, as in Classic and Blurry: "Name (Group)". */
 const displayName = (idol: IdolListItem) => `${idol.artist_name} (${groupOf(idol)})`;
+
+// The same spring as the Pixelated and Classic lists: a short fade with a 10 px slide, in and out.
+const LIST_SPRING = { type: "spring", stiffness: 500, damping: 50 } as const;
 
 /** Suggestions with the same rules as the Classic/Blurry search bar: name, any group (past ones too)
  *  or "solo" for soloists; guessed idols left out; name start, name, group, soloist order. */
@@ -167,47 +171,53 @@ const InkSearch = ({ idols, triedIds, isPending, winnerCount, onGuess }: InkSear
                     </button>
                 </div>
 
-                {showList && (
-                    <div
-                        className={cn(
-                            "absolute inset-x-0 top-[calc(100%+10px)] z-30 overflow-hidden rounded-[20px] border-2 border-(--ink) bg-(--menu-bg)",
-                            "shadow-[4px_5px_0_var(--ctl-off)] animate-[ikDrop_.22s_var(--ease-settle)_backwards]",
-                        )}
-                    >
-                        <ul id={listId} role="listbox" aria-label="Idols" className="pp-scroll m-0 flex max-h-80 list-none flex-col gap-0.5 overflow-y-auto p-1.5">
-                            {suggestions.map((idol, index) => {
-                                const photo = resolveCdnUrl(idol.image_path, idol.image_version);
+                <AnimatePresence>
+                    {showList && (
+                        <motion.div
+                            initial={{ y: -10, opacity: 0 }}
+                            animate={{ y: 0, opacity: 1 }}
+                            exit={{ y: -10, opacity: 0 }}
+                            transition={LIST_SPRING}
+                            className={cn(
+                                "absolute inset-x-0 top-[calc(100%+10px)] z-30 overflow-hidden rounded-[20px] border-2 border-(--ink) bg-(--menu-bg)",
+                                "shadow-[4px_5px_0_var(--ctl-off)] transform-gpu",
+                            )}
+                        >
+                            <ul id={listId} role="listbox" aria-label="Idols" className="pp-scroll m-0 flex max-h-80 list-none flex-col gap-0.5 overflow-y-auto p-1.5">
+                                {suggestions.map((idol, index) => {
+                                    const photo = resolveCdnUrl(idol.image_path, idol.image_version);
 
-                                return (
-                                    <li
-                                        key={idol.id}
-                                        id={`${listId}-${index}`}
-                                        role="option"
-                                        aria-selected={index === current}
-                                        data-testid="inkit-suggestion"
-                                        onPointerDown={(event) => event.preventDefault()}
-                                        onClick={() => pick(idol)}
-                                        onPointerEnter={() => setActiveIndex(index)}
-                                        className={cn("flex cursor-pointer items-center gap-3 rounded-[13px] p-2", index === current && "bg-(--opt-hover)")}
-                                    >
-                                        {photo && (
-                                            <Img
-                                                src={photo}
-                                                alt=""
-                                                className="size-10 flex-none rounded-full border-2 border-(--ink) bg-(--chip-hover) object-cover object-center"
-                                            />
-                                        )}
+                                    return (
+                                        <li
+                                            key={idol.id}
+                                            id={`${listId}-${index}`}
+                                            role="option"
+                                            aria-selected={index === current}
+                                            data-testid="inkit-suggestion"
+                                            onPointerDown={(event) => event.preventDefault()}
+                                            onClick={() => pick(idol)}
+                                            onPointerEnter={() => setActiveIndex(index)}
+                                            className={cn("flex cursor-pointer items-center gap-3 rounded-[13px] px-3 py-2.5", index === current && "bg-(--opt-hover)")}
+                                        >
+                                            {photo && (
+                                                <Img
+                                                    src={photo}
+                                                    alt=""
+                                                    className="size-12 flex-none rounded-full border-2 border-(--ink) bg-(--chip-hover) object-cover object-center"
+                                                />
+                                            )}
 
-                                        <div className="min-w-0 flex-1">
-                                            <div className="truncate font-bold text-[15px] text-(--chip-ink)">{idol.artist_name}</div>
-                                            <div className="truncate font-medium text-[11px] text-(--group)">{groupOf(idol)}</div>
-                                        </div>
-                                    </li>
-                                );
-                            })}
-                        </ul>
-                    </div>
-                )}
+                                            <div className="min-w-0 flex-1">
+                                                <div className="truncate font-bold text-base leading-tight text-(--chip-ink)">{idol.artist_name}</div>
+                                                <div className="truncate font-medium text-sm leading-tight text-(--ik-group)">{groupOf(idol)}</div>
+                                            </div>
+                                        </li>
+                                    );
+                                })}
+                            </ul>
+                        </motion.div>
+                    )}
+                </AnimatePresence>
             </div>
 
             {winnerCount !== null && (

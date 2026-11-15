@@ -9,6 +9,7 @@
     --wood: #F3E3D3;
     --ik-field: rgba(26, 20, 24, 0.05);
     --ik-num: #FF3399;
+    --ik-group: rgba(26, 20, 24, 0.55);
     --ik-grain-blend: multiply;
     --ik-grain-opacity: 0.45;
     --row-wrong: #FD5C63;
@@ -20,6 +21,7 @@
     --wood: #3B343A;
     --ik-field: rgba(255, 138, 196, 0.1);
     --ik-num: #FF8AC4;
+    --ik-group: #FF8AC4;
     --ik-grain-blend: soft-light;
     --ik-grain-opacity: 0.3;
 }
@@ -233,13 +235,6 @@
     60% {
         scale: 1.03;
         opacity: 1;
-    }
-}
-
-@keyframes ikDrop {
-    from {
-        translate: 0 -8px;
-        opacity: 0;
     }
 }
 
