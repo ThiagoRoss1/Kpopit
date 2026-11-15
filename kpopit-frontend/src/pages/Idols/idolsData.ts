@@ -2,6 +2,7 @@ import { queryOptions, type QueryKey } from "@tanstack/react-query";
 import { getIdolInfo, getIdolsPage } from "../../services/api";
 import { getQueryClient } from "../../services/queryClient";
 import type { IdolProfileData, IdolsPageData } from "../../interfaces/gameInterfaces";
+import { retryUnlessNotFound } from "../../utils/notFound";
 
 const STALE_MS = 1000 * 60 * 60 * 4;
 
@@ -16,6 +17,7 @@ export const idolProfileQuery = (id: string) => queryOptions<IdolProfileData>({
     queryKey: ["idolProfileData", id],
     queryFn: () => getIdolInfo(Number(id)),
     staleTime: STALE_MS,
+    retry: retryUnlessNotFound,
 });
 
 // Cached data at once; otherwise the page's prerendered .data file (snapshot), falling back to the

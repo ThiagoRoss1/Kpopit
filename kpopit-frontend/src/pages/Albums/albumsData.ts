@@ -2,6 +2,7 @@ import { queryOptions } from "@tanstack/react-query";
 import { getAlbumInfo, getAlbumsPage } from "../../services/api";
 import { loadWithSnapshot } from "../Idols/idolsData";
 import type { AlbumPageData, AlbumsPageItem } from "../../interfaces/gameInterfaces";
+import { retryUnlessNotFound } from "../../utils/notFound";
 
 const STALE_MS = 1000 * 60 * 60 * 4;
 
@@ -16,6 +17,7 @@ export const albumQuery = (id: string) => queryOptions<AlbumPageData>({
     queryKey: ["albumPageData", id],
     queryFn: () => getAlbumInfo(Number(id)),
     staleTime: STALE_MS,
+    retry: retryUnlessNotFound,
 });
 
 export const loadAlbumsList = (snapshot: () => Promise<AlbumsPageItem[]>) =>

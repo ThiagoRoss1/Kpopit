@@ -1,7 +1,9 @@
 import { Suspense, type ReactNode } from "react";
-import { Await, useLocation, useRevalidator } from "react-router";
+import { Await, useAsyncError, useLocation, useRevalidator } from "react-router";
 import type { Held } from "../../utils/holdNavigation";
 import PageLoader from "./PageLoader";
+import NotFound from "../../pages/NotFound/NotFound";
+import { isNotFoundError } from "../../utils/notFound";
 
 type HeldDataProps<T> = {
     // null: nothing was loaded ahead (the page loads its own data).
@@ -23,10 +25,18 @@ export default function HeldData<T>({ data, message, errorMessage, children }: H
         <Suspense key={location.key} fallback={<PageLoader message={message} />}>
             <Await
                 resolve={data.promise}
-                errorElement={<PageLoader error errorMessage={errorMessage} onRetry={() => revalidator.revalidate()} />}
+                errorElement={<HeldError errorMessage={errorMessage} onRetry={() => revalidator.revalidate()} />}
             >
                 {(value) => children(value as T)}
             </Await>
         </Suspense>
     );
 }
+
+// A 404 means the item doesn't exist: the Not Found page. Anything else can be retried.
+const HeldError = ({ errorMessage, onRetry }: { errorMessage: string; onRetry: () => void }) => {
+    const error = useAsyncError();
+    if (isNotFoundError(error)) return <NotFound />;
+
+    return <PageLoader error errorMessage={errorMessage} onRetry={onRetry} />;
+};

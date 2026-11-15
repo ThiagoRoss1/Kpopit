@@ -14,6 +14,7 @@ import { resolveCdnUrl } from "../../utils/imageUrl";
 import { buildAlbumSlug } from "../../utils/formatters";
 import type { AlbumDiscographyItem, AlbumPageData } from "../../interfaces/gameInterfaces";
 import NotFound from "../NotFound/NotFound";
+import { isNotFoundError } from "../../utils/notFound";
 import { albumPath, albumQuery, languageFlag, shortType } from "./albumsData";
 
 const MONTHS = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
@@ -172,10 +173,11 @@ interface AlbumPageProps {
 }
 
 const AlbumPage = ({ id, initialAlbum }: AlbumPageProps) => {
-    const { data, isError } = useQuery({ ...albumQuery(id), initialData: initialAlbum, retry: false });
+    const { data, error, isError, refetch } = useQuery({ ...albumQuery(id), initialData: initialAlbum });
 
-    if (isError) return <NotFound />;
-    if (!data) return <PageLoader message="Loading album..." />;
+    // Only a real 404 is the Not Found page; a failed request can be retried.
+    if (!data && isNotFoundError(error)) return <NotFound />;
+    if (!data) return <PageLoader message="Loading album..." error={isError} errorMessage="Error fetching this album." onRetry={() => void refetch()} />;
 
     return <Album key={data.id} album={data} />;
 };

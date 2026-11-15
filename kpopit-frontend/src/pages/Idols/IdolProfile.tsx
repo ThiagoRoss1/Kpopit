@@ -17,6 +17,8 @@ import FitText from "../../components/FitText";
 import { getNationalityFlag } from "../../utils/getFlags";
 import { resolveCdnUrl } from "../../utils/imageUrl";
 import { buildIdolSlug } from "../../utils/formatters";
+import { isNotFoundError } from "../../utils/notFound";
+import NotFound from "../NotFound/NotFound";
 import { groupLabel, idolProfileQuery, idolsListQuery, prefetchIdolProfile, prefetchIdolsList } from "./idolsData";
 import { buildFacts, relatedIdols, type Fact, type FactChip, type Span, type TabKey } from "./idolFacts";
 
@@ -82,7 +84,7 @@ const IdolProfile = ({ initialProfile }: IdolProfileProps) => {
     const { id, slug } = useParams<{ id: string; slug: string }>();
     const navigate = useNavigate();
     const { data: idols } = useQuery({ ...idolsListQuery, refetchOnWindowFocus: false });
-    const { data, isLoading, isError, refetch } = useQuery({
+    const { data, error, isLoading, isError, refetch } = useQuery({
         ...idolProfileQuery(id ?? ""),
         initialData: initialProfile,
         initialDataUpdatedAt: 0,
@@ -98,6 +100,8 @@ const IdolProfile = ({ initialProfile }: IdolProfileProps) => {
 
         if (slug !== canonicalSlug) navigate(`/idols/${id}/${canonicalSlug}`, { replace: true });
     }, [data, id, slug, navigate]);
+
+    if (!data && isNotFoundError(error)) return <NotFound />;
 
     if (!data) {
         return (

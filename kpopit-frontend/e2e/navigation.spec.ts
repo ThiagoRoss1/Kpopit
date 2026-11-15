@@ -88,6 +88,16 @@ test.describe('every route loads @mobile', () => {
     await expectCleanLoad(page, consoleErrors);
   });
 
+  test('an unknown idol is the 404; a failing API offers Retry instead', async ({ page }) => {
+    await page.goto('/idols/99999999/nobody');
+    await expect(page.getByRole('heading', { name: '404' })).toBeVisible();
+
+    await page.route(/\/api\/idols-page\/99999998/, (route) => route.fulfill({ status: 500, json: { error: 'down' } }));
+    await page.goto('/idols/99999998/nobody');
+    await expect(page.getByText('Error fetching idol profile data.')).toBeVisible({ timeout: 30_000 });
+    await expect(page.getByRole('button', { name: 'Retry' })).toBeVisible();
+  });
+
   test('the old /collection path is just an unknown route (the 404)', async ({ page }) => {
     await page.goto('/collection');
     await expect(page.getByRole('heading', { name: '404' })).toBeVisible();
