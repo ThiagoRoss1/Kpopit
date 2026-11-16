@@ -198,10 +198,14 @@ if FLASK_ENV == "development":
 
         source = f"{R2_PUBLIC_URL}/{row['image_path'].lstrip('/')}?v={row['image_version']}"
         try:
-            with urllib.request.urlopen(source, timeout=10) as upstream:
+            # Cloudflare answers 403 to urllib's default User-Agent ("Python-urllib/x.y").
+            fetch = urllib.request.Request(source, headers={"User-Agent": "kpopit-dev-photo/1.0"})
+            with urllib.request.urlopen(fetch, timeout=10) as upstream:
                 body, mimetype = upstream.read(), upstream.headers.get_content_type()
-        except (urllib.error.URLError, OSError):
-            logger.warning("Could not fetch the InkIt dev photo from the public bucket")
+        except (urllib.error.URLError, OSError) as err:
+            # The status or error type only: the URL would name the idol.
+            reason = getattr(err, "code", None) or type(err).__name__
+            logger.warning("Could not fetch the InkIt dev photo from the public bucket (%s)", reason)
             return jsonify({"error": "Could not load the photo"}), 502
 
         response = Response(body, mimetype=mimetype)

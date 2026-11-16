@@ -648,11 +648,13 @@ def test_dev_photo_streams_the_bytes_without_naming_the_file(client, db_conn, ga
     db_conn.commit()
     fetched = []
     monkeypatch.setattr(inkit_routes, "R2_PUBLIC_URL", "https://bucket.test")
-    monkeypatch.setattr(inkit_routes.urllib.request, "urlopen", lambda url, timeout: fetched.append(url) or _Upstream())
+    monkeypatch.setattr(inkit_routes.urllib.request, "urlopen", lambda request, timeout: fetched.append(request) or _Upstream())
 
     res = client.get(f"/api/game/inkit/dev/photo?path=/images/inkit/{game['answer']:032x}.webp")
     assert (res.status_code, res.mimetype, res.data) == (200, "image/webp", b"webp-bytes")
-    assert "a_b" not in res.get_data(as_text=True) and fetched == ["https://bucket.test/b/a_b.webp?v=1"]
+    assert "a_b" not in res.get_data(as_text=True) and [r.full_url for r in fetched] == ["https://bucket.test/b/a_b.webp?v=1"]
+    # Not urllib's default User-Agent, which Cloudflare refuses.
+    assert fetched[0].get_header("User-agent") == "kpopit-dev-photo/1.0"
     assert client.get("/api/game/inkit/dev/photo?path=/images/inkit/unknown.webp").status_code == 404
 
 
