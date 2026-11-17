@@ -296,7 +296,7 @@ const Album = ({ album }: { album: AlbumPageData }) => {
                                 draggable={false}
                                 src={cover}
                                 alt={`${album.name} cover`}
-                                className="relative block size-full object-cover transition-[scale,opacity] duration-700 ease-(--ease-settle) group-hover/hero:scale-105"
+                                className="relative block size-full object-cover transition-[scale] duration-700 ease-(--ease-settle) group-hover/hero:scale-105"
                             />
 
                             {/* A light sweep across the sleeve on hover */}
@@ -592,7 +592,7 @@ const MoreCard = ({ release, artistName, index }: MoreCardProps) => {
                             alt=""
                             loading="lazy"
                             decoding="async"
-                            className="relative block size-full object-cover transition-[scale,opacity] duration-600 ease-(--ease-settle) group-hover:scale-108"
+                            className="relative block size-full object-cover transition-[scale] duration-600 ease-(--ease-settle) group-hover:scale-108"
                         />
                     </div>
 
