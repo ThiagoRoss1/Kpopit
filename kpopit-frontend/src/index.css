@@ -425,16 +425,6 @@ img[data-fade="in"] {
         outline-offset: -1px;
     }
 
-    /* The navbar items' hover: no lift and the pill appears at once. The fade and the lift made the
-       pill and its shadow flicker. */
-    .pp-nav [data-st="idle"]:hover {
-        translate: none !important;
-    }
-
-    .pp-nav [data-st]::before {
-        transition: none !important;
-    }
-
     /* No scale on hover or press for anything carrying text (buttons, cards, tags): Firefox redraws a
        scaling element's text and outlines on every frame, which read as lag. The lift and the press
        (translate) stay. */
