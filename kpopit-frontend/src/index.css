@@ -432,23 +432,80 @@ img[data-fade="in"] {
         filter: none;
     }
 
-    /* No scale on hover or press: Firefox redraws a scaling element's text and edges on every frame,
-       which read as lag. The lift and the press (translate) stay. */
-    [class*="hover:scale-"]:hover,
-    :is(.group, [class*="group/"]):hover [class*="hover:scale-"],
-    :is(.group, [class*="group/"]):hover [class*="hover/"][class*=":scale-"],
+    /* Every other ink-bordered box with an offset shadow: the same light arc shows between border and
+       shadow. A 2px outline in the border's colour, centred on the border box's edge, covers the arc
+       (recaptured on screen: no arc left); the border loses the 1px the outline adds outside, so the
+       ink keeps its width. Boxes drawn with a drop-shadow above are left alone. */
+    :where([class*=" shadow-["], [class^="shadow-["], [class*=" shadow-("], [class^="shadow-("], .inkit-hint):where([class~="border-(--ink)"]):not(.pp-press, .inkit-btn, .inkit-go, [class*="firefox:drop-shadow"], [class~="shadow-none"], [class~="shadow-(--face-hl)"], [class*="border-t-"], [class*="border-b-"], [class*="border-l-"], [class*="border-r-"], [class*="border-x-"], [class*="border-y-"]) {
+        outline: 2px solid var(--ink);
+        outline-offset: -1px;
+    }
+
+    :where([class*=" shadow-["], [class^="shadow-["], [class*=" shadow-("], [class^="shadow-("], .inkit-hint):where([class~="border-[#1A1418]"]):not(.pp-press, .inkit-btn, .inkit-go, [class*="firefox:drop-shadow"], [class~="shadow-none"], [class~="shadow-(--face-hl)"], [class*="border-t-"], [class*="border-b-"], [class*="border-l-"], [class*="border-r-"], [class*="border-x-"], [class*="border-y-"]) {
+        outline: 2px solid #1A1418;
+        outline-offset: -1px;
+    }
+
+    :where([class*=" shadow-["], [class^="shadow-["], [class*=" shadow-("], [class^="shadow-("], .inkit-hint):where([class~="border-(--ink)"], [class~="border-[#1A1418]"]):where([class~="border-2"]):not(.pp-press, .inkit-btn, .inkit-go, [class*="firefox:drop-shadow"], [class~="shadow-none"], [class~="shadow-(--face-hl)"]) {
+        border-width: 1px;
+    }
+
+    :where([class*=" shadow-["], [class^="shadow-["], [class*=" shadow-("], [class^="shadow-("], .inkit-hint):where([class~="border-(--ink)"], [class~="border-[#1A1418]"]):where([class~="border-[3px]"]):not(.pp-press, .inkit-btn, .inkit-go, [class*="firefox:drop-shadow"], [class~="shadow-none"], [class~="shadow-(--face-hl)"]) {
+        border-width: 2px;
+    }
+
+    /* No scale on hover or press for anything carrying text (buttons, cards, tags): Firefox redraws a
+       scaling element's text and outlines on every frame, which read as lag. The lift and the press
+       (translate) stay. */
+    :not(img)[class*="hover:scale-"]:hover,
+    :is(.group, [class*="group/"]):hover :not(img)[class*="hover:scale-"],
+    :is(.group, [class*="group/"]):hover :not(img)[class*="hover/"][class*=":scale-"],
     [class*="active:scale-"]:active,
     .group:active [class*="group-active:scale-"],
     [class*="pressed:scale-"]:is(:active, .link-pending),
     :is(.group, [class*="group/"]):is(:active, .link-pending) [class*="pressed:scale-"],
-    .inkit-tool:not(:disabled):active,
-    .inkit-photo:hover {
+    .inkit-tool:not(:disabled):active {
         scale: none !important;
     }
 
-    /* Page entrances off: a fade from nothing, staggered over dozens of cards, dropped frames in
-       Firefox and showed as a ghosted page. The content is simply there. */
-    .pp-enter,
+    /* Photos keep their hover zoom, quicker, so fewer frames are drawn while it moves. */
+    img[class*="hover:scale-"],
+    img[class*="hover/"][class*=":scale-"],
+    .inkit-photo {
+        transition-duration: 0.25s !important;
+    }
+
+    /* Page entrances stay, quicker: the slow fades, staggered over dozens of cards, dropped frames and
+       showed as a ghosted page. The catalogue grids come in together instead of one card at a time. */
+    .pp-enter {
+        animation-duration: 0.3s !important;
+        animation-delay: calc(var(--pp-delay, 0ms) / 2) !important;
+    }
+
+    .calendar-enter,
+    .calendar-panel-enter,
+    .how-to-play-tile-enter,
+    .idol-menu-enter,
+    .idol-side-enter,
+    .idol-tile-enter,
+    .not-found-tile-enter,
+    .profile-column-enter,
+    .profile-pane-enter,
+    [class*="animate-[puffDrop_"] {
+        animation-duration: 0.3s !important;
+    }
+
+    .idol-photo-enter {
+        animation-duration: 0.35s !important;
+    }
+
+    [class*="animate-[puffIn_"] {
+        animation-duration: 0.3s !important;
+        animation-delay: 0s !important;
+    }
+
+    /* The album page mounts again for every album picked on its timeline, so its entrances replayed on
+       each click and the page blinked: off on that page. */
     .album-disc-enter,
     .album-dot-enter,
     .album-drop-enter,
@@ -457,19 +514,7 @@ img[data-fade="in"] {
     .album-row-enter,
     .album-sleeve-enter,
     .album-spin-enter,
-    .album-tile-enter,
-    .calendar-enter,
-    .calendar-panel-enter,
-    .how-to-play-tile-enter,
-    .idol-menu-enter,
-    .idol-photo-enter,
-    .idol-side-enter,
-    .idol-tile-enter,
-    .not-found-tile-enter,
-    .profile-column-enter,
-    .profile-pane-enter,
-    [class*="animate-[puffIn_"],
-    [class*="animate-[puffDrop_"] {
+    .album-tile-enter {
         animation: none !important;
     }
 
