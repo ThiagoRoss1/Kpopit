@@ -1,5 +1,5 @@
 import type { Features } from "../../utils/features";
-import { useEffect, useRef, useState, useSyncExternalStore } from "react";
+import { useEffect, useLayoutEffect, useRef, useState, useSyncExternalStore } from "react";
 import { Link, useLocation } from "react-router";
 import { ChevronDown, Menu, Moon, Sun, X } from "lucide-react";
 import { cn } from "../../lib/utils";
@@ -87,6 +87,21 @@ const NavBar = ({ forceTheme }: NavBarProps) => {
     const rowsOf = (menu: NavMenu) => menuRows(menu, features);
     const [theme, toggleTheme] = useTheme();
     const rootRef = useRef<HTMLDivElement>(null);
+
+    // Leaving or entering a forced theme swaps every colour token in the bar at once. For that one
+    // paint the bar's transitions are off: fading from the other theme showed the toggle and the
+    // items in the old page's colours first.
+    const lastForcedTheme = useRef(forceTheme);
+    useLayoutEffect(() => {
+        const root = rootRef.current;
+        if (!root || lastForcedTheme.current === forceTheme) return;
+
+        lastForcedTheme.current = forceTheme;
+        root.setAttribute("data-theme-swap", "");
+        const frame = requestAnimationFrame(() => requestAnimationFrame(() => root.removeAttribute("data-theme-swap")));
+
+        return () => cancelAnimationFrame(frame);
+    }, [forceTheme]);
 
     // A menu belongs to the page it was opened on: navigating closes it.
     const [openState, setOpenState] = useState<{ menu: OpenMenu; key: string }>({ menu: null, key: locationKey });

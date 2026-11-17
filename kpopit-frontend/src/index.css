@@ -375,6 +375,13 @@ img[data-fade="in"] {
     animation: imgIn 0.35s ease-out;
 }
 
+/* The navbar while its theme is swapped by a page change (set for one paint by NavBar). */
+.pp-nav[data-theme-swap],
+.pp-nav[data-theme-swap] *,
+.pp-nav[data-theme-swap] *::before {
+    transition: none !important;
+}
+
 /* Firefox only. */
 @supports (-moz-appearance: none) {
     /* Firefox cuts a box-shadow out from under its box, and on a rounded corner that cut and the
