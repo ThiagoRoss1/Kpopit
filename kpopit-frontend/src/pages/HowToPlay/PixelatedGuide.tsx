@@ -62,16 +62,16 @@ const PixelatedGuide = () => {
                         const isOpen = isUnlocked && openSleeves[i];
 
                         return (
-                            <div key={sleeve.label} className="relative h-24">
+                            <div key={sleeve.label} className="relative h-28">
                                 <div
                                     aria-hidden
                                     className={cn(
-                                        "absolute left-2 top-2 grid place-items-center size-20 rounded-full border-2 border-[#1A1418] bg-[#0D0008]",
+                                        "absolute left-2 top-2 grid place-items-center size-24 rounded-full border-2 border-[#1A1418] bg-[#0D0008]",
                                         SLEEVE_MOTION,
-                                        isOpen && "translate-x-20.5 rotate-360",
+                                        isOpen && "translate-x-24.5 rotate-360",
                                     )}
                                 >
-                                    <span className={cn("grid place-items-center size-10 rounded-full font-bold text-xs", sleeve.look)}>{sleeve.value}</span>
+                                    <span className={cn("grid place-items-center size-14 rounded-full text-center font-bold text-xs/[1.1]", sleeve.look)}>{sleeve.value}</span>
                                 </div>
 
                                 <button
@@ -80,7 +80,7 @@ const PixelatedGuide = () => {
                                     aria-label={isUnlocked ? `${sleeve.label} hint` : `${sleeve.label} hint, locked`}
                                     onClick={() => toggleSleeve(i)}
                                     className={cn(
-                                        "pp-focus absolute left-0 top-0 flex flex-col justify-between size-24 p-2 rounded-[10px] text-left cursor-pointer disabled:cursor-default",
+                                        "pp-focus absolute left-0 top-0 flex flex-col justify-between size-28 p-2.5 rounded-[10px] text-left cursor-pointer disabled:cursor-default",
                                         "border-2 border-[#1A1418] shadow-[3px_4px_0_var(--ctl-off)]",
                                         SLEEVE_MOTION,
                                         isOpen ? "-translate-x-1.5 -rotate-7" : "-rotate-2",
@@ -100,7 +100,7 @@ const PixelatedGuide = () => {
                                     </span>
                                 </button>
 
-                                <span className="@max-[431px]:hidden absolute left-50 top-1/2 -translate-y-1/2 text-sm">
+                                <span className="@max-[431px]:hidden absolute left-58 top-1/2 -translate-y-1/2 text-sm">
                                     <b>{sleeve.label}</b> unlocks after <b>{sleeve.unlocksAt} guesses</b>.
                                 </span>
                             </div>
