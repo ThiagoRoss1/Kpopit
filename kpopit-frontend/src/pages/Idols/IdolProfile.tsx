@@ -615,7 +615,10 @@ const RelatedIdols = ({ idols }: { idols: IdolsPageData[] }) => {
                             "transition-[translate,rotate,box-shadow] duration-380 ease-(--ease-settle) will-change-transform",
                             "hover:-translate-y-1 hover:rotate-0",
                             "pressed:translate-x-0.75 pressed:translate-y-1 pressed:rotate-0 pressed:shadow-[2px_2px_0_var(--ctl-off),var(--in)] pressed:duration-150",
-                            index % 2 ? "rotate-[0.8deg]" : "rotate-[-0.8deg]",
+                            // Firefox keeps the tilt on hover and press: the straightening redrew the card on every frame.
+                            index % 2
+                                ? "rotate-[0.8deg] firefox:hover:rotate-[0.8deg] firefox:pressed:rotate-[0.8deg]"
+                                : "rotate-[-0.8deg] firefox:hover:rotate-[-0.8deg] firefox:pressed:rotate-[-0.8deg]",
                         )}
                     >
                         <span className="block aspect-square overflow-hidden border-[2.5px] border-[#1A1418] rounded-xl bg-[#1A1418]">

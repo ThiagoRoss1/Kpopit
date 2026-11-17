@@ -28,7 +28,8 @@ const ListCard = ({ to, label, index, animate = true, stagger = true, onIntent, 
             <div
                 className={cn(
                     "relative transition-[rotate] duration-420 ease-(--ease-settle) transform-gpu group-hover:rotate-0",
-                    isEven ? "rotate-[-0.5deg]" : "rotate-[0.5deg]",
+                    // Firefox keeps the tilt on hover: the straightening redrew the card on every frame.
+                    isEven ? "rotate-[-0.5deg] firefox:group-hover:rotate-[-0.5deg]" : "rotate-[0.5deg] firefox:group-hover:rotate-[0.5deg]",
                 )}
             >
                 {/* The pink depth the face presses into */}

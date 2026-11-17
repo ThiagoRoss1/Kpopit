@@ -574,7 +574,8 @@ const MoreCard = ({ release, artistName, index }: MoreCardProps) => {
             <div
                 className={cn(
                     "relative transition-[rotate] duration-450 ease-(--ease-settle) transform-gpu group-hover:rotate-0",
-                    index % 2 ? "rotate-[0.5deg]" : "rotate-[-0.5deg]",
+                    // Firefox keeps the tilt on hover: the straightening redrew the card on every frame.
+                    index % 2 ? "rotate-[0.5deg] firefox:group-hover:rotate-[0.5deg]" : "rotate-[-0.5deg] firefox:group-hover:rotate-[-0.5deg]",
                 )}
             >
                 <div aria-hidden className="absolute inset-0 rounded-[20px] border-2 border-(--ink) bg-(--side) translate-x-1 translate-y-1.25" />
