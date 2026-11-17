@@ -205,6 +205,32 @@ test.describe('inkit', () => {
     expect(total / before.length).toBeLessThan(1.5);
   });
 
+  test('leaving the page and coming back keeps the guesses, the drawing and the search focus', async ({ page }) => {
+    await openInkIt(page);
+    const { wrong } = await todaysAnswer(page);
+    await draw(page, [0.1, 0.3], [0.9, 0.6]);
+    await guess(page, wrong[0]);
+    // The field stays focused, so the next guess needs no click.
+    await expect(searchInput(page, 'inkit')).toBeFocused();
+    await guess(page, wrong[1]);
+    const before = await sheetPixels(page);
+
+    // A client navigation away and back: the page mounts again from the cached day.
+    await page.getByRole('link', { name: 'Calendar' }).first().click();
+    await expect(page).toHaveURL(/\/calendar/);
+    await page.goBack();
+    await expect(sheet(page)).toHaveAttribute('data-status', 'ready', { timeout: 30_000 });
+
+    await expect(page.getByTestId('inkit-guess-row')).toHaveCount(2);
+    await expect(page.getByTestId('inkit-invite')).toHaveCount(0);
+    await expect(page.getByTestId('inkit-tool-pen')).toHaveAttribute('data-locked', 'false');
+
+    const after = await sheetPixels(page);
+    let total = 0;
+    for (let index = 0; index < before.length; index++) total += Math.abs(before[index] - after[index]);
+    expect(total / before.length).toBeLessThan(1.5);
+  });
+
   test('reduced motion: the win shows the photo and the card at once', async ({ page }) => {
     await page.emulateMedia({ reducedMotion: 'reduce' });
     await openInkIt(page);

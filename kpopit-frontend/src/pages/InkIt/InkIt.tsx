@@ -1,6 +1,6 @@
 import "./InkIt.css";
 import { lazy, Suspense, useCallback, useEffect, useMemo, useRef, useState } from "react";
-import { useMutation, useQuery } from "@tanstack/react-query";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { Navigate, useSearchParams } from "react-router";
 import { Check, Info } from "lucide-react";
 import { cn } from "../../lib/utils";
@@ -8,7 +8,7 @@ import {
     getDailyUserCount, getInkItCalendarDay, getInkItDaily, getUserPosition, getYesterdaysIdol, inkitDevPhotoUrl,
     postInkItGuess, postInkItHint,
 } from "../../services/api";
-import type { IdolListItem, InkItAnswer, InkItGame, InkItGuess, YesterdayIdol } from "../../interfaces/gameInterfaces";
+import type { IdolListItem, InkItAnswer, InkItCalendarDay, InkItDay, InkItGame, InkItGuess, YesterdayIdol } from "../../interfaces/gameInterfaces";
 import type { CardGranted } from "../../interfaces/albumInterfaces";
 import { useInkIt } from "../../features/inkit/useInkIt.ts";
 import { grainUrl } from "../../features/inkit/sprites.ts";
@@ -78,7 +78,21 @@ type StatsModal = null | "stats" | "transfer-data" | "import-data" | "export-dat
 const photoUrlFor = (imagePath: string, imageVersion: string): string | null =>
     inkitDevPhotoUrl ? inkitDevPhotoUrl(imagePath) : resolveCdnUrl(imagePath, imageVersion);
 
+/** A day nobody has guessed on yet, as the server would send it after the first guess. */
+const emptyGame = (gameDate: string): InkItGame => ({
+    inkit_guesses: [],
+    guesses_count: 0,
+    game_complete: false,
+    game_won: false,
+    game_date: gameDate,
+    hint_ink_guess: null,
+    draft: null,
+    group_hint: null,
+    answer: null,
+});
+
 const InkIt = ({ date = null }: InkItProps) => {
+    const queryClient = useQueryClient();
     const gameMode = useGameMode();
     const isCalendarDay = date !== null;
     const { userToken, isInitialized, allIdolsData } = useSharedGameData();
@@ -146,6 +160,19 @@ const InkIt = ({ date = null }: InkItProps) => {
 
     const query = isCalendarDay ? past : live;
 
+    // Each guess and hint is written into the cached day, so leaving the page and coming back
+    // finds the game (rows, drawing, hints) as it was left instead of the day's first answer.
+    const rememberGame = useCallback((patch: Partial<InkItGame>) => {
+        const merge = (game: InkItGame | null, gameDate: string): InkItGame => ({ ...(game ?? emptyGame(gameDate)), ...patch });
+
+        if (isCalendarDay) {
+            queryClient.setQueryData<InkItCalendarDay>(["inkitCalendarDay", date], (cached) => cached && { ...cached, game: merge(cached.game, cached.challenge_date) });
+            return;
+        }
+
+        queryClient.setQueryData<InkItDay>(["inkitDaily", gameMode, day], (cached) => cached && { ...cached, game: merge(cached.game, cached.server_date) });
+    }, [queryClient, isCalendarDay, date, gameMode, day]);
+
     // A hand-typed ?date=<today> plays the live game, which keeps the day on this device.
     if (past.data?.is_today) return <Navigate to="/inkit" replace />;
 
@@ -166,7 +193,7 @@ const InkIt = ({ date = null }: InkItProps) => {
     return (
         <>
             {metadata}
-            <InkItGame key={data.gameDate} data={data} idols={allIdolsData} isCalendarDay={isCalendarDay} />
+            <InkItGame key={data.gameDate} data={data} idols={allIdolsData} isCalendarDay={isCalendarDay} onGameChange={rememberGame} />
         </>
     );
 };
@@ -175,11 +202,13 @@ interface InkItGameProps {
     data: DayData;
     idols: IdolListItem[];
     isCalendarDay: boolean;
+    /** Keeps the cached day in step with what was just played. */
+    onGameChange: (patch: Partial<InkItGame>) => void;
 }
 
 const viewportSize = () => ({ width: window.innerWidth, height: window.innerHeight });
 
-const InkItGame = ({ data, idols, isCalendarDay }: InkItGameProps) => {
+const InkItGame = ({ data, idols, isCalendarDay, onGameChange }: InkItGameProps) => {
     const gameMode = useGameMode();
     const [searchParams] = useSearchParams();
     const { day } = useGameDay();
@@ -341,15 +370,28 @@ const InkItGame = ({ data, idols, isCalendarDay }: InkItGameProps) => {
             // The sheet as it is at this guess: what "Share my drawing" shows if it is the winning one.
             ink.snapshotForShare();
 
-            return postInkItGuess(idol.id, data.gameDate, draft, isCalendarDay ? data.gameDate : null);
-        },
-        onSuccess: (result) => {
-            const guess: InkItGuess = { ...result.guessed_idol_data, correct: result.guess_correct };
+            const result = await postInkItGuess(idol.id, data.gameDate, draft, isCalendarDay ? data.gameDate : null);
 
-            setGuesses((current) => (current.some((entry) => entry.idol_id === guess.idol_id) ? current : [...current, guess]));
+            return { result, draft };
+        },
+        onSuccess: ({ result, draft }) => {
+            const guess: InkItGuess = { ...result.guessed_idol_data, correct: result.guess_correct };
+            const nextGuesses = guesses.some((entry) => entry.idol_id === guess.idol_id) ? guesses : [...guesses, guess];
+
+            setGuesses(nextGuesses);
             setSyncedCount(result.guesses_count);
             setGroupHint(result.group_hint);
             setDrawingMode(false);
+            onGameChange({
+                inkit_guesses: nextGuesses,
+                guesses_count: result.guesses_count,
+                group_hint: result.group_hint,
+                game_won: result.guess_correct,
+                game_complete: result.guess_correct,
+                answer: result.answer,
+                // A drawing that couldn't be packed wasn't saved either: the last saved one stays.
+                ...(draft ? { draft } : {}),
+            });
 
             queryClient.invalidateQueries({ queryKey: ["userStats"] });
             queryClient.invalidateQueries({ queryKey: ["dailyUserCount", gameMode] });
@@ -377,6 +419,7 @@ const InkItGame = ({ data, idols, isCalendarDay }: InkItGameProps) => {
             // The extra ink lands as soon as the server accepts the hint; the card animates on top.
             ink.addHint();
             setInkHintRound(result.hint_ink_guess);
+            onGameChange({ hint_ink_guess: result.hint_ink_guess });
 
             return true;
         } catch {
