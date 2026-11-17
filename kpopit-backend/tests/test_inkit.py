@@ -285,6 +285,11 @@ def _bomb() -> str:
     base64.b64encode(bytes([1]) + zlib.compress(bytes(DRAFT_RAW_LENGTH - 1))).decode("ascii"),
     123,
     ["a"],
+    # Named cases: pytest puts the test id in an environment variable, and Windows refuses one
+    # over 32767 characters (the oversized drawing as its own id).
+], ids=[
+    "wrong-version", "too-short", "too-long", "not-base64", "empty", "not-deflate", "empty-deflate",
+    "trailing-bytes", "over-max-bytes", "old-layout", "a-number", "a-list",
 ])
 def test_bad_drawings_are_rejected_and_the_guess_is_not_recorded(client, db_conn, game, bad):
     res = guess(client, game["token"], game["wrong"][0], draft=bad)
