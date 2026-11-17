@@ -85,7 +85,8 @@ const UserDropdown = ({ open, onToggle }: UserDropdownProps) => {
                     <img
                         src={avatar}
                         alt=""
-                        className="block size-full object-cover transition-transform duration-500 ease-(--ease-settle) group-hover:scale-108"
+                        // Firefox: no zoom on hover; the photo glitched while it scaled.
+                        className="block size-full object-cover transition-transform duration-500 ease-(--ease-settle) group-hover:scale-108 firefox:group-hover:scale-100"
                         draggable={false}
                     />
                 ) : (
