@@ -354,7 +354,9 @@ const IdolPage = ({ data, idols }: IdolPageProps) => {
                                                     "pp-focus flex items-baseline gap-2 pt-2.5 px-4.5 pb-3 border-2 border-[#1A1418] rounded-2xl",
                                                     "font-bold leading-none uppercase whitespace-nowrap cursor-pointer",
                                                     "text-lg @max-[561px]/idol:text-sm",
-                                                    "transition-[translate,rotate,background-color,color,box-shadow] duration-380 ease-(--ease-settle) will-change-transform",
+                                                    // The colour never fades: the puffy outline arrives at once, and dark text fading to
+                                                    // white under it read as a black blob for a moment.
+                                                    "transition-[translate,rotate,background-color,box-shadow] duration-380 ease-(--ease-settle) will-change-transform",
                                                     "pressed:translate-x-0.5 pressed:translate-y-0.75 pressed:rotate-0 pressed:shadow-none pressed:duration-150",
                                                     isActive
                                                         ? "bg-[#FF8AC4] text-white text-shadow-(--ink-puff) -translate-y-0.75 -rotate-2 shadow-[3px_4px_0_0_var(--tab-o),3px_4px_0_0_var(--tab-o)]"
