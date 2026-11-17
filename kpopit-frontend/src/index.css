@@ -394,64 +394,35 @@ img[data-fade="in"] {
 }
 
 @supports (-moz-appearance: none) {
-    /* Depth as a drop-shadow. Firefox cuts a box-shadow out from under its rounded box and leaves a
-       light arc between border and shadow (seen on the theme toggle in a real Firefox window); a
-       drop-shadow follows the drawn edge, so nothing shows through. */
-    .pp-press {
-        box-shadow: var(--pp-in, var(--in)) !important;
-        filter: drop-shadow(2px 3px 0 var(--pp-off, var(--ctl-off)));
-        transition:
-            translate 0.3s var(--ease-settle),
-            background-color 0.3s ease,
-            color 0.3s ease;
-    }
-
-    .pp-press[aria-pressed="true"],
-    .pp-press[aria-current="page"],
-    .pp-press.link-pending,
-    .pp-press:not(:disabled):active:active:active:active {
-        filter: none;
-    }
-
-    .inkit-btn {
-        box-shadow: var(--in) !important;
-        filter: drop-shadow(2px 3px 0 var(--ctl-off));
-        transition: translate 0.18s var(--ease-settle);
-    }
-
-    .inkit-go {
-        box-shadow: var(--in-pink) !important;
-        filter: drop-shadow(0 3px 0 var(--ink));
-        transition:
-            translate 0.18s var(--ease-settle),
-            rotate 0.18s var(--ease-settle);
-    }
-
-    .inkit-btn:not(:disabled):active:active:active:active:active,
-    .inkit-go:not(:disabled):active:active:active:active:active {
-        filter: none;
-    }
-
-    /* Every other ink-bordered box with an offset shadow: the same light arc shows between border and
-       shadow. A 2px outline in the border's colour, centred on the border box's edge, covers the arc
-       (recaptured on screen: no arc left); the border loses the 1px the outline adds outside, so the
-       ink keeps its width. Boxes drawn with a drop-shadow above are left alone. */
-    :where([class*=" shadow-["], [class^="shadow-["], [class*=" shadow-("], [class^="shadow-("], .inkit-hint):where([class~="border-(--ink)"]):not(.pp-press, .inkit-btn, .inkit-go, [class*="firefox:drop-shadow"], [class~="shadow-none"], [class~="shadow-(--face-hl)"], [class*="border-t-"], [class*="border-b-"], [class*="border-l-"], [class*="border-r-"], [class*="border-x-"], [class*="border-y-"]) {
+    /* Ink-bordered boxes with an offset shadow. Firefox draws a light line between a rounded border and
+       its shadow (the box's own edge is antialiased against a shadow that stops under it; a drop-shadow
+       still leaves it). A 2px outline in the border's colour, centred on the box's edge, covers that
+       line: measured in the installed Firefox 160, the theme toggle's line is gone. The border loses
+       the 1px the outline adds outside, so the drawn ink keeps its width. */
+    :where([class*=" shadow-["], [class^="shadow-["], [class*=" shadow-("], [class^="shadow-("], .pp-press, .inkit-btn, .inkit-go, .inkit-hint):where([class~="border-(--ink)"]):not([class~="shadow-none"], [class~="shadow-(--face-hl)"], [class*="border-t-"], [class*="border-b-"], [class*="border-l-"], [class*="border-r-"], [class*="border-x-"], [class*="border-y-"]),
+    .post-body blockquote {
         outline: 2px solid var(--ink);
         outline-offset: -1px;
     }
 
-    :where([class*=" shadow-["], [class^="shadow-["], [class*=" shadow-("], [class^="shadow-("], .inkit-hint):where([class~="border-[#1A1418]"]):not(.pp-press, .inkit-btn, .inkit-go, [class*="firefox:drop-shadow"], [class~="shadow-none"], [class~="shadow-(--face-hl)"], [class*="border-t-"], [class*="border-b-"], [class*="border-l-"], [class*="border-r-"], [class*="border-x-"], [class*="border-y-"]) {
+    :where([class*=" shadow-["], [class^="shadow-["], [class*=" shadow-("], [class^="shadow-("], .pp-press, .inkit-btn, .inkit-go, .inkit-hint):where([class~="border-[#1A1418]"]):not([class~="shadow-none"], [class~="shadow-(--face-hl)"], [class*="border-t-"], [class*="border-b-"], [class*="border-l-"], [class*="border-r-"], [class*="border-x-"], [class*="border-y-"]),
+    .post-body img {
         outline: 2px solid #1A1418;
         outline-offset: -1px;
     }
 
-    :where([class*=" shadow-["], [class^="shadow-["], [class*=" shadow-("], [class^="shadow-("], .inkit-hint):where([class~="border-(--ink)"], [class~="border-[#1A1418]"]):where([class~="border-2"]):not(.pp-press, .inkit-btn, .inkit-go, [class*="firefox:drop-shadow"], [class~="shadow-none"], [class~="shadow-(--face-hl)"]) {
+    :where([class*=" shadow-["], [class^="shadow-["], [class*=" shadow-("], [class^="shadow-("], .pp-press, .inkit-btn, .inkit-go, .inkit-hint):where([class~="border-(--ink)"], [class~="border-[#1A1418]"]):where([class~="border-2"]):not([class~="shadow-none"], [class~="shadow-(--face-hl)"], [class*="border-t-"], [class*="border-b-"], [class*="border-l-"], [class*="border-r-"], [class*="border-x-"], [class*="border-y-"]),
+    .post-body blockquote {
         border-width: 1px;
     }
 
-    :where([class*=" shadow-["], [class^="shadow-["], [class*=" shadow-("], [class^="shadow-("], .inkit-hint):where([class~="border-(--ink)"], [class~="border-[#1A1418]"]):where([class~="border-[3px]"]):not(.pp-press, .inkit-btn, .inkit-go, [class*="firefox:drop-shadow"], [class~="shadow-none"], [class~="shadow-(--face-hl)"]) {
+    :where([class*=" shadow-["], [class^="shadow-["], [class*=" shadow-("], [class^="shadow-("], .pp-press, .inkit-btn, .inkit-go, .inkit-hint):where([class~="border-(--ink)"], [class~="border-[#1A1418]"]):where([class~="border-[3px]"]):not([class~="shadow-none"], [class~="shadow-(--face-hl)"], [class*="border-t-"], [class*="border-b-"], [class*="border-l-"], [class*="border-r-"], [class*="border-x-"], [class*="border-y-"]) {
         border-width: 2px;
+    }
+
+    :where([class*=" shadow-["], [class^="shadow-["], [class*=" shadow-("], [class^="shadow-("], .pp-press, .inkit-btn, .inkit-go, .inkit-hint):where([class~="border-(--ink)"], [class~="border-[#1A1418]"]):where([class~="border-[2.5px]"]):not([class~="shadow-none"], [class~="shadow-(--face-hl)"], [class*="border-t-"], [class*="border-b-"], [class*="border-l-"], [class*="border-r-"], [class*="border-x-"], [class*="border-y-"]),
+    .post-body img {
+        border-width: 1.5px;
     }
 
     /* No scale on hover or press for anything carrying text (buttons, cards, tags): Firefox redraws a

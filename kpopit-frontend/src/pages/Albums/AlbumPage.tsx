@@ -59,8 +59,6 @@ const Tile = ({ label, koreanLabel, value, sub, flag, className, delay }: TilePr
             className={cn(
                 "album-tile-enter flex flex-col gap-2 min-w-0 pt-3.5 px-3.5 pb-3.25",
                 "rounded-[20px] border-2 border-(--ink) bg-(--chip) text-(--chip-ink) shadow-[3px_4px_0_var(--ctl-off),var(--in)]",
-                // Firefox: the depth as a drop-shadow (its box-shadow leaves a light arc on the rounded corners).
-                "firefox:shadow-(--in) firefox:drop-shadow-[3px_4px_0_var(--ctl-off)]",
                 "transition-[translate] duration-450 ease-(--ease-settle) transform-gpu hover:-translate-y-0.5",
                 className,
             )}
@@ -159,14 +157,8 @@ const ReleaseDot = ({ release, isCurrent, size }: { release: AlbumDiscographyIte
                 "transition-[scale,background-color] duration-350 ease-(--ease-pop) transform-gpu",
                 "group-hover:scale-120 group-pressed:scale-86 group-pressed:duration-150",
                 isCurrent
-                    ? cn(
-                        "album-dot-enter bg-neon-pink shadow-[2px_3px_0_#1A1418,inset_0_2px_0_rgba(255,255,255,.5)]",
-                        "firefox:shadow-[inset_0_2px_0_rgba(255,255,255,.5)] firefox:drop-shadow-[2px_3px_0_#1A1418]",
-                    )
-                    : cn(
-                        "shadow-[1.5px_2px_0_#1A1418] firefox:shadow-none firefox:drop-shadow-[1.5px_2px_0_#1A1418]",
-                        release.type === "Single" ? "bg-(--chip)" : "bg-(--side)",
-                    ),
+                    ? "album-dot-enter bg-neon-pink shadow-[2px_3px_0_#1A1418,inset_0_2px_0_rgba(255,255,255,.5)]"
+                    : cn("shadow-[1.5px_2px_0_#1A1418]", release.type === "Single" ? "bg-(--chip)" : "bg-(--side)"),
                 size === "row" && (isCurrent ? "size-6.5" : "size-4 mt-1.25"),
                 size === "list" && (isCurrent ? "size-5.5" : "size-3.5"),
             )}

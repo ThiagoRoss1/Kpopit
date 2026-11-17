@@ -33,8 +33,6 @@ const CHANNEL_CARD = cn(
     "transition-[translate,rotate,box-shadow,background-color] duration-450 ease-(--ease-settle) will-change-transform",
     "hover:-translate-y-0.5 hover:rotate-0 hover:bg-(--chip-hover)",
     "active:translate-1 active:rotate-0 active:shadow-[0_0_0_0_#FF8AC4,0_0_0_2px_var(--ink)] active:duration-180",
-    // Firefox: the depth as a drop-shadow (its box-shadow leaves a light arc on the rounded corners).
-    "firefox:shadow-none firefox:drop-shadow-[4px_4px_0_var(--ink)] firefox:active:drop-shadow-none",
 );
 
 const Contact = () => {
