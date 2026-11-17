@@ -31,6 +31,9 @@ const displayName = (idol: IdolListItem) => `${idol.artist_name} (${groupOf(idol
 // The same spring as the Pixelated and Classic lists: a short fade with a 10 px slide, in and out.
 const LIST_SPRING = { type: "spring", stiffness: 500, damping: 50 } as const;
 
+// The game page renders only in the browser, so the engine check is safe here.
+const IS_FIREFOX = typeof CSS !== "undefined" && CSS.supports("-moz-appearance", "none");
+
 /** Suggestions with the same rules as the Classic/Blurry search bar: name, any group (past ones too)
  *  or "solo" for soloists; guessed idols left out; name start, name, group, soloist order. */
 const findSuggestions = (idols: IdolListItem[], query: string, triedIds: number[]): IdolListItem[] => {
@@ -179,7 +182,8 @@ const InkSearch = ({ idols, triedIds, isPending, winnerCount, onGuess }: InkSear
                         <motion.div
                             initial={{ y: -10, opacity: 0 }}
                             animate={{ y: 0, opacity: 1 }}
-                            exit={{ y: -10, opacity: 0 }}
+                            // Firefox closes the list at once: its fade-out ghosted over the rows below.
+                            exit={IS_FIREFOX ? undefined : { y: -10, opacity: 0 }}
                             transition={LIST_SPRING}
                             className={cn(
                                 "absolute inset-x-0 top-[calc(100%+10px)] z-30 overflow-hidden rounded-[20px] border-2 border-(--ink) bg-(--menu-bg)",
