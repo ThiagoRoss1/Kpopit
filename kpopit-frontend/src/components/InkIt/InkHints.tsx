@@ -185,7 +185,7 @@ const InkHints = ({
                 onUse={() => groupHint !== null}
                 onRevealed={onShowGroupHint}
             >
-                {groupHint?.join(", ") || "No group"}
+                {groupHint?.join(", ") || "Soloist"}
             </HintCard>
         </div>
     );
