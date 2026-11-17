@@ -49,7 +49,8 @@ async function guess(page: Page, idol: IdolEntry): Promise<void> {
   const input = searchInput(page, 'inkit');
   await input.fill(idol.artist_name);
   // Like Classic and Blurry: a click picks the idol ("Name (Group)"), Enter sends it.
-  await page.getByTestId('inkit-suggestion').filter({ hasText: idol.artist_name }).first().click();
+  // Two idols can share a name (two Yujins): the group picks the right one.
+  await page.getByTestId('inkit-suggestion').filter({ hasText: idol.artist_name }).filter({ hasText: idol.active_group || 'Soloist' }).first().click();
   await expect(input).toHaveValue(new RegExp(`^${escapeRe(idol.artist_name)} \\(`));
   await input.press('Enter');
   expect((await reply).status()).toBe(200);
