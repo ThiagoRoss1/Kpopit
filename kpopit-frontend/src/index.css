@@ -382,6 +382,103 @@ img[data-fade="in"] {
     transition: none !important;
 }
 
+/* --------------------------------------------------------------------------
+   Firefox only. Chrome and Safari never match these rules: their motion and
+   depth stay exactly as designed.
+   -------------------------------------------------------------------------- */
+
+@keyframes ffFade {
+    from {
+        opacity: 0;
+    }
+}
+
+@supports (-moz-appearance: none) {
+    /* Depth as a drop-shadow. Firefox cuts a box-shadow out from under its rounded box and leaves a
+       light arc between border and shadow (seen on the theme toggle in a real Firefox window); a
+       drop-shadow follows the drawn edge, so nothing shows through. */
+    .pp-press {
+        box-shadow: var(--pp-in, var(--in)) !important;
+        filter: drop-shadow(2px 3px 0 var(--pp-off, var(--ctl-off)));
+        transition:
+            translate 0.3s var(--ease-settle),
+            background-color 0.3s ease,
+            color 0.3s ease;
+    }
+
+    .pp-press[aria-pressed="true"],
+    .pp-press[aria-current="page"],
+    .pp-press.link-pending,
+    .pp-press:not(:disabled):active:active:active:active {
+        filter: none;
+    }
+
+    .inkit-btn {
+        box-shadow: var(--in) !important;
+        filter: drop-shadow(2px 3px 0 var(--ctl-off));
+        transition: translate 0.18s var(--ease-settle);
+    }
+
+    .inkit-go {
+        box-shadow: var(--in-pink) !important;
+        filter: drop-shadow(0 3px 0 var(--ink));
+        transition:
+            translate 0.18s var(--ease-settle),
+            rotate 0.18s var(--ease-settle);
+    }
+
+    .inkit-btn:not(:disabled):active:active:active:active:active,
+    .inkit-go:not(:disabled):active:active:active:active:active {
+        filter: none;
+    }
+
+    /* No scale on hover or press: Firefox redraws a scaling element's text and edges on every frame,
+       which read as lag. The lift and the press (translate) stay. */
+    [class*="hover:scale-"]:hover,
+    :is(.group, [class*="group/"]):hover [class*="hover:scale-"],
+    :is(.group, [class*="group/"]):hover [class*="hover/"][class*=":scale-"],
+    [class*="active:scale-"]:active,
+    .group:active [class*="group-active:scale-"],
+    [class*="pressed:scale-"]:is(:active, .link-pending),
+    :is(.group, [class*="group/"]):is(:active, .link-pending) [class*="pressed:scale-"],
+    .inkit-tool:not(:disabled):active,
+    .inkit-photo:hover {
+        scale: none !important;
+    }
+
+    /* Page entrances off: a fade from nothing, staggered over dozens of cards, dropped frames in
+       Firefox and showed as a ghosted page. The content is simply there. */
+    .pp-enter,
+    .album-disc-enter,
+    .album-dot-enter,
+    .album-drop-enter,
+    .album-fade-enter,
+    .album-rise-enter,
+    .album-row-enter,
+    .album-sleeve-enter,
+    .album-spin-enter,
+    .album-tile-enter,
+    .calendar-enter,
+    .calendar-panel-enter,
+    .how-to-play-tile-enter,
+    .idol-menu-enter,
+    .idol-photo-enter,
+    .idol-side-enter,
+    .idol-tile-enter,
+    .not-found-tile-enter,
+    .profile-column-enter,
+    .profile-pane-enter,
+    [class*="animate-[puffIn_"],
+    [class*="animate-[puffDrop_"] {
+        animation: none !important;
+    }
+
+    /* Menus open with a quick fade and no slide. */
+    [class*="animate-[puffMenu_"] {
+        animation: ffFade 0.1s ease-out !important;
+    }
+}
+
 @media (prefers-reduced-motion: reduce) {
     .pp-root,
     .pp-root *,
