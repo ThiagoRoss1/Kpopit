@@ -251,6 +251,8 @@ const Polaroid = ({ src }: { src: string | null }) => {
                 "relative flex-none pt-2.25 px-2.25 pb-8 rounded-lg -rotate-2",
                 "border-2 border-[#1A1418] bg-[#FFFDFA] shadow-[4px_5px_0_var(--ctl-off)]",
                 "transition-[translate,rotate] duration-400 ease-(--ease-settle) transform-gpu hover:-translate-y-0.75 hover:rotate-0",
+                // Firefox: the polaroid stays put on hover; its straightening shimmered there.
+                "firefox:hover:-rotate-2 firefox:hover:translate-0",
             )}
         >
             {src

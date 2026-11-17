@@ -65,6 +65,8 @@ const InkGuessRows = ({ rows, settledCount }: InkGuessRowsProps) => {
                                 isNew ? "bg-(--chip-hover)" : "bg-[#1A1418]",
                                 "shadow-[3px_3px_0_color-mix(in_oklab,var(--col)_55%,#000),5px_5px_8px_color-mix(in_oklab,var(--col)_40%,transparent)]",
                                 "transform-gpu transition-[scale,rotate] duration-[380ms] ease-(--ease-settle) hover:scale-105 hover:rotate-[-2deg]",
+                                // Firefox: no zoom or turn on hover; the photo glitched while it moved.
+                                "firefox:hover:rotate-0",
                                 isNew && "animate-[ikPhoto_1.05s_cubic-bezier(.3,.75,.35,1)_.15s_backwards]",
                             )}
                         >
