@@ -35,6 +35,8 @@ const NO_IDOLS: IdolsPageData[] = [];
 const LIGHT_LETTER_SHADOW = "inset 0 3px 0 rgba(255,255,255,.75),inset 0 -5px 0 rgba(26,20,24,.13),4px 4px 0 #1A1418";
 const DARK_LETTER_SHADOW = "inset 0 3px 0 rgba(255,255,255,.2),inset 0 -5px 0 rgba(0,0,0,.45),4px 4px 0 #1A1418";
 const PINK_LETTER_SHADOW = "inset 0 3px 0 rgba(255,255,255,.55),inset 0 -5px 0 rgba(198,35,104,.35),4px 4px 0 #1A1418";
+// Firefox reads this one (index.css): a tilted, unblurred shadow leaves stray pixels there.
+const firefoxShadow = (shadow: string) => shadow.replaceAll(" 0 #", " 0.5px #").replaceAll(" 0 rgba", " 0.5px rgba");
 
 const LETTER_STYLES = [
     { background: "#FFFFFF", color: "#1A1418", boxShadow: LIGHT_LETTER_SHADOW },
@@ -242,7 +244,8 @@ const IdolPage = ({ data, idols }: IdolPageProps) => {
                         />
 
                         <div className="idol-photo-enter relative">
-                            <div className="relative aspect-4/5 -rotate-3 border-[3px] border-[#1A1418] rounded-[30px] bg-[#1A1418] shadow-[8px_8px_0_#FF8AC4,8px_8px_0_3px_#1A1418]">
+                            {/* Firefox: the depth with a 0.5px blur; unblurred, the tilted shadow left stray pixels. */}
+                            <div className="relative aspect-4/5 -rotate-3 border-[3px] border-[#1A1418] rounded-[30px] bg-[#1A1418] shadow-[8px_8px_0_#FF8AC4,8px_8px_0_3px_#1A1418] firefox:shadow-[8px_8px_0.5px_#FF8AC4,8px_8px_0.5px_3px_#1A1418]">
                                 <div className="absolute inset-0 overflow-hidden rounded-[27px] [clip-path:inset(0_round_27px)] isolate transform-[translateZ(0)]">
                                     <FadeImg
                                         src={cdnImage ?? ""}
@@ -314,6 +317,7 @@ const IdolPage = ({ data, idols }: IdolPageProps) => {
                                                 )}
                                                 style={{
                                                     ...letterStyle,
+                                                    "--ff-shadow": firefoxShadow(letterStyle.boxShadow),
                                                     rotate: `${LETTER_ROTATIONS[letterIndex % LETTER_ROTATIONS.length]}deg`,
                                                     translate: `0 ${LETTER_OFFSETS[letterIndex % LETTER_OFFSETS.length]}`,
                                                     "--ls": isOdd ? nameScale * 0.82 : nameScale,
