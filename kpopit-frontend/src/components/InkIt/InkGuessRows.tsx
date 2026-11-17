@@ -45,7 +45,8 @@ const InkGuessRows = ({ rows, settledCount }: InkGuessRowsProps) => {
                         style={{ "--col": color, backgroundColor: isNew ? undefined : color } as CSSProperties}
                         className={cn(
                             "relative isolate flex h-18.5 items-center gap-3.5 rounded-full border-2 border-(--ink) pr-5 pl-3.25 max-[900px]:h-17",
-                            "shadow-[3px_4px_0_var(--ink),var(--in)]",
+                            // The row keeps its colour in Night, so its top light stays white too.
+                            "shadow-[3px_4px_0_var(--ink),inset_0_2px_0_#FFFFFF,inset_0_-3px_0_rgba(26,20,24,.07)]",
                             isNew && "bg-(--face) animate-[ikRow_1.05s_var(--ease-settle)_backwards]",
                         )}
                     >
