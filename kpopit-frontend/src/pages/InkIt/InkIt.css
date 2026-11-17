@@ -226,14 +226,15 @@
     }
 }
 
+/* The card rises with a small overshoot. It never scales: its text would be redrawn at every size. */
 @keyframes ikPop {
     0% {
-        scale: 0.9;
+        translate: 0 16px;
         opacity: 0;
     }
 
     60% {
-        scale: 1.03;
+        translate: 0 -3px;
         opacity: 1;
     }
 }
