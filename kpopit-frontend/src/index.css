@@ -425,6 +425,13 @@ img[data-fade="in"] {
         border-width: 1.5px;
     }
 
+    /* The same for the hover pill the navbar and account menu draw on ::before (idle items only). */
+    [class*="before:shadow-["][class~="before:border-(--ink)"]::before {
+        outline: 2px solid var(--ink);
+        outline-offset: -1px;
+        border-width: 1px;
+    }
+
     /* No scale on hover or press for anything carrying text (buttons, cards, tags): Firefox redraws a
        scaling element's text and outlines on every frame, which read as lag. The lift and the press
        (translate) stay. */
