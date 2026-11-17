@@ -180,7 +180,8 @@ const InkSheet = ({
                 </div>
             </div>
 
-            {children && <div className="relative z-2 mt-1.5 flex justify-center">{children}</div>}
+            {/* Room for the ledge's 6px depth, so face and depth sit centred under the easel like the sheet. */}
+            {children && <div className="relative z-2 mt-1.5 flex justify-center pr-1.5">{children}</div>}
         </div>
     );
 };
