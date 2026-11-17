@@ -394,6 +394,20 @@ img[data-fade="in"] {
 }
 
 @supports (-moz-appearance: none) {
+    /* The inset highlights with a 0.5px blur: unblurred, Firefox drew stray white pixels where a
+       tilted or fractionally placed box's highlight meets its border (the menu's icon tiles). */
+    :root,
+    [data-theme="day"] {
+        --tile-in: inset 0 2px 0.5px rgba(255, 255, 255, .7), inset 0 -3px 0.5px rgba(198, 35, 104, .14);
+        --in: inset 0 2px 0.5px #FFFFFF, inset 0 -3px 0.5px rgba(26, 20, 24, .07);
+        --in-pink: inset 0 2px 0.5px rgba(255, 255, 255, .55), inset 0 -3px 0.5px rgba(198, 35, 104, .28);
+    }
+
+    [data-theme="night"] {
+        --tile-in: inset 0 2px 0.5px rgba(255, 255, 255, .1);
+        --in: inset 0 2px 0.5px rgba(255, 255, 255, .12), inset 0 -3px 0.5px rgba(0, 0, 0, .24);
+    }
+
     /* Ink-bordered boxes with an offset shadow. Firefox draws a light line between a rounded border and
        its shadow (the box's own edge is antialiased against a shadow that stops under it; a drop-shadow
        still leaves it). A 2px outline in the border's colour, centred on the box's edge, covers that
