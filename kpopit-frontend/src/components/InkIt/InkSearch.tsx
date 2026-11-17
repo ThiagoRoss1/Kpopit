@@ -141,7 +141,10 @@ const InkSearch = ({ idols, triedIds, isPending, winnerCount, onGuess }: InkSear
                         spellCheck={false}
                         maxLength={60}
                         value={query}
-                        disabled={isPending}
+                        // Read-only, not disabled, while a guess is on its way: a disabled field drops
+                        // the focus, and the next guess would need a click first.
+                        readOnly={isPending}
+                        aria-busy={isPending}
                         data-testid="inkit-search"
                         onChange={(event) => {
                             setQuery(event.target.value);
