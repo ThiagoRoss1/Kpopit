@@ -397,8 +397,8 @@ img[data-fade="in"] {
     /* Ink-bordered boxes with an offset shadow. Firefox draws a light line between a rounded border and
        its shadow (the box's own edge is antialiased against a shadow that stops under it; a drop-shadow
        still leaves it). A 2px outline in the border's colour, centred on the box's edge, covers that
-       line: measured in the installed Firefox 160, the theme toggle's line is gone. The border loses
-       the 1px the outline adds outside, so the drawn ink keeps its width. */
+       line: measured in the installed Firefox 160. The border keeps its width (thinning it left stray
+       pixels), so the ink reads 1px heavier in Firefox. */
     :where([class*=" shadow-["], [class^="shadow-["], [class*=" shadow-("], [class^="shadow-("], .pp-press, .inkit-btn, .inkit-go, .inkit-hint):where([class~="border-(--ink)"]):not([class~="shadow-none"], [class~="shadow-(--face-hl)"], [class*="border-t-"], [class*="border-b-"], [class*="border-l-"], [class*="border-r-"], [class*="border-x-"], [class*="border-y-"]),
     .post-body blockquote {
         outline: 2px solid var(--ink);
@@ -411,25 +411,28 @@ img[data-fade="in"] {
         outline-offset: -1px;
     }
 
-    :where([class*=" shadow-["], [class^="shadow-["], [class*=" shadow-("], [class^="shadow-("], .pp-press, .inkit-btn, .inkit-go, .inkit-hint):where([class~="border-(--ink)"], [class~="border-[#1A1418]"]):where([class~="border-2"]):not([class~="shadow-none"], [class~="shadow-(--face-hl)"], [class*="border-t-"], [class*="border-b-"], [class*="border-l-"], [class*="border-r-"], [class*="border-x-"], [class*="border-y-"]),
-    .post-body blockquote {
-        border-width: 1px;
-    }
-
-    :where([class*=" shadow-["], [class^="shadow-["], [class*=" shadow-("], [class^="shadow-("], .pp-press, .inkit-btn, .inkit-go, .inkit-hint):where([class~="border-(--ink)"], [class~="border-[#1A1418]"]):where([class~="border-[3px]"]):not([class~="shadow-none"], [class~="shadow-(--face-hl)"], [class*="border-t-"], [class*="border-b-"], [class*="border-l-"], [class*="border-r-"], [class*="border-x-"], [class*="border-y-"]) {
-        border-width: 2px;
-    }
-
-    :where([class*=" shadow-["], [class^="shadow-["], [class*=" shadow-("], [class^="shadow-("], .pp-press, .inkit-btn, .inkit-go, .inkit-hint):where([class~="border-(--ink)"], [class~="border-[#1A1418]"]):where([class~="border-[2.5px]"]):not([class~="shadow-none"], [class~="shadow-(--face-hl)"], [class*="border-t-"], [class*="border-b-"], [class*="border-l-"], [class*="border-r-"], [class*="border-x-"], [class*="border-y-"]),
-    .post-body img {
-        border-width: 1.5px;
-    }
-
     /* The same for the hover pill the navbar and account menu draw on ::before (idle items only). */
     [class*="before:shadow-["][class~="before:border-(--ink)"]::before {
         outline: 2px solid var(--ink);
         outline-offset: -1px;
-        border-width: 1px;
+    }
+
+    /* The idol name's letter tiles: their shadows come inline, so Firefox reads the version with a
+       0.5px blur (see below) and gets the same outline. */
+    .idol-name-letter {
+        box-shadow: var(--ff-shadow) !important;
+        outline: 2px solid #1A1418;
+        outline-offset: -1px;
+    }
+
+    /* The navbar items' hover: no lift and the pill appears at once. The fade and the lift made the
+       pill and its shadow flicker. */
+    .pp-nav [data-st="idle"]:hover {
+        translate: none !important;
+    }
+
+    .pp-nav [data-st]::before {
+        transition: none !important;
     }
 
     /* No scale on hover or press for anything carrying text (buttons, cards, tags): Firefox redraws a
