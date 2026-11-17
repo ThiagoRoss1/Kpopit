@@ -375,6 +375,22 @@ img[data-fade="in"] {
     animation: imgIn 0.35s ease-out;
 }
 
+/* Firefox only. */
+@supports (-moz-appearance: none) {
+    /* Firefox cuts a box-shadow out from under its box, and on a rounded corner that cut and the
+       border's edge leave a light fringe between border and shadow. A hairline in the border's own
+       colour over that edge covers it (measured on screen: fringe pixels go from ~120 to ~45). */
+    :where([class~="border-(--ink)"]):where([class*=" shadow-["], [class^="shadow-["], [class*=" shadow-("], [class^="shadow-("], .pp-press, .inkit-btn, .inkit-go, .inkit-hint):not(:focus-visible, [class~="shadow-(--face-hl)"], [class*="border-t-"], [class*="border-b-"], [class*="border-l-"], [class*="border-r-"], [class*="border-x-"], [class*="border-y-"]) {
+        outline: 1px solid var(--ink);
+        outline-offset: -0.5px;
+    }
+
+    :where([class~="border-[#1A1418]"]):where([class*=" shadow-["], [class^="shadow-["], [class*=" shadow-("], [class^="shadow-("], .pp-press, .inkit-btn, .inkit-go, .inkit-hint):not(:focus-visible, [class~="shadow-(--face-hl)"], [class*="border-t-"], [class*="border-b-"], [class*="border-l-"], [class*="border-r-"], [class*="border-x-"], [class*="border-y-"]) {
+        outline: 1px solid #1A1418;
+        outline-offset: -0.5px;
+    }
+}
+
 @media (prefers-reduced-motion: reduce) {
     .pp-root,
     .pp-root *,
