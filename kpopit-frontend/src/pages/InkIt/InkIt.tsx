@@ -185,6 +185,10 @@ const InkIt = ({ date = null }: InkItProps) => {
         return (
             <>
                 {metadata}
+                {/* The band is part of the page's frame: it shows over the loader instead of arriving with the day. */}
+                <div className="relative z-95">
+                    <DripBand />
+                </div>
                 <PageLoader error={query.isError || userToken.isError} onRetry={retry} />
             </>
         );
