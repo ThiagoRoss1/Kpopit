@@ -41,7 +41,8 @@ interface TileProps {
 
 /** A row's square: an icon (About rows) or a photo (games, idols). */
 export const Tile = ({ row, size, animated = false }: TileProps) => {
-    const motion = animated && "transition-transform duration-450 ease-(--ease-pop) transform-gpu group-hover:-rotate-4";
+    // Firefox turns the icon quicker, so fewer frames are drawn while it moves.
+    const motion = animated && "transition-transform duration-450 ease-(--ease-pop) transform-gpu group-hover:-rotate-4 firefox:duration-200";
 
     if (row.icon) {
         const Icon = row.icon;
