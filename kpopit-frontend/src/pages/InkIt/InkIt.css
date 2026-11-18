@@ -287,10 +287,9 @@
     }
 }
 
-/* The name and group fade in without sliding: at the end of a slide the browser repaints the text on
-   the pixel grid, and it jumped (measured: half a pixel, and sharper) as the row settled. */
 @keyframes ikName {
     from {
+        translate: -18px 0;
         opacity: 0;
     }
 }
