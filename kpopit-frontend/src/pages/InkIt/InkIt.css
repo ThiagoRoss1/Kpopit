@@ -271,11 +271,11 @@
     }
 }
 
-/* New guess row: drop in, pencil photo, four brush strokes of colour, name, wash. */
+/* New guess row: drop in (no scale, which redrew its name and photo every frame), pencil photo, four
+   brush strokes of colour, name, wash. */
 @keyframes ikRow {
     from {
         translate: 0 -14px;
-        scale: 0.985;
         opacity: 0;
     }
 }
@@ -287,9 +287,10 @@
     }
 }
 
+/* The name and group fade in without sliding: at the end of a slide the browser repaints the text on
+   the pixel grid, and it jumped (measured: half a pixel, and sharper) as the row settled. */
 @keyframes ikName {
     from {
-        translate: -18px 0;
         opacity: 0;
     }
 }
