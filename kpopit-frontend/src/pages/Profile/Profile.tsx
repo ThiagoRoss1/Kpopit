@@ -141,7 +141,7 @@ const ProfileView = ({ profile, viewerKey }: { profile: VisibleProfile; viewerKe
 
                     <div className="flex flex-col gap-3 min-w-0">
                         {/* truncate clips: the bottom pad leaves room for descenders (g, y) and the puff shadow under them. */}
-                        <PuffTitle className="-mb-[.12em] pb-[.28em] text-[56px] @max-[581px]:text-[42px] leading-[1.02] origin-left @max-[641px]:origin-center truncate">{name}</PuffTitle>
+                        <PuffTitle className="mb-[-0.12em] pb-[.28em] text-[56px] @max-[581px]:text-[42px] leading-[1.02] origin-left @max-[641px]:origin-center truncate">{name}</PuffTitle>
 
                         <div className="flex flex-wrap items-center @max-[641px]:justify-center gap-2 font-medium text-sm text-(--muted)">
                             <span className="font-bold text-(--text)">@{profile.username}</span>

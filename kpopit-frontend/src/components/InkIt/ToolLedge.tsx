@@ -93,7 +93,7 @@ const ToolLedge = ({ tool, unlocked, inkShare, disabled, onSelect, labelled = fa
                                 <span
                                     className={cn(
                                         "relative grid size-14 place-items-center rounded-full border-2 transform-gpu",
-                                        "transition-[background-color,box-shadow] duration-[280ms] ease-[ease]",
+                                        "transition-[background-color,box-shadow] duration-280 ease-[ease]",
                                         isSelected && "border-(--ink) bg-[#FF8AC4] shadow-(--in-pink)",
                                         isLocked && "border-dashed border-(--rule) bg-transparent",
                                         !isSelected && !isLocked && "border-(--ink) bg-(--face) shadow-[2px_3px_0_var(--ctl-off),var(--in)]",
@@ -104,9 +104,9 @@ const ToolLedge = ({ tool, unlocked, inkShare, disabled, onSelect, labelled = fa
                                         alt=""
                                         draggable={false}
                                         className={cn(
-                                            "inkit-sprite size-8.75 transition-[rotate,scale] duration-[450ms] ease-(--ease-pop)",
+                                            "inkit-sprite size-8.75 transition-[rotate,scale] duration-450 ease-(--ease-pop)",
                                             isLocked && "opacity-40",
-                                            isSelected && "rotate-[-12deg] scale-[1.08]",
+                                            isSelected && "-rotate-12 scale-[1.08]",
                                         )}
                                     />
 

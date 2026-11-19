@@ -78,7 +78,7 @@ const HintCard = ({ label, guessesLeft, used, disabled, reducedMotion, tilt, tes
             data-state={isLocked ? "locked" : shown}
             className={cn(
                 "inkit-hint pp-focus relative mb-1.25 block h-22.5 rounded-[18px] border-2 border-(--ink) bg-(--face) p-2 text-left max-[900px]:h-15.5",
-                "[container-type:inline-size]",
+                "@container",
                 tilt,
                 isAnimating ? "z-5" : "z-1",
                 isLocked ? "shadow-[2px_3px_0_var(--ctl-off),var(--in)]" : "shadow-[0_7px_0_-2px_#FF8AC4,0_7px_0_0_var(--ink),var(--in)]",
@@ -120,7 +120,7 @@ const HintCard = ({ label, guessesLeft, used, disabled, reducedMotion, tilt, tes
 
             {shown === "write" && (
                 <span aria-hidden className="absolute top-[44%] left-0 z-3 animate-[ikMove_.9s_linear_forwards]">
-                    <img src={spriteUrl("pen")} alt="" className="inkit-sprite absolute size-11.5 max-w-none translate-x-[-10%] translate-y-[-90%] rotate-[-6deg]" />
+                    <img src={spriteUrl("pen")} alt="" className="inkit-sprite absolute size-11.5 max-w-none translate-x-[-10%] translate-y-[-90%] -rotate-6" />
                 </span>
             )}
 

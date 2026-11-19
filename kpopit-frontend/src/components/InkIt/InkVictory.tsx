@@ -226,7 +226,7 @@ const InkVictory = ({
                     )}
 
                     {isCalendarDay ? (
-                        <Link to="/calendar?mode=inkit" className="font-bold text-sm text-(--group) hover:text-[#FF3399]">Back to the calendar</Link>
+                        <Link to="/calendar?mode=inkit" className="font-bold text-sm text-(--group) hover:text-neon-pink">Back to the calendar</Link>
                     ) : countdown && (
                         <div className="flex items-baseline justify-center gap-2">
                             <span className="font-medium text-[13px] text-(--muted)">Next idol in</span>
