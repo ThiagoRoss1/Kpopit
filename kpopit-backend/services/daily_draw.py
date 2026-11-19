@@ -9,7 +9,7 @@ import random
 from dataclasses import dataclass
 from datetime import date, timedelta
 
-from services.inkit_mode import DRAFT_KEEP_DAYS
+from services.inkit_mode import DRAFT_KEEP_DAYS, INKIT_GAMEMODE_ID
 from utils.dates import get_today_date
 
 logger = logging.getLogger(__name__)
@@ -59,7 +59,16 @@ _MODES = {
             WHERE i.is_published = TRUE
         """,
         # updated_at, not the game date: a past day played today through the calendar survives.
-        "new_day": f"DELETE FROM inkit_drafts WHERE updated_at < CURRENT_TIMESTAMP - INTERVAL '{DRAFT_KEEP_DAYS} days'",
+        # An unfinished game keeps its drawing and ink hint, so a calendar replay picks up where it stopped.
+        "new_day": f"""
+            DELETE FROM inkit_drafts d
+            WHERE d.updated_at < CURRENT_TIMESTAMP - INTERVAL '{DRAFT_KEEP_DAYS} days'
+              AND NOT EXISTS (
+                  SELECT 1 FROM daily_user_history h
+                  WHERE h.user_id = d.user_id AND h.date = d.game_date
+                    AND h.gamemode_id = {INKIT_GAMEMODE_ID} AND h.won IS NOT TRUE
+              )
+        """,
     },
 }
 

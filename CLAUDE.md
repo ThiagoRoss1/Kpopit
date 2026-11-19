@@ -238,7 +238,7 @@ Return `None` if valid, an error string otherwise (except `validate_and_normaliz
 - `daily_user_history` — per user/day/mode: `guessed_ids INT[]` (ordered), `guesses_origin` (`live`/`backfill`), `is_calendar`, `won`, `one_shot_win`, `score`, `started_at`, `won_at`, `card_granted_at`.
 - `user_history` — aggregate stats per mode (streaks, averages). Calendar games count in wins, never in streaks or ranking.
 - `idol_selections` — Idol XP selection history (one current per user). XP is computed per request from history.
-- `inkit_mode_data` (one photo per idol, opaque `image_path`), `inkit_drafts` (drawing + ink hint per user and challenge day, deleted 2 days after `updated_at` by the daily draw).
+- `inkit_mode_data` (one photo per idol, opaque `image_path`), `inkit_drafts` (drawing + ink hint per user and challenge day, deleted 2 days after `updated_at` by the daily draw, unless that day's game is unfinished).
 - `blurry_mode_data`, `group_features` (Album 1 palette/image), `collections` / `collection_group_eligibility` / `cards` / `user_cards`.
 
 ## Collection system (Album 1)

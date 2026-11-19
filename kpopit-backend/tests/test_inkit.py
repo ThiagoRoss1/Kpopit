@@ -394,7 +394,22 @@ def test_old_drawings_are_deleted_by_the_daily_draw(client, db_conn, game, pin):
     )
     assert played_today.status_code == 200
 
+    # Two calendar days whose drawings go stale: one left unfinished, one won.
+    unfinished, won = game["wrong"][6], game["wrong"][7]
+    pin(unfinished, offset=-4)
+    pin(won, offset=-6)
+    for offset, guessed in ((-4, game["wrong"][2]), (-6, won)):
+        response = client.post(
+            f"/api/calendar/inkit/{day(offset)}/guess", json={"guessed_idol_id": guessed, "draft": draft(3)},
+            headers={"Authorization": game["token"]},
+        )
+        assert response.status_code == 200
+
     with db_conn.cursor() as cur:
+        cur.execute(
+            "UPDATE inkit_drafts SET updated_at = CURRENT_TIMESTAMP - INTERVAL '3 days' WHERE user_id = %s AND game_date IN (%s, %s)",
+            (game["user_id"], day(-4), day(-6)),
+        )
         cur.execute(
             "INSERT INTO inkit_drafts (user_id, game_date, masks, updated_at) VALUES (%s, %s, %s, CURRENT_TIMESTAMP - INTERVAL '3 days')",
             (game["user_id"], day(-3), b"\x01old"),
@@ -411,8 +426,9 @@ def test_old_drawings_are_deleted_by_the_daily_draw(client, db_conn, game, pin):
     with db_conn.cursor() as cur:
         cur.execute("SELECT game_date FROM inkit_drafts WHERE user_id = %s ORDER BY game_date", (game["user_id"],))
         kept = [row["game_date"].isoformat() for row in cur.fetchall()]
-    # The old calendar day played today survives: the cleanup goes by updated_at.
-    assert kept == [day(-5), day(-1), day(0)]
+    # The old calendar day played today survives (the cleanup goes by updated_at), and so does the
+    # stale unfinished one; the stale won day and the stale day without a game are deleted.
+    assert kept == [day(-5), day(-4), day(-1), day(0)]
 
 
 def test_seeding_gives_every_blurry_photo_one_opaque_path(db_conn, make_idol):
