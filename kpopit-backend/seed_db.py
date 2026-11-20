@@ -4,6 +4,7 @@ import os
 from utils.env import load_local_env
 from services.get_db import get_manual_db
 from services.inkit_mode import SEED_PHOTOS_FROM_BLURRY_SQL
+from utils.inkit_paths import KINDS, opaque_path
 
 load_local_env()
 DATA_FOLDER = os.getenv("DATA_FOLDER")
@@ -28,8 +29,12 @@ def csv_has_rows(csv_file):
     with open(csv_file, "r", encoding="utf-8") as file:
         return next(csv.DictReader(file), None) is not None
 
-def seed_table(cursor, csv_file, table_name, columns, conflict_column=None):
-    """Read data from a CSV file and insert it into a database table."""
+def seed_table(cursor, csv_file, table_name, columns, conflict_column=None, row_transform=None):
+    """Read data from a CSV file and insert it into a database table.
+
+    `row_transform`, when given, maps each CSV row (a dict) to the row actually seeded,
+    so a seed can add computed columns (e.g. the InkIt hashed paths) the CSV does not hold.
+    """
     if conflict_column is None:
         conflict_column = ["id"]
 
@@ -57,6 +62,8 @@ def seed_table(cursor, csv_file, table_name, columns, conflict_column=None):
 
         # Insert each row in database - List appending
         for row in reader:
+            if row_transform is not None:
+                row = row_transform(row)
             values_by_column = {column: (row[column] if row[column] != "" else None) for column in columns}
             values = [values_by_column[column] for column in columns]
 
@@ -115,7 +122,37 @@ def seed_table(cursor, csv_file, table_name, columns, conflict_column=None):
                 stats["skipped"] += 1
 
         print(f"Seeded {table_name}: {stats['inserted']} inserted, {stats['updated']} updated, {stats['skipped']} skipped.")
-        
+
+
+# InkIt rows carry a readable image_file plus three hashed path columns computed at seed time.
+INKIT_IDOLS_COLUMNS = ["idol_id", "image_file", "image_path", "pencil_path", "pen_path", "is_active", "image_version"]
+_INKIT_KIND_COLUMN = {"photo": "image_path", "pencil": "pencil_path", "pen": "pen_path"}
+
+
+def _inkit_row_transform(secret):
+    """Add the three hashed path columns to a CSV row from its readable image_file stem."""
+
+    def transform(row):
+        stem = os.path.splitext(row["image_file"])[0]
+        paths = {_INKIT_KIND_COLUMN[kind]: opaque_path(stem, kind, secret) for kind in KINDS}
+        return {**row, **paths}
+
+    return transform
+
+
+def seed_inkit_photos(cursor, csv_file=INKIT_IDOLS_CSV_FILE):
+    """Seed inkit_mode_data: hashed paths from the readable names when the CSV has rows, else the
+    Blurry placeholders. Refuses to seed real rows without INKIT_PATH_SECRET."""
+    if csv_has_rows(csv_file):
+        secret = os.getenv("INKIT_PATH_SECRET", "")
+        if not secret:
+            raise RuntimeError("Set INKIT_PATH_SECRET to seed InkIt photos")
+        seed_table(cursor, csv_file, "inkit_mode_data", INKIT_IDOLS_COLUMNS,
+                   conflict_column=["idol_id"], row_transform=_inkit_row_transform(secret))
+    else:
+        cursor.execute(SEED_PHOTOS_FROM_BLURRY_SQL)
+
+
 def run_seed():
     with get_manual_db() as connect:
         with connect.cursor() as cursor:
@@ -171,15 +208,8 @@ def run_seed():
                 ]
                 seed_table(cursor, BLURRY_IDOLS_CSV_FILE, 'blurry_mode_data', blurry_idols_columns, conflict_column=["idol_id"])
 
-                # InkIt idol Table Seeding (image_path must be opaque: it reaches the browser before the win)
-                inkit_idols_columns = [
-                    "idol_id", "image_path", "is_active", "image_version"
-                ]
-                seed_table(cursor, INKIT_IDOLS_CSV_FILE, 'inkit_mode_data', inkit_idols_columns, conflict_column=["idol_id"])
-
-                # Until inkit_idols.csv has rows, the Blurry photos stand in as placeholders
-                if not csv_has_rows(INKIT_IDOLS_CSV_FILE):
-                    cursor.execute(SEED_PHOTOS_FROM_BLURRY_SQL)
+                # InkIt idol Table Seeding (paths must be opaque: they reach the browser before the win)
+                seed_inkit_photos(cursor, INKIT_IDOLS_CSV_FILE)
 
                 # Albums Table Seeding
                 albums_columns = [

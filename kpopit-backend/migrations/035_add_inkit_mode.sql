@@ -13,6 +13,9 @@ SELECT setval(pg_get_serial_sequence('gamemodes', 'id'), (SELECT MAX(id) FROM ga
 CREATE TABLE IF NOT EXISTS inkit_mode_data (
     idol_id INTEGER PRIMARY KEY,
     image_path TEXT NOT NULL,
+    image_file TEXT NULL UNIQUE,
+    pencil_path TEXT NULL UNIQUE,
+    pen_path TEXT NULL UNIQUE,
     image_version TEXT NOT NULL DEFAULT '1',
     is_active BOOLEAN NOT NULL DEFAULT TRUE,
     created_at TIMESTAMPTZ NOT NULL DEFAULT CURRENT_TIMESTAMP,
@@ -22,8 +25,12 @@ CREATE TABLE IF NOT EXISTS inkit_mode_data (
     CONSTRAINT uq_inkit_mode_data_image_path UNIQUE (image_path)
 );
 
-INSERT INTO inkit_mode_data (idol_id, image_path, is_active)
-SELECT b.idol_id, '/images/inkit/' || replace(gen_random_uuid()::text, '-', '') || '.webp', COALESCE(b.is_active, TRUE)
+INSERT INTO inkit_mode_data (idol_id, image_path, pencil_path, pen_path, is_active)
+SELECT b.idol_id,
+       '/images/inkit/' || replace(gen_random_uuid()::text, '-', '') || '.webp',
+       '/images/inkit/pencil/' || replace(gen_random_uuid()::text, '-', '') || '.webp',
+       '/images/inkit/pen/' || replace(gen_random_uuid()::text, '-', '') || '.webp',
+       COALESCE(b.is_active, TRUE)
 FROM blurry_mode_data b
 ON CONFLICT (idol_id) DO NOTHING;
 

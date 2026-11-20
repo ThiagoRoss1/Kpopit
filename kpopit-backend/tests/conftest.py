@@ -51,6 +51,8 @@ os.environ.setdefault(
     "test_jwt_secret_key_at_least_32_chars_long_for_pytest_runs",
 )
 os.environ.setdefault("FLASK_ENV", "development")
+# Needed only by tests that import seed_db (it builds CSV paths at import).
+os.environ.setdefault("DATA_FOLDER", str(BACKEND_ROOT / "data"))
 # Read at import by collection_bp and the grant hook; tests flip the hook via monkeypatch.
 os.environ["COLLECTION_ENABLED"] = "true"
 # Register the admin blueprint regardless of the local .env, so its auth rules are always tested.

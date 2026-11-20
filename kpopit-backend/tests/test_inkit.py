@@ -636,7 +636,7 @@ def test_seed_csv_header_matches_the_table():
     from pathlib import Path
 
     with open(Path(__file__).parents[1] / "data/inkit_idols.csv", encoding="utf-8") as file:
-        assert next(csv.reader(file)) == ["idol_id", "image_path", "is_active", "image_version"]
+        assert next(csv.reader(file)) == ["idol_id", "image_file", "is_active", "image_version"]
 
 
 def test_gamemodes_count_follows_the_flag(client, monkeypatch):
@@ -778,3 +778,133 @@ def test_backend_rules_match_the_frontend_config():
     assert number(r"version: (\d+)") == inkit_mode.DRAFT_VERSION
     assert number(r"export const SHEET = (\d+)") / 2 == inkit_mode.DRAFT_MASK_SIDE
     assert inkit_mode.DRAFT_RAW_LENGTH == 93_751
+
+
+# --- B2: hashed paths in the seed and migration ----------------------------
+
+
+def _seed_inkit_csv(tmp_path, idol_id, image_file="seeun_i.webp"):
+    csv_path = tmp_path / "inkit.csv"
+    csv_path.write_text(
+        f"idol_id,image_file,is_active,image_version\n{idol_id},{image_file},true,1\n",
+        encoding="utf-8",
+    )
+    return str(csv_path)
+
+
+def test_seed_hashes_readable_inkit_files(db_conn, make_idol, tmp_path):
+    import seed_db
+    from utils.inkit_paths import opaque_path
+
+    idol = make_idol("Seed Idol")
+    with db_conn.cursor() as cur:
+        seed_db.seed_inkit_photos(cur, _seed_inkit_csv(tmp_path, idol))
+    db_conn.commit()
+
+    with db_conn.cursor() as cur:
+        cur.execute("SELECT image_file, image_path, pencil_path, pen_path FROM inkit_mode_data WHERE idol_id = %s", (idol,))
+        row = cur.fetchone()
+
+    secret = os.environ["INKIT_PATH_SECRET"]
+    assert row["image_file"] == "seeun_i.webp"
+    assert row["image_path"] == opaque_path("seeun_i", "photo", secret)
+    assert row["pencil_path"] == opaque_path("seeun_i", "pencil", secret)
+    assert row["pen_path"] == opaque_path("seeun_i", "pen", secret)
+
+
+def test_no_readable_file_in_any_path_column(db_conn, make_idol, tmp_path):
+    import seed_db
+
+    idol = make_idol("Readable Idol")
+    with db_conn.cursor() as cur:
+        seed_db.seed_inkit_photos(cur, _seed_inkit_csv(tmp_path, idol))
+    db_conn.commit()
+
+    with db_conn.cursor() as cur:
+        cur.execute("SELECT image_path, pencil_path, pen_path FROM inkit_mode_data WHERE idol_id = %s", (idol,))
+        row = cur.fetchone()
+    for column in ("image_path", "pencil_path", "pen_path"):
+        assert "seeun" not in row[column]
+
+
+def test_seed_refuses_without_secret(db_conn, make_idol, tmp_path, monkeypatch):
+    import seed_db
+
+    idol = make_idol("No Secret Idol")
+    csv_path = _seed_inkit_csv(tmp_path, idol)
+    monkeypatch.setenv("INKIT_PATH_SECRET", "")
+    with db_conn.cursor() as cur:
+        with pytest.raises(RuntimeError):
+            seed_db.seed_inkit_photos(cur, csv_path)
+    db_conn.rollback()
+
+    with db_conn.cursor() as cur:
+        cur.execute("SELECT 1 FROM inkit_mode_data WHERE idol_id = %s", (idol,))
+        assert cur.fetchone() is None
+
+
+def test_placeholders_get_three_opaque_paths(db_conn, make_idol, tmp_path):
+    import seed_db
+
+    idol = make_idol("Placeholder Idol")
+    with db_conn.cursor() as cur:
+        cur.execute("INSERT INTO blurry_mode_data (idol_id, blur_image_path, is_active) VALUES (%s, '/b/x.webp', TRUE)", (idol,))
+    db_conn.commit()
+
+    empty = tmp_path / "empty.csv"
+    empty.write_text("idol_id,image_file,is_active,image_version\n", encoding="utf-8")
+    with db_conn.cursor() as cur:
+        seed_db.seed_inkit_photos(cur, str(empty))
+    db_conn.commit()
+
+    with db_conn.cursor() as cur:
+        cur.execute("SELECT image_path, pencil_path, pen_path FROM inkit_mode_data WHERE idol_id = %s", (idol,))
+        row = cur.fetchone()
+    assert re.fullmatch(r"/images/inkit/[0-9a-f]{32}\.webp", row["image_path"])
+    assert re.fullmatch(r"/images/inkit/pencil/[0-9a-f]{32}\.webp", row["pencil_path"])
+    assert re.fullmatch(r"/images/inkit/pen/[0-9a-f]{32}\.webp", row["pen_path"])
+
+
+def test_api_never_returns_image_file(client, db_conn, game, pin):
+    """A readable image_file on every InkIt row must never surface in any response."""
+    with db_conn.cursor() as cur:
+        cur.execute("UPDATE inkit_mode_data SET image_file = 'readable_' || idol_id || '.webp'")
+    db_conn.commit()
+    pin(game["wrong"][9], offset=-2)
+    headers = {"Authorization": game["token"]}
+
+    responses = [
+        daily(client).get_json(),
+        guess(client, game["token"], game["wrong"][0]).get_json(),
+        daily(client, game["token"]).get_json(),
+        client.get("/api/game/restore-session", headers=headers).get_json(),
+        client.get("/api/game-state?gamemode_id=4", headers={"X-User-Token": game["token"]}).get_json(),
+        client.get(f"/api/calendar/inkit/{day(-2)}", headers=headers).get_json(),
+        client.post(f"/api/calendar/inkit/{day(-2)}/guess", headers=headers,
+                    json={"guessed_idol_id": game["wrong"][1]}).get_json(),
+    ]
+    for body in responses:
+        text = json.dumps(body)
+        assert "image_file" not in text and "readable_" not in text
+
+
+def test_migration_035_is_rerunnable(db_conn):
+    from pathlib import Path
+    from typing import LiteralString, cast
+
+    import psycopg
+
+    # The migration file is trusted repo SQL, run as is (like migrations.py does).
+    sql = cast(LiteralString, (Path(__file__).parents[1] / "migrations/035_add_inkit_mode.sql").read_text(encoding="utf-8"))
+
+    def count(conn, query: LiteralString) -> int:
+        row = conn.execute(query).fetchone()
+        assert row is not None
+        return row[0]
+
+    with psycopg.connect(os.environ["DB_URL"], autocommit=True) as conn:
+        conn.execute(sql)
+        rows_first = count(conn, "SELECT COUNT(*) FROM inkit_mode_data")
+        conn.execute(sql)
+        assert count(conn, "SELECT COUNT(*) FROM gamemodes WHERE id = 4") == 1
+        assert count(conn, "SELECT COUNT(*) FROM inkit_mode_data") == rows_first
