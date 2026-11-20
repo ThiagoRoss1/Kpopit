@@ -10,7 +10,7 @@ const python = path.join(BACKEND, win ? '.venv/Scripts/python.exe' : '.venv/bin/
 
 const R2_VARS = [
   'R2_ACCESS_KEY_ID', 'R2_SECRET_ACCESS_KEY', 'R2_BUCKET_NAME', 'R2_BACKUP_BUCKET_NAME', 'R2_ENDPOINT_URL',
-  'R2_AVATARS_ACCESS_KEY_ID', 'R2_AVATARS_SECRET_ACCESS_KEY', 'R2_AVATARS_BUCKET_NAME', 'R2_AVATARS_PREFIX',
+  'R2_AVATARS_ACCESS_KEY_ID', 'R2_AVATARS_SECRET_ACCESS_KEY', 'R2_AVATARS_BUCKET_NAME', 'R2_AVATARS_PREFIX', 'R2_PUBLIC_URL',
 ];
 
 // Same isolation as e2e/support/env.ts: an explicit local DB, .env never loaded, every service off.
@@ -42,6 +42,7 @@ function backendEnv() {
     MAINTENANCE_MODE: 'false',
     CALENDAR_ENABLED: 'false',
     IDOL_XP_ENABLED: 'false',
+    INKIT_ENABLED: 'false',
     PUBLIC_PROFILE_ENABLED: 'false',
     ADMIN_ENABLED: 'false',
     RESEND_API_KEY: '',

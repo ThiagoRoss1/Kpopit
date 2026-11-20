@@ -30,12 +30,14 @@ const R2_VARS = [
   'R2_AVATARS_SECRET_ACCESS_KEY',
   'R2_AVATARS_BUCKET_NAME',
   'R2_AVATARS_PREFIX',
+  'R2_PUBLIC_URL',
 ];
 
 // Off unless a test turns them on: feature flags false, task routes disabled (empty keys).
 const DISABLED = {
   CALENDAR_ENABLED: 'false',
   IDOL_XP_ENABLED: 'false',
+  INKIT_ENABLED: 'false',
   PUBLIC_PROFILE_ENABLED: 'false',
   BACKUP_AUTH_KEY: '',
   ACCOUNT_PURGE_AUTH_KEY: '',

@@ -19,7 +19,7 @@ import { cn } from "../../lib/utils";
 import type { ProfileHeroXp, PublicProfile } from "../../interfaces/playerInterfaces";
 import { OverviewPane, ModeDot, StatsPane } from "./ProfilePanes";
 import ProfileHistory from "./ProfileHistory";
-import { MODES, TABS, formatJoined, parseTab, type ModeFilter, type ProfileTab } from "./profileData";
+import { MODES, TABS, formatJoined, modesFor, parseTab, type ModeFilter, type ProfileTab } from "./profileData";
 import "./profile.css";
 
 const BANNER_DISMISS_KEY = "emailVerifiedBannerDismissed";
@@ -140,7 +140,8 @@ const ProfileView = ({ profile, viewerKey }: { profile: VisibleProfile; viewerKe
                     <Polaroid src={resolveAvatarUrl(profile.avatar_url)} />
 
                     <div className="flex flex-col gap-3 min-w-0">
-                        <PuffTitle className="pb-2 text-[56px] @max-[581px]:text-[42px] leading-[1.02] origin-left @max-[641px]:origin-center truncate">{name}</PuffTitle>
+                        {/* truncate clips: the bottom pad leaves room for descenders (g, y) and the puff shadow under them. */}
+                        <PuffTitle className="mb-[-0.12em] pb-[.28em] text-[56px] @max-[581px]:text-[42px] leading-[1.02] origin-left @max-[641px]:origin-center truncate">{name}</PuffTitle>
 
                         <div className="flex flex-wrap items-center @max-[641px]:justify-center gap-2 font-medium text-sm text-(--muted)">
                             <span className="font-bold text-(--text)">@{profile.username}</span>
@@ -203,7 +204,7 @@ const ProfileView = ({ profile, viewerKey }: { profile: VisibleProfile; viewerKe
 
                 {tab !== "overview" && (
                     <div role="group" aria-label="Mode" className="flex flex-wrap justify-center gap-2 -mt-2.5">
-                        {(["all", ...MODES.map((mode) => mode.id)] as ModeFilter[]).map((id) => (
+                        {(["all", ...modesFor(features).map((mode) => mode.id)] as ModeFilter[]).map((id) => (
                             <Pill
                                 key={id}
                                 active={filter === id}
@@ -250,6 +251,8 @@ const Polaroid = ({ src }: { src: string | null }) => {
                 "relative flex-none pt-2.25 px-2.25 pb-8 rounded-lg -rotate-2",
                 "border-2 border-[#1A1418] bg-[#FFFDFA] shadow-[4px_5px_0_var(--ctl-off)]",
                 "transition-[translate,rotate] duration-400 ease-(--ease-settle) transform-gpu hover:-translate-y-0.75 hover:rotate-0",
+                // Firefox: the polaroid stays put on hover; its straightening shimmered there.
+                "firefox:hover:-rotate-2 firefox:hover:translate-0",
             )}
         >
             {src

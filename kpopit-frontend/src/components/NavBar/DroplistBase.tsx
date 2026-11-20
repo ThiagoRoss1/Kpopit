@@ -1,6 +1,6 @@
 import type { ReactNode } from "react";
+import ModeImage from "./ModeImage";
 import { cn } from "../../lib/utils";
-import { resolveCdnUrl } from "../../utils/imageUrl";
 import IntentLink from "../Links/IntentLink";
 import { PREFETCH, type NavPage, type NavRow } from "./navigation";
 
@@ -41,7 +41,8 @@ interface TileProps {
 
 /** A row's square: an icon (About rows) or a photo (games, idols). */
 export const Tile = ({ row, size, animated = false }: TileProps) => {
-    const motion = animated && "transition-transform duration-450 ease-(--ease-pop) transform-gpu group-hover:-rotate-4";
+    // Firefox turns the icon quicker, so fewer frames are drawn while it moves.
+    const motion = animated && "transition-transform duration-450 ease-(--ease-pop) transform-gpu group-hover:-rotate-4 firefox:duration-200";
 
     if (row.icon) {
         const Icon = row.icon;
@@ -64,18 +65,14 @@ export const Tile = ({ row, size, animated = false }: TileProps) => {
     return (
         <span
             className={cn(
-                "flex-none box-border overflow-hidden rounded-[13px] border-2 border-[#1A1418] bg-[#DCD6D2]",
+                "flex-none box-border overflow-hidden rounded-[13px] border-2 border-[#1A1418]",
+                // An ink fill: a light one showed as a stripe at the tilted photo's antialiased edges.
+                "bg-[#1A1418]",
                 size === "lg" ? "size-11.5 shadow-[2px_2px_0_#1A1418]" : "size-10",
                 motion,
             )}
         >
-            <img
-                src={resolveCdnUrl(row.img ?? null) ?? ""}
-                alt=""
-                loading="lazy"
-                className={cn("block size-full object-cover", row.imgClass)}
-                draggable={false}
-            />
+            <ModeImage src={row.img ?? null} pixelBlock={row.pixelBlock} className={row.imgClass} />
         </span>
     );
 };

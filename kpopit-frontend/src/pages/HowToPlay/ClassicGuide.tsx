@@ -69,7 +69,12 @@ const SearchDemo = () => {
 
 /** A hint card that flips over and unblurs: front, blurred value, clear value, then back to front. */
 const HintCard = ({ hint, index, step, onStep }: { hint: (typeof HINTS)[number]; index: number; step: number; onStep: () => void }) => {
-    const face = "absolute inset-0 flex flex-col items-center justify-center rounded-[18px] border-2 border-(--ink) shadow-[3px_4px_0_var(--ctl-off)] backface-hidden";
+    const face = cn(
+        "absolute inset-0 flex flex-col items-center justify-center rounded-[18px] border-2 border-(--ink) shadow-[3px_4px_0_var(--ctl-off)] backface-hidden",
+        // Firefox: a soft shadow edge (a sharp one left stray pixels on the tilt) and a crossfade for the flip.
+        "firefox:shadow-[3px_4px_0.5px_var(--ctl-off)] firefox:transition-opacity firefox:duration-200",
+    );
+    const tilt = index ? "rotate-[1.5deg]" : "rotate-[-1.5deg]";
 
     return (
         <button
@@ -80,7 +85,10 @@ const HintCard = ({ hint, index, step, onStep }: { hint: (typeof HINTS)[number];
                 "pp-focus relative h-37.5 p-0 border-0 bg-transparent cursor-pointer perspective-midrange",
                 "transition-[translate,rotate] duration-450 ease-(--ease-settle) will-change-transform",
                 "hover:-translate-y-0.75 hover:rotate-0 active:translate-x-0.5 active:translate-y-0.75 active:rotate-0 active:duration-150",
-                index ? "rotate-[1.5deg]" : "rotate-[-1.5deg]",
+                tilt,
+                // Firefox: the card keeps its tilt and doesn't lift; straightening it redrew the edges with white seams.
+                "firefox:perspective-none firefox:hover:translate-0",
+                index ? "firefox:hover:rotate-[1.5deg] firefox:active:rotate-[1.5deg]" : "firefox:hover:rotate-[-1.5deg] firefox:active:rotate-[-1.5deg]",
             )}
         >
             <span
@@ -88,15 +96,17 @@ const HintCard = ({ hint, index, step, onStep }: { hint: (typeof HINTS)[number];
                     "relative block size-full transform-3d",
                     "transition-transform duration-800 ease-[cubic-bezier(.34,1.35,.64,1)]",
                     step > 0 && "rotate-y-180",
+                    // Firefox drew the 3D flip with jagged edges and torn shadows: the faces crossfade instead.
+                    "firefox:transform-none firefox:transform-flat",
                 )}
             >
-                <span className={cn(face, "gap-1 bg-[#FF8AC4] text-[#1A1418]")}>
+                <span className={cn(face, "gap-1 bg-[#FF8AC4] text-[#1A1418]", step > 0 && "firefox:opacity-0")}>
                     <span className="font-bold text-[11px] tracking-[.14em]">HINT #{index + 1}</span>
                     <span className="font-bold text-[40px] leading-none text-white text-shadow-(--puff-value)">?</span>
                     <span className="font-medium text-xs">Unlocks after {hint.unlocksAt} guesses · tap to flip</span>
                 </span>
 
-                <span className={cn(face, "gap-1.5 bg-(--chip) text-(--chip-ink) rotate-y-180")}>
+                <span className={cn(face, "gap-1.5 bg-(--chip) text-(--chip-ink) rotate-y-180 firefox:transform-none", step === 0 && "firefox:opacity-0")}>
                     <span className="font-bold text-[11px] tracking-[.14em] text-(--muted)">{hint.caption}</span>
                     <span className={cn("font-bold text-2xl transition-[filter] duration-550 ease-(--ease-settle)", step === 1 && "blur-[7px]")}>{hint.value}</span>
                     <span className="font-medium text-xs text-(--muted)">{step === 1 ? "Tap to unblur" : "Tap to flip back"}</span>

@@ -121,6 +121,7 @@ const PixelatedSearchBar = (props: PixelatedSearchBarProps) => {
             />
             <button
               type="button"
+              aria-label="Guess"
               onClick={submit}
               disabled={disabled || submitting || !selectedAlbum}
               className="flex items-center gap-1.5 w-14.5 h-11 px-4 sm:px-4 p-2 rounded-full font-bold 
@@ -128,7 +129,7 @@ const PixelatedSearchBar = (props: PixelatedSearchBarProps) => {
                 hover:brightness-110 hover:cursor-pointer active:translate-y-1 active:shadow-[0_1px_0_var(--color-ink)]
                 disabled:opacity-50 disabled:pointer-events-none"
             >
-              <Img src={SearchIcon} alt="Search Icon" aria-hidden="true" className="size-full" draggable={false} />
+              <Img src={SearchIcon} alt="" aria-hidden="true" className="size-full" draggable={false} />
             </button>
 
             <AnimatePresence>

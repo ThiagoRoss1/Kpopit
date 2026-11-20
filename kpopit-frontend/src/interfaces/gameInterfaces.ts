@@ -30,6 +30,8 @@ export interface IdolListItem {
   companies: string[];
   blur_image_path?: string | null;
   blur_image_version?: string | null;
+  /** Only while the inkit flag is on: InkIt can draw her (she has an InkIt photo). */
+  has_inkit_photo?: boolean;
 }
 
 export interface FeedbackItem {
@@ -316,6 +318,8 @@ export interface RestoreSessionResponse {
   classic: ClassicGameState | null;
   blurry: BlurryGameState | null;
   pixelated: PixelatedGameState | null;
+  /** Only while the inkit flag is on. */
+  inkit?: InkItGame | null;
   server_date: string;
 }
 
@@ -363,8 +367,68 @@ export interface AlbumPageData {
   discography: AlbumDiscographyItem[];
 }
 
+// InkIt (/api/game/inkit/*): the photo under an opaque path and the caller's own game.
+export interface InkItGuess {
+  idol_id: number;
+  artist_name: string;
+  image_path: string | null;
+  image_version: string | null;
+  correct: boolean;
+}
+
+/** Sent only once the caller won the day. */
+export interface InkItAnswer {
+  idol_id: number;
+  artist_name: string;
+  image_path: string | null;
+  image_version: string | null;
+  groups: string[];
+}
+
+export interface InkItGame {
+  inkit_guesses: InkItGuess[];
+  guesses_count: number;
+  game_complete: boolean;
+  game_won: boolean;
+  game_date: string;
+  /** Round hint 1 "More ink" was used in, or null. */
+  hint_ink_guess: number | null;
+  /** The drawing saved with the last guess (base64). */
+  draft: string | null;
+  /** Hint 2: the answer's groups, from round 8. */
+  group_hint: string[] | null;
+  answer: InkItAnswer | null;
+}
+
+export interface InkItDay {
+  image_path: string;
+  image_version: string;
+  day_number: number | null;
+  game: InkItGame | null;
+  server_date: string;
+}
+
+export interface InkItCalendarDay {
+  challenge_date: string;
+  is_today: boolean;
+  day_number: number | null;
+  status: CalendarStatus;
+  puzzle: { image_path: string; image_version: string };
+  game: InkItGame | null;
+}
+
+export interface InkItGuessResult {
+  guess_correct: boolean;
+  guessed_idol_data: Omit<InkItGuess, "correct">;
+  guesses_count: number;
+  group_hint: string[] | null;
+  answer: InkItAnswer | null;
+  card_granted: CardGranted | null;
+}
+
 // The calendar (/api/calendar/*): past challenge days per mode.
-export type CalendarMode = "classic" | "blurry" | "pixelated";
+/** "inkit" only exists in the API's answers while its flag is on. */
+export type CalendarMode = "classic" | "blurry" | "pixelated" | "inkit";
 export type CalendarStatus = "not_played" | "in_progress" | "won_live" | "won_calendar";
 
 export interface CalendarTimelineDay {
@@ -389,6 +453,7 @@ export interface CalendarGuessSummary {
 
 export interface CalendarDayData {
   challenge_date: string;
+  is_today: boolean;
   day_number: number | null;
   mode: CalendarMode;
   status: CalendarStatus;
@@ -410,6 +475,8 @@ export interface CalendarDayData {
     blurry_guesses_details?: GuessResponse<Partial<FeedbackData>>[];
     pixelated_guesses_details?: PixelatedGuessDetail[];
     game_complete?: boolean;
+    /** InkIt: the answer (with her groups) once the caller won the day. */
+    answer?: InkItAnswer | null;
   } | null;
   /** Only once the caller finished the day. */
   answer: { idol_id?: number; artist_name?: string; image_path?: string | null; album_id?: number; album_name?: string } | null;

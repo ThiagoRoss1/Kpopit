@@ -179,11 +179,12 @@ const SearchBar = (props: SearchBarProps) => {
             }
               disabled={disabled || inCooldown}
               type="button"
+              aria-label="Guess"
             >
               {!isMobile ? (
               <motion.img 
                 src={SearchIcon} 
-                alt="G" 
+                alt="" 
                 className="size-5.5 sm:size-5.5 mx-auto" 
                 draggable={false} 
                 animate={{ scale: isButtonHovered ? 1.2 : 1 }}
@@ -196,7 +197,7 @@ const SearchBar = (props: SearchBarProps) => {
               ) : (
                 <Img
                 src={SearchIcon} 
-                alt="G" 
+                alt="" 
                 className="size-5.5 sm:size-5.5 mx-auto" 
                 draggable={false} 
                 />

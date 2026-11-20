@@ -1,5 +1,5 @@
 import axios from 'axios';
-import type { AddIdolRequest, CompleteGuessTrafficRequest, RestoreSessionResponse, PixelatedGameData, PixelatedGuessPayload, AlbumSearchResult, AlbumsPageItem, AlbumPageData, CalendarDayData, CalendarMode, CalendarTimeline } from '../interfaces/gameInterfaces';
+import type { AddIdolRequest, CompleteGuessTrafficRequest, RestoreSessionResponse, PixelatedGameData, PixelatedGuessPayload, AlbumSearchResult, AlbumsPageItem, AlbumPageData, CalendarDayData, CalendarMode, CalendarTimeline, InkItCalendarDay, InkItDay, InkItGuessResult } from '../interfaces/gameInterfaces';
 import type { CollectionAlbumGroup, CollectionListItem } from '../interfaces/albumInterfaces';
 import type { MeResponse, UpdateProfilePayload } from '../interfaces/authInterfaces';
 import type { IdolXpState, PourResult, ProfileHistory, ProfileSettings, ProfileStats, PublicProfile } from '../interfaces/playerInterfaces';
@@ -19,7 +19,8 @@ const api = axios.create({
 const MODES: Record<string, number> = {
     "classic": 1,
     "blurry": 2,
-    "pixelated": 3
+    "pixelated": 3,
+    "inkit": 4
 };
 
 // Response interceptor to handle invalid user token globally
@@ -197,11 +198,6 @@ export const saveGameState = async (gameState: object) => {
     return api.post('/game-state', { game_state: gameState }, { headers: userTokenHeader(token) });
 }
 
-export const fetchGameState = async (user_token: string) => {
-    const response = await api.get('/game-state', { headers: userTokenHeader(user_token) });
-    return response.data;
-}
-
 // Logged in: the interceptor's Bearer token wins. Anonymous: the UUID identifies the player.
 export const restoreSession = async (anonymousToken?: string): Promise<RestoreSessionResponse> => {
     const response = await api.get('/game/restore-session', {
@@ -249,6 +245,45 @@ export const getPixelatedGuessAlbum = async (payload: PixelatedGuessPayload) => 
     };
     return response.data;
 }
+
+// InkIt game APIs. The day carries the caller's own game, so every call identifies the player.
+const inkitHeaders = async (): Promise<Record<string, string>> => {
+    const encrypted = localStorage.getItem('userToken');
+    const token = encrypted ? await decryptToken(encrypted) : null;
+    return token && !getAccessToken() ? { 'Authorization': token } : {};
+};
+
+export const getInkItDaily = async (): Promise<InkItDay> => {
+    const response = await api.get('/game/inkit/daily', { headers: await inkitHeaders() });
+    return response.data;
+};
+
+export const getInkItCalendarDay = async (date: string): Promise<InkItCalendarDay> => {
+    const response = await api.get(`/calendar/inkit/${date}`, { headers: await inkitHeaders() });
+    return response.data;
+};
+
+/** One guess with the drawing it was made with; `date` plays a past calendar day. */
+export const postInkItGuess = async (
+    guessedIdolId: number, gameDate: string, draft: string | null, calendarDate: string | null,
+): Promise<InkItGuessResult> => {
+    const body = { guessed_idol_id: guessedIdolId, game_date: gameDate, ...(draft ? { draft } : {}) };
+    const url = calendarDate ? `/calendar/inkit/${calendarDate}/guess` : '/game/inkit/guess';
+    const response = await api.post(url, body, { headers: await inkitHeaders() });
+    return response.data;
+};
+
+export const postInkItHint = async (gameDate: string): Promise<{ hint_ink_guess: number }> => {
+    const response = await api.post('/game/inkit/hint', { game_date: gameDate }, { headers: await inkitHeaders() });
+    return response.data;
+};
+
+/** Development only (null in production builds): where a local build finds an InkIt photo
+ *  before its opaque copy exists in the image bucket. */
+// Development only: the photo's bytes through the API (the opaque copies aren't in the bucket yet).
+export const inkitDevPhotoUrl = import.meta.env.DEV
+    ? (path: string) => `${api.defaults.baseURL}/game/inkit/dev/photo?path=${encodeURIComponent(path)}`
+    : null;
 
 const collectionAuthHeaders = async () => {
     const encrypted = localStorage.getItem('userToken');

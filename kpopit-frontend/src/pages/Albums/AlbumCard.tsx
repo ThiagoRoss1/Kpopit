@@ -109,7 +109,7 @@ const AlbumCard = ({ album, index, animate = true, stagger }: AlbumCardProps) =>
                         alt={`${album.name} cover`}
                         loading="lazy"
                         decoding="async"
-                        className="relative block size-full object-cover transition-[scale,opacity] duration-750 ease-(--ease-settle) group-hover:scale-108"
+                        className="relative block size-full object-cover transition-[scale] duration-750 ease-(--ease-settle) group-hover:scale-108"
                     />
 
                     {/* A light sweep across the sleeve on hover */}

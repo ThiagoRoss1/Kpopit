@@ -1,4 +1,5 @@
 from repositories.idol_repository import IdolRepository, CURRENT_CAREER_CTE
+import services.inkit_mode as inkit_mode
 
 
 class IdolService:
@@ -62,6 +63,10 @@ class IdolService:
                 AND bi.is_active = TRUE
             """, (idol_id,))
         game_modes["Blurry"] = cursor.fetchone() is not None
+
+        if inkit_mode.INKIT_ENABLED:
+            cursor.execute("SELECT 1 FROM inkit_mode_data WHERE idol_id = %s AND is_active = TRUE", (idol_id,))
+            game_modes["InkIt"] = cursor.fetchone() is not None
 
         return {
             "idol_profile": {
@@ -184,6 +189,12 @@ class IdolService:
         for row in results:
             idol_companies.setdefault(row["idol_id"], []).append(row["company_name"])
 
+        # InkIt's search lists only the idols it can draw (field present only while the mode is on).
+        inkit_ids = None
+        if inkit_mode.INKIT_ENABLED:
+            cursor.execute("SELECT idol_id FROM inkit_mode_data WHERE is_active = TRUE")
+            inkit_ids = {row["idol_id"] for row in cursor.fetchall()}
+
         for idol in idols_list:
             idol_id = idol["id"]
             # sorted(): a bare set() follows per-process string hashing, so each worker answered
@@ -193,6 +204,8 @@ class IdolService:
             idol["active_group"] = ", ".join(sorted(set(idol_groups_active.get(idol_id, [])))) or None
             idol["companies"] = sorted(set(idol_companies.get(idol_id, [])))
             idol["member_count"] = idol_member_counts.get(idol_id)
+            if inkit_ids is not None:
+                idol["has_inkit_photo"] = idol_id in inkit_ids
 
             for field in ["nationality", "position"]:
                 if field in idol and isinstance(idol[field], str) and idol[field]:

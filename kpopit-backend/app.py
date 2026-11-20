@@ -9,6 +9,7 @@ from utils.env import load_local_env, require_isolated_startup
 from services.get_db import init_app
 from routes.games.blurry import blurry_bp
 from routes.games.classic import classic_bp
+from routes.games.inkit import inkit_bp
 from routes.games.pixelated import pixelated_bp
 from routes.games.restore import restore_bp
 from routes.users import user_bp
@@ -32,6 +33,7 @@ from services.collections_service import COLLECTION_ENABLED
 from services.profile_service import PUBLIC_PROFILE_ENABLED
 from services.calendar_service import CALENDAR_ENABLED
 from services.xp_service import IDOL_XP_ENABLED
+from services.inkit_mode import INKIT_ENABLED
 load_local_env()
 require_isolated_startup()
 
@@ -92,6 +94,14 @@ def check_maintenance_mode():
         return jsonify({"error": "The service is currently under maintenance. Please try again later."}), 503 
 
 @app.before_request
+def reject_non_object_json():
+    """Every JSON route reads `.get` on the body: a list, string, null or broken JSON gets a JSON
+    400 here instead of an HTML 500 inside the handler. An empty body is left to the route."""
+    if request.path.startswith("/api") and request.is_json and request.get_data():
+        if not isinstance(request.get_json(silent=True), dict):
+            return jsonify({"error": "Request body must be a JSON object"}), 400
+
+@app.before_request
 def load_gamemode():
     """Load gamemode from request args before each request"""
     g.gamemode_id = request.args.get("gamemode_id", default=1, type=int)
@@ -117,6 +127,10 @@ app.register_blueprint(classic_bp, url_prefix="/api")
 
 # Pixelated game blueprint - Register routes
 app.register_blueprint(pixelated_bp, url_prefix="/api")
+
+# InkIt game blueprint - the 4th daily mode, off until INKIT_ENABLED
+if INKIT_ENABLED:
+    app.register_blueprint(inkit_bp, url_prefix="/api")
 
 # Restore session blueprint - Per-mode game state for authenticated users
 app.register_blueprint(restore_bp, url_prefix="/api")

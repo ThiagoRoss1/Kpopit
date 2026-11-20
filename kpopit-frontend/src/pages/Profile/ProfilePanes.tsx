@@ -2,10 +2,11 @@ import { useState, type ReactNode } from "react";
 import SlidingPill from "../../components/buttons/SlidingPill";
 import { resolveCdnUrl } from "../../utils/imageUrl";
 import { cn } from "../../lib/utils";
+import { useFeatures } from "../../hooks/useFeatures";
 import type { ModeStats, ProfileStats } from "../../interfaces/playerInterfaces";
 import {
     CHART_W, GROUP_COLORS, HEAT_TONES, MODES, chartY, formatDay, formatDuration, heatmapDays, lastRate, linePath,
-    modeName, type ModeFilter,
+    modeName, modesFor, type ModeFilter,
 } from "./profileData";
 
 // A stat tile: tilted, it straightens and lifts on hover.
@@ -58,8 +59,11 @@ const Footnote = ({ children }: { children: ReactNode }) => <span className="fon
 
 export const OverviewPane = ({ stats, activity, today }: { stats: ProfileStats; activity: { date: string; modes: number }[] | null; today: string }) => {
     const total = stats.all;
+    const { features } = useFeatures();
+    const modes = modesFor(features).filter((mode) => stats[mode.id]);
     const streakMode = MODES.find((mode) => mode.id === total.current_streak_mode);
     const days = activity ? heatmapDays(today, activity) : [];
+    const tones = HEAT_TONES.slice(0, modes.length + 1);
     return (
         <div className="profile-pane-enter flex flex-col gap-5">
             <Tiles tiles={[
@@ -78,14 +82,14 @@ export const OverviewPane = ({ stats, activity, today }: { stats: ProfileStats; 
                                         key={day.date}
                                         title={`${formatDay(day.date)}: ${day.modes} ${day.modes === 1 ? "mode" : "modes"}`}
                                         className={cn("aspect-square rounded-sm border-[1.5px]", day.modes ? "border-(--ink)" : "border-(--rule)")}
-                                        style={{ background: HEAT_TONES[day.modes] }}
+                                        style={{ background: tones[Math.min(day.modes, modes.length)] }}
                                     />
                                 ))}
                             </div>
                             <div className="flex items-center gap-1.5 justify-end font-medium text-[11px] text-(--muted)">
                                 0 modes
-                                {HEAT_TONES.map((tone) => <span key={tone} className="size-3 rounded-[3px] border-[1.5px] border-(--ink)" style={{ background: tone }} />)}
-                                3 modes
+                                {tones.map((tone) => <span key={tone} className="size-3 rounded-[3px] border-[1.5px] border-(--ink)" style={{ background: tone }} />)}
+                                {modes.length} modes
                             </div>
                         </>
                     ) : (
@@ -94,7 +98,7 @@ export const OverviewPane = ({ stats, activity, today }: { stats: ProfileStats; 
                 </Section>
                 <Section title="Modes" aside={`${total.played} games`}>
                     <div className="flex flex-col gap-2.5 flex-1 justify-center">
-                        {MODES.map((mode) => {
+                        {modes.map((mode) => {
                             const modeStats = stats[mode.id];
 
                             return (
@@ -130,7 +134,9 @@ export const ModeDot = ({ color }: { color: string }) => (
 );
 
 export const StatsPane = ({ stats, filter }: { stats: ProfileStats; filter: ModeFilter }) => {
-    const modeStats = stats[filter];
+    const { features } = useFeatures();
+    const modes = modesFor(features).filter((mode) => stats[mode.id]);
+    const modeStats = stats[filter] ?? stats.all;
     const label = modeName(filter);
 
     return (
@@ -144,8 +150,8 @@ export const StatsPane = ({ stats, filter }: { stats: ProfileStats; filter: Mode
             <div className="grid grid-cols-2 @max-[901px]:grid-cols-1 items-stretch gap-5">
                 <Distribution stats={modeStats} label={label} />
                 <Section title="Accuracy by mode">
-                    <div className="grid grid-cols-3 gap-2.5 flex-1 items-center">
-                        {MODES.map((mode, i) => {
+                    <div className={cn("grid gap-2.5 flex-1 items-center", modes.length > 3 ? "grid-cols-4 @max-[581px]:grid-cols-2" : "grid-cols-3")}>
+                        {modes.map((mode, i) => {
                             const winRate = stats[mode.id].win_rate;
                             const isShown = filter === "all" || filter === mode.id;
 
@@ -212,7 +218,10 @@ const Distribution = ({ stats, label }: { stats: ModeStats; label: string }) => 
 
 const WinRateChart = ({ stats, filter }: { stats: ProfileStats; filter: ModeFilter }) => {
     const [span, setSpan] = useState<"weekly" | "monthly">("weekly");
-    const lines = MODES.filter((mode) => filter === "all" || filter === mode.id).map((mode) => ({ mode, buckets: stats[mode.id][span] }));
+    const { features } = useFeatures();
+    const lines = modesFor(features)
+        .filter((mode) => stats[mode.id] && (filter === "all" || filter === mode.id))
+        .map((mode) => ({ mode, buckets: stats[mode.id][span] }));
     const marks = span === "weekly" ? ["16 weeks ago", "8 weeks ago", "This week"] : ["12 months ago", "6 months ago", "This month"];
     return (
         <Section title="Win rate over time">
@@ -262,11 +271,11 @@ const WinRateChart = ({ stats, filter }: { stats: ProfileStats; filter: ModeFilt
 
 const MostGuessed = ({ stats, filter }: { stats: ProfileStats; filter: ModeFilter }) => {
     // Pixelated guesses are albums: its filter shows the idol modes' list instead.
-    const source = filter === "pixelated" ? "all" : filter;
+    const source = filter === "pixelated" || !stats[filter] ? "all" : filter;
     const idols = stats[source].most_guessed;
     const top = idols[0]?.guesses ?? 1;
     return (
-        <Section title="Most guessed idols" aside={source === "all" ? "Classic + Blurry" : modeName(source)}>
+        <Section title="Most guessed idols" aside={source === "all" ? "Idol modes" : modeName(source)}>
             <div className="flex flex-col gap-2.5">
                 {idols.map((idol, i) => {
                     const imageSource = resolveCdnUrl(idol.image_path);

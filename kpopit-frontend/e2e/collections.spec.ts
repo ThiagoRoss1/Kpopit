@@ -1,7 +1,7 @@
 import { test, expect, type Page } from './support/fixtures';
 import { answerIdol, guessIdol, openGame, userToken, victoryMarker, type IdolEntry } from './support/game';
 import { anyIdolWithCard, idolHasCard, seedIdolCard, userIdByToken, userIdByUsername, userIdolCard } from './support/db';
-import { expectLoggedIn, newUser, registerViaApi } from './support/accounts';
+import { expectLoggedIn, newUser, registerBeforeLoad, registerViaApi } from './support/accounts';
 
 type Mode = 'classic' | 'blurry';
 
@@ -68,6 +68,86 @@ test.describe('Collections', () => {
     expect(await userIdolCard(userId, answer.id)).toEqual({ level: 2, times_won: 2 });
   });
 
+  test('the album tour: Enter is Next, but presses Back or Skip when reached with Tab', async ({ page }) => {
+    await page.addInitScript(() => localStorage.setItem('kpopit-collections-hq-warned', 'true'));
+    await page.goto('/collections');
+    await page.locator('a[href^="/collections/1/"]').first().click();
+    const tour = page.getByRole('dialog', { name: 'Album tour' });
+    await expect(tour.getByText(/^Step 1 of \d+$/)).toBeVisible();
+
+    await page.keyboard.press('Enter');
+    await expect(tour.getByText(/^Step 2 of \d+$/)).toBeVisible();
+    // A clicked Back keeps focus but no focus ring: Enter still means Next.
+    await tour.getByRole('button', { name: 'Back' }).click();
+    await expect(tour.getByText(/^Step 1 of \d+$/)).toBeVisible();
+    await page.keyboard.press('Enter');
+    await expect(tour.getByText(/^Step 2 of \d+$/)).toBeVisible();
+
+    const tabTo = async (name: string, key = 'Tab') => {
+      for (let i = 0; i < 5 && !(await tour.getByRole('button', { name }).evaluate((el) => el === document.activeElement)); i++) {
+        await page.keyboard.press(key);
+      }
+    };
+    await tabTo('Back');
+    await page.keyboard.press('Enter');
+    await expect(tour.getByText(/^Step 1 of \d+$/)).toBeVisible();
+    // Skip sits before Back.
+    await tabTo('Skip', 'Shift+Tab');
+    await page.keyboard.press('Enter');
+    await expect(tour).toBeHidden();
+  });
+
+  test('the FX panel takes keyboard focus and hands it back to its button', async ({ page }) => {
+    await skipOverlays(page);
+    await page.goto('/collections');
+    const toggle = page.locator('#fx-panel-toggle');
+    const panel = page.getByRole('dialog', { name: 'Visual effects' });
+
+    await toggle.focus();
+    await page.keyboard.press('Enter');
+    await expect(panel).toBeVisible();
+    expect(await panel.evaluate((el) => el.contains(document.activeElement))).toBe(true);
+
+    await page.keyboard.press('Escape');
+    await expect(panel).toBeHidden();
+    await expect(toggle).toBeFocused();
+  });
+
+  test('a failed collections list shows an error with Retry, not an empty page', async ({ page }) => {
+    await skipOverlays(page);
+    // Signed in: the route can't load ahead of the session, so the page's own query fetches the list.
+    await registerBeforeLoad(page, newUser());
+    await page.route(/\/api\/collections\/list/, (route) => route.fulfill({ status: 500, json: { error: 'down' } }));
+    await page.goto('/collections');
+    await expect(page.getByText('Error loading your collections.')).toBeVisible({ timeout: 30_000 });
+
+    await page.unroute(/\/api\/collections\/list/);
+    await page.getByRole('button', { name: 'Retry' }).click();
+    await expect(page.getByText(/% complete/).first()).toBeVisible();
+  });
+
+  test("widening past lg closes the album's phone-only Focus mode and index", async ({ page, isMobile }) => {
+    test.skip(isMobile, 'resizes a desktop window');
+    await skipOverlays(page);
+    await page.setViewportSize({ width: 390, height: 844 });
+    await page.goto('/collections');
+    await page.locator('a[href^="/collections/1/"]').first().click();
+    const root = page.locator('[data-focus]');
+
+    await page.locator('[data-tour="focus"]').click();
+    await expect(root).toHaveAttribute('data-focus', 'on');
+    await page.setViewportSize({ width: 1440, height: 900 });
+    await expect(root).toHaveAttribute('data-focus', 'off');
+
+    await page.setViewportSize({ width: 390, height: 844 });
+    await page.locator('[data-tour="summary"]').click();
+    const search = page.getByPlaceholder(/^Search for a group/);
+    await expect(search).toBeVisible();
+    await page.setViewportSize({ width: 1440, height: 900 });
+    // The desktop rail keeps its own search; the modal's copy goes away.
+    await expect(search).toHaveCount(1);
+  });
+
   test('anonymous visitor sees the collections list and a locked album', async ({ page }) => {
     await skipOverlays(page);
     await page.goto('/collections');
@@ -102,4 +182,23 @@ test('an expired access token on the collections list is refreshed, not cached a
   const rows = await (await replayed).json();
   expect(rows[0].owned_cards).toBe(1);
   await expect(page.getByText(/^1\/\d+ stickers$/).first()).toBeVisible();
+});
+
+test.describe('Collections off on the backend', () => {
+  test.beforeAll(async ({ backend }) => {
+    await backend.restart(0, { COLLECTION_ENABLED: 'false' });
+  });
+  test.afterAll(async ({ backend }) => {
+    await backend.restart(0, {});
+  });
+
+  test('the list and an album are the 404, and the navbar has no Collections link', async ({ page }) => {
+    await page.goto('/collections');
+    await expect(page.getByRole('heading', { name: '404' })).toBeVisible();
+    await expect(page.locator('meta[name="robots"]')).toHaveAttribute('content', 'noindex');
+    await expect(page.locator('nav').getByRole('link', { name: 'Collections' })).toHaveCount(0);
+
+    await page.goto('/collections/1/official-collection');
+    await expect(page.getByRole('heading', { name: '404' })).toBeVisible();
+  });
 });

@@ -27,6 +27,7 @@
   --font-caveat: 'Caveat', cursive;
   --font-mono-display: 'Major Mono Display', monospace;
   --font-korean: 'Noto Sans KR', sans-serif;
+  --font-script: 'Kaushan Script', cursive;
 }
 
 /* Puff Pop (docs/design-system/tokens/puffpop.css). Day is the default; data-theme="night" on any
@@ -35,6 +36,7 @@
 [data-theme="day"] {
   --ground: #FAF6F0;
   --dot: rgba(26, 20, 24, .07);
+  --hatch: rgba(26, 20, 24, .07);
   --text: #1A1418;
   --muted: #6B5F66;
   --ink: #1A1418;
@@ -85,6 +87,7 @@
 [data-theme="night"] {
   --ground: #1E1C1F;
   --dot: rgba(255, 255, 255, .05);
+  --hatch: rgba(255, 255, 255, .06);
   --text: #FAF6F0;
   --muted: #CFC5CB;
   --ink: #0A0A0A;
@@ -370,6 +373,140 @@ img[data-fade="wait"] {
 
 img[data-fade="in"] {
     animation: imgIn 0.35s ease-out;
+}
+
+/* The navbar while its theme is swapped by a page change (set for one paint by NavBar). */
+.pp-nav[data-theme-swap],
+.pp-nav[data-theme-swap] *,
+.pp-nav[data-theme-swap] *::before {
+    transition: none !important;
+}
+
+/* --------------------------------------------------------------------------
+   Firefox only. Chrome and Safari never match these rules: their motion and
+   depth stay exactly as designed.
+   -------------------------------------------------------------------------- */
+
+@keyframes ffFade {
+    from {
+        opacity: 0;
+    }
+}
+
+@supports (-moz-appearance: none) {
+    /* The inset highlights with a 0.5px blur: unblurred, Firefox drew stray white pixels where a
+       tilted or fractionally placed box's highlight meets its border (the menu's icon tiles). */
+    :root,
+    [data-theme="day"] {
+        --tile-in: inset 0 2px 0.5px rgba(255, 255, 255, .7), inset 0 -3px 0.5px rgba(198, 35, 104, .14);
+        --in: inset 0 2px 0.5px #FFFFFF, inset 0 -3px 0.5px rgba(26, 20, 24, .07);
+        --in-pink: inset 0 2px 0.5px rgba(255, 255, 255, .55), inset 0 -3px 0.5px rgba(198, 35, 104, .28);
+    }
+
+    [data-theme="night"] {
+        --tile-in: inset 0 2px 0.5px rgba(255, 255, 255, .1);
+        --in: inset 0 2px 0.5px rgba(255, 255, 255, .12), inset 0 -3px 0.5px rgba(0, 0, 0, .24);
+    }
+
+    /* Ink-bordered boxes with an offset shadow. Firefox draws a light line between a rounded border and
+       its shadow (the box's own edge is antialiased against a shadow that stops under it; a drop-shadow
+       still leaves it). A 2px outline in the border's colour, centred on the box's edge, covers that
+       line: measured in the installed Firefox 160. The border keeps its width (thinning it left stray
+       pixels), so the ink reads 1px heavier in Firefox. */
+    :where([class*=" shadow-["], [class^="shadow-["], [class*=" shadow-("], [class^="shadow-("], .pp-press, .inkit-btn, .inkit-go, .inkit-hint):where([class~="border-(--ink)"]):not([class~="shadow-none"], [class~="shadow-(--face-hl)"], [class*="border-t-"], [class*="border-b-"], [class*="border-l-"], [class*="border-r-"], [class*="border-x-"], [class*="border-y-"]),
+    .post-body blockquote {
+        outline: 2px solid var(--ink);
+        outline-offset: -1px;
+    }
+
+    :where([class*=" shadow-["], [class^="shadow-["], [class*=" shadow-("], [class^="shadow-("], .pp-press, .inkit-btn, .inkit-go, .inkit-hint):where([class~="border-[#1A1418]"]):not([class~="shadow-none"], [class~="shadow-(--face-hl)"], [class*="border-t-"], [class*="border-b-"], [class*="border-l-"], [class*="border-r-"], [class*="border-x-"], [class*="border-y-"]),
+    .post-body img {
+        outline: 2px solid #1A1418;
+        outline-offset: -1px;
+    }
+
+    /* The same for the hover pill the navbar and account menu draw on ::before (idle items only). */
+    [class*="before:shadow-["][class~="before:border-(--ink)"]::before {
+        outline: 2px solid var(--ink);
+        outline-offset: -1px;
+    }
+
+    /* The idol name's letter tiles: their shadows come inline, so Firefox reads the version with a
+       0.5px blur (see below) and gets the same outline. */
+    .idol-name-letter {
+        box-shadow: var(--ff-shadow) !important;
+        outline: 2px solid #1A1418;
+        outline-offset: -1px;
+    }
+
+    /* No scale on hover or press for anything carrying text (buttons, cards, tags): Firefox redraws a
+       scaling element's text and outlines on every frame, which read as lag. The lift and the press
+       (translate) stay. */
+    :not(img)[class*="hover:scale-"]:hover,
+    :is(.group, [class*="group/"]):hover :not(img)[class*="hover:scale-"],
+    :is(.group, [class*="group/"]):hover :not(img)[class*="hover/"][class*=":scale-"],
+    [class*="active:scale-"]:active,
+    .group:active [class*="group-active:scale-"],
+    [class*="pressed:scale-"]:is(:active, .link-pending),
+    :is(.group, [class*="group/"]):is(:active, .link-pending) [class*="pressed:scale-"],
+    .inkit-tool:not(:disabled):active {
+        scale: none !important;
+    }
+
+    /* Photos keep their hover zoom, quicker, so fewer frames are drawn while it moves. */
+    img[class*="hover:scale-"],
+    img[class*="hover/"][class*=":scale-"],
+    .inkit-photo {
+        transition-duration: 0.25s !important;
+    }
+
+    /* Page entrances stay, quicker: the slow fades, staggered over dozens of cards, dropped frames and
+       showed as a ghosted page. The catalogue grids come in together instead of one card at a time. */
+    .pp-enter {
+        animation-duration: 0.3s !important;
+        animation-delay: calc(var(--pp-delay, 0ms) / 2) !important;
+    }
+
+    .calendar-enter,
+    .calendar-panel-enter,
+    .how-to-play-tile-enter,
+    .idol-menu-enter,
+    .idol-side-enter,
+    .idol-tile-enter,
+    .not-found-tile-enter,
+    .profile-column-enter,
+    .profile-pane-enter,
+    [class*="animate-[puffDrop_"] {
+        animation-duration: 0.3s !important;
+    }
+
+    .idol-photo-enter {
+        animation-duration: 0.35s !important;
+    }
+
+    [class*="animate-[puffIn_"] {
+        animation-duration: 0.3s !important;
+        animation-delay: 0s !important;
+    }
+
+    /* The album page mounts again for every album picked on its timeline, so its entrances replayed on
+       each click and the page blinked: off on that page. */
+    .album-disc-enter,
+    .album-dot-enter,
+    .album-drop-enter,
+    .album-fade-enter,
+    .album-rise-enter,
+    .album-row-enter,
+    .album-sleeve-enter,
+    .album-spin-enter,
+    .album-tile-enter {
+        animation: none !important;
+    }
+
+    /* Menus open with a quick fade and no slide. */
+    [class*="animate-[puffMenu_"] {
+        animation: ffFade 0.1s ease-out !important;
+    }
 }
 
 @media (prefers-reduced-motion: reduce) {

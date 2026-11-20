@@ -1,9 +1,9 @@
 import { test, expect } from './support/fixtures';
 import {
   DATE_KEY, answerAlbum, answerIdol, guessAlbum, guessIdol, openGame, searchInput, serverDate,
-  userToken, victoryMarker, wrongIdols,
+  userToken, victoryMarker, wrongIdols, type SearchMode,
 } from './support/game';
-import { dailyPick, userHistory, userIdByToken, type ModeName } from './support/db';
+import { dailyPick, userHistory, userIdByToken } from './support/db';
 
 test.beforeEach(async ({ backend }) => {
   if (backend.offset !== 0) await backend.restart(0);
@@ -15,7 +15,7 @@ const plusOneDay = (iso: string) => {
   return d.toISOString().slice(0, 10);
 };
 
-async function winToday(page: import('@playwright/test').Page, mode: ModeName) {
+async function winToday(page: import('@playwright/test').Page, mode: SearchMode) {
   if (mode === 'pixelated') {
     const album = await answerAlbum(page);
     await guessAlbum(page, album);

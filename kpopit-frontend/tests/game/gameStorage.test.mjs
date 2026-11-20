@@ -1,7 +1,7 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import {
-    BLURRY_KEYS, CLASSIC_KEYS, GAME_DATE_KEY, MODE_KEYS, PIXELATED_KEYS, clearModeKeys, isNewGameDay,
+    BLURRY_KEYS, CLASSIC_KEYS, GAME_DATE_KEY, INKIT_KEYS, MODE_KEYS, PIXELATED_KEYS, clearModeKeys, isNewGameDay,
     startFirstGameDay,
 } from '../../src/utils/gameStorage.ts';
 
@@ -20,7 +20,7 @@ test('every mode lists its own date key', () => {
 });
 
 test('mode key lists never overlap', () => {
-    const all = [...CLASSIC_KEYS, ...BLURRY_KEYS, ...PIXELATED_KEYS];
+    const all = [...CLASSIC_KEYS, ...BLURRY_KEYS, ...PIXELATED_KEYS, ...INKIT_KEYS];
     assert.equal(new Set(all).size, all.length);
 });
 

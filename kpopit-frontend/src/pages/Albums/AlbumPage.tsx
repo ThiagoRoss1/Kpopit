@@ -14,6 +14,7 @@ import { resolveCdnUrl } from "../../utils/imageUrl";
 import { buildAlbumSlug } from "../../utils/formatters";
 import type { AlbumDiscographyItem, AlbumPageData } from "../../interfaces/gameInterfaces";
 import NotFound from "../NotFound/NotFound";
+import { isNotFoundError } from "../../utils/notFound";
 import { albumPath, albumQuery, languageFlag, shortType } from "./albumsData";
 
 const MONTHS = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
@@ -172,10 +173,11 @@ interface AlbumPageProps {
 }
 
 const AlbumPage = ({ id, initialAlbum }: AlbumPageProps) => {
-    const { data, isError } = useQuery({ ...albumQuery(id), initialData: initialAlbum, retry: false });
+    const { data, error, isError, refetch } = useQuery({ ...albumQuery(id), initialData: initialAlbum });
 
-    if (isError) return <NotFound />;
-    if (!data) return <PageLoader message="Loading album..." />;
+    // Only a real 404 is the Not Found page; a failed request can be retried.
+    if (!data && isNotFoundError(error)) return <NotFound />;
+    if (!data) return <PageLoader message="Loading album..." error={isError} errorMessage="Error fetching this album." onRetry={() => void refetch()} />;
 
     return <Album key={data.id} album={data} />;
 };
@@ -294,7 +296,7 @@ const Album = ({ album }: { album: AlbumPageData }) => {
                                 draggable={false}
                                 src={cover}
                                 alt={`${album.name} cover`}
-                                className="relative block size-full object-cover transition-[scale,opacity] duration-700 ease-(--ease-settle) group-hover/hero:scale-105"
+                                className="relative block size-full object-cover transition-[scale] duration-700 ease-(--ease-settle) group-hover/hero:scale-105"
                             />
 
                             {/* A light sweep across the sleeve on hover */}
@@ -564,7 +566,8 @@ const MoreCard = ({ release, artistName, index }: MoreCardProps) => {
             <div
                 className={cn(
                     "relative transition-[rotate] duration-450 ease-(--ease-settle) transform-gpu group-hover:rotate-0",
-                    index % 2 ? "rotate-[0.5deg]" : "rotate-[-0.5deg]",
+                    // Firefox keeps the tilt on hover: the straightening redrew the card on every frame.
+                    index % 2 ? "rotate-[0.5deg] firefox:group-hover:rotate-[0.5deg]" : "rotate-[-0.5deg] firefox:group-hover:rotate-[-0.5deg]",
                 )}
             >
                 <div aria-hidden className="absolute inset-0 rounded-[20px] border-2 border-(--ink) bg-(--side) translate-x-1 translate-y-1.25" />
@@ -590,7 +593,7 @@ const MoreCard = ({ release, artistName, index }: MoreCardProps) => {
                             alt=""
                             loading="lazy"
                             decoding="async"
-                            className="relative block size-full object-cover transition-[scale,opacity] duration-600 ease-(--ease-settle) group-hover:scale-108"
+                            className="relative block size-full object-cover transition-[scale] duration-600 ease-(--ease-settle) group-hover:scale-108"
                         />
                     </div>
 

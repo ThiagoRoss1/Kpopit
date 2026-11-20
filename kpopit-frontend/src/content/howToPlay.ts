@@ -1,9 +1,9 @@
 import type { ContentPage } from "./types";
-import type { GameModeKey } from "../utils/gameStorage";
+import type { StoredGameModeKey } from "../utils/gameStorage";
 
 const DAILY_RESET = "A new challenge starts every day at midnight in New York (EST), the same for every player.";
 
-export const HOW_TO_PLAY: Record<GameModeKey, ContentPage> = {
+export const HOW_TO_PLAY: Record<StoredGameModeKey, ContentPage> = {
     classic: {
         title: "How to play Classic",
         intro: "Guess today's K-pop idol. It changes every 24 hours.",

@@ -70,6 +70,8 @@ test.describe('Blurry', () => {
     expect((await dailyHistory(userId, 'blurry'))[0]).toMatchObject({ won: true, guesses_count: 2 });
 
     await page.getByRole('img', { name: 'Share' }).first().click();
+    // The heading matches the copied line, which names the mode.
+    await expect(page.getByText("I found today's #KpopIt Blurry Idol in 2 attempts! 🎤").first()).toBeVisible();
     await expect(page.getByText(/Hardmode ❌/)).toBeVisible();
     await expect(page.getByText(/Grayscale ✅/)).toBeVisible();
     await closeModal(page, 'Share...');
@@ -103,5 +105,19 @@ test.describe('Blurry', () => {
     await page.getByRole('img', { name: 'Stats' }).first().click();
     await expect(page.getByText('Games won')).toBeVisible();
     await closeModal(page, 'Stats...');
+  });
+
+  test('the portrait tap zoom closes when the phone turns sideways @mobile', async ({ page, isMobile }) => {
+    test.skip(!isMobile, 'touch zoom');
+    await openGame(page, 'blurry');
+    const photo = page.getByAltText("Blurry image of the day's idol");
+    await expect(photo).toBeVisible();
+    const box = (await photo.boundingBox())!;
+    await page.touchscreen.tap(box.x + box.width / 2, box.y + box.height / 2);
+    const backdrop = page.locator('div.fixed.inset-0.z-40');
+    await expect(backdrop).toBeVisible();
+
+    await page.setViewportSize({ width: 844, height: 390 });
+    await expect(backdrop).toHaveCount(0);
   });
 });

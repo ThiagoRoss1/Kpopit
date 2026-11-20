@@ -1,7 +1,10 @@
 // Per-mode localStorage keys and the new-day rules, kept free of React and of the global
 // `localStorage` so they can be unit-tested with any Storage-like object.
 
-export type GameModeKey = "classic" | "blurry" | "pixelated";
+export type GameModeKey = "classic" | "blurry" | "pixelated" | "inkit";
+
+/** Modes whose game is rebuilt from localStorage (InkIt's comes whole from the server). */
+export type StoredGameModeKey = Exclude<GameModeKey, "inkit">;
 
 /** The slice of the Web Storage API these helpers use. */
 export type KeyValueStorage = Pick<Storage, "getItem" | "setItem" | "removeItem">;
@@ -48,10 +51,22 @@ export const PIXELATED_KEYS = [
     "pixelatedGameDate",
 ] as const;
 
+// InkIt's game comes whole from the server; this mirrors it for the first paint and the
+// "won today" marks on the other modes' tiles.
+export const INKIT_KEYS = [
+    "inkitGame",
+    "inkitGameComplete",
+    "inkitGameWon",
+    "inkitGroupHintShown",
+    "confettiShownInkit",
+    "inkitGameDate",
+] as const;
+
 export const MODE_KEYS: Record<GameModeKey, readonly string[]> = {
     classic: CLASSIC_KEYS,
     blurry: BLURRY_KEYS,
     pixelated: PIXELATED_KEYS,
+    inkit: INKIT_KEYS,
 };
 
 /** Key holding the server date each mode last saw. */
@@ -59,6 +74,7 @@ export const GAME_DATE_KEY: Record<GameModeKey, string> = {
     classic: "gameDate",
     blurry: "blurryGameDate",
     pixelated: "pixelatedGameDate",
+    inkit: "inkitGameDate",
 };
 
 /** Removes the mode's keys one by one (never a blind clear). */

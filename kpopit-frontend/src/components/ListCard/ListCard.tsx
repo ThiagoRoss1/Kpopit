@@ -28,7 +28,8 @@ const ListCard = ({ to, label, index, animate = true, stagger = true, onIntent, 
             <div
                 className={cn(
                     "relative transition-[rotate] duration-420 ease-(--ease-settle) transform-gpu group-hover:rotate-0",
-                    isEven ? "rotate-[-0.5deg]" : "rotate-[0.5deg]",
+                    // Firefox keeps the tilt on hover: the straightening redrew the card on every frame.
+                    isEven ? "rotate-[-0.5deg] firefox:group-hover:rotate-[-0.5deg]" : "rotate-[0.5deg] firefox:group-hover:rotate-[0.5deg]",
                 )}
             >
                 {/* The pink depth the face presses into */}
@@ -51,6 +52,9 @@ const ListCard = ({ to, label, index, animate = true, stagger = true, onIntent, 
                         "transition-[translate,background-color] duration-380 ease-(--ease-settle) transform-gpu",
                         "[--press-x:5px] [--press-y:5px] @max-[580px]:[--press-x:4px] @max-[580px]:[--press-y:4px]",
                         "group-hover:-translate-x-px group-hover:-translate-y-0.75 group-hover:bg-(--face-hover)",
+                        // Firefox: the face stays put on hover. Its lift moved the puffy name by fractions of
+                        // a pixel on every frame, and the name's outline shimmered.
+                        "firefox:group-hover:translate-0",
                         "group-active:translate-1.25 group-active:duration-120",
                         "@max-[580px]:group-active:translate-1",
                         "focus-visible:outline-3 focus-visible:outline-neon-pink focus-visible:outline-offset-5",

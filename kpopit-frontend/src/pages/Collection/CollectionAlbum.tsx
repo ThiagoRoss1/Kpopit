@@ -237,6 +237,21 @@ export default function CollectionAlbum() {
         history.pushState({ kpopitFocus: true }, '');
     }, [focusActive, frontClosed]);
 
+    // Focus mode and the index modal are the phone layout's (their buttons are lg:hidden): widening
+    // past lg closes them, or a single page would stay up with no way back.
+    const indexMounted = index.mounted;
+    useEffect(() => {
+        if (!focusActive && !indexMounted) return;
+        const wide = window.matchMedia('(min-width: 1024px)');
+        const onChange = () => {
+            if (!wide.matches) return;
+            if (focusActive) toggleFocus();
+            closeIndex();
+        };
+        wide.addEventListener('change', onChange);
+        return () => wide.removeEventListener('change', onChange);
+    }, [focusActive, indexMounted, toggleFocus, closeIndex]);
+
     useEffect(() => {
         if (!focusActive) return;
         const onPopState = () => {

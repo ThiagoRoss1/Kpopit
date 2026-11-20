@@ -46,6 +46,9 @@ const ButtonsDroplist = ({ menu, rows, page }: ButtonsDroplistProps) => {
                                 : "bg-(--chip) shadow-[2px_3px_0_var(--ctl-off),var(--in)] pressed:shadow-[0_0_0_var(--ctl-off),var(--in)]",
                             !isCurrent && !isWip && "hover:bg-(--chip-hover)",
                             !isWip && "hover:-translate-y-0.5 hover:rotate-0 pressed:translate-x-0.5 pressed:translate-y-0.75 pressed:rotate-0 pressed:duration-180",
+                            // Firefox: the row stays tilted and still on hover (its lift glitched); the icon still moves.
+                            !isWip && "firefox:hover:translate-0",
+                            !isWip && (index % 2 ? "firefox:hover:rotate-[0.6deg]" : "firefox:hover:rotate-[-0.6deg]"),
                             isWip && "opacity-60 cursor-default",
                         )}
                     >

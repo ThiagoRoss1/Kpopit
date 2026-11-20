@@ -1,4 +1,5 @@
-import { useEffect, useRef, useState } from "react";
+import type { Features } from "../../utils/features";
+import { useEffect, useLayoutEffect, useRef, useState, useSyncExternalStore } from "react";
 import { Link, useLocation } from "react-router";
 import { ChevronDown, Menu, Moon, Sun, X } from "lucide-react";
 import { cn } from "../../lib/utils";
@@ -10,7 +11,7 @@ import ButtonsListMobile from "./ButtonsListMobile";
 import UserDropdown from "./UserDropdown";
 import {
     ABOUT_ROWS,
-    GAME_ROWS,
+    gameRows,
     IDOL_ROWS,
     PAGE_LABEL,
     PREFETCH,
@@ -22,6 +23,12 @@ import {
 } from "./navigation";
 
 type OpenMenu = NavMenu | "sheet" | "user" | null;
+
+// The bar spans the page, so its container width is the page's width without the scrollbar.
+const subscribeResize = (onChange: () => void) => {
+    window.addEventListener("resize", onChange);
+    return () => window.removeEventListener("resize", onChange);
+};
 
 interface NavLink {
     id: NavMenu | "calendar" | "collections";
@@ -57,8 +64,8 @@ const navItemClasses = (state: "current" | "open" | "idle") => cn(
     ),
 );
 
-const rowsOf = (menu: NavMenu) => {
-    if (menu === "games") return GAME_ROWS;
+const menuRows = (menu: NavMenu, features: Features) => {
+    if (menu === "games") return gameRows(features);
     if (menu === "idols") return IDOL_ROWS;
 
     return ABOUT_ROWS;
@@ -77,12 +84,32 @@ const NavBar = ({ forceTheme }: NavBarProps) => {
     const page = pageOf(pathname);
     const section = menuOf(page);
     const { features } = useFeatures();
+    const rowsOf = (menu: NavMenu) => menuRows(menu, features);
     const [theme, toggleTheme] = useTheme();
     const rootRef = useRef<HTMLDivElement>(null);
+
+    // Leaving or entering a forced theme swaps every colour token in the bar at once. For that one
+    // paint the bar's transitions are off: fading from the other theme showed the toggle and the
+    // items in the old page's colours first.
+    const lastForcedTheme = useRef(forceTheme);
+    useLayoutEffect(() => {
+        const root = rootRef.current;
+        if (!root || lastForcedTheme.current === forceTheme) return;
+
+        lastForcedTheme.current = forceTheme;
+        root.setAttribute("data-theme-swap", "");
+        const frame = requestAnimationFrame(() => requestAnimationFrame(() => root.removeAttribute("data-theme-swap")));
+
+        return () => cancelAnimationFrame(frame);
+    }, [forceTheme]);
 
     // A menu belongs to the page it was opened on: navigating closes it.
     const [openState, setOpenState] = useState<{ menu: OpenMenu; key: string }>({ menu: null, key: locationKey });
     if (openState.key !== locationKey) setOpenState({ menu: null, key: locationKey });
+
+    // The sheet is the phone/tablet menu: widening past the bar's 860px container breakpoint closes it.
+    const wideBar = useSyncExternalStore(subscribeResize, () => document.documentElement.clientWidth >= 860, () => false);
+    if (wideBar && openState.menu === "sheet") setOpenState({ ...openState, menu: null });
 
     const openMenu = openState.key === locationKey ? openState.menu : null;
     const setOpenMenu = (menu: OpenMenu) => setOpenState({ menu, key: locationKey });

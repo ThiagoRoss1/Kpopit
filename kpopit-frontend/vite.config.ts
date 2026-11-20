@@ -23,6 +23,9 @@ export default defineConfig(({ isSsrBuild }) => ({
     entries: ['app/**/*.{ts,tsx}', 'src/**/*.{ts,tsx}'],
   },
   server: {
+    // Node resolves "localhost" to ::1 on macOS, so the default bound IPv6 only and IPv4 clients got
+    // nothing. 127.0.0.1 matches the backend and the proxy; browsers reach it from localhost too.
+    host: '127.0.0.1',
     proxy: {
         '/api': {
             // DEV_API_TARGET lets a second local stack (another port) run next to the default one.

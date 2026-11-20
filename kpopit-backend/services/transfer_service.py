@@ -75,13 +75,18 @@ class TransferService:
         if expires_at < est_now():
             raise TransferError("Transfer code has expired")
 
+        # Claims the code atomically: of two concurrent requests only one gets the row back.
         cursor.execute("""
                 UPDATE transfer_data
                 SET used = TRUE
                 WHERE code = %s AND used = FALSE
+                RETURNING user_token
             """, (transfer_code,))
+        claimed = cursor.fetchone()
         self.db.commit()
-        return code_row["user_token"]
+        if not claimed:
+            raise TransferError("Transfer code has already been used")
+        return claimed["user_token"]
 
     def get_active_code(self, cursor, user_token: str) -> dict:
         """The user's unused, unexpired code, or nulls."""

@@ -5,7 +5,7 @@ const escapeXml = (value: string) =>
   value.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;").replace(/'/g, "&apos;");
 
 /** Daily games change every day; the rest changes rarely. */
-const changefreq = (path: string) => (["/", "/classic", "/blurry", "/pixelated"].includes(path) ? "daily" : "weekly");
+const changefreq = (path: string) => (["/", "/classic", "/blurry", "/pixelated", "/inkit"].includes(path) ? "daily" : "weekly");
 
 // Private, per-player or placeholder pages never go in the sitemap, even if a path list holds them.
 const NEVER = ["/idol-xp", "/profile", "/login", "/register", "/major-patch", "/admin", "/forgot-password", "/reset-password", "/verify-email", "/confirm-email-change", "/revert-email-change"];

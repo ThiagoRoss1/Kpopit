@@ -2,11 +2,13 @@ import json
 from services.album_service import AlbumService
 from services.game_service import GameService
 from services.idol_guess_service import IdolGuessService
+from services.inkit_mode import INKIT_GAMEMODE_ID, INKIT_MODE
+from services.inkit_service import InkItService
 
 # game_state keeps only screen state (hints, animations); guesses come from guessed_ids.
 SCREEN_STATE_KEYS = ("hints_revealed", "show_hints", "colorize_hints", "animated_idols", "game_date")
 
-MODE_KEYS = {1: "classic", 2: "blurry", 3: "pixelated"}
+MODE_KEYS = {1: "classic", 2: "blurry", 3: "pixelated", **{gamemode_id: name for name, gamemode_id in INKIT_MODE.items()}}
 
 
 def screen_state_only(state) -> dict:
@@ -41,6 +43,9 @@ class RestoreService:
         return result
 
     def build_mode(self, cursor, user_id: int, today: str, gamemode_id: int) -> dict | None:
+        if gamemode_id == INKIT_GAMEMODE_ID:
+            return InkItService(self.db, self.repository).game_state(cursor, user_id, today)
+
         cursor.execute(
             """
                 SELECT guessed_ids, won, game_state FROM daily_user_history

@@ -8,13 +8,15 @@ import { DAY_FRAME, DAY_GROUND, DAY_TAG, KIND_WORD, SMALL_STRIPES, STRIPES, imag
 interface CellProps {
     day: CalendarDay;
     selected: boolean;
+    /** The grid's one Tab stop: the selected day, or the shown month's first open day. */
+    tabbable: boolean;
     mode: CalendarMode;
     onPick: (date: string, mode: CalendarMode) => void;
 }
 
 /** A day in the month grid (wider screens): the date, the day number, the answer's photo once
  *  guessed, and a word for the day's state. The selected day lifts and tilts. */
-export const DayCell = ({ day, index, selected, mode, onPick }: CellProps & { index: number }) => {
+export const DayCell = ({ day, index, selected, tabbable, mode, onPick }: CellProps & { index: number }) => {
     const isOff = day.kind === "pre" || day.kind === "future";
     const isGuessed = isDone(day.kind);
     const dayOfMonth = Number(day.date.slice(8, 10));
@@ -29,7 +31,7 @@ export const DayCell = ({ day, index, selected, mode, onPick }: CellProps & { in
             type="button"
             data-date={day.date}
             disabled={isOff}
-            tabIndex={selected ? 0 : -1}
+            tabIndex={tabbable ? 0 : -1}
             aria-pressed={selected}
             aria-label={label}
             onClick={() => onPick(day.date, mode)}
@@ -96,7 +98,7 @@ export const DayCell = ({ day, index, selected, mode, onPick }: CellProps & { in
 };
 
 /** A day in the compact grid (phones): a round photo or date with a dot for today. */
-export const DotCell = ({ day, selected, today, mode, onPick }: CellProps & { today: string }) => {
+export const DotCell = ({ day, selected, tabbable, today, mode, onPick }: CellProps & { today: string }) => {
     const isOff = day.kind === "pre" || day.kind === "future";
     const isGuessed = isDone(day.kind);
     const isToday = day.date === today;
@@ -107,7 +109,7 @@ export const DotCell = ({ day, selected, today, mode, onPick }: CellProps & { to
             type="button"
             data-date={day.date}
             disabled={isOff}
-            tabIndex={selected ? 0 : -1}
+            tabIndex={tabbable ? 0 : -1}
             aria-pressed={selected}
             aria-label={isOff ? formatShort(day.date) : `${formatShort(day.date)}, Day ${day.no}, ${KIND_WORD[day.kind]}`}
             onClick={() => onPick(day.date, mode)}

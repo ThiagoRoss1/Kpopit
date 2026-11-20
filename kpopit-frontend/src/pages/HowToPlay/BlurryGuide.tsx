@@ -1,8 +1,11 @@
 import { useState } from "react";
 import { BLUR_LEVELS } from "../BlurryMode/blurLevels";
 import { resolveCdnUrl } from "../../utils/imageUrl";
-import { CLASSIC_EXAMPLE, HINT_AT, guessesLeft } from "./howToPlayData";
+import { HINT_AT, guessesLeft } from "./howToPlayData";
 import { GuessStepper, GuideCard, Heading, Steps, Switch } from "./HowToPlayParts";
+
+// Chaewon's Blurry photo (the one the mode itself plays), not her Classic portrait.
+const BLURRY_PHOTO = resolveCdnUrl("/images/blurry_idols/chaewon_b.webp", 1);
 
 const BlurryGuide = () => {
     const [guesses, setGuesses] = useState(0);
@@ -38,7 +41,7 @@ const BlurryGuide = () => {
                             {/* The blur is the game's own level for this attempt, so it stays inline. */}
                             <img
                                 draggable={false}
-                                src={resolveCdnUrl(CLASSIC_EXAMPLE.hit.image) ?? ""}
+                                src={BLURRY_PHOTO ?? ""}
                                 alt="Blurred idol photo"
                                 className="block size-full object-cover scale-110 transition-[filter] duration-550 ease-(--ease-settle)"
                                 style={{ filter: `blur(${blur}px) grayscale(${isColorOn && isColorUnlocked ? 0 : 1})` }}

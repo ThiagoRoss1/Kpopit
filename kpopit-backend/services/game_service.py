@@ -87,11 +87,12 @@ class GameService:
         existing = cursor.fetchone() or {}
         return existing.get("position"), False, existing.get("recorded")
 
-    def save_user_history(self, connect, cursor, user_id, gamemode_id, guessed_id, answer_data, answer_id, today, current_timestamp, analytics_data, is_calendar=False):
+    def save_user_history(self, connect, cursor, user_id, gamemode_id, guessed_id, answer_data, answer_id, today, current_timestamp, analytics_data, is_calendar=False, on_recorded=None):
         """Record one guess for the challenge day `today` and, on the first correct one, the win (score,
         stats, card; the streak only for live games). A calendar win (a past day finished through the
         calendar) is marked is_calendar. Attempts come from the server's guess list; returns
-        (is_correct, card_granted)."""
+        (is_correct, card_granted). `on_recorded(cursor, attempt)` runs in the same transaction when
+        this call recorded the guess (a mode's extras, e.g. the InkIt drawing)."""
         analytics_data = analytics_data or {}
         answer_data = answer_data or {}
         guessed_id = int(guessed_id)
@@ -102,6 +103,9 @@ class GameService:
             attempt, appended, recorded = self._append_guess(
                 cursor, user_id, gamemode_id, guessed_id, today, current_timestamp
             )
+
+            if appended and on_recorded:
+                on_recorded(cursor, attempt)
 
             if is_correct and appended:
                 one_shot_win = attempt == 1 and recorded == 1

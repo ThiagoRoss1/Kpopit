@@ -126,4 +126,52 @@ test.describe('calendar @mobile', () => {
     await page.locator('main').getByRole('link', { name: 'Calendar', exact: true }).click();
     await expect(page.getByText(/^Played from the calendar · /).filter({ visible: true }).first()).toBeVisible();
   });
+
+  test("today's date in ?date= opens the live game", async ({ page }) => {
+    for (const [mode, , liveTitle] of gameMetadata) {
+      await openGame(page, mode);
+      const today = await serverDate(page, mode);
+      await page.goto(`/${mode}?date=${today}`);
+      await expect(page).toHaveURL(new RegExp(`/${mode}$`));
+      await expect(page).toHaveTitle(liveTitle);
+    }
+  });
+
+  test('a malformed ?date= falls back to today', async ({ page }) => {
+    await page.goto('/calendar?date=2026-11-0x');
+    await expect(page.getByRole('link', { name: 'Go to Classic' }).first()).toBeVisible();
+    await expect(page.getByText(/NaN|undefined/)).toHaveCount(0);
+  });
+
+  test("another month's grid keeps a day in the Tab order", async ({ page }) => {
+    await page.goto('/calendar');
+    const previous = page.locator('button[aria-label="Previous month"]:visible').first();
+    test.skip(await previous.isDisabled(), 'only one month of challenges');
+    await previous.click();
+    await expect(page.locator('[role="grid"]:visible [data-date][tabindex="0"]')).toHaveCount(1);
+  });
+
+  test('the month picker closes on Escape, outside clicks and its opener', async ({ page }) => {
+    await page.goto('/calendar');
+    const opener = page.locator('button[aria-haspopup="dialog"]:visible').first();
+    const picker = page.getByRole('dialog', { name: 'Jump to a month...' });
+
+    // From the keyboard, Escape hands focus back to the opener.
+    await opener.focus();
+    await page.keyboard.press('Enter');
+    await expect(picker).toBeVisible();
+    await page.keyboard.press('Escape');
+    await expect(picker).toBeHidden();
+    await expect(opener).toBeFocused();
+
+    await opener.click();
+    await expect(picker).toBeVisible();
+    await page.getByRole('heading', { name: 'Calendar', level: 1 }).click();
+    await expect(picker).toBeHidden();
+
+    await opener.click();
+    await expect(picker).toBeVisible();
+    await opener.click();
+    await expect(picker).toBeHidden();
+  });
 });

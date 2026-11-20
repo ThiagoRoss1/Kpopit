@@ -42,12 +42,15 @@ const MainLayout = () => {
     });
     // An old page with a light look (Pixelated) keeps the navbar in Day until it is redesigned.
     const navTheme = matches.map((match) => (match.handle as { navTheme?: "day" } | undefined)?.navTheme).find(Boolean);
+    // A mode with its own ground pattern (InkIt's hatch) carries it under the footer too.
+    const hatched = matches.some((match) => (match.handle as { ground?: "hatch" } | undefined)?.ground === "hatch");
 
     return (
-        // The page ground (and its dots) is painted once here, so it runs under the navbar and the
+        // The page ground (and its dots, or a mode's hatch) is painted once here, so it runs under the navbar and the
         // footer too; pages draw on top of it instead of painting their own.
         <div className={`relative isolate min-h-screen flex flex-col text-foreground selection:bg-pink-800 ${puff ? "bg-(--ground) transition-colors duration-300" : "bg-transparent"}`}>
-            {puff && <div aria-hidden className="absolute inset-0 -z-10 pointer-events-none bg-[radial-gradient(circle,var(--dot)_1.4px,transparent_1.8px)] bg-size-[19px_19px]" />}
+            {puff && !hatched && <div aria-hidden className="absolute inset-0 -z-10 pointer-events-none bg-[radial-gradient(circle,var(--dot)_1.4px,transparent_1.8px)] bg-size-[19px_19px]" />}
+            {puff && hatched && <div aria-hidden className="absolute inset-0 -z-10 pointer-events-none bg-[repeating-linear-gradient(-45deg,var(--hatch)_0_1.2px,transparent_1.2px_8px)]" />}
             <NavBar forceTheme={puff ? undefined : navTheme ?? "night"} />
             
             {/* Notices */}

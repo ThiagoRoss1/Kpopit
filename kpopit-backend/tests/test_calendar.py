@@ -298,3 +298,10 @@ def test_another_players_day_never_reveals_guesses(client, make_user, week):
     cal_guess(client, finisher, -1, week[-1])
     view = client.get(f"/api/calendar/classic/{day(-1)}", headers={"Authorization": visitor}).get_json()
     assert view["guesses"] is None and view["answer"] is None and view["xp"] is None
+
+
+def test_only_todays_day_says_it_is_today(client, make_user, week):
+    _, token = make_user()
+    flags = [client.get(f"/api/calendar/classic/{day(offset)}", headers={"Authorization": token}).get_json()["is_today"]
+             for offset in (0, -1)]
+    assert flags == [True, False]

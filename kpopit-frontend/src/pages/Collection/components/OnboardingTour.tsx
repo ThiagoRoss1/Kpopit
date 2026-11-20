@@ -68,7 +68,7 @@ const STEPS: readonly TourStep[] = [
         key: 'sticker',
         target: '.album-card-isolate, [data-treatment]',
         title: 'Your stickers',
-        body: 'Win Classic or Blurry to collect a sticker. Win again to level it up: Base → Gold → Holo. Tap any sticker to zoom in.',
+        body: 'Win a daily idol game to collect that idol\'s sticker. Win again to level it up: Base → Gold → Holo. Tap any sticker to zoom in.',
     },
     {
         key: 'done',
@@ -203,9 +203,13 @@ export default function OnboardingTour({ night, onClose, onShowSticker }: Onboar
         rootRef.current?.focus();
     }, []);
 
-    // Keyboard: Esc skips, arrows/Enter navigate.
+    // Keyboard: Esc skips, arrows/Enter navigate. Enter on a button reached with Tab (Skip, Back)
+    // presses that button; a clicked button keeps focus without :focus-visible, so Enter stays Next.
     useEffect(() => {
         const onKey = (event: KeyboardEvent) => {
+            const target = event.target as HTMLElement;
+            if (event.key === 'Enter' && target instanceof HTMLButtonElement && target.matches(':focus-visible')) return;
+
             if (event.key === 'Escape') {
                 event.preventDefault();
                 finish();

@@ -31,6 +31,13 @@ test.describe('albums @mobile', () => {
     expect(consoleErrors.list).toEqual([]);
   });
 
+  test('a failing album API offers Retry, not the 404', async ({ page }) => {
+    await page.route(/\/api\/albums-page\/99999998/, (route) => route.fulfill({ status: 500, json: { error: 'down' } }));
+    await page.goto('/albums/99999998/nope');
+    await expect(page.getByText('Error fetching this album.')).toBeVisible({ timeout: 30_000 });
+    await expect(page.getByRole('heading', { name: '404' })).toHaveCount(0);
+  });
+
   test('a wrong slug goes to the canonical one and an unknown album is the 404', async ({ page, request }) => {
     const [album] = await (await request.get('/api/albums-page')).json();
     await page.goto(`/albums/${album.id}/old-name`);

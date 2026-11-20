@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { cn } from "../../lib/utils";
 import Img from "../Img";
+import { useMediaQuery } from "../../hooks/useIsDevice";
 
 interface BlurryStageProps {
     src: string;
@@ -22,6 +23,9 @@ const CORNERS = [
 /** Both challenge dates use the same photo frame, reveal and mobile zoom. */
 const BlurryStage = ({ src, blur, color, gameEnded, answerName, isLoading = false, onLoad }: BlurryStageProps) => {
     const [isTouched, setIsTouched] = useState(false);
+    // The tap zoom is portrait-only: turning the phone sideways drops it (and its backdrop).
+    const portrait = useMediaQuery("(orientation: portrait)");
+    if (isTouched && !portrait) setIsTouched(false);
 
     return (
         <>

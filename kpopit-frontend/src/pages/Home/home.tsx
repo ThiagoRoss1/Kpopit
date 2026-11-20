@@ -9,9 +9,11 @@ import Modal from "../../components/buttons/modals/Modal";
 import ChangelogText from "../../components/buttons/modals/ChangelogContent";
 import AboutText from "../../components/buttons/modals/AboutContent";
 import Img from "../../components/Img";
+import { useFeatures } from "../../hooks/useFeatures";
 import { HOME_JSON_LD } from "./homeJsonLd";
 
 function Home() {
+    const { features } = useFeatures();
     const [showModal, setShowModal] = useState<null | "changelog" | "about">(null);
 
     return (
@@ -183,6 +185,50 @@ function Home() {
                                 </div>
                             </div>
                         </Link>
+
+                        {/* InkIt (while its flag is on) */}
+                        {features.inkit && (
+                            <Link
+                                to="/inkit"
+                                className="group flex max-xxs:w-70 xxs:w-80 xs:w-90 xm:w-94 sm:w-117.5 max-xxs:h-20 xxs:h-20 xs:h-20 xm:h-20 sm:h-25 max-xxs:px-1 xxs:px-1 xm:px-2 bg-transparent border border-white rounded-3xl
+                                items-center justify-start max-xxs:gap-0 xxs:gap-1 xs:gap-2 shadow-[4px_4px_0px_0px_rgba(255,255,255,1)] hover:shadow-[0px_0px_0px_0px_rgba(255,255,255,1)]
+                                hover:bg-black hover:translate-x-1 hover:translate-y-1 transition-all duration-200 transform-gpu
+                                active:shadow-[0px_0px_0px_0px_rgba(255,255,255,1)] active:bg-black active:translate-x-1 active:translate-y-1">
+                                <div className="flex size-20 bg-white/0 rounded-full items-center text-center justify-center">
+                                    <Img
+                                        src="/kpopit-icon-svg.svg"
+                                        alt="Kpopit Icon"
+                                        className="max-xxs:size-10 xxs:size-10 xs:size-12 sm:size-12 grayscale"
+                                        draggable={false} />
+                                </div>
+
+                                <div className="flex-1 flex flex-row items-center justify-center gap-2 sm:gap-6">
+                                    <div
+                                        className="flex-1 flex flex-col items-start justify-center gap-0.5">
+                                        <div className="flex items-center justify-center text-center border-b border-[#e70a7d] gap-0">
+                                            <h2 className="text-[#e70a7d] brightness-110 [text-shadow:2px_2px_0px_rgba(0,0,0,1),0_0_12px_rgba(231,10,125,0.60)]
+                                            max-xxs:text-base xxs:text-lg xs:text-lg xm:text-xl sm:text-2xl font-bold">
+                                                InkIt
+                                            </h2>
+                                        </div>
+
+                                        <span className="text-white max-xxs:text-[11px] xxs:text-[12px] sm:text-base
+                                        [text-shadow:2px_2px_0px_rgba(0,0,0,1),0_0_12px_rgba(255,255,255,0.60)]">
+                                            Draw to reveal the daily K-pop idol
+                                        </span>
+                                    </div>
+
+                                    <div
+                                        className="flex max-xxs:w-14 max-xxs:h-12 xxs:w-16 xxs:h-12 xs:w-18 xs:h-12 xm:w-20 xm:h-12 sm:w-22.5 sm:h-15 bg-transparent border border-white
+                                        rounded-2xl text-white items-center justify-center text-center
+                                        hover:scale-105 hover:bg-[#e70a7d] group-active:scale-95 ease-[cubic-bezier(0.34,1.56,0.64,1)] group-active:bg-[#e70a7d]
+                                        transition-all duration-500 transform-gpu mr-3.5"
+                                        draggable={false}>
+                                            Play
+                                    </div>
+                                </div>
+                            </Link>
+                        )}
                     </div>
                 </div>
 

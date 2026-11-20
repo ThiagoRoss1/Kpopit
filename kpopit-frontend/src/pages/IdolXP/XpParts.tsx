@@ -161,6 +161,10 @@ export const XpCard = ({ idol, index, animate, stagger, isCurrent, isPending, fa
                 "hover:-translate-y-0.75 hover:rotate-0 @max-[581px]:hover:-translate-y-px",
                 "active:translate-x-px active:translate-y-0.5 active:duration-150",
                 index % 2 ? "rotate-[0.5deg]" : "rotate-[-0.5deg]",
+                // Firefox: the card stays tilted and still on hover; straightening and lifting it
+                // redrew its text and edges on every frame.
+                index % 2 ? "firefox:hover:rotate-[0.5deg]" : "firefox:hover:rotate-[-0.5deg]",
+                "firefox:hover:translate-0",
                 "@max-[581px]:rotate-0",
                 isHighlighted
                     ? "bg-(--chip-hover) shadow-[4px_5px_0_0_#FF8AC4,4px_5px_0_2px_var(--ink),var(--in)]"

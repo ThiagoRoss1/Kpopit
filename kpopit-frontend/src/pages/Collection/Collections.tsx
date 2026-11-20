@@ -1,5 +1,6 @@
 import './collections.css';
 import { useQuery } from '@tanstack/react-query';
+import PageLoader from '../../components/Loading/PageLoader';
 import { Helmet } from 'react-helmet-async';
 import { collectionsListQuery } from './collectionData';
 import CollectionsBackdrop from './components/CollectionsBackdrop';
@@ -23,7 +24,7 @@ export default function Collection() {
     const [night, setNight] = useCollectionNight();
 
     // Usually already cached by the route loader; on a first visit it waits for the session.
-    const { data: collections, isLoading } = useQuery({
+    const { data: collections, isLoading, isError, refetch } = useQuery({
         ...collectionsListQuery,
         enabled: !isAuthLoading,
         refetchOnWindowFocus: false,
@@ -33,6 +34,11 @@ export default function Collection() {
     const textMain = night ? 'text-white' : 'text-ink';
     const textMuted = night ? 'text-white/62' : 'text-[#6b5f55]';
     const rule = night ? 'border-white/22' : 'border-ink';
+
+    // Same screen as a failed route load: with nothing cached, an empty page would read as "no albums".
+    if (isError && !collections) {
+        return <PageLoader error errorMessage="Error loading your collections." onRetry={() => void refetch()} />;
+    }
 
     return (
         <>

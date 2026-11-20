@@ -1,5 +1,5 @@
 import { useRef, useState } from "react";
-import { useIsLg } from "../../hooks/useIsDevice";
+import { useIsLg, useMediaQuery } from "../../hooks/useIsDevice";
 import { cn } from "../../lib/utils";
 import PixelatedCanvas from "./PixelatedCanvas";
 import PixelatedHints from "./PixelatedHints";
@@ -18,6 +18,9 @@ interface PixelatedStageProps {
 const PixelatedStage = ({ coverUrl, blockSize, guessCount, gameEnded, releaseYear, artistName, persist = true }: PixelatedStageProps) => {
     const isLg = useIsLg();
     const [zoom, setZoom] = useState<"closed" | "open" | "closing">("closed");
+    // The tap zoom is for portrait phones: widening to lg or turning sideways drops it.
+    const portrait = useMediaQuery("(orientation: portrait)");
+    if (zoom !== "closed" && (isLg || !portrait)) setZoom("closed");
     const touchStartRef = useRef<{ x: number; y: number } | null>(null);
     const stageWidth = "w-55 xxs:w-60 xs:w-65 xm:w-70 zm:w-76 sm:w-80 md:w-90 lg:w-90 xl:w-110";
 

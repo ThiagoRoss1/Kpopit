@@ -3,7 +3,7 @@
 // list in the background and replaces it (catalog edits show up on the next visit at the latest).
 // Bump the key version when the list shape changes; copies older than MAX_AGE are ignored.
 
-export const ALL_IDOLS_KEY = "kpopit_allIdols_v2";
+export const ALL_IDOLS_KEY = "kpopit_allIdols_v3";
 export const ALL_ALBUMS_KEY = "kpopit_allAlbums_v2";
 
 const MAX_AGE_MS = 7 * 24 * 60 * 60 * 1000;

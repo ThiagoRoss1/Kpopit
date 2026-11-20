@@ -17,6 +17,8 @@ import FitText from "../../components/FitText";
 import { getNationalityFlag } from "../../utils/getFlags";
 import { resolveCdnUrl } from "../../utils/imageUrl";
 import { buildIdolSlug } from "../../utils/formatters";
+import { isNotFoundError } from "../../utils/notFound";
+import NotFound from "../NotFound/NotFound";
 import { groupLabel, idolProfileQuery, idolsListQuery, prefetchIdolProfile, prefetchIdolsList } from "./idolsData";
 import { buildFacts, relatedIdols, type Fact, type FactChip, type Span, type TabKey } from "./idolFacts";
 
@@ -33,6 +35,8 @@ const NO_IDOLS: IdolsPageData[] = [];
 const LIGHT_LETTER_SHADOW = "inset 0 3px 0 rgba(255,255,255,.75),inset 0 -5px 0 rgba(26,20,24,.13),4px 4px 0 #1A1418";
 const DARK_LETTER_SHADOW = "inset 0 3px 0 rgba(255,255,255,.2),inset 0 -5px 0 rgba(0,0,0,.45),4px 4px 0 #1A1418";
 const PINK_LETTER_SHADOW = "inset 0 3px 0 rgba(255,255,255,.55),inset 0 -5px 0 rgba(198,35,104,.35),4px 4px 0 #1A1418";
+// Firefox reads this one (index.css): a tilted, unblurred shadow leaves stray pixels there.
+const firefoxShadow = (shadow: string) => shadow.replaceAll(" 0 #", " 0.5px #").replaceAll(" 0 rgba", " 0.5px rgba");
 
 const LETTER_STYLES = [
     { background: "#FFFFFF", color: "#1A1418", boxShadow: LIGHT_LETTER_SHADOW },
@@ -82,7 +86,7 @@ const IdolProfile = ({ initialProfile }: IdolProfileProps) => {
     const { id, slug } = useParams<{ id: string; slug: string }>();
     const navigate = useNavigate();
     const { data: idols } = useQuery({ ...idolsListQuery, refetchOnWindowFocus: false });
-    const { data, isLoading, isError, refetch } = useQuery({
+    const { data, error, isLoading, isError, refetch } = useQuery({
         ...idolProfileQuery(id ?? ""),
         initialData: initialProfile,
         initialDataUpdatedAt: 0,
@@ -98,6 +102,8 @@ const IdolProfile = ({ initialProfile }: IdolProfileProps) => {
 
         if (slug !== canonicalSlug) navigate(`/idols/${id}/${canonicalSlug}`, { replace: true });
     }, [data, id, slug, navigate]);
+
+    if (!data && isNotFoundError(error)) return <NotFound />;
 
     if (!data) {
         return (
@@ -238,7 +244,8 @@ const IdolPage = ({ data, idols }: IdolPageProps) => {
                         />
 
                         <div className="idol-photo-enter relative">
-                            <div className="relative aspect-4/5 -rotate-3 border-[3px] border-[#1A1418] rounded-[30px] bg-[#1A1418] shadow-[8px_8px_0_#FF8AC4,8px_8px_0_3px_#1A1418]">
+                            {/* Firefox: the depth with a 0.5px blur; unblurred, the tilted shadow left stray pixels. */}
+                            <div className="relative aspect-4/5 -rotate-3 border-[3px] border-[#1A1418] rounded-[30px] bg-[#1A1418] shadow-[8px_8px_0_#FF8AC4,8px_8px_0_3px_#1A1418] firefox:shadow-[8px_8px_0.5px_#FF8AC4,8px_8px_0.5px_3px_#1A1418]">
                                 <div className="absolute inset-0 overflow-hidden rounded-[27px] [clip-path:inset(0_round_27px)] isolate transform-[translateZ(0)]">
                                     <FadeImg
                                         src={cdnImage ?? ""}
@@ -288,7 +295,10 @@ const IdolPage = ({ data, idols }: IdolPageProps) => {
                             )}
 
                             <div className="@container w-full">
-                                <div role="img" aria-label={artistName} className="flex flex-nowrap gap-0.75">
+                                {/* The page's heading: the tiles are drawn letters, so the name itself is read from the hidden span. */}
+                                <h1 className="flex flex-nowrap gap-0.75">
+                                    <span className="sr-only">{artistName}</span>
+
                                     {letters.map((character, position) => {
                                         if (character === " ") return <span key={position} aria-hidden className="w-2.5 flex-none" />;
 
@@ -307,6 +317,7 @@ const IdolPage = ({ data, idols }: IdolPageProps) => {
                                                 )}
                                                 style={{
                                                     ...letterStyle,
+                                                    "--ff-shadow": firefoxShadow(letterStyle.boxShadow),
                                                     rotate: `${LETTER_ROTATIONS[letterIndex % LETTER_ROTATIONS.length]}deg`,
                                                     translate: `0 ${LETTER_OFFSETS[letterIndex % LETTER_OFFSETS.length]}`,
                                                     "--ls": isOdd ? nameScale * 0.82 : nameScale,
@@ -318,7 +329,7 @@ const IdolPage = ({ data, idols }: IdolPageProps) => {
                                             </span>
                                         );
                                     })}
-                                </div>
+                                </h1>
                             </div>
                         </div>
                     </div>
@@ -347,7 +358,9 @@ const IdolPage = ({ data, idols }: IdolPageProps) => {
                                                     "pp-focus flex items-baseline gap-2 pt-2.5 px-4.5 pb-3 border-2 border-[#1A1418] rounded-2xl",
                                                     "font-bold leading-none uppercase whitespace-nowrap cursor-pointer",
                                                     "text-lg @max-[561px]/idol:text-sm",
-                                                    "transition-[translate,rotate,background-color,color,box-shadow] duration-380 ease-(--ease-settle) will-change-transform",
+                                                    // The colour never fades: the puffy outline arrives at once, and dark text fading to
+                                                    // white under it read as a black blob for a moment.
+                                                    "transition-[translate,rotate,background-color,box-shadow] duration-380 ease-(--ease-settle) will-change-transform",
                                                     "pressed:translate-x-0.5 pressed:translate-y-0.75 pressed:rotate-0 pressed:shadow-none pressed:duration-150",
                                                     isActive
                                                         ? "bg-[#FF8AC4] text-white text-shadow-(--ink-puff) -translate-y-0.75 -rotate-2 shadow-[3px_4px_0_0_var(--tab-o),3px_4px_0_0_var(--tab-o)]"
@@ -606,7 +619,10 @@ const RelatedIdols = ({ idols }: { idols: IdolsPageData[] }) => {
                             "transition-[translate,rotate,box-shadow] duration-380 ease-(--ease-settle) will-change-transform",
                             "hover:-translate-y-1 hover:rotate-0",
                             "pressed:translate-x-0.75 pressed:translate-y-1 pressed:rotate-0 pressed:shadow-[2px_2px_0_var(--ctl-off),var(--in)] pressed:duration-150",
-                            index % 2 ? "rotate-[0.8deg]" : "rotate-[-0.8deg]",
+                            // Firefox keeps the tilt on hover and press: the straightening redrew the card on every frame.
+                            index % 2
+                                ? "rotate-[0.8deg] firefox:hover:rotate-[0.8deg] firefox:pressed:rotate-[0.8deg]"
+                                : "rotate-[-0.8deg] firefox:hover:rotate-[-0.8deg] firefox:pressed:rotate-[-0.8deg]",
                         )}
                     >
                         <span className="block aspect-square overflow-hidden border-[2.5px] border-[#1A1418] rounded-xl bg-[#1A1418]">

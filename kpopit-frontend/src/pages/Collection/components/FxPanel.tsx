@@ -411,6 +411,20 @@ export default function FxPanel({ night, onClose, albumName, closing, onAnimatio
         };
     }, [onClose]);
 
+    // Focus moves into the panel (the dialog itself, so no control flashes a ring) and back to the
+    // FX button on close, unless the player already moved on to something else.
+    useEffect(() => {
+        const panel = panelRef.current;
+        panel?.focus({ preventScroll: true });
+
+        return () => {
+            const active = document.activeElement;
+            if (!active || active === document.body || panel?.contains(active)) {
+                document.getElementById('fx-panel-toggle')?.focus({ preventScroll: true });
+            }
+        };
+    }, []);
+
     const setBoolean = (key: SwitchSpec['key'], value: boolean) => {
         guardedSetGfx(key, value);
     };
@@ -432,9 +446,10 @@ export default function FxPanel({ night, onClose, albumName, closing, onAnimatio
                 ref={panelRef}
                 role="dialog"
                 aria-label="Visual effects"
+                tabIndex={-1}
                 onAnimationEnd={onAnimationEnd}
                 className={`fixed inset-x-0 bottom-0 z-260 flex max-h-[80dvh] flex-col overflow-hidden rounded-t-[20px] border-2 p-4 
-                text-left transition-colors duration-300 lg:absolute lg:inset-x-auto lg:bottom-auto lg:right-3 lg:top-full lg:mt-4 lg:max-h-[min(80dvh,44rem)] 
+                text-left outline-none transition-colors duration-300 lg:absolute lg:inset-x-auto lg:bottom-auto lg:right-3 lg:top-full lg:mt-4 lg:max-h-[min(80dvh,44rem)] 
                 lg:w-72 lg:rounded-[20px] lg:p-3 ${motionClass} ${shell}`}
             >
                 <div className="flex flex-none items-start justify-between gap-2.5">

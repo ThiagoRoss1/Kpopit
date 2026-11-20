@@ -4,6 +4,8 @@ from utils.env import load_local_env
 from services.album_service import AlbumService
 from services.game_service import GameService
 from services.idol_guess_service import IdolGuessService
+from services.inkit_mode import INKIT_GAMEMODE_ID, INKIT_MODE
+from services.inkit_service import InkItError, InkItService
 from services.restore_service import RestoreService
 from services.xp_service import game_xp
 from utils.dates import get_current_timestamp, get_today_date
@@ -14,7 +16,7 @@ load_local_env()
 # answer" stays visible to everyone (there is no calendar to play it in).
 CALENDAR_ENABLED = os.getenv("CALENDAR_ENABLED", "false").lower() == "true"
 
-MODES = {"classic": 1, "blurry": 2, "pixelated": 3}
+MODES = {"classic": 1, "blurry": 2, "pixelated": 3, **INKIT_MODE}
 
 # Timeline statuses. No mode has a lost state: a game is unfinished until it is won.
 NOT_PLAYED, IN_PROGRESS, WON_LIVE, WON_CALENDAR = "not_played", "in_progress", "won_live", "won_calendar"
@@ -124,6 +126,8 @@ class CalendarService:
         puzzle, answer = self._puzzle(cursor, gamemode_id, answer_id)
         return {
             "challenge_date": day,
+            # Today's challenge belongs to the live page: the client sends ?date=<today> there.
+            "is_today": day == get_today_date().isoformat(),
             "day_number": self.day_number(cursor, gamemode_id, date.fromisoformat(day)),
             "mode": mode,
             "status": status,
@@ -161,6 +165,10 @@ class CalendarService:
 
         idol = dict(self.repository.fetch_full_idol_data(answer_id) or {})
         answer = {key: idol.get(key) for key in ("idol_id", "artist_name", "image_path", "image_version")}
+        if gamemode_id == INKIT_GAMEMODE_ID:
+            # Only the photo: the group hint comes with the caller's game once its round unlocks it.
+            photo = InkItService(self.db, self.repository).photo(cursor, answer_id) or {}
+            return {key: photo.get(key) for key in ("image_path", "image_version")}, answer
         if gamemode_id == 2:
             blurry = self.repository.fetch_blurry_idol_data(answer_id) or {}
             career = self.repository.fetch_full_idol_career(answer_id)
@@ -184,9 +192,10 @@ class CalendarService:
         }
         return puzzle, answer
 
-    def guess(self, cursor, user_id: int, mode: str, raw_day: str, guessed_id, analytics_data: dict) -> dict:
+    def guess(self, cursor, user_id: int, mode: str, raw_day: str, guessed_id, analytics_data: dict,
+              draft=None) -> dict:
         """Record a guess on a challenge day. A finished day is view-only; finishing a past day here
-        (even one started live) makes it a calendar game."""
+        (even one started live) makes it a calendar game. `draft` is the InkIt drawing of the guess."""
         gamemode_id = MODES[mode]
         day = self.challenge_day(cursor, gamemode_id, raw_day)
         if not isinstance(guessed_id, int) or isinstance(guessed_id, bool) or guessed_id <= 0:
@@ -202,6 +211,14 @@ class CalendarService:
             if "error" in result:
                 raise CalendarError(result["error"])
             return result
+
+        if gamemode_id == INKIT_GAMEMODE_ID:
+            try:
+                return InkItService(self.db, self.repository).process_guess(
+                    cursor, user_id, guessed_id, day, draft, analytics_data, is_calendar=is_calendar,
+                )
+            except InkItError as err:
+                raise CalendarError(str(err), err.status) from None
 
         game_service = GameService(self.db, self.repository)
         answer_id = game_service.resolve_answer_id(cursor, gamemode_id, day)

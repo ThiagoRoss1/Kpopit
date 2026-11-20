@@ -18,6 +18,9 @@ const ShareText = (props: ShareContentProps) => {
     const { guesses, hasWon, attempts, gameMode, wonWithHardMode, wonWithoutColors } = props;
 
     const [copied, setCopied] = useState<boolean>(false);
+
+    // One line for the preview heading and the copied text, so what's shown is what's pasted.
+    const headline = `I found today's #KpopIt ${gameMode === 'blurry' ? 'Blurry ' : ''}Idol in ${attempts} ${attempts === 1 ? "attempt" : "attempts"}! 🎤`;
     
     const getStatusEmoji = (status: string) => {
     switch (status) {
@@ -30,8 +33,8 @@ const ShareText = (props: ShareContentProps) => {
     }
 }
 
-    const textToCopy = (guesses: GuessResponse[], attempts?: number) => {
-        const header = `I found today's #KpopIt Idol in ${attempts} ${attempts === 1 ? "attempt" : "attempts"}! 🎤\n\n`;
+    const textToCopy = (guesses: GuessResponse[]) => {
+        const header = `${headline}\n\n`;
         const body = [...guesses].reverse().map(guess => {
 
         return categories.map(category  => getStatusEmoji(guess.feedback[category]?.status)).join('');
@@ -42,8 +45,8 @@ const ShareText = (props: ShareContentProps) => {
         return header + body + siteLink;
     };
 
-    const textToCopyCategoriesBlurry = (attempts?: number) => {
-        const header = `I found today's #KpopIt Blurry Idol in ${attempts} ${attempts === 1 ? "attempt" : "attempts"}! 🎤\n\n`;
+    const textToCopyCategoriesBlurry = () => {
+        const header = `${headline}\n\n`;
         const bodyHardmode = `Hardmode ${wonWithHardMode ? "✅" : "❌"}\n`;
         const bodyGrayscale = `Grayscale ${wonWithoutColors ? "✅" : "❌"}`;
         const siteLink = `\n\n${window.location.href}`;
@@ -56,18 +59,18 @@ const ShareText = (props: ShareContentProps) => {
 
     const handleCopy = () => {
         if (gameMode === 'blurry') {
-            navigator.clipboard.writeText(textToCopyCategoriesBlurry(attempts));
+            navigator.clipboard.writeText(textToCopyCategoriesBlurry());
         }
         else {
-        navigator.clipboard.writeText(textToCopy(guesses, attempts));
+        navigator.clipboard.writeText(textToCopy(guesses));
         }
 
         setCopied(true);
         setTimeout(() => setCopied(false), 1500);
     }
 
-    const shareOnTwitter = (guesses: GuessResponse[], attempts?: number) => {
-        openTweet(gameMode === 'blurry' ? textToCopyCategoriesBlurry(attempts) : textToCopy(guesses, attempts));
+    const shareOnTwitter = (guesses: GuessResponse[]) => {
+        openTweet(gameMode === 'blurry' ? textToCopyCategoriesBlurry() : textToCopy(guesses));
     }
 
     return (
@@ -76,7 +79,7 @@ const ShareText = (props: ShareContentProps) => {
             <div className="w-full flex justify-center items-center mt-1">
                 <div className="flex flex-col justify-center items-center">
                     <span className="text-xl [text-shadow:1.2px_1.2px_4px_rgba(0,0,0,0.8),0_0_12px_rgba(255,255,255,0.35)]">
-                        {`I found today's #KpopIt Idol in ${attempts} ${attempts === 1 ? "attempt" : "attempts"}! 🎤`}
+                        {headline}
                     </span>
                 </div>
                 
@@ -161,7 +164,7 @@ const ShareText = (props: ShareContentProps) => {
                         type='button'  
                         onClick={(() => {
                             if (hasWon) {
-                                shareOnTwitter(guesses, attempts);
+                                shareOnTwitter(guesses);
                             }
                         })}>
                         <div className='relative flex flex-row items-center justify-center gap-2'>

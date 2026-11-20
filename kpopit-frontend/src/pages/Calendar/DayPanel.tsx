@@ -73,7 +73,9 @@ const DayPanel = ({ day, mode }: { day: CalendarDay; mode: CalendarMode }) => {
     const triesLabel = `${tries} ${tries === 1 ? "try" : "tries"}`;
     const guesses = detail.data?.guesses ?? [];
     const name = day.entry?.answer_name ?? "";
-    const group = mode === "pixelated" ? detail.data?.puzzle.group_name : detail.data?.puzzle.groups?.[0];
+    const group = mode === "pixelated" ? detail.data?.puzzle.group_name
+        : mode === "inkit" ? detail.data?.game?.answer?.groups[0]
+        : detail.data?.puzzle.groups?.[0];
     const hiddenNote = day.kind === "started" ? "Almost there..." : "Still a secret...";
     const dayLabel = day.no ? `Day ${day.no}` : formatShort(day.date);
     const xp = detail.data?.xp ?? day.entry?.xp;

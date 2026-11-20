@@ -1,8 +1,9 @@
 from datetime import date, timedelta
 from repositories.idol_repository import CURRENT_CAREER_CTE
+from services.inkit_mode import INKIT_GAMEMODE_ID, INKIT_MODE
 
-MODE_KEYS = {1: "classic", 2: "blurry", 3: "pixelated"}
-IDOL_MODES = (1, 2)
+MODE_KEYS = {1: "classic", 2: "blurry", 3: "pixelated", **{gamemode_id: name for name, gamemode_id in INKIT_MODE.items()}}
+IDOL_MODES = [1, 2, INKIT_GAMEMODE_ID]
 DISTRIBUTION_BUCKETS = 8  # the last bucket holds 8 guesses and more
 WEEKS, MONTHS = 16, 12
 TOP_GROUPS, TOP_IDOLS = 5, 5
@@ -105,11 +106,11 @@ class ProfileStats:
                 )
                 SELECT gs.gamemode_id, g.name, COUNT(*) AS guesses
                 FROM guesses gs
-                LEFT JOIN primary_group pg ON gs.gamemode_id IN (1, 2) AND pg.idol_id = gs.gid
+                LEFT JOIN primary_group pg ON gs.gamemode_id = ANY(%s) AND pg.idol_id = gs.gid
                 LEFT JOIN albums al ON gs.gamemode_id = 3 AND al.id = gs.gid
                 JOIN groups g ON g.id = COALESCE(pg.group_id, al.group_id)
                 GROUP BY gs.gamemode_id, g.name
-            """, (user_id, last_day),
+            """, (user_id, last_day, IDOL_MODES),
         )
         groups = cursor.fetchall()
         cursor.execute(
@@ -122,9 +123,9 @@ class ProfileStats:
                 JOIN idols i ON i.id = gid
                 LEFT JOIN primary_group pg ON pg.idol_id = i.id
                 LEFT JOIN groups g ON g.id = pg.group_id
-                WHERE h.user_id = %s AND h.date <= %s AND h.gamemode_id IN (1, 2)
+                WHERE h.user_id = %s AND h.date <= %s AND h.gamemode_id = ANY(%s)
                 GROUP BY h.gamemode_id, i.id, i.artist_name, i.image_path, g.name
-            """, (user_id, last_day),
+            """, (user_id, last_day, IDOL_MODES),
         )
         return groups, cursor.fetchall()
 

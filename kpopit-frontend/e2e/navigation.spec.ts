@@ -39,6 +39,8 @@ test.describe('every route loads @mobile', () => {
   for (const mode of ['classic', 'blurry', 'pixelated'] as const) {
     test(`/${mode} loads without console errors @smoke`, async ({ page, consoleErrors }) => {
       await openGame(page, mode);
+      // The icon-only submit button has a name for screen readers.
+      await expect(page.getByRole('button', { name: 'Guess', exact: true })).toBeVisible();
       await expectCleanLoad(page, consoleErrors);
     });
   }
@@ -47,6 +49,10 @@ test.describe('every route loads @mobile', () => {
     await page.goto('/idols');
     const cards = page.locator('a[href^="/idols/"]');
     await expect(cards.nth(1)).toBeVisible();
+    // The cards puff in with a staggered entrance: measured mid-way, neighbours sit a few px apart.
+    await page.evaluate(() => Promise.all(document.getAnimations()
+      .filter((animation) => (animation as CSSAnimation).animationName === 'puffIn')
+      .map((animation) => animation.finished)));
     const [a, b] = [await cards.nth(0).boundingBox(), await cards.nth(1).boundingBox()];
     // Side by side on one row, even on a phone (two columns at least): not a single stacked column.
     expect(Math.abs(a!.y - b!.y)).toBeLessThan(2);
@@ -63,6 +69,10 @@ test.describe('every route loads @mobile', () => {
     await page.goto(href!);
     await expect(page).toHaveURL(href!);
     await expect(page.getByRole('img', { name: / photo$/ }).first()).toBeVisible();
+    // The lettered name is the page's only h1, named like the photo.
+    const photoName = (await page.getByRole('img', { name: / photo$/ }).first().getAttribute('alt'))!.replace(/ photo$/, '');
+    await expect(page.getByRole('heading', { level: 1 })).toHaveCount(1);
+    await expect(page.getByRole('heading', { level: 1 })).toContainText(photoName);
     await expectCleanLoad(page, consoleErrors);
   });
 
@@ -76,6 +86,16 @@ test.describe('every route loads @mobile', () => {
     await page.goto(href!);
     await expect(page).toHaveURL(href!);
     await expectCleanLoad(page, consoleErrors);
+  });
+
+  test('an unknown idol is the 404; a failing API offers Retry instead', async ({ page }) => {
+    await page.goto('/idols/99999999/nobody');
+    await expect(page.getByRole('heading', { name: '404' })).toBeVisible();
+
+    await page.route(/\/api\/idols-page\/99999998/, (route) => route.fulfill({ status: 500, json: { error: 'down' } }));
+    await page.goto('/idols/99999998/nobody');
+    await expect(page.getByText('Error fetching idol profile data.')).toBeVisible({ timeout: 30_000 });
+    await expect(page.getByRole('button', { name: 'Retry' })).toBeVisible();
   });
 
   test('the old /collection path is just an unknown route (the 404)', async ({ page }) => {
@@ -195,5 +215,11 @@ test.describe('navbar, footer and home modals', () => {
     await page.getByRole('button', { name: 'Changelog' }).click();
     await expect(page.getByRole('heading', { name: 'Changelog...' })).toBeVisible();
     await closeModal(page, 'Changelog...');
+
+    // Escape closes them too.
+    await page.getByRole('button', { name: 'Changelog' }).click();
+    await expect(page.getByRole('heading', { name: 'Changelog...' })).toBeVisible();
+    await page.keyboard.press('Escape');
+    await expect(page.getByRole('heading', { name: 'Changelog...' })).toBeHidden();
   });
 });

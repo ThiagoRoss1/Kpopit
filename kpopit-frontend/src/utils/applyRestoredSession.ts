@@ -64,5 +64,14 @@ export const applyRestoredSession = (payload: RestoreSessionResponse, modes?: re
         writeBool("pixelatedGameWon", pixelated.game_won);
     }
 
+    // InkIt reads its game from the server; only the day's result is mirrored (other modes' tiles).
+    const inkit = only("inkit") ? payload.inkit : null;
+
+    if (inkit) {
+        writeBool("inkitGameComplete", inkit.game_complete);
+        writeBool("inkitGameWon", inkit.game_won);
+        localStorage.setItem("inkitGameDate", payload.server_date);
+    }
+
     window.dispatchEvent(new Event("session-restored"));
 };

@@ -18,8 +18,9 @@ test('has no lastmod (the build date would change on every deploy)', () => {
 });
 
 test('daily games change daily, other pages weekly', () => {
-    const xml = buildSitemap(['/pixelated', '/privacy-policy']);
+    const xml = buildSitemap(['/pixelated', '/inkit', '/privacy-policy']);
     assert.match(xml, /pixelated<\/loc>\n {4}<changefreq>daily/);
+    assert.match(xml, /inkit<\/loc>\n {4}<changefreq>daily/);
     assert.match(xml, /privacy-policy<\/loc>\n {4}<changefreq>weekly/);
 });
 

@@ -7,8 +7,8 @@ import { HINT_AT, guessesLeft } from "./howToPlayData";
 import { GuessStepper, GuideCard, Heading, Steps } from "./HowToPlayParts";
 
 const SLEEVES = [
-    { label: "Release Year", korean: "발매년도", value: "2022", unlocksAt: HINT_AT.pixelated[0], look: "bg-[#E4E4E4] text-[#72401A]" },
-    { label: "Artist", korean: "가수", value: "IVE", unlocksAt: HINT_AT.pixelated[1], look: "bg-[#FFD1E8] text-[#5A1A48]" },
+    { label: "Release Year", korean: "발매년도", value: "2018", unlocksAt: HINT_AT.pixelated[0], look: "bg-[#E4E4E4] text-[#72401A]" },
+    { label: "Artist", korean: "가수", value: "Red Velvet", unlocksAt: HINT_AT.pixelated[1], look: "bg-[#FFD1E8] text-[#5A1A48]" },
 ];
 
 // The game's sleeve motion: a springy slide for the record and the sleeve.
@@ -28,7 +28,7 @@ const PixelatedGuide = () => {
                         <div className="relative aspect-square overflow-hidden rounded-[18px] border-[2.5px] border-[#1A1418] bg-[#DCD6D2] shadow-[4px_5px_0_var(--ctl-off)]">
                             {/* The game's own mosaic canvas, so each step looks exactly like that attempt in Pixelated. */}
                             <PixelatedCanvas
-                                imageUrl={resolveCdnUrl("/images/albums/after_like.webp") ?? undefined}
+                                imageUrl={resolveCdnUrl("/images/albums/summer_magic.webp") ?? undefined}
                                 blockSize={PIXEL_LEVELS[Math.min(guesses, PIXEL_LEVELS.length - 1)]}
                                 alt="Pixelated album cover"
                                 className="absolute inset-0 size-full"
@@ -62,16 +62,16 @@ const PixelatedGuide = () => {
                         const isOpen = isUnlocked && openSleeves[i];
 
                         return (
-                            <div key={sleeve.label} className="relative h-24">
+                            <div key={sleeve.label} className="relative h-28">
                                 <div
                                     aria-hidden
                                     className={cn(
-                                        "absolute left-2 top-2 grid place-items-center size-20 rounded-full border-2 border-[#1A1418] bg-[#0D0008]",
+                                        "absolute left-2 top-2 grid place-items-center size-24 rounded-full border-2 border-[#1A1418] bg-[#0D0008]",
                                         SLEEVE_MOTION,
-                                        isOpen && "translate-x-20.5 rotate-360",
+                                        isOpen && "translate-x-24.5 rotate-360",
                                     )}
                                 >
-                                    <span className={cn("grid place-items-center size-10 rounded-full font-bold text-xs", sleeve.look)}>{sleeve.value}</span>
+                                    <span className={cn("grid place-items-center size-14 rounded-full text-center font-bold text-xs/[1.1]", sleeve.look)}>{sleeve.value}</span>
                                 </div>
 
                                 <button
@@ -80,7 +80,7 @@ const PixelatedGuide = () => {
                                     aria-label={isUnlocked ? `${sleeve.label} hint` : `${sleeve.label} hint, locked`}
                                     onClick={() => toggleSleeve(i)}
                                     className={cn(
-                                        "pp-focus absolute left-0 top-0 flex flex-col justify-between size-24 p-2 rounded-[10px] text-left cursor-pointer disabled:cursor-default",
+                                        "pp-focus absolute left-0 top-0 flex flex-col justify-between size-28 p-2.5 rounded-[10px] text-left cursor-pointer disabled:cursor-default",
                                         "border-2 border-[#1A1418] shadow-[3px_4px_0_var(--ctl-off)]",
                                         SLEEVE_MOTION,
                                         isOpen ? "-translate-x-1.5 -rotate-7" : "-rotate-2",
@@ -100,7 +100,7 @@ const PixelatedGuide = () => {
                                     </span>
                                 </button>
 
-                                <span className="@max-[431px]:hidden absolute left-50 top-1/2 -translate-y-1/2 text-sm">
+                                <span className="@max-[431px]:hidden absolute left-58 top-1/2 -translate-y-1/2 text-sm">
                                     <b>{sleeve.label}</b> unlocks after <b>{sleeve.unlocksAt} guesses</b>.
                                 </span>
                             </div>

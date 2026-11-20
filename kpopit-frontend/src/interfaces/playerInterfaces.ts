@@ -85,6 +85,7 @@ export interface ModeStats {
     most_guessed: { idol_id: number; artist_name: string; image_path: string | null; group_name: string | null; guesses: number }[];
 }
 
+/** `inkit` is present only while its flag is on (list the modes with modesFor). */
 export type ProfileStats = Record<CalendarMode | "all", ModeStats>;
 
 export type HistoryEntry =

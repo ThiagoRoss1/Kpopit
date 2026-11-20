@@ -48,7 +48,7 @@ const IdolsCards = ({ idol, index, animate, stagger }: IdolsCardsProps) => {
                         decoding="async"
                         className={cn(
                             "relative block size-full object-cover object-[center_28%]",
-                            "transition-[scale,opacity] duration-750 ease-(--ease-settle) group-hover:scale-108",
+                            "transition-[scale] duration-750 ease-(--ease-settle) group-hover:scale-108",
                         )}
                     />
 
