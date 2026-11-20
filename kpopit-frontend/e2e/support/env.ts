@@ -66,6 +66,7 @@ export function testBackendEnv(extra: Record<string, string> = {}): Record<strin
     PYTHON_DOTENV_DISABLED: '1',
     FLASK_SKIP_DOTENV: '1',
     JWT_SECRET_KEY: 'e2e-only-dummy-jwt-signing-key-at-least-32-characters',
+    INKIT_PATH_SECRET: 'test-inkit-path-secret',
     RESEND_EMAIL_FROM: 'test@example.com',
     COLLECTION_ENABLED: 'true',
     ADMIN_ENABLED: 'true',

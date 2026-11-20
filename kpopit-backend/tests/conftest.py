@@ -60,6 +60,8 @@ os.environ["PUBLIC_PROFILE_ENABLED"] = "true"
 os.environ["CALENDAR_ENABLED"] = "true"
 os.environ["IDOL_XP_ENABLED"] = "true"
 os.environ["INKIT_ENABLED"] = "true"
+# HMAC key for the InkIt per-file hashed paths (owner's machine and test runners only).
+os.environ["INKIT_PATH_SECRET"] = "test-inkit-path-secret"
 # No test may reach Resend: emails go to a per-test outbox (see the email_outbox fixture).
 os.environ["EMAIL_DELIVERY"] = "outbox"
 os.environ["RESEND_API_KEY"] = ""

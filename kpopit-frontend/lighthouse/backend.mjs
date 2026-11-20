@@ -38,6 +38,7 @@ function backendEnv() {
     DB_URL: localDbUrl(),
     FLASK_ENV: 'development',
     JWT_SECRET_KEY: 'lighthouse-only-dummy-jwt-signing-key-at-least-32-chars',
+    INKIT_PATH_SECRET: 'test-inkit-path-secret',
     COLLECTION_ENABLED: 'true',
     MAINTENANCE_MODE: 'false',
     CALENDAR_ENABLED: 'false',
