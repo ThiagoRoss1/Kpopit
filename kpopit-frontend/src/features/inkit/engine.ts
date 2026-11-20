@@ -1,4 +1,4 @@
-import { INKIT_CONFIG, SHEET, SHEET_PIXELS, TOOL_IDS, type ToolId } from "./config.ts";
+import { INKIT_CONFIG, RENDER_SIDE, SHEET, SHEET_PIXELS, TOOL_IDS, type ToolId } from "./config.ts";
 
 // The InkIt sheet, ported 1:1 from the reference engine (v9 glow brush, InkIt Lab ink and rounds).
 // Everything is in sheet units (a fixed 500×500 sheet): convert pointer positions with toSheet first, so screen
@@ -69,6 +69,25 @@ export const roundInk = (hint1Used: boolean): number => INKIT_CONFIG.inkPerRound
 
 /** The reveal's last stage: the masks ease into the photo over this long. */
 export const REVEAL_SETTLE_MS = 450;
+
+/** Per render coordinate: the two neighbouring SHEET cells around its centre and the blend weight.
+ *  The same plan serves x and y, cached per side. */
+const samplePlans = new Map<number, { low: Int32Array; high: Int32Array; weight: Float32Array }>();
+const samplePlan = (side: number) => {
+    let plan = samplePlans.get(side);
+    if (plan) return plan;
+
+    plan = { low: new Int32Array(side), high: new Int32Array(side), weight: new Float32Array(side) };
+    for (let coordinate = 0; coordinate < side; coordinate++) {
+        const position = Math.min(SHEET - 1, Math.max(0, ((coordinate + 0.5) * SHEET) / side - 0.5));
+        const low = Math.floor(position);
+        plan.low[coordinate] = low;
+        plan.high[coordinate] = Math.min(SHEET - 1, low + 1);
+        plan.weight[coordinate] = position - low;
+    }
+    samplePlans.set(side, plan);
+    return plan;
+};
 
 const copyMasks = (masks: Masks): Masks => ({
     pencil: Float32Array.from(masks.pencil),
@@ -310,8 +329,64 @@ export class InkItSheet {
     /* ---- Compositing ---- */
 
     /** White paper → paint mixes the photo in → graphite and ink darken on top. The page's CSS paper
-     *  shows through because the canvas multiplies over it (white = transparent). `out` is SHEET×SHEET. */
-    render(layers: Layers, out: { data: Uint8ClampedArray }): void {
+     *  shows through because the canvas multiplies over it (white = transparent). `out` and the layers
+     *  are side×side; the SHEET-sized masks are sampled bilinearly at each pixel's centre. */
+    render(layers: Layers, out: { data: Uint8ClampedArray }, side: number = RENDER_SIDE): void {
+        if (side === SHEET) {
+            this.renderAtSheet(layers, out);
+            return;
+        }
+
+        const data = out.data;
+        const { photo, pencil, pen } = layers;
+        const { masks } = this;
+        const { low, high, weight } = samplePlan(side);
+
+        const { paint: paintMask, pencil: pencilMask, pen: penMask } = masks;
+
+        for (let y = 0; y < side; y++) {
+            const rowLow = low[y] * SHEET;
+            const rowHigh = high[y] * SHEET;
+            const fy = weight[y];
+
+            for (let x = 0; x < side; x++) {
+                const a = rowLow + low[x];
+                const b = rowLow + high[x];
+                const c = rowHigh + low[x];
+                const d = rowHigh + high[x];
+                const fx = weight[x];
+                // Bilinear: blend along x on both rows, then between the rows.
+                const wa = (1 - fx) * (1 - fy);
+                const wb = fx * (1 - fy);
+                const wc = (1 - fx) * fy;
+                const wd = fx * fy;
+
+                const index = y * side + x;
+                const offset = index * 4;
+                const paint = paintMask[a] * wa + paintMask[b] * wb + paintMask[c] * wc + paintMask[d] * wd;
+                let red = 255;
+                let green = 255;
+                let blue = 255;
+
+                if (paint > 0) {
+                    red += (photo[offset] - red) * paint;
+                    green += (photo[offset + 1] - green) * paint;
+                    blue += (photo[offset + 2] - blue) * paint;
+                }
+
+                const graphite = (pencilMask[a] * wa + pencilMask[b] * wb + pencilMask[c] * wc + pencilMask[d] * wd) * pencil[index];
+                const ink = (penMask[a] * wa + penMask[b] * wb + penMask[c] * wc + penMask[d] * wd) * pen[index];
+
+                data[offset] = red * (1 - graphite * 0.86) * (1 - ink);
+                data[offset + 1] = green * (1 - graphite * 0.84) * (1 - ink);
+                data[offset + 2] = blue * (1 - graphite * 0.76) * (1 - ink * 0.95);
+                data[offset + 3] = 255;
+            }
+        }
+    }
+
+    /** The same composite with one mask value per pixel (side = SHEET): the pre-layer render, unchanged. */
+    private renderAtSheet(layers: Layers, out: { data: Uint8ClampedArray }): void {
         const data = out.data;
         const { photo, pencil, pen } = layers;
         const { masks } = this;

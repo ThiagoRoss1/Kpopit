@@ -8,6 +8,10 @@ export const TOOL_IDS: readonly ToolId[] = ["pencil", "pen", "paint"];
 /** The logical sheet side: every position, radius, speed and saved mask is in these units. */
 export const SHEET = 500;
 export const SHEET_PIXELS = SHEET * SHEET;
+/** The composited sheet's side in canvas pixels; the masks stay at SHEET and are upsampled.
+ *  500 reproduces the pre-layer look exactly. 1000 waits for a faster compositor: on the CPU it
+ *  measured ~18 ms a frame on a desktop (500: ~2 ms), past the 8 ms budget for phones. */
+export const RENDER_SIDE = 500;
 
 export interface ToolConfig {
     /** The round (the guess about to be made = wrong guesses + 1) the tool unlocks at. */

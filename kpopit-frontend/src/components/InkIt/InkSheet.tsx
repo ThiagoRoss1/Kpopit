@@ -1,6 +1,6 @@
 import type { ComponentProps, CSSProperties, ReactNode, RefObject } from "react";
 import { Paintbrush, RotateCw } from "lucide-react";
-import { SHEET, type ToolId } from "../../features/inkit/config.ts";
+import { RENDER_SIDE, type ToolId } from "../../features/inkit/config.ts";
 import { grainUrl, greySpriteUrl, spriteUrl, toolCursor } from "../../features/inkit/sprites.ts";
 import type { SheetStatus } from "../../features/inkit/useInkIt.ts";
 
@@ -87,8 +87,8 @@ const InkSheet = ({
 
                             <canvas
                                 ref={canvasRef}
-                                width={SHEET}
-                                height={SHEET}
+                                width={RENDER_SIDE}
+                                height={RENDER_SIDE}
                                 role="img"
                                 aria-label={finished ? "The idol's photo, revealed" : "Drawing sheet: draw to reveal the idol's photo"}
                                 data-testid="inkit-sheet"

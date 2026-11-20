@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useRef, useState, type PointerEvent as ReactPointerEvent } from "react";
-import { SHEET, SHEET_PIXELS, type ToolId } from "./config.ts";
+import { RENDER_SIDE, SHEET, type ToolId } from "./config.ts";
 import { exportDraft, importDraft } from "./codec.ts";
 import { InkItSheet, toSheet, unlockedTools, type Layers } from "./engine.ts";
 import { buildLayersFromPhoto, loadLayer, loadPhotoPixels } from "./layerFiles.ts";
@@ -34,8 +34,8 @@ const MAX_FRAME_SECONDS = 0.05;
 // Until a layer arrives the sheet renders it as paper: the pen and paint masks stay 0 before their round.
 let blankLayers: { darkness: Float32Array; photo: Uint8ClampedArray } | null = null;
 const blanks = () => (blankLayers ??= {
-    darkness: new Float32Array(SHEET_PIXELS),
-    photo: new Uint8ClampedArray(SHEET_PIXELS * 4).fill(255),
+    darkness: new Float32Array(RENDER_SIDE * RENDER_SIDE),
+    photo: new Uint8ClampedArray(RENDER_SIDE * RENDER_SIDE * 4).fill(255),
 });
 
 const TOOL_LAYER: Record<ToolId, LayerKind> = { pencil: "pencil", pen: "pen", paint: "photo" };
@@ -43,7 +43,7 @@ const IDLE_LAYERS: Record<LayerKind, LayerStatus> = { pencil: "idle", pen: "idle
 
 const makeCanvas = () => {
     const canvas = document.createElement("canvas");
-    canvas.width = canvas.height = SHEET;
+    canvas.width = canvas.height = RENDER_SIDE;
 
     return canvas;
 };
@@ -99,7 +99,7 @@ export const useInkIt = ({
         const target = canvas.getContext("2d");
         if (!target) return;
 
-        frameRef.current ??= target.createImageData(SHEET, SHEET);
+        frameRef.current ??= target.createImageData(RENDER_SIDE, RENDER_SIDE);
         sheetRef.current.render(layers, frameRef.current);
         target.putImageData(frameRef.current, 0, 0);
     }, []);
@@ -172,7 +172,7 @@ export const useInkIt = ({
             setIsEmpty(sheet.isEmpty());
             if (finishedRef.current && layersRef.current) {
                 // Kept for "Share my drawing" after a reload: the sheet as it was at the last guess.
-                const snapshot = new ImageData(SHEET, SHEET);
+                const snapshot = new ImageData(RENDER_SIDE, RENDER_SIDE);
                 sheet.render(layersRef.current, snapshot);
                 shareSnapshotRef.current ??= snapshot;
                 sheet.showPhoto();
@@ -312,7 +312,7 @@ export const useInkIt = ({
     const snapshotForShare = useCallback(() => {
         if (!layersRef.current) return;
 
-        const snapshot = new ImageData(SHEET, SHEET);
+        const snapshot = new ImageData(RENDER_SIDE, RENDER_SIDE);
         sheetRef.current.render(layersRef.current, snapshot);
         shareSnapshotRef.current = snapshot;
     }, []);
@@ -330,7 +330,7 @@ export const useInkIt = ({
         if (!target) return null;
 
         target.fillStyle = paperColor;
-        target.fillRect(0, 0, SHEET, SHEET);
+        target.fillRect(0, 0, RENDER_SIDE, RENDER_SIDE);
         target.globalCompositeOperation = "multiply";
         target.drawImage(drawing, 0, 0);
 

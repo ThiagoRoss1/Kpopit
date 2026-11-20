@@ -393,15 +393,69 @@ test('compositing: white paper, paint shows the photo, graphite and ink darken (
     const out = { data: new Uint8ClampedArray(pixels * 4) };
     const sheet = new InkItSheet();
 
-    sheet.render(layers, out);
+    sheet.render(layers, out, SHEET);
     assert.deepEqual([...out.data.subarray(0, 4)], [255, 255, 255, 255]);
 
     sheet.masks.pencil.fill(1);
-    sheet.render(layers, out);
+    sheet.render(layers, out, SHEET);
     assert.deepEqual([...out.data.subarray(0, 3)], [Math.round(255 * 0.14), Math.round(255 * 0.16), Math.round(255 * 0.24)]);
 
     sheet.masks.pencil.fill(0);
     sheet.masks.paint.fill(1);
-    sheet.render(layers, out);
+    sheet.render(layers, out, SHEET);
     assert.deepEqual([...out.data.subarray(0, 4)], [100, 100, 100, 255]);
+});
+
+const layersAt = (side, { pencil = 0.5, pen = 0.5, photo = [200, 100, 50] } = {}) => {
+    const photoPixels = new Uint8ClampedArray(side * side * 4);
+    for (let index = 0; index < side * side; index++) photoPixels.set([...photo, 255], index * 4);
+    return { photo: photoPixels, pencil: new Float32Array(side * side).fill(pencil), pen: new Float32Array(side * side).fill(pen) };
+};
+
+test('render at RENDER_SIDE 500 matches today', () => {
+    const sheet = new InkItSheet();
+    sheet.pointerDown({ x: 80, y: 120 }, 0);
+    for (let step = 1; step <= 30; step++) sheet.pointerMove({ x: 80 + step * 11, y: 120 + Math.sin(step / 3) * 60 }, step * 20);
+    sheet.pointerUp();
+    sheet.masks.paint.fill(0.3, 0, SHEET * 40);
+    sheet.masks.pen.fill(0.6, SHEET * 300, SHEET * 340);
+
+    const layers = layersAt(SHEET, { pencil: 0.4, pen: 0.7 });
+    const out = { data: new Uint8ClampedArray(SHEET * SHEET * 4) };
+    sheet.render(layers, out, SHEET);
+
+    // The formula as it stood before RENDER_SIDE: per pixel, paint over white, then graphite and ink.
+    const expected = new Uint8ClampedArray(SHEET * SHEET * 4);
+    for (let index = 0; index < SHEET * SHEET; index++) {
+        const offset = index * 4;
+        const paint = sheet.masks.paint[index];
+        const [red, green, blue] = [0, 1, 2].map((channel) => 255 + (layers.photo[offset + channel] - 255) * paint);
+        const graphite = sheet.masks.pencil[index] * 0.4;
+        const ink = sheet.masks.pen[index] * 0.7;
+        expected.set([red * (1 - graphite * 0.86) * (1 - ink), green * (1 - graphite * 0.84) * (1 - ink), blue * (1 - graphite * 0.76) * (1 - ink * 0.95), 255], offset);
+    }
+    assert.deepEqual(out.data, expected);
+});
+
+test('render upsamples masks at 1000', () => {
+    const sheet = new InkItSheet();
+    const [mx, my] = [200, 150];
+    sheet.masks.pen[my * SHEET + mx] = 1;
+
+    const side = 1000;
+    const out = { data: new Uint8ClampedArray(side * side * 4) };
+    sheet.render(layersAt(side, { pencil: 0, pen: 1 }), out, side);
+
+    const red = (x, y) => out.data[(y * side + x) * 4];
+    const block = [[2 * mx, 2 * my], [2 * mx + 1, 2 * my], [2 * mx, 2 * my + 1], [2 * mx + 1, 2 * my + 1]];
+    const inBlock = block.map(([x, y]) => red(x, y));
+
+    // The matching 2×2 block is lit evenly, darker than any pixel around it; far away stays paper.
+    assert.ok(inBlock.every((value) => value === inBlock[0]), `block ${inBlock}`);
+    assert.ok(inBlock[0] < 255);
+    for (const [x, y] of [[2 * mx - 1, 2 * my], [2 * mx + 2, 2 * my], [2 * mx, 2 * my - 1], [2 * mx, 2 * my + 2]]) {
+        assert.ok(red(x, y) > inBlock[0], `neighbour ${x},${y}: ${red(x, y)} vs ${inBlock[0]}`);
+    }
+    assert.equal(red(2 * mx + 10, 2 * my + 10), 255);
+    assert.equal(red(0, 0), 255);
 });
