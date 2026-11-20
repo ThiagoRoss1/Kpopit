@@ -1,6 +1,7 @@
 import { useEffect, useRef, useState, type ReactNode } from "react";
 import { Lock } from "lucide-react";
 import { cn } from "../../lib/utils";
+import FitText from "../FitText";
 import { INKIT_CONFIG } from "../../features/inkit/config.ts";
 import { spriteUrl } from "../../features/inkit/sprites.ts";
 
@@ -102,8 +103,10 @@ const HintCard = ({ label, guessesLeft, used, disabled, reducedMotion, tilt, tes
                     <span
                         data-testid={`${testId}-result`}
                         className={cn(
-                            "col-start-1 row-start-1 flex items-center gap-1.5 px-[.3em] py-[.35em]",
+                            "col-start-1 row-start-1 flex w-full min-w-0 items-center justify-center gap-1.5 px-[.3em] py-[.35em]",
                             "font-script text-[27px] leading-none whitespace-nowrap text-[#1A1418] max-[900px]:text-[19px]",
+                            // The size a long result (FitText) starts from before shrinking to fit the card.
+                            "[--hint-text:27px] max-[900px]:[--hint-text:19px]",
                             shown === "write" && "animate-[ikWrite_.9s_linear_both]",
                         )}
                     >
@@ -185,7 +188,7 @@ const InkHints = ({
                 onUse={() => groupHint !== null}
                 onRevealed={onShowGroupHint}
             >
-                {groupHint?.join(", ") || "Soloist"}
+                <FitText maxSize="var(--hint-text)">{groupHint?.join(", ") || "Soloist"}</FitText>
             </HintCard>
         </div>
     );
