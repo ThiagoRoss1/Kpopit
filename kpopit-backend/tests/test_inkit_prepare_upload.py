@@ -85,3 +85,42 @@ def test_cli_prints_version_reminder(tmp_path, monkeypatch, capsys):
     monkeypatch.setenv("INKIT_PATH_SECRET", "")
     with pytest.raises(SystemExit, match="INKIT_PATH_SECRET"):
         prepare_upload.main([str(webp), str(upload)])
+
+
+def test_existing_files_are_skipped_unless_force(tmp_path, capsys, monkeypatch):
+    webp, upload = tmp_path / "webp", tmp_path / "upload"
+    _webps(webp, "seeun_i")
+    assert prepare_upload.prepare(webp, upload, SECRET) == ["seeun_i"]
+
+    # A second batch in the same folder: only the new idol is copied.
+    _webps(webp, "tzuyu_i")
+    (webp / "seeun_i.pen.webp").write_bytes(b"replaced")
+    assert prepare_upload.prepare(webp, upload, SECRET) == ["tzuyu_i"]
+    pen_key = upload / opaque_path("seeun_i", "pen", SECRET).lstrip("/")
+    assert pen_key.read_bytes() == b"seeun_i:pen"
+
+    # --force rewrites a replaced idol's files.
+    assert prepare_upload.prepare(webp, upload, SECRET, force=True) == ["seeun_i", "tzuyu_i"]
+    assert pen_key.read_bytes() == b"replaced"
+
+    monkeypatch.setenv("INKIT_PATH_SECRET", SECRET)
+    assert prepare_upload.main([str(webp), str(upload)]) == 0
+    assert "0 idols ready" in capsys.readouterr().out
+
+
+def test_cli_reads_the_secret_from_the_backend_env(tmp_path, monkeypatch, capsys):
+    webp, upload = tmp_path / "webp", tmp_path / "upload"
+    _webps(webp, "seeun_i")
+    loaded = []
+
+    def fake_load_local_env():
+        loaded.append(True)
+        monkeypatch.setenv("INKIT_PATH_SECRET", SECRET)
+        return True
+
+    monkeypatch.delenv("INKIT_PATH_SECRET", raising=False)
+    monkeypatch.setattr("utils.env.load_local_env", fake_load_local_env)
+
+    assert prepare_upload.main([str(webp), str(upload)]) == 0
+    assert loaded == [True]
+    assert (upload / opaque_path("seeun_i", "photo", SECRET).lstrip("/")).exists()

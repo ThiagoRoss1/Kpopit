@@ -11,3 +11,5 @@ opencv-python
 numpy
 pillow
 pytest
+# prepare_upload.py reads INKIT_PATH_SECRET from kpopit-backend/.env through utils/env.py
+python-dotenv

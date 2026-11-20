@@ -40,6 +40,20 @@ Layer files are 8-bit grayscale PNG, **white = paper**
 (`value = round(255 * (1 - darkness))`). Convert to WebP next with
 `convert_to_webp.py`, then `prepare_upload.py` for the R2 layout.
 
+## Prepare the upload
+
+```bash
+.venv/Scripts/python.exe prepare_upload.py <webp_dir> <upload_dir> [--force]
+.venv/Scripts/python.exe prepare_upload.py --lookup <stem>
+```
+
+- Reads `INKIT_PATH_SECRET` from `kpopit-backend/.env` (or the environment). `seed_db.py` must
+  use the same value, and changing it later means a full re-upload and re-seed.
+- Copies `<stem>.webp`, `<stem>.pencil.webp` and `<stem>.pen.webp` to their hashed keys in an
+  R2-shaped folder. Keep one upload folder: files already there are skipped, and the printed
+  `N idols ready` counts only the new ones. Use `--force` for a replaced photo, and bump its
+  `image_version` in `data/inkit_idols.csv`.
+
 ## Tests
 
 ```bash

@@ -1,7 +1,8 @@
 """Copy converted InkIt WebPs into the R2 layout, one hashed key per file (local only).
 
-    python prepare_upload.py <webp_dir> <upload_dir>   # <s>.webp, <s>.pencil.webp, <s>.pen.webp
-    python prepare_upload.py --lookup <stem>           # print the three keys (INKIT_PATH_SECRET)
+    python prepare_upload.py <webp_dir> <upload_dir> [--force]   # files already there are skipped
+    python prepare_upload.py --lookup <stem>                     # print the three keys
+INKIT_PATH_SECRET comes from the environment or kpopit-backend/.env.
 """
 
 import argparse
@@ -33,9 +34,10 @@ def lookup(stem: str, secret: str) -> dict[str, str]:
     return {kind: _opaque_path(stem, kind, secret) for kind in ("photo", "pencil", "pen")}
 
 
-def prepare(webp_dir: Path, upload_dir: Path, secret: str) -> list[str]:
-    """Copy every stem's three files to their hashed keys under upload_dir; returns the stems.
-    Refuses before copying anything if a stem lacks one of its three files."""
+def prepare(webp_dir: Path, upload_dir: Path, secret: str, force: bool = False) -> list[str]:
+    """Copy each stem's three files to their hashed keys under upload_dir; returns the stems that got
+    a new file. Keys already there are skipped unless `force` (a replaced photo). Refuses before
+    copying anything if a stem lacks one of its three files."""
     found: dict[str, dict[str, Path]] = {}
     for path in sorted(Path(webp_dir).iterdir()):
         parts = _split(path.name) if path.is_file() else None
@@ -46,23 +48,35 @@ def prepare(webp_dir: Path, upload_dir: Path, secret: str) -> list[str]:
     if incomplete:
         raise SystemExit(f"Missing photo, pencil or pen file for: {', '.join(incomplete)}")
 
+    copied = []
     for stem, files in sorted(found.items()):
+        wrote = False
         for kind, key in lookup(stem, secret).items():
             target = Path(upload_dir) / key.lstrip("/")
+            if target.exists() and not force:
+                continue
             target.parent.mkdir(parents=True, exist_ok=True)
             shutil.copy2(files[kind], target)
-    return sorted(found)
+            wrote = True
+        if wrote:
+            copied.append(stem)
+    return copied
 
 
 def main(argv: list[str]) -> int:
     parser = argparse.ArgumentParser(description="Prepare InkIt WebPs for upload under hashed keys.")
     parser.add_argument("paths", nargs="*", metavar="<webp_dir> <upload_dir>")
     parser.add_argument("--lookup", metavar="STEM", help="print the three keys of one stem")
+    parser.add_argument("--force", action="store_true", help="rewrite files already in the upload folder")
     args = parser.parse_args(argv)
 
+    # The same loader as seed_db.py: the secret can live in kpopit-backend/.env (tests disable it).
+    from utils import env
+
+    env.load_local_env()
     secret = os.getenv("INKIT_PATH_SECRET", "")
     if not secret:
-        raise SystemExit("Set INKIT_PATH_SECRET in the environment first")
+        raise SystemExit("Set INKIT_PATH_SECRET in kpopit-backend/.env or the environment first")
 
     if args.lookup:
         for kind, key in lookup(args.lookup, secret).items():
@@ -71,7 +85,7 @@ def main(argv: list[str]) -> int:
 
     if len(args.paths) != 2:
         parser.error("expected <webp_dir> <upload_dir>")
-    stems = prepare(Path(args.paths[0]), Path(args.paths[1]), secret)
+    stems = prepare(Path(args.paths[0]), Path(args.paths[1]), secret, force=args.force)
     print(f"{len(stems)} idols ready")
     print("Bump image_version in inkit_idols.csv for every replaced idol")
     return 0
