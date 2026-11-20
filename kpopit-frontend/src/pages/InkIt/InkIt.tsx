@@ -11,7 +11,7 @@ import {
 import type { IdolListItem, InkItAnswer, InkItCalendarDay, InkItDay, InkItFiles, InkItGame, InkItGuess, YesterdayIdol } from "../../interfaces/gameInterfaces";
 import type { CardGranted } from "../../interfaces/albumInterfaces";
 import { useInkIt } from "../../features/inkit/useInkIt.ts";
-import { fileUrl, type LayerUrls } from "../../features/inkit/layerLoader.ts";
+import { fileUrl, onceByKey, type LayerUrls } from "../../features/inkit/layerLoader.ts";
 import { grainUrl } from "../../features/inkit/sprites.ts";
 import { useSharedGameData } from "../../hooks/useSharedGameData";
 import { useGameMode } from "../../hooks/useGameMode";
@@ -77,6 +77,12 @@ type StatsModal = null | "stats" | "transfer-data" | "import-data" | "export-dat
  *  since the hashed copies only exist in the bucket once they are uploaded. */
 const urlFor = (path: string, version: string): string =>
     fileUrl(path, version, { bucket: import.meta.env.VITE_IMAGE_BUCKET_URL, devFileUrl: inkitDevFileUrl });
+
+/** The emergency photo of a game day, asked for once however many times the page mounts. */
+const fallbackPhotoFor = onceByKey(async (gameDate: string) => {
+    const { photo, version } = await postInkItFallbackPhoto(gameDate);
+    return urlFor(photo, version);
+});
 
 /** Unlocks only grow: of two file sets for the same day, the one that unlocked more. */
 const moreUnlocked = (a: InkItFiles, b: InkItFiles | null | undefined): InkItFiles =>
@@ -274,10 +280,7 @@ const InkItGame = ({ data, idols, isCalendarDay, onGameChange }: InkItGameProps)
         ...(files.pen ? { pen: urlFor(files.pen, files.version) } : {}),
         ...(files.photo ? { photo: urlFor(files.photo, files.version) } : {}),
     }), [files]);
-    const fallbackPhoto = useCallback(async () => {
-        const { photo, version } = await postInkItFallbackPhoto(data.gameDate);
-        return urlFor(photo, version);
-    }, [data.gameDate]);
+    const fallbackPhoto = useCallback(() => fallbackPhotoFor(data.gameDate), [data.gameDate]);
 
     const ink = useInkIt({
         files: fileUrls,

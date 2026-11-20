@@ -127,6 +127,25 @@ export const createLayerLoader = ({
 
 export type LayerLoader = ReturnType<typeof createLayerLoader>;
 
+/** One call per key, shared by everyone who asks: the page mounts twice under React StrictMode
+ *  (development) and can remount, but asks the emergency endpoint once per game day. A failed
+ *  call is forgotten, so a later retry asks again. */
+export const onceByKey = <T>(run: (key: string) => Promise<T>) => {
+    const calls = new Map<string, Promise<T>>();
+
+    return (key: string): Promise<T> => {
+        let call = calls.get(key);
+        if (!call) {
+            call = run(key).catch((error: unknown) => {
+                calls.delete(key);
+                throw error;
+            });
+            calls.set(key, call);
+        }
+        return call;
+    };
+};
+
 /** The URL of a stored InkIt path: the bucket with ?v=<version>, or the dev route in a dev build. */
 export const fileUrl = (
     path: string, version: string, { bucket, devFileUrl = null }: { bucket: string; devFileUrl?: ((path: string) => string) | null },

@@ -1,6 +1,6 @@
 import test, { mock } from 'node:test';
 import assert from 'node:assert/strict';
-import { createLayerLoader, darknessFromPixels, fileUrl } from '../../src/features/inkit/layerLoader.ts';
+import { createLayerLoader, darknessFromPixels, fileUrl, onceByKey } from '../../src/features/inkit/layerLoader.ts';
 
 /** A promise the test settles by hand. */
 const deferred = () => {
@@ -180,4 +180,32 @@ test('a download that stalls times out and is retried', async () => {
     } finally {
         mock.timers.reset();
     }
+});
+
+test('onceByKey: one emergency call per day, however many loaders ask', async () => {
+    const asked = [];
+    const photoFor = onceByKey(async (day) => {
+        asked.push(day);
+        return `photo-${day}`;
+    });
+
+    // React StrictMode mounts the page twice in development: two loaders, one call.
+    const [first, second] = await Promise.all([photoFor('2026-11-17'), photoFor('2026-11-17')]);
+    assert.equal(first, 'photo-2026-11-17');
+    assert.equal(second, 'photo-2026-11-17');
+    assert.equal(await photoFor('2026-11-18'), 'photo-2026-11-18');
+    assert.deepEqual(asked, ['2026-11-17', '2026-11-18']);
+});
+
+test('onceByKey: a failed call is forgotten, so a retry asks again', async () => {
+    let calls = 0;
+    const photoFor = onceByKey(async () => {
+        calls += 1;
+        if (calls === 1) throw new Error('429');
+        return 'photo';
+    });
+
+    await assert.rejects(photoFor('2026-11-17'));
+    assert.equal(await photoFor('2026-11-17'), 'photo');
+    assert.equal(calls, 2);
 });
