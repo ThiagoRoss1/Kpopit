@@ -1,6 +1,6 @@
-/* InkIt, the 4th daily mode: its gamemode row and one photo per idol. The photo path is opaque
-   (never the idol's name), since it is sent to the browser before the answer is found. Seeded
-   from the Blurry photos; the objects are copied to these paths in the image bucket. */
+/* InkIt, the 4th daily mode: its gamemode row and the table of its files (photo, pencil, pen) per
+   idol. Every path is opaque, since it reaches the browser before the answer is found. Rows come
+   only from seed_db.py; the migration creates none. */
 
 BEGIN;
 
@@ -24,14 +24,5 @@ CREATE TABLE IF NOT EXISTS inkit_mode_data (
     CONSTRAINT fk_inkit_mode_data_idol_id FOREIGN KEY (idol_id) REFERENCES idols(id) ON DELETE CASCADE,
     CONSTRAINT uq_inkit_mode_data_image_path UNIQUE (image_path)
 );
-
-INSERT INTO inkit_mode_data (idol_id, image_path, pencil_path, pen_path, is_active)
-SELECT b.idol_id,
-       '/images/inkit/' || replace(gen_random_uuid()::text, '-', '') || '.webp',
-       '/images/inkit/pencil/' || replace(gen_random_uuid()::text, '-', '') || '.webp',
-       '/images/inkit/pen/' || replace(gen_random_uuid()::text, '-', '') || '.webp',
-       COALESCE(b.is_active, TRUE)
-FROM blurry_mode_data b
-ON CONFLICT (idol_id) DO NOTHING;
 
 COMMIT;
