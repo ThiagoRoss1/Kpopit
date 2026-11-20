@@ -1,9 +1,9 @@
 # InkIt layer conversion — local only, never installed on Railway/production.
 # Create the venv and install with:
-#   py -3.12 -m venv .venv
+#   py -3.14 -m venv .venv
 #   .venv/Scripts/python.exe -m pip install -r requirements-inkit.txt
 # For a CUDA build of torch, install it from the PyTorch index first, e.g.:
-#   .venv/Scripts/python.exe -m pip install torch torchvision --index-url https://download.pytorch.org/whl/cu124
+#   .venv/Scripts/python.exe -m pip install torch torchvision --index-url https://download.pytorch.org/whl/cu128
 torch
 torchvision
 controlnet_aux

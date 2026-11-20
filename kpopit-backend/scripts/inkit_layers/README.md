@@ -14,13 +14,13 @@ are not committed — they download to the local Hugging Face cache on first run
 ## Setup
 
 ```bash
-py -3.12 -m venv .venv
+py -3.14 -m venv .venv
 .venv/Scripts/python.exe -m pip install -r requirements-inkit.txt
 # For GPU, install a CUDA build of torch first, e.g.:
-#   .venv/Scripts/python.exe -m pip install torch torchvision --index-url https://download.pytorch.org/whl/cu124
+#   .venv/Scripts/python.exe -m pip install torch torchvision --index-url https://download.pytorch.org/whl/cu128
 ```
 
-Python 3.12–3.14. CUDA is used when available, otherwise CPU (much slower).
+Tested with Python 3.14 and torch cu128 (RTX 2060). CUDA is used when available, otherwise CPU (much slower).
 
 ## Build the layers
 
