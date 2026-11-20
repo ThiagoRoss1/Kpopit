@@ -172,41 +172,55 @@ def use_inkit_ink_hint():
 if FLASK_ENV == "development":
     R2_PUBLIC_URL = os.getenv("R2_PUBLIC_URL", "").rstrip("/")
 
-    @inkit_bp.route("/game/inkit/dev/photo", methods=["GET"])
-    def dev_photo():
-        """Development only: the opaque InkIt copies exist in the bucket only once uploaded, so this
-        streams the idol's Blurry photo instead. The bytes come through here, so the browser never
-        sees the file name (which names the idol). Reads the public bucket at R2_PUBLIC_URL."""
+    def _dev_source(cursor, path: str) -> str | None:
+        """The bucket URL behind a stored InkIt path, or None for any other path. The hashed photo
+        may not be uploaded yet, so a photo path streams the idol's Blurry photo instead."""
+        cursor.execute(
+            """
+                SELECT m.image_path, m.pencil_path, m.pen_path, m.image_version,
+                       b.blur_image_path, b.blur_image_version
+                FROM inkit_mode_data m LEFT JOIN blurry_mode_data b ON b.idol_id = m.idol_id
+                WHERE %(path)s IN (m.image_path, m.pencil_path, m.pen_path)
+            """, {"path": path},
+        )
+        row = cursor.fetchone()
+        if not row or not path:
+            return None
+        if path == row["image_path"]:
+            if not row["blur_image_path"]:
+                return None
+            return f"{R2_PUBLIC_URL}/{row['blur_image_path'].lstrip('/')}?v={row['blur_image_version']}"
+        return f"{R2_PUBLIC_URL}{path}?v={row['image_version']}"
+
+    @inkit_bp.route("/game/inkit/dev/file", methods=["GET"])
+    def dev_file():
+        """Development only: streams a stored InkIt file (photo, pencil or pen) from the public bucket
+        at R2_PUBLIC_URL. The bytes come through here, so the browser never sees a readable name."""
         if not R2_PUBLIC_URL:
-            return jsonify({"error": "Set R2_PUBLIC_URL to load InkIt photos locally"}), 503
+            return jsonify({"error": "Set R2_PUBLIC_URL to load InkIt files locally"}), 503
 
         connect = get_db()
         cursor = connect.cursor()
         try:
-            cursor.execute(
-                """
-                    SELECT b.blur_image_path AS image_path, b.blur_image_version AS image_version
-                    FROM inkit_mode_data m JOIN blurry_mode_data b ON b.idol_id = m.idol_id
-                    WHERE m.image_path = %s
-                """, (request.args.get("path", ""),),
-            )
-            row = cursor.fetchone()
+            source = _dev_source(cursor, request.args.get("path", ""))
         finally:
             cursor.close()
-        if not row:
+        if not source:
             return jsonify({"error": "Not found"}), 404
 
-        source = f"{R2_PUBLIC_URL}/{row['image_path'].lstrip('/')}?v={row['image_version']}"
         try:
             # Cloudflare answers 403 to urllib's default User-Agent ("Python-urllib/x.y").
             fetch = urllib.request.Request(source, headers={"User-Agent": "kpopit-dev-photo/1.0"})
             with urllib.request.urlopen(fetch, timeout=10) as upstream:
                 body, mimetype = upstream.read(), upstream.headers.get_content_type()
+        except urllib.error.HTTPError as err:
+            # A layer that isn't uploaded is a 404, so the page falls back to building the layers.
+            logger.warning("Could not fetch the InkIt dev file from the public bucket (%s)", err.code)
+            return jsonify({"error": "Could not load the file"}), 404 if err.code == 404 else 502
         except (urllib.error.URLError, OSError) as err:
-            # The status or error type only: the URL would name the idol.
-            reason = getattr(err, "code", None) or type(err).__name__
-            logger.warning("Could not fetch the InkIt dev photo from the public bucket (%s)", reason)
-            return jsonify({"error": "Could not load the photo"}), 502
+            # The error type only: the URL would name the idol.
+            logger.warning("Could not fetch the InkIt dev file from the public bucket (%s)", type(err).__name__)
+            return jsonify({"error": "Could not load the file"}), 502
 
         response = Response(body, mimetype=mimetype)
         response.headers["Cache-Control"] = "private, max-age=3600"

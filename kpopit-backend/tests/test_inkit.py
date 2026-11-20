@@ -669,30 +669,69 @@ class _Upstream:
         return b"webp-bytes"
 
 
-def test_dev_photo_streams_the_bytes_without_naming_the_file(client, db_conn, game, monkeypatch):
+def _dev_bucket(monkeypatch, upstream=None):
+    """Point the dev route at a fake public bucket; returns the requests it receives."""
     from routes.games import inkit as inkit_routes
 
+    fetched = []
+
+    def fake_urlopen(request, timeout):
+        fetched.append(request)
+        if upstream is not None:
+            return upstream(request)
+        return _Upstream()
+
+    monkeypatch.setattr(inkit_routes, "R2_PUBLIC_URL", "https://bucket.test")
+    monkeypatch.setattr(inkit_routes.urllib.request, "urlopen", fake_urlopen)
+    return fetched
+
+
+def test_dev_file_streams_photo_from_blurry(client, db_conn, game, monkeypatch):
     with db_conn.cursor() as cur:
         cur.execute("INSERT INTO blurry_mode_data (idol_id, blur_image_path, is_active) VALUES (%s, '/b/a_b.webp', TRUE)",
                     (game["answer"],))
     db_conn.commit()
-    fetched = []
-    monkeypatch.setattr(inkit_routes, "R2_PUBLIC_URL", "https://bucket.test")
-    monkeypatch.setattr(inkit_routes.urllib.request, "urlopen", lambda request, timeout: fetched.append(request) or _Upstream())
+    fetched = _dev_bucket(monkeypatch)
 
-    res = client.get(f"/api/game/inkit/dev/photo?path=/images/inkit/{game['answer']:032x}.webp")
+    res = client.get(f"/api/game/inkit/dev/file?path=/images/inkit/{game['answer']:032x}.webp")
     assert (res.status_code, res.mimetype, res.data) == (200, "image/webp", b"webp-bytes")
     assert "a_b" not in res.get_data(as_text=True) and [r.full_url for r in fetched] == ["https://bucket.test/b/a_b.webp?v=1"]
     # Not urllib's default User-Agent, which Cloudflare refuses.
     assert fetched[0].get_header("User-agent") == "kpopit-dev-photo/1.0"
-    assert client.get("/api/game/inkit/dev/photo?path=/images/inkit/unknown.webp").status_code == 404
 
 
-def test_dev_photo_needs_the_bucket_url(client, monkeypatch):
+def test_dev_file_streams_layer_by_stored_path(client, game, monkeypatch):
+    import urllib.error
+    from email.message import Message
+
+    fetched = _dev_bucket(monkeypatch)
+    for path in (pencil_path(game["answer"]), pen_path(game["answer"])):
+        res = client.get(f"/api/game/inkit/dev/file?path={path}")
+        assert (res.status_code, res.data) == (200, b"webp-bytes")
+        assert res.headers["Cache-Control"] == "private, max-age=3600"
+    assert [r.full_url for r in fetched] == [
+        f"https://bucket.test{pencil_path(game['answer'])}?v=1", f"https://bucket.test{pen_path(game['answer'])}?v=1",
+    ]
+
+    def not_uploaded(request):
+        raise urllib.error.HTTPError(request.full_url, 404, "Not Found", Message(), None)
+
+    _dev_bucket(monkeypatch, upstream=not_uploaded)
+    assert client.get(f"/api/game/inkit/dev/file?path={pen_path(game['answer'])}").status_code == 404
+
+
+def test_dev_file_unknown_path_404(client, game, monkeypatch):
+    fetched = _dev_bucket(monkeypatch)
+    for path in ("/images/inkit/unknown.webp", "/images/inkit/pen/unknown.webp", "/b/a_b.webp", ""):
+        assert client.get(f"/api/game/inkit/dev/file?path={path}").status_code == 404
+    assert fetched == []
+
+
+def test_dev_file_needs_the_bucket_url(client, monkeypatch):
     from routes.games import inkit as inkit_routes
 
     monkeypatch.setattr(inkit_routes, "R2_PUBLIC_URL", "")
-    assert client.get("/api/game/inkit/dev/photo?path=x").status_code == 503
+    assert client.get("/api/game/inkit/dev/file?path=x").status_code == 503
 
 
 def _run_app(script: str, **env) -> subprocess.CompletedProcess:
@@ -708,7 +747,7 @@ def test_inkit_is_absent_when_the_flag_is_off():
         "c.post('/api/game/inkit/guess', json={}).status_code, "
         "c.post('/api/game/inkit/hint', json={}).status_code, "
         "c.get('/api/calendar/inkit/2026-01-01', headers={'Authorization': '00000000-0000-4000-8000-000000000000'}).status_code, "
-        "c.get('/api/game/inkit/dev/photo').status_code, "
+        "c.get('/api/game/inkit/dev/file').status_code, "
         "json.dumps(c.get('/api/features').get_json()['inkit']), "
         "c.get('/api/gamemodes-count').get_json()['gamemodes_count'])"
     )
@@ -716,13 +755,14 @@ def test_inkit_is_absent_when_the_flag_is_off():
     assert result.stdout.split()[-7:] == ["404", "404", "404", "404", "404", "false", "3"], result.stderr[-2000:]
 
 
-def test_dev_photo_is_absent_in_production():
+def test_dev_file_absent_in_production():
     script = ("import app; c = app.app.test_client(); "
-              "print(c.get('/api/game/inkit/dev/photo?path=x').status_code, c.get('/api/game/inkit/daily').status_code)")
+              "print(c.get('/api/game/inkit/dev/file?path=x').status_code, "
+              "c.get('/api/game/inkit/dev/photo?path=x').status_code, c.get('/api/game/inkit/daily').status_code)")
     result = _run_app(script, FLASK_ENV="production", INKIT_ENABLED="true", FRONTEND_URL="http://localhost:5173",
                       PYTHON_DOTENV_DISABLED="", FLASK_SKIP_DOTENV="")
     # Startup refuses a local test DB outside the isolated runners, or serves no dev route at all.
-    assert result.returncode != 0 or result.stdout.split()[-2] == "404", result.stderr[-2000:]
+    assert result.returncode != 0 or result.stdout.split()[-3:-1] == ["404", "404"], result.stderr[-2000:]
 
 
 # --- Many days ---------------------------------------------------------------
