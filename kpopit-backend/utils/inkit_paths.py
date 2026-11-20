@@ -1,14 +1,7 @@
-"""Per-file opaque paths for the InkIt layers.
-
-Each of a photo's three files (photo, pencil, pen) gets its own HMAC-SHA256 hash of
-the readable stem and the kind, so the pencil URL a player sees at round 1 reveals
-nothing about the pen or the photo. The hash is stable across case and accents
-(computed on the NFC-normalised, lower-cased stem), so `Rosé_i` and `ROSE_I`-style
-spellings map to the same keys. No path is ever derived from another.
-
-The HMAC key is `INKIT_PATH_SECRET`, which exists only on the owner's machine and in
-the test runners — never on Railway. Production only reads paths already stored in the
-database and never computes one.
+"""Per-file opaque paths for the InkIt photo, pencil and pen: one HMAC-SHA256 hash of the
+NFC-normalised, lower-cased stem and the kind each, so no path reveals or derives another.
+The key (INKIT_PATH_SECRET) exists only on the owner's machine and in the test runners, never
+on Railway: production only reads the paths already stored in the database.
 """
 
 import hashlib

@@ -1,8 +1,7 @@
 """Every number for the InkIt layer conversion, like the frontend's config.ts.
 
-The values are exactly those of the approved `68_balanceada` look
-(C:\\Kpopit-images\\kpopit-idols-inkit-filtered\\_teste-recortes). Change a
-layer by changing a number here, never by editing the ports.
+The values are exactly those of the approved 68_balanceada look; change a layer by changing
+a number here, never by editing the ports.
 """
 
 # ---------------------------------------------------------------- resolution
