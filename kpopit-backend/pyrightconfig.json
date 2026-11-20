@@ -2,5 +2,5 @@
   "venvPath": ".",
   "venv": ".venv",
   "typeCheckingMode": "basic",
-  "exclude": [".venv", "**/__pycache__", "data", "templates"]
+  "exclude": [".venv", "**/__pycache__", "data", "templates", "scripts/inkit_layers"]
 }
