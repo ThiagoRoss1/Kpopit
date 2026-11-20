@@ -1,4 +1,4 @@
-import test from 'node:test';
+import test, { mock } from 'node:test';
 import assert from 'node:assert/strict';
 import { createLayerLoader, darknessFromPixels, fileUrl } from '../../src/features/inkit/layerLoader.ts';
 
@@ -155,4 +155,29 @@ test('darknessFromPixels: white is paper, black is ink', () => {
     assert.equal(darkness[0], 0);
     assert.equal(darkness[1], 1);
     assert.ok(Math.abs(darkness[2] - 0.498) < 0.001, `128 → ${darkness[2]}`);
+});
+
+test('a download that stalls times out and is retried', async () => {
+    mock.timers.enable({ apis: ['setTimeout'] });
+    try {
+        const { load, calls } = controllableLoad();
+        const loader = createLayerLoader({ load, timeoutMs: 30_000, ...noFallback });
+
+        loader.offer({ pencil: 'pencil-url' });
+        assert.equal(calls.length, 1);
+
+        mock.timers.tick(29_999);
+        await flush();
+        assert.equal(calls.length, 1);
+
+        mock.timers.tick(1);
+        await flush();
+        assert.equal(calls.length, 2);
+
+        calls[1].resolve(layer(0.4));
+        await flush();
+        assert.equal(loader.status('pencil'), 'ready');
+    } finally {
+        mock.timers.reset();
+    }
 });

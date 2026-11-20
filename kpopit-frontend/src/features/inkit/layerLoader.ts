@@ -20,6 +20,8 @@ interface LayerLoaderOptions {
     loadPhoto?: (url: string) => Promise<Uint8ClampedArray>;
     /** Extra tries after a failed download. */
     retries?: number;
+    /** A download still pending after this long counts as failed (a stalled connection never errors). */
+    timeoutMs?: number;
     /** The emergency photo URL, asked for once when a drawing layer can't be loaded. */
     fallbackPhoto: () => Promise<string>;
     /** The old layers, built in the browser from that photo. */
@@ -30,8 +32,22 @@ interface LayerLoaderOptions {
 
 const KINDS: LayerKind[] = ["pencil", "pen", "photo"];
 
+const withTimeout = <T>(promise: Promise<T>, ms: number): Promise<T> => new Promise((resolve, reject) => {
+    const timer = setTimeout(() => reject(new Error("InkIt file timed out")), ms);
+    promise.then(
+        (value) => {
+            clearTimeout(timer);
+            resolve(value);
+        },
+        (error: unknown) => {
+            clearTimeout(timer);
+            reject(error);
+        },
+    );
+});
+
 export const createLayerLoader = ({
-    load, loadPhoto, retries = 2, fallbackPhoto, buildFromPhoto, onChange,
+    load, loadPhoto, retries = 2, timeoutMs = 30_000, fallbackPhoto, buildFromPhoto, onChange,
 }: LayerLoaderOptions) => {
     const urls: LayerUrls = {};
     const statuses: Record<LayerKind, LayerStatus> = { pencil: "idle", pen: "idle", photo: "idle" };
@@ -67,7 +83,7 @@ export const createLayerLoader = ({
     const download = async (kind: LayerKind, url: string) => {
         for (let attempt = 0; attempt <= retries; attempt++) {
             try {
-                const value = kind === "photo" ? await loadPhoto!(url) : await load(url);
+                const value = await withTimeout<Float32Array | Uint8ClampedArray>(kind === "photo" ? loadPhoto!(url) : load(url), timeoutMs);
                 // A newer URL for the same layer replaced this one while it downloaded.
                 if (urls[kind] !== url) return;
                 if (kind === "photo") layers.photo = value as Uint8ClampedArray;
