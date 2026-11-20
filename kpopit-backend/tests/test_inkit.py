@@ -1263,3 +1263,17 @@ def test_fallback_photo_log_has_no_id(client, game, caplog):
         assert photo_path(game["answer"]) not in message and SECRET_NAME not in message
         assert f"{game['answer']:032x}" not in message
 
+
+
+# --- Past days whose idol has no InkIt row -----------------------------------
+
+
+def test_calendar_day_without_an_inkit_row_is_a_clear_404(client, game, pin, make_idol):
+    """A past pick whose InkIt row is gone can't be drawn: answer 404 instead of a puzzle without files."""
+    gone = make_idol("No Longer In InkIt")
+    pin(gone, offset=-2)
+
+    res = client.get(f"/api/calendar/inkit/{day(-2)}", headers={"Authorization": game["token"]})
+    assert res.status_code == 404
+    assert res.get_json()["error"] == "This day can't be played"
+    assert names_nothing(res.get_json(), gone)
