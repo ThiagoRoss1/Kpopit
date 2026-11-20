@@ -5,12 +5,13 @@ import { Navigate, useSearchParams } from "react-router";
 import { Check, Info } from "lucide-react";
 import { cn } from "../../lib/utils";
 import {
-    getDailyUserCount, getInkItCalendarDay, getInkItDaily, getUserPosition, getYesterdaysIdol, inkitDevPhotoUrl,
-    postInkItGuess, postInkItHint,
+    getDailyUserCount, getInkItCalendarDay, getInkItDaily, getUserPosition, getYesterdaysIdol, inkitDevFileUrl,
+    postInkItFallbackPhoto, postInkItGuess, postInkItHint,
 } from "../../services/api";
-import type { IdolListItem, InkItAnswer, InkItCalendarDay, InkItDay, InkItGame, InkItGuess, YesterdayIdol } from "../../interfaces/gameInterfaces";
+import type { IdolListItem, InkItAnswer, InkItCalendarDay, InkItDay, InkItFiles, InkItGame, InkItGuess, YesterdayIdol } from "../../interfaces/gameInterfaces";
 import type { CardGranted } from "../../interfaces/albumInterfaces";
 import { useInkIt } from "../../features/inkit/useInkIt.ts";
+import { fileUrl, type LayerUrls } from "../../features/inkit/layerLoader.ts";
 import { grainUrl } from "../../features/inkit/sprites.ts";
 import { useSharedGameData } from "../../hooks/useSharedGameData";
 import { useGameMode } from "../../hooks/useGameMode";
@@ -20,7 +21,6 @@ import { useAllGameModes } from "../../hooks/useAllGameModes";
 import { useClearGameStorage } from "../../hooks/useClearGameStorage";
 import { DAILY_REFETCH, useGameDay } from "../../contexts/game_day_context";
 import { isNewGameDay, startFirstGameDay } from "../../utils/gameStorage";
-import { resolveCdnUrl } from "../../utils/imageUrl";
 import { buildIdolSlug } from "../../utils/formatters";
 import { WinnerExplosion } from "../../utils/confetti";
 import PageLoader from "../../components/Loading/PageLoader";
@@ -63,8 +63,8 @@ interface InkItProps {
 
 /** What the page plays, whether it came from the live route or from the calendar. */
 interface DayData {
-    imagePath: string;
-    imageVersion: string;
+    /** The files the caller's round unlocks (stored paths). */
+    files: InkItFiles;
     dayNumber: number | null;
     /** The challenge day guesses and hints are recorded on. */
     gameDate: string;
@@ -73,13 +73,18 @@ interface DayData {
 
 type StatsModal = null | "stats" | "transfer-data" | "import-data" | "export-data";
 
-/** In production the photo is the opaque bucket path. A dev build loads it through the local backend,
- *  since the opaque copies only exist in the bucket once they are uploaded. */
-const photoUrlFor = (imagePath: string, imageVersion: string): string | null =>
-    inkitDevPhotoUrl ? inkitDevPhotoUrl(imagePath) : resolveCdnUrl(imagePath, imageVersion);
+/** In production a file is its hashed bucket path. A dev build loads it through the local backend,
+ *  since the hashed copies only exist in the bucket once they are uploaded. */
+const urlFor = (path: string, version: string): string =>
+    fileUrl(path, version, { bucket: import.meta.env.VITE_IMAGE_BUCKET_URL, devFileUrl: inkitDevFileUrl });
+
+/** Unlocks only grow: of two file sets for the same day, the one that unlocked more. */
+const moreUnlocked = (a: InkItFiles, b: InkItFiles | null | undefined): InkItFiles =>
+    b && Object.keys(b).length > Object.keys(a).length ? b : a;
 
 /** A day nobody has guessed on yet, as the server would send it after the first guess. */
 const emptyGame = (gameDate: string): InkItGame => ({
+    files: null,
     inkit_guesses: [],
     guesses_count: 0,
     game_complete: false,
@@ -132,8 +137,7 @@ const InkIt = ({ date = null }: InkItProps) => {
     const data = useMemo<DayData | null>(() => {
         if (isCalendarDay) {
             return past.data ? {
-                imagePath: past.data.puzzle.image_path,
-                imageVersion: past.data.puzzle.image_version,
+                files: moreUnlocked(past.data.puzzle.files, past.data.game?.files),
                 dayNumber: past.data.day_number,
                 gameDate: past.data.challenge_date,
                 game: past.data.game,
@@ -141,8 +145,7 @@ const InkIt = ({ date = null }: InkItProps) => {
         }
 
         return live.data ? {
-            imagePath: live.data.image_path,
-            imageVersion: live.data.image_version,
+            files: moreUnlocked(live.data.files, live.data.game?.files),
             dayNumber: live.data.day_number,
             gameDate: live.data.server_date,
             game: live.data.game,
@@ -261,12 +264,24 @@ const InkItGame = ({ data, idols, isCalendarDay, onGameChange }: InkItGameProps)
 
     const round = guesses.length + 1;
     const finished = phase !== "playing";
-    const photoUrl = photoUrlFor(data.imagePath, data.imageVersion);
     const onOutOfInk = useCallback(() => setOutOfInkNudge((count) => count + 1), []);
 
+    // The files unlocked so far: the day's, or the last guess's when it unlocked more.
+    const [guessFiles, setGuessFiles] = useState<InkItFiles | null>(null);
+    const files = moreUnlocked(data.files, guessFiles);
+    const fileUrls = useMemo<LayerUrls>(() => ({
+        pencil: urlFor(files.pencil, files.version),
+        ...(files.pen ? { pen: urlFor(files.pen, files.version) } : {}),
+        ...(files.photo ? { photo: urlFor(files.photo, files.version) } : {}),
+    }), [files]);
+    const fallbackPhoto = useCallback(async () => {
+        const { photo, version } = await postInkItFallbackPhoto(data.gameDate);
+        return urlFor(photo, version);
+    }, [data.gameDate]);
+
     const ink = useInkIt({
-        photoUrl,
-        photoKey: data.imagePath,
+        files: fileUrls,
+        fallbackPhoto,
         round,
         hintActive: inkHintRound !== null,
         finished,
@@ -385,8 +400,10 @@ const InkItGame = ({ data, idols, isCalendarDay, onGameChange }: InkItGameProps)
             setGuesses(nextGuesses);
             setSyncedCount(result.guesses_count);
             setGroupHint(result.group_hint);
+            setGuessFiles(result.files);
             setDrawingMode(false);
             onGameChange({
+                ...(result.files ? { files: result.files } : {}),
                 inkit_guesses: nextGuesses,
                 guesses_count: result.guesses_count,
                 group_hint: result.group_hint,
@@ -529,6 +546,7 @@ const InkItGame = ({ data, idols, isCalendarDay, onGameChange }: InkItGameProps)
         <ToolLedge
             tool={ink.tool}
             unlocked={ink.unlocked}
+            loading={ink.loadingTools}
             inkShare={ink.inkShare}
             disabled={finished}
             onSelect={ink.selectTool}
@@ -584,7 +602,7 @@ const InkItGame = ({ data, idols, isCalendarDay, onGameChange }: InkItGameProps)
                         canvasRef={ink.canvasRef}
                         canvasHandlers={ink.canvasHandlers}
                         revealSpriteRef={ink.revealSpriteRef}
-                        status={photoUrl ? ink.status : "loading"}
+                        status={ink.status}
                         onRetry={ink.retry}
                         dayNumber={data.dayNumber}
                         tool={ink.tool}

@@ -86,6 +86,8 @@ test.describe('inkit', () => {
     const photo = await inkitPhotoPath(answer.id);
     expect(photo).toMatch(/^\/images\/inkit\/[0-9a-f]{32}\.webp$/);
     for (const body of replies) {
+      // Round 3: the photo unlocks at round 5 or the win, so no reply carries its path yet.
+      expect(body).not.toContain(photo);
       expect(body).not.toContain(`"artist_name":"${answer.artist_name}"`);
       expect(body).not.toMatch(new RegExp(`"(answer_id|idol_id)":\\s*${answer.id}\\b`));
     }

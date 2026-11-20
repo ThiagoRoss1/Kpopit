@@ -1,5 +1,5 @@
 import type { CSSProperties } from "react";
-import { Lock } from "lucide-react";
+import { LoaderCircle, Lock } from "lucide-react";
 import { cn } from "../../lib/utils";
 import { INKIT_CONFIG, TOOL_IDS, type ToolId } from "../../features/inkit/config.ts";
 import { greySpriteUrl, spriteUrl } from "../../features/inkit/sprites.ts";
@@ -8,6 +8,8 @@ import { TOOL_INFO } from "./toolInfo";
 interface ToolLedgeProps {
     tool: ToolId;
     unlocked: ToolId[];
+    /** Unlocked tools whose layer is still downloading: shown as loading and not selectable yet. */
+    loading?: ToolId[];
     /** Ink left as a share (0-1) of a full pot. */
     inkShare: number;
     disabled: boolean;
@@ -48,7 +50,7 @@ const InkJar = ({ inkShare }: { inkShare: number }) => {
 };
 
 /** The three tools (locked until their round) and the ink jar. */
-const ToolLedge = ({ tool, unlocked, inkShare, disabled, onSelect, labelled = false, className }: ToolLedgeProps) => {
+const ToolLedge = ({ tool, unlocked, loading = [], inkShare, disabled, onSelect, labelled = false, className }: ToolLedgeProps) => {
     return (
         <div
             className={cn(
@@ -62,6 +64,7 @@ const ToolLedge = ({ tool, unlocked, inkShare, disabled, onSelect, labelled = fa
                 {TOOL_IDS.map((id) => {
                     const info = TOOL_INFO[id];
                     const isLocked = !unlocked.includes(id);
+                    const isLoading = !isLocked && loading.includes(id);
                     const isSelected = !isLocked && tool === id;
 
                     return (
@@ -69,14 +72,20 @@ const ToolLedge = ({ tool, unlocked, inkShare, disabled, onSelect, labelled = fa
                             <button
                                 type="button"
                                 aria-pressed={isSelected}
-                                aria-label={isLocked ? `${info.name}, locked until guess ${INKIT_CONFIG.tools[id].unlockRound}` : `${info.name}: reveals ${info.reveals}`}
-                                disabled={disabled || isLocked}
+                                aria-label={
+                                    isLocked ? `${info.name}, locked until guess ${INKIT_CONFIG.tools[id].unlockRound}`
+                                        : isLoading ? `${info.name}, loading`
+                                            : `${info.name}: reveals ${info.reveals}`
+                                }
+                                aria-busy={isLoading || undefined}
+                                disabled={disabled || isLocked || isLoading}
                                 onClick={() => onSelect(id)}
                                 data-testid={`inkit-tool-${id}`}
                                 data-locked={isLocked}
+                                data-loading={isLoading}
                                 className={cn(
                                     "inkit-tool pp-focus relative grid size-14 place-items-center rounded-full border-0 bg-transparent p-0",
-                                    isLocked ? "cursor-not-allowed" : "cursor-pointer",
+                                    isLocked ? "cursor-not-allowed" : isLoading ? "cursor-progress" : "cursor-pointer",
                                 )}
                             >
                                 {/* Ink ring: only around the tool in hand. */}
@@ -110,9 +119,13 @@ const ToolLedge = ({ tool, unlocked, inkShare, disabled, onSelect, labelled = fa
                                         )}
                                     />
 
-                                    {isLocked && (
+                                    {(isLocked || isLoading) && (
                                         <span className="absolute -top-1.25 -right-1.25 grid size-4.5 place-items-center rounded-full border-[1.5px] border-(--ink) bg-(--face) text-(--face-ink)">
-                                            <Lock className="size-2.5" strokeWidth={2.8} aria-hidden />
+                                            {isLocked ? (
+                                                <Lock className="size-2.5" strokeWidth={2.8} aria-hidden />
+                                            ) : (
+                                                <LoaderCircle className="size-2.75 transform-gpu motion-safe:animate-spin" strokeWidth={2.8} aria-hidden data-testid={`inkit-tool-${id}-loading`} />
+                                            )}
                                         </span>
                                     )}
                                 </span>

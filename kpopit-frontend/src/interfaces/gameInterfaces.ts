@@ -367,7 +367,15 @@ export interface AlbumPageData {
   discography: AlbumDiscographyItem[];
 }
 
-// InkIt (/api/game/inkit/*): the photo under an opaque path and the caller's own game.
+// InkIt (/api/game/inkit/*): the files the caller's round unlocks (opaque paths) and their own game.
+/** Stored paths only: the pencil always, the pen from round 3, the photo from round 5 or the win. */
+export interface InkItFiles {
+  version: string;
+  pencil: string;
+  pen?: string;
+  photo?: string;
+}
+
 export interface InkItGuess {
   idol_id: number;
   artist_name: string;
@@ -386,6 +394,8 @@ export interface InkItAnswer {
 }
 
 export interface InkItGame {
+  /** Unlocked at this game's round (null on a game built locally before the first guess). */
+  files: InkItFiles | null;
   inkit_guesses: InkItGuess[];
   guesses_count: number;
   game_complete: boolean;
@@ -401,8 +411,7 @@ export interface InkItGame {
 }
 
 export interface InkItDay {
-  image_path: string;
-  image_version: string;
+  files: InkItFiles;
   day_number: number | null;
   game: InkItGame | null;
   server_date: string;
@@ -413,11 +422,13 @@ export interface InkItCalendarDay {
   is_today: boolean;
   day_number: number | null;
   status: CalendarStatus;
-  puzzle: { image_path: string; image_version: string };
+  puzzle: { files: InkItFiles };
   game: InkItGame | null;
 }
 
 export interface InkItGuessResult {
+  /** Everything unlocked after this guess. */
+  files: InkItFiles | null;
   guess_correct: boolean;
   guessed_idol_data: Omit<InkItGuess, "correct">;
   guesses_count: number;

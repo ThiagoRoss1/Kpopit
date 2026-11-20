@@ -1,17 +1,18 @@
 import { useCallback, useEffect, useRef, useState, type PointerEvent as ReactPointerEvent } from "react";
-import { SHEET, type ToolId } from "./config.ts";
+import { SHEET, SHEET_PIXELS, type ToolId } from "./config.ts";
 import { exportDraft, importDraft } from "./codec.ts";
 import { InkItSheet, toSheet, unlockedTools, type Layers } from "./engine.ts";
-import { buildLayers, seedFromPath } from "./layers.ts";
+import { buildLayersFromPhoto, loadLayer, loadPhotoPixels } from "./layerFiles.ts";
+import { createLayerLoader, type LayerKind, type LayerLoader, type LayerStatus, type LayerUrls } from "./layerLoader.ts";
 import { spriteUrl } from "./sprites.ts";
 
 export type SheetStatus = "loading" | "ready" | "error";
 
 interface UseInkItOptions {
-    /** Full URL of the day's photo (CORS-readable), or null while the day loads. */
-    photoUrl: string | null;
-    /** Stable per photo: seeds the pencil hatching, so every device draws the same one. */
-    photoKey: string;
+    /** Full (CORS-readable) URLs of the files the server has unlocked so far. */
+    files: LayerUrls;
+    /** The emergency photo URL, asked for only when a drawing layer can't be loaded. */
+    fallbackPhoto: () => Promise<string>;
     /** The server's round: the guess about to be made = wrong guesses + 1. */
     round: number;
     /** Hint 1 "More ink" was accepted by the server in this game. */
@@ -30,6 +31,16 @@ interface UseInkItOptions {
 const FIRST_FRAME_SECONDS = 1 / 60;
 const MAX_FRAME_SECONDS = 0.05;
 
+// Until a layer arrives the sheet renders it as paper: the pen and paint masks stay 0 before their round.
+let blankLayers: { darkness: Float32Array; photo: Uint8ClampedArray } | null = null;
+const blanks = () => (blankLayers ??= {
+    darkness: new Float32Array(SHEET_PIXELS),
+    photo: new Uint8ClampedArray(SHEET_PIXELS * 4).fill(255),
+});
+
+const TOOL_LAYER: Record<ToolId, LayerKind> = { pencil: "pencil", pen: "pen", paint: "photo" };
+const IDLE_LAYERS: Record<LayerKind, LayerStatus> = { pencil: "idle", pen: "idle", photo: "idle" };
+
 const makeCanvas = () => {
     const canvas = document.createElement("canvas");
     canvas.width = canvas.height = SHEET;
@@ -38,7 +49,7 @@ const makeCanvas = () => {
 };
 
 export const useInkIt = ({
-    photoUrl, photoKey, round, hintActive, finished, canDraw, savedDraft, onOutOfInk,
+    files, fallbackPhoto, round, hintActive, finished, canDraw, savedDraft, onOutOfInk,
 }: UseInkItOptions) => {
     const canvasRef = useRef<HTMLCanvasElement | null>(null);
     const sheetRef = useRef<InkItSheet>(new InkItSheet());
@@ -49,6 +60,8 @@ export const useInkIt = ({
     const shareSnapshotRef = useRef<ImageData | null>(null);
     // The tool sprite that rides the reveal's leading edge, moved straight on the element.
     const revealSpriteRef = useRef<HTMLImageElement | null>(null);
+    const loaderRef = useRef<LayerLoader | null>(null);
+    const fallbackPhotoRef = useRef(fallbackPhoto);
     const onOutOfInkRef = useRef(onOutOfInk);
     const finishedRef = useRef(finished);
     const hintActiveRef = useRef(hintActive);
@@ -56,7 +69,7 @@ export const useInkIt = ({
     const strokeStartSpentRef = useRef(0);
     const lastStrokeCostRef = useRef(0);
 
-    const [status, setStatus] = useState<SheetStatus>("loading");
+    const [layerStatus, setLayerStatus] = useState<Record<LayerKind, LayerStatus>>(IDLE_LAYERS);
     const [attempt, setAttempt] = useState(0);
     const [tool, setTool] = useState<ToolId>("pencil");
     const [inkShare, setInkShare] = useState(1);
@@ -66,9 +79,15 @@ export const useInkIt = ({
     // Read by effects that must not re-run when these change.
     useEffect(() => {
         onOutOfInkRef.current = onOutOfInk;
+        fallbackPhotoRef.current = fallbackPhoto;
         finishedRef.current = finished;
         hintActiveRef.current = hintActive;
-    }, [onOutOfInk, finished, hintActive]);
+    }, [onOutOfInk, fallbackPhoto, finished, hintActive]);
+
+    // A layer the sheet can't show yet fails the sheet; the pencil alone makes it playable.
+    const failed = Object.values(layerStatus).includes("failed");
+    const status: SheetStatus = failed ? "error" : layerStatus.pencil === "ready" ? "ready" : "loading";
+    const toolReady = (id: ToolId) => layerStatus[TOOL_LAYER[id]] === "ready";
 
     const render = useCallback(() => {
         renderQueuedRef.current = false;
@@ -102,40 +121,41 @@ export const useInkIt = ({
         setTool(sheet.tool);
     }, []);
 
-    // Load the photo and build what each tool reveals.
+    // One loader per attempt: it downloads each file as soon as its URL is unlocked.
     useEffect(() => {
-        if (!photoUrl) return;
+        const loader = createLayerLoader({
+            load: loadLayer,
+            loadPhoto: loadPhotoPixels,
+            fallbackPhoto: () => fallbackPhotoRef.current(),
+            buildFromPhoto: (url) => {
+                if (import.meta.env.DEV) console.warn("InkIt: precomputed layers unavailable, building them in the browser");
+                return buildLayersFromPhoto(url);
+            },
+            onChange: () => {
+                if (loaderRef.current !== loader) return;
 
-        let cancelled = false;
-        const image = new Image();
-        image.crossOrigin = "anonymous";
-        image.decoding = "async";
-
-        image.onload = () => {
-            if (cancelled) return;
-
-            try {
-                layersRef.current = buildLayers(image, seedFromPath(photoKey));
-                setStatus("ready");
-            } catch {
-                // A photo served without CORS headers taints the canvas: its pixels can't be read.
-                layersRef.current = null;
-                setStatus("error");
-            }
-        };
-        image.onerror = () => {
-            if (!cancelled) setStatus("error");
-        };
-        image.src = photoUrl;
+                const pencil = loader.layer("pencil");
+                layersRef.current = pencil
+                    ? { pencil, pen: loader.layer("pen") ?? blanks().darkness, photo: loader.layer("photo") ?? blanks().photo }
+                    : null;
+                setLayerStatus({ pencil: loader.status("pencil"), pen: loader.status("pen"), photo: loader.status("photo") });
+                queueRender();
+            },
+        });
+        loaderRef.current = loader;
 
         return () => {
-            cancelled = true;
-            image.onload = image.onerror = null;
+            loaderRef.current = null;
         };
-    }, [photoUrl, photoKey, attempt]);
+    }, [attempt, queueRender]);
+
+    useEffect(() => {
+        loaderRef.current?.offer(files);
+    }, [files, attempt]);
 
     const retry = useCallback(() => {
-        setStatus("loading");
+        layersRef.current = null;
+        setLayerStatus(IDLE_LAYERS);
         setAttempt((current) => current + 1);
     }, []);
 
@@ -233,6 +253,8 @@ export const useInkIt = ({
         if (event.pointerType === "mouse" && event.button !== 0) return;
 
         const sheet = sheetRef.current;
+        // A tool whose layer is still downloading would rub out the pencil and reveal nothing.
+        if (layerStatus[TOOL_LAYER[sheet.tool]] !== "ready") return;
         const point = toSheet(event.clientX, event.clientY, event.currentTarget.getBoundingClientRect());
         strokeStartSpentRef.current = totalSpent();
 
@@ -253,7 +275,7 @@ export const useInkIt = ({
         queueRender();
         lastFrameRef.current = null;
         requestAnimationFrame((now) => frameLoopRef.current(now));
-    }, [canDraw, finished, isRevealing, queueRender, status, syncInk]);
+    }, [canDraw, finished, isRevealing, queueRender, status, syncInk, layerStatus]);
 
     const onPointerMove = useCallback((event: ReactPointerEvent<HTMLCanvasElement>) => {
         if (event.pointerId !== pointerIdRef.current) return;
@@ -373,6 +395,8 @@ export const useInkIt = ({
         tool,
         selectTool,
         unlocked: unlockedTools(round),
+        /** Unlocked tools whose layer is still downloading: shown as loading, not usable yet. */
+        loadingTools: unlockedTools(round).filter((id) => !toolReady(id)),
         inkShare,
         outOfInk: inkShare <= 0,
         isEmpty,

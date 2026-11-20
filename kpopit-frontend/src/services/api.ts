@@ -278,11 +278,16 @@ export const postInkItHint = async (gameDate: string): Promise<{ hint_ink_guess:
     return response.data;
 };
 
-/** Development only (null in production builds): where a local build finds an InkIt photo
- *  before its opaque copy exists in the image bucket. */
-// Development only: the photo's bytes through the API (the opaque copies aren't in the bucket yet).
-export const inkitDevPhotoUrl = import.meta.env.DEV
-    ? (path: string) => `${api.defaults.baseURL}/game/inkit/dev/photo?path=${encodeURIComponent(path)}`
+/** Emergency only: the photo path of the caller's game on `gameDate`, when a layer can't be loaded. */
+export const postInkItFallbackPhoto = async (gameDate: string): Promise<{ photo: string; version: string }> => {
+    const response = await api.post('/game/inkit/fallback-photo', { date: gameDate }, { headers: await inkitHeaders() });
+    return response.data;
+};
+
+/** Development only (null in production builds): a stored InkIt file's bytes through the API, since
+ *  the hashed copies only exist in the bucket once uploaded. */
+export const inkitDevFileUrl = import.meta.env.DEV
+    ? (path: string) => `${api.defaults.baseURL}/game/inkit/dev/file?path=${encodeURIComponent(path)}`
     : null;
 
 const collectionAuthHeaders = async () => {

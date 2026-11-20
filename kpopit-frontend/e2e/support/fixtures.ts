@@ -77,8 +77,8 @@ export const test = base.extend<{ consoleErrors: ConsoleErrors }, { backend: Off
     currentIp = nextClientIp();
     await tagApiRequests(context, currentIp);
     await stubImageBuckets(context);
-    // A dev build loads InkIt's photo through the backend, which reads the real bucket: same stub here.
-    await context.route(/\/api\/game\/inkit\/dev\/photo\?/, (route) =>
+    // A dev build loads InkIt's files through the backend, which reads the real bucket: same stub here.
+    await context.route(/\/api\/game\/inkit\/dev\/file\?/, (route) =>
       route.fulfill({ status: 200, contentType: 'image/png', path: STUB_IMAGE }),
     );
     await context.route('**/*', (route) => {
