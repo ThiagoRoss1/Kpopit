@@ -1023,8 +1023,10 @@ def test_files_present_false_on_404(monkeypatch):
 
     from services import inkit_assets
 
+    from email.message import Message
+
     def missing(request, timeout):
-        raise urllib.error.HTTPError(request.full_url, 404, "Not Found", {}, None)
+        raise urllib.error.HTTPError(request.full_url, 404, "Not Found", Message(), None)
 
     monkeypatch.setenv("R2_PUBLIC_URL", "https://cdn.test")
     monkeypatch.setattr("urllib.request.urlopen", missing)
