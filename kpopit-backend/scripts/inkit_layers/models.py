@@ -4,6 +4,7 @@ OUTPUT_SIDE). torch and controlnet_aux are imported lazily, so the layer tests t
 inject a fake extractor need no weights.
 """
 
+import warnings
 from dataclasses import dataclass
 
 import cv2
@@ -31,12 +32,18 @@ class Extractor:
 
     def __init__(self):
         import torch
-        from controlnet_aux import LineartDetector, MidasDetector
 
         self._torch = torch
         self._device = "cuda" if torch.cuda.is_available() else "cpu"
-        self._lineart = LineartDetector.from_pretrained("lllyasviel/Annotators").to(self._device)
-        self._midas = MidasDetector.from_pretrained("lllyasviel/Annotators").model.to(self._device).eval()
+
+        # controlnet_aux imports every detector it ships and loads MiDaS by an old timm name;
+        # those library warnings (SAM, openpose, mediapipe, timm) don't concern the two models used here.
+        with warnings.catch_warnings():
+            warnings.simplefilter("ignore")
+            from controlnet_aux import LineartDetector, MidasDetector
+
+            self._lineart = LineartDetector.from_pretrained("lllyasviel/Annotators").to(self._device)
+            self._midas = MidasDetector.from_pretrained("lllyasviel/Annotators").model.to(self._device).eval()
 
     def _lineart_map(self, image, coarse: bool, resolution: int) -> np.ndarray:
         raw = self._lineart(image, coarse=coarse, detect_resolution=resolution, image_resolution=resolution, output_type="np")
