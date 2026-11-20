@@ -25,6 +25,14 @@ def draft(fill: int = 0, version: int = 1, length: int = DRAFT_RAW_LENGTH - 1) -
     return base64.b64encode(zlib.compress(bytes([version]) + bytes([fill]) * length)).decode("ascii")
 
 
+def pencil_path(idol_id: int) -> str:
+    return f"/images/inkit/pencil/{(idol_id << 8) | 1:032x}.webp"
+
+
+def pen_path(idol_id: int) -> str:
+    return f"/images/inkit/pen/{(idol_id << 8) | 2:032x}.webp"
+
+
 def day(offset: int) -> str:
     return (dates.get_today_date() + timedelta(days=offset)).isoformat()
 
@@ -37,8 +45,9 @@ def inkit_idol(db_conn, make_idol):
         idol_id = make_idol(name, image_path=f"/images/idols/{name.lower().replace(' ', '_')}.webp")
         with db_conn.cursor() as cur:
             cur.execute(
-                "INSERT INTO inkit_mode_data (idol_id, image_path, is_active) VALUES (%s, %s, %s)",
-                (idol_id, f"/images/inkit/{idol_id:032x}.webp", active),
+                "INSERT INTO inkit_mode_data (idol_id, image_path, pencil_path, pen_path, is_active) "
+                "VALUES (%s, %s, %s, %s, %s)",
+                (idol_id, f"/images/inkit/{idol_id:032x}.webp", pencil_path(idol_id), pen_path(idol_id), active),
             )
         db_conn.commit()
         return idol_id
@@ -908,3 +917,126 @@ def test_migration_035_is_rerunnable(db_conn):
         conn.execute(sql)
         assert count(conn, "SELECT COUNT(*) FROM gamemodes WHERE id = 4") == 1
         assert count(conn, "SELECT COUNT(*) FROM inkit_mode_data") == rows_first
+
+
+# --- B4: draw-time check on the three stored paths -------------------------
+
+
+def _draw_inkit(db_conn, pick_date, seed):
+    import random
+    from datetime import date
+
+    from services.daily_draw import ensure_pick
+
+    with db_conn.cursor() as cur:
+        chosen = ensure_pick(cur, MODE, date.fromisoformat(pick_date), random.Random(seed))
+    db_conn.rollback()
+    return chosen
+
+
+def test_draw_skips_idol_without_files(db_conn, inkit_idol, monkeypatch):
+    good, missing = inkit_idol("Has Files"), inkit_idol("Missing Pen")
+    monkeypatch.setattr("services.inkit_assets.files_present", lambda paths: pen_path(missing) not in paths)
+
+    for seed in range(10):
+        assert _draw_inkit(db_conn, day(30 + seed), seed) == good
+
+
+def test_draw_skips_idol_with_null_layer_path(db_conn, inkit_idol, monkeypatch):
+    good, missing = inkit_idol("Has Files"), inkit_idol("Null Pen")
+    with db_conn.cursor() as cur:
+        cur.execute("UPDATE inkit_mode_data SET pen_path = NULL WHERE idol_id = %s", (missing,))
+    db_conn.commit()
+    monkeypatch.setattr("services.inkit_assets.files_present", lambda paths: True)
+
+    for seed in range(10):
+        assert _draw_inkit(db_conn, day(30 + seed), seed) == good
+
+
+def test_draw_returns_none_when_every_idol_lacks_files(db_conn, inkit_idol, monkeypatch):
+    inkit_idol("Missing One")
+    inkit_idol("Missing Two")
+    monkeypatch.setattr("services.inkit_assets.files_present", lambda paths: False)
+
+    assert _draw_inkit(db_conn, day(30), 0) is None
+
+
+def test_draw_log_never_names_the_idol(db_conn, inkit_idol, monkeypatch, caplog):
+    inkit_idol("Has Files")
+    missing = inkit_idol("Missing Pen Idol")
+    monkeypatch.setattr("services.inkit_assets.files_present", lambda paths: pen_path(missing) not in paths)
+
+    with caplog.at_level("DEBUG"):
+        for seed in range(10):
+            _draw_inkit(db_conn, day(30 + seed), seed)
+
+    draw_records = [r for r in caplog.records if r.name in ("services.daily_draw", "services.inkit_assets")]
+    assert draw_records, "a skip must be logged"
+    for record in draw_records:
+        assert record.msg == "Skipped %d InkIt idols without files" and record.args == (1,)
+        assert "Missing Pen Idol" not in record.getMessage()
+
+
+class _Head:
+    def __enter__(self):
+        return self
+
+    def __exit__(self, *exc):
+        return False
+
+
+def test_files_present_checks_three_distinct_paths(monkeypatch):
+    from services import inkit_assets
+
+    seen = []
+
+    def fake_urlopen(request, timeout):
+        seen.append((request.full_url, request.get_method(), request.get_header("User-agent"), timeout))
+        return _Head()
+
+    monkeypatch.setenv("R2_PUBLIC_URL", "https://cdn.test/")
+    monkeypatch.setattr("urllib.request.urlopen", fake_urlopen)
+    paths = ["/images/inkit/a.webp", "/images/inkit/pencil/b.webp", "/images/inkit/pen/c.webp"]
+
+    assert inkit_assets.files_present(paths) is True
+    assert seen == [(f"https://cdn.test{path}", "HEAD", "kpopit-inkit-check/1.0", 3) for path in paths]
+
+
+def test_files_present_fails_open_on_network_error(monkeypatch, caplog):
+    import urllib.error
+
+    from services import inkit_assets
+
+    def down(request, timeout):
+        raise urllib.error.URLError("dns")
+
+    monkeypatch.setenv("R2_PUBLIC_URL", "https://cdn.test")
+    monkeypatch.setattr("urllib.request.urlopen", down)
+    with caplog.at_level("WARNING"):
+        assert inkit_assets.files_present(["/images/inkit/a.webp"]) is True
+    assert any("InkIt file check unavailable" in r.getMessage() for r in caplog.records)
+    assert all("a.webp" not in r.getMessage() for r in caplog.records)
+
+
+def test_files_present_false_on_404(monkeypatch):
+    import urllib.error
+
+    from services import inkit_assets
+
+    def missing(request, timeout):
+        raise urllib.error.HTTPError(request.full_url, 404, "Not Found", {}, None)
+
+    monkeypatch.setenv("R2_PUBLIC_URL", "https://cdn.test")
+    monkeypatch.setattr("urllib.request.urlopen", missing)
+    assert inkit_assets.files_present(["/images/inkit/a.webp", "/images/inkit/pen/c.webp"]) is False
+
+
+def test_files_present_skipped_without_bucket_url(monkeypatch):
+    from services import inkit_assets
+
+    def never(request, timeout):
+        raise AssertionError("no request without a bucket URL")
+
+    monkeypatch.setenv("R2_PUBLIC_URL", "")
+    monkeypatch.setattr("urllib.request.urlopen", never)
+    assert inkit_assets.files_present(["/images/inkit/a.webp"]) is True

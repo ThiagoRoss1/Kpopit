@@ -9,6 +9,7 @@ import random
 from dataclasses import dataclass
 from datetime import date, timedelta
 
+from services import inkit_assets
 from services.inkit_mode import DRAFT_KEEP_DAYS, INKIT_GAMEMODE_ID
 from utils.dates import get_today_date
 
@@ -169,6 +170,27 @@ def _read_pick(cursor, gamemode_id: int, pick_date: date) -> int | None:
     return row["item_id"] if row else None
 
 
+def _inkit_files_present(cursor, idol_id: int) -> bool:
+    """All three stored paths set and found on the bucket (a NULL path counts as missing)."""
+    cursor.execute("SELECT image_path, pencil_path, pen_path FROM inkit_mode_data WHERE idol_id = %s", (idol_id,))
+    row = cursor.fetchone()
+    paths = [row["image_path"], row["pencil_path"], row["pen_path"]] if row else []
+    return len(paths) == 3 and all(paths) and inkit_assets.files_present(paths)
+
+
+def _draw_inkit(cursor, items: list[DrawItem], rng: random.Random | None) -> int | None:
+    """Draw, dropping idols whose files are missing; the log counts them and never names one."""
+    skipped = 0
+    chosen = draw(items, len(items), rng)
+    while chosen is not None and not _inkit_files_present(cursor, chosen):
+        skipped += 1
+        items = [item for item in items if item.item_id != chosen]
+        chosen = draw(items, len(items), rng)
+    if skipped:
+        logger.warning("Skipped %d InkIt idols without files", skipped)
+    return chosen
+
+
 def ensure_pick(cursor, gamemode_id: int, pick_date: date, rng: random.Random | None = None) -> int | None:
     """Return the pick for `pick_date`, drawing it first if missing.
 
@@ -179,7 +201,10 @@ def ensure_pick(cursor, gamemode_id: int, pick_date: date, rng: random.Random | 
         return existing
 
     items = load_items(cursor, gamemode_id, pick_date)
-    chosen = draw(items, len(items), rng)
+    if gamemode_id == INKIT_GAMEMODE_ID:
+        chosen = _draw_inkit(cursor, items, rng)
+    else:
+        chosen = draw(items, len(items), rng)
     if chosen is None:
         return None
 
