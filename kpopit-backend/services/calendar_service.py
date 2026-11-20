@@ -123,7 +123,7 @@ class CalendarService:
         row = self._row(cursor, user_id, gamemode_id, day)
         status = day_status(row)
         finished = row if status in (WON_LIVE, WON_CALENDAR) else None
-        puzzle, answer = self._puzzle(cursor, gamemode_id, answer_id)
+        puzzle, answer = self._puzzle(cursor, gamemode_id, answer_id, row)
         return {
             "challenge_date": day,
             # Today's challenge belongs to the live page: the client sends ?date=<today> there.
@@ -154,8 +154,9 @@ class CalendarService:
             for gid in guessed_ids if gid in by_id
         ]
 
-    def _puzzle(self, cursor, gamemode_id: int, answer_id: int) -> tuple[dict, dict]:
-        """(what the player needs to play, what would reveal the answer)."""
+    def _puzzle(self, cursor, gamemode_id: int, answer_id: int, row: dict | None = None) -> tuple[dict, dict]:
+        """(what the player needs to play, what would reveal the answer). `row` is the caller's game
+        of that day, which decides the InkIt files its round unlocks."""
         if gamemode_id == 3:
             album = AlbumService(self.db).get_album_by_id(cursor, answer_id) or {}
             cursor.execute("SELECT name FROM albums WHERE id = %s", (answer_id,))
@@ -166,9 +167,9 @@ class CalendarService:
         idol = dict(self.repository.fetch_full_idol_data(answer_id) or {})
         answer = {key: idol.get(key) for key in ("idol_id", "artist_name", "image_path", "image_version")}
         if gamemode_id == INKIT_GAMEMODE_ID:
-            # Only the photo: the group hint comes with the caller's game once its round unlocks it.
-            photo = InkItService(self.db, self.repository).photo(cursor, answer_id) or {}
-            return {key: photo.get(key) for key in ("image_path", "image_version")}, answer
+            # Only the files the caller's round unlocks; the group hint comes with the game likewise.
+            inkit = InkItService(self.db, self.repository)
+            return {"files": inkit.unlocked_files(cursor, answer_id, *inkit.round_of(row))}, answer
         if gamemode_id == 2:
             blurry = self.repository.fetch_blurry_idol_data(answer_id) or {}
             career = self.repository.fetch_full_idol_career(answer_id)

@@ -5,6 +5,7 @@ from datetime import date
 from services.game_service import GameService
 from services.inkit_mode import (
     DRAFT_MAX_BYTES, DRAFT_RAW_LENGTH, DRAFT_VERSION, GROUP_HINT_ROUND, INK_HINT_ROUND, INKIT_GAMEMODE_ID,
+    PEN_ROUND, PHOTO_ROUND,
 )
 from utils.dates import get_current_timestamp, utc_now
 
@@ -56,8 +57,34 @@ class InkItService:
         self.repository = repository
 
     def photo(self, cursor, idol_id: int) -> dict | None:
-        cursor.execute("SELECT image_path, image_version FROM inkit_mode_data WHERE idol_id = %s", (idol_id,))
+        """The one reader of an idol's three stored paths (never image_file, which names the idol)."""
+        cursor.execute(
+            "SELECT image_path, pencil_path, pen_path, image_version FROM inkit_mode_data WHERE idol_id = %s",
+            (idol_id,),
+        )
         return cursor.fetchone()
+
+    def unlocked_files(self, cursor, answer_id: int, round_number: int, won: bool) -> dict | None:
+        """The stored paths the caller may load at `round_number` (wrong guesses + 1): the pencil,
+        the pen from PEN_ROUND, the photo from PHOTO_ROUND or once won. None without an InkIt row."""
+        row = self.photo(cursor, answer_id)
+        if not row:
+            return None
+        files = {"version": row["image_version"], "pencil": row["pencil_path"]}
+        if round_number >= PEN_ROUND:
+            files["pen"] = row["pen_path"]
+        if won or round_number >= PHOTO_ROUND:
+            files["photo"] = row["image_path"]
+        return files
+
+    @staticmethod
+    def round_of(row: dict | None) -> tuple[int, bool]:
+        """(round, won) of a daily_user_history row: the round is the wrong guesses + 1."""
+        if not row:
+            return 1, False
+        won = bool(row.get("won"))
+        guesses = row.get("guesses_count") or len(row.get("guessed_ids") or [])
+        return guesses - (1 if won else 0) + 1, won
 
     def day_number(self, cursor, day: date) -> int | None:
         """Day N of InkIt: its first challenge day is Day 1."""
@@ -118,7 +145,9 @@ class InkItService:
 
         guesses_count = row["guesses_count"] or len(guessed_ids)
         answer, groups = self._answer(answer_id) if answer_id is not None else (None, [])
+        files = self.unlocked_files(cursor, answer_id, *self.round_of(row)) if answer_id is not None else None
         return {
+            "files": files,
             "inkit_guesses": guesses,
             "guessed_idols": [guess["artist_name"] for guess in guesses],
             "guesses_count": guesses_count,
@@ -132,14 +161,14 @@ class InkItService:
         }
 
     def day_payload(self, cursor, user_id: int | None, day: str, answer_id: int) -> dict | None:
-        """What the page needs to play `day`: the photo under its opaque path, Day N and the
-        caller's game. None if the idol has no InkIt photo."""
-        photo = self.photo(cursor, answer_id)
-        if not photo:
+        """What the page needs to play `day`: the files its round unlocks (opaque paths), Day N and
+        the caller's game. None if the idol has no InkIt row."""
+        row = self._history(cursor, user_id, day) if user_id is not None else None
+        files = self.unlocked_files(cursor, answer_id, *self.round_of(row))
+        if not files:
             return None
         return {
-            "image_path": photo["image_path"],
-            "image_version": photo["image_version"],
+            "files": files,
             "day_number": self.day_number(cursor, date.fromisoformat(day)),
             "game": self.game_state(cursor, user_id, day, answer_id) if user_id is not None else None,
         }
@@ -183,6 +212,8 @@ class InkItService:
         guesses_count = row.get("guesses_count") or 0
         answer, groups = self._answer(answer_id)
         return {
+            # Everything unlocked after this guess, so the page can start loading what it just unlocked.
+            "files": self.unlocked_files(cursor, answer_id, *self.round_of(row)),
             "guess_correct": is_correct,
             "guessed_idol_data": {key: guessed.get(key) for key in ("idol_id", "artist_name", "image_path", "image_version")},
             "guesses_count": guesses_count,

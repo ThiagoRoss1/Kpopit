@@ -25,6 +25,10 @@ def draft(fill: int = 0, version: int = 1, length: int = DRAFT_RAW_LENGTH - 1) -
     return base64.b64encode(zlib.compress(bytes([version]) + bytes([fill]) * length)).decode("ascii")
 
 
+def photo_path(idol_id: int) -> str:
+    return f"/images/inkit/{idol_id:032x}.webp"
+
+
 def pencil_path(idol_id: int) -> str:
     return f"/images/inkit/pencil/{(idol_id << 8) | 1:032x}.webp"
 
@@ -130,13 +134,13 @@ def names_nothing(body, answer_id) -> bool:
 # --- Day payload -----------------------------------------------------------
 
 
-def test_day_payload_has_the_photo_and_never_the_answer(client, game):
+def test_day_payload_has_the_pencil_and_never_the_answer(client, game):
     res = daily(client)
     body = res.get_json()
 
     assert res.status_code == 200
-    assert set(body) == {"image_path", "image_version", "day_number", "game", "server_date"}
-    assert body["image_path"] == f"/images/inkit/{game['answer']:032x}.webp"
+    assert set(body) == {"files", "day_number", "game", "server_date"}
+    assert body["files"] == {"version": "1", "pencil": pencil_path(game["answer"])}
     assert body["day_number"] == 1 and body["game"] is None
     assert body["server_date"] == dates.get_today_date_str()
     assert names_nothing(body, game["answer"])
@@ -161,7 +165,9 @@ def test_tomorrows_pick_is_drawn_but_never_returned(client, db_conn, game):
         picks = cur.fetchall()
 
     assert [pick["pick_date"].isoformat() for pick in picks] == [day(0), day(1)]
-    assert body["image_path"] != f"/images/inkit/{picks[1]['idol_id']:032x}.webp" or picks[1]["idol_id"] == game["answer"]
+    tomorrow = picks[1]["idol_id"]
+    if tomorrow != game["answer"]:
+        assert all(path(tomorrow) not in json.dumps(body) for path in (photo_path, pencil_path, pen_path))
 
 
 def test_expired_bearer_token_is_rejected(client, game):
@@ -386,7 +392,7 @@ def test_only_published_idols_with_an_active_photo_are_drawn(client, db_conn, in
     inkit_idol("Inactive Photo", active=False)
     only = inkit_idol("Only One")
 
-    assert daily(client).get_json()["image_path"] == f"/images/inkit/{only:032x}.webp"
+    assert daily(client).get_json()["files"]["pencil"] == pencil_path(only)
 
 
 def test_no_eligible_idol_is_a_404(client):
@@ -540,7 +546,7 @@ def test_calendar_day_is_played_with_its_own_drawing(client, db_conn, game, pin)
     headers = {"Authorization": game["token"]}
 
     puzzle = client.get(f"/api/calendar/inkit/{day(-2)}", headers=headers).get_json()
-    assert puzzle["puzzle"] == {"image_path": f"/images/inkit/{past_answer:032x}.webp", "image_version": "1"}
+    assert puzzle["puzzle"] == {"files": {"version": "1", "pencil": pencil_path(past_answer)}}
     assert puzzle["answer"] is None and puzzle["game"] is None and puzzle["day_number"] == 1
     assert "Wrong 9" not in json.dumps(puzzle)
 
@@ -772,7 +778,7 @@ def test_thirty_days_of_play(client, db_conn, inkit_idol, make_user, monkeypatch
     """A month of daily games: one pick a day, a 10-day cooldown, a fresh sheet every day and the
     answer never sent before the win."""
     idols = {inkit_idol(f"Daily Idol {index}"): f"Daily Idol {index}" for index in range(15)}
-    by_path = {f"/images/inkit/{idol_id:032x}.webp": idol_id for idol_id in idols}
+    by_path = {pencil_path(idol_id): idol_id for idol_id in idols}
     user_id, token = make_user()
     answers = []
 
@@ -781,7 +787,7 @@ def test_thirty_days_of_play(client, db_conn, inkit_idol, make_user, monkeypatch
         monkeypatch.setattr(dates, "TEST_DATE_OFFSET", offset)
 
         payload = daily(client, token).get_json()
-        answer = by_path[payload["image_path"]]
+        answer = by_path[payload["files"]["pencil"]]
         assert payload["day_number"] == offset + 1 and payload["game"] is None
         assert idols[answer] not in json.dumps(payload)
         assert answer not in answers[-10:]
@@ -824,6 +830,8 @@ def test_backend_rules_match_the_frontend_config():
 
     assert number(r"hint1: \{ fromRound: (\d+)") == inkit_mode.INK_HINT_ROUND
     assert number(r"hint2: \{ fromRound: (\d+)") == inkit_mode.GROUP_HINT_ROUND
+    assert number(r"pen: \{ unlockRound: (\d+)") == inkit_mode.PEN_ROUND
+    assert number(r"paint: \{ unlockRound: (\d+)") == inkit_mode.PHOTO_ROUND
     assert number(r"version: (\d+)") == inkit_mode.DRAFT_VERSION
     assert number(r"export const SHEET = (\d+)") / 2 == inkit_mode.DRAFT_MASK_SIDE
     assert inkit_mode.DRAFT_RAW_LENGTH == 93_751
@@ -1082,3 +1090,152 @@ def test_files_present_skipped_without_bucket_url(monkeypatch):
     monkeypatch.setenv("R2_PUBLIC_URL", "")
     monkeypatch.setattr("urllib.request.urlopen", never)
     assert inkit_assets.files_present(["/images/inkit/a.webp"]) is True
+
+
+# --- B6: files by round and the emergency photo ------------------------------
+
+
+def _wrong_guesses(client, game, count) -> dict:
+    """Make `count` (at least 1) wrong guesses; returns the last guess response."""
+    body: dict = {}
+    for wrong in game["wrong"][:count]:
+        body = guess(client, game["token"], wrong).get_json()
+    assert body, "make at least one guess"
+    return body
+
+
+def _assert_files(body, answer, pen: bool, photo: bool):
+    """`body` carries exactly the unlocked files, and no locked path appears anywhere in it."""
+    text = json.dumps(body)
+    assert pencil_path(answer) in text
+    assert (pen_path(answer) in text) is pen
+    assert (photo_path(answer) in text) is photo
+
+
+def test_round_1_payload_has_only_pencil(client, game):
+    anonymous = daily(client).get_json()
+    assert anonymous["files"] == {"version": "1", "pencil": pencil_path(game["answer"])}
+    assert "image_path" not in anonymous and "image_version" not in anonymous
+    _assert_files(anonymous, game["answer"], pen=False, photo=False)
+    _assert_files(daily(client, game["token"]).get_json(), game["answer"], pen=False, photo=False)
+
+
+def test_round_2_payload_has_no_pen_or_photo(client, game):
+    response = _wrong_guesses(client, game, 1)
+    assert response["files"] == {"version": "1", "pencil": pencil_path(game["answer"])}
+    _assert_files(response, game["answer"], pen=False, photo=False)
+    _assert_files(daily(client, game["token"]).get_json(), game["answer"], pen=False, photo=False)
+
+
+def test_round_3_payload_adds_pen_not_photo(client, game):
+    response = _wrong_guesses(client, game, 2)
+    assert response["files"] == {"version": "1", "pencil": pencil_path(game["answer"]), "pen": pen_path(game["answer"])}
+    _assert_files(response, game["answer"], pen=True, photo=False)
+    _assert_files(daily(client, game["token"]).get_json(), game["answer"], pen=True, photo=False)
+
+
+def test_round_4_payload_has_no_photo(client, game):
+    _assert_files(_wrong_guesses(client, game, 3), game["answer"], pen=True, photo=False)
+    _assert_files(daily(client, game["token"]).get_json(), game["answer"], pen=True, photo=False)
+
+
+def test_round_5_payload_adds_photo(client, game):
+    response = _wrong_guesses(client, game, 4)
+    assert response["files"]["photo"] == photo_path(game["answer"])
+    _assert_files(response, game["answer"], pen=True, photo=True)
+    _assert_files(daily(client, game["token"]).get_json(), game["answer"], pen=True, photo=True)
+
+
+def test_winning_guess_adds_photo(client, game):
+    _wrong_guesses(client, game, 1)
+    won = guess(client, game["token"], game["answer"]).get_json()
+    assert won["guess_correct"] is True
+    assert won["files"] == {"version": "1", "pencil": pencil_path(game["answer"]), "photo": photo_path(game["answer"])}
+
+
+def test_restore_payload_follows_rounds(client, game):
+    _wrong_guesses(client, game, 1)
+    restored = client.get("/api/game/restore-session", headers={"Authorization": game["token"]}).get_json()
+    assert restored["inkit"]["files"] == {"version": "1", "pencil": pencil_path(game["answer"])}
+    _assert_files(restored, game["answer"], pen=False, photo=False)
+    state = client.get("/api/game-state?gamemode_id=4", headers={"X-User-Token": game["token"]}).get_json()
+    _assert_files(state, game["answer"], pen=False, photo=False)
+
+
+def test_calendar_past_day_follows_rounds(client, game, pin):
+    past = game["wrong"][9]
+    pin(past, offset=-2)
+    headers = {"Authorization": game["token"]}
+
+    puzzle = client.get(f"/api/calendar/inkit/{day(-2)}", headers=headers).get_json()
+    assert puzzle["puzzle"] == {"files": {"version": "1", "pencil": pencil_path(past)}}
+    _assert_files(puzzle, past, pen=False, photo=False)
+
+    for wrong in game["wrong"][:2]:
+        response = client.post(f"/api/calendar/inkit/{day(-2)}/guess", headers=headers,
+                               json={"guessed_idol_id": wrong}).get_json()
+    _assert_files(response, past, pen=True, photo=False)
+    _assert_files(client.get(f"/api/calendar/inkit/{day(-2)}", headers=headers).get_json(), past, pen=True, photo=False)
+
+
+def test_nothing_names_the_answer_before_the_end(client, db_conn, game):
+    with db_conn.cursor() as cur:
+        cur.execute("UPDATE inkit_mode_data SET image_file = 'secret_answer_readable.webp' WHERE idol_id = %s",
+                    (game["answer"],))
+    db_conn.commit()
+    headers = {"Authorization": game["token"]}
+
+    responses = [daily(client).get_json()]
+    for wrong in game["wrong"][:6]:
+        responses.append(guess(client, game["token"], wrong).get_json())
+        responses.append(daily(client, game["token"]).get_json())
+        responses.append(client.get("/api/game/restore-session", headers=headers).get_json())
+        responses.append(client.get("/api/game-state?gamemode_id=4", headers={"X-User-Token": game["token"]}).get_json())
+
+    for body in responses:
+        assert names_nothing(body, game["answer"])
+        assert "secret_answer_readable" not in json.dumps(body)
+
+
+def fallback(client, token=None, game_date=None):
+    body = {} if game_date is None else {"date": game_date}
+    return client.post("/api/game/inkit/fallback-photo", json=body,
+                       headers={"Authorization": token} if token else {})
+
+
+def test_fallback_photo_only_for_own_game(client, game):
+    daily(client)  # draws today's and tomorrow's picks
+    assert fallback(client).status_code == 400
+    assert fallback(client, game["token"], day(-40)).status_code == 404
+    assert fallback(client, game["token"], day(1)).status_code == 404  # tomorrow is drawn but never served
+    assert fallback(client, game["token"], "not-a-date").status_code == 404
+
+    res = fallback(client, game["token"])
+    assert res.status_code == 200
+    assert res.get_json() == {"photo": photo_path(game["answer"]), "version": "1"}
+    assert res.headers["Cache-Control"] == "private, no-store"
+
+
+def test_fallback_photo_limited_per_game(client, game, pin, make_user):
+    pin(game["wrong"][9], offset=-2)
+    today = dates.get_today_date_str()
+
+    assert [fallback(client, game["token"], today).status_code for _ in range(3)] == [200, 200, 429]
+    other_day = fallback(client, game["token"], day(-2))
+    assert other_day.status_code == 200 and other_day.get_json()["photo"] == photo_path(game["wrong"][9])
+
+    _, other_token = make_user()
+    assert fallback(client, other_token, today).status_code == 200
+
+
+def test_fallback_photo_log_has_no_id(client, game, caplog):
+    with caplog.at_level("INFO"):
+        assert fallback(client, game["token"]).status_code == 200
+
+    served = [r for r in caplog.records if r.getMessage() == "InkIt fallback photo served"]
+    assert len(served) == 1
+    for record in caplog.records:
+        message = record.getMessage()
+        assert photo_path(game["answer"]) not in message and SECRET_NAME not in message
+        assert f"{game['answer']:032x}" not in message
+

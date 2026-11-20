@@ -3,15 +3,19 @@ import os
 import urllib.error
 import urllib.request
 from flask import Blueprint, Response, g, jsonify, request
+from flask_limiter.util import get_remote_address
 from services.calendar_service import CALENDAR_ENABLED, CalendarError, CalendarService
 from services.daily_draw import ensure_daily_picks
+from services.game_service import GameService
 from services.get_db import get_db, get_idol_repo
 from services.inkit_mode import INK_HINT_ROUND, INKIT_GAMEMODE_ID
 from services.inkit_service import InkItError, InkItService
 from services.user_service import UserService
 from utils.analytics import get_analytics_data, get_country_name
 from utils.auth_decorators import optional_auth
+from utils.auth_helpers import detect_user
 from utils.dates import get_today_date_str
+from utils.rate_limiter import limiter
 
 inkit_bp = Blueprint("inkit", __name__)
 
@@ -164,6 +168,58 @@ def use_inkit_ink_hint():
         connect.rollback()
         logger.exception("Error saving the InkIt ink hint")
         return jsonify({"error": "Could not use the hint"}), 500
+
+    finally:
+        cursor.close()
+
+
+def _fallback_game_date() -> str:
+    data = request.get_json(silent=True)
+    day = data.get("date") if isinstance(data, dict) else None
+    return day if isinstance(day, str) and day else get_today_date_str()
+
+
+def _fallback_limit_key() -> str:
+    """One allowance per caller and game date: a calendar day never spends today's."""
+    auth = detect_user(request)
+    who = auth.get("user_id") if auth["source"] == "jwt" else auth.get("token") if auth["source"] == "anonymous" else None
+    return f"{who or get_remote_address()}:{_fallback_game_date()}"
+
+
+@inkit_bp.route("/game/inkit/fallback-photo", methods=["POST"])
+@limiter.limit("2 per day", key_func=_fallback_limit_key)
+@optional_auth
+def inkit_fallback_photo():
+    """Emergency only: the photo path, so a page whose layers failed to load can build them in the
+    browser. For an identified caller and a real challenge day (today, or a past day through the
+    calendar), never tomorrow. Logged without the idol or the path."""
+    connect = get_db()
+    cursor = connect.cursor()
+
+    try:
+        user_id, error = _caller_id(cursor)
+        if error or user_id is None:
+            return error or (jsonify({"error": "Missing user token"}), 400)
+
+        today = get_today_date_str()
+        day = _fallback_game_date()
+        if day != today:
+            if not CALENDAR_ENABLED:
+                return jsonify({"error": "Not found"}), 404
+            try:
+                day = CalendarService(connect, get_idol_repo()).challenge_day(cursor, INKIT_GAMEMODE_ID, day)
+            except CalendarError:
+                return jsonify({"error": "Not found"}), 404
+
+        answer_id = GameService(connect, get_idol_repo()).resolve_answer_id(cursor, INKIT_GAMEMODE_ID, day)
+        photo = InkItService(connect, get_idol_repo()).photo(cursor, answer_id) if answer_id is not None else None
+        if not photo:
+            return jsonify({"error": "Not found"}), 404
+
+        logger.info("InkIt fallback photo served")
+        response = jsonify({"photo": photo["image_path"], "version": photo["image_version"]})
+        response.headers["Cache-Control"] = "private, no-store"
+        return response, 200
 
     finally:
         cursor.close()
