@@ -2,5 +2,15 @@
   "venvPath": ".",
   "venv": ".venv",
   "typeCheckingMode": "basic",
-  "exclude": [".venv", "**/__pycache__", "data", "templates", "scripts/inkit_layers"]
+  "exclude": [".venv", "**/__pycache__", "data", "templates", "scripts/inkit_layers"],
+  "executionEnvironments": [
+    {
+      "root": "scripts/inkit_layers",
+      "extraPaths": [
+        "scripts/inkit_layers",
+        "scripts/inkit_layers/.venv/Lib/site-packages",
+        "scripts/inkit_layers/.venv/lib/python3.14/site-packages"
+      ]
+    }
+  ]
 }
