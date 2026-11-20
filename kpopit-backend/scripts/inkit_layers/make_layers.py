@@ -1,11 +1,8 @@
-"""CLI: turn a folder of square photo renders into the three InkIt files per photo.
+"""CLI: python make_layers.py <input_dir> <output_dir> [--force] [--calibrate]
 
-    python make_layers.py <input_dir> <output_dir> [--force] [--calibrate]
-
-Writes `<stem>.png` (photo copy), `<stem>.pencil.png` and `<stem>.pen.png` (8-bit
-grayscale, white = paper). Skips existing outputs unless --force. --calibrate writes
-nothing and prints the hatching density. An optional overrides.json in <input_dir>
-multiplies layer darkness for review. The model extractor is injectable for tests.
+Writes <stem>.png (photo copy), <stem>.pencil.png and <stem>.pen.png per photo (8-bit grayscale,
+white = paper), skipping existing outputs unless --force. --calibrate only prints the hatching
+density; an optional overrides.json in <input_dir> scales darkness for review.
 """
 
 import argparse
@@ -84,6 +81,9 @@ def main(argv: list[str], extractor=None) -> int:
         return 0
 
     output_dir = Path(args.output_dir)
+    # The photo copy is <stem>.png: writing next to the sources would overwrite them.
+    if output_dir.resolve() == input_dir.resolve():
+        raise SystemExit("output_dir must differ from input_dir")
     output_dir.mkdir(parents=True, exist_ok=True)
     overrides_path = input_dir / "overrides.json"
     overrides = json.loads(overrides_path.read_text(encoding="utf-8")) if overrides_path.exists() else {}

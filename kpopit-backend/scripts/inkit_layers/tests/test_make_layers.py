@@ -133,3 +133,17 @@ def test_calibrate_writes_nothing(tmp_path, capsys):
 
     assert not out_dir.exists() or not any(out_dir.iterdir())
     assert "density" in capsys.readouterr().out
+
+
+def test_refuses_to_write_into_the_input_folder(tmp_path):
+    in_dir = tmp_path / "in"
+    in_dir.mkdir()
+    _save(in_dir / "a.png", _gradient_photo())
+    original = (in_dir / "a.png").read_bytes()
+
+    import pytest
+
+    with pytest.raises(SystemExit):
+        make_layers.main([str(in_dir), str(in_dir)], extractor=FakeExtractor())
+    assert (in_dir / "a.png").read_bytes() == original
+    assert not (in_dir / "a.pencil.png").exists()
