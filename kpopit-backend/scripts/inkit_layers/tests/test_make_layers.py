@@ -147,3 +147,48 @@ def test_refuses_to_write_into_the_input_folder(tmp_path):
         make_layers.main([str(in_dir), str(in_dir)], extractor=FakeExtractor())
     assert (in_dir / "a.png").read_bytes() == original
     assert not (in_dir / "a.pencil.png").exists()
+
+
+def test_reports_built_skipped_and_a_summary(tmp_path, capsys):
+    in_dir, out_dir = tmp_path / "in", tmp_path / "out"
+    in_dir.mkdir()
+    _save(in_dir / "a.png", _gradient_photo())
+
+    make_layers.main([str(in_dir), str(out_dir)], extractor=FakeExtractor())
+    first = capsys.readouterr().out
+    assert "Built: a -> a.png, a.pencil.png, a.pen.png" in first
+    assert "Layers built: 1" in first and "Skipped (already exists): 0" in first
+
+    make_layers.main([str(in_dir), str(out_dir)], extractor=FakeExtractor())
+    second = capsys.readouterr().out
+    assert "Already exists, skipping: a" in second
+    assert "Total photos: 1" in second and "Layers built: 0" in second
+    assert "Skipped (already exists): 1" in second and "Errors encountered: 0" in second
+
+
+def test_models_are_not_loaded_when_nothing_is_left(tmp_path, monkeypatch, capsys):
+    in_dir, out_dir = tmp_path / "in", tmp_path / "out"
+    in_dir.mkdir()
+    _save(in_dir / "a.png", _gradient_photo())
+    make_layers.main([str(in_dir), str(out_dir)], extractor=FakeExtractor())
+
+    class NoModels:
+        def __init__(self):
+            raise AssertionError("the models must not load when every photo is done")
+
+    monkeypatch.setattr("models.Extractor", NoModels)
+    assert make_layers.main([str(in_dir), str(out_dir)]) == 0
+    assert "Skipped (already exists): 1" in capsys.readouterr().out
+
+
+def test_a_broken_photo_is_counted_and_the_run_goes_on(tmp_path, capsys):
+    in_dir, out_dir = tmp_path / "in", tmp_path / "out"
+    in_dir.mkdir()
+    _save(in_dir / "a.png", _gradient_photo())
+    (in_dir / "broken.png").write_bytes(b"not a png")
+
+    assert make_layers.main([str(in_dir), str(out_dir)], extractor=FakeExtractor()) == 1
+    out = capsys.readouterr().out
+    assert "Error building broken:" in out
+    assert (out_dir / "a.pen.png").exists()
+    assert "Layers built: 1" in out and "Errors encountered: 1" in out

@@ -61,7 +61,14 @@ def _calibrate(items: list[tuple[Path, np.ndarray]], extractor) -> float:
     return density
 
 
+def _load_extractor():
+    from models import Extractor
+
+    return Extractor()
+
+
 def main(argv: list[str], extractor=None) -> int:
+    """Returns 1 when any photo failed, so a script or CI step can tell."""
     parser = argparse.ArgumentParser(description="Build InkIt pencil/pen layers from square photos.")
     parser.add_argument("input_dir")
     parser.add_argument("output_dir")
@@ -71,13 +78,9 @@ def main(argv: list[str], extractor=None) -> int:
 
     input_dir = Path(args.input_dir)
     photos = _photos(input_dir)
-    if extractor is None:
-        from models import Extractor
-
-        extractor = Extractor()
 
     if args.calibrate:
-        _calibrate([(photo, load_square(photo)) for photo in photos], extractor)
+        _calibrate([(photo, load_square(photo)) for photo in photos], extractor or _load_extractor())
         return 0
 
     output_dir = Path(args.output_dir)
@@ -88,19 +91,42 @@ def main(argv: list[str], extractor=None) -> int:
     overrides_path = input_dir / "overrides.json"
     overrides = json.loads(overrides_path.read_text(encoding="utf-8")) if overrides_path.exists() else {}
 
+    print("-- Starting --")
+    print(f"Source folder: {input_dir}")
+    print(f"Destination folder: {output_dir}")
+
+    built = skipped = errors = 0
     for photo in photos:
         stem = photo.stem
         targets = (output_dir / f"{stem}.png", output_dir / f"{stem}.pencil.png", output_dir / f"{stem}.pen.png")
         if not args.force and all(target.exists() for target in targets):
+            print(f"Already exists, skipping: {stem}", flush=True)
+            skipped += 1
             continue
-        rgb = load_square(photo)
-        maps = extractor.maps(rgb)
-        pencil, pen = build_layers(rgb, maps, stem, overrides.get(stem))
-        _photo_png(rgb).save(targets[0])
-        _layer_png(pencil).save(targets[1])
-        _layer_png(pen).save(targets[2])
-        print(stem, flush=True)
-    return 0
+
+        try:
+            rgb = load_square(photo)
+            # Loaded on the first photo that needs it: a run with nothing left never waits for the GPU.
+            extractor = extractor or _load_extractor()
+            pencil, pen = build_layers(rgb, extractor.maps(rgb), stem, overrides.get(stem))
+            _photo_png(rgb).save(targets[0])
+            _layer_png(pencil).save(targets[1])
+            _layer_png(pen).save(targets[2])
+        except Exception as error:
+            print(f"Error building {stem}: {error}", flush=True)
+            errors += 1
+            continue
+
+        print(f"Built: {stem} -> {', '.join(target.name for target in targets)}", flush=True)
+        built += 1
+
+    print()
+    print("-- Summary --")
+    print(f"Total photos: {len(photos)}")
+    print(f"Layers built: {built}")
+    print(f"Skipped (already exists): {skipped}")
+    print(f"Errors encountered: {errors}")
+    return 1 if errors else 0
 
 
 if __name__ == "__main__":
