@@ -11,7 +11,9 @@ SECRET = "test-inkit-path-secret"
 
 
 def _hash(path: str) -> str:
-    return re.search(r"([0-9a-f]{32})\.webp$", path).group(1)
+    match = re.search(r"([0-9a-f]{32})\.webp$", path)
+    assert match
+    return match.group(1)
 
 
 def test_opaque_path_shapes():
