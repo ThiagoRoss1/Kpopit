@@ -228,9 +228,10 @@ def inkit_fallback_photo():
 if FLASK_ENV == "development":
     R2_PUBLIC_URL = os.getenv("R2_PUBLIC_URL", "").rstrip("/")
 
-    def _dev_source(cursor, path: str) -> str | None:
-        """The bucket URL behind a stored InkIt path, or None for any other path. The hashed photo
-        may not be uploaded yet, so a photo path streams the idol's Blurry photo instead."""
+    def _dev_sources(cursor, path: str) -> list[str]:
+        """The bucket URLs to try for a stored InkIt path, in order; empty for any other path. A photo
+        tries its uploaded file (the crop the layers were drawn from), then the Blurry photo, which
+        only stands in before the upload (the fallback layers are then built from it too)."""
         cursor.execute(
             """
                 SELECT m.image_path, m.pencil_path, m.pen_path, m.image_version,
@@ -241,12 +242,17 @@ if FLASK_ENV == "development":
         )
         row = cursor.fetchone()
         if not row or not path:
-            return None
-        if path == row["image_path"]:
-            if not row["blur_image_path"]:
-                return None
-            return f"{R2_PUBLIC_URL}/{row['blur_image_path'].lstrip('/')}?v={row['blur_image_version']}"
-        return f"{R2_PUBLIC_URL}{path}?v={row['image_version']}"
+            return []
+        sources = [f"{R2_PUBLIC_URL}{path}?v={row['image_version']}"]
+        if path == row["image_path"] and row["blur_image_path"]:
+            sources.append(f"{R2_PUBLIC_URL}/{row['blur_image_path'].lstrip('/')}?v={row['blur_image_version']}")
+        return sources
+
+    def _fetch(source: str) -> tuple[bytes, str]:
+        # Cloudflare answers 403 to urllib's default User-Agent ("Python-urllib/x.y").
+        fetch = urllib.request.Request(source, headers={"User-Agent": "kpopit-dev-photo/1.0"})
+        with urllib.request.urlopen(fetch, timeout=10) as upstream:
+            return upstream.read(), upstream.headers.get_content_type()
 
     @inkit_bp.route("/game/inkit/dev/file", methods=["GET"])
     def dev_file():
@@ -258,25 +264,28 @@ if FLASK_ENV == "development":
         connect = get_db()
         cursor = connect.cursor()
         try:
-            source = _dev_source(cursor, request.args.get("path", ""))
+            sources = _dev_sources(cursor, request.args.get("path", ""))
         finally:
             cursor.close()
-        if not source:
+        if not sources:
             return jsonify({"error": "Not found"}), 404
 
-        try:
-            # Cloudflare answers 403 to urllib's default User-Agent ("Python-urllib/x.y").
-            fetch = urllib.request.Request(source, headers={"User-Agent": "kpopit-dev-photo/1.0"})
-            with urllib.request.urlopen(fetch, timeout=10) as upstream:
-                body, mimetype = upstream.read(), upstream.headers.get_content_type()
-        except urllib.error.HTTPError as err:
-            # A layer that isn't uploaded is a 404, so the page falls back to building the layers.
-            logger.warning("Could not fetch the InkIt dev file from the public bucket (%s)", err.code)
-            return jsonify({"error": "Could not load the file"}), 404 if err.code == 404 else 502
-        except (urllib.error.URLError, OSError) as err:
-            # The error type only: the URL would name the idol.
-            logger.warning("Could not fetch the InkIt dev file from the public bucket (%s)", type(err).__name__)
-            return jsonify({"error": "Could not load the file"}), 502
+        for index, source in enumerate(sources):
+            try:
+                body, mimetype = _fetch(source)
+                break
+            except urllib.error.HTTPError as err:
+                if err.code == 404 and index < len(sources) - 1:
+                    continue
+                # A layer that isn't uploaded is a 404, so the page falls back to building the layers.
+                logger.warning("Could not fetch the InkIt dev file from the public bucket (%s)", err.code)
+                return jsonify({"error": "Could not load the file"}), 404 if err.code == 404 else 502
+            except (urllib.error.URLError, OSError) as err:
+                # The error type only: the URL would name the idol.
+                logger.warning("Could not fetch the InkIt dev file from the public bucket (%s)", type(err).__name__)
+                return jsonify({"error": "Could not load the file"}), 502
+        else:
+            return jsonify({"error": "Not found"}), 404
 
         response = Response(body, mimetype=mimetype)
         response.headers["Cache-Control"] = "private, max-age=3600"

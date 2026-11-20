@@ -692,18 +692,42 @@ def _dev_bucket(monkeypatch, upstream=None):
     return fetched
 
 
-def test_dev_file_streams_photo_from_blurry(client, db_conn, game, monkeypatch):
+def test_dev_file_streams_the_uploaded_photo(client, db_conn, game, monkeypatch):
+    """The uploaded photo is the one the layers were drawn from: the Blurry photo is another crop."""
     with db_conn.cursor() as cur:
         cur.execute("INSERT INTO blurry_mode_data (idol_id, blur_image_path, is_active) VALUES (%s, '/b/a_b.webp', TRUE)",
                     (game["answer"],))
     db_conn.commit()
     fetched = _dev_bucket(monkeypatch)
 
-    res = client.get(f"/api/game/inkit/dev/file?path=/images/inkit/{game['answer']:032x}.webp")
+    res = client.get(f"/api/game/inkit/dev/file?path={photo_path(game['answer'])}")
     assert (res.status_code, res.mimetype, res.data) == (200, "image/webp", b"webp-bytes")
-    assert "a_b" not in res.get_data(as_text=True) and [r.full_url for r in fetched] == ["https://bucket.test/b/a_b.webp?v=1"]
+    assert [r.full_url for r in fetched] == [f"https://bucket.test{photo_path(game['answer'])}?v=1"]
     # Not urllib's default User-Agent, which Cloudflare refuses.
     assert fetched[0].get_header("User-agent") == "kpopit-dev-photo/1.0"
+
+
+def test_dev_file_photo_falls_back_to_blurry_before_upload(client, db_conn, game, monkeypatch):
+    import urllib.error
+    from email.message import Message
+
+    with db_conn.cursor() as cur:
+        cur.execute("INSERT INTO blurry_mode_data (idol_id, blur_image_path, is_active) VALUES (%s, '/b/a_b.webp', TRUE)",
+                    (game["answer"],))
+    db_conn.commit()
+
+    def not_uploaded_yet(request):
+        if "/images/inkit/" in request.full_url:
+            raise urllib.error.HTTPError(request.full_url, 404, "Not Found", Message(), None)
+        return _Upstream()
+
+    fetched = _dev_bucket(monkeypatch, upstream=not_uploaded_yet)
+    res = client.get(f"/api/game/inkit/dev/file?path={photo_path(game['answer'])}")
+    assert (res.status_code, res.data) == (200, b"webp-bytes")
+    assert "a_b" not in res.get_data(as_text=True)
+    assert [r.full_url for r in fetched] == [
+        f"https://bucket.test{photo_path(game['answer'])}?v=1", "https://bucket.test/b/a_b.webp?v=1",
+    ]
 
 
 def test_dev_file_streams_layer_by_stored_path(client, game, monkeypatch):
