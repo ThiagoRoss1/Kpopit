@@ -424,6 +424,8 @@ export interface InkItCalendarDay {
   status: CalendarStatus;
   puzzle: { files: InkItFiles };
   game: InkItGame | null;
+  /** Sent only once the caller finished that day. */
+  answer: InkItAnswer | null;
 }
 
 export interface InkItGuessResult {

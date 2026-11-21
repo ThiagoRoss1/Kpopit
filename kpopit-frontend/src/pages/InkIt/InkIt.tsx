@@ -12,6 +12,7 @@ import type { IdolListItem, InkItAnswer, InkItCalendarDay, InkItDay, InkItFiles,
 import type { CardGranted } from "../../interfaces/albumInterfaces";
 import { useInkIt } from "../../features/inkit/useInkIt.ts";
 import { fileUrl, onceByKey, type LayerUrls } from "../../features/inkit/layerLoader.ts";
+import { addDays } from "../Calendar/calendarData";
 import { grainUrl } from "../../features/inkit/sprites.ts";
 import { useSharedGameData } from "../../hooks/useSharedGameData";
 import { useGameMode } from "../../hooks/useGameMode";
@@ -356,6 +357,18 @@ const InkItGame = ({ data, idols, isCalendarDay, onGameChange }: InkItGameProps)
         refetchOnWindowFocus: false,
     });
 
+    // A calendar day's "yesterday" is the challenge day before it (none before Day 1, which the
+    // server rejects); its answer comes only if the player finished that day too.
+    const previousDate = isCalendarDay ? addDays(data.gameDate, -1) : null;
+    const previousDay = useQuery({
+        queryKey: ["inkitCalendarDay", previousDate],
+        queryFn: () => getInkItCalendarDay(previousDate!),
+        enabled: previousDate !== null && phase === "won",
+        retry: false,
+        staleTime: 1000 * 60 * 5,
+        refetchOnWindowFocus: false,
+    });
+
     const victoryRef = useRef<HTMLDivElement | null>(null);
     const timers = useRef<number[]>([]);
     useEffect(() => () => timers.current.forEach((timer) => window.clearTimeout(timer)), []);
@@ -520,8 +533,21 @@ const InkItGame = ({ data, idols, isCalendarDay, onGameChange }: InkItGameProps)
     // cached before the field existed has no flags at all and is shown whole until it refreshes.
     const guessable = useMemo(() => idols.filter((idol) => idol.has_inkit_photo !== false), [idols]);
 
-    const yesterdayData = yesterdayIdol.data;
-    const yesterday: YesterdayInfo | null = !yesterdayData || !("yesterdays_pick_date" in yesterdayData) ? null : yesterdayData.locked
+    const yesterdayData = isCalendarDay ? undefined : yesterdayIdol.data;
+    const previousDayData = isCalendarDay && !previousDay.isError ? previousDay.data : undefined;
+    const previousAnswer = previousDayData?.answer;
+    const calendarYesterday: YesterdayInfo | null = !previousDayData ? null : previousAnswer
+        ? {
+            name: previousAnswer.artist_name,
+            group: previousAnswer.groups[0] ?? null,
+            href: idolHref(previousAnswer.idol_id, previousAnswer.artist_name),
+            imagePath: previousAnswer.image_path,
+            imageVersion: previousAnswer.image_version,
+            locked: null,
+        }
+        : { name: null, group: null, href: null, imagePath: null, imageVersion: null, locked: { date: previousDayData.challenge_date, dayNumber: previousDayData.day_number } };
+    const yesterday: YesterdayInfo | null = isCalendarDay ? calendarYesterday
+        : !yesterdayData || !("yesterdays_pick_date" in yesterdayData) ? null : yesterdayData.locked
         ? { name: null, group: null, href: null, imagePath: null, imageVersion: null, locked: { date: yesterdayData.yesterdays_pick_date, dayNumber: yesterdayData.day_number } }
         : {
             name: yesterdayData.artist_name,
