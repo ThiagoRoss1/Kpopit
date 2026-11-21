@@ -1,11 +1,11 @@
 //import React from "react";
-import type { GuessedIdolData, YesterdayIdolPick, YesterdayLocked } from "../../interfaces/gameInterfaces";
+import type { CalendarVictoryDay, GuessedIdolData, YesterdayIdolPick, YesterdayLocked } from "../../interfaces/gameInterfaces";
 import YesterdayLockedCard from "./YesterdayLockedCard";
 import { Link } from "react-router";
 import TargetAttempt from "../../assets/icons/target.svg";
 import RankPosition from "../../assets/icons/ranking-fill.svg";
 import PositionTrend from "../../assets/icons/trending-up.svg";
-import { Share2 } from "lucide-react";
+import { ArrowLeft, CalendarDays, Share2 } from "lucide-react";
 import { buildIdolSlug } from "../../utils/formatters";
 import Img from "../Img";
 
@@ -33,10 +33,12 @@ interface VictoryCardBigProps {
     nextReset: () => { timeRemaining: number | null; formattedTime: string; };
     onShareClick?: () => void;
     otherGameModes?: GameMode[];
+    /** A past day won from the calendar (no ranking, countdown or share). */
+    calendarDay?: CalendarVictoryDay;
 }
 
 const VictoryCardBig = (props: VictoryCardBigProps) => {
-    const { cardInfo, idolActiveGroup, attempts, yesterdayIdolId, yesterdayIdol, yesterdayIdolGroup, yesterdayIdolImage, yesterdayIdolImageVersion, userPosition, userRank, userScore, nextReset, onShareClick, otherGameModes } = props;
+    const { cardInfo, idolActiveGroup, attempts, yesterdayIdolId, yesterdayIdol, yesterdayIdolGroup, yesterdayIdolImage, yesterdayIdolImageVersion, userPosition, userRank, userScore, nextReset, onShareClick, otherGameModes, calendarDay } = props;
 
     const ordinal = (n: number | null | undefined) => {
         if (n === null || n === undefined) return "...";
@@ -75,18 +77,20 @@ return (
 
             <div className="absolute flex flex-col items-center justify-center w-full sm:w-145 max-h-20 sm:max-h-20 max-xxs:mt-32 xxs:mt-30 xs:mt-36 sm:mt-44">
                 <span className="max-xxs:text-base xxs:text-base xs:text-base xm:text-[18px] sm:text-[22px] text-center">
-                    Today's Idol was <span className="font-bold bg-linear-to-r from-[#db3189] via-[#e44d86] to-[#ec5e65] text-transparent bg-clip-text max-xxs:text-base xxs:text-base xs:text-[18px] sm:text-[22px] brightness-105">
+                    {calendarDay ? "This day's idol was" : "Today's Idol was"} <span className="font-bold bg-linear-to-r from-[#db3189] via-[#e44d86] to-[#ec5e65] text-transparent bg-clip-text max-xxs:text-base xxs:text-base xs:text-[18px] sm:text-[22px] brightness-105">
                         {cardInfo.artist_name}
                     </span> <span className="font-bold bg-linear-to-r from-[#ec5e65] via-[#e44d86] to-[#db3189] text-transparent bg-clip-text max-xxs:text-base xxs:text-base xs:text-[18px] sm:text-[22px] brightness-105 whitespace-nowrap">
                             ({activeGroup})
                         </span>
                 </span>
 
+                {!calendarDay && (
                 <span className="max-xxs:text-[14px] xxs:text-[14px] xs:text-base sm:text-[18px] mt-2 text-center">
                     You were the <span className="font-bold bg-linear-to-r from-[#db3189] via-[#e44d86] to-[#ec5e65] text-transparent bg-clip-text brightness-110">
                         {ordinal(userPosition)}
                     </span> fan to guess correctly!
                 </span>
+                )}
             </div>
         </div>
 
@@ -106,12 +110,16 @@ return (
 
                 <div className="relative flex flex-col items-center justify-start text-center max-xxs:h-21.5 xxs:h-21.5 xs:w-27 xs:h-25 xm:w-29 xm:h-25 sm:w-45 sm:h-25 bg-linear-to-br from-[#7a4de4] to-[#1f2686] 
                     gap-0.5 rounded-[18px] sm:rounded-[20px]">
-                    <Img src={RankPosition} alt="P" className="max-xxs:size-4 xxs:size-5 xs:size-6 sm:size-6 mt-2" draggable={false} />
+                    {calendarDay ? (
+                        <CalendarDays className="max-xxs:size-4 xxs:size-5 xs:size-6 sm:size-6 mt-2" strokeWidth={2.4} aria-hidden />
+                    ) : (
+                        <Img src={RankPosition} alt="P" className="max-xxs:size-4 xxs:size-5 xs:size-6 sm:size-6 mt-2" draggable={false} />
+                    )}
                     <span className="max-xxs:text-lg xxs:text-[20px] xs:text-[22px] font-bold">
-                        {userRank ?? "-"}
+                        {calendarDay ? calendarDay.dayNumber ?? "-" : userRank ?? "-"}
                     </span>
                     <span className="max-xxs:text-[12px] xxs:text-[12px] xs:text-[14px] font-semibold">
-                        Position
+                        {calendarDay ? "Day" : "Position"}
                     </span>
                 </div>
 
@@ -119,10 +127,10 @@ return (
                     gap-0.5 rounded-[18px] sm:rounded-[20px]">
                     <Img src={PositionTrend} alt="S" className="max-xxs:size-4 xxs:size-5 xs:size-6 sm:size-6 mt-2" draggable={false} />
                     <span className="max-xxs:text-lg xxs:text-[20px] xs:text-[22px] font-bold">
-                        {userScore?.toFixed(2)}
+                        {calendarDay ? (calendarDay.xp != null ? `+${calendarDay.xp}` : "-") : userScore?.toFixed(2)}
                     </span>
                     <span className="max-xxs:text-[12px] xxs:text-[12px] xs:text-[14px] font-semibold">
-                        Score
+                        {calendarDay ? "XP" : "Score"}
                     </span>
                 </div>
             </div>
@@ -160,19 +168,31 @@ return (
                         </div>
                     </div>
                     
+                    {!calendarDay && (
                     <div className="flex size-full items-center justify-center">
                         <span className="max-xxs:text-[12px] xxs:text-[12px] xs:text-[14px] sm:text-base">
                             Next idol in {nextReset().formattedTime}
                         </span>
                     </div>
+                    )}
                 </div>
             </div>
         </div>
         )}
 
-        {/* Share Container + Opens small card */}
+        {/* Share Container + Opens small card (a calendar day leads back to the calendar instead) */}
         <div className="relative w-full h-12 sm:h-14 mb-5 px-4 sm:px-6">
-            <button 
+            {calendarDay ? (
+                <Link
+                    to={`/calendar?mode=classic&date=${calendarDay.date}`}
+                    className="relative flex size-full items-center justify-center gap-3 border border-white/60 rounded-xl text-white no-underline
+                    hover:bg-black hover:brightness-105 hover:scale-105 transition-transform duration-500 transform-gpu"
+                >
+                    <ArrowLeft className="max-xxs:size-4 xxs:size-4 xs:size-5 sm:size-6" aria-hidden />
+                    <span className="max-xxs:text-base xxs:text-base xs:text-[18px] sm:text-xl">Back to the calendar</span>
+                </Link>
+            ) : (
+            <button
                 className="relative w-full h-full items-center justify-center text-center bg-linear-to-b from-transparent to-transparent border border-white/60 
                 rounded-xl hover:bg-black hover:brightness-105 hover:scale-105 hover:cursor-pointer transition-transform duration-500 transform-gpu" 
                 onClick={() => onShareClick?.()}
@@ -182,6 +202,7 @@ return (
                     <span className="max-xxs:text-base xxs:text-base xs:text-[18px] sm:text-xl">Share Results</span>
                 </div>
             </button>
+            )}
         </div>
 
         {/* Other Game Modes */}

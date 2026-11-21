@@ -1,12 +1,12 @@
 import { useState, useEffect, useRef } from "react";
 import "./PixelatedVictory.css";
 import { resolveCdnUrl } from "../../utils/imageUrl";
-import type { YesterdayAlbumPick, YesterdayLocked } from "../../interfaces/gameInterfaces";
+import type { CalendarVictoryDay, YesterdayAlbumPick, YesterdayLocked } from "../../interfaces/gameInterfaces";
 import { Link } from "react-router";
 import { albumPath } from "../../pages/Albums/albumsData";
 import YesterdayLockedCard from "../VictoryCard/YesterdayLockedCard";
 import { OtherGamemodes } from "../OtherGamemodes/OtherGamemodes";
-import { Copy } from "lucide-react";
+import { ArrowLeft, CalendarDays, Copy } from "lucide-react";
 import TargetAttempt from "../../assets/icons/target.svg";
 import RankPosition from "../../assets/icons/ranking-fill.svg";
 import PositionTrend from "../../assets/icons/trending-up.svg";
@@ -27,6 +27,7 @@ interface PixelatedVictoryProps {
     albumName: string;
     groupName: string;
     coverPath: string;
+    yesterdayAlbumId?: YesterdayAlbumPick["past_album_id"] | null;
     yesterdayAlbum?: YesterdayAlbumPick["album_name"] | null;
     yesterdayAlbumCover?: YesterdayAlbumPick["cover_path"] | null;
     yesterdayAlbumArtist?: YesterdayAlbumPick["artist"] | null;
@@ -35,10 +36,12 @@ interface PixelatedVictoryProps {
     score?: number | null;
     rank?: number | null;
     otherGamemodes?: GameMode[];
+    /** A past day won from the calendar (no ranking or share). */
+    calendarDay?: CalendarVictoryDay;
 }
 
 const PixelatedVictory = (props: PixelatedVictoryProps) => {
-    const { albumName, groupName, coverPath, yesterdayAlbum, yesterdayAlbumCover, yesterdayAlbumArtist, attempts, position, score, rank, otherGamemodes } = props;
+    const { albumName, groupName, coverPath, yesterdayAlbum, yesterdayAlbumCover, yesterdayAlbumArtist, attempts, position, score, rank, otherGamemodes, calendarDay } = props;
     
     const [copied, setCopied] = useState<boolean>(false);
     const [showYesterdayName, setShowYesterdayName] = useState<boolean>(false);
@@ -167,11 +170,13 @@ const PixelatedVictory = (props: PixelatedVictoryProps) => {
                 </div>
             </div>
 
-            <span className="flex justify-center items-center text-center mb-4">
-                <span className="font-caveat text-2xl text-ink">
-                    You were the <span className="text-neon-pink font-bold">{ordinal(position)}</span> fan to guess the album!
+            {!calendarDay && (
+                <span className="flex justify-center items-center text-center mb-4">
+                    <span className="font-caveat text-2xl text-ink">
+                        You were the <span className="text-neon-pink font-bold">{ordinal(position)}</span> fan to guess the album!
+                    </span>
                 </span>
-            </span>
+            )}
 
             {/* Yesterday's album */}
             {props.yesterdayLocked && <YesterdayLockedCard mode="pixelated" day={props.yesterdayLocked} />}
@@ -202,15 +207,31 @@ const PixelatedVictory = (props: PixelatedVictoryProps) => {
                                     </div>
                                 </div>
 
-                                {/* Album sleeve */}
+                                {/* Album sleeve: opens the album's page, like yesterday's idol photo in the other modes */}
                                 <div className="absolute left-0 top-1/2 -translate-y-1/2 -rotate-3 max-xxs:w-19 max-xxs:h-19 w-23 h-23 sm:w-24 sm:h-24 z-1 p-1 rounded-[9px]
                                 bg-[#1c1c1c] shadow-[0_5px_14px_rgba(10,10,10,0.25)]">
-                                    <Img
-                                        src={yesterdayCoverUrl ?? undefined}
-                                        alt={`${yesterdayAlbum} cover`}
-                                        className="size-full object-cover rounded-md"
-                                        draggable={false}
-                                    />
+                                    {props.yesterdayAlbumId ? (
+                                        <Link
+                                            to={albumPath({ id: props.yesterdayAlbumId, name: yesterdayAlbum }, yesterdayAlbumArtist ?? "")}
+                                            aria-label={`${yesterdayAlbum} album page`}
+                                            draggable={false}
+                                            className="group pp-focus block size-full overflow-hidden rounded-md transition-[scale] duration-150 active:scale-92 will-change-transform transform-gpu"
+                                        >
+                                            <Img
+                                                src={yesterdayCoverUrl ?? undefined}
+                                                alt={`${yesterdayAlbum} cover`}
+                                                className="size-full object-cover transition-[scale] duration-300 group-hover:scale-115 transform-gpu"
+                                                draggable={false}
+                                            />
+                                        </Link>
+                                    ) : (
+                                        <Img
+                                            src={yesterdayCoverUrl ?? undefined}
+                                            alt={`${yesterdayAlbum} cover`}
+                                            className="size-full object-cover rounded-md"
+                                            draggable={false}
+                                        />
+                                    )}
                                 </div>
                             </div>
 
@@ -273,11 +294,15 @@ const PixelatedVictory = (props: PixelatedVictoryProps) => {
                     className="flex flex-1 flex-col justify-start items-center text-center max-xxs:py-2.5 max-xxs:px-1 py-3 px-2 gap-1 bg-linear-to-r from-[#1f1f1f] to-[#1f1f1f]/90 rounded-3xl
                     shadow-[3px_3px_0_var(--color-neon-pink)] text-cream hover:translate-y-1 hover:translate-x-1 hover:shadow-[0px_1px_0_var(--color-neon-pink)] transition-all duration-300"
                 >
-                    <Img src={RankPosition} alt="Rank Icon" className="size-4 sm:size-6" draggable={false} />
+                    {calendarDay ? (
+                        <CalendarDays className="size-4 sm:size-6" strokeWidth={2.4} aria-hidden />
+                    ) : (
+                        <Img src={RankPosition} alt="Rank Icon" className="size-4 sm:size-6" draggable={false} />
+                    )}
 
-                    <div className="font-bold max-xxs:text-xl text-2xl">{fmt(rank)}</div>
+                    <div className="font-bold max-xxs:text-xl text-2xl">{calendarDay ? calendarDay.dayNumber ?? "—" : fmt(rank)}</div>
 
-                    <div className="font-bold max-xxs:text-[11px] text-sm uppercase">Position</div>
+                    <div className="font-bold max-xxs:text-[11px] text-sm uppercase">{calendarDay ? "Day" : "Position"}</div>
                 </div>
 
                 <div 
@@ -286,14 +311,14 @@ const PixelatedVictory = (props: PixelatedVictoryProps) => {
                 >
                     <Img src={PositionTrend} alt="Position Icon" className="size-4 sm:size-6" draggable={false} />
 
-                    <div className="font-bold max-xxs:text-xl text-2xl">{fmt(score, 2)}</div>
+                    <div className="font-bold max-xxs:text-xl text-2xl">{calendarDay ? (calendarDay.xp != null ? `+${calendarDay.xp}` : "—") : fmt(score, 2)}</div>
 
-                    <div className="font-bold max-xxs:text-[11px] text-sm uppercase">Score</div>
+                    <div className="font-bold max-xxs:text-[11px] text-sm uppercase">{calendarDay ? "XP" : "Score"}</div>
                 </div>
             </div>
 
             <div className="flex flex-col size-full gap-1">
-                <div className="flex items-start justify-start">
+                <div className="flex items-center justify-center">
                     <span className="text-ink text-lg font-bold [text-shadow:1px_1px_6px_rgba(0,0,0,0)]">
                         Other Game Modes
                     </span>
@@ -304,8 +329,21 @@ const PixelatedVictory = (props: PixelatedVictoryProps) => {
                 />
             </div>
 
-            {/* Share */}
+            {/* Share (a calendar day leads back to the calendar instead) */}
             <div className="flex flex-row justify-center gap-2 mt-6">
+                {calendarDay ? (
+                    <Link
+                        to={`/calendar?mode=pixelated&date=${calendarDay.date}`}
+                        className="kp-tilt-l flex justify-center items-center text-center gap-2 h-12 px-5 sm:px-7 rounded-full font-bold text-[14px] sm:text-base text-white no-underline
+                        bg-neon-pink border-2 border-ink shadow-[0_5px_0_var(--color-ink)] firefox:shadow-none firefox:drop-shadow-[0_5px_0_var(--color-ink)]
+                        firefox:active:drop-shadow-[0_1px_0_var(--color-ink)] transition-all duration-200 transform-gpu
+                        hover:scale-101 firefox:hover:scale-100 hover:brightness-110 active:translate-y-1 active:shadow-[0_1px_0_var(--color-ink)]"
+                    >
+                        <ArrowLeft className="size-4" strokeWidth={3} aria-hidden />
+                        Back to the calendar
+                    </Link>
+                ) : (
+                <>
                 <button
                     type="button"
                     onClick={() => handleCopy(attempts)}
@@ -331,6 +369,8 @@ const PixelatedVictory = (props: PixelatedVictoryProps) => {
                         className="size-8 object-cover" 
                         draggable={false} />
                 </button>
+                </>
+                )}
             </div>
         </div>
     );

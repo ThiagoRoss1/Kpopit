@@ -121,9 +121,9 @@ test.describe('calendar @mobile', () => {
     const response = page.waitForResponse((r) => r.url().includes(`/api/calendar/classic/${yesterday}/guess`) && r.request().method() === 'POST');
     await input.press('Enter');
     expect((await response).ok()).toBeTruthy();
-    await expect(page.getByText('You found it!')).toBeVisible();
+    await expect(page.getByText("This day's idol was")).toBeVisible();
 
-    await page.locator('main').getByRole('link', { name: 'Calendar', exact: true }).click();
+    await page.getByRole('link', { name: 'Back to the calendar' }).click();
     await expect(page.getByText(/^Played from the calendar · /).filter({ visible: true }).first()).toBeVisible();
   });
 

@@ -20,7 +20,7 @@ export const OtherGamemodes = (props: OtherGamemodesProps) => {
 
     return (
         <div className="flex w-full flex-col justify-center items-center">
-            <div className="flex w-full flex-nowrap max-xs:gap-2 gap-3 max-xs:px-2.5 px-4 py-2 rounded-2xl border-2 border-dashed border-ink/50 bg-cream">
+            <div className="flex w-full flex-nowrap justify-center max-xs:gap-2 gap-3 max-xs:px-2.5 px-4 py-2 rounded-2xl border-2 border-dashed border-ink/50 bg-cream">
                 {/* Below xs (≤414px) cards share the row and shrink so they can never overflow/overlap */}
                 {otherGamemodes.map((mode) => (
                     <Link key={mode.id} to={mode.path} className="flex flex-row justify-start items-center min-w-0 max-xs:flex-1">

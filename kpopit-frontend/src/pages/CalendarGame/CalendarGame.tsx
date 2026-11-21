@@ -5,7 +5,8 @@ import { ArrowLeft, CalendarDays } from "lucide-react";
 import { useSharedGameData } from "../../hooks/useSharedGameData";
 import { getAllAlbums, getCalendarDay, postCalendarGuess } from "../../services/api";
 import type {
-    AlbumSearchResult, CalendarDayData, CalendarMode, FeedbackData, GuessResponse, IdolListItem, PixelatedGuessDetail,
+    AlbumSearchResult, CalendarDayData, CalendarMode, CalendarVictoryDay, FeedbackData, GuessResponse, IdolListItem, PixelatedGuessDetail,
+    YesterdayLocked,
 } from "../../interfaces/gameInterfaces";
 import type { CardGranted } from "../../interfaces/albumInterfaces";
 import BackgroundStyle from "../../components/Background/BackgroundStyle";
@@ -20,16 +21,23 @@ import PixelatedStage from "../../components/Pixelated/PixelatedStage";
 import PixelatedSearchBar from "../../components/Pixelated/PixelatedSearchBar";
 import PixelatedGuessGrid from "../../components/Pixelated/PixelatedGuessGrid";
 import CardGrantedReveal from "../Collection/components/CardGrantedReveal";
+import VictoryCardHud from "../../components/VictoryCard/VictoryCardHud";
+import VictoryCardHudBlurry from "../../components/Blurry/VictoryCard/VictoryCardHudBlurry";
+import PixelatedVictory from "../../components/Pixelated/PixelatedVictory";
+import { useAllGameModes } from "../../hooks/useAllGameModes";
+import { formatGroupName } from "../../utils/formatters";
 import GetBlurLevel, { BLUR_LEVELS } from "../BlurryMode/blurLevels";
 import ModeOptions from "../../components/Blurry/buttons/ModeOptions";
 import { GetPixelLevel, PIXEL_LEVELS } from "../../utils/pixelLevels";
 import { resolveCdnUrl } from "../../utils/imageUrl";
 import NotFound from "../NotFound/NotFound";
-import { MODES } from "../Calendar/calendarData";
+import { addDays, MODES } from "../Calendar/calendarData";
 import { cn } from "../../lib/utils";
 import "../PixelatedMode/PixelatedMode.css";
 
 const NO_IDOLS: IdolListItem[] = [];
+// The victory cards' countdown and share card are live-only; a calendar day shows neither.
+const NO_RESET = () => ({ timeRemaining: null, formattedTime: "" });
 const MONTHS = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
 
 const shortDate = (iso: string) => {
@@ -115,8 +123,21 @@ const CalendarGame = ({ mode, date }: { mode: PlayableMode; date: string }) => {
     const [victoryRevealed, setVictoryRevealed] = useState(false);
     const [blurryOptions, setBlurryOptions] = useState({ hardcore: false, color: false });
     const submittingRef = useRef(false);
+    const { otherModes } = useAllGameModes(mode);
     // Rows guessed on this visit, on top of what the server restored (a new day starts empty).
     const extra = added.date === date ? added : { date, idols: [], albums: [] };
+
+    // The victory card's "yesterday" is the day before this one: its answer once the player
+    // finished it, else a lock that opens it in the calendar (none before the mode's first day).
+    const dayWon = day.data?.status === "won_live" || day.data?.status === "won_calendar"
+        || extra.idols.some((guess) => guess.guess_correct) || extra.albums.some((guess) => guess.guess_correct);
+    const previousDate = addDays(date, -1);
+    const previousDay = useQuery<CalendarDayData>({
+        queryKey: ["calendarDay", mode, previousDate],
+        queryFn: () => getCalendarDay(mode, previousDate),
+        enabled: isInitialized && dayWon,
+        retry: false,
+    });
 
     const guessMutation = useMutation({
         mutationFn: (id: number) => postCalendarGuess(mode, date, id),
@@ -251,14 +272,77 @@ const CalendarGame = ({ mode, date }: { mode: PlayableMode; date: string }) => {
             {guessMutation.isError && <p role="alert" className="mt-3 text-[#fd5c63] font-semibold">That guess didn't go through. Try again.</p>}
         </div>
     );
-    const result = showVictory && (
-        <div className="w-full max-w-md px-4 mb-10 flex flex-col items-center gap-3 text-center" role="status">
-            <p className={cn("m-0 font-bold text-2xl", mode === "pixelated" ? "text-ink" : "text-white")}>You found it!</p>
-            {day.data.answer && (
-                <p className={cn("m-0 font-semibold", mode === "pixelated" ? "text-ink/70" : "text-white/85")}>{day.data.answer.artist_name ?? day.data.answer.album_name}</p>
-            )}
-            {day.data.xp !== null && <p className="m-0 text-neon-pink font-bold">{`+${day.data.xp} XP`}</p>}
+    const calendarDay: CalendarVictoryDay = { date, dayNumber: day.data.day_number, xp: day.data.xp };
+    const previous = previousDay.isError ? undefined : previousDay.data;
+    const previousAnswer = previous?.answer ?? null;
+    const yesterdayLocked: YesterdayLocked | undefined = previous && !previousAnswer
+        ? { locked: true, play_in_calendar: true, yesterdays_pick_date: previousDate, day_number: previous.day_number }
+        : undefined;
+    const yesterdayIdol = previousAnswer?.idol_id != null ? allIdolsData.find((idol) => idol.id === previousAnswer.idol_id) : undefined;
+    const yesterdayAlbum = previousAnswer?.album_id != null ? albums.data?.find((album) => album.id === previousAnswer.album_id) : undefined;
+    const winningIdol = idolGuesses.find((guess) => guess.guess_correct);
+    const winningAlbum = albumGuesses.find((guess) => guess.guess_correct);
+
+    // The live pages' victory card, with the day and its XP in place of the ranking.
+    const idolVictory = showVictory && winningIdol && (
+        <div className="w-full flex flex-col items-center">
             {cardGranted && <CardGrantedReveal cardGranted={cardGranted} />}
+            <div className="w-full flex items-center justify-center mt-10">
+                {mode === "classic" ? (
+                    <VictoryCardHud
+                        cardInfo={winningIdol.guessed_idol_data}
+                        guesses={idolGuesses as GuessResponse[]}
+                        attempts={attempts}
+                        nextReset={NO_RESET}
+                        yesterdayLocked={yesterdayLocked}
+                        yesterdayIdolId={previousAnswer?.idol_id ?? 0}
+                        yesterdayIdol={previousAnswer?.artist_name ?? ""}
+                        yesterdayIdolGroup={yesterdayIdol?.groups ?? []}
+                        yesterdayIdolImage={yesterdayIdol?.image_path ?? previousAnswer?.image_path ?? null}
+                        yesterdayIdolImageVersion={yesterdayIdol?.image_version ?? null}
+                        stats={undefined}
+                        idolActiveGroup={puzzle.groups?.map((group) => formatGroupName(group, puzzle.is_former_group ?? false)) ?? null}
+                        otherGameModes={otherModes}
+                        calendarDay={calendarDay}
+                    />
+                ) : (
+                    <VictoryCardHudBlurry
+                        cardInfo={winningIdol.guessed_idol_data}
+                        guesses={idolGuesses}
+                        attempts={attempts}
+                        idol_blur_image={puzzle.blur_image_path ?? ""}
+                        idol_blur_image_version={puzzle.blur_image_version ?? ""}
+                        nextReset={NO_RESET}
+                        yesterdayLocked={yesterdayLocked}
+                        yesterdayIdolId={previousAnswer?.idol_id ?? 0}
+                        yesterdayIdol={previousAnswer?.artist_name ?? ""}
+                        yesterdayIdolGroup={yesterdayIdol?.groups ?? []}
+                        yesterdayIdolImage={yesterdayIdol?.image_path ?? previousAnswer?.image_path ?? null}
+                        yesterdayIdolImageVersion={yesterdayIdol?.image_version ?? null}
+                        stats={undefined}
+                        otherGameModes={otherModes}
+                        calendarDay={calendarDay}
+                    />
+                )}
+            </div>
+        </div>
+    );
+    const albumVictory = showVictory && winningAlbum && (
+        <div className="mt-25">
+            <PixelatedVictory
+                albumId={winningAlbum.album_id}
+                yesterdayLocked={yesterdayLocked}
+                albumName={winningAlbum.album_name}
+                groupName={puzzle.group_name ?? winningAlbum.group_name}
+                coverPath={puzzle.cover_path ?? winningAlbum.cover_path}
+                yesterdayAlbumId={previousAnswer?.album_id ?? null}
+                yesterdayAlbum={previousAnswer?.album_name ?? null}
+                yesterdayAlbumCover={yesterdayAlbum?.cover_path ?? null}
+                yesterdayAlbumArtist={yesterdayAlbum?.group_name ?? null}
+                attempts={attempts}
+                otherGamemodes={otherModes}
+                calendarDay={calendarDay}
+            />
         </div>
     );
     const header = <CalendarHeader mode={mode} date={date} dayNumber={day.data.day_number} />;
@@ -284,10 +368,11 @@ const CalendarGame = ({ mode, date }: { mode: PlayableMode; date: string }) => {
                         <div className="flex-1 min-w-0 w-full">
                             <div className="hidden lg:block mb-6">{header}</div>
                             {search}
-                            {result}
                             <PixelatedGuessGrid guesses={albumGuesses} onAnimationComplete={revealVictory} persist={false} />
                         </div>
                     </div>
+
+                    {albumVictory}
                 </div>
             </div>
         );
@@ -329,12 +414,13 @@ const CalendarGame = ({ mode, date }: { mode: PlayableMode; date: string }) => {
                 )}
 
                 {search}
-                {result}
 
                 <div className="w-full flex items-center justify-center">
                     {mode === "classic" && <GuessesGrid guesses={idolGuesses as GuessResponse[]} allIdols={allIdolsData} onAllAnimationsComplete={revealVictory} persist={false} />}
                     {mode === "blurry" && <BlurryGuessGrid guesses={idolGuesses} onAnimationComplete={revealVictory} persist={false} />}
                 </div>
+
+                {idolVictory}
             </div>
         </>
     );

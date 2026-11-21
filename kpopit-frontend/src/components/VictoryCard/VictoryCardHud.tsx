@@ -5,7 +5,7 @@ import type { GuessedIdolData, GuessResponse, UserStats } from "../../interfaces
 import { motion } from "motion/react";
 import VictoryCardSmall from "./VictoryCardSmall.tsx";
 import VictoryCardBig from "./VictoryCardBig.tsx";
-import type { YesterdayLocked } from "../../interfaces/gameInterfaces";
+import type { CalendarVictoryDay, YesterdayLocked } from "../../interfaces/gameInterfaces";
 
 interface GameMode {
     id: string;
@@ -32,6 +32,7 @@ interface VictoryCardHudProps {
     stats: UserStats | undefined;
     nextReset: () => { timeRemaining: number | null; formattedTime: string; };
     otherGameModes?: GameMode[];
+    calendarDay?: CalendarVictoryDay;
 }
 
 const VictoryCardHud = (props: VictoryCardHudProps) => {
@@ -87,6 +88,7 @@ return (
                     idolActiveGroup={idolActiveGroup ?? null}
                     onShareClick={() => setShowSmallModal(true)}
                     otherGameModes={otherGameModes}
+                    calendarDay={props.calendarDay}
                 />
             </motion.div>
         </div>

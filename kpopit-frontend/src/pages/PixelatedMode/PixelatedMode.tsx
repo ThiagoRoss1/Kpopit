@@ -470,6 +470,7 @@ function PixelatedMode() {
                                 albumName={winningGuess.album_name}
                                 groupName={pixelatedGameData.group_name}
                                 coverPath={pixelatedGameData.cover_path}
+                                yesterdayAlbumId={yesterdayPick?.past_album_id ?? null}
                                 yesterdayAlbum={yesterdayAlbum}
                                 yesterdayAlbumCover={yesterdayAlbumCover}
                                 yesterdayAlbumArtist={yesterdayAlbumArtist}

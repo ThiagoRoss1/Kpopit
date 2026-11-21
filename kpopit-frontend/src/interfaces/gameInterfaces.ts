@@ -126,6 +126,14 @@ export interface YesterdayAlbumPick {
   artist: string;
 }
 
+/** A past day won from the calendar: its victory card shows the day and its XP instead of the
+ *  live ranking, and leads back to the calendar instead of a countdown. */
+export interface CalendarVictoryDay {
+  date: string;
+  dayNumber: number | null;
+  xp: number | null;
+}
+
 export type YesterdayIdol = YesterdayIdolPick | YesterdayLocked;
 
 export type YesterdayAlbum = YesterdayAlbumPick | YesterdayLocked;

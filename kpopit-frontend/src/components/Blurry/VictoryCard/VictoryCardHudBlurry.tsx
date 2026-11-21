@@ -4,7 +4,7 @@ import { useEffect, useState, useRef } from "react";
 import type { GuessedIdolData, FeedbackData, GuessResponse, UserStats } from "../../../interfaces/gameInterfaces"
 import VictoryCardBigBlurry from "./VictoryCardBigBlurry";
 import VictoryCardSmall from "../../VictoryCard/VictoryCardSmall";
-import type { YesterdayLocked } from "../../../interfaces/gameInterfaces";
+import type { CalendarVictoryDay, YesterdayLocked } from "../../../interfaces/gameInterfaces";
 
 interface GameMode {
     id: string;
@@ -34,6 +34,7 @@ interface BlurryVictoryCardHudProps {
     otherGameModes?: GameMode[];
     wonWithHardMode?: boolean;
     wonWithoutColors?: boolean;
+    calendarDay?: CalendarVictoryDay;
 }
 
 const VictoryCardHudBlurry = (props: BlurryVictoryCardHudProps) => {
@@ -81,6 +82,7 @@ const VictoryCardHudBlurry = (props: BlurryVictoryCardHudProps) => {
                         nextReset={nextReset}
                         onShareClick={() => setShowSmallModal(true)}
                         otherGameModes={otherGameModes}
+                        calendarDay={props.calendarDay}
                     />
                 </div>
             </div>
