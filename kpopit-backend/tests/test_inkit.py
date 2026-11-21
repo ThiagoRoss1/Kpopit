@@ -1277,3 +1277,21 @@ def test_calendar_day_without_an_inkit_row_is_a_clear_404(client, game, pin, mak
     assert res.status_code == 404
     assert res.get_json()["error"] == "This day can't be played"
     assert names_nothing(res.get_json(), gone)
+
+
+def test_calendar_day_whose_idol_left_the_mode_is_a_404(client, game, pin, inkit_idol):
+    """Only idols in the mode (an active InkIt row, what the draw picks from) can be a playable day."""
+    left = inkit_idol("Left The Mode", active=False)
+    pin(left, offset=-2)
+
+    res = client.get(f"/api/calendar/inkit/{day(-2)}", headers={"Authorization": game["token"]})
+    assert res.status_code == 404
+    assert res.get_json()["error"] == "This day can't be played"
+
+
+def test_fallback_photo_only_for_idols_in_the_mode(client, game, pin, inkit_idol):
+    left = inkit_idol("Not In The Mode", active=False)
+    pin(left, offset=-2)
+
+    assert fallback(client, game["token"], day(-2)).status_code == 404
+    assert fallback(client, game["token"]).status_code == 200  # today's answer is in the mode

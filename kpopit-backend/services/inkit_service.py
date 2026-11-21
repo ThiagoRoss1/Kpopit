@@ -57,9 +57,12 @@ class InkItService:
         self.repository = repository
 
     def photo(self, cursor, idol_id: int) -> dict | None:
-        """The one reader of an idol's three stored paths (never image_file, which names the idol)."""
+        """The one reader of an idol's three stored paths (never image_file, which names the idol).
+        Only idols in the mode (an active row, what the draw picks from): a day whose answer left it
+        gets no files, so neither the layers nor the emergency photo are ever served for it."""
         cursor.execute(
-            "SELECT image_path, pencil_path, pen_path, image_version FROM inkit_mode_data WHERE idol_id = %s",
+            "SELECT image_path, pencil_path, pen_path, image_version FROM inkit_mode_data "
+            "WHERE idol_id = %s AND is_active",
             (idol_id,),
         )
         return cursor.fetchone()

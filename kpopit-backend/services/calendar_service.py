@@ -170,7 +170,7 @@ class CalendarService:
             # Only the files the caller's round unlocks; the group hint comes with the game likewise.
             inkit = InkItService(self.db, self.repository)
             files = inkit.unlocked_files(cursor, answer_id, *inkit.round_of(row))
-            # A past pick whose InkIt row is gone has nothing to draw on (and no emergency photo).
+            # A past pick no longer in the mode (no active InkIt row) has nothing to draw on.
             if files is None:
                 raise CalendarError("This day can't be played", 404)
             return {"files": files}, answer
