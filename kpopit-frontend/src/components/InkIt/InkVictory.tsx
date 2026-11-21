@@ -1,8 +1,8 @@
 import type { ReactNode, Ref } from "react";
 import { Link } from "react-router";
-import { Lock, Share2 } from "lucide-react";
+import { CalendarDays, Lock, Share2 } from "lucide-react";
 import { cn } from "../../lib/utils";
-import type { InkItAnswer } from "../../interfaces/gameInterfaces";
+import type { CalendarVictoryDay, InkItAnswer } from "../../interfaces/gameInterfaces";
 import { resolveCdnUrl } from "../../utils/imageUrl";
 import InkThumb from "./InkThumb";
 import { PressButton } from "../buttons/PressButton";
@@ -47,8 +47,8 @@ interface InkVictoryProps {
     shareState: ShareState;
     onShare: () => void;
     canShare: boolean;
-    /** A past day played from the calendar: no ranking, no countdown. */
-    isCalendarDay: boolean;
+    /** A past day played from the calendar: its day and XP instead of the ranking, no countdown. */
+    calendarDay: CalendarVictoryDay | null;
 }
 
 const SHARE_LABEL: Record<ShareState, string> = {
@@ -91,7 +91,10 @@ const GroupPill = ({ children }: { children: ReactNode }) => {
 };
 
 /** The other modes' stat icons (white SVGs for their dark cards), painted in ink through a mask. */
-const StatIcon = ({ src }: { src: string }) => {
+const StatIcon = ({ src }: { src: string | null }) => {
+    // No SVG: the calendar day tile, as in the other modes' calendar cards.
+    if (!src) return <CalendarDays aria-hidden strokeWidth={2.4} className="size-6.5 text-(--ink) max-[900px]:size-5.5" />;
+
     return (
         <span
             aria-hidden
@@ -105,11 +108,15 @@ const PINK_DEPTH = "shadow-[0_6px_0_-2px_#FF8AC4,0_6px_0_0_var(--ink),var(--in)]
 
 /** The win: today's idol, the numbers, yesterday's idol, share, countdown and the other modes. */
 const InkVictory = ({
-    cardRef, answer, answerHref, guessCount, position, score, yesterday, countdown, otherModes, shareState, onShare, canShare, isCalendarDay,
+    cardRef, answer, answerHref, guessCount, position, score, yesterday, countdown, otherModes, shareState, onShare, canShare, calendarDay,
 }: InkVictoryProps) => {
-    const stats = [
+    const isCalendarDay = calendarDay !== null;
+    const stats: { label: string; icon: string | null; value: string }[] = [
         { label: "GUESSES", icon: TargetIcon, value: String(guessCount) },
-        ...(isCalendarDay ? [] : [
+        ...(calendarDay ? [
+            { label: "DAY", icon: null, value: calendarDay.dayNumber != null ? String(calendarDay.dayNumber) : "-" },
+            { label: "XP", icon: TrendIcon, value: calendarDay.xp != null ? `+${calendarDay.xp}` : "-" },
+        ] : [
             { label: "POSITION", icon: RankIcon, value: position ? `#${position}` : "-" },
             { label: "SCORE", icon: TrendIcon, value: score != null ? String(Number(score.toFixed(2))) : "-" },
         ]),

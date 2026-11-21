@@ -432,6 +432,8 @@ export interface InkItCalendarDay {
   status: CalendarStatus;
   puzzle: { files: InkItFiles };
   game: InkItGame | null;
+  /** The game's XP, once the caller finished the day. */
+  xp: number | null;
 }
 
 export interface InkItGuessResult {

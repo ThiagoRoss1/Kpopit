@@ -372,6 +372,18 @@ const InkItGame = ({ data, idols, isCalendarDay, onGameChange }: InkItGameProps)
         refetchOnWindowFocus: false,
     });
 
+    // The day's XP for the calendar victory card: the game here keeps the day as first loaded, so a
+    // win made on this visit reads it once more (the server only sends XP for a finished day).
+    const calendarXp = useQuery({
+        queryKey: ["inkitCalendarXp", data.gameDate],
+        queryFn: () => getInkItCalendarDay(data.gameDate),
+        select: (day) => day.xp,
+        enabled: isCalendarDay && phase === "won",
+        retry: false,
+        staleTime: Infinity,
+        refetchOnWindowFocus: false,
+    });
+
     const victoryRef = useRef<HTMLDivElement | null>(null);
     const timers = useRef<number[]>([]);
     useEffect(() => () => timers.current.forEach((timer) => window.clearTimeout(timer)), []);
@@ -737,7 +749,7 @@ const InkItGame = ({ data, idols, isCalendarDay, onGameChange }: InkItGameProps)
                             shareState={shareState}
                             onShare={share}
                             canShare={ink.status === "ready"}
-                            isCalendarDay={isCalendarDay}
+                            calendarDay={isCalendarDay ? { date: data.gameDate, dayNumber: data.dayNumber, xp: calendarXp.data ?? null } : null}
                         />
                     </div>
                 )}

@@ -279,6 +279,8 @@ test.describe('inkit', () => {
     await guess(page, idols.find((idol) => idol.id === pastAnswer)!);
     await expect(page.getByTestId('inkit-answer-name')).toHaveText(await idolName(pastAnswer), { timeout: 15_000 });
     await expect(page.getByTestId('inkit-stat-position')).toHaveCount(0);
+    await expect(page.getByTestId('inkit-stat-day')).toContainText(/\d+/);
+    await expect(page.getByTestId('inkit-stat-xp')).toContainText(/\+\d+/);
   });
 });
 
