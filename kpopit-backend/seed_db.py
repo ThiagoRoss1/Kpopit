@@ -3,7 +3,6 @@ import csv
 import os
 from utils.env import load_local_env
 from services.get_db import get_manual_db
-from services.inkit_mode import SEED_PHOTOS_FROM_BLURRY_SQL
 from utils.inkit_paths import KINDS, opaque_path
 
 load_local_env()
@@ -141,16 +140,15 @@ def _inkit_row_transform(secret):
 
 
 def seed_inkit_photos(cursor, csv_file=INKIT_IDOLS_CSV_FILE):
-    """Seed inkit_mode_data: hashed paths from the readable names when the CSV has rows, else the
-    Blurry placeholders. Refuses to seed real rows without INKIT_PATH_SECRET."""
-    if csv_has_rows(csv_file):
-        secret = os.getenv("INKIT_PATH_SECRET", "")
-        if not secret:
-            raise RuntimeError("Set INKIT_PATH_SECRET to seed InkIt photos")
-        seed_table(cursor, csv_file, "inkit_mode_data", INKIT_IDOLS_COLUMNS,
-                   conflict_column=["idol_id"], row_transform=_inkit_row_transform(secret))
-    else:
-        cursor.execute(SEED_PHOTOS_FROM_BLURRY_SQL)
+    """Seed inkit_mode_data from the CSV: the readable names plus their hashed paths. An empty CSV
+    seeds nothing. Refuses to seed real rows without INKIT_PATH_SECRET."""
+    if not csv_has_rows(csv_file):
+        return
+    secret = os.getenv("INKIT_PATH_SECRET", "")
+    if not secret:
+        raise RuntimeError("Set INKIT_PATH_SECRET to seed InkIt photos")
+    seed_table(cursor, csv_file, "inkit_mode_data", INKIT_IDOLS_COLUMNS,
+               conflict_column=["idol_id"], row_transform=_inkit_row_transform(secret))
 
 
 def run_seed():

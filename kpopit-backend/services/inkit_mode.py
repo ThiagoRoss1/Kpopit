@@ -26,16 +26,3 @@ DRAFT_MASK_SIDE = 250
 DRAFT_RAW_LENGTH = 1 + 3 * DRAFT_MASK_SIDE * DRAFT_MASK_SIDE // 2
 DRAFT_MAX_BYTES = 32 * 1024
 DRAFT_KEEP_DAYS = 2
-
-# Placeholder photos while data/inkit_idols.csv is empty: every Blurry photo without an InkIt row
-# gets one, with opaque photo/pencil/pen paths (new rows only).
-SEED_PHOTOS_FROM_BLURRY_SQL = """
-    INSERT INTO inkit_mode_data (idol_id, image_path, pencil_path, pen_path, is_active)
-    SELECT b.idol_id,
-           '/images/inkit/' || replace(gen_random_uuid()::text, '-', '') || '.webp',
-           '/images/inkit/pencil/' || replace(gen_random_uuid()::text, '-', '') || '.webp',
-           '/images/inkit/pen/' || replace(gen_random_uuid()::text, '-', '') || '.webp',
-           COALESCE(b.is_active, TRUE)
-    FROM blurry_mode_data b
-    ON CONFLICT (idol_id) DO NOTHING
-"""

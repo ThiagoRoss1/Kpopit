@@ -13,7 +13,7 @@ from datetime import timedelta
 
 import pytest
 
-from services.inkit_mode import DRAFT_MAX_BYTES, DRAFT_RAW_LENGTH, SEED_PHOTOS_FROM_BLURRY_SQL
+from services.inkit_mode import DRAFT_MAX_BYTES, DRAFT_RAW_LENGTH
 from utils import dates
 
 MODE = 4
@@ -446,26 +446,21 @@ def test_old_drawings_are_deleted_by_the_daily_draw(client, db_conn, game, pin):
     assert kept == [day(-5), day(-4), day(-1), day(0)]
 
 
-def test_seeding_gives_every_blurry_photo_one_opaque_path(db_conn, make_idol):
-    idols = [make_idol(f"Seeded {index}") for index in range(3)]
+def test_an_empty_csv_seeds_no_inkit_rows(db_conn, make_idol, tmp_path):
+    """InkIt rows come only from inkit_idols.csv: Blurry photos never stand in for InkIt files."""
+    import seed_db
+
+    idol = make_idol("Blurry Only")
     with db_conn.cursor() as cur:
-        for idol_id in idols:
-            cur.execute(
-                "INSERT INTO blurry_mode_data (idol_id, blur_image_path, is_active) VALUES (%s, %s, TRUE)",
-                (idol_id, f"/images/blurry_idols/seeded_{idol_id}_b.webp"),
-            )
-        cur.execute(SEED_PHOTOS_FROM_BLURRY_SQL)
-        cur.execute("SELECT idol_id, image_path FROM inkit_mode_data ORDER BY idol_id")
-        first = cur.fetchall()
-        cur.execute(SEED_PHOTOS_FROM_BLURRY_SQL)
-        cur.execute("SELECT idol_id, image_path FROM inkit_mode_data ORDER BY idol_id")
-        second = cur.fetchall()
+        cur.execute("INSERT INTO blurry_mode_data (idol_id, blur_image_path, is_active) VALUES (%s, '/b/x.webp', TRUE)", (idol,))
     db_conn.commit()
 
-    assert [row["idol_id"] for row in first] == idols and first == second
-    assert len({row["image_path"] for row in first}) == 3
-    for row in first:
-        assert row["image_path"].startswith("/images/inkit/") and "seeded" not in row["image_path"]
+    empty = tmp_path / "empty.csv"
+    empty.write_text("idol_id,image_file,is_active,image_version\n", encoding="utf-8")
+    with db_conn.cursor() as cur:
+        seed_db.seed_inkit_photos(cur, str(empty))
+        cur.execute("SELECT COUNT(*) AS n FROM inkit_mode_data")
+        assert cur.fetchone()["n"] == 0
 
 
 def test_migrations_created_the_inkit_tables(db_conn):
@@ -707,7 +702,8 @@ def test_dev_file_streams_the_uploaded_photo(client, db_conn, game, monkeypatch)
     assert fetched[0].get_header("User-agent") == "kpopit-dev-photo/1.0"
 
 
-def test_dev_file_photo_falls_back_to_blurry_before_upload(client, db_conn, game, monkeypatch):
+def test_dev_file_photo_not_uploaded_is_404(client, db_conn, game, monkeypatch):
+    """No stand-in for a missing photo: the Blurry photo is another crop and never replaces it."""
     import urllib.error
     from email.message import Message
 
@@ -716,18 +712,12 @@ def test_dev_file_photo_falls_back_to_blurry_before_upload(client, db_conn, game
                     (game["answer"],))
     db_conn.commit()
 
-    def not_uploaded_yet(request):
-        if "/images/inkit/" in request.full_url:
-            raise urllib.error.HTTPError(request.full_url, 404, "Not Found", Message(), None)
-        return _Upstream()
+    def not_uploaded(request):
+        raise urllib.error.HTTPError(request.full_url, 404, "Not Found", Message(), None)
 
-    fetched = _dev_bucket(monkeypatch, upstream=not_uploaded_yet)
-    res = client.get(f"/api/game/inkit/dev/file?path={photo_path(game['answer'])}")
-    assert (res.status_code, res.data) == (200, b"webp-bytes")
-    assert "a_b" not in res.get_data(as_text=True)
-    assert [r.full_url for r in fetched] == [
-        f"https://bucket.test{photo_path(game['answer'])}?v=1", "https://bucket.test/b/a_b.webp?v=1",
-    ]
+    fetched = _dev_bucket(monkeypatch, upstream=not_uploaded)
+    assert client.get(f"/api/game/inkit/dev/file?path={photo_path(game['answer'])}").status_code == 404
+    assert [r.full_url for r in fetched] == [f"https://bucket.test{photo_path(game['answer'])}?v=1"]
 
 
 def test_dev_file_streams_layer_by_stored_path(client, game, monkeypatch):
@@ -922,28 +912,6 @@ def test_seed_refuses_without_secret(db_conn, make_idol, tmp_path, monkeypatch):
     with db_conn.cursor() as cur:
         cur.execute("SELECT 1 FROM inkit_mode_data WHERE idol_id = %s", (idol,))
         assert cur.fetchone() is None
-
-
-def test_placeholders_get_three_opaque_paths(db_conn, make_idol, tmp_path):
-    import seed_db
-
-    idol = make_idol("Placeholder Idol")
-    with db_conn.cursor() as cur:
-        cur.execute("INSERT INTO blurry_mode_data (idol_id, blur_image_path, is_active) VALUES (%s, '/b/x.webp', TRUE)", (idol,))
-    db_conn.commit()
-
-    empty = tmp_path / "empty.csv"
-    empty.write_text("idol_id,image_file,is_active,image_version\n", encoding="utf-8")
-    with db_conn.cursor() as cur:
-        seed_db.seed_inkit_photos(cur, str(empty))
-    db_conn.commit()
-
-    with db_conn.cursor() as cur:
-        cur.execute("SELECT image_path, pencil_path, pen_path FROM inkit_mode_data WHERE idol_id = %s", (idol,))
-        row = cur.fetchone()
-    assert re.fullmatch(r"/images/inkit/[0-9a-f]{32}\.webp", row["image_path"])
-    assert re.fullmatch(r"/images/inkit/pencil/[0-9a-f]{32}\.webp", row["pencil_path"])
-    assert re.fullmatch(r"/images/inkit/pen/[0-9a-f]{32}\.webp", row["pen_path"])
 
 
 def test_api_never_returns_image_file(client, db_conn, game, pin):
