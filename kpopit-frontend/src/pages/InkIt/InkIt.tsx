@@ -545,7 +545,8 @@ const InkItGame = ({ data, idols, isCalendarDay, onGameChange }: InkItGameProps)
 
     const yesterdayData = isCalendarDay ? undefined : yesterdayIdol.data;
     const previousDayData = isCalendarDay && !previousDay.isError ? previousDay.data : undefined;
-    const previousAnswer = previousDayData?.answer;
+    // The day's game carries the full answer (groups included) once that day was finished.
+    const previousAnswer = previousDayData?.game?.answer;
     const calendarYesterday: YesterdayInfo | null = !previousDayData ? null : previousAnswer
         ? {
             name: previousAnswer.artist_name,
