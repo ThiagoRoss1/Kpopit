@@ -1,8 +1,8 @@
 import "./InkIt.css";
 import { lazy, Suspense, useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { Navigate, useSearchParams } from "react-router";
-import { Check, Info } from "lucide-react";
+import { Link, Navigate, useSearchParams } from "react-router";
+import { ArrowLeft, CalendarDays, Check, Info } from "lucide-react";
 import { cn } from "../../lib/utils";
 import {
     getDailyUserCount, getInkItCalendarDay, getInkItDaily, getUserPosition, getYesterdaysIdol, inkitDevFileUrl,
@@ -12,7 +12,7 @@ import type { IdolListItem, InkItAnswer, InkItCalendarDay, InkItDay, InkItFiles,
 import type { CardGranted } from "../../interfaces/albumInterfaces";
 import { useInkIt } from "../../features/inkit/useInkIt.ts";
 import { fileUrl, onceByKey, type LayerUrls } from "../../features/inkit/layerLoader.ts";
-import { addDays } from "../Calendar/calendarData";
+import { addDays, formatShort } from "../Calendar/calendarData";
 import { grainUrl } from "../../features/inkit/sprites.ts";
 import { useSharedGameData } from "../../hooks/useSharedGameData";
 import { useGameMode } from "../../hooks/useGameMode";
@@ -102,6 +102,9 @@ const emptyGame = (gameDate: string): InkItGame => ({
     group_hint: null,
     answer: null,
 });
+
+/** "Nov 3, 2026", like the other modes' calendar day tag. */
+const longDate = (iso: string) => `${formatShort(iso)}, ${iso.slice(0, 4)}`;
 
 const InkIt = ({ date = null }: InkItProps) => {
     const queryClient = useQueryClient();
@@ -586,6 +589,7 @@ const InkItGame = ({ data, idols, isCalendarDay, onGameChange }: InkItGameProps)
         <ToolLedge
             tool={ink.tool}
             unlocked={ink.unlocked}
+            round={round}
             loading={ink.loadingTools}
             inkShare={ink.inkShare}
             disabled={finished}
@@ -617,15 +621,41 @@ const InkItGame = ({ data, idols, isCalendarDay, onGameChange }: InkItGameProps)
                     drawingMode ? "z-110" : "z-2",
                 )}
             >
-                <header className="flex items-center justify-center gap-4 pt-7.5 [grid-area:head] max-[900px]:pt-0">
+                <header
+                    className={cn(
+                        "flex items-center justify-center gap-4 pt-7.5 [grid-area:head] max-[900px]:pt-0",
+                        isCalendarDay && "flex-col gap-3.5 max-[900px]:gap-2.5",
+                    )}
+                >
                     <h1 className="m-0 inline-block rotate-[-1.5deg] font-bold text-[64px] leading-none text-white text-shadow-(--puff-title) max-[900px]:text-4xl max-[900px]:text-shadow-(--puff-value)">
                         Ink<span className="text-[#FF8AC4]">It</span>
                     </h1>
 
-                    {isCalendarDay && data.dayNumber != null && (
-                        <span className="rounded-full border-2 border-(--ink) bg-[#FF8AC4] px-2.5 py-0.5 font-bold text-xs text-[#1A1418]">Day {data.dayNumber}</span>
-                    )}
+                    {/* A calendar day: back to that day in the calendar and which day it is, as in the other modes (no stats). */}
+                    {isCalendarDay ? (
+                        <div className="flex flex-wrap items-center justify-center gap-2.5">
+                            <Link
+                                to={`/calendar?mode=inkit&date=${data.gameDate}`}
+                                data-testid="inkit-calendar-back"
+                                className="inkit-btn pp-focus inline-flex h-9 items-center gap-1.5 rounded-full border-2 border-(--ink) bg-(--face) pr-3.5 pl-2.5 font-bold text-[13px] text-(--face-ink) no-underline"
+                            >
+                                <ArrowLeft className="size-4" strokeWidth={3} aria-hidden />
+                                Calendar
+                            </Link>
 
+                            <span
+                                data-testid="inkit-calendar-day"
+                                className={cn(
+                                    "inline-flex h-9 items-center gap-1.5 rounded-full px-3.5 rotate-[-2deg]",
+                                    "border-2 border-(--ink) bg-[#FF8AC4] shadow-[2px_3px_0_var(--ink),inset_0_2px_0_rgba(255,255,255,.55)]",
+                                    "font-bold text-[13px] text-[#1A1418]",
+                                )}
+                            >
+                                <CalendarDays className="size-4" strokeWidth={2.6} aria-hidden />
+                                {data.dayNumber != null ? `Day ${data.dayNumber} · ${longDate(data.gameDate)}` : longDate(data.gameDate)}
+                            </span>
+                        </div>
+                    ) : (
                     <button
                         type="button"
                         aria-label="Stats"
@@ -635,6 +665,7 @@ const InkItGame = ({ data, idols, isCalendarDay, onGameChange }: InkItGameProps)
                     >
                         <Info className="size-5" strokeWidth={2.5} aria-hidden />
                     </button>
+                    )}
                 </header>
 
                 <div className="flex min-w-0 flex-col items-center gap-4 [grid-area:art] max-[900px]:gap-0.5" data-testid="inkit-stage" data-drawing={drawingMode}>

@@ -8,6 +8,8 @@ import { TOOL_INFO } from "./toolInfo";
 interface ToolLedgeProps {
     tool: ToolId;
     unlocked: ToolId[];
+    /** The guess about to be made: a locked tool counts down to its round, like the hints. */
+    round: number;
     /** Unlocked tools whose layer is still downloading: shown as loading and not selectable yet. */
     loading?: ToolId[];
     /** Ink left as a share (0-1) of a full pot. */
@@ -50,7 +52,7 @@ const InkJar = ({ inkShare }: { inkShare: number }) => {
 };
 
 /** The three tools (locked until their round) and the ink jar. */
-const ToolLedge = ({ tool, unlocked, loading = [], inkShare, disabled, onSelect, labelled = false, className }: ToolLedgeProps) => {
+const ToolLedge = ({ tool, unlocked, round, loading = [], inkShare, disabled, onSelect, labelled = false, className }: ToolLedgeProps) => {
     return (
         <div
             className={cn(
@@ -66,14 +68,15 @@ const ToolLedge = ({ tool, unlocked, loading = [], inkShare, disabled, onSelect,
                     const isLocked = !unlocked.includes(id);
                     const isLoading = !isLocked && loading.includes(id);
                     const isSelected = !isLocked && tool === id;
+                    const guessesLeft = Math.max(1, INKIT_CONFIG.tools[id].unlockRound - round);
 
                     return (
-                        <div key={id} className="flex flex-col items-center gap-1.5">
+                        <div key={id} className="flex flex-col items-center lg:gap-1.5 gap-2">
                             <button
                                 type="button"
                                 aria-pressed={isSelected}
                                 aria-label={
-                                    isLocked ? `${info.name}, locked until guess ${INKIT_CONFIG.tools[id].unlockRound}`
+                                    isLocked ? `${info.name}, unlocks in ${guessesLeft} ${guessesLeft === 1 ? "guess" : "guesses"}`
                                         : isLoading ? `${info.name}, loading`
                                             : `${info.name}: reveals ${info.reveals}`
                                 }
@@ -133,7 +136,7 @@ const ToolLedge = ({ tool, unlocked, loading = [], inkShare, disabled, onSelect,
 
                             {(labelled || isLocked) && (
                                 <span className={cn("font-bold text-[11px] leading-none", isLocked ? "text-(--muted)" : "text-(--face-ink)")}>
-                                    {isLocked ? `guess ${INKIT_CONFIG.tools[id].unlockRound}` : info.name}
+                                    {isLocked ? `${guessesLeft} more` : info.name}
                                 </span>
                             )}
                         </div>

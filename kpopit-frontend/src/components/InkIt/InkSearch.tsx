@@ -121,7 +121,10 @@ const InkSearch = ({ idols, triedIds, isPending, winnerCount, onGuess }: InkSear
 
     return (
         <div className="flex flex-col gap-3 max-[900px]:gap-2">
-            <span className="text-center font-medium text-base text-(--muted) max-[900px]:text-sm">Guess today's idol...</span>
+            <span className="text-center font-medium text-base text-(--muted) max-[900px]:text-sm">
+                {/* No winner count = a past day from the calendar. */}
+                {winnerCount === null ? "Guess this day's idol..." : "Guess today's idol..."}
+            </span>
 
             <div className="relative">
                 <div
