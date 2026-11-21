@@ -501,7 +501,8 @@ const FactTile = ({ fact, delay }: FactTileProps) => {
                                     src={flag.src!}
                                     alt={flag.nationality}
                                     className={cn(
-                                        "w-9 h-6 @max-[561px]/idol:w-7.5 @max-[561px]/idol:h-5",
+                                        // The flag files are 4:3; a box of the same shape shows them whole.
+                                        "w-11 aspect-4/3 @max-[561px]/idol:w-9",
                                         "rounded-[5px] border-2 border-[#1A1418] object-cover shadow-[2px_2.5px_0_#1A1418] -rotate-3",
                                     )}
                                 />
