@@ -69,12 +69,13 @@ class InkItService:
 
     def unlocked_files(self, cursor, answer_id: int, round_number: int, won: bool) -> dict | None:
         """The stored paths the caller may load at `round_number` (wrong guesses + 1): the pencil,
-        the pen from PEN_ROUND, the photo from PHOTO_ROUND or once won. None without an InkIt row."""
+        the pen from PEN_ROUND, the photo from PHOTO_ROUND. A won game gets all three (the reveal
+        draws every layer). None for an idol outside the mode."""
         row = self.photo(cursor, answer_id)
         if not row:
             return None
         files = {"version": row["image_version"], "pencil": row["pencil_path"]}
-        if round_number >= PEN_ROUND:
+        if won or round_number >= PEN_ROUND:
             files["pen"] = row["pen_path"]
         if won or round_number >= PHOTO_ROUND:
             files["photo"] = row["image_path"]

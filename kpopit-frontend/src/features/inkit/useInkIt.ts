@@ -31,12 +31,9 @@ interface UseInkItOptions {
 const FIRST_FRAME_SECONDS = 1 / 60;
 const MAX_FRAME_SECONDS = 0.05;
 
-// Until a layer arrives the sheet renders it as paper: the pen and paint masks stay 0 before their round.
-let blankLayers: { darkness: Float32Array; photo: Uint8ClampedArray } | null = null;
-const blanks = () => (blankLayers ??= {
-    darkness: new Float32Array(RENDER_SIDE * RENDER_SIDE),
-    photo: new Uint8ClampedArray(RENDER_SIDE * RENDER_SIDE * 4).fill(255),
-});
+// Until the photo arrives the sheet paints with paper: the paint mask stays 0 before its round.
+let paperPhoto: Uint8ClampedArray | null = null;
+const blankPhoto = () => (paperPhoto ??= new Uint8ClampedArray(RENDER_SIDE * RENDER_SIDE * 4).fill(255));
 
 const TOOL_LAYER: Record<ToolId, LayerKind> = { pencil: "pencil", pen: "pen", paint: "photo" };
 const IDLE_LAYERS: Record<LayerKind, LayerStatus> = { pencil: "idle", pen: "idle", photo: "idle" };
@@ -135,8 +132,10 @@ export const useInkIt = ({
                 if (loaderRef.current !== loader) return;
 
                 const pencil = loader.layer("pencil");
+                // Until the pen file arrives the pencil stands in for it: an empty pen layer would rub the
+                // pencil out (the win reveal's pen stage) instead of drawing anything.
                 layersRef.current = pencil
-                    ? { pencil, pen: loader.layer("pen") ?? blanks().darkness, photo: loader.layer("photo") ?? blanks().photo }
+                    ? { pencil, pen: loader.layer("pen") ?? pencil, photo: loader.layer("photo") ?? blankPhoto() }
                     : null;
                 setLayerStatus({ pencil: loader.status("pencil"), pen: loader.status("pen"), photo: loader.status("photo") });
                 queueRender();

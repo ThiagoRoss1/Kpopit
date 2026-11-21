@@ -1138,11 +1138,18 @@ def test_round_5_payload_adds_photo(client, game):
     _assert_files(daily(client, game["token"]).get_json(), game["answer"], pen=True, photo=True)
 
 
-def test_winning_guess_adds_photo(client, game):
+def test_winning_guess_unlocks_every_file(client, game):
+    """A win before the pen round still sends the pen: the reveal draws every layer (an empty pen
+    layer would rub the pencil out instead of drawing)."""
     _wrong_guesses(client, game, 1)
     won = guess(client, game["token"], game["answer"]).get_json()
     assert won["guess_correct"] is True
-    assert won["files"] == {"version": "1", "pencil": pencil_path(game["answer"]), "photo": photo_path(game["answer"])}
+    assert won["files"] == {
+        "version": "1", "pencil": pencil_path(game["answer"]), "pen": pen_path(game["answer"]),
+        "photo": photo_path(game["answer"]),
+    }
+    restored = daily(client, game["token"]).get_json()
+    assert set(restored["files"]) == {"version", "pencil", "pen", "photo"}
 
 
 def test_restore_payload_follows_rounds(client, game):

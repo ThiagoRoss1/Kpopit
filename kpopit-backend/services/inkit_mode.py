@@ -15,8 +15,8 @@ INKIT_MODE = {"inkit": INKIT_GAMEMODE_ID} if INKIT_ENABLED else {}
 # kpopit-frontend/src/features/inkit/config.ts (test_inkit checks both sides agree).
 INK_HINT_ROUND = 5
 GROUP_HINT_ROUND = 8
-# Files by round: the pen layer is sent from the round the pen unlocks, the photo from the paint
-# round or the win (unlockRound in config.ts). The pencil is always sent.
+# Files by round: the pen layer from the round the pen unlocks, the photo from the paint round
+# (unlockRound in config.ts); the pencil always, and all three once the game is won.
 PEN_ROUND = 3
 PHOTO_ROUND = 5
 
