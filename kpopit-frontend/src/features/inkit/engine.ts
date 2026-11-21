@@ -62,6 +62,25 @@ export const glowAt = (distance: number, peak: number): number => {
     return 0;
 };
 
+/** glowAt sampled once per stamp, so its cells read a table instead of walking the stops. The step
+ *  count is a multiple of 4: every stop lands on a sample and interpolating gives glowAt exactly. */
+const glowTable = (peak: number, radius: number): Float64Array => {
+    const steps = 4 * Math.max(2, Math.ceil(radius / 2));
+    // One extra zero past distance 1 keeps the interpolation's upper read in range.
+    const table = new Float64Array(steps + 2);
+
+    for (let step = 0; step <= steps; step++) table[step] = glowAt(step / steps, peak);
+
+    return table;
+};
+
+const sampleGlow = (table: Float64Array, distance: number): number => {
+    const position = distance * (table.length - 2);
+    const step = position | 0;
+
+    return table[step] + (table[step + 1] - table[step]) * (position - step);
+};
+
 export const speedCost = (speed: number): number =>
     Math.min(INKIT_CONFIG.maxSpeedCost, 1 + INKIT_CONFIG.speedWeight * Math.max(0, speed / INKIT_CONFIG.idealSpeed - 1));
 
@@ -265,16 +284,28 @@ export class InkItSheet {
         const right = Math.min(SHEET - 1, Math.ceil(x + radius));
         const top = Math.max(0, Math.floor(y - radius));
         const bottom = Math.min(SHEET - 1, Math.ceil(y + radius));
+        // The win reveal stamps big discs several times a frame: squared distances and one falloff
+        // table per stamp keep its cells cheap on phones.
+        const radiusSquared = radius * radius;
+        const mask = this.masks[id];
+        const glow = glowTable(peak, radius);
+        const otherMasks = others.map((other) => this.masks[other]);
+        const otherGlows = others.map((other) => glowTable(peak * erases[other]!, radius));
 
         for (let py = top; py <= bottom; py++) {
+            const dySquared = (py - y) * (py - y);
+
             for (let px = left; px <= right; px++) {
-                const distance = Math.hypot(px - x, py - y) / radius;
-                if (distance >= 1) continue;
+                const distanceSquared = (px - x) * (px - x) + dySquared;
+                if (distanceSquared >= radiusSquared) continue;
 
+                const distance = Math.sqrt(distanceSquared) / radius;
                 const index = py * SHEET + px;
-                this.masks[id][index] += (1 - this.masks[id][index]) * glowAt(distance, peak);
+                mask[index] += (1 - mask[index]) * sampleGlow(glow, distance);
 
-                for (const other of others) this.masks[other][index] *= 1 - glowAt(distance, peak * erases[other]!);
+                for (let other = 0; other < otherMasks.length; other++) {
+                    otherMasks[other][index] *= 1 - sampleGlow(otherGlows[other], distance);
+                }
             }
         }
     }
@@ -285,16 +316,21 @@ export class InkItSheet {
         const right = Math.min(SHEET - 1, Math.ceil(x + radius));
         const top = Math.max(0, Math.floor(y - radius));
         const bottom = Math.min(SHEET - 1, Math.ceil(y + radius));
+        const radiusSquared = radius * radius;
+        const glow = glowTable(1, radius);
+        const masks = TOOL_IDS.map((id) => this.masks[id]);
 
         for (let py = top; py <= bottom; py++) {
-            for (let px = left; px <= right; px++) {
-                const distance = Math.hypot(px - x, py - y) / radius;
-                if (distance >= 1) continue;
+            const dySquared = (py - y) * (py - y);
 
-                const keep = 1 - glowAt(distance, 1);
+            for (let px = left; px <= right; px++) {
+                const distanceSquared = (px - x) * (px - x) + dySquared;
+                if (distanceSquared >= radiusSquared) continue;
+
+                const keep = 1 - sampleGlow(glow, Math.sqrt(distanceSquared) / radius);
                 const index = py * SHEET + px;
 
-                for (const id of TOOL_IDS) this.masks[id][index] *= keep;
+                for (const mask of masks) mask[index] *= keep;
             }
         }
     }

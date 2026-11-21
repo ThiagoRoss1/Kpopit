@@ -356,6 +356,9 @@ export const useInkIt = ({
             const step = sheet.revealStepper();
             const sprite = revealSpriteRef.current;
             const startedAt = performance.now();
+            // Read once: a layout read after each frame's style write would force a layout per frame.
+            const scale = (sprite?.parentElement?.clientWidth ?? SHEET) / SHEET;
+            let spriteStage: string | null = null;
 
             const frame = (now: number) => {
                 const { done, head } = step(now - startedAt);
@@ -365,10 +368,13 @@ export const useInkIt = ({
                 if (sprite && !head) sprite.style.opacity = "0";
 
                 if (sprite && head) {
-                    const scale = (sprite.parentElement?.clientWidth ?? SHEET) / SHEET;
                     const wobble = Math.sin((now - startedAt) / 60) * 8;
 
-                    sprite.src = spriteUrl(head.stage);
+                    // Setting src (even to the same data URL) restarts the image load: only per stage.
+                    if (head.stage !== spriteStage) {
+                        spriteStage = head.stage;
+                        sprite.src = spriteUrl(head.stage);
+                    }
                     sprite.style.transform = `translate(${head.x * scale - 10}px, ${head.y * scale - 58}px) rotate(${wobble}deg)`;
                     sprite.style.opacity = "1";
                 }
