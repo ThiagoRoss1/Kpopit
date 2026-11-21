@@ -379,25 +379,35 @@ const InkItGame = ({ data, idols, isCalendarDay, onGameChange }: InkItGameProps)
     useEffect(() => {
         if (syncedWin && ink.status === "ready") void playReveal(false);
     }, [syncedWin, ink.status, playReveal]);
+    const scrollToVictory = useCallback(() => {
+        const card = victoryRef.current;
+        if (!card) return;
+
+        window.scrollTo({
+            top: card.getBoundingClientRect().top + window.scrollY - 96,
+            behavior: reducedMotion ? "auto" : "smooth",
+        });
+    }, [reducedMotion]);
+
     const celebrate = useCallback(() => {
         // 1) the winning row lands, 2) the sheet resolves into the photo, 3) the card and the confetti.
         timers.current.push(window.setTimeout(() => {
             void playReveal(!reducedMotion).then(() => {
                 setPhase("won");
                 if (isCalendarDay || localStorage.getItem("confettiShownInkit") !== "true") setShowConfetti(true);
-
-                timers.current.push(window.setTimeout(() => {
-                    const card = victoryRef.current;
-                    if (!card) return;
-
-                    window.scrollTo({
-                        top: card.getBoundingClientRect().top + window.scrollY - 96,
-                        behavior: reducedMotion ? "auto" : "smooth",
-                    });
-                }, 160));
+                timers.current.push(window.setTimeout(scrollToVictory, 160));
             });
         }, reducedMotion ? 0 : ROW_SETTLE_MS));
-    }, [isCalendarDay, playReveal, reducedMotion]);
+    }, [isCalendarDay, playReveal, reducedMotion, scrollToVictory]);
+
+    // A day already won when the page opens (coming back later) lands on the victory card, like the other modes.
+    const [openedWon] = useState(() => serverGame?.game_won === true);
+    useEffect(() => {
+        if (!openedWon) return;
+
+        const timer = window.setTimeout(scrollToVictory, 300);
+        return () => window.clearTimeout(timer);
+    }, [openedWon, scrollToVictory]);
 
     const guessMutation = useMutation({
         mutationFn: async (idol: IdolListItem) => {
@@ -678,21 +688,26 @@ const InkItGame = ({ data, idols, isCalendarDay, onGameChange }: InkItGameProps)
                 </div>
 
                 {phase === "won" && answer && (
-                    <InkVictory
-                        cardRef={victoryRef}
-                        answer={answer}
-                        answerHref={idolHref(answer.idol_id, answer.artist_name)}
-                        guessCount={guesses.length}
-                        position={userPosition.data?.position ?? null}
-                        score={userPosition.data?.score ?? null}
-                        yesterday={yesterday}
-                        countdown={timeRemaining !== null ? formattedTime : null}
-                        otherModes={modeTiles}
-                        shareState={shareState}
-                        onShare={share}
-                        canShare={ink.status === "ready"}
-                        isCalendarDay={isCalendarDay}
-                    />
+                    // The new or levelled card sits above the victory card, as in the other modes.
+                    <div className="flex w-full min-w-0 flex-col items-center [grid-area:win]">
+                        <CardGrantedReveal cardGranted={cardGranted} />
+
+                        <InkVictory
+                            cardRef={victoryRef}
+                            answer={answer}
+                            answerHref={idolHref(answer.idol_id, answer.artist_name)}
+                            guessCount={guesses.length}
+                            position={userPosition.data?.position ?? null}
+                            score={userPosition.data?.score ?? null}
+                            yesterday={yesterday}
+                            countdown={timeRemaining !== null ? formattedTime : null}
+                            otherModes={modeTiles}
+                            shareState={shareState}
+                            onShare={share}
+                            canShare={ink.status === "ready"}
+                            isCalendarDay={isCalendarDay}
+                        />
+                    </div>
                 )}
 
                 <div aria-hidden className="h-14 [grid-area:end]" />
@@ -715,8 +730,6 @@ const InkItGame = ({ data, idols, isCalendarDay, onGameChange }: InkItGameProps)
                     </div>
                 </div>
             )}
-
-            {phase === "won" && <CardGrantedReveal cardGranted={cardGranted} />}
 
             {showConfetti && (
                 <WinnerExplosion

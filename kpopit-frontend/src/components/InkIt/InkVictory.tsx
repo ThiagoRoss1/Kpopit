@@ -119,7 +119,7 @@ const InkVictory = ({
         <div
             ref={cardRef}
             data-testid="inkit-victory"
-            className="mt-5 w-full max-w-160 justify-self-center pr-1.75 pb-1.75 [grid-area:win] animate-[ikIn_.55s_var(--ease-settle)_.15s_backwards]"
+            className="mt-10 w-full max-w-160 pr-1.75 pb-1.75 animate-[ikIn_.55s_var(--ease-settle)_.15s_backwards]"
         >
             <section
                 aria-label="You found the idol"
