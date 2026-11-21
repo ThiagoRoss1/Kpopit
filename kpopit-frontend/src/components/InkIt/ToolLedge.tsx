@@ -43,7 +43,7 @@ const InkJar = ({ inkShare }: { inkShare: number }) => {
             <div className="absolute inset-x-0 top-1.75 bottom-0 overflow-hidden rounded-[8px_8px_10px_10px] border-2 border-(--ink) bg-[#FFFDFA] shadow-[2px_3px_0_var(--ctl-off)]">
                 <div
                     style={{ scale: `1 ${clampShare(inkShare)}` }}
-                    className="absolute inset-0 origin-bottom bg-[#FF70B8] transition-[scale] duration-200 ease-linear"
+                    className="absolute inset-0 origin-bottom bg-[#FF70B8] transition-[scale] duration-200 ease-linear transform-gpu"
                 />
                 <span className="absolute top-[14%] left-[18%] h-[38%] w-[16%] rounded-[9px] bg-white/70" />
             </div>
@@ -116,7 +116,7 @@ const ToolLedge = ({ tool, unlocked, round, loading = [], inkShare, disabled, on
                                         alt=""
                                         draggable={false}
                                         className={cn(
-                                            "inkit-sprite size-8.75 transition-[rotate,scale] duration-450 ease-(--ease-pop)",
+                                            "inkit-sprite size-8.75 transition-[rotate,scale] duration-450 ease-(--ease-pop) transform-gpu",
                                             isLocked && "opacity-40",
                                             isSelected && "-rotate-12 scale-[1.08]",
                                         )}

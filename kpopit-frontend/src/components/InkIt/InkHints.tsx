@@ -78,7 +78,7 @@ const HintCard = ({ label, guessesLeft, used, disabled, reducedMotion, tilt, tes
             data-testid={testId}
             data-state={isLocked ? "locked" : shown}
             className={cn(
-                "inkit-hint pp-focus relative mb-1.25 block h-22.5 rounded-[18px] border-2 border-(--ink) bg-(--face) p-2 text-left max-[900px]:h-15.5",
+                "inkit-hint pp-focus transform-gpu relative mb-1.25 block h-22.5 rounded-[18px] border-2 border-(--ink) bg-(--face) p-2 text-left max-[900px]:h-15.5",
                 "@container",
                 tilt,
                 isAnimating ? "z-5" : "z-1",
@@ -116,13 +116,13 @@ const HintCard = ({ label, guessesLeft, used, disabled, reducedMotion, tilt, tes
             </div>
 
             {shown === "erase" && (
-                <span aria-hidden className="absolute top-1/2 left-0 z-3 animate-[ikMove_.7s_linear_forwards]">
-                    <img src={spriteUrl("eraser")} alt="" className="inkit-sprite absolute size-11.5 max-w-none animate-[ikWig_.18s_ease-in-out_infinite]" />
+                <span aria-hidden className="absolute top-1/2 left-0 z-3 transform-gpu animate-[ikMove_.7s_linear_forwards]">
+                    <img src={spriteUrl("eraser")} alt="" className="inkit-sprite absolute size-11.5 max-w-none transform-gpu animate-[ikWig_.18s_ease-in-out_infinite]" />
                 </span>
             )}
 
             {shown === "write" && (
-                <span aria-hidden className="absolute top-[44%] left-0 z-3 animate-[ikMove_.9s_linear_forwards]">
+                <span aria-hidden className="absolute top-[44%] left-0 z-3 transform-gpu animate-[ikMove_.9s_linear_forwards]">
                     <img src={spriteUrl("pen")} alt="" className="inkit-sprite absolute size-11.5 max-w-none translate-x-[-10%] translate-y-[-90%] -rotate-6" />
                 </span>
             )}

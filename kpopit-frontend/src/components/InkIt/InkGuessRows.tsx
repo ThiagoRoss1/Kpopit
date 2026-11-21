@@ -47,7 +47,7 @@ const InkGuessRows = ({ rows, settledCount }: InkGuessRowsProps) => {
                             "relative isolate flex h-18.5 items-center gap-3.5 rounded-full border-2 border-(--ink) pr-5 pl-3.25 max-[900px]:h-17",
                             // The row keeps its colour in Night, so its top light stays white too.
                             "shadow-[3px_4px_0_var(--ink),inset_0_2px_0_#FFFFFF,inset_0_-3px_0_rgba(26,20,24,.07)]",
-                            isNew && "bg-(--face) animate-[ikRow_1.05s_var(--ease-settle)_backwards]",
+                            isNew && "bg-(--face) transform-gpu animate-[ikRow_1.05s_var(--ease-settle)_backwards]",
                         )}
                     >
                         {isNew && (
@@ -67,7 +67,7 @@ const InkGuessRows = ({ rows, settledCount }: InkGuessRowsProps) => {
                                 "transform-gpu transition-[scale,rotate] duration-380 ease-(--ease-settle) hover:scale-105 hover:-rotate-2",
                                 // Firefox: no zoom or turn on hover; the photo glitched while it moved.
                                 "firefox:hover:rotate-0",
-                                isNew && "animate-[ikPhoto_1.05s_cubic-bezier(.3,.75,.35,1)_.15s_backwards]",
+                                isNew && "transform-gpu animate-[ikPhoto_1.05s_cubic-bezier(.3,.75,.35,1)_.15s_backwards]",
                             )}
                         >
                             {!isNew && <img src={photo} alt="" draggable={false} className="absolute inset-0 size-full object-cover object-center" />}
@@ -93,7 +93,7 @@ const InkGuessRows = ({ rows, settledCount }: InkGuessRowsProps) => {
                         <div
                             className={cn(
                                 "relative flex min-w-0 flex-1 flex-col items-start gap-px [container:inkrow/inline-size]",
-                                isNew && "animate-[ikName_.75s_cubic-bezier(.16,1,.3,1)_.9s_backwards]",
+                                isNew && "transform-gpu animate-[ikName_.75s_cubic-bezier(.16,1,.3,1)_.9s_backwards]",
                             )}
                         >
                             <span className="max-w-full truncate pt-px pr-1 pb-0.75 pl-0.5 font-bold text-xl/[1.15] text-white text-shadow-(--puff-name) max-[900px]:text-lg/[1.15]">

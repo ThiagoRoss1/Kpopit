@@ -11,7 +11,7 @@ interface InkStatsModalProps {
     onTransferData: () => void;
 }
 
-const BUTTON = "inkit-btn pp-focus grid h-11 cursor-pointer place-items-center rounded-full border-2 border-(--ink) bg-(--face) font-bold text-sm text-(--face-ink)";
+const BUTTON = "inkit-btn pp-focus transform-gpu grid h-11 cursor-pointer place-items-center rounded-full border-2 border-(--ink) bg-(--face) font-bold text-sm text-(--face-ink)";
 
 /** The player's InkIt numbers, with the way to How to play and to moving data between devices. */
 const InkStatsModal = ({ stats, onClose, onTransferData }: InkStatsModalProps) => {
@@ -77,7 +77,7 @@ const InkStatsModal = ({ stats, onClose, onTransferData }: InkStatsModalProps) =
                 onClick={(event) => event.stopPropagation()}
                 className={cn(
                     "flex w-full max-w-120 flex-col gap-4.5 rounded-[23px] border-2 border-(--ink) bg-(--menu-bg) px-5.5 pt-5 pb-6 text-(--face-ink)",
-                    "shadow-[7px_8px_0_-2px_#FF8AC4,7px_8px_0_0_var(--ink),var(--in)] animate-[ikPop_.3s_var(--ease-pop)_backwards]",
+                    "shadow-[7px_8px_0_-2px_#FF8AC4,7px_8px_0_0_var(--ink),var(--in)] transform-gpu animate-[ikPop_.3s_var(--ease-pop)_backwards]",
                 )}
             >
                 <div className="flex items-center gap-3">
@@ -85,7 +85,7 @@ const InkStatsModal = ({ stats, onClose, onTransferData }: InkStatsModalProps) =
 
                     <Link
                         to="/how-to-play"
-                        className="inkit-btn pp-focus flex h-9 items-center gap-1.5 rounded-full border-2 border-(--ink) bg-(--face) pr-3.5 pl-2.75 font-bold text-[13px] text-(--face-ink) no-underline"
+                        className="inkit-btn pp-focus transform-gpu flex h-9 items-center gap-1.5 rounded-full border-2 border-(--ink) bg-(--face) pr-3.5 pl-2.75 font-bold text-[13px] text-(--face-ink) no-underline"
                     >
                         <BookOpen className="size-3.75" strokeWidth={2.6} aria-hidden />
                         How to play
@@ -96,7 +96,7 @@ const InkStatsModal = ({ stats, onClose, onTransferData }: InkStatsModalProps) =
                         type="button"
                         aria-label="Close"
                         onClick={onClose}
-                        className="inkit-btn pp-focus grid size-9.5 flex-none cursor-pointer place-items-center rounded-full border-2 border-(--ink) bg-(--face) p-0 text-(--face-ink)"
+                        className="inkit-btn pp-focus transform-gpu grid size-9.5 flex-none cursor-pointer place-items-center rounded-full border-2 border-(--ink) bg-(--face) p-0 text-(--face-ink)"
                     >
                         <X className="size-3.75" strokeWidth={3} aria-hidden />
                     </button>

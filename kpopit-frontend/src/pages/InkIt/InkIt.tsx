@@ -637,7 +637,7 @@ const InkItGame = ({ data, idols, isCalendarDay, onGameChange }: InkItGameProps)
                             <Link
                                 to={`/calendar?mode=inkit&date=${data.gameDate}`}
                                 data-testid="inkit-calendar-back"
-                                className="inkit-btn pp-focus inline-flex h-9 items-center gap-1.5 rounded-full border-2 border-(--ink) bg-(--face) pr-3.5 pl-2.5 font-bold text-[13px] text-(--face-ink) no-underline"
+                                className="inkit-btn pp-focus transform-gpu inline-flex h-9 items-center gap-1.5 rounded-full border-2 border-(--ink) bg-(--face) pr-3.5 pl-2.5 font-bold text-[13px] text-(--face-ink) no-underline"
                             >
                                 <ArrowLeft className="size-4" strokeWidth={3} aria-hidden />
                                 Calendar
@@ -646,7 +646,7 @@ const InkItGame = ({ data, idols, isCalendarDay, onGameChange }: InkItGameProps)
                             <span
                                 data-testid="inkit-calendar-day"
                                 className={cn(
-                                    "inline-flex h-9 items-center gap-1.5 rounded-full px-3.5 rotate-[-2deg]",
+                                    "inline-flex h-9 items-center gap-1.5 rounded-full px-3.5 rotate-[-2deg] transform-gpu",
                                     "border-2 border-(--ink) bg-[#FF8AC4] shadow-[2px_3px_0_var(--ink),inset_0_2px_0_rgba(255,255,255,.55)]",
                                     "font-bold text-[13px] text-[#1A1418]",
                                 )}
@@ -661,7 +661,7 @@ const InkItGame = ({ data, idols, isCalendarDay, onGameChange }: InkItGameProps)
                         aria-label="Stats"
                         onClick={() => setModal("stats")}
                         data-testid="inkit-stats-button"
-                        className="inkit-btn pp-focus grid size-11 flex-none cursor-pointer place-items-center rounded-full border-2 border-(--ink) bg-(--face) p-0 text-(--face-ink) max-[900px]:size-9"
+                        className="inkit-btn pp-focus transform-gpu grid size-11 flex-none cursor-pointer place-items-center rounded-full border-2 border-(--ink) bg-(--face) p-0 text-(--face-ink) max-[900px]:size-9"
                     >
                         <Info className="size-5" strokeWidth={2.5} aria-hidden />
                     </button>
@@ -751,7 +751,7 @@ const InkItGame = ({ data, idols, isCalendarDay, onGameChange }: InkItGameProps)
                         type="button"
                         onClick={() => setDrawingMode(false)}
                         data-testid="inkit-done"
-                        className="inkit-btn pp-focus pointer-events-auto absolute top-4 left-3.5 flex h-11 cursor-pointer items-center gap-2 rounded-full border-2 border-(--ink) bg-(--face) pr-4.5 pl-3.5 font-bold text-[15px] text-(--face-ink)"
+                        className="inkit-btn pp-focus transform-gpu pointer-events-auto absolute top-4 left-3.5 flex h-11 cursor-pointer items-center gap-2 rounded-full border-2 border-(--ink) bg-(--face) pr-4.5 pl-3.5 font-bold text-[15px] text-(--face-ink)"
                     >
                         <Check className="size-4.5" strokeWidth={2.8} aria-hidden />
                         Done

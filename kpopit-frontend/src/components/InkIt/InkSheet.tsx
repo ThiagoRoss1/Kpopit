@@ -118,7 +118,7 @@ const InkSheet = ({
                                     <button
                                         type="button"
                                         onClick={onRetry}
-                                        className="inkit-btn pp-focus flex h-9 cursor-pointer items-center gap-2 rounded-full border-2 border-[#1A1418] bg-[#FFFDFA] px-3.5 font-bold text-[13px] text-[#1A1418] [--ctl-off:#1A1418]"
+                                        className="inkit-btn pp-focus transform-gpu flex h-9 cursor-pointer items-center gap-2 rounded-full border-2 border-[#1A1418] bg-[#FFFDFA] px-3.5 font-bold text-[13px] text-[#1A1418] [--ctl-off:#1A1418]"
                                     >
                                         <RotateCw className="size-4" aria-hidden />
                                         Try again
@@ -129,7 +129,7 @@ const InkSheet = ({
                             {/* Desktop, before the first stroke. */}
                             {isReady && isEmpty && !finished && !onOpenDrawing && !fixedRect && (
                                 <div className="pointer-events-none absolute inset-0 grid place-items-center max-[900px]:hidden" data-testid="inkit-invite">
-                                    <div className="flex flex-col items-center gap-1.5 animate-[ikNudge_2.4s_ease-in-out_infinite]">
+                                    <div className="flex flex-col items-center gap-1.5 transform-gpu animate-[ikNudge_2.4s_ease-in-out_infinite]">
                                         <img src={spriteUrl("pencil")} alt="" className="inkit-sprite size-12" />
                                         <span className="font-caveat font-semibold text-2xl leading-none text-[rgba(60,52,70,.62)]">draw anywhere...</span>
                                     </div>
@@ -141,7 +141,7 @@ const InkSheet = ({
                                     key={outOfInkNudge}
                                     role="status"
                                     data-testid="inkit-out-of-ink"
-                                    className="pointer-events-none absolute inset-x-0 bottom-5 flex justify-center animate-[ikToast_2.8s_var(--ease-settle)_forwards]"
+                                    className="pointer-events-none absolute inset-x-0 bottom-5 flex justify-center transform-gpu animate-[ikToast_2.8s_var(--ease-settle)_forwards]"
                                 >
                                     <div className="flex items-center gap-2.5 rounded-2xl border-2 border-[#1A1418] bg-[#FFFDFA] py-2.25 pr-3.5 pl-2.5 text-[#1A1418] shadow-[0_4px_0_0_#FF8AC4,0_4px_0_2px_#1A1418]">
                                         <img src={greySpriteUrl(tool)} alt="" className="inkit-sprite size-7.5" />

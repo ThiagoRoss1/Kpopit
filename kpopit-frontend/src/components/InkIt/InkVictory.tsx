@@ -119,7 +119,7 @@ const InkVictory = ({
         <div
             ref={cardRef}
             data-testid="inkit-victory"
-            className="mt-10 w-full max-w-160 pr-1.75 pb-1.75 animate-[ikIn_.55s_var(--ease-settle)_.15s_backwards]"
+            className="mt-10 w-full max-w-160 pr-1.75 pb-1.75 transform-gpu animate-[ikIn_.55s_var(--ease-settle)_.15s_backwards]"
         >
             <section
                 aria-label="You found the idol"
@@ -187,7 +187,7 @@ const InkVictory = ({
                                 to={`/calendar?mode=inkit&date=${yesterday.locked.date}`}
                                 aria-label="Play yesterday in the calendar"
                                 data-testid="inkit-yesterday-locked"
-                                className="inkit-btn pp-focus inline-flex h-10 items-center gap-2 rounded-full border-2 border-(--ink) bg-(--face) px-4 font-bold text-sm text-(--face-ink) no-underline"
+                                className="inkit-btn pp-focus transform-gpu inline-flex h-10 items-center gap-2 rounded-full border-2 border-(--ink) bg-(--face) px-4 font-bold text-sm text-(--face-ink) no-underline"
                             >
                                 <Lock className="size-3.5" strokeWidth={3} aria-hidden />
                                 {yesterday.locked.dayNumber ? `Day ${yesterday.locked.dayNumber}` : "Locked"}
@@ -246,7 +246,7 @@ const InkVictory = ({
                                     to={mode.path}
                                     data-testid={`inkit-other-${mode.id}`}
                                     className={cn(
-                                        "inkit-btn pp-focus flex flex-col items-center gap-1.75 rounded-[20px] border-2 border-(--ink) bg-(--face) px-1.5 pt-1.5 pb-2 text-(--face-ink) no-underline",
+                                        "inkit-btn pp-focus transform-gpu flex flex-col items-center gap-1.75 rounded-[20px] border-2 border-(--ink) bg-(--face) px-1.5 pt-1.5 pb-2 text-(--face-ink) no-underline",
                                         mode.won && "opacity-60",
                                     )}
                                 >
