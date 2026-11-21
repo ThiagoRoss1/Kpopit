@@ -26,6 +26,7 @@ import VictoryCardHudBlurry from "../../components/Blurry/VictoryCard/VictoryCar
 import PixelatedVictory from "../../components/Pixelated/PixelatedVictory";
 import { useAllGameModes } from "../../hooks/useAllGameModes";
 import { formatGroupName } from "../../utils/formatters";
+import { WinnerExplosion } from "../../utils/confetti";
 import GetBlurLevel, { BLUR_LEVELS } from "../BlurryMode/blurLevels";
 import ModeOptions from "../../components/Blurry/buttons/ModeOptions";
 import { GetPixelLevel, PIXEL_LEVELS } from "../../utils/pixelLevels";
@@ -121,6 +122,7 @@ const CalendarGame = ({ mode, date }: { mode: PlayableMode; date: string }) => {
     const [added, setAdded] = useState<{ date: string; idols: IdolGuess[]; albums: PixelatedGuessDetail[] }>({ date, idols: [], albums: [] });
     const [cardGranted, setCardGranted] = useState<CardGranted>(null);
     const [victoryRevealed, setVictoryRevealed] = useState(false);
+    const [confettiDone, setConfettiDone] = useState(false);
     const [blurryOptions, setBlurryOptions] = useState({ hardcore: false, color: false });
     const submittingRef = useRef(false);
     const { otherModes } = useAllGameModes(mode);
@@ -219,6 +221,8 @@ const CalendarGame = ({ mode, date }: { mode: PlayableMode; date: string }) => {
     const won = finished || idolGuesses.some((guess) => guess.guess_correct) || albumGuesses.some((guess) => guess.guess_correct);
     const wonThisVisit = extra.idols.some((guess) => guess.guess_correct) || extra.albums.some((guess) => guess.guess_correct);
     const showVictory = won && (!wonThisVisit || victoryRevealed);
+    // Like InkIt's calendar days: every win made on this visit gets the confetti (reopening a won day doesn't).
+    const confetti = wonThisVisit && victoryRevealed && !confettiDone && <WinnerExplosion onComplete={() => setConfettiDone(true)} />;
 
     const submit = () => {
         if (selected === null || submittingRef.current || guessMutation.isPending || won) return;
@@ -352,6 +356,7 @@ const CalendarGame = ({ mode, date }: { mode: PlayableMode; date: string }) => {
         return (
             <div className="pixelmode min-h-full w-full">
                 {metadata}
+                {confetti}
                 <div className="pixelmode__bg" aria-hidden="true"><div className="pixelmode__margin" /></div>
                 <div className="mx-auto max-w-340 px-4 zm:px-6 sm:px-12 md:px-20 lg:px-10 py-4 lg:py-10">
                     <div className="flex flex-col lg:flex-row gap-4 lg:gap-10 items-center lg:items-start">
@@ -381,6 +386,7 @@ const CalendarGame = ({ mode, date }: { mode: PlayableMode; date: string }) => {
     return (
         <>
             {metadata}
+            {confetti}
             <BackgroundStyle attempts={attempts} />
             <div className={cn("flex flex-col items-center justify-start w-full min-h-full pb-24", mode === "classic" ? "mt-12" : "mt-4")}>
                 <div className="mb-10">{header}</div>
