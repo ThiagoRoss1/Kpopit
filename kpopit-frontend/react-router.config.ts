@@ -23,7 +23,11 @@ async function prerenderPaths() {
     [idols, albums] = await Promise.all([fetchIdolsPage(), fetchAlbumsPage()]);
   } catch (err) {
     if (!LENIENT_PRERENDER) throw err;
-    console.warn(`${(err as Error).message} Preview build: the idol pages load client-side; set PRERENDER_API_URL to a running API to prerender them.`);
+    // The dev server reads this list once at startup, so its fix is a restart, not a new URL.
+    const fix = process.env.NODE_ENV === "development"
+      ? "restart the dev server once the backend is up (until then their .data requests log \"Refusing to SSR\")"
+      : "set PRERENDER_API_URL to a running API to prerender them";
+    console.warn(`${(err as Error).message} The idol and album pages load from the API; ${fix}.`);
     // React Router needs one prerendered path per route with a build-time loader: /idols is kept
     // (its loader returns nothing) and a placeholder stands in for the idol pages.
     return [...STATIC_PATHS, ...inkit, ...blogPaths(), "/idols/0/preview", "/albums", "/albums/0/preview"];
